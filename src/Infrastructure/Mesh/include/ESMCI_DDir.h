@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -84,8 +84,16 @@ bool operator<(const dentry &rhs) const {
   return origin_lid < rhs.origin_lid; // (not sure why a mesh would have several copies)
 }
 
+#if 0
 bool operator==(const dentry &rhs) const {
-  return (gid == rhs.gid &&
+  return (gid == rhs.gid && 
+          origin_proc == rhs.origin_proc);
+}
+#endif
+
+
+bool operator==(const dentry &rhs) const {
+  return (gid == rhs.gid && origin_lid == rhs.origin_lid &&
           origin_proc == rhs.origin_proc);
 }
 

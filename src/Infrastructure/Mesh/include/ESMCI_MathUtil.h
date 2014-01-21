@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -39,7 +39,7 @@ namespace ESMCI {
 
   double tri_area(const double * const u, const double * const v, const double * const w);
 
-  void get_elem_coords(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords);
+  void get_elem_coords(const MeshObj *elem, const MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords);
 
   void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
                               int *num_nodes, double *coords);
@@ -71,7 +71,42 @@ namespace ESMCI {
 
   bool is_smashed_quad3D(int num_p, double *p);
 
+  void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, double *max);
+
+
+int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, double *pnt3, double *pnt4, 
+                            double *p1, double *p2);
+
+int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
+                           double *p1, double *p2);
+
+
+
+
   
+  // Handy macros
+#define MU_SET_MIN_VEC3D(min,vec)       \
+  if (vec[0]<min[0]) min[0]=vec[0];\
+  if (vec[1]<min[1]) min[1]=vec[1];\
+  if (vec[2]<min[2]) min[2]=vec[2];
+
+#define MU_SET_MAX_VEC3D(max,vec)       \
+  if (vec[0]>max[0]) max[0]=vec[0];\
+  if (vec[1]>max[1]) max[1]=vec[1];\
+  if (vec[2]>max[2]) max[2]=vec[2];
+
+#define MU_ADD_VEC3D(out,a,b) \
+  out[0]=a[0]+b[0]; \
+  out[1]=a[1]+b[1]; \
+  out[2]=a[2]+b[2];
+
+
+#define MU_CROSS_PRODUCT_VEC3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+
+#define MU_LEN_VEC3D(a) std::sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+
+#define MU_DOT_VEC3D(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
+
 
   // STUFF FOR TRIANGULATION
 

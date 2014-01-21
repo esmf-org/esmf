@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -150,8 +150,16 @@ extern "C" {
   }
 
   if (!present) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute present flag", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // until Attribute class is changed, must have convention, purpose, object minimum
+  if (*count < 3) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "specList must contain 3 or 4 values", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -180,6 +188,7 @@ extern "C" {
     string capname;
     cvalue.push_back(capname);
   }
+
   //TODO: make this more general, for now order is object, convention, purpose, instname
   *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0], cvalue[3]);
   if (!(*attpack)) *present = ESMF_FALSE;
@@ -2189,11 +2198,8 @@ extern "C" {
   int status;
   ESMCI::Attribute *attr;
 
-printf("00000000000000\n");
-
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
-printf("11111111111111111\n");
 
   if (!base) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2201,7 +2207,6 @@ printf("11111111111111111\n");
     if (rc) *rc = status;    
     return;
   }
-printf("2222222222222222\n");
 
   if (!tk) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,

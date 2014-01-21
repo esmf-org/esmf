@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -20,6 +20,12 @@
 #include <string>
 
 namespace ESMCI {
+
+
+  // Type used to specify method used to do spherical (3,2) mapping
+  // eventually could be broadened to specify other types
+  enum MAP_TYPE {MAP_TYPE_CART_APPROX=0, MAP_TYPE_GREAT_CIRCLE};
+  extern MAP_TYPE sph_map_type;
 
 /**
  * Mapping subsystem.  Provides the mapping from a parametric element

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -271,9 +271,9 @@ extern "C" {
           *rc = ESMF_SUCCESS;
         else
           *rc = ESMF_RC_NOT_FOUND;
-	break;
+  break;
       default:
-	*rc = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
     }
 #else
   if (RemoveDirectory (path.c_str())) {
@@ -291,6 +291,46 @@ extern "C" {
     }
   }
 #endif
+
+}
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_GetCWD - Get the current directory from the file system
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_getcwd)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      char *pathname,           // in - path name
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
+//
+// !DESCRIPTION:
+//     Gets the current directory in the file system.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_UtilGetCWD"
+
+#if !defined (ESMF_OS_MinGW)
+  if (getcwd (pathname, pathname_l) != NULL)
+    *rc = ESMF_SUCCESS;
+  else
+    *rc = ESMF_FAILURE;
+#else
+  int winrt = GetCurrentDirectory (pathname_l, pathname)
+  if (winrt == 0 || winrt > pathname_l)
+    *rc = ESMF_FAILURE;
+  else
+    *rc = ESMF_SUCCESS;
+#endif
+  if (strlen(pathname) < pathname_l)
+    for (int i = strlen(pathname); i < pathname_l; ++i)
+      pathname[i] = ' ';
 
 }
 

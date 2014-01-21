@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1304,10 +1304,11 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   int regridPoleType = 0;
   int regridPoleNPnts = 1;
   int regridScheme = 0;
+  int map_type=0;
 //WriteVTKMesh(srcmesh, "srcmesh");
 //WriteVTKMesh(dstmesh, "dstmesh");
   if (!regrid(srcmesh, dstmesh, midmesh, wts, regridMethod, &regridScheme, 
-            &regridPoleType, &regridPoleNPnts, unmappedaction))
+              &regridPoleType, &regridPoleNPnts, &map_type, unmappedaction))
     Throw() << "Regridding error" << std::endl;
 
   return 1;

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research, 
+! Copyright 2002-2014, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -319,6 +319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcMaskValues, dstMaskValues, &
                     regridmethod, &
                     polemethod, regridPoleNPnts, & 
+                    lineType, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -336,6 +337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),intent(in),   optional :: regridmethod
       type(ESMF_PoleMethod_Flag),  intent(in),   optional :: polemethod
       integer,                     intent(in),   optional :: regridPoleNPnts
+      type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       logical,                     intent(in),   optional :: ignoreDegenerate
       integer,                     intent(inout),optional :: srcTermProcessing
@@ -368,6 +370,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              execution. The argument {\tt unmappedDstList} allows the user to 
 !              get a list of the destination items which the regridding couldn't 
 !              map to a source. 
+! \item[6.3.0r] Added argument {\tt lineType}. This argument allows the user to 
+!               control the path of the line between two points on a sphere surface. 
+!               This allows the user to use their preferred line path for the calculation
+!               of distances and the shape of cells during regrid weight calculation on 
+!               a sphere.
 ! \end{description}
 ! \end{itemize}
 !
@@ -427,6 +434,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           This parameter indicates how many points should be averaged
 !           over. Must be specified if {\tt polemethod} is 
 !           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!     \item [{[lineType]}]
+!           This argument controls the path of the line which connects two points on a sphere surface. This in
+!           turn controls the path along which distances are calculated and the shape of the edges that make
+!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
+!           list of valid options for this argument. If not specified, the default depends on the 
+!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -575,6 +591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         logical :: localIgnoreDegenerate
+        type(ESMF_LineType_Flag):: localLineType
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -637,6 +654,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            lregridmethod=regridmethod
         else     
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
+        endif
+
+        ! TODO: If lineType is present then do error checking here
+
+        ! Handle optional lineType argument
+        if (present(lineType)) then
+           localLineType=lineType
+        else     
+           localLineType=ESMF_LINETYPE_CART
         endif
 
 
@@ -920,6 +946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              present(indices) .or. present(factorIndexList)) then
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
+                localLineType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &
@@ -944,6 +971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
+                localLineType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &

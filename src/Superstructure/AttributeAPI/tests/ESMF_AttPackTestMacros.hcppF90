@@ -1,0 +1,379 @@
+#if 0
+! $Id$
+!
+! Earth System Modeling Framework
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+#endif
+#if 0
+!------------------------------------------------------------------------------
+! Macros for Attribute testing
+!
+! The structure of this file and these macros are compatible with the gcc
+! preprocessor - they assume the use of ## as a paste operator, require that
+! no additional spaces be added (e.g. no pre-tokenization as done by some
+! preprocessors which assume C syntax), assume an option exists to suppress
+! C-specific syntax directives such as #line or #pragma, and that an option
+! exists to produce output on stdout and not into a file.  The output of
+! the preprocessor phase is a valid .F90 file ready to be compiled by the
+! standard fortran compiler.  (gcc is *not* used for compilation.)
+!
+! The macros are intended to be written with @\ at the end of each line of
+! a multiline macro, and the output piped thru 'tr' to translate each
+! @ into <cr> to produce multiple lines of fortran code from a single
+! macro invocation.   If any preprocessor directives are to be left in the
+! output file (e.g. #include ""), the source should use ^directive (e.g.
+! ^include "header.h" ) again using 'tr' to substitute # for ^ after
+! preprocessing is completed.  
+!------------------------------------------------------------------------------
+#endif
+
+#define AttPackTestMacro(mclass, mname, mobj, mtag) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+ @\
+      conv = "customconvention" @\
+      purp = "custompurpose   " @\
+      attpackList(1) = "ESMF_I4" @\
+      attpackList(2) = "ESMF_I4_list" @\
+      attpackList(3) = "ESMF_I8" @\
+      attpackList(4) = "ESMF_I8_list" @\
+      attpackList(5) = "ESMF_R4" @\
+      attpackList(6) = "ESMF_R4_list" @\
+      attpackList(7) = "ESMF_R8" @\
+      attpackList(8) = "ESMF_R8_list" @\
+      attpackList(9) = "ESMF_Logical" @\
+      attpackList(10) = "ESMF_Logical_list" @\
+      attpackList(11) = "ESMF_Character" @\
+      attpackList(12) = "ESMF_Character_list" @\
+ @\
+      inI4 = 4 @\
+      inI4l = (/1,2,3/) @\
+      inI8 = 4 @\
+      inI8l = (/1,2,3/) @\
+      inR4 = 4 @\
+      inR4l = (/1,2,3/) @\
+      inR8 = 4 @\
+      inR8l = (/1,2,3/) @\
+      inLog = .true. @\
+      inLogl(1) = .true. @\
+      inLogl(2) = .false. @\
+      inLogl(3) = .true. @\
+      inChar = "charAttribute" @\
+      InCharl(1) = "Character String 1" @\
+      InCharl(2) = "Character String 2" @\
+      InCharl(3) = "Character String 3" @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Attribute package - custom using specList @\
+    !------------------------------------------------------------------------- @\
+ @\
+      !mtag @\
+      ! Create a custom Attribute package using an AttPack object and a specList on mobj Test @\
+      call ESMF_AttributeAdd(mname, (/conv, purp/), & @\
+        attpackList, attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Creating a custom Attribute package using an AttPack object and a specList on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_I4 Attribute in an Attribute package on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_I4", value=inI4, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_I4 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_I4 Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_I4", attpack=attpack, value=outI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inI4==outI4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_I4 list Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_I4_list", valueList=inI4l, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_I4 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_I4 list Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_I4_list", attpack=attpack, & @\
+        valueList=outI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI4l==outI4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+     !mtag @\
+      ! Set an ESMF_I8 Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_I8", value=inI8, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_I8 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_I8 Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_I8", attpack=attpack, value=outI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. (inI8==outI8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+     !mtag @\
+      ! Set an ESMF_I8 list Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_I8_list", valueList=inI8l, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_I8 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_I8 list Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_I8_list", attpack=attpack, & @\
+        valueList=outI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI8l==outI8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_R4 Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_R4", value=inR4, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_R4 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_R4 Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_R4", attpack=attpack, value=outR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inR4==outR4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_R4 list Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_R4_list", valueList=inR4l, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_R4 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_R4 list Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_R4_list", attpack=attpack, & @\
+        valueList=outR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR4l==outR4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_R8 Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_R8", value=inR8, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_R8name Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_R8 Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_R8", attpack=attpack, value=outR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8 Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inR8==outR8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set an ESMF_R8 list Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_R8_list", valueList=inR8l, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an ESMF_R8 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an ESMF_R8 list Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_R8_list", attpack=attpack, & @\
+        valueList=outR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8 list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (inR8l==outR8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set a logical Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_Logical", value=inLog, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting a logical Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get a logical Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_Logical", attpack=attpack, value=outLog, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a logical Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. (inLog.eqv.outLog), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set a logical list Attribute in an Attribute package using an AttPack object  on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_Logical_list", valueList=inLogl, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting a logical list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get a logical list Attribute using an AttPack object on a Array Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_Logical_list", attpack=attpack, & @\
+        valueList=OutLogl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a logical list Attribute using an AttPack object on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InLogl(1:2).eqv.OutLogl(1:2)), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set a character Attribute in an Attribute package using an AttPack object  on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_Character", value=inChar, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting a character Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get a character Attribute using an AttPack object on mobj Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_Character", attpack=attpack, value=outChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a character Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. (inChar==outChar), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Set a character list Attribute in an Attribute package using an AttPack object on mobj Test @\
+      call ESMF_AttributeSet(mname, name="ESMF_Character_list", valueList=inCharl, & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting a character list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get a character list Attribute using an AttPack object on a Array Test @\
+      call ESMF_AttributeGet(mname, name="ESMF_Character_list", attpack=attpack, & @\
+        valueList=OutCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a character list Attribute using an AttPack object on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl(1:2)==OutCharl(1:2)), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="ESMF_Character_list", attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an Char list Attribute using an AttPack object on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      isPresent = .false. @\
+      ! Test for the presence of an AttPack object using a specList on mobj @\
+      call ESMF_AttributeGetAttPack(mname, (/conv, purp/), & @\
+        isPresent=isPresent, rc=rc)      @\
+      write(failMsg, *) "Did not return isPresent=True" @\
+      write(name, *) "Test for the presence of an AttPack object using a specList on mobj" @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get an AttPack using a specList on mobj test @\
+      call ESMF_AttributeGetAttPack(mname, specList=(/conv, purp/), & @\
+        attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Get an AttPack using a specList on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Remove the entire Attribute package from mobj Test @\
+      call ESMF_AttributeRemove(mname, attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing the entire Attribute package from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Test for the presence of an AttPack object using a specList on mobj @\
+      call ESMF_AttributeGet(mname, name="NotHere", value=outI4, & @\
+        attpack=attpack, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return isPresent=False" @\
+      write(name, *) "Test for the presence of an AttPack object using a specList on mobj" @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..false.), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+^endif @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------
+
+#define AttPackStandardTestMacro(mclass, mname, mobj, mconv, mpurp, mtag) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+      conv = mconv @\
+      purp = mpurp @\
+ @\
+      !mtag @\
+      ! Create a standard Attribute package using an AttPack object and a specList on mobj Test @\
+      call ESMF_AttributeAdd(mname, (/conv, purp/), attpack=attpack, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Creating a standard Attribute package using an AttPack object and a specList on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+^endif @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------

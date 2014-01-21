@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -529,19 +529,19 @@ program ESMF_ArrayIOUTest
 ! ! Compare read in and the existing file
   write(name, *) "Compare read in data to the existing data without halo"
   write(failMsg, *) "Comparison failed"
-  Maxvalue(1) = 0.0
+  r8Max(1) = 0.0
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
   do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-   diff = abs( Farray2D_wouthalo(i,j) - Farray2D_withhalo(i,j) )
-   if (Maxvalue(1).le.diff) Maxvalue(1)=diff
+   r8diff = abs( Farray2D_wouthalo(i,j) - Farray2D_withhalo(i,j) )
+   if (r8Max(1).le.r8diff) r8Max(1)=r8diff
   enddo
   enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  write(*,*)"Maximum Error (With/Without Halo case) = ", Maxvalue(1)
-  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (With/Without Halo case) = ", r8Max(1)
+  call ESMF_Test((r8Max(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((r8Max(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------

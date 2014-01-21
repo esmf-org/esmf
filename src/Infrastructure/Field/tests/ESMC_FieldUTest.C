@@ -37,11 +37,14 @@ int main(void){
   int rc;
   
   ESMC_ArraySpec arrayspec;
-  int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
+  enum ESMC_StaggerLoc staggerloc=ESMC_STAGGERLOC_CENTER;
+  int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound, *maxIndex;
   ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
+  ESMC_InterfaceInt i_maxIndex;
   ESMC_Field field, field2;
 
   int num_elem, num_node, conn_size;
+  ESMC_Grid grid;
   ESMC_Mesh mesh, mesh1, mesh2;
   ESMC_Array array, array2;
   int pdim=2;
@@ -267,6 +270,20 @@ int main(void){
   rc = ESMC_MeshDestroy(&mesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Field object from grid and arrayspec");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  maxIndex = (int *)malloc(2*sizeof(int));
+  maxIndex[0] = 4;
+  maxIndex[1] = 4;
+  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, 2, &rc);
+  rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
+  grid=ESMC_GridCreateNoPeriDim(i_maxIndex, 0, 0, &rc);
+  field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, "must have a name", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
   
   free(nodeId);
   free(nodeCoord);
@@ -282,6 +299,8 @@ int main(void){
   ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
   free(ungriddedUBound);
   ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
+  free(maxIndex);
+  ESMC_InterfaceIntDestroy(&i_maxIndex);
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

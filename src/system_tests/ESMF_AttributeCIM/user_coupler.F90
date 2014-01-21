@@ -298,7 +298,7 @@ module user_coupler
 
 
     ! Platform description attributes
-    call ESMF_AttPackGet(comp, convCIM, purpPlatform, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(comp, convCIM, purpPlatform, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'CompilerName', &
@@ -373,7 +373,7 @@ module user_coupler
 
 
     ! Component Properties: custom attributes
-    call ESMF_AttPackGet(comp, convCIM, purpProp, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(comp, convCIM, purpProp, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'SimulationType', &
@@ -399,7 +399,7 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Responsible party attributes (for Principal Investigator)
-    call ESMF_AttPackGet(comp, convISO, purpRP, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'Name', &
@@ -440,7 +440,7 @@ module user_coupler
 
 
     ! Responsible party attributes (for Contact)
-    call ESMF_AttPackGet(comp, convISO, purpRP, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
       attPackInstanceName=nestAttPackName(2), attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -488,7 +488,7 @@ module user_coupler
 
 
     ! Responsible party attributes (for Funder)
-    call ESMF_AttPackGet(comp, convISO, purpRP, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
       attPackInstanceName=nestAttPackName(3), attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -525,7 +525,7 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Citation attributes (1st Citation attribute package)
-    call ESMF_AttPackGet(comp, convISO, purpCitation, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(comp, convISO, purpCitation, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortTitle', &
@@ -579,7 +579,7 @@ module user_coupler
     !         nestAttPackName(x) is not needed (optional)
     !         when referring to the 1st nested attribute package
     !         of either a Responsible Party or a Citation.
-    call ESMF_AttPackGet(comp, convISO, purpCitation, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpCitation, &
       attPackInstanceName=nestAttPackName(5), attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

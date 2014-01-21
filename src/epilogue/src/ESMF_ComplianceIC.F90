@@ -112,7 +112,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase Zero for Initialize registered.",&
+      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Initialize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -125,7 +125,7 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     else
-      call ESMF_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase Zero!", &
+      call ESMF_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase ZERO!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -140,7 +140,12 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     else
-      write(output,*) " ",phaseCount," phase(s) of Initialize registered."
+      if (phaseZeroFlag) then
+        write(output,*) " ",phaseCount," phase(s) of Initialize registered"// &
+          " (not counting ZERO phase)."
+      else
+        write(output,*) " ",phaseCount," phase(s) of Initialize registered."
+      endif
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -164,7 +169,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase Zero for Run registered.",&
+      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Run registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -185,7 +190,12 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     else
-      write(output,*) " ",phaseCount," phase(s) of Run registered."
+      if (phaseZeroFlag) then
+        write(output,*) " ",phaseCount," phase(s) of Run registered"// &
+          " (not counting ZERO phase)."
+      else
+        write(output,*) " ",phaseCount," phase(s) of Run registered."
+      endif
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -209,7 +219,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
-      call ESMF_LogWrite(trim(prefix)//" phase Zero for Finalize registered.",&
+      call ESMF_LogWrite(trim(prefix)//" phase ZERO for Finalize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -230,7 +240,12 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     else
-      write(output,*) " ",phaseCount," phase(s) of Finalize registered."
+      if (phaseZeroFlag) then
+        write(output,*) " ",phaseCount," phase(s) of Finalize registered"// &
+          " (not counting ZERO phase)."
+      else
+        write(output,*) " ",phaseCount," phase(s) of Finalize registered."
+      endif
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -800,9 +815,11 @@ module ESMF_ComplianceICMod
 
     character(ESMF_MAXSTR)  :: compName
     character(len=3)        :: arrow
+    character(len=3)        :: forwardArrow
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    forwardArrow = "|->"
     arrow = "|->" ! default direction
     if (present(forward)) then
       if (.not.forward) arrow = "|<-"
@@ -814,8 +831,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    prefix = "COMPLIANCECHECKER:"//repeat(arrow, ccfDepth)//&
-      ":"//trim(compName)//":"
+    prefix = "COMPLIANCECHECKER:"//repeat(forwardArrow, ccfDepth-1)//&
+      arrow//":"//trim(compName)//":"
 
   end subroutine    
 
@@ -1309,7 +1326,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-  	call ESMF_AttPackGet(comp, attpack=attpack, &
+  	call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1516,6 +1533,33 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
+    attributeName = "Updated"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    attributeName = "SyncOfferGeomObject"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    attributeName = "SyncActionGeomObject"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
   end subroutine
     
   recursive subroutine checkFieldAttribute(prefix, field, attributeName, &
@@ -1535,7 +1579,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-	  call ESMF_AttPackGet(field, attpack=attpack, &
+	  call ESMF_AttributeGetAttPack(field, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &

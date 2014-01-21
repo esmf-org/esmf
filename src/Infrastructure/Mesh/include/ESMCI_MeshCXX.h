@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -28,7 +28,7 @@ namespace ESMCI {
     static MeshCXX* create(int, int, int*);
     static MeshCXX* createFromFile(char *, int, int *, int *, 
 				   char *, int *, char *, int *);
-    double * getLocalCoords(int *, int *, int *);
+    void getLocalCoords(double *, int *, int *, int *);
     static int destroy(MeshCXX **);
 
     int addElements(int, int*, int*, int*, int*, double *);

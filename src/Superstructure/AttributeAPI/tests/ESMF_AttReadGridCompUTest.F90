@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -123,7 +123,7 @@ print *, 'rc = ', rc
       ! Get ESG General Attribute package from a GridComp Test
       attrname = 'ComponentShortName'
       attrvalue = 'GEOS'
-      call ESMF_AttPackGet(gridcomp, attpack=attpack, &
+      call ESMF_AttributeGetAttPack(gridcomp, attpack=attpack, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Get ESG General Attribute package from a GridComp Test"

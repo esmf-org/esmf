@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,6 +16,7 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/include/ESMCI_OTree.h>
  
 #include <iostream>
@@ -32,6 +33,8 @@
 
 #include <Mesh/include/ESMCI_BBox.h>
 
+
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -39,6 +42,9 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
+
+
+extern bool mathutil_debug;
 
 // Store the index and a found flag for the
 // dimension.
@@ -235,8 +241,15 @@ static int found_func(void *c, void *y) {
   MeshObj &elem = *static_cast<MeshObj*>(c);
   OctSearchNodesData &si = *static_cast<OctSearchNodesData*>(y);
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("Checking node=%d vs. elem id=%d\n",si.snr.node->get_id(),elem.get_id());
+  }
+#endif
+
   // if we already have some one, then make sure this guy has a smaller id 
   if (si.is_in && (elem.get_id()>si.elem->get_id())) return 0; 
+
 
   // Get kernel
   const Kernel &ker = *elem.GetKernel();
@@ -285,14 +298,38 @@ static int found_func(void *c, void *y) {
   GatherElemData<>(cme, *si.src_cfield, elem, &node_coord[0]);
     
 
-  //  printf("B elem=%d\n",elem.get_id());
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
+    mathutil_debug=true;
+  }
+#endif
 
   bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
 
-  // printf("A elem=%d\n",elem.get_id());
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si.snr.node->get_id()== ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.node->get_id(),in,pcoord[0],pcoord[1],dist,elem.get_id());
+
+    double coords[3*40];
+    int num_nds;
+    int ids[40];
+
+    get_elem_coords_and_ids(&elem, si.src_cfield, etopo->spatial_dim, 40, &num_nds, coords, ids);
+    
+    for (int i=0; i<num_nds; i++) {
+      printf("%d ",ids[i]);
+    }
+    printf("]\n");
+
+    mathutil_debug=false;
+  }
+#endif
+
 
   // if we're too far away don't even consider this as a fall back candidate
   if (!in && (dist > 1.0E-10)) return 0;
+
 
   // In or close enough, so set as a candidate, until someone better comes along...
   if (in) {
@@ -317,7 +354,7 @@ static int found_func(void *c, void *y) {
 }
 
 // The main routine
-  void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol,
+  void OctSearch(const Mesh &src, const Mesh &dest, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, 
      std::vector<const MeshObj*> *to_investigate,OTree *box_in) {
   Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
 
@@ -450,8 +487,24 @@ static int found_func(void *c, void *y) {
     si.coords[0] = c[0]; si.coords[1] = c[1]; si.coords[2] = (sdim == 3 ? c[2] : 0.0);
     
     
+    // Set global map_type
+    // TODO: pass this directly to is_in_cell mapping function
+    MAP_TYPE old_sph_map_type=sph_map_type;
+    sph_map_type=mtype;
+
+    // Do Search and mapping
     box->runon(pmin, pmax, found_func, (void*)&si);
     
+    // Reset global map_type
+    sph_map_type=old_sph_map_type;
+
+
+#if 0
+     if (node.get_id()==1) {
+    printf("HH Mapped node=%d in=%d pcoords=%20.17f %20.17f s_elem=%d\n",node.get_id(),si.is_in,si.snr.pcoord[0],si.snr.pcoord[1],si.elem->get_id());
+
+  }
+#endif
     if (!si.investigated) {
       again.push_back(&node);
     } else {
@@ -503,7 +556,7 @@ static int found_func(void *c, void *y) {
 	  Throw() << " Unknown unmappedaction option";
 	}
      } else {
-       OctSearch(src, dest, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
+       OctSearch(src, dest, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
      }
   }
 

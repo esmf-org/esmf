@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research, 
+! Copyright 2002-2014, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -335,28 +335,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: localrc        ! local return code
-    type(ESMF_TypeKind_Flag)      :: opt_typekind           ! helper variable
-    integer                       :: opt_rank               ! helper variable
-    type(ESMF_Pointer), pointer   :: opt_localarrayPtrList(:)   ! helper variable
-    integer                       :: len_localarrayPtrList, i   ! helper variable
-    type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
-    type(ESMF_InterfaceInt)       :: distgridToPackedArrayMapArg ! helper var
-    type(ESMF_InterfaceInt)       :: arrayToDistGridMapArg  ! helper variable
-    type(ESMF_InterfaceInt)       :: undistLBoundArg        ! helper variable
-    type(ESMF_InterfaceInt)       :: undistUBoundArg        ! helper variable
-    type(ESMF_InterfaceInt)       :: exclusiveLBoundArg     ! helper variable
-    type(ESMF_InterfaceInt)       :: exclusiveUBoundArg     ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalLBoundArg ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalUBoundArg ! helper variable
-    type(ESMF_InterfaceInt)       :: totalLBoundArg         ! helper variable
-    type(ESMF_InterfaceInt)       :: totalUBoundArg         ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
-    type(ESMF_InterfaceInt)       :: totalLWidthArg         ! helper variable
-    type(ESMF_InterfaceInt)       :: totalUWidthArg         ! helper variable
-    type(ESMF_DistGrid)           :: opt_distgrid           ! helper variable
-    type(ESMF_DELayout)           :: opt_delayout           ! helper variable
+    integer                         :: localrc        ! local return code
+    type(ESMF_TypeKind_Flag)        :: opt_typekind           ! helper variable
+    integer                         :: opt_rank               ! helper variable
+    type(ESMF_Pointer), allocatable :: opt_localarrayPtrList(:)   ! helper var
+    integer                         :: len_localarrayPtrList, i   ! helper var
+    type(ESMF_InterfaceInt)         :: distgridToArrayMapArg  ! helper variable
+    type(ESMF_InterfaceInt)         :: distgridToPackedArrayMapArg ! helper var
+    type(ESMF_InterfaceInt)         :: arrayToDistGridMapArg  ! helper variable
+    type(ESMF_InterfaceInt)         :: undistLBoundArg        ! helper variable
+    type(ESMF_InterfaceInt)         :: undistUBoundArg        ! helper variable
+    type(ESMF_InterfaceInt)         :: exclusiveLBoundArg     ! helper variable
+    type(ESMF_InterfaceInt)         :: exclusiveUBoundArg     ! helper variable
+    type(ESMF_InterfaceInt)         :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt)         :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt)         :: totalLBoundArg         ! helper variable
+    type(ESMF_InterfaceInt)         :: totalUBoundArg         ! helper variable
+    type(ESMF_InterfaceInt)         :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt)         :: computationalUWidthArg ! helper variable
+    type(ESMF_InterfaceInt)         :: totalLWidthArg         ! helper variable
+    type(ESMF_InterfaceInt)         :: totalUWidthArg         ! helper variable
+    type(ESMF_DistGrid)             :: opt_distgrid           ! helper variable
+    type(ESMF_DELayout)             :: opt_delayout           ! helper variable
 
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL

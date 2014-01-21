@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,7 +38,7 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p, grid_tripole;
+  ESMC_Grid grid_np, grid_1p, grid_tripole, grid_from_file;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -46,6 +46,8 @@ int main(void){
   ESMC_InterfaceInt i_maxIndex;
   int p;
   bool pass;
+  int elbnd[dimcount],eubnd[dimcount];
+
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -95,6 +97,18 @@ int main(void){
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CORNER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetCoordBounds");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc=ESMC_GridGetCoordBounds(grid_np, 
+                             ESMC_STAGGERLOC_CORNER, 
+                             elbnd,
+                             eubnd,NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -422,6 +436,22 @@ int main(void){
   rc = ESMC_GridDestroy(&grid_1p);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+#endif
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file
+  strcpy(name, "GridCreateFromFile_SCRIP");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", ESMC_FILEFORMAT_SCRIP,
+					   NULL, NULL, NULL, NULL, "", "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_GridDestroy(&grid_from_file);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   //----------------------------------------------------------------------------

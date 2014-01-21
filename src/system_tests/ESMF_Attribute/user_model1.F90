@@ -414,7 +414,7 @@ module user_model1
 !        call ESMF_AttributeWrite(field,conv,purp,rc=rc)
 !        call ESMF_AttributeWrite(field,conv,purp, &
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-        call ESMF_AttPackGet(field, conv, purp, attpack=attpack, rc=rc)
+        call ESMF_AttributeGetAttPack(field, conv, purp, attpack=attpack, rc=rc)
         call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 1

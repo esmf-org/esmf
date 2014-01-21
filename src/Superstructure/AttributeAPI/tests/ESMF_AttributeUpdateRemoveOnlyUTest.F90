@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -339,7 +339,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttPackGet(field, convESMF, purpGen, attpack=attpack, rc=status)
+    call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
 #if 0
@@ -638,7 +638,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 #endif
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(field, convention=convESMF, &
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, &
                          purpose=purpGen, attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, attpack=attpack, &
     					   isPresent=isPresent, rc=rc)

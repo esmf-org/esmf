@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -259,7 +259,7 @@ program ESMF_SCompEx
                            convention=convCIM, purpose=purpSci, &
                            attrList=dc_sciPropAtt, rc=rc)
 
-    call ESMF_AttPackGet(dc_scicomp, convCIM, purpSci, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(dc_scicomp, convCIM, purpSci, attpack=attpack, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, 'TopBoundaryCondition', &
                            'radiation boundary condition', &

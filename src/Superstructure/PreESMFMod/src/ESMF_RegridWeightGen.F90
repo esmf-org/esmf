@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -256,186 +256,186 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
       
-      type(ESMF_RegridMethod_Flag) :: localRegridMethod
-      type(ESMF_PoleMethod_Flag)   :: localPoleMethod
-      type(ESMF_FileFormat_Flag)   :: localSrcFileType
-      type(ESMF_FileFormat_Flag)   :: localDstFileType
-      integer            :: localPoleNPnts
-      logical            :: localUserAreaFlag
-      logical            :: localLargefileFlag
-      logical            :: localNetcdf4fileFlag
-      logical            :: localVerboseFlag
-      integer            :: localrc
-      type(ESMF_VM)      :: vm
-      integer            :: PetNo, PetCnt
-      type(ESMF_Mesh)    :: srcMesh, dstMesh
-      type(ESMF_Grid)    :: srcGrid, dstGrid
-      type(ESMF_Field)   :: srcField, dstField
-      type(ESMF_Field)   :: srcFracField, dstFracField
-      type(ESMF_ArraySpec) :: arrayspec
-      integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
-      real(ESMF_KIND_R8), pointer :: factorList(:)
-      integer(ESMF_KIND_I4) :: maskvals(1)
-      integer            :: ind
-      integer, pointer   :: srcdims(:), dstdims(:)
-      integer            :: srcrank, dstrank
-      logical            :: isConserve, srcIsSphere, dstIsSphere
-      logical            :: addCorners,convertToDual
-      type(ESMF_MeshLoc) :: meshloc
-      logical            :: srcIsReg, dstIsReg
-      logical            :: srcIsRegional, dstIsRegional, typeSetFlag
-      character(len=256) :: methodStr
-      real(ESMF_KIND_R8), pointer :: srcArea(:)
-      real(ESMF_KIND_R8), pointer :: dstArea(:)
-      real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
-      integer            :: regridScheme
-      integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
-      logical            :: wasCompacted
-      integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
-      real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
-      type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
-      logical            :: srcMissingValue, dstMissingValue
-      character(len=256) :: argStr
-      logical            :: useSrcCoordVar, useDstCoordVar
-      logical            :: useSrcMask, useDstMask
-      integer            :: commandbuf(6)
-      !real(ESMF_KIND_R8) :: starttime, endtime
+    type(ESMF_RegridMethod_Flag) :: localRegridMethod
+    type(ESMF_PoleMethod_Flag)   :: localPoleMethod
+    type(ESMF_FileFormat_Flag)   :: localSrcFileType
+    type(ESMF_FileFormat_Flag)   :: localDstFileType
+    integer            :: localPoleNPnts
+    logical            :: localUserAreaFlag
+    logical            :: localLargefileFlag
+    logical            :: localNetcdf4fileFlag
+    logical            :: localVerboseFlag
+    integer            :: localrc
+    type(ESMF_VM)      :: vm
+    integer            :: PetNo, PetCnt
+    type(ESMF_Mesh)    :: srcMesh, dstMesh
+    type(ESMF_Grid)    :: srcGrid, dstGrid
+    type(ESMF_Field)   :: srcField, dstField
+    type(ESMF_Field)   :: srcFracField, dstFracField
+    type(ESMF_ArraySpec) :: arrayspec
+    integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer :: factorList(:)
+    integer(ESMF_KIND_I4) :: maskvals(1)
+    integer            :: ind
+    integer, pointer   :: srcdims(:), dstdims(:)
+    integer            :: srcrank, dstrank
+    logical            :: isConserve, srcIsSphere, dstIsSphere
+    logical            :: addCorners,convertToDual
+    type(ESMF_MeshLoc) :: meshloc
+    logical            :: srcIsReg, dstIsReg
+    logical            :: srcIsRegional, dstIsRegional, typeSetFlag
+    character(len=256) :: methodStr
+    real(ESMF_KIND_R8), pointer :: srcArea(:)
+    real(ESMF_KIND_R8), pointer :: dstArea(:)
+    real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
+    integer            :: regridScheme
+    integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
+    logical            :: wasCompacted
+    integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
+    type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
+    logical            :: srcMissingValue, dstMissingValue
+    character(len=256) :: argStr
+    logical            :: useSrcCoordVar, useDstCoordVar
+    logical            :: useSrcMask, useDstMask
+    integer            :: commandbuf(6)
+    !real(ESMF_KIND_R8) :: starttime, endtime
 
 #ifdef ESMF_NETCDF     
-      !------------------------------------------------------------------------
-      ! get global vm information
-      !
-      call ESMF_VMGetCurrent(vm, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+    !------------------------------------------------------------------------
+    ! get global vm information
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                           ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! set up local pet info
-      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                           ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! Default values
-      useSrcMask = .TRUE.
-      useDstMask = .TRUE.
-      localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
-      localSrcFileType = ESMF_FILEFORMAT_SCRIP
-      localDstFileType = ESMF_FILEFORMAT_SCRIP
-      localVerboseFlag = .false.
-      srcIsRegional = .false.
-      dstIsRegional = .false.
-      srcMissingValue = .false.
-      dstMissingValue = .false.
-      localLargeFileFlag = .false.
-      localNetcdf4FileFlag = .false.
-      localUserAreaflag = .false.
-      useSrcCoordVar = .false.
-      useDstCoordVar = .false.
-      localPoleNPnts = 0
+    ! Default values
+    useSrcMask = .TRUE.
+    useDstMask = .TRUE.
+    localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
+    localSrcFileType = ESMF_FILEFORMAT_SCRIP
+    localDstFileType = ESMF_FILEFORMAT_SCRIP
+    localVerboseFlag = .false.
+    srcIsRegional = .false.
+    dstIsRegional = .false.
+    srcMissingValue = .false.
+    dstMissingValue = .false.
+    localLargeFileFlag = .false.
+    localNetcdf4FileFlag = .false.
+    localUserAreaflag = .false.
+    useSrcCoordVar = .false.
+    useDstCoordVar = .false.
+    localPoleNPnts = 0
 
-      if (present(regridMethod)) then
-        localRegridMethod = regridMethod
+    if (present(regridMethod)) then
+      localRegridMethod = regridMethod
+    endif
+    
+    if (present(poleMethod)) then
+    	 localPoleMethod = poleMethod
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+       localPoleMethod = ESMF_POLEMETHOD_NONE
+    else
+       localPoleMethod = ESMF_POLEMETHOD_ALLAVG
+    endif
+
+    if (localPoleMethod == ESMF_POLEMETHOD_NPNTAVG) then
+      if (present(regridPoleNPnts)) then
+  	localPoleNPnts = regridPoleNPnts
+      else 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg ="regridPoleNPnts argument is missing for ESMF_POLEMETHOD_NPNTAVG", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
       endif
-    	
-      if (present(poleMethod)) then
-      	 localPoleMethod = poleMethod
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-         localPoleMethod = ESMF_POLEMETHOD_NONE
-      else
-         localPoleMethod = ESMF_POLEMETHOD_ALLAVG
-      endif
+    endif
 
-      if (localPoleMethod == ESMF_POLEMETHOD_NPNTAVG) then
-        if (present(regridPoleNPnts)) then
-  	  localPoleNPnts = regridPoleNPnts
-        else 
+    if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .and. &
+	     (localPoleMethod /= ESMF_POLEMETHOD_NONE)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg ="Conserve method only works with no pole", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+
+    if (present(srcFileType)) then
+       localSrcFileType = srcFileType
+    endif
+
+    if (present(dstFileType)) then
+       localDstFileType = dstFileType
+    endif
+
+    ! If the src grid type is UGRID, get the dummy variable name in the file
+    if (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
+      if (.not. present(srcMeshname)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg ="srcMeshname is not given", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! If the dst grid type is UGRID, get the dummy variable name in the file
+    if (localDstFileType == ESMF_FILEFORMAT_UGRID) then
+      if (.not. present(dstMeshname)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg ="dstMeshname is not given", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
+    if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
+    	  localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      if (present(srcMissingvalueFlag)) then
+	      srcMissingValue = srcMissingvalueFlag
+	    else
+	      srcMissingValue = .false.
+      endif
+	    if (srcMissingValue) then
+	      if (.not. present(srcMissingvalueVar)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="regridPoleNPnts argument is missing for ESMF_POLEMETHOD_NPNTAVG", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-
-      if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .and. &
-	       (localPoleMethod /= ESMF_POLEMETHOD_NONE)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="Conserve method only works with no pole", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      endif
-
-      if (present(srcFileType)) then
-         localSrcFileType = srcFileType
-      endif
-
-      if (present(dstFileType)) then
-         localDstFileType = dstFileType
-      endif
-
-      ! If the src grid type is UGRID, get the dummy variable name in the file
-      if (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
-        if (.not. present(srcMeshname)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="srcMeshname is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-
-      ! If the dst grid type is UGRID, get the dummy variable name in the file
-      if (localDstFileType == ESMF_FILEFORMAT_UGRID) then
-        if (.not. present(dstMeshname)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="dstMeshname is not given", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-
-      ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
-      if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
-      	  localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        if (present(srcMissingvalueFlag)) then
-	   srcMissingValue = srcMissingvalueFlag
-	else
-	   srcMissingValue = .false.
-        endif
-	if (srcMissingValue) then
-	   if (.not. present(srcMissingvalueVar)) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
    	        msg ="srcMissingvalueVar argument is not given", &
-                ESMF_CONTEXT, rcToReturn=rc)
-             return
- 	   endif  
-        endif
-      endif
-
-      ! If the dst grid type is UGRID or GRIDSPEC, check if the dstMissingvalueVar is given 
-      if (localDstFileType == ESMF_FILEFORMAT_UGRID .or. &
-      	  localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        if (present(dstMissingvalueFlag)) then
-	   dstMissingValue = dstMissingvalueFlag
-	else
-	   dstMissingValue = .false.
-        endif
-	if (dstMissingValue) then
-	   if (.not. present(dstMissingvalueVar)) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-   	        msg ="dstMissingvalueVar argument is not given", &
-                ESMF_CONTEXT, rcToReturn=rc)
-             return
-           endif
-        endif
-      endif
-
-      if (srcMissingValue .and. (localSrcFileType == ESMF_FILEFORMAT_SCRIP .or. &
-          localSrcFileType == ESMF_FILEFORMAT_ESMFMESH)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg =" missingvalue is only supported for UGRID and GRIDSPEC", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
+ 	      endif  
       endif
+    endif
+
+    ! If the dst grid type is UGRID or GRIDSPEC, check if the dstMissingvalueVar is given 
+    if (localDstFileType == ESMF_FILEFORMAT_UGRID .or. &
+      	localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      if (present(dstMissingvalueFlag)) then
+	      dstMissingValue = dstMissingvalueFlag
+	    else
+	      dstMissingValue = .false.
+      endif
+	    if (dstMissingValue) then
+	      if (.not. present(dstMissingvalueVar)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+   	        msg ="dstMissingvalueVar argument is not given", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
+      endif
+    endif
+
+    if (srcMissingValue .and. (localSrcFileType == ESMF_FILEFORMAT_SCRIP .or. &
+        localSrcFileType == ESMF_FILEFORMAT_ESMFMESH)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg =" missingvalue is only supported for UGRID and GRIDSPEC", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
 !      if (srcMissingValue .and. localSrcFileType == ESMF_FILEFORMAT_UGRID .and. &
 !          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
@@ -445,13 +445,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          return
 !      endif
 
-      if (dstMissingValue .and. (localDstFileType == ESMF_FILEFORMAT_SCRIP .or. &
-          localDstFileType == ESMF_FILEFORMAT_ESMFMESH)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg = " missingvalue is only supported for UGRID and GRIDSPEC", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      endif
+    if (dstMissingValue .and. (localDstFileType == ESMF_FILEFORMAT_SCRIP .or. &
+        localDstFileType == ESMF_FILEFORMAT_ESMFMESH)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = " missingvalue is only supported for UGRID and GRIDSPEC", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
 !      if (dstMissingValue .and. localDstFileType == ESMF_FILEFORMAT_UGRID .and. &
 !          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
@@ -461,931 +461,930 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          return
 !      endif
 
-      if (present(unmappedaction)) then
-        localUnmappedaction = unmappedaction
+    if (present(unmappedaction)) then
+      localUnmappedaction = unmappedaction
+    else
+      localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+    endif
+
+    if (present(srcRegionalFlag)) then
+      srcIsRegional = srcRegionalFlag
+    endif
+
+    if (present(dstRegionalFlag)) then
+      dstIsRegional = dstRegionalFlag
+    endif
+
+!    if (srcIsRegional .or. dstIsRegional) then
+    if (srcIsRegional) then
+      localPoleMethod = ESMF_POLEMETHOD_NONE
+      localPoleNPnts = 0
+    endif
+
+    if (present(largefileFlag)) then
+	    localLargeFileFlag = largefileFlag
+    endif
+
+    if (present(netcdf4fileFlag)) then
+	    localNetcdf4FileFlag = netcdf4fileFlag
+    endif
+
+    if (present(useUserAreaFlag)) then
+	    localUserAreaFlag = useUserAreaFlag
+    endif
+
+    if (present(verboseFlag)) then
+      localVerboseFlag = verboseFlag
+    endif
+
+    ! user area only needed for conservative regridding
+    if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = " user defined area is only used for the conservative regridding", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (localUserAreaFlag .and. (localSrcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+ 	      localSrcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
+	      (localDstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+ 	      localDstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
+    ! coordinate variables
+    if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      if (present(useSrcCoordFlag)) then
+	      useSrcCoordVar = useSrcCoordFlag
       else
-        localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+        useSrcCoordVar = .false.
       endif
-
-      if (present(srcRegionalFlag)) then
-         srcIsRegional = srcRegionalFlag
-      endif
-
-      if (present(dstRegionalFlag)) then
-         dstIsRegional = dstRegionalFlag
-      endif
-
-!      if (srcIsRegional .or. dstIsRegional) then
-      if (srcIsRegional) then
-         localPoleMethod = ESMF_POLEMETHOD_NONE
-         localPoleNPnts = 0
-      endif
-
-      if (present(largefileFlag)) then
-	   localLargeFileFlag = largefileFlag
-      endif
-
-      if (present(netcdf4fileFlag)) then
-	   localNetcdf4FileFlag = netcdf4fileFlag
-      endif
-
-      if (present(useUserAreaFlag)) then
-	   localUserAreaFlag = useUserAreaFlag
-      endif
-
-      if (present(verboseFlag)) then
-           localVerboseFlag = verboseFlag
-      endif
-
-      ! user area only needed for conservative regridding
-      if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+      if (useSrcCoordVar) then
+	      if (.not. present(srcCoordinateVars)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg = " user defined area is only used for the conservative regridding", &
+     	      msg = "srcCoordinateVars argument is not given.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
+	      endif  
       endif
+    endif
 
-      if (localUserAreaFlag .and. (localSrcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
- 	    localSrcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
-	    (localDstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
- 	    localDstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	       msg = "user defined areas is supported only when the source or dest grid is in SCRIP of ESMF format", &
-               ESMF_CONTEXT, rcToReturn=rc)
-             return
-      endif
-
-      ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
-      ! coordinate variables
-      if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-         if (present(useSrcCoordFlag)) then
-	    useSrcCoordVar = useSrcCoordFlag
-         else
-            useSrcCoordVar = .false.
-         endif
-         if (useSrcCoordVar) then
-	    if (.not. present(srcCoordinateVars)) then
-                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-       	           msg = "srcCoordinateVars argument is not given.", &
-                   ESMF_CONTEXT, rcToReturn=rc)
-              return
-	    endif  
-         endif
-      endif
-
-      if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-         if (present(useDstCoordFlag)) then
-	    useDstCoordVar = useDstCoordFlag
-         else
-            useDstCoordVar = .false.
-         endif
-         if (useDstCoordVar) then
-	    if (.not. present(dstCoordinateVars)) then
-                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-       	           msg = "dstCoordinateVars argument is not given.", &
-                   ESMF_CONTEXT, rcToReturn=rc)
-              return
-	    endif  
-         endif
-      endif
-
-
-      ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
-      ! either GRIDSPEC or UGRID, same for useDstMask
-      if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
-          useSrcMask = .false.
-
-      if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
-           useDstMask = .false.
- 
-      ! Should I have only PetNO=0 to open the file and find out the size?
-      if (PetNo == 0) then
-        if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-	    call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
-	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
-             write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', srcfile
-           endif
-           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-           if (srcrank == 2) then
-	     srcIsReg = .true.
-           else
-             srcIsReg = .false.
-           endif
-        elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-           allocate(srcdims(2))
-	   if (useSrcCoordVar) then
-   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
-	   else
-	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
- 	   endif
-	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
-             write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', srcfile
-           endif
-           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-	   srcIsReg = .true.
-           srcrank = 2
-        else
-	   srcIsReg = .false.
-        endif
-        if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
-	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
-	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
-             write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', dstfile
-           endif
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           if (dstrank == 2) then
-	     dstIsReg = .true.
-           else
-             dstIsReg = .false.
-           endif
-         elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	   allocate(dstdims(2))
-	   if (useDstCoordVar) then
-	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordinateVars, rc=localrc)
-	   else
-	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=localrc)
-	   endif 
-	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
-             write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', dstfile
-           endif
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	   dstrank = 2
-	   dstIsReg = .true.
-        else
-	   dstIsReg = .false.
-        endif
-        commandbuf(:) = 0
-	if (srcIsReg) commandbuf(1) = 1
-	if (dstIsReg) commandbuf(2) = 1
-        if (srcIsReg) then
-           commandbuf(3) = srcdims(1)
-     	   commandbuf(4) = srcdims(2)
-        endif 
-	if (dstIsReg) then 
-  	   commandbuf(5) = dstdims(1)
-	   commandbuf(6) = dstdims(2)   
-        endif
-        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+    if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      if (present(useDstCoordFlag)) then
+	      useDstCoordVar = useDstCoordFlag
       else
-        ! Not the Root PET
-        allocate(srcdims(2),dstdims(2))
-        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-        if (commandbuf(1) == 1) then
-	    srcIsReg = .true.
-        else
-            srcIsReg = .false.
-        endif        
-        if (commandbuf(2) == 1) then
-	    dstIsReg = .true.
-        else
-            dstIsReg = .false.
-        endif        
-	srcdims(1) = commandbuf(3)  
-	srcdims(2) = commandbuf(4)  
-	dstdims(1) = commandbuf(5)  
-	dstdims(2) = commandbuf(6)  
+        useDstCoordVar = .false.
       endif
+      if (useDstCoordVar) then
+	      if (.not. present(dstCoordinateVars)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+     	      msg = "dstCoordinateVars argument is not given.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+	      endif  
+      endif
+    endif
 
-      ! Print the regrid options
-      if (localVerboseFlag .and. PetNo == 0) then
+    ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
+    ! either GRIDSPEC or UGRID, same for useDstMask
+    if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+      useSrcMask = .false.
+
+    if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+      useDstMask = .false.
+ 
+    ! Should I have only PetNO=0 to open the file and find out the size?
+    if (PetNo == 0) then
+      if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
+	      call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
+	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+          write(*,*)
+	        print *, 'ERROR: Unable to get dimension information from:', srcfile
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        if (srcrank == 2) then
+	        srcIsReg = .true.
+        else
+          srcIsReg = .false.
+        endif
+      elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+        allocate(srcdims(2))
+	      if (useSrcCoordVar) then
+   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
+	      else
+	        call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
+ 	      endif
+	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+          write(*,*)
+	        print *, 'ERROR: Unable to get dimension information from:', srcfile
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	      srcIsReg = .true.
+        srcrank = 2
+      else
+	      srcIsReg = .false.
+      endif
+      if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
+	      call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
+	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+          write(*,*)
+	        print *, 'ERROR: Unable to get dimension information from:', dstfile
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        if (dstrank == 2) then
+	        dstIsReg = .true.
+        else
+          dstIsReg = .false.
+        endif
+      elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	      allocate(dstdims(2))
+	      if (useDstCoordVar) then
+	        call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordinateVars, rc=localrc)
+	      else
+	        call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=localrc)
+	      endif 
+	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+          write(*,*)
+	        print *, 'ERROR: Unable to get dimension information from:', dstfile
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	      dstrank = 2
+	      dstIsReg = .true.
+      else
+	      dstIsReg = .false.
+      endif
+      commandbuf(:) = 0
+	    if (srcIsReg) commandbuf(1) = 1
+	    if (dstIsReg) commandbuf(2) = 1
+      if (srcIsReg) then
+        commandbuf(3) = srcdims(1)
+     	  commandbuf(4) = srcdims(2)
+      endif 
+	    if (dstIsReg) then 
+  	    commandbuf(5) = dstdims(1)
+	      commandbuf(6) = dstdims(2)   
+      endif
+      call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Not the Root PET
+      allocate(srcdims(2),dstdims(2))
+      call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      if (commandbuf(1) == 1) then
+	      srcIsReg = .true.
+      else
+        srcIsReg = .false.
+      endif        
+      if (commandbuf(2) == 1) then
+	      dstIsReg = .true.
+      else
+        dstIsReg = .false.
+      endif        
+	      srcdims(1) = commandbuf(3)  
+	      srcdims(2) = commandbuf(4)  
+	      dstdims(1) = commandbuf(5)  
+	      dstdims(2) = commandbuf(6)  
+    endif
+
+    ! Print the regrid options
+    if (localVerboseFlag .and. PetNo == 0) then
   	  print *, "Starting weight generation with these inputs: "
-	  print *, "  Source File: ", trim(srcfile)
-	  print *, "  Destination File: ", trim(dstfile)
+	    print *, "  Source File: ", trim(srcfile)
+	    print *, "  Destination File: ", trim(dstfile)
   	  print *, "  Weight File: ", trim(weightFile)
-          if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then 
-             print *, "  Source File is in SCRIP format"
-          elseif (localSrcFileType == ESMF_FILEFORMAT_ESMFMESH) then 
-             print *, "  Source File is in ESMF format"
-          elseif (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
-             print *, "  Source File is in UGRID format, dummy variable: ", &
-		trim(srcMeshName)
-	     if (srcMissingValue) then
+      if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then 
+        print *, "  Source File is in SCRIP format"
+      elseif (localSrcFileType == ESMF_FILEFORMAT_ESMFMESH) then 
+        print *, "  Source File is in ESMF format"
+      elseif (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
+        print *, "  Source File is in UGRID format, dummy variable: ", &
+		    trim(srcMeshName)
+	      if (srcMissingValue) then
 	        print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
-	     endif
-	  else 
-	     print *, "  Source File is in GRIDSPEC foramt"
-	     if (useSrcCoordVar) then
+	      endif
+	    else 
+	      print *, "  Source File is in GRIDSPEC foramt"
+	      if (useSrcCoordVar) then
 	        print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
-		         "' as the longitude and latitude variables"
-	     endif
-	     if (srcMissingValue) then
+		               "' as the longitude and latitude variables"
+	      endif
+	      if (srcMissingValue) then
 	        print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
-             endif
-          endif
-          if (srcIsRegional) then
-	     print *, "  Source Grid is a regional grid"
-          else 
-	     print *, "  Source Grid is a global grid"
-	  endif
-	  if (srcIsReg)   then
-	     print *, "  Source Grid is a logically rectangular grid"
-          else
-	     print *, "  Source Grid is an unstructured grid"
-          endif
-          if (localDstFileType == ESMF_FILEFORMAT_SCRIP) then 
-              print *, "  Destination File is in SCRIP format"
-          elseif (localDstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
-              print *, "  Destination File is in ESMF format"
-          elseif (localDstFileType == ESMF_FILEFORMAT_UGRID) then
-              print *, "  Destination File is in UGRID format, dummy variable: ", & 
-	  	trim(dstMeshName)
+        endif
+      endif
+      if (srcIsRegional) then
+	      print *, "  Source Grid is a regional grid"
+      else 
+	      print *, "  Source Grid is a global grid"
+	    endif
+	    if (srcIsReg)   then
+	      print *, "  Source Grid is a logically rectangular grid"
+      else
+	      print *, "  Source Grid is an unstructured grid"
+      endif
+      if (localDstFileType == ESMF_FILEFORMAT_SCRIP) then 
+        print *, "  Destination File is in SCRIP format"
+      elseif (localDstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
+        print *, "  Destination File is in ESMF format"
+      elseif (localDstFileType == ESMF_FILEFORMAT_UGRID) then
+        print *, "  Destination File is in UGRID format, dummy variable: ", & 
+	    	trim(dstMeshName)
 	      if (dstMissingValue) then
 	        print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
-              endif	
-          else
+        endif	
+      else
 	      print *, "  Destination File is in GRIDSPEC format"	
 	      if (useDstCoordVar) then
 	        print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), &
-		         "' as the longitude and latitude variables"
+		               "' as the longitude and latitude variables"
 	      endif
 	      if (dstMissingValue) then
 	        print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
-              endif	
-	  endif
-          if (dstIsRegional) then
-	     print *, "  Destination Grid is a regional grid"
-          else 
-	     print *, "  Destination Grid is a global grid"
-	  endif
-          if (dstIsReg)   then
-	     print *, "  Destination Grid is a logically rectangular grid"
-          else
-	     print *, "  Destination Grid is an unstructured grid"
-          endif
-          if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
-             print *, "  Regrid Method: bilinear"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-             print *, "  Regrid Method: conserve"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
-             print *, "  Regrid Method: patch"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
-             print *, "  Regrid Method: nearest source to destination"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-             print *, "  Regrid Method: nearest destination to source"
-	  endif
-          if (localPoleMethod .eq. ESMF_POLEMETHOD_NONE) then
-	     print *, "  Pole option: NONE"
-	  elseif (localPoleMethod .eq. ESMF_POLEMETHOD_ALLAVG) then
-	     print *, "  Pole option: ALL"
-	  elseif (localPoleMethod .eq. ESMF_POLEMETHOD_TEETH) then
-	     print *, "  Pole option: TEETH"
-	  else
-	     print *, "  Pole option: ", localPoleNPnts
-          endif
-          if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
-	     print *, "  Ignore unmapped destination points"
-          endif
-	  if (localLargeFileFlag) then
-	     print *, "  Output weight file in 64bit offset NetCDF file format"
-          endif
-	  if (localNetcdf4FileFlag) then
-	     print *, "  Output weight file in NetCDF4 file format"
-          endif
-	  if (localUserAreaFlag) then
-	     print *, "  Use user defined cell area for both the source and destination grids"
-          endif
-          write(*,*)
-     endif 
+        endif	
+	    endif
+      if (dstIsRegional) then
+	      print *, "  Destination Grid is a regional grid"
+      else 
+	      print *, "  Destination Grid is a global grid"
+	    endif
+      if (dstIsReg)   then
+	      print *, "  Destination Grid is a logically rectangular grid"
+      else
+	      print *, "  Destination Grid is an unstructured grid"
+      endif
+      if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+        print *, "  Regrid Method: bilinear"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+        print *, "  Regrid Method: conserve"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+        print *, "  Regrid Method: patch"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+        print *, "  Regrid Method: nearest source to destination"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+        print *, "  Regrid Method: nearest destination to source"
+	    endif
+      if (localPoleMethod .eq. ESMF_POLEMETHOD_NONE) then
+	      print *, "  Pole option: NONE"
+	    elseif (localPoleMethod .eq. ESMF_POLEMETHOD_ALLAVG) then
+	      print *, "  Pole option: ALL"
+	    elseif (localPoleMethod .eq. ESMF_POLEMETHOD_TEETH) then
+	      print *, "  Pole option: TEETH"
+	    else
+	      print *, "  Pole option: ", localPoleNPnts
+      endif
+      if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
+	      print *, "  Ignore unmapped destination points"
+      endif
+	    if (localLargeFileFlag) then
+	      print *, "  Output weight file in 64bit offset NetCDF file format"
+      endif
+	    if (localNetcdf4FileFlag) then
+	      print *, "  Output weight file in NetCDF4 file format"
+      endif
+	    if (localUserAreaFlag) then
+	      print *, "  Use user defined cell area for both the source and destination grids"
+      endif
+        write(*,*)
+    endif 
 
-     ! Set flags according to the regrid method
-     if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-        isConserve=.true.
-        addCorners=.true.
-        convertToDual=.false.
-        meshloc=ESMF_MESHLOC_ELEMENT
-     else
-        isConserve=.false.
-        addCorners=.false.
-        convertToDual=.true.
-        meshloc=ESMF_MESHLOC_NODE
-     endif
+    ! Set flags according to the regrid method
+    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+      isConserve=.true.
+      addCorners=.true.
+      convertToDual=.false.
+      meshloc=ESMF_MESHLOC_ELEMENT
+    else
+      isConserve=.false.
+      addCorners=.false.
+      convertToDual=.true.
+      meshloc=ESMF_MESHLOC_NODE
+    endif
 
-     if (srcIsRegional .and. dstIsRegional) then
-        regridScheme = ESMF_REGRID_SCHEME_REGION3D
-        srcIsSphere=.false.
-        dstIsSphere=.false.
-     elseif (srcIsRegional) then
-        regridScheme = ESMF_REGRID_SCHEME_REGTOFULL3D
-        srcIsSphere=.false.
-        dstIsSphere=.true.
-     elseif (dstIsRegional) then  
-        regridScheme = ESMF_REGRID_SCHEME_FULLTOREG3D
-        srcIsSphere=.true.
-        dstIsSphere=.false.
-     else
-        regridScheme = ESMF_REGRID_SCHEME_FULL3D
-        srcIsSphere=.true.
-        dstIsSphere=.true.
-     endif
+    if (srcIsRegional .and. dstIsRegional) then
+      regridScheme = ESMF_REGRID_SCHEME_REGION3D
+      srcIsSphere=.false.
+      dstIsSphere=.false.
+    elseif (srcIsRegional) then
+      regridScheme = ESMF_REGRID_SCHEME_REGTOFULL3D
+      srcIsSphere=.false.
+      dstIsSphere=.true.
+    elseif (dstIsRegional) then  
+      regridScheme = ESMF_REGRID_SCHEME_FULLTOREG3D
+      srcIsSphere=.true.
+      dstIsSphere=.false.
+    else
+      regridScheme = ESMF_REGRID_SCHEME_FULL3D
+      srcIsSphere=.true.
+      dstIsSphere=.true.
+    endif
 
-     ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
-     ! otherwise, regrid will not work
-     if (PetCnt == 1) then
-	xpart = 1
-	ypart = 1
-     else
+    ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
+    ! otherwise, regrid will not work
+    if (PetCnt == 1) then
+	    xpart = 1
+	    ypart = 1
+    else
      	bigFac = 1
      	do i=2, int(sqrt(float(PetCnt)))
-	   if ((PetCnt/i)*i == PetCnt) then
-	      bigFac = i
-           endif
-        enddo
-	xpets = bigFac
-	ypets = PetCnt/xpets
-        if (srcIsReg) then
-	   if ((srcdims(1) <= srcdims(2) .and. xpets <= ypets) .or. &
-	       (srcdims(1) > srcdims(2) .and. xpets > ypets)) then
-	       xpart = xpets
-	       ypart = ypets
-	   else 
-	       xpart = ypets
-	       ypart = xpets
-	   endif
-	   xdim = srcdims(1)/xpart
-	   ydim = srcdims(2)/ypart
-	   do while (xdim <= 1 .and. xpart>1)
-	      xpart = xpart-1
-   	      xdim = srcdims(1)/xpart
-           enddo
-	   do while (ydim <= 1 .and. ypart>1) 
-	      ypart = ypart-1
-   	      ydim = srcdims(2)/ypart
-           enddo
+	      if ((PetCnt/i)*i == PetCnt) then
+	        bigFac = i
         endif
-     endif
+      enddo
+	    xpets = bigFac
+	    ypets = PetCnt/xpets
+      if (srcIsReg) then
+	      if ((srcdims(1) <= srcdims(2) .and. xpets <= ypets) .or. &
+	          (srcdims(1) > srcdims(2) .and. xpets > ypets)) then
+	        xpart = xpets
+	        ypart = ypets
+	      else 
+	        xpart = ypets
+	        ypart = xpets
+	      endif
+	      xdim = srcdims(1)/xpart
+	      ydim = srcdims(2)/ypart
+	      do while (xdim <= 1 .and. xpart>1)
+	        xpart = xpart-1
+   	      xdim = srcdims(1)/xpart
+        enddo
+	      do while (ydim <= 1 .and. ypart>1) 
+	        ypart = ypart-1
+   	      ydim = srcdims(2)/ypart
+        enddo
+      endif
+    endif
 
-     !Read in the srcfile and create the corresponding ESMF object (either
-     ! ESMF_Grid or ESMF_Mesh
+    !Read in the srcfile and create the corresponding ESMF object (either
+    ! ESMF_Grid or ESMF_Mesh
 
-     if (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	if (useSrcCoordVar) then
- 	  if (srcMissingValue) then
-	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
-		  coordNames = srcCoordinateVars, rc=localrc)
-          else
-             srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
-		       addCornerStagger=addCorners, &
-                       isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
-	  endif
-        else 
- 	  if (srcMissingValue) then
-	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
-          else
-             srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
-		       addCornerStagger=addCorners, &
-                       isSphere=srcIsSphere, rc=localrc)
-	  endif
-	endif
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	    if (useSrcCoordVar) then
+ 	      if (srcMissingValue) then
+	        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+		        addCornerStagger=addCorners, &
+		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
+		        coordNames = srcCoordinateVars, rc=localrc)
+        else
+          srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
+		        addCornerStagger=addCorners, &
+            isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
+	      endif
+      else 
+ 	      if (srcMissingValue) then
+	        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+		        addCornerStagger=addCorners, &
+		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
+        else
+          srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
+		        addCornerStagger=addCorners, &
+            isSphere=srcIsSphere, rc=localrc)
+	      endif
+	    endif
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     	srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
+	    if(srcIsReg) then
+        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+			    addCornerStagger=addCorners, &
+          isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-     elseif (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-	if(srcIsReg) then
-           srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-			addCornerStagger=addCorners, &
-                        isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-           !call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, filename="srcGrid", &
-           !     rc=localrc)
-           !if (ESMF_LogFoundError(localrc, &
-           !                       ESMF_ERR_PASSTHRU, &
-           !                       ESMF_CONTEXT, rcToReturn=rc)) return
-           !
+         !call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, filename="srcGrid", &
+         !     rc=localrc)
+         !if (ESMF_LogFoundError(localrc, &
+         !                       ESMF_ERR_PASSTHRU, &
+         !                       ESMF_CONTEXT, rcToReturn=rc)) return
+         !
 
-	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-    	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	else
-           srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-		       rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
-           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	endif
-      else
-	! if srcfile is not SCRIP, it is always unstructured
-	if (srcMissingValue) then
-	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-                    meshname = trim(srcMeshName), maskFlag =meshloc, &
-                    addUserArea=localUserAreaFlag, &
-		    varname=trim(srcMissingvalueVar), rc=localrc)
-	else
-	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-                    addUserArea=localUserAreaFlag, &
-                    meshname = trim(srcMeshName), rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-	endif
+	      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    	  srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    else
+        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+          convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+		      rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
         srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    endif
+    else
+	    ! if srcfile is not SCRIP, it is always unstructured
+	    if (srcMissingValue) then
+	      srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
+          meshname = trim(srcMeshName), maskFlag =meshloc, &
+          addUserArea=localUserAreaFlag, &
+		      varname=trim(srcMissingvalueVar), rc=localrc)
+	    else
+	      srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
+          addUserArea=localUserAreaFlag, &
+          meshname = trim(srcMeshName), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    endif
+      !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+      srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-     !Read in the dstfile and create the corresponding ESMF object (either
-     ! ESMF_Grid or ESMF_Mesh)
-     if (PetCnt == 1) then
-	xpart = 1
-	ypart = 1
-     else
-        if (dstIsReg) then
-	   if ((dstdims(1) <= dstdims(2) .and. xpets <= ypets) .or. &
-	       (dstdims(1) > dstdims(2) .and. xpets > ypets)) then
-	       xpart = xpets
-	       ypart = ypets
-	   else 
-	       xpart = ypets
-	       ypart = xpets
-	   endif
-	   xdim = dstdims(1)/xpart
-	   ydim = dstdims(2)/ypart
-	   do while (xdim <= 1 .and. xpart>1)
-	     xpart = xpart-1
-   	     xdim = dstdims(1)/xpart
-           enddo
-	   do while (ydim <= 1 .and. ypart>1) 
-	     ypart = ypart-1
-   	     ydim = dstdims(2)/ypart
-           enddo
-        endif
-     endif
-     if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	if (useDstCoordVar) then
- 	  if (dstMissingValue) then
-	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
-		  coordNames = dstCoordinateVars, rc=localrc)
-          else
-             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-			addCornerStagger=addCorners, &
-                        isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
-	  endif
+    !Read in the dstfile and create the corresponding ESMF object (either
+    ! ESMF_Grid or ESMF_Mesh)
+    if (PetCnt == 1) then
+	    xpart = 1
+	    ypart = 1
+    else
+      if (dstIsReg) then
+	      if ((dstdims(1) <= dstdims(2) .and. xpets <= ypets) .or. &
+	          (dstdims(1) > dstdims(2) .and. xpets > ypets)) then
+	        xpart = xpets
+	        ypart = ypets
+	      else 
+	        xpart = ypets
+	        ypart = xpets
+	      endif
+	      xdim = dstdims(1)/xpart
+	      ydim = dstdims(2)/ypart
+	      do while (xdim <= 1 .and. xpart>1)
+	        xpart = xpart-1
+   	      xdim = dstdims(1)/xpart
+        enddo
+	      do while (ydim <= 1 .and. ypart>1) 
+	        ypart = ypart-1
+   	      ydim = dstdims(2)/ypart
+        enddo
+      endif
+    endif
+    if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	    if (useDstCoordVar) then
+ 	      if (dstMissingValue) then
+	        dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+		        addCornerStagger=addCorners, &
+		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
+		        coordNames = dstCoordinateVars, rc=localrc)
         else
- 	  if (dstMissingValue) then
-	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
-          else
-             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-			addCornerStagger=addCorners, &
-                        isSphere=dstIsSphere, rc=localrc)
-	  endif
-	endif
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-    	dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-     elseif (localDstFileType == ESMF_FILEFORMAT_SCRIP) then
-	if(dstIsReg) then
-           dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
-			addCornerStagger=addCorners, &
-                        isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-    	   dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	else
-           dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	endif
+          dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+			      addCornerStagger=addCorners, &
+            isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
+	      endif
       else
-	! if dstfile is not SCRIP, it is always unstructured
-	if (dstMissingValue) then
- 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                    meshname = trim(dstMeshName), maskFlag=meshloc, &
-                    addUserArea=localUserAreaFlag, &
-		    varname=trim(dstMissingvalueVar), rc=localrc)
-	else
-	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                    addUserArea=localUserAreaFlag, &
-                    meshname = trim(dstMeshName), rc=localrc)
-        endif
+ 	      if (dstMissingValue) then
+	        dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+		        addCornerStagger=addCorners, &
+		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
+        else
+          dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+			      addCornerStagger=addCorners, &
+            isSphere=dstIsSphere, rc=localrc)
+	      endif
+	    endif
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (localDstFileType == ESMF_FILEFORMAT_SCRIP) then
+	    if(dstIsReg) then
+        dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
+			    addCornerStagger=addCorners, &
+          isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    else
+        dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+          convertToDual=convertToDual, addUserArea=localUserAreaFlag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      ! Create Frac Fields if conservative
-      if (isConserve) then
-         if (srcIsReg) then
-            call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            srcFracField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         else
-            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-
-         if (dstIsReg) then
-            call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            dstFracField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         else
-            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-      endif
-
-      !call ESMF_VMBarrier(vm)
-      !call ESMF_VMWtime(starttime, rc=localrc)
-      maskvals(1) = 0
-      if (localPoleNPnts <= 0) localPoleNPnts = 1
-
-      if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
-            methodStr = "Bilinear remapping"
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-            methodStr = "Conservative remapping"
-     else ! nothing recognizable so report error
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg="unrecognized RegridMethod", &
-            ESMF_CONTEXT, rcToReturn=rc)
-      endif
-
-      if (useSrcMask .and. useDstMask) then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=localUnmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-	    rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-       else if (useSrcMask) then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, &
-	    unmappedaction=localUnmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-	    rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-       else if (useDstMask) then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    dstMaskValues = maskvals, &
-	    unmappedaction=localUnmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-	    rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-       else	
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    unmappedaction=localUnmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-	    rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-       end if
-      ! print *, PetNo, size(factorList), factorIndexList(1,1), factorIndexList(2,1)
-      ! Compute areas if conservative
-      ! Area only valid on PET 0 right now, when parallel Array
-      ! write works, then make area io parallel
-      if (isConserve) then
-         if (srcIsReg) then
-            call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-
-         if (dstIsReg) then
-            call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-      endif
-
-      ! Compact weight matrix
-      ! (only compact if one of the grids is irregular, because that's when the repeated entries occur)
-      if ((.not. srcIsReg) .or. (.not. dstIsReg)) then
-         call compactMatrix(factorList, factorIndexList, &
-                            wasCompacted, &
-                            compactedFactorList, compactedFactorIndexList, &
-                            localrc)
-         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-         ! If the list was compacted get rid of the old lists and 
-         ! point to the new lists
-         if (wasCompacted) then
-            deallocate(factorList)
-            factorList=>compactedFactorList
-            deallocate(factorIndexList)
-            factorIndexList=>compactedFactorIndexList
-         endif
-      endif
-
-      ! Computer fraction if bilinear
-      ! src fraction is always 0
-      ! destination fraction depends on the src mask, dst mask, and the weight
-      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-	if (dstIsReg) then
-	   call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-        else
-	   call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-      else 
-         if (srcIsReg) then
-            call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         else
-            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
-                 srcFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-
-         if (dstIsReg) then
-            call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         else
-            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
-                 dstFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-      endif
-
-      !! Write the weight table into a SCRIP format NetCDF file
-      if (PetNo == 0) then
-         if (isConserve) then
-	   if (useSrcCoordVar .and. useDstCoordVar) then
-              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, &
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	   srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-    	   else if (useSrcCoordVar) then	
-              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, &
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	   srccoordnames = srcCoordinateVars, rc=localrc)
-	   elseif (useDstCoordVar) then
-              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, &
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	   dstcoordnames = dstCoordinateVars, rc=localrc)
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    endif
+    else
+	    ! if dstfile is not SCRIP, it is always unstructured
+	    if (dstMissingValue) then
+ 	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
+          meshname = trim(dstMeshName), maskFlag=meshloc, &
+          addUserArea=localUserAreaFlag, &
+		    varname=trim(dstMissingvalueVar), rc=localrc)
 	    else
-              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, &
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-	   endif
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-         else
-	   if (useSrcCoordVar .and. useDstCoordVar) then
-               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
-		   largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	   srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-	   elseif (useSrcCoordVar) then
-               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
-		   largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	   srccoordnames = srcCoordinateVars, rc=localrc)
-	   elseif (useDstCoordVar) then
-               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
-		   largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	   dstcoordnames = dstCoordinateVars, rc=localrc)
-	   else
-               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
-		   largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, &
-		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-           endif
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	 endif
-      else 
-	 call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
+          addUserArea=localUserAreaFlag, &
+          meshname = trim(dstMeshName), rc=localrc)
+      endif
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Create Frac Fields if conservative
+    if (isConserve) then
+      if (srcIsReg) then
+        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        srcFracField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      !call ESMF_VMBarrier(vm)
-      !call ESMF_VMWtime(endtime, rc=localrc)
+      if (dstIsReg) then
+        call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        dstFracField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
 
-      ! Get rid of conservative arrays
+    !call ESMF_VMBarrier(vm)
+    !call ESMF_VMWtime(starttime, rc=localrc)
+    maskvals(1) = 0
+    if (localPoleNPnts <= 0) localPoleNPnts = 1
+
+    if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+      methodStr = "Bilinear remapping"
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+      methodStr = "Conservative remapping"
+    else ! nothing recognizable so report error
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+        msg="unrecognized RegridMethod", &
+        ESMF_CONTEXT, rcToReturn=rc)
+    endif
+
+    if (useSrcMask .and. useDstMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      factorIndexList=factorIndexList, factorList=factorList, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (useSrcMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      factorIndexList=factorIndexList, factorList=factorList, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (useDstMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      factorIndexList=factorIndexList, factorList=factorList, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else	
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      unmappedaction=localUnmappedaction, &
+	      factorIndexList=factorIndexList, factorList=factorList, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    ! print *, PetNo, size(factorList), factorIndexList(1,1), factorIndexList(2,1)
+    ! Compute areas if conservative
+    ! Area only valid on PET 0 right now, when parallel Array
+    ! write works, then make area io parallel
+    if (isConserve) then
+      if (srcIsReg) then
+        call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, localrc)
+        if (ESMF_LogFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      if (dstIsReg) then
+        call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+
+    ! Compact weight matrix
+    ! (only compact if one of the grids is irregular, because that's when the repeated entries occur)
+    if ((.not. srcIsReg) .or. (.not. dstIsReg)) then
+      call compactMatrix(factorList, factorIndexList, &
+        wasCompacted, &
+        compactedFactorList, compactedFactorIndexList, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+      ! If the list was compacted get rid of the old lists and 
+      ! point to the new lists
+      if (wasCompacted) then
+        deallocate(factorList)
+        factorList=>compactedFactorList
+        deallocate(factorIndexList)
+        factorIndexList=>compactedFactorIndexList
+      endif
+    endif
+
+    ! Computer fraction if bilinear
+    ! src fraction is always 0
+    ! destination fraction depends on the src mask, dst mask, and the weight
+    if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+	    if (dstIsReg) then
+	      call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+	      call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    else
+      if (srcIsReg) then
+        call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+          srcFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+ 
+      if (dstIsReg) then
+        call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+          dstFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+
+    !! Write the weight table into a SCRIP format NetCDF file
+    if (PetNo == 0) then
       if (isConserve) then
-         if (PetNo == 0) then
-	    deallocate(srcArea)
-	    deallocate(dstArea)
-         endif
+	      if (useSrcCoordVar .and. useDstCoordVar) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	        srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+        else if (useSrcCoordVar) then	
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	        srccoordnames = srcCoordinateVars, rc=localrc)
+	      elseif (useDstCoordVar) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	        dstcoordnames = dstCoordinateVars, rc=localrc)
+	      else
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
+	      endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+	      if (useSrcCoordVar .and. useDstCoordVar) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+		        largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	        srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+	      elseif (useSrcCoordVar) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+		        largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	        srccoordnames = srcCoordinateVars, rc=localrc)
+	      elseif (useDstCoordVar) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+		        largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	        dstcoordnames = dstCoordinateVars, rc=localrc)
+	      else
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+		        largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, &
+		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	    endif
+    else 
+	    call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    !call ESMF_VMBarrier(vm)
+    !call ESMF_VMWtime(endtime, rc=localr
+    ! Get rid of conservative arrays
+    if (isConserve) then
+      if (PetNo == 0) then
+	      deallocate(srcArea)
+	      deallocate(dstArea)
       endif
-      
-      rc = ESMF_SUCCESS
-      return 
+    endif
+
+    rc = ESMF_SUCCESS
+    return 
 #else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-      return
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
 #endif
-end subroutine ESMF_RegridWeightGenFile
+  end subroutine ESMF_RegridWeightGenFile
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1396,8 +1395,8 @@ end subroutine ESMF_RegridWeightGenFile
 ! \label{api:esmf_regridweightgenDG}
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
-   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
-    srcElementDistgrid, dstElementDistgrid, keywordEnforcer, &
+  subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
+    keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
     weightFile, regridmethod, unmappedaction, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, verboseFlag, rc)
@@ -1427,15 +1426,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{itemize}
 ! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
 ! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
-! other subroutine.
+! other subroutine if {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are specified.
 ! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
-! \item This subroutine has three additional required arguments: {\tt regridRouteHandle}, {\tt srcElementDistgrid},
-! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF\_DistGrid},
-! they are used to define the distribution of the source and destination grid elements. The output {\tt regridRouteHandle} 
-! allows user to regrid the field values later in the application.
+! \item This subroutine has one additional required argument {\tt regridRouteHandle} and four additional optional
+! arguments: {\tt srcElementDistgrid}, {\tt dstElementDistgrid}, {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid}.
+! These four arguments are of type {\tt ESMF\_DistGrid}, they are used to define the distribution of the source
+! and destination grid elements and nodes. The output {\tt regridRouteHandle} allows user to regrid the field
+! values later in the application.
 ! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
-! \item The subroutine also takes user-specified nodals distribution {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid} as 
-! optional input arguments.
 ! \end{itemize}
 ! \smallskip
 ! 
@@ -1448,9 +1446,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [regridRouteHandle]
 !     The regrid RouteHandle returned by {\tt ESMF\_FieldRegridStore()}
 !   \item [srcElementDistgrid]
-!     A distGrid that specifies the distribution of the source grid's elements
+!     A optional distGrid that specifies the distribution of the source grid's elements. If not 
+!     specified, a system-defined block decomposition is used.
 !   \item [dstElementDistgrid]
-!     A distGrid taht specifies the distribution of the destination grid's elements
+!     A optional distGrid taht specifies the distribution of the destination grid's elements. If
+!     not specified, a system-defined block decomposition is used.
 !   \item [weightFile]
 !     The interpolation weight file name. If present, an output weight file will be generated.
 !   \item [srcNodalDistgrid]
@@ -1485,370 +1485,372 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !EOP
       
-      type(ESMF_RegridMethod_Flag) :: localRegridMethod
-      logical            :: localUserAreaFlag
-      logical            :: localLargefileFlag
-      logical            :: localNetcdf4fileFlag
-      logical            :: localVerboseFlag
-      integer            :: localrc
-      type(ESMF_VM)      :: vm
-      integer            :: PetNo, PetCnt
-      type(ESMF_Mesh)    :: srcMesh, dstMesh
-      type(ESMF_Field)   :: srcField, dstField
-      type(ESMF_Field)   :: srcFracField, dstFracField
-      type(ESMF_ArraySpec) :: arrayspec
-      integer(ESMF_KIND_I4) :: maskvals(1)
-      integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
-      real(ESMF_KIND_R8), pointer :: factorList(:)
-      integer            :: ind
-      logical            :: convert3D
-      logical            :: isConserve
-      logical            :: convertToDual
-      type(ESMF_MeshLoc) :: meshloc
-      character(len=256) :: methodStr
-      real(ESMF_KIND_R8), pointer :: srcArea(:)
-      real(ESMF_KIND_R8), pointer :: dstArea(:)
-      real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
-      integer            :: regridScheme
-      logical            :: wasCompacted
-      integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
-      real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
-      type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
-      character(len=256) :: argStr
-      !real(ESMF_KIND_R8) :: starttime, endtime
+    type(ESMF_RegridMethod_Flag) :: localRegridMethod
+    logical            :: localUserAreaFlag
+    logical            :: localLargefileFlag
+    logical            :: localNetcdf4fileFlag
+    logical            :: localVerboseFlag
+    integer            :: localrc
+    type(ESMF_VM)      :: vm
+    integer            :: PetNo, PetCnt
+    type(ESMF_Mesh)    :: srcMesh, dstMesh
+    type(ESMF_Field)   :: srcField, dstField
+    type(ESMF_Field)   :: srcFracField, dstFracField
+    type(ESMF_ArraySpec) :: arrayspec
+    integer(ESMF_KIND_I4) :: maskvals(1)
+    integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer :: factorList(:)
+    integer            :: ind
+    logical            :: convert3D
+    logical            :: isConserve
+    logical            :: convertToDual
+    type(ESMF_MeshLoc) :: meshloc
+    character(len=256) :: methodStr
+    real(ESMF_KIND_R8), pointer :: srcArea(:)
+    real(ESMF_KIND_R8), pointer :: dstArea(:)
+    real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
+    integer            :: regridScheme
+    logical            :: wasCompacted
+    integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
+    type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
+    character(len=256) :: argStr
+    !real(ESMF_KIND_R8) :: starttime, endtime
 
 #ifdef ESMF_NETCDF     
-      !------------------------------------------------------------------------
-      ! get global vm information
-      !
-      call ESMF_VMGetCurrent(vm, rc=localrc)
+    !------------------------------------------------------------------------
+    ! get global vm information
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Default values
+    localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
+    localVerboseFlag = .false.
+    localLargeFileFlag = .false.
+    localNetcdf4FileFlag = .false.
+    localUserAreaflag = .false.
+
+    if (present(regridMethod)) then
+      localRegridMethod = regridMethod
+    endif
+    
+    if (present(unmappedaction)) then
+      localUnmappedaction = unmappedaction
+    else
+      localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+    endif
+
+    if (present(largefileFlag)) then
+	    localLargeFileFlag = largefileFlag
+    endif
+
+    if (present(netcdf4fileFlag)) then
+	    localNetcdf4FileFlag = netcdf4fileFlag
+    endif
+
+    if (present(useUserAreaFlag)) then
+	    localUserAreaFlag = useUserAreaFlag
+    endif
+
+    if (present(verboseFlag)) then
+      localVerboseFlag = verboseFlag
+    endif
+
+    ! user area only needed for conservative regridding
+    if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	      msg = " user defined area is only used for the conservative regridding", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! Print the regrid options
+    if (localVerboseFlag .and. PetNo == 0) then
+      print *, "Starting weight generation with these inputs: "
+      print *, "  Source File: ", trim(srcfile)
+      print *, "  Destination File: ", trim(dstfile)
+      if (present(weightFile)) then
+        print *, "  Weight File: ", trim(weightFile)
+      endif
+      if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+        print *, "  Regrid Method: bilinear"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+        print *, "  Regrid Method: conserve"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+        print *, "  Regrid Method: patch"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+        print *, "  Regrid Method: nearest source to destination"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+        print *, "  Regrid Method: nearest destination to source"
+	    endif
+      if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
+	      print *, "  Ignore unmapped destination points"
+      endif
+	    if (localLargeFileFlag) then
+	      print *, "  Output weight file in 64bit offset NetCDF file format"
+      endif
+	    if (localNetcdf4FileFlag) then
+	      print *, "  Output weight file in NetCDF4 file format"
+      endif
+	    if (localUserAreaFlag) then
+	       print *, "  Use user defined cell area for both the source and destination grids"
+      endif
+      write(*,*)
+    endif 
+
+    ! Set flags according to the regrid method
+    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+      isConserve=.true.
+      convertToDual=.false.
+      meshloc=ESMF_MESHLOC_ELEMENT
+    else
+      isConserve=.false.
+      convertToDual=.true.
+      meshloc=ESMF_MESHLOC_NODE
+    endif
+
+    regridScheme = ESMF_REGRID_SCHEME_FULL3D
+    maskvals(1) = 0
+
+    !Read in the srcfile and create the corresponding ESMF_Mesh object
+    if (present(srcElementDistgrid) .and. present(srcNodalDistgrid)) then
+      srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+		    elementDistgrid=srcElementDistgrid, nodalDistgrid=srcNodalDistgrid, &
+		    rc=localrc)
+    elseif (present(srcElementDistgrid)) then
+      srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        elementDistgrid=srcElementDistgrid, &
+        rc=localrc)
+    else                     
+      srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        rc=localrc)
+    endif                  
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
+    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+    srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !Read in the dstfile and create the corresponding ESMF object (either
+    ! ESMF_Grid or ESMF_Mesh)
+    if (present(dstElementDistgrid) .and. present(dstNodalDistgrid)) then
+      dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
+        rc=localrc)
+    elseif (present(dstElementDistgrid)) then
+      dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        elementDistgrid=dstElementDistgrid, &
+        rc=localrc)
+    else
+      dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        rc=localrc)
+    endif                           
+    if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create Frac Fields if conservative
+    if (isConserve) then
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! set up local pet info
-      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-      ! Default values
-      localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
-      localVerboseFlag = .false.
-      localLargeFileFlag = .false.
-      localNetcdf4FileFlag = .false.
-      localUserAreaflag = .false.
+    !call ESMF_VMBarrier(vm)
+    !call ESMF_VMWtime(starttime, rc=localrc)
+    if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+      methodStr = "Bilinear remapping"
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+      methodStr = "Conservative remapping"
+    else ! nothing recognizable so report error
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+        msg="unrecognized RegridMethod", &
+        ESMF_CONTEXT, rcToReturn=rc)
+    endif
 
-      if (present(regridMethod)) then
-        localRegridMethod = regridMethod
-      endif
-    	
-      if (present(unmappedaction)) then
-        localUnmappedaction = unmappedaction
-      else
-        localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
-      endif
+    if (present(weightFile)) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      routehandle=regridRouteHandle, &
+	      factorIndexList=factorIndexList, factorList=factorList, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = ESMF_POLEMETHOD_NONE, &
+	      rc=localrc)
+    else
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      routehandle=regridRouteHandle, &
+        srcFracField=srcFracField, dstFracField=dstFracField, &
+        regridmethod = localRegridMethod, &
+        polemethod = ESMF_POLEMETHOD_NONE, &
+	      rc=localrc)
+    endif
 
-      if (present(largefileFlag)) then
-	   localLargeFileFlag = largefileFlag
-      endif
+    if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (present(netcdf4fileFlag)) then
-	   localNetcdf4FileFlag = netcdf4fileFlag
-      endif
-
-      if (present(useUserAreaFlag)) then
-	   localUserAreaFlag = useUserAreaFlag
-      endif
-
-      if (present(verboseFlag)) then
-           localVerboseFlag = verboseFlag
-      endif
-
-      ! user area only needed for conservative regridding
-      if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg = " user defined area is only used for the conservative regridding", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      endif
-
-      ! Print the regrid options
-      if (localVerboseFlag .and. PetNo == 0) then
-  	  print *, "Starting weight generation with these inputs: "
-	  print *, "  Source File: ", trim(srcfile)
-	  print *, "  Destination File: ", trim(dstfile)
-  	  print *, "  Weight File: ", trim(weightFile)
-          if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
-             print *, "  Regrid Method: bilinear"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-             print *, "  Regrid Method: conserve"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
-             print *, "  Regrid Method: patch"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
-             print *, "  Regrid Method: nearest source to destination"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-             print *, "  Regrid Method: nearest destination to source"
-	  endif
-          if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
-	     print *, "  Ignore unmapped destination points"
-          endif
-	  if (localLargeFileFlag) then
-	     print *, "  Output weight file in 64bit offset NetCDF file format"
-          endif
-	  if (localNetcdf4FileFlag) then
-	     print *, "  Output weight file in NetCDF4 file format"
-          endif
-	  if (localUserAreaFlag) then
-	     print *, "  Use user defined cell area for both the source and destination grids"
-          endif
-          write(*,*)
-     endif 
-
-     ! Set flags according to the regrid method
-     if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-        isConserve=.true.
-        convertToDual=.false.
-        meshloc=ESMF_MESHLOC_ELEMENT
-     else
-        isConserve=.false.
-        convertToDual=.true.
-        meshloc=ESMF_MESHLOC_NODE
-     endif
-
-     regridScheme = ESMF_REGRID_SCHEME_FULL3D
-     maskvals(1) = 0
-
-     !Read in the srcfile and create the corresponding ESMF_Mesh object
-     if (present(srcElementDistgrid) .and. present(srcNodalDistgrid)) then
-        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-		       elementDistgrid=srcElementDistgrid, nodalDistgrid=srcNodalDistgrid, &
-		       rc=localrc)
-     elseif (present(srcElementDistgrid)) then
-        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-                      elementDistgrid=srcElementDistgrid, &
-                      rc=localrc)
-     else                     
-        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-                      rc=localrc)
-     endif                  
-     if (ESMF_LogFoundError(localrc, &
-                       ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-     !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
-     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-     srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                        ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
-
-     !Read in the dstfile and create the corresponding ESMF object (either
-     ! ESMF_Grid or ESMF_Mesh)
-     if (present(dstElementDistgrid) .and. present(dstNodalDistgrid)) then
-         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-                       elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
-                       rc=localrc)
-     elseif (present(dstElementDistgrid)) then
-         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-                      convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-                      elementDistgrid=dstElementDistgrid, &
-                      rc=localrc)
-     else
-         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-                      rc=localrc)
-     endif                           
-     if (ESMF_LogFoundError(localrc, &
-                       ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                       ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-     dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                       ESMF_ERR_PASSTHRU, &
-                       ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Create Frac Fields if conservative
+    ! Only compute area, fraction and output weight file is weightFile is present
+    if (present(weightFile)) then
+      ! Compute areas if conservative
+      ! Area only valid on PET 0 right now, when parallel Array
+      ! write works, then make area io parallel
       if (isConserve) then
-           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      call compactMatrix(factorList, factorIndexList, &
+        wasCompacted, &
+        compactedFactorList, compactedFactorIndexList, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! If the list was compacted get rid of the old lists and 
+      ! point to the new lists
+      if (wasCompacted) then
+        deallocate(factorList)
+        factorList=>compactedFactorList
+        deallocate(factorIndexList)
+        factorIndexList=>compactedFactorIndexList
+      endif
+
+      ! Computer fraction if bilinear
+      ! src fraction is always 0
+      ! destination fraction depends on the src mask, dst mask, and the weight
+      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+	      call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+          srcFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+          dstFrac, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      !! Write the weight table into a SCRIP format NetCDF file
+      if (PetNo == 0) then
+        if (isConserve) then
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, method = localRegridMethod, & 
+            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	          srcFile=srcfile, dstFile=dstfile, &
+	          method = localRegridMethod, dstFrac=dstFrac, &
+		        largeFileFlag=localLargeFileFlag, &
+		        netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+	      endif
+      else 
+	      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       !call ESMF_VMBarrier(vm)
-      !call ESMF_VMWtime(starttime, rc=localrc)
-      if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
-            methodStr = "Bilinear remapping"
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-            methodStr = "Conservative remapping"
-      else ! nothing recognizable so report error
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg="unrecognized RegridMethod", &
-            ESMF_CONTEXT, rcToReturn=rc)
-      endif
+      !call ESMF_VMWtime(endtime, rc=localrc)
 
-      if (present(weightFile)) then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=localUnmappedaction, &
-	    routehandle=regridRouteHandle, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = ESMF_POLEMETHOD_NONE, &
-	    rc=localrc)
-      else
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=localUnmappedaction, &
-	    routehandle=regridRouteHandle, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = localRegridMethod, &
-            polemethod = ESMF_POLEMETHOD_NONE, &
-	    rc=localrc)
-       endif
-
-       if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Only compute area, fraction and output weight file is weightFile is present
-      if (present(weightFile)) then
-        ! Compute areas if conservative
-        ! Area only valid on PET 0 right now, when parallel Array
-        ! write works, then make area io parallel
-        if (isConserve) then
-            call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        call compactMatrix(factorList, factorIndexList, &
-                            wasCompacted, &
-                            compactedFactorList, compactedFactorIndexList, &
-                            localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! If the list was compacted get rid of the old lists and 
-        ! point to the new lists
-        if (wasCompacted) then
-           deallocate(factorList)
-           factorList=>compactedFactorList
-           deallocate(factorIndexList)
-           factorIndexList=>compactedFactorIndexList
-        endif
-
-        ! Computer fraction if bilinear
-        ! src fraction is always 0
-        ! destination fraction depends on the src mask, dst mask, and the weight
-        if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-	   call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
-           if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-        else
-            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
-                 srcFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
-                 dstFrac, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        !! Write the weight table into a SCRIP format NetCDF file
+      ! Get rid of conservative arrays
+      if (isConserve) then
         if (PetNo == 0) then
-           if (isConserve) then
-              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, method = localRegridMethod, & 
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-           else
-               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, &
-	           method = localRegridMethod, dstFrac=dstFrac, &
-		   largeFileFlag=localLargeFileFlag, &
-		   netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
-               if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-	   endif
-        else 
-	 call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+	        deallocate(srcArea)
+	        deallocate(dstArea)
         endif
-
-        !call ESMF_VMBarrier(vm)
-        !call ESMF_VMWtime(endtime, rc=localrc)
-
-        ! Get rid of conservative arrays
-        if (isConserve) then
-           if (PetNo == 0) then
-	      deallocate(srcArea)
-	      deallocate(dstArea)
-           endif
-         endif
       endif
-      rc = ESMF_SUCCESS
-      return 
+    endif
+      
+    rc = ESMF_SUCCESS
+    return 
 #else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-      return
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
 #endif
-end subroutine ESMF_RegridWeightGenDG
-
+  end subroutine ESMF_RegridWeightGenDG
 
 
 !------------------------------------------------------------------------------
@@ -2014,7 +2016,7 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
 
   ! The element disgrid is for the split elements, thus the following code
   ! doesn't work with split element
-  call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=rc)
+  call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
                          ESMF_ERR_PASSTHRU, &
                          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2782,6 +2784,11 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        return
     endif
 
+   ! Sort the dstInd first
+   call QSort(inListCount, inFactorIndexList, InFactorList)
+
+   write(*,*) "COMPACTING MATRIX"
+
    ! Put source indices for each run of destination
    ! indices in sorted order to allow weights with 
    ! the same indices to be merged below. Note
@@ -2925,6 +2932,60 @@ subroutine hsort_array(ia,ra)
    goto 10
  end subroutine hsort_array
 
+
+recursive subroutine QSort(nA, A, B)
+ 
+! DUMMY ARGUMENTS
+integer, intent(in) :: nA
+integer(ESMF_KIND_I4), intent(inout) :: A(:,:)
+real(ESMF_KIND_R8), intent(inout) :: B(:)
+ 
+! LOCAL VARIABLES
+integer :: left, right
+real(ESMF_KIND_R8) :: random, tempR
+real(ESMF_KIND_I4) :: tempI(2), pivot
+integer :: marker
+ 
+    if (nA > 1) then
+ 
+        call random_number(random)
+	! random pivor (not best performance, but avoids worst-case)
+        pivot = A(2,int(random*real(nA-1))+1)
+        left = 0
+        right = nA + 1
+ 
+        do while (left < right)
+            right = right - 1
+            do while (A(2,right) > pivot)
+                right = right - 1
+            end do
+            left = left + 1
+            do while (A(2,left) < pivot)
+                left = left + 1
+            end do
+            if (left < right) then
+                tempI = A(:,left)
+                A(:,left) = A(:,right)
+                A(:,right) = tempI
+		tempR = B(left)
+		B(left)=B(right)
+		B(right)=tempR                
+            end if
+        end do
+ 
+        if (left == right) then
+            marker = left + 1
+        else
+            marker = left
+        end if
+ 
+        call QSort(marker-1,A(:,:marker-1),B(:marker-1))
+        call QSort(nA-marker+1,A(:,marker:),B(marker:))
+ 
+    end if
+ 
+end subroutine QSort
+ 
 !------------------------------------------------------------------------------
 
 end module ESMF_RegridWeightGenMod

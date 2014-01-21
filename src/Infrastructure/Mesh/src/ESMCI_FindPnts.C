@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -366,6 +366,8 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
 #endif
   }
 
+  // Now that we're not using it anymore get rid of SpaceDir
+  delete spacedir;
 
   // Get the number of processors used below
   int num_procs=Par::Size();

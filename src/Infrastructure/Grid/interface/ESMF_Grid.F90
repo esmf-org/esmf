@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -350,6 +350,7 @@ interface ESMF_GridCreate
       module procedure ESMF_GridCreateFrmDistGrid
       module procedure ESMF_GridCreateFrmDistGridArb
       module procedure ESMF_GridCreateFrmNCFile
+      module procedure ESMF_GridCreateFrmNCFileDG
       module procedure ESMF_GridCreateEdgeConnR
       module procedure ESMF_GridCreateEdgeConnI
       module procedure ESMF_GridCreateEdgeConnA      
@@ -5459,6 +5460,217 @@ subroutine pack_and_send_int2D(vm, bufsize, recvPets, rootPet, buffer, &
     deallocate(sendbuf)
   endif
 end subroutine pack_and_send_int2D
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFrmNCFileDG"
+!BOP
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP or GRIDSPEC format grid file with a user specified distribution
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
+     function ESMF_GridCreateFrmNCFileDG(filename, fileFormat, distGrid, keywordEnforcer, &
+       isSphere, addCornerStagger, addUserArea, addMask, &
+       varname, coordNames, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateFrmNCFileDG
+!
+! !ARGUMENTS:
+
+    character(len=*),       intent(in)             :: filename
+    type(ESMF_FileFormat_Flag), intent(in)	   :: fileFormat
+    type(ESMF_DistGrid),    intent(in)		   :: distGrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional  :: isSphere
+    logical,                intent(in),  optional  :: addCornerStagger
+    logical,                intent(in),  optional  :: addUserArea
+    logical,                intent(in),  optional  :: addMask
+    character(len=*),       intent(in),  optional  :: varname
+    character(len=*),       intent(in),  optional  :: coordNames(:)
+    integer,                intent(out), optional  :: rc
+
+! !DESCRIPTION:
+! This function creates a {\tt ESMF\_Grid} object using the grid definition from
+! a grid file in NetCDF that is either in the SCRIP format or in the CF convention. 
+! To specify the distribution, the user passes in a {\tt distGrid}.
+! The grid defined in the file has to be a 2D logically rectangular grid.
+! This function first call {\tt ESMF\_GridCreateFrmNCFile()} to create a {\tt ESMF\_Grid}
+! object using a pre-calculated block distribution, then redistribute the Grid to
+! create a new Grid object using the user specified {\tt distGrid}. 
+!
+! This call is {\em collective} across the current VM.
+!
+! The arguments are:
+! \begin{description}
+! \item[filename]
+!     The NetCDF Grid filename.
+! \item[fileFormat]
+!     The Grid file format, please see Section~\ref{const:grid:fileformat}
+!         for a list of valid options. 
+! \item[distGrid] 
+!      A distGrid defines how the grid is distributed
+! \item[{[isSphere]}]
+!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+! \item[{[addCornerStagger]}]
+!      Uses the information in the grid file to add the Corner stagger to 
+!      the Grid. The coordinates for the corner stagger is required for conservative
+!      regridding. If not specified, defaults to false. 
+! \item[{[addUserArea]}]
+!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
+! \item[{[addMask]}]
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+! \item[{[varname]}]
+!      If addMask is true, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
+!\item[{[coordNames]}]
+!      a two-element array containing the longitude and latitude variable names in a 
+!      GRIDSPEC file if there are multiple coordinates defined in the file
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+    type(ESMF_Grid) :: grid
+    integer         :: localrc
+    logical         :: localIsSphere, localAddCorner
+    type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    type(ESMF_vm)   :: vm
+    integer         :: i, PetCnt, PetNo
+    integer         :: xpart, ypart, bigFac
+    integer         :: xpets, ypets
+    integer         :: xdim, ydim
+    integer         :: srcrank
+    integer, pointer:: griddims(:)
+
+    if (present(rc)) rc=ESMF_FAILURE
+
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                           ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                           ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(isSphere)) then
+	localIsSphere = isSphere
+    else
+	localIsSphere = .true.
+    endif
+
+    if (present(addCornerStagger)) then
+	localAddCorner = AddCornerStagger
+    else
+	localAddCorner = .false.
+    endif
+    allocate(griddims(2))
+    if (PetNo == 0) then
+       if (fileFormat == ESMF_FILEFORMAT_SCRIP) then
+           call ESMF_ScripInq(filename, grid_dims=griddims, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        elseif (fileFormat == ESMF_FILEFORMAT_GRIDSPEC) then
+	   if (present(coordNames)) then
+   	      call ESMF_GridspecInq(filename, srcrank, griddims, coord_names=coordNames, rc=localrc)
+	   else
+	      call ESMF_GridspecInq(filename, srcrank, griddims, rc=localrc)
+ 	   endif
+           if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+     endif
+     call ESMF_VMBroadcast(vm, griddims, 2, 0, rc=localrc)        
+
+    ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
+    ! otherwise, regrid will not work
+    if (PetCnt == 1) then
+	xpart = 1
+	ypart = 1
+    else
+     	bigFac = 1
+     	do i=2, int(sqrt(float(PetCnt)))
+	   if ((PetCnt/i)*i == PetCnt) then
+	      bigFac = i
+           endif
+        enddo
+	xpets = bigFac
+	ypets = PetCnt/xpets
+        if ((griddims(1) <= griddims(2) .and. xpets <= ypets) .or. &
+	       (griddims(1) > griddims(2) .and. xpets > ypets)) then
+	       xpart = xpets
+	       ypart = ypets
+        else 
+	       xpart = ypets
+	       ypart = xpets
+	endif
+	xdim = griddims(1)/xpart
+	ydim = griddims(2)/ypart
+	do while (xdim <= 1 .and. xpart>1)
+	      xpart = xpart-1
+   	      xdim = griddims(1)/xpart
+        enddo
+	do while (ydim <= 1 .and. ypart>1) 
+	      ypart = ypart-1
+   	      ydim = griddims(2)/ypart
+        enddo
+    endif
+    deallocate(griddims)
+
+    localDecompFlag(:) = ESMF_DECOMP_BALANCED
+
+    if (fileformat == ESMF_FILEFORMAT_SCRIP) then
+	grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		addUserArea=addUserArea, rc=localrc)
+    else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
+        ! Warning about user area in GridSpec 
+        if (present(addUserArea)) then
+           if (addUserArea) then
+              call ESMF_LogWrite("ESMF does not currently support " // &
+                   "user areas in GRIDSPEC format, so user areas will " // &
+                   "not be used for the GRIDSPEC file.", &
+                   ESMF_LOGMSG_WARNING, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+        endif
+
+	if (present(addMask)) then
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
+        else
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		coordNames = coordNames, rc=localrc)
+	endif
+    else
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- The fileformat has to be either ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_GRIDSPEC", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridCreateFrmNCFileDG = ESMF_GridCreateCopyFromNewDG(grid, distGrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_GridCreateFrmNCFileDG
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

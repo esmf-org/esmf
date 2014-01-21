@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -213,6 +213,9 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
 
     // Register the nodal coordinate field.
     IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
+     
+    // Need this for split elements, put on Mesh for now
+    mesh.node_coord=node_coord;
 
     // If not cartesian then keep original coordinate field
     IOField<NodalField> *node_orig_coord;
@@ -406,9 +409,144 @@ extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
 
 }
 
+// Get the element topology
+const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
+
+  if (pdim==2) {
+    if (sdim==2) {
+      if (etype==3) {
+        return GetTopo("TRI3");
+      } else if (etype==4) {
+        return GetTopo("QUAD");
+      } else {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- for a mesh with parametric dimension 2 topo types must be either triangles or quadrilaterals ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    } else if (sdim==3) {
+      if (etype==3) {
+        return GetTopo("SHELL3");
+      } else if (etype==4) {
+        return GetTopo("SHELL");
+      } else {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- for a mesh with parametric dimension 2 topo types must be either triangles or quadrilaterals ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+  } else if (pdim==3) {
+    return Vtk2Topo(sdim, etype);
+  }
+}
+
+// Get the number of nodes from the element type
+// Get the element topology
+int ElemType2NumNodes(int pdim, int sdim, int etype) {
+  if (pdim==2) {
+    return etype;
+  } else if (pdim==3) {
+    if (etype==10) return 4;
+    else if (etype==12) return 8;
+    else {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+       "- for a mesh with parametric dimension 3 element types must be either tetrahedrons or hexahedrons",
+                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+  }
+}
+
+// triangulate > 4 sided
+// sdim = spatial dim
+// num_p = number of points in poly
+// p     = poly coords size=num_p*sdim
+// td    = temporary buffer size=num_p*sdim
+// ti    = temporary integer buffer size = num_p
+// tri_ind = output array  size = 3*(nump-2)
+// tri_frac = fraction each triangle is of whole poly size=(num_p-2)
+void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+                 double *tri_frac) {
+          int localrc;
+          
+
+          // Call into triagulation routines
+          int ret;
+          if (sdim==2) {
+            ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                              ti, tri_ind);
+          } else if (sdim==3) {
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+                                               ti, tri_ind);
+          } else {
+            if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                          " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
+          }
+
+          // Check return code
+          if (ret != ESMCI_TP_SUCCESS) {
+            if (ret == ESMCI_TP_DEGENERATE_POLY) {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   " - can't triangulate a polygon with less than 3 sides", 
+                                                ESMC_CONTEXT, &localrc)) throw localrc;
+            } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   " - clockwise polygons not supported in triangulation routine",
+                                                ESMC_CONTEXT, &localrc)) throw localrc;
+            } else {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                                " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
+            }
+          }
+
+
+          // Calculate triangule areas
+          double tot_area=0.0;
+          int ti_pos=0;
+          for (int i=0; i<num_p-2; i++) {
+            // Copy triangle coordinates into td
+            int td_pos=0;
+            for (int j=0; j<3; j++) {
+              double *pnt=p+sdim*tri_ind[ti_pos+j];
+              for (int k=0; k<sdim; k++) {
+                td[td_pos]=pnt[k];
+                td_pos++;
+              }
+            }
+
+            // compute area of triangle
+            double tri_area;
+            if (sdim == 2) {
+              tri_area = area_of_flat_2D_polygon(3, td);
+            } else if (sdim == 3) {
+              tri_area = great_circle_area(3, td);
+            } // Other sdim caught above
+
+            // Save areas to use for computing fractions
+            tri_frac[i]=tri_area;
+            
+            // compute total
+            tot_area += tri_area;
+
+            // Advance to next triangle
+            ti_pos +=3;
+          }
+
+          // Calculate triangle fractions
+          for (int i=0; i<num_p-2; i++) {
+            if (tot_area >0.0) tri_frac[i]=tri_frac[i]/tot_area;
+            else tri_frac[i]=0.0;
+          }
+
+    return;
+}
+
+
 extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt **elemMaskII ,
-                                              int *areaPresent, double *elemArea, 
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt **_elemMaskII ,
+                                              int *_areaPresent, double *elemArea, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, int *rc) 
 {
    try {
@@ -422,6 +560,8 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
    throw localrc;  // bail out with exception
     }
 
+    // local rc code
+    int localrc;
 
     // Set some convient variables
     Mesh *meshp = *meshpp;
@@ -433,45 +573,117 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
     int num_elemConn=*_num_elemConn;
 
+    InterfaceInt *elemMaskII=*_elemMaskII;
+
+    int areaPresent=*_areaPresent;
 
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
 
     // Error check input
     //// Check element type
-    for (int i=0; i< num_elems; i++) {
-      if (parametric_dim==2) {
+    if (parametric_dim==2) {
+      // DONT DO THE CHECK BECAUSE WE NOW SUPPORT 
+      // ANY NUMBER OF CORNERS WITH PDIM=2
+#if 0
+      for (int i=0; i< num_elems; i++) {
         if ((elemType[i] != 5) && (elemType[i] != 9)) {
-	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-           "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ",
-           ESMC_CONTEXT, &localrc)) throw localrc;
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
         }
-      } else if (parametric_dim==3) {
+      }
+#endif
+    } else if (parametric_dim==3) {
+      for (int i=0; i< num_elems; i++) {
         if ((elemType[i] != 10) && (elemType[i] != 12)) {
-	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-           "- for a mesh with parametric dimension 3 element types must be either tetrahedron or hexahedron ",
-           ESMC_CONTEXT, &localrc)) throw localrc;
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- for a mesh with parametric dimension 3 element types must be either tetrahedron or hexahedron ",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
         }
-
       }
     }
 
+
     //// Check size of connectivity list
     int expected_conn_size=0;
-    for (int i=0; i< num_elems; i++) {
-      if (elemType[i]==5) expected_conn_size += 3;   
-      else if (elemType[i]==9) expected_conn_size += 4;   
-      else if (elemType[i]==10) expected_conn_size += 4;   
-      else if (elemType[i]==12) expected_conn_size += 8;   
+    if (parametric_dim==2) {
+      for (int i=0; i< num_elems; i++) {
+        expected_conn_size += elemType[i];
+      }
+    } else if (parametric_dim==3) {
+      for (int i=0; i< num_elems; i++) {
+        if (elemType[i]==10) expected_conn_size += 4;   
+        else if (elemType[i]==12) expected_conn_size += 8;   
+      }
     }
+      
     if (expected_conn_size != num_elemConn) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       "- element connectivity list doesn't contain the right number of entries ",
-       ESMC_CONTEXT, &localrc)) throw localrc;
+        "- element connectivity list doesn't contain the right number of entries ",
+                                       ESMC_CONTEXT, &localrc)) throw localrc;
     }
+
+
+    // Count the number of extra elements we need for splitting
+    int num_extra_elem=0;
+    int max_num_conn=0;
+    if (parametric_dim==2) {
+      for (int e = 0; e < num_elems; ++e) {
+        if (elemType[e] >4) {
+          num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
+        }
+
+        if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
+      }
+
+      int tot_num_extra_elem=0;
+      MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,Par::Comm());
+
+      // If there's num_extra_elem than it's a split mesh
+      if (tot_num_extra_elem>0) {
+        mesh.is_split=true;
+      } else {
+        mesh.is_split=false;
+      }
+    } else {
+      mesh.is_split=false;
+    }
+
+    // Compute the extra element ranges
+    int beg_extra_ids=0;
+    if (mesh.is_split) {      
+      // get maximum local elem id      
+      int max_id=0;
+      for (int e = 0; e < num_elems; ++e) {
+        if (elemId[e] > max_id) {
+          max_id=elemId[e];
+        }
+      }
+
+      // Calc global max id
+      int global_max_id=0;
+      MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,Par::Comm());
+      
+      // Set maximum of non-split ids
+      mesh.max_non_split_id=global_max_id;
+
+      // Calc our range of extra elem ids
+      beg_extra_ids=0;
+      MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,Par::Comm());
+
+      // Remove this processor's number from the sum to get the beginning
+      beg_extra_ids=beg_extra_ids-num_extra_elem;
+
+      // Start 1 up from max
+      beg_extra_ids=beg_extra_ids+global_max_id+1;
+
+      // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+    }
+
 
     // Get number of nodes
     int num_nodes = mesh.num_nodes();
@@ -481,70 +693,34 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     node_used.resize(num_nodes, 0);
 
 
-    // We must first store all nodes in a flat array since element
-    // connectivity will index into this array.
-    std::vector<MeshObj*> all_nodes;
-
-    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
-
-    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-    for (; ni != ne; ++ni) {
-
-      int seq = ni->get_data_index();
-
-      if (seq >= num_nodes){
-	int localrc;
-	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-            "- node index is larger or equal to num_nodes", 
-            ESMC_CONTEXT, &localrc))  throw localrc;
-         }
-      
-      all_nodes[seq] = &*ni;
-
-    }
-
-    // Now loop the elements and add them to the mesh.
-    int cur_conn = 0;
-
+    // Error check elemConn array
+    int c = 0;
     for (int e = 0; e < num_elems; ++e) {
-
-    // Get/deduce the element topology
-    const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
-
-    int nnodes = topo->num_nodes;
-
-    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
-
-      // The object
-      long eid = elemId[e];
-      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
+      int nnodes = ElemType2NumNodes(mesh.parametric_dim(),
+                                     mesh.spatial_dim(), 
+                                     elemType[e]);
 
       for (int n = 0; n < nnodes; ++n) {
       
         // Get 0-based node index
-        int node_index=elemConn[cur_conn]-1;
+        int node_index=elemConn[c]-1;
 
         // Check elemConn
         if ((node_index < 0) || (node_index > num_nodes-1)) {
+
+          printf("BAD node_indes=%d\n",node_index);
+
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be greater than number of nodes on processor ",
            ESMC_CONTEXT, &localrc)) throw localrc;
 	}
-
-        // Setup connectivity list
-        nconnect[n] = all_nodes[node_index];
-
         // Mark as used
         node_used[node_index]=1;
 
         // Advance to next
-        cur_conn++;
+        c++;
       }
-
-      mesh.add_element(elem, nconnect, topo->number, topo);
-
     } // for e
 
     // Make sure every node used
@@ -563,9 +739,235 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
           ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
+    // If they exist, error check mask 
+    if (elemMaskII != NULL) { // if masks exist
+      // Error checking
+      if (elemMaskII->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+      
+      if (elemMaskII->extent[0] != num_elems) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- elementMask array must be the same size as elementIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // Before setting up connectivity store all nodes in a flat array since elemConn
+    // will index into this array.
+    std::vector<MeshObj*> all_nodes;
+
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      if (seq >= num_nodes){
+	int localrc;
+	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- node index is larger or equal to num_nodes", 
+            ESMC_CONTEXT, &localrc))  throw localrc;
+         }
+      
+      all_nodes[seq] = &*ni;
+    }
+
+
+ /* XMRKX */
+
+    // Generate connectivity list with split elements
+    // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
+    int num_elems_wsplit=0;
+    int *elemConn_wsplit=NULL;
+    int *elemType_wsplit=NULL;
+    int *elemId_wsplit=NULL;
+    double *elemArea_wsplit=NULL;
+    int *elemMaskIIArray_wsplit=NULL;
+    InterfaceInt *elemMaskII_wsplit=NULL;
+
+
+    if (mesh.is_split) {
+      // New number of elements
+      num_elems_wsplit=num_elems+num_extra_elem;
+
+      // Allocate arrays to hold split lists
+      elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
+      elemType_wsplit=new int[num_elems_wsplit];
+      elemId_wsplit=new int[num_elems_wsplit];
+      if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
+
+
+      //// Setup for split mask
+      int *elemMaskIIArray=NULL;
+      if (elemMaskII != NULL) { 
+
+        // Get mask value array
+        elemMaskIIArray=elemMaskII->array;
+
+        int extent[1];
+        elemMaskIIArray_wsplit=new int[num_elems_wsplit];
+
+        extent[0]=num_elems_wsplit;
+        elemMaskII_wsplit=new InterfaceInt(elemMaskIIArray_wsplit,1,extent);
+      }
+
+
+      // Allocate some temporary variables for splitting
+      double *polyCoords=new double[3*max_num_conn];
+      double *polyDblBuf=new double[3*max_num_conn];
+      int    *polyIntBuf=new int[max_num_conn];
+      int    *triInd=new int[3*(max_num_conn-2)];
+      double *triFrac=new double[max_num_conn-2];
+
+      // new id counter
+      int curr_extra_id=beg_extra_ids;
+
+      // Get some useful information
+      int sdim = mesh.spatial_dim(); 
+
+      // Loop through elems generating split elems if necessary
+      int conn_pos = 0;
+      int split_conn_pos = 0;
+      int split_elem_pos = 0;
+      for (int e = 0; e < num_elems; ++e) {
+        
+        // More than 4 side, split
+        if (elemType[e]>4) {
+
+          // Get coordinates
+          int crd_pos=0;
+          for (int i=0; i<elemType[e]; i++) {
+            MeshObj *node=all_nodes[elemConn[conn_pos+i]-1];
+            double *crd=mesh.node_coord->data(*node);
+            
+            for (int j=0; j<sdim; j++) {
+              polyCoords[crd_pos]=crd[j];
+              crd_pos++;
+            }
+
+            // printf("id=%d coord=%f %f \n",elemId[e],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
+          }
+
+          // Triangulate polygon
+          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+                      triInd, triFrac); 
+          
+
+          // Create split element list
+          int tI_pos=0;
+          for (int i=0; i<elemType[e]-2; i++) {
+            // First id is same, others are from new ids
+            if (i==0) {
+              elemId_wsplit[split_elem_pos]=elemId[e];
+              mesh.split_id_to_frac[elemId[e]]=triFrac[i];
+            } else {
+              elemId_wsplit[split_elem_pos]=curr_extra_id;
+              mesh.split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+              mesh.split_id_to_frac[curr_extra_id]=triFrac[i];
+              curr_extra_id++;
+            }
+
+            // Type is triangle
+            elemType_wsplit[split_elem_pos]=3; 
+
+            // Set area to fraction of original area
+            if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e]*triFrac[i];
+
+            // Set mask (if it exists)
+            if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+
+            // Next split element
+            split_elem_pos++;
+
+            // Set triangle corners based on triInd
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
+            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
+            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+
+            // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+            split_conn_pos +=3;
+            tI_pos +=3;
+
+          }
+
+          // Advance to next elemConn position 
+          conn_pos +=elemType[e];
+
+        } else { // just copy
+          elemId_wsplit[split_elem_pos]=elemId[e];
+          elemType_wsplit[split_elem_pos]=elemType[e];
+          if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e];
+          if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+          split_elem_pos++;
+          for (int i=0; i<elemType[e]; i++) {
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
+            split_conn_pos++;
+            conn_pos++;
+          }
+        }
+      }
+      
+      
+      // Allocate some temporary variables for splitting
+      delete [] polyCoords;
+      delete [] polyDblBuf;
+      delete [] polyIntBuf;
+      delete [] triInd;
+      delete [] triFrac;
+
+      // Use the new split list for the connection lists below
+      num_elems=num_elems_wsplit;
+      elemConn=elemConn_wsplit;
+      elemType=elemType_wsplit;
+      elemId=elemId_wsplit;
+      if (areaPresent==1) elemArea=elemArea_wsplit;
+
+      if (elemMaskII != NULL) { 
+        elemMaskII=elemMaskII_wsplit;
+      }
+    }   
+
+    // Now loop the elements and add them to the mesh.
+    int cur_conn = 0;
+    for (int e = 0; e < num_elems; ++e) {
+
+      // Get/deduce the element topology
+      const MeshObjTopo *topo = ElemType2Topo(mesh.parametric_dim(),
+                                              mesh.spatial_dim(), 
+                                              elemType[e]);
+
+    int nnodes = topo->num_nodes;
+
+    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+
+      // The object
+      long eid = elemId[e];
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
+
+      for (int n = 0; n < nnodes; ++n) {
+      
+        // Get 0-based node index
+        int node_index=elemConn[cur_conn]-1;
+
+        // Setup connectivity list
+        nconnect[n] = all_nodes[node_index];
+
+        // Advance to next
+        cur_conn++;
+      }
+
+      mesh.add_element(elem, nconnect, topo->number, topo);
+
+    } // for e
+
+
   // Register the frac field
-
-
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
     Context ctxt; ctxt.flip();
      MEField<> *elem_frac = mesh.RegisterField("elem_frac",
@@ -575,19 +977,8 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
   // Handle element masking
   bool has_elem_mask=false;
-  if (*elemMaskII != NULL) { // if masks exist
-    // Error checking
-    if ((*elemMaskII)->dimCount !=1) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-    }
-
-    if ((*elemMaskII)->extent[0] != num_elems) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- elementMask array must be the same size as elementIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+  if (elemMaskII != NULL) { // if masks exist
+    // ERROR CHECKED ABOVE
 
     // Context for new fields
     Context ctxt; ctxt.flip();
@@ -607,7 +998,8 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
   // Handle element area
   bool has_elem_area=false;
-  if (*areaPresent == 1) { // if areas exist
+  if (areaPresent == 1) { // if areas exist
+
     // Context for new fields
     Context ctxt; ctxt.flip();
 
@@ -620,12 +1012,11 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   } 
 
 
-
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.Commit();
-  
-  
+
+
   // Set Mask values
   if (has_elem_mask) {
     // Get Fields
@@ -633,7 +1024,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     MEField<> *elem_mask=mesh.GetField("elem_mask"); 
     
     // Get mask value array
-    int *elemMask=(*elemMaskII)->array;
+    int *elemMask=elemMaskII->array;
 
     // Loop through elements setting values
     // Here we depend on the fact that data index for elements
@@ -657,6 +1048,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
   // Set area values
   if (has_elem_area) {
+
     // Get Fields
     MEField<> *elem_area=mesh.GetField("elem_area"); 
     
@@ -675,6 +1067,23 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
   }
 
+
+  // Get rid of extra memory for split elements
+  if (mesh.is_split) {
+    if (elemConn_wsplit != NULL) delete [] elemConn_wsplit;
+    if (elemType_wsplit != NULL) delete [] elemType_wsplit;
+    if (elemId_wsplit != NULL) delete [] elemId_wsplit;
+    if (areaPresent==1) {
+      if (elemArea_wsplit != NULL) delete [] elemArea_wsplit;
+    }
+
+    //// Setup for split mask
+    if (elemMaskII != NULL) { 
+      if (elemMaskIIArray_wsplit != NULL) delete [] elemMaskIIArray_wsplit;
+      if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
+    }
+
+  }
 
 
   } catch(std::exception &x) {
@@ -955,8 +1364,9 @@ void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
 
 
 /**
- * Sort nodes by the order in which they were originally declared
+ * Sort elements by the order in which they were originally declared
  * (which is stored by get_data_index)
+ * Don't include split elements
  */
 void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
 
@@ -971,6 +1381,9 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
     MeshObj &elem = *ei;
 
     if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Don't do split elements
+    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
 
     int idx = elem.get_data_index();
 
@@ -1333,8 +1746,36 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
 
     mesh.GetImprints(&numSets, &nvalSetSizes, &nvalSetVals, &nvalSetObjSizes, &nvalSetObjVals);
 
+    // Record which Fields are present
+#define ESMF_RECONCILE_MESH_NUM_FIELDS 8
+    int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS];
+    
+    // zero out fields present list
+    for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+      fields_present[i]=0;
+    }
+    
+    // Record list
+    if (mesh.GetCoordField() != NULL) fields_present[0]=1;
+    if (mesh.GetField("mask") != NULL) fields_present[1]=1;
+    if (mesh.GetField("node_mask_val") != NULL) fields_present[2]=1;       
+    if (mesh.GetField("elem_mask") != NULL) fields_present[3]=1;       
+    if (mesh.GetField("elem_mask_val") != NULL) fields_present[4]=1;       
+    if (mesh.GetField("elem_area") != NULL) fields_present[5]=1;       
+    if (mesh.GetField("elem_frac2") != NULL) fields_present[6]=1;       
+    if (mesh.GetField("elem_frac") != NULL) fields_present[7]=1;       
+
+    // DEBUG OUTPUT
+    // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+    //  printf("%d# S: %d fields_present=%d\n",Par::Rank(),i,fields_present[i]);
+    //}
+
+
     // Calc Size
-    int size = 3*sizeof(int)+2*numSets*sizeof(UInt);
+    int size = 5*sizeof(int)+
+               ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
+               2*numSets*sizeof(UInt);
+
 
     if (nvalSetSizes != NULL)
       for (int i=0; i<numSets; i++) {
@@ -1355,13 +1796,23 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
       }
     }
 
+
     // Save integers
     ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = mesh.spatial_dim();
       *ip++ = mesh.parametric_dim();
       *ip++ = numSets;
+
+      for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+        *ip++=fields_present[i];
+      }      
+
+      if (mesh.is_split) *ip++ = 1;
+      else *ip++ = 0;
+      *ip++ = mesh.max_non_split_id;
     }
+
 
     // Save UInt data
     uip=(UInt *)ip;
@@ -1469,7 +1920,19 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
     std::vector<UInt> nvalSetObjSizes; 
     std::vector<UInt> nvalSetObjVals;
 
-    numSets=*ip++;
+    numSets=*ip++; 
+
+    // Decode which Fields are present
+    int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS]; // ESMF_RECONCILE_MESH_NUM_FIELDS DEFINED ABOVE
+    
+    for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+      fields_present[i]=*ip++;
+    }      
+
+    // Stuff for split meshes
+    int is_split=*ip++;
+    int max_non_split_id=*ip++; 
+
 
     // convert pointer
     uip=(UInt *)ip;
@@ -1505,7 +1968,7 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
       }
 
     // Adjust offset
-    *offset += 3*sizeof(int)+
+      *offset += 5*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+    
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -1516,11 +1979,34 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
     // Set dimensions
     meshp->set_spatial_dimension(spatial_dim);
     meshp->set_parametric_dimension(parametric_dim);
+
+    // Stuff for split meshes
+    if (is_split==1) meshp->is_split=true;
+    else  meshp->is_split=false;
+
+    meshp->max_non_split_id=max_non_split_id; 
+
+    //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
     
-    
-    // Register the nodal coordinate field.
-    meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
-    
+
+    // Register fields
+    Context ctxt; ctxt.flip(); // Needed below for element registration
+    if (fields_present[0]) meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
+    if (fields_present[1]) meshp->RegisterNodalField(*meshp, "mask", 1);
+    if (fields_present[2]) meshp->RegisterNodalField(*meshp, "node_mask_val", 1);
+    if (fields_present[3]) meshp->RegisterField("elem_mask",MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[4]) meshp->RegisterField("elem_mask_val", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[5]) meshp->RegisterField("elem_area", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[6]) meshp->RegisterField("elem_frac2", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[7]) meshp->RegisterField("elem_frac", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // DEBUG OUTPUT
+    // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+    //  printf("%d# D: %d fields_present=%d\n",Par::Rank(),i,fields_present[i]);
+    //}
+#undef ESMF_RECONCILE_MESH_NUM_FIELDS    
+
+
     // Setup the Mesh
     //    meshp->build_sym_comm_rel(MeshObj::NODE);
     meshp->ProxyCommit(numSets,
@@ -1744,9 +2230,12 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
     // Declare id vector
     std::vector<int> egids; 
     
-    // get elem ids
+    // get elem ids    
+    // TODO: IN FUTURE MAYBE JUST USE DATA INDEX DIRECTY, ALTHOUGH THEN HAVE TO STICK 
+    //       SPLIT ELEMENTS AT END
     getElemGIDS(*meshp, egids);
-    
+
+
     // If there are no elements then leave
     if (egids.empty()) {
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1759,6 +2248,7 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
     }
     
     
+
     // If an area field exists use that instead
     MEField<> *area_field = mesh.GetField("elem_area");
     if (area_field) {
@@ -1787,10 +2277,47 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
         elem_areas[i]=*area;
       }
 
+      // Add in the split elements
+      if (mesh.is_split) {
+        std::map<int,int> id_to_index;
+        for (int i=0; i<egids.size(); i++) {
+          id_to_index[egids[i]]=i;
+        }
+
+        // Iterate through split elements adding in area
+        Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+        for (; ei != ee; ++ei) {
+          MeshObj &elem = *ei;
+        
+          // Don't do non-local elements
+          if (!GetAttr(elem).is_locally_owned()) continue;
+
+          // Get the element id
+          int eid=elem.get_id();
+
+          // Skip non-split elements
+          if (!(eid > mesh.max_non_split_id)) continue; 
+
+          // Get area from field
+          double *area=area_field->data(elem);
+      
+          // Get original id
+          int orig_id=mesh.split_to_orig_id[eid];
+
+          // Get index
+          int index=id_to_index[orig_id];
+
+          // Add area to what's already there
+          elem_areas[index] += *area;
+        }
+      }
+
+      // Return success
       if (rc!=NULL) *rc = ESMF_SUCCESS;      
       return;
-    }
-    
+      }
+
+ /* XMRKX */    
 
     ////// Otherwise calculate areas..... 
 
@@ -1846,8 +2373,66 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
 
       // Put area into area array
       elem_areas[i]=area;
+
     }
+
+
+    // Add in the split elements
+    if (mesh.is_split) {
+      std::map<int,int> id_to_index;
+      for (int i=0; i<egids.size(); i++) {
+        id_to_index[egids[i]]=i;
+      }
+      
+      // Iterate through split elements adding in area
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
         
+        // Don't do non-local elements
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get the element id
+        int eid=elem.get_id();
+        
+        // Skip non-split elements
+        if (!(eid > mesh.max_non_split_id)) continue; 
+        
+        // Compute area depending on dimensions
+        double area;
+        if (pdim==2) {
+          if (sdim==2) {
+            get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+            remove_0len_edges2D(&num_poly_nodes, poly_coords);
+            area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+          } else if (sdim==3) {
+            get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
+            remove_0len_edges3D(&num_poly_nodes, poly_coords);
+            area=great_circle_area(num_poly_nodes, poly_coords);
+          }
+        } else if (pdim==3) {
+          if (sdim==3) {
+            Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
+            area=tmp_phedra.calc_volume(); 
+          } else {
+            Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
+          }
+        } else {
+          Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
+        }
+
+        // Get original id
+        int orig_id=mesh.split_to_orig_id[eid];
+        
+        // Get index
+        int index=id_to_index[orig_id];
+        
+        // Add area to what's already there
+        elem_areas[index] += area;
+      }
+    }
+
+      
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
@@ -1872,6 +2457,11 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+
+  // Declare polygon information
+#undef  MAX_NUM_POLY_COORDS  
+#undef  MAX_NUM_POLY_NODES_2D
+#undef  MAX_NUM_POLY_NODES_3D
 }
 
 extern "C" void FTN_X(c_esmc_meshgetdimensions)(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
@@ -2082,7 +2672,7 @@ extern "C" void FTN_X(c_esmc_meshgetcentroid)(Mesh **meshpp, int *num_elem, doub
 
 }
 
-extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *rc) {
   
   try {
 
@@ -2100,6 +2690,9 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
     // Get Mesh reference
     Mesh &mesh = *meshp;
     
+    // Dereference number of elements
+    int num_elem=*_num_elem;
+
     // Declare id vector
     std::vector<int> egids; 
     
@@ -2113,7 +2706,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
     }
 
     // Check size
-    if (*num_elem != egids.size()) {
+    if (num_elem != egids.size()) {
       Throw() << "Number of elements doesn't match size of input array for areas";
     }
 
@@ -2122,28 +2715,86 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
     if (!elem_frac) Throw() << "Getting elem_frac when it doesn't exist";
 
     // Loop through elements and put areas into array
-    for (int i=0; i<egids.size(); i++) {
-      // Get element gid
-      int elem_gid=egids[i];
-      
-      //  Find the corresponding Mesh element
-      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
-      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Element not in mesh";
+    if (!mesh.is_split) {
+      for (int i=0; i<egids.size(); i++) {
+        // Get element gid
+        int elem_gid=egids[i];
+        
+        //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
+        if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+          Throw() << "Element not in mesh";
+        }
+        
+        // Get the element
+        const MeshObj &elem = *mi; 
+        
+        // Get frac data
+        double *f=elem_frac->data(elem);
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Put frac into frac array
+        elem_fracs[i]=*f;
+      }
+    } else {
+      // get map of elem ids to index
+      std::map<int,int> id_to_index;
+      for (int i=0; i<egids.size(); i++) {
+        id_to_index[egids[i]]=i;
+      }
+
+      // Zero out array
+      for (int i=0; i<num_elem; i++) {
+        elem_fracs[i]=0.0;
       }
       
-      // Get the element
-      const MeshObj &elem = *mi; 
+      // Iterate through split elements adding in frac
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Don't do non-local elements
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get the element id
+        int eid=elem.get_id();
+        
+        // Get frac data
+        double *f=elem_frac->data(elem);
+        double frac=*f;
 
-      // Get frac data
-      double *f=elem_frac->data(elem);
-      
-      // Only put it in if it's locally owned
-      if (!GetAttr(elem).is_locally_owned()) continue;
-
-      // Put frac into frac array
-      elem_fracs[i]=*f;
+        // See if the element is part of a larger polygon
+        std::map<UInt,double>::iterator mi =  mesh.split_id_to_frac.find(eid);
+        
+        // Not part of something larger, so just stick in array
+        if (mi == mesh.split_id_to_frac.end()) {
+          int index=id_to_index[eid];
+          elem_fracs[index] = frac;
+        } 
+        
+        
+        // It is part of original poly, so modify by fraction 
+        frac *= mi->second;
+        
+        // Translate id if necessary
+        int orig_id;
+        std::map<UInt,UInt>::iterator soi =  mesh.split_to_orig_id.find(eid);
+        if (soi == mesh.split_to_orig_id.end()) {
+          orig_id=eid;
+        } else {
+          orig_id=soi->second;
+        }
+        
+        // Get index
+        int index=id_to_index[orig_id];
+        
+        // Add modified frac to what's already there
+        elem_fracs[index] += frac;
+      }
     }
+
         
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -2796,51 +3447,231 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredist)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
-                                               int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreateredist()"
 
-  try {
+void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_num_elem_gids_ws, int **_elem_gids_ws, std::map<UInt,UInt> &split_to_orig_id) {
 
-    // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+  
+  // Copy input array to UInt
+  UInt *elem_gids_u=NULL;
+  if (num_elem_gids>0) {
+    elem_gids_u= new UInt[num_elem_gids];
+
+    for (int i=0; i<num_elem_gids; i++) {
+      elem_gids_u[i]=elem_gids[i];
     }
-
-
-    // Call C++ side
-    MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
-
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                           "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
 
 
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+  // Get number of elements
+  int num_gids=mesh->num_elems();
+
+  // Get list of split and orig element gids
+  UInt *gids_split=NULL;
+  UInt *gids_orig=NULL;
+  if (num_gids>0) {
+
+    // Allocate space
+    gids_split= new UInt[num_gids];
+    gids_orig= new UInt[num_gids];
+    
+    // Loop through list putting into arrays
+    int pos=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+ 
+      // Only do local
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Get element id
+      UInt split_eid=elem.get_id();
+
+      // See if this is a split id
+      std::map<UInt,UInt>::iterator soi=mesh->split_to_orig_id.find(split_eid);
+
+      // If this is a split set it to the original, otherwise just set it to the elem id
+      UInt orig_eid;
+      if (soi==mesh->split_to_orig_id.end()) {
+        orig_eid=split_eid;
+      } else {
+        orig_eid=soi->second;
+      }
+
+      // Put into arrays
+      gids_orig[pos]=orig_eid;
+      gids_split[pos]=split_eid;
+
+      // Next
+      pos++;
+    }
+  }
+
+  // Put into a DDir
+  DDir<> id_map_dir;
+  id_map_dir.Create(num_gids,gids_orig,gids_split);
+
+  // Clean up 
+  if (num_gids>0) {
+    if (gids_split!= NULL) delete [] gids_split;
+    if (gids_orig != NULL) delete [] gids_orig;
+  }
+
+  // Do a look up of the input ids
+  std::vector<DDir<>::dentry> lookups;
+  id_map_dir.RemoteGID(num_elem_gids, elem_gids_u, lookups);
+
+  // Don't need anymore so clean up 
+  if (num_elem_gids>0) {
+    if (elem_gids_u != NULL) delete [] elem_gids_u;
+  }
+
+  // Loop through lookups and generate new list
+  int num_elem_gids_ws=lookups.size();
+  int *elem_gids_ws=NULL;
+  if (num_elem_gids_ws>0) {
+    elem_gids_ws= new int[num_elem_gids_ws];
+
+    for (int i=0; i<lookups.size(); i++) {
+      elem_gids_ws[i]=lookups[i].origin_lid;
+      
+      // If split put into map
+      if (lookups[i].gid != lookups[i].origin_lid) {
+        split_to_orig_id[lookups[i].origin_lid]=lookups[i].gid;
+      }
+    }
+  }
+
+  // Output 
+  *_num_elem_gids_ws=num_elem_gids_ws;
+  *_elem_gids_ws=elem_gids_ws;
 }
 
+void calc_split_id_to_frac(Mesh *mesh) {
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+  double tmp_coords[MAX_NUM_POLY_COORDS];
+
+
+  // Get useful info
+  int sdim=mesh->spatial_dim();
+  MEField<> *cfield = mesh->GetCoordField();
+
+  // Setup map to hold total areas
+  std::map<UInt,double> orig_id_to_area;
+
+  // Loop gathering split,orig id pairs
+  std::vector<UInt> split_ids;
+  std::vector<UInt> orig_ids;
+
+  std::map<UInt,UInt>::iterator mi=mesh->split_to_orig_id.begin();
+  std::map<UInt,UInt>::iterator me=mesh->split_to_orig_id.end();
+  for ( ; mi != me; mi++) {
+    // Get split element id
+    split_ids.push_back(mi->first);
+
+    // Get original element id
+    orig_ids.push_back(mi->second);
+
+    // Get uniqued list of original ids and set to zero
+    orig_id_to_area[mi->second]=0.0;
+  }
+
+  // also add orig_id to orig_id pairs that are part of each split polygon
+  std::map<UInt,double>::iterator otai=orig_id_to_area.begin();
+  std::map<UInt,double>::iterator otae=orig_id_to_area.end();
+  for ( ; otai != otae; otai++) {
+    // Get split element id
+    split_ids.push_back(otai->first);
+
+    // Get original element id
+    orig_ids.push_back(otai->first);
+  }
+
+
+  // Loop split triangles set their area and sum into original polygon area
+  for (int i=0; i<split_ids.size(); i++) {
+
+    // Get split element id
+    UInt s_id=split_ids[i];
+
+    // Get original element id
+    UInt o_id=orig_ids[i];
+
+
+    //  Find the corresponding Mesh element
+    Mesh::MeshObjIDMap::iterator ei = mesh->map_find(MeshObj::ELEMENT, s_id);
+    if (ei == mesh->map_end(MeshObj::ELEMENT)) {
+      Throw() << "Element not in mesh";
+    }    
+
+    // Get the element
+    const MeshObj &elem = *ei; 
+     
+    // Compute area depending on dimensions
+    double area;
+    if (sdim==2) {
+      get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+      remove_0len_edges2D(&num_poly_nodes, poly_coords);
+      area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
+    } else if (sdim==3) {
+      get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
+      remove_0len_edges3D(&num_poly_nodes, poly_coords);
+      area=great_circle_area(num_poly_nodes, poly_coords);
+    }
+
+    // Set area in split_id_to_frac
+    mesh->split_id_to_frac[s_id]=area;
+
+    // Sum to original polygon area
+    //  Find the corresponding orig id 
+    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
+    // If not in map yet then complain
+    if (oi == orig_id_to_area.end()) {
+      Throw() << "orig id no in map!!! \n";
+    } 
+
+    // Add to original polygon total
+    oi->second += area;
+  }
+
+
+  // Loop again dividing to get fractional area
+  for (int i=0; i<split_ids.size(); i++) {
+
+    // Get split element id
+    UInt s_id=split_ids[i];
+
+    // Get original element id
+    UInt o_id=orig_ids[i];
+
+    // Find total area
+    std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
+    if (oi == orig_id_to_area.end()) {
+      Throw() << "Origianl id not found in map! \n";
+    } 
+    double total_area=oi->second;
+
+
+    // Find entry to split id
+    std::map<UInt,double>::iterator si = mesh->split_id_to_frac.find(s_id);
+    if (si == mesh->split_id_to_frac.end()) {
+      Throw() << "Split id not found in map! \n";
+    } 
+
+    // Divide to get fraction
+    si->second=si->second/total_area;
+
+  }
+ /* XMRKX */
+
+#undef  MAX_NUM_POLY_COORDS  
+#undef  MAX_NUM_POLY_NODES_2D 
+#undef  MAX_NUM_POLY_NODES_3D 
+}
 
 
 extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, 
@@ -2858,9 +3689,74 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
       throw localrc;  // bail out with exception
     }
 
+    // Dereference
+    Mesh *src_mesh=*src_meshpp;
 
-    // Call C++ side
-    MeshRedistElem(*src_meshpp, *num_elem_gids, elem_gids, output_meshpp);
+    // if not split mesh, then just do the usual thing
+    if (!src_mesh->is_split) {
+      MeshRedistElem(src_mesh, *num_elem_gids, elem_gids, output_meshpp);
+    } else {
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<UInt,UInt> split_to_orig_id;
+      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
+      
+      // Call into redist with expanded ids
+      MeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      output_mesh->is_split=src_mesh->is_split;
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      output_mesh->split_to_orig_id=split_to_orig_id;
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh); 
+
+#if 0
+      // DEBUG OUTPUT
+    // Loop and get split-orig id pairs
+    std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
+    
+    for ( ; mi != me; mi++) {
+      printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
+    }
+#endif
+
+
+#if 0
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
+    
+    for ( ; si != se; si++) {
+      printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
+    
+    for ( ; si != se; si++) {
+      printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+#endif
+    /* XMRKX */
+
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
+    }
 
 
   } catch(std::exception &x) {
@@ -2887,6 +3783,81 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+
+
+extern "C" void FTN_X(c_esmc_meshcreateredist)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                               int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Dereference
+    Mesh *src_mesh=*src_meshpp;
+
+    // if not split mesh, then just do the usual thing
+    if (!src_mesh->is_split) {
+      MeshRedist(src_mesh, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+    } else {
+      // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<UInt,UInt> split_to_orig_id;
+      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
+      
+      // Call into redist with expanded ids
+      MeshRedist(src_mesh, *num_node_gids, node_gids, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      output_mesh->is_split=src_mesh->is_split;
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      output_mesh->split_to_orig_id=split_to_orig_id;
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh); 
+
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
 
 
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
@@ -2999,7 +3970,6 @@ extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gi
       throw localrc;  // bail out with exception
     }
 
- /* XMRKX */
 
     // For convenience deref mesh 
     Mesh *meshp = *meshpp;
@@ -3014,6 +3984,9 @@ extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gi
     for (;ni != ne; ++ni) {
       const MeshObj &elem = *ni;
  
+      // Don't do split elements
+      if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue; 
+
       if (GetAttr(elem).is_locally_owned()) {
         num_local_elems++;
       }

@@ -44,6 +44,7 @@ use File::Find
 
 # Arrays of unit tests files
 @ut_files = ();		# Unit Test files
+@temp_files = ();	# Unit Test files
 @ut_x_files = ();	# Unit test executable files
 @all_files = (); 	# All files
 @Log_files = (); 	# Unit Test Log files 
@@ -103,7 +104,8 @@ use File::Find
                         push @all_files, "$File::Find::name\n" ;
         }
         # Get all unit tests files
-        @ut_files=grep (/UTest/, @all_files);
+        @temp_files=grep (/UTest/, @all_files);
+        @ut_files=grep(!/cppF90/, @temp_files);
 	# Delete all testg or testO from list
 	@Log_files=grep (/test$ESMF_BOPT/, @ut_files);
         # Delete Log files from list

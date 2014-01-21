@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1477,7 +1477,7 @@ static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::
   }
 }
   
-Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_src_, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
+Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_src_, const std::vector<FieldPair> &_fpairs, MAP_TYPE mtype, int unmappedaction) :
 sres(),
 grend(src, dest, get_dst_config(dest, _fpairs), freeze_src_),
 fpairs(_fpairs),
@@ -1534,7 +1534,7 @@ zz(0)
       ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
-        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_)
@@ -1560,7 +1560,7 @@ zz(0)
         SearchNearestSrcToDst(src, dest, unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
-        OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
+        OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
       }

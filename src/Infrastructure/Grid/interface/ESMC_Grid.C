@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -144,7 +144,7 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
-  /*
+  
   int exLB[2]={-1,-1}, exUB[2]={-1,-1};
   double *gridXCoord;
   gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
@@ -163,7 +163,7 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
     printf ("%lf\n", gridYCoord[i]);
   }
   printf ("...]\n");
-  */
+  
   //printf ("End ESMC_Grid.C : ESMC_GridCreateFromFile()\n");
   return grid;
 }
@@ -313,7 +313,7 @@ int ESMC_GridGetCoordBounds(ESMC_Grid grid,
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return *rc;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

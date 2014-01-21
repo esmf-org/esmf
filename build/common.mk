@@ -594,8 +594,11 @@ EXAMPLES_CONFIG     = $(ESMF_EXDIR)/examples.config
 TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
+DO_ST_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_st_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
@@ -2026,6 +2029,7 @@ MPMDCLEANUP:
 #
 dust_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_ml_results
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.Log
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.stdout
 	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
@@ -2141,11 +2145,11 @@ stest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)STest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest 1\> ./ESMF_$(TNAME)STest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)STest 1> ./ESMF_$(TNAME)STest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest 1\> ./ESMF_$(TNAME)STest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest 1> ./ESMF_$(TNAME)STest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)STest.Log> ./ESMF_$(TNAME)STest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)STest.Log
@@ -2156,6 +2160,7 @@ stest:
 clean_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest*  $(SYS_TESTS_CONFIG)
 	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_ml_results
 	$(MAKE) ACTION=tree_cleanfiles tree
 
 #
@@ -2163,6 +2168,14 @@ clean_system_tests:
 #
 check_system_tests: 
 	@$(DO_ST_RESULTS)
+
+
+#
+# run the system tests memory leak report.
+#
+check_system_tests_ml:
+	@$(DO_ST_ML_RESULTS)
+
 
 
 #-------------------------------------------------------------------------------
@@ -2357,11 +2370,11 @@ tree_dry_run_use_test_cases: $(USE_TEST_CASES_DRY_RUN)
 #
 uctest:
 	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2>&1 ; \
 	fi 
 
 #
@@ -2582,6 +2595,13 @@ check_unit_tests:
 	@$(DO_UT_RESULTS)
 
 #
+# report statistics on memoey leak tests
+#
+check_unit_tests_ml:
+	@$(DO_UT_ML_RESULTS)
+
+
+#
 # internal targets used to actually run the fortran and c++ unit tests
 #
 #  the call in the local makefiles is something like:
@@ -2599,11 +2619,11 @@ ftest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
@@ -2612,14 +2632,14 @@ htest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ESMF_$(TNAME)UTest.stdout ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml ; \
 	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
 		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
 	  fi ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml 1> ./ESMF_$(HNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest -case $(TESTHARNESSCASE)_test.rc -xml $(TESTHARNESSCASE).xml 1> ./ESMF_$(HNAME)UTest.stdout 2>&1 ; \
 	  if [ -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout ] ; then \
 		mv -f $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout $(ESMF_TESTDIR)/ESMF_$(HNAME)UTest.stdout ; \
 	   fi ; \
@@ -2637,11 +2657,11 @@ ctest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)UTest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1\> ./ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)UTest 1\> ./ESMC_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
@@ -2650,11 +2670,11 @@ citest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(TNAME)UTest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(TNAME)UTest ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest 1\> ./ESMCI_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMCI_$(TNAME)UTest 1> ./ESMCI_$(TNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(TNAME)UTest 1\> ./ESMCI_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(TNAME)UTest 1> ./ESMCI_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMCI_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
@@ -2867,11 +2887,11 @@ exfrun:
 	-@cd $(ESMF_EXDIR) ; \
 	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex \> ./ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(EXNAME)Ex > ./ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex \> ./ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(EXNAME)Ex > ./ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(EXNAME)Ex.Log> ./ESMF_$(EXNAME)Ex.Log ; \
 	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
@@ -2881,11 +2901,11 @@ excrun:
 	-@cd $(ESMF_EXDIR) ; \
 	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex ; \
 	else \
-	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex \> ./ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(EXNAME)Ex > ./ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex \> ./ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(EXNAME)Ex > ./ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(EXNAME)Ex.Log> ./ESMC_$(EXNAME)Ex.Log ; \
 	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log
@@ -2903,6 +2923,13 @@ clean_examples:
 #
 check_examples:
 	@$(DO_EX_RESULTS)
+
+
+#
+# report memory leak statistics on examples
+#
+check_examples_ml:
+	@$(DO_EX_ML_RESULTS)
 
 
 #-------------------------------------------------------------------------------

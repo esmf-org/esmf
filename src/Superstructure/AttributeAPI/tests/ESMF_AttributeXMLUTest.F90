@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -220,7 +220,7 @@ program ESMF_AttributeXMLUTest
     !NEX_UTest
     ! Set the attribute values within the 2 child nodes in the tree; child 1
     !  physical address
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:deliveryPoint', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
       'Department of Meteorology, University of ABC', &
@@ -233,7 +233,7 @@ program ESMF_AttributeXMLUTest
     !NEX_UTest
     ! Set the attribute values within the 2 child nodes in the tree; child 2
     !  email address
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:electronicMailAddress', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
       'john.doe@earthsys.org', &
@@ -245,7 +245,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !NEX_UTest
     ! Set the attribute values within the 2 child nodes in the tree; dummy 1
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:CI_Address', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'dummy comment1', attpack=attpack, rc=rc)
@@ -256,7 +256,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !NEX_UTest
     ! Set the attribute values within the 2 child nodes in the tree; dummy 2
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:address', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'dummy comment2', &
@@ -313,7 +313,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within the child node in the tree: URL
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:linkage', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'gmd:URL', &
       'www.earthsys.org', &
@@ -325,7 +325,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within a child node in the tree: dummy3
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:CI_OnlineResource', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'dummy comment3', &
@@ -337,7 +337,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within a child node in the tree: dummy4
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:onlineResource', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'dummy comment4', &
@@ -372,7 +372,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within a child node in the tree: dummy5
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:CI_Contact', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
         'dummy comment5', &
@@ -397,7 +397,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within a child node in the tree: dummy6
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:contactInfo', attpack=attpack, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'description', &
         'dummy comment6', &
@@ -426,7 +426,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within the child node in the tree: individualName
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:individualName', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
       'John Doe', &
@@ -491,7 +491,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within a child node in the tree: dummy7
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'gmd:CI_ResponsibleParty', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'dummy comment7', &
@@ -525,7 +525,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within the child node in the tree: abbreviation
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'responsibleParty', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'abbreviation', 'JD', &
       convention=convCIM, purpose='responsibleParty', rc=rc)
@@ -537,7 +537,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! set XML comment (not actually part of compter-readable file -- filtered
     ! out by parsers -- only for human readability)
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'responsibleParty', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp, 'description', &
       'responsibleParty uri :: d8397bf0-223f-31df-b0dc-001ce029e16b', &
@@ -719,7 +719,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 1st attribute value within the last CIM RP package
-    call ESMF_AttPackGet(gridcomp2, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp2, convCIM, &
       purpComp, attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp2, 'Name', 'John Doe', &
                            convention=convCIM, &
@@ -732,7 +732,7 @@ program ESMF_AttributeXMLUTest
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    call ESMF_AttPackGet(gridcomp2, convISO, &
+    call ESMF_AttributeGetAttPack(gridcomp2, convISO, &
       purpRP, attpack=attpack, rc=rc)
     ! Set the 2nd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
@@ -998,7 +998,7 @@ program ESMF_AttributeXMLUTest
     !EX__UTest
     ! Set the 1st <componentProperty> attribute value within the CIM component
     !   package
-    call ESMF_AttPackGet(gridcomp, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp, convCIM, &
       'Scientific Property Description', attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyShortName', &
       'TimeStep', &
@@ -1042,7 +1042,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttPackGet(gridcomp3, convCIM, &
+    call ESMF_AttributeGetAttPack(gridcomp3, convCIM, &
       purpPlatform, attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp3, 'MachineDescription', &
       'HECToR (Phase 2a) is currently an integrated system known ' // &
@@ -1191,7 +1191,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttPackGet(gridcomp3, convISO, &
+    call ESMF_AttributeGetAttPack(gridcomp3, convISO, &
       purpCitation, attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp3, 'ShortTitle', &
       'Doe_2009', &
@@ -1265,7 +1265,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st attribute value within the CIM RP package
     ! This sets <gmd:individualName> and <gmd:role> codeListValue='author'
     !call ESMF_AttributeSet(gridcomp3, 'PrincipalInvestigator','John Doe', &
-    call ESMF_AttPackGet(gridcomp3, convISO, &
+    call ESMF_AttributeGetAttPack(gridcomp3, convISO, &
       purpRP, attpack=attpack, rc=rc)
     call ESMF_AttributeSet(gridcomp3, 'Name','John Doe', &
       convention=convISO, purpose=purpRP, rc=rc)

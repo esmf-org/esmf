@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research, 
+! Copyright 2002-2014, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -77,11 +77,10 @@ module ESMF_DistGridMod
   end type
 
   type(ESMF_Decomp_Flag), parameter:: &
-    ESMF_DECOMP_DEFAULT     = ESMF_Decomp_Flag(1), &
-    ESMF_DECOMP_BALANCED    = ESMF_Decomp_Flag(2), &
-    ESMF_DECOMP_RESTFIRST   = ESMF_Decomp_Flag(3), &
-    ESMF_DECOMP_RESTLAST    = ESMF_Decomp_Flag(4), &
-    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(5)
+    ESMF_DECOMP_BALANCED    = ESMF_Decomp_Flag(1), &
+    ESMF_DECOMP_RESTFIRST   = ESMF_Decomp_Flag(2), &
+    ESMF_DECOMP_RESTLAST    = ESMF_Decomp_Flag(3), &
+    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(4)
     
 !------------------------------------------------------------------------------
 
@@ -106,9 +105,8 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DistGrid
-  public ESMF_Decomp_Flag, ESMF_DECOMP_DEFAULT, &
-    ESMF_DECOMP_BALANCED, ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, &
-    ESMF_DECOMP_CYCLIC
+  public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, &
+  ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC
   public ESMF_DistGridMatch_Flag, ESMF_DISTGRIDMATCH_INVALID, &
     ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
   public ESMF_DistGridConnection  ! implemented in ESMF_DistGridConnectionMod
@@ -912,8 +910,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                target, intent(in),  optional :: regDecomp(:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
-    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
-    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,       target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,       target, intent(in),  optional :: regDecompLastExtra(:)
     integer,                target, intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
@@ -1596,8 +1594,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in),  optional :: regDecompPTile(:,:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
-    integer,                target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
-    integer,                target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
+    integer,               target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
+    integer,               target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)

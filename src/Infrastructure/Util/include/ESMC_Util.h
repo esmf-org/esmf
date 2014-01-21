@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,10 +66,10 @@ enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_MONOPOLE=1,
                          ESMC_POLEKIND_BIPOLE=2};
 
-enum ESMC_PoleMethod_Flag {ESMF_POLEMETHOD_NONE=0,
-			   ESMF_POLEMETHOD_ALLAVG,
-			   ESMF_POLEMETHOD_NPNTAVG,
-			   ESMF_POLEMETHOD_TEETH};
+enum ESMC_PoleMethod_Flag {ESMC_POLEMETHOD_NONE=0,
+			   ESMC_POLEMETHOD_ALLAVG,
+			   ESMC_POLEMETHOD_NPNTAVG,
+			   ESMC_POLEMETHOD_TEETH};
 
 enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                        ESMC_REGION_SELECT,
@@ -108,7 +108,7 @@ enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
 			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
 			   ESMC_FILEFORMAT_GRIDSPEC};
 
-enum ESMC_Decomp_Flag {ESMC_DECOMP_DEFAULT, ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+enum ESMC_Decomp_Flag {ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
 		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 // ESMF platform-dependent data types

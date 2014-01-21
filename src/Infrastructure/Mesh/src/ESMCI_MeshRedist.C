@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2012, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -76,9 +76,16 @@ namespace ESMCI {
 
   Trace __trace("MeshRedist(const Mesh &src_mesh, int num_node_gids, int *node_gids, Mesh **output_mesh)");
 
+
 #if 0
   for (int i=0; i<num_elem_gids; i++) {
-    printf("%d :: e_gids=%d \n",i,elem_gids[i]);
+    printf("%d#    %d :: e_gids=%d \n",Par::Rank(),i,elem_gids[i]);
+  }
+
+  printf("\n");
+
+  for (int i=0; i<num_node_gids; i++) {
+    printf("%d#    %d :: n_gids=%d \n",Par::Rank(),i,node_gids[i]);
   }
 #endif
 
@@ -214,9 +221,10 @@ namespace ESMCI {
 
   Trace __trace("MeshRedistElem()");
 
+
 #if 0
   for (int i=0; i<num_elem_gids; i++) {
-    printf("%d :: e_gids=%d \n",i,elem_gids[i]);
+    printf("%d# %d :: e_gids=%d \n",Par::Rank(),i,elem_gids[i]);
   }
 #endif
 
@@ -254,7 +262,6 @@ namespace ESMCI {
  CommReg elemComm; 
  redist_elems(src_mesh, edir, output_mesh, &elemComm);
  
-
  // Assign elem owners
  set_elem_owners(output_mesh, edir);
 
@@ -267,16 +274,17 @@ namespace ESMCI {
  // Set Node data indices
  set_node_data_indices_wo_list(output_mesh);
 
-
   // Assume Contexts
   output_mesh->AssumeContexts(*src_mesh);
   
   // Register fields
   register_fields(src_mesh, output_mesh);
 
+
    // Commit Mesh
   output_mesh->Commit();
   
+
   // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
   send_mesh_fields(src_mesh, output_mesh, elemComm);
 
@@ -318,7 +326,6 @@ namespace ESMCI {
 
   }
 #endif
-
 
 
   // Output 
@@ -408,6 +415,7 @@ namespace ESMCI {
       }
     }
     
+
     // Set non-local to after local
     int index=num_elem_gids;
     ei = output_mesh->elem_begin();
@@ -483,8 +491,7 @@ namespace ESMCI {
   // Assign node owners in output_mesh using ndir
   void set_node_owners_wo_list(Mesh *output_mesh) {
     Trace __trace("set_node_owners_wo_list()");
-    
-    
+
     // Get a list of the Mesh nodes with gids 
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     
@@ -534,10 +541,11 @@ namespace ESMCI {
  /* XMRKX */
 
      std::vector<DDir<>::dentry> lookups;
-     if (gids.size ())
+     if (gids.size())
        dir.RemoteGID(gids.size(), &gids[0], lookups);
      else
        dir.RemoteGID(0, (UInt *) NULL, lookups);
+
 
      // Loop through the results. 
      int curr_pos=0;
@@ -610,8 +618,13 @@ namespace ESMCI {
 
      } // ri
 
+
      // Set owner of last gid before moving on
-     owner[curr_pos]=curr_proc_best;
+     // (could use gids.size() in if here also, but 
+     //  owner.size seemed clearer...)
+     if (owner.size()) {
+       owner[curr_pos]=curr_proc_best;
+     }
 
      // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
 
@@ -640,9 +653,8 @@ namespace ESMCI {
         output_mesh->update_obj(&node, attr);
       }
     } 
+
   }
-
-
 
 
   // Assign element owners in output_mesh using edir

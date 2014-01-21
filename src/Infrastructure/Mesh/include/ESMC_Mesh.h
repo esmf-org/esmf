@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -296,20 +296,21 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 // !IROUTINE: ESMC_MeshGetCoord - Get lat/lon coordinates from a Mesh \label{sec:mesh:capi:meshgetcoord}
 //
 // !INTERFACE:
-double * ESMC_MeshGetCoord(
+void ESMC_MeshGetCoord(
 			 ESMC_Mesh mesh_in, // in (required)
-			 int * num_nodes,   // out
-			 int * num_dims,    // out
-			 int * rc           // out
+			 double *nodeCoord, // out
+			 int *num_nodes,    // out
+			 int *num_dims,     // out
+			 int *rc            // out
 			 );
 // !RETURN VALUE:
-//  type(double *)         :: ESMC_MeshGetCoord
+//  None
 //
 // !DESCRIPTION:
 //
-// This call returns a pointer of values of type {\tt double}.  The
-// values are the node coordinates of the {\tt ESMC\_Mesh} passed as an
-// argument.  A 1-D array is returned with the coordinates for a given node
+// This call returns the node coordinates of the given {\tt ESMC\_Mesh} 
+// in the provided {\tt nodeCoord} buffer of doubles.  At completion, this
+// buffer is a 1-D array with the coordinates for a given node
 // in adjacent indices.  For example, for $d$-dimensional coordinates, the first
 // $d$ values in the returned array are the coordinates for the first node,
 // the second $d$ values are the coordinates for the second node, etc.
@@ -317,6 +318,7 @@ double * ESMC_MeshGetCoord(
 // The arguments are:
 // \begin{description}
 // \item[mesh\_in] Mesh object.
+// \item[nodeCoord] Pointer to doubles.  The node coordinates are returned here.
 // \item[num\_nodes] Pointer to an integer.  The number of nodes found in
 // the input Mesh is returned here.
 // \item[num\_dims] Pointer to an integer.  The number of coordinate dimensions 

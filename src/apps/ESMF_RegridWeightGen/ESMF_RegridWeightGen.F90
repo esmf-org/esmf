@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -13,829 +13,851 @@
 program ESMF_RegridWeightGenApp
 
 ! !USES:
-      use ESMF
-      use ESMF_IOScripMod
-      use ESMF_IOGridspecMod
-      use ESMF_RegridWeightGenMod
+  use ESMF
+  use ESMF_IOScripMod
+  use ESMF_IOGridspecMod
+  use ESMF_RegridWeightGenMod
+  use ESMF_RegridWeightGenCheckMod
 
-      implicit none
+  implicit none
 
-      integer            :: rc
-      type(ESMF_VM)      :: vm
-      integer            :: PetNo, PetCnt
-      character(len=256) :: srcfile, dstfile, wgtfile
-      character(len=256) :: srcmeshname, dstmeshname
-      character(len=40)  :: method, flag
-      type(ESMF_PoleMethod_Flag) :: pole
-      integer            :: poleptrs
-      type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
-      type(ESMF_RegridMethod_Flag) :: methodflag
-      character(len=256) :: commandbuf1(3)
-      character(len=64)  :: commandbuf3(8)
-      integer            :: commandbuf2(14)
-      integer            :: ind, pos
-      logical            :: largeFileFlag
-      logical            :: netcdf4FileFlag
-      logical 		 :: ignoreUnmapped, userAreaFlag
-      type(ESMF_UnmappedAction_Flag) :: unmappedaction
-      logical            :: srcMissingValue, dstMissingValue
-      logical            :: srcIsRegional, dstIsRegional, typeSetFlag
-      logical            :: useSrcCoordVar, useDstCoordVar
-      character(len=64) :: srcvarname, dstvarname
-      character(len=64) :: srcCoordNames(2), dstCoordNames(2)
-      character(len=256) :: argStr
-      logical            :: terminateProg
-      !real(ESMF_KIND_R8) :: starttime, endtime
+  integer            :: rc
+  type(ESMF_VM)      :: vm
+  integer            :: PetNo, PetCnt
+  character(ESMF_MAXPATHLEN) :: srcfile, dstfile, wgtfile
+  character(ESMF_MAXPATHLEN) :: srcmeshname, dstmeshname
+  character(ESMF_MAXPATHLEN) :: cwd
+  character(len=40)  :: method, flag
+  type(ESMF_PoleMethod_Flag) :: pole
+  integer            :: poleptrs
+  type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
+  type(ESMF_RegridMethod_Flag) :: methodflag
+  character(len=256) :: commandbuf1(3)
+  character(len=64)  :: commandbuf3(8)
+  integer            :: commandbuf2(15)
+  integer            :: ind, pos
+  logical            :: largeFileFlag
+  logical            :: netcdf4FileFlag
+  logical 		 :: ignoreUnmapped, userAreaFlag
+  type(ESMF_UnmappedAction_Flag) :: unmappedaction
+  logical            :: srcMissingValue, dstMissingValue
+  logical            :: srcIsRegional, dstIsRegional, typeSetFlag
+  logical            :: useSrcCoordVar, useDstCoordVar
+  character(len=64) :: srcvarname, dstvarname
+  character(len=64) :: srcCoordNames(2), dstCoordNames(2)
+  character(len=256) :: argStr
+  logical            :: terminateProg
+  !real(ESMF_KIND_R8) :: starttime, endtime
+  logical            :: checkFlag
   
-      terminateProg = .false.
-      !------------------------------------------------------------------------
-      ! Initialize ESMF
-      !
-      call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
-			defaultlogfilename="RegridWeightGen.Log", &
-                    	logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
+  terminateProg = .false.
+  !------------------------------------------------------------------------
+  ! Initialize ESMF
+  !
+  call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
+	defaultlogfilename="RegridWeightGen.Log", &
+                	logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
 
-      !------------------------------------------------------------------------
-      ! get global vm information
-      !
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
+  !------------------------------------------------------------------------
+  ! get global vm information
+  !
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
 
-      ! set up local pet info
-      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
-      !------------------------------------------------------------------------
-      ! Parse keyword based arguments at Pet 0
-      !   then broadcast the results to the rest of the Pets
-      !
-      if (PetNo == 0) then
-         call ESMF_UtilGetArgIndex('--help', argindex=ind)
-         if (ind /= -1) then
-	   call PrintUsage()
-           terminateProg=.true.
-         endif
-         call ESMF_UtilGetArgIndex('--version', argindex=ind)
-         if (ind /= -1) then
-	   call PrintVersionInfo()
-           terminateProg=.true.
-         endif
-         if (terminateProg) goto 1110
-         call ESMF_UtilGetArgIndex('-s', argindex=ind)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
-         if (ind == -1) then
-           write(*,*)
-           print *, "ERROR: The required argument [-s|--source] is missing."
-           print *, "Use the --help argument to see an explanation of usage."
-           call ESMF_Finalize(endflag=ESMF_END_ABORT)
-         else
-           call ESMF_UtilGetArg(ind+1, argvalue=srcfile)
-         endif
-      
-         call ESMF_UtilGetArgIndex('-d', argindex=ind, rc=rc)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
-         if (ind == -1) then
-           write(*,*)
-           print *, "ERROR: The required argument [-d|-destination] is missing."
-           print *, "Use the --help argument to see an explanation of usage."
-           call ESMF_Finalize(endflag=ESMF_END_ABORT)
-         else
-           call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
-         endif
-          
-         call ESMF_UtilGetArgIndex('-w', argindex=ind, rc=rc)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--weight', argindex=ind, rc=rc)
-         if (ind == -1) then
-           write(*,*)
-           print *, "ERROR: The required argument [-w|--weight] is missing."
-           print *, "Use the --help argument to see an explanation of usage."
-           call ESMF_Finalize(endflag=ESMF_END_ABORT)
-         else	
-           call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
-         endif
-
-         call ESMF_UtilGetArgIndex('-m', argindex=ind, rc=rc)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--method', argindex=ind, rc=rc)
-         if (ind == -1) then
-          !  print *, 'Use default interpolation method: bilinear'
-           method = 'bilinear'
-         else
-           call ESMF_UtilGetArg(ind+1, argvalue=method)
-	   if ((trim(method) .ne. 'bilinear') .and. &
-               (trim(method) .ne. 'conserve') .and. &
-	       (trim(method) .ne. 'patch')    .and. &
-               (trim(method) .ne. 'nearestdtos')   .and. &
-               (trim(method) .ne. 'neareststod')) then
-              write(*,*)
-              print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
-              print *, '  The supported methods are "bilinear", "patch", and "conserve"'
-              print *, "Use the --help argument to see an explanation of usage."
-              call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif    
-         endif
-
-         poleptrs = -1
-         call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
-         if (ind == -1) then
-	   if ((trim(method) .eq. 'conserve') .or.    & 
-               (trim(method) .eq. 'nearestdtos') .or. &
-               (trim(method) .eq. 'neareststod')) then
-             ! print *, 'Use default pole: None'
-              pole = ESMF_POLEMETHOD_NONE
-	      poleptrs = 0
-	   else
-              !print *, 'Use default pole: All'
-              pole = ESMF_POLEMETHOD_ALLAVG
-           endif
-         else
-           call ESMF_UtilGetArg(ind+1, argvalue=flag)
-           if (trim(flag) .eq. 'none') then
-	     pole = ESMF_POLEMETHOD_NONE
-	     poleptrs = 0
-           else if (trim(flag) .eq. 'all') then
-             pole = ESMF_POLEMETHOD_ALLAVG
-           else if (trim(flag) .eq. 'teeth') then
-             pole = ESMF_POLEMETHOD_TEETH
-             poleptrs = -2
-           else 
-             read(flag,'(i4)') poleptrs
-             pole = ESMF_POLEMETHOD_NPNTAVG
-           endif
-	   if ((method .eq. 'conserve') .and. &
-	       (pole .ne. ESMF_POLEMETHOD_NONE)) then
-             write(*,*)
-	     print *, 'ERROR: Conserve method only works with no pole.'
-             print *, "Use the --help argument to see an explanation of usage."
-             call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif
-         endif
-
-         typeSetFlag = .false.  
-         srcFileType = ESMF_FILEFORMAT_SCRIP
-         dstFileType = ESMF_FILEFORMAT_SCRIP
-         srcIsRegional = .false.
-         dstIsRegional = .false.
-         call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           call ESMF_UtilGetArg(ind+1, argvalue=flag)
-	   if (trim(flag) .eq. 'ESMF') then
-	     srcFileType = ESMF_FILEFORMAT_ESMFMESH
-             dstFileType = ESMF_FILEFORMAT_ESMFMESH
-             !write(*,*)
-             !print *, 'Set src and dst grid file types to ESMF.'
-	   else if (trim(flag) .eq. 'UGRID') then
-	     srcFileType = ESMF_FILEFORMAT_UGRID
-             dstFileType = ESMF_FILEFORMAT_UGRID
-             !write(*,*)
-             !print *, 'Set src and dst grid file types to UGRID.'
-           else if (trim(flag) .eq. 'GRIDSPEC') then
-	     srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-             dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-           else if (trim(flag) .ne. 'SCRIP') then
-             write(*,*)
-	     print *, 'ERROR: Unknown -t: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
-             print *, "Use the --help argument to see an explanation of usage."
-             call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif 
-           typeSetFlag = .true.
-         endif
-
-         call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           call ESMF_UtilGetArg(ind+1, argvalue=flag)
-	   if (typeSetFlag) then
-	     ! check if the type is consistent with -t
-             if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-                (trim(flag) .eq. 'UGRID' .and. srcFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-	        (trim(flag) .eq. 'GRIDSPEC' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-	        (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP)) then
-                write(*,*)
-	        print *, 'ERROR: Source file type conflict: --src_type and -t.' 
-                print *, "Use the --help argument to see an explanation of usage."
-                call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	     end if
-           endif
-           if (trim(flag) .eq. 'ESMF') then
-	     srcFileType = ESMF_FILEFORMAT_ESMFMESH
-           else if (trim(flag) .eq. 'UGRID') then
-	     srcFileType = ESMF_FILEFORMAT_UGRID
-           else if (trim(flag) .eq. 'GRIDSPEC') then
-	     srcFileType = ESMF_FILEFORMAT_GRIDSPEC
-           else if (trim(flag) .ne. 'SCRIP') then
-             write(*,*)
-	     print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
-             print *, "Use the --help argument to see an explanation of usage."
-             call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif
-         endif
-
-         call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           call ESMF_UtilGetArg(ind+1, argvalue=flag)
-	   if (typeSetFlag) then
-	     ! check if the type is consistent with -t
-             if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
-                (trim(flag) .eq. 'UGRID' .and. dstFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
-	        (trim(flag) .eq. 'GRIDSPEC' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
-	        (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP)) then
-                write(*,*)
-	        print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
-                print *, "Use the --help argument to see an explanation of usage."
-                call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	     end if
-           endif
-           if (trim(flag) .eq. 'ESMF') then
-	     dstFileType = ESMF_FILEFORMAT_ESMFMESH
-           else if (trim(flag) .eq. 'UGRID') then
-	     dstFileType = ESMF_FILEFORMAT_UGRID
-           else if (trim(flag) .eq. 'GRIDSPEC') then
-	     dstFileType = ESMF_FILEFORMAT_GRIDSPEC
-           else if (trim(flag) .ne. 'SCRIP') then
-             write(*,*)
-	     print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
-             print *, "Use the --help argument to see an explanation of usage."
-             call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           end if
-         endif
-
-         ! If the src grid type is UGRID, get the dummy variable name in the file
-	 if (srcFileType == ESMF_FILEFORMAT_UGRID) then
-	    call ESMF_UtilGetArgIndex('--src_meshname', argindex=ind, rc=rc)
-            if (ind == -1) then
-	         write(*,*)
-                 print *, 'ERROR: The argument --src_meshname is missing.'
-                 print *, "Use the --help argument to see an explanation of usage."
-                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
-            else
-                 call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)	   
-            endif
-         endif
-
-         ! If the dst grid type is UGRID, get the dummy variable name in the file
-	 if (dstFileType == ESMF_FILEFORMAT_UGRID) then
-	    call ESMF_UtilGetArgIndex('--dst_meshname', argindex=ind, rc=rc)
-            if (ind == -1) then
-	         write(*,*)
-                 print *, 'ERROR: The argument --dst_meshname is missing.'
-                 print *, "Use the --help argument to see an explanation of usage."
-                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
-            else
-                 call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)	   
-            endif
-         endif
-
-         ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
-         call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
-         if (ind == -1) then
-	    srcMissingValue = .false.
-         else
-	     srcMissingValue = .true.
-             call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
-         endif
-
-         ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
-         ! file is UGRID, it only support the missing value when doing conservative regrid
-         if (srcMissingValue) then
-	   if (srcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
-	      srcFileType /= ESMF_FILEFORMAT_UGRID) then
-              write(*,*)
-	      print *, 'ERROR: --src_missingvalue is supported only when the source grid is in'
-	      print *, '       UGRID or GRIDSPEC format.'
-              print *, "Use the --help argument to see an explanation of usage."
-	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!           else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-!              write(*,*)
-!	      print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
-!	      print *, '       it only works with the conservative regridding if the src grid is'
-!             print *, '       a UGRID'
-!              print *, "Use the --help argument to see an explanation of usage."
-!	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif
-	 endif
-
-         ! If the dst grid type is GRIDSPEC or UGRID, check if --dst_missingvalue argument is given
-	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=ind, rc=rc)
-         if (ind == -1) then
-	    dstMissingValue = .false.
-         else
-	     dstMissingValue = .true.
-             call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
-         endif
-
-         ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
-         ! file is UGRID, it only support the missing value when doing conservative regrid
-         if (dstMissingValue) then
-	   if (dstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
-	      dstFileType /= ESMF_FILEFORMAT_UGRID) then
-              write(*,*)
-	      print *, 'ERROR: --dst_missingvalue is supported only when the source grid is in'
-	      print *, '       UGRID or GRIDSPEC format.'
-              print *, "Use the --help argument to see an explanation of usage."
-	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!           else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-!              write(*,*)
-!	      print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
-!	      print *, '       with the conservative regridding when the dst grid is'
-!             print *, '       a UGRID'
-!              print *, "Use the --help argument to see an explanation of usage."
-!	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           endif
-	 endif
-
-         ignoreUnmapped=.false.
-         call ESMF_UtilGetArgIndex('-i', argindex=ind, rc=rc)
-         if (ind == -1) call ESMF_UtilGetArgIndex('--ignore_unmapped', argindex=ind, rc=rc)
-         if (ind /= -1) then
-            ignoreUnmapped=.true.
-         end if
-
-         call ESMF_UtilGetArgIndex('-r', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           srcIsRegional = .true.
-           dstIsRegional = .true.
-           pole = ESMF_POLEMETHOD_NONE
-           poleptrs = 0
-           ! print *, 'Set pole to None for regional grids.'
-         end if
-
-         call ESMF_UtilGetArgIndex('--src_regional', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           srcIsRegional = .true.
-           pole = ESMF_POLEMETHOD_NONE
-           poleptrs = 0
-           ! print *, 'Set pole to None for regional source grid.'
-         end if
-
-         call ESMF_UtilGetArgIndex('--dst_regional', argindex=ind, rc=rc)
-         if (ind /= -1) then
-           dstIsRegional = .true.
-         end if
-
-	! --64bit_offset for large weight file
- 	call ESMF_UtilGetArgIndex('--64bit_offset', argindex=ind, rc=rc)
-	if (ind /= -1) then
-	   largeFileFlag = .true.
-	else
-	   largeFileFlag = .false.
-        end if
-
-	! --netcdf4 for weight file format
- 	call ESMF_UtilGetArgIndex('--netcdf4', argindex=ind, rc=rc)
-	if (ind /= -1) then
-	   netcdf4FileFlag = .true.
-	else
-	   netcdf4FileFlag = .false.
-        end if
-
-	if (largeFileFlag .and. netcdf4FileFlag) then
-             write(*,*)
-	     print *, 'ERROR: Both --netcdf4 and --64bit_offset are specified.'
-	     print *, '       Only one flag can be given.'
-             print *, "Use the --help argument to see an explanation of usage."
-	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-        endif
-
-        ! --user_area - to use user-defined area for the cells
- 	call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
-	if (ind /= -1) then
-	   userAreaFlag = .true.
-	else
-	   userAreaFlag = .false.
-        endif
-
-	! user area only needed for conservative regridding
-        if (userAreaFlag .and. (method .ne. 'conserve')) then
-             write(*,*)
-	     print *, 'WARNING: --user_areas is only needed in conservative remapping'
-	     print *, '       The flag is ignored'
-	     userAreaFlag = .false.
-        endif
-
-        if (userAreaFlag .and. (srcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
- 	    srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
-	    (dstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
- 	    dstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
-             write(*,*)
-	     print *, 'ERROR: --user_areas is supported only when the source or destination'
-	     print *, '       grid are in SCRIP of ESMF format.'
-             print *, "Use the --help argument to see an explanation of usage."
-	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	endif
-
-        ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
-        ! coordinate variables
-	useSrcCoordVar = .false.
-        useDstCoordVar = .false.
-	if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	    call ESMF_UtilGetArgIndex('--src_coordinates', argindex=ind, rc=rc)
-            if (ind /= -1) then
-                 call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
-                 pos = INDEX(argStr, ',')
-	         if (pos == 0) then
-		    write(*,*)
-		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
-	  	    print *, "       variable names separated by comma" 
-                    print *, "Use the --help argument to see an explanation of usage."
-	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  	         endif
-	         srcCoordNames(1)=argStr(1:pos-1)
-                 srcCoordNames(2)=argStr(pos+1:)
-                 pos = INDEX(argStr(pos+1:), ",")
-	         if (pos /= 0) then
-		    write(*,*)
-		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
-	  	    print *, "       variable names separated by comma" 
-                    print *, "Use the --help argument to see an explanation of usage."
-	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  	         endif
-	         useSrcCoordVar = .true.
-            endif
-         endif
-
-	 if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	    call ESMF_UtilGetArgIndex('--dst_coordinates', argindex=ind, rc=rc)
-            if (ind /= -1) then
-                 call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
-                 pos = INDEX(argStr, ",")
-	         if (pos == 0) then
-		    write(*,*)
-		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
-	  	    print *, "       variable names separated by comma" 
-                    print *, "Use the --help argument to see an explanation of usage."
-	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  	         endif
-	         dstCoordNames(1)=argStr(1:pos-1)
-                 dstCoordNames(2)=argStr(pos+1:)
-                 pos = INDEX(argStr(pos+1:), ",")
-	         if (pos /= 0) then
-		    write(*,*)
-		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
-	  	    print *, "       variable names separated by comma" 
-                    print *, "Use the --help argument to see an explanation of usage."
-	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  	         endif
-	         useDstCoordVar = .true.
-            endif
-         endif
-
-     1110 continue 
-        commandbuf2(:)=0
-        if (terminateProg) then
-	    commandbuf2(1)=-9999            
-        else
-            commandbuf2(1)=srcFileType%fileformat
-            commandbuf2(2)=dstFileType%fileformat
-            if (method .eq. 'patch') commandbuf2(3)=1
-	    if (method .eq. 'conserve') commandbuf2(3)=2
-	    if (method .eq. 'neareststod') commandbuf2(3)=3
-            if (method .eq. 'nearestdtos') commandbuf2(3)=4
-            commandbuf2(4)=poleptrs
-            if (srcIsRegional) commandbuf2(9) = 1
-            if (dstIsRegional) commandbuf2(10) = 1
-            if (ignoreUnmapped) commandbuf2(5) = 1
-	    if (userAreaFlag)   commandbuf2(6) = 1
-            if (srcMissingValue) commandbuf2(7) = 1
-            if (dstMissingValue) commandbuf2(8) = 1
-            if (srcIsRegional) commandbuf2(9) = 1
-            if (dstIsRegional) commandbuf2(10) = 1
-            if (useSrcCoordVar) commandbuf2(11) = 1
-            if (useDstCoordVar) commandbuf2(12) = 1
-            if (largeFileFlag) commandbuf2(13) = 1
-            if (netcdf4FileFlag) commandbuf2(14) = 1
-        endif 
-
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-
-        if (terminateProg) then
-            goto 1111
-        endif
-
-        ! Group the command line arguments and broadcast to other PETs
-        commandbuf1(1)=srcfile
-        commandbuf1(2)=dstfile
-        commandbuf1(3)=wgtfile
-        commandbuf3(1)=srcMeshName
-	commandbuf3(2)=dstMeshName
-        commandbuf3(3)=srcVarName
-	commandbuf3(4)=dstVarName
-        commandbuf3(5)=srcCoordNames(1)
-        commandbuf3(6)=srcCoordNames(2)
-        commandbuf3(7)=dstCoordNames(1)
-        commandbuf3(8)=dstCoordNames(2)
-
-        ! Broadcast the command line arguments to all the PETs
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-
-     else
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-
-        if (commandbuf2(1) == -9999) then
-	   goto 1111	  
-        endif
-
-	srcFileType%fileformat = commandbuf2(1)
-	dstFileType%fileformat = commandbuf2(2)
-        if (commandbuf2(3)==0) then
-	   method = 'bilinear'
-        else if (commandbuf2(3)==1) then
-           method = 'patch'
-        else if (commandbuf2(3)==2) then
-           method = 'conserve'
-        else if (commandbuf2(3)==3) then
-           method = 'neareststod'
-        else
-           method = 'nearestdtos'
-        endif
-        poleptrs = commandbuf2(4)
-        if (poleptrs == -1) then 
-	   pole=ESMF_POLEMETHOD_ALLAVG
-        else if (poleptrs == -2) then 
-	   pole=ESMF_POLEMETHOD_TEETH
-        else if (poleptrs ==  0) then
-           pole=ESMF_POLEMETHOD_NONE
-	else
-           pole=ESMF_POLEMETHOD_NPNTAVG 
-        endif
-        if (commandbuf2(5) == 1) then
-           ignoreUnmapped=.true.
-        else
-           ignoreUnmapped=.false.
-        endif
-
-        if (commandbuf2(6) == 1) then
-           userAreaFlag=.true.
-        else
-           userAreaFlag=.false.
-        endif
-
-        if (commandbuf2(7) == 1) then
-           srcMissingValue=.true.
-        else
-           srcMissingValue=.false.
-        endif
-
-        if (commandbuf2(8) == 1) then
-           dstMissingValue=.true.
-        else
-           dstMissingValue=.false.
-        endif
-        if (commandbuf2(9)==1) then
-           srcIsRegional = .true.
-        else
-           srcIsRegional = .false.
-        end if
-        if (commandbuf2(10)==1) then
-           dstIsRegional = .true.
-        else
-           dstIsRegional = .false.
-        end if
-        if (commandbuf2(11)==1) then
-           useSrcCoordVar = .true.
-        else
-           useSrcCoordVar = .false.
-        end if
-        if (commandbuf2(12)==1) then
-           useDstCoordVar = .true.
-        else
-           useDstCoordVar = .false.
-        end if
-        if (commandbuf2(13)==1) then
-           largeFileFlag = .true.
-        else
-           largeFileFlag = .false.
-        end if
-        if (commandbuf2(14)==1) then
-           netcdf4FileFlag = .true.
-        else
-           netcdf4FileFlag = .false.
-        end if
-
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        srcfile = commandbuf1(1)
-        dstfile = commandbuf1(2)
-        wgtfile = commandbuf1(3)
-        srcMeshName = commandbuf3(1)
-	dstMeshName = commandbuf3(2)
-        srcVarName = commandbuf3(3)
-	dstVarName = commandbuf3(4)
-	srcCoordNames(1) = commandbuf3(5)
-	srcCoordNames(2) = commandbuf3(6)
-	dstCoordNames(1) = commandbuf3(7)
-	dstCoordNames(2) = commandbuf3(8)
-     endif
-
-     if (trim(method) .eq. 'bilinear') then
-        methodflag = ESMF_REGRIDMETHOD_BILINEAR
-     else if (trim(method) .eq. 'conserve') then
-        methodflag = ESMF_REGRIDMETHOD_CONSERVE
-     else if (trim(method) .eq. 'patch') then
-        methodflag = ESMF_REGRIDMETHOD_PATCH
-     else if (trim(method) .eq. 'neareststod') then
-        methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
-     else if (trim(method) .eq. 'nearestdtos') then
-        methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
-     endif	 
+  !------------------------------------------------------------------------
+  ! Parse keyword based arguments at Pet 0
+  !   then broadcast the results to the rest of the Pets
+  !
+  if (PetNo == 0) then
+    call ESMF_UtilGetArgIndex('--help', argindex=ind)
+    if (ind /= -1) then
+	    call PrintUsage()
+      terminateProg=.true.
+    endif
+    call ESMF_UtilGetArgIndex('--version', argindex=ind)
+    if (ind /= -1) then
+	    call PrintVersionInfo()
+      terminateProg=.true.
+    endif
+    if (terminateProg) goto 1110
+    call ESMF_UtilGetArgIndex('-s', argindex=ind)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
+    if (ind == -1) then
+      write(*,*)
+      print *, "ERROR: The required argument [-s|--source] is missing."
+      print *, "Use the --help argument to see an explanation of usage."
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=srcfile)
+    endif
     
-     if (ignoreunmapped) then
-         unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
-     else
-         unmappedaction = ESMF_UNMAPPEDACTION_ERROR
-     endif
-     call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
-          polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
-	  srcFileType = srcFileType, dstFileType = dstFileType, &
-	  srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
-	  srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
-	  srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
-	  dstMissingvalueFlag = dstMissingValue, dstMissingvalueVar = dstVarName, &
-          useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
-	  srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
-	  useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
-	  netcdf4FileFlag = netcdf4FileFlag, &
-	  verboseFlag = .true., rc = rc)
+    call ESMF_UtilGetArgIndex('-d', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
+    if (ind == -1) then
+      write(*,*)
+      print *, "ERROR: The required argument [-d|-destination] is missing."
+      print *, "Use the --help argument to see an explanation of usage."
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
+    endif
+     
+    call ESMF_UtilGetArgIndex('-w', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--weight', argindex=ind, rc=rc)
+    if (ind == -1) then
+      write(*,*)
+      print *, "ERROR: The required argument [-w|--weight] is missing."
+      print *, "Use the --help argument to see an explanation of usage."
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    else	
+      call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
+    endif
 
-      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    call ESMF_UtilGetArgIndex('-m', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--method', argindex=ind, rc=rc)
+    if (ind == -1) then
+      !  print *, 'Use default interpolation method: bilinear'
+      method = 'bilinear'
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=method)
+	    if ((trim(method) .ne. 'bilinear') .and. &
+          (trim(method) .ne. 'conserve') .and. &
+	        (trim(method) .ne. 'patch')    .and. &
+          (trim(method) .ne. 'nearestdtos')   .and. &
+          (trim(method) .ne. 'neareststod')) then
+        write(*,*)
+        print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
+        print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif    
+    endif
 
-      ! Output success
-      if (PetNo==0) then
-         write(*,*) "Completed weight generation successfully."
-!         write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
-         write(*,*) 
+    poleptrs = -1
+    call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
+    if (ind == -1) then
+      if ((trim(method) .eq. 'conserve') .or.    & 
+          (trim(method) .eq. 'nearestdtos') .or. &
+          (trim(method) .eq. 'neareststod')) then
+        ! print *, 'Use default pole: None'
+        pole = ESMF_POLEMETHOD_NONE
+        poleptrs = 0
+      else
+        !print *, 'Use default pole: All'
+        pole = ESMF_POLEMETHOD_ALLAVG
       endif
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=flag)
+      if (trim(flag) .eq. 'none') then
+        pole = ESMF_POLEMETHOD_NONE
+        poleptrs = 0
+      else if (trim(flag) .eq. 'all') then
+        pole = ESMF_POLEMETHOD_ALLAVG
+      else if (trim(flag) .eq. 'teeth') then
+        pole = ESMF_POLEMETHOD_TEETH
+        poleptrs = -2
+      else 
+        read(flag,'(i4)') poleptrs
+        pole = ESMF_POLEMETHOD_NPNTAVG
+      endif
+      if ((method .eq. 'conserve') .and. &
+          (pole .ne. ESMF_POLEMETHOD_NONE)) then
+        write(*,*)
+        print *, 'ERROR: Conserve method only works with no pole.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
 
-  1111  continue
-      call ESMF_Finalize()
+    typeSetFlag = .false.  
+    srcFileType = ESMF_FILEFORMAT_SCRIP
+    dstFileType = ESMF_FILEFORMAT_SCRIP
+    srcIsRegional = .false.
+    dstIsRegional = .false.
+    call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=flag)
+      if (trim(flag) .eq. 'ESMF') then
+        srcFileType = ESMF_FILEFORMAT_ESMFMESH
+        dstFileType = ESMF_FILEFORMAT_ESMFMESH
+        !write(*,*)
+        !print *, 'Set src and dst grid file types to ESMF.'
+      else if (trim(flag) .eq. 'UGRID') then
+        srcFileType = ESMF_FILEFORMAT_UGRID
+        dstFileType = ESMF_FILEFORMAT_UGRID
+        !write(*,*)
+        !print *, 'Set src and dst grid file types to UGRID.'
+      else if (trim(flag) .eq. 'GRIDSPEC') then
+        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
+        dstFileType = ESMF_FILEFORMAT_GRIDSPEC
+      else if (trim(flag) .ne. 'SCRIP') then
+        write(*,*)
+        print *, 'ERROR: Unknown -t: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif 
+      typeSetFlag = .true.
+    endif
+
+    call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=flag)
+      if (typeSetFlag) then
+        ! check if the type is consistent with -t
+        if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
+            (trim(flag) .eq. 'UGRID' .and. srcFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
+            (trim(flag) .eq. 'GRIDSPEC' .and. srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
+            (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP)) then
+          write(*,*)
+          print *, 'ERROR: Source file type conflict: --src_type and -t.' 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+      endif
+      if (trim(flag) .eq. 'ESMF') then
+        srcFileType = ESMF_FILEFORMAT_ESMFMESH
+      else if (trim(flag) .eq. 'UGRID') then
+        srcFileType = ESMF_FILEFORMAT_UGRID
+      else if (trim(flag) .eq. 'GRIDSPEC') then
+        srcFileType = ESMF_FILEFORMAT_GRIDSPEC
+      else if (trim(flag) .ne. 'SCRIP') then
+        write(*,*)
+        print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=flag)
+      if (typeSetFlag) then
+        ! check if the type is consistent with -t
+        if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
+            (trim(flag) .eq. 'UGRID' .and. dstFileType /= ESMF_FILEFORMAT_UGRID) .or.   &
+            (trim(flag) .eq. 'GRIDSPEC' .and. dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .or. &
+            (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP)) then
+          write(*,*)
+          print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+      endif
+      if (trim(flag) .eq. 'ESMF') then
+         dstFileType = ESMF_FILEFORMAT_ESMFMESH
+      else if (trim(flag) .eq. 'UGRID') then
+         dstFileType = ESMF_FILEFORMAT_UGRID
+      else if (trim(flag) .eq. 'GRIDSPEC') then
+         dstFileType = ESMF_FILEFORMAT_GRIDSPEC
+      else if (trim(flag) .ne. 'SCRIP') then
+        write(*,*)
+        print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    ! If the src grid type is UGRID, get the dummy variable name in the file
+    if (srcFileType == ESMF_FILEFORMAT_UGRID) then
+      call ESMF_UtilGetArgIndex('--src_meshname', argindex=ind, rc=rc)
+      if (ind == -1) then
+        write(*,*)
+        print *, 'ERROR: The argument --src_meshname is missing.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      else
+        call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)	   
+      endif
+    endif
+
+    ! If the dst grid type is UGRID, get the dummy variable name in the file
+    if (dstFileType == ESMF_FILEFORMAT_UGRID) then
+      call ESMF_UtilGetArgIndex('--dst_meshname', argindex=ind, rc=rc)
+      if (ind == -1) then
+        write(*,*)
+        print *, 'ERROR: The argument --dst_meshname is missing.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      else
+        call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)	   
+      endif
+    endif
+
+    ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
+    call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
+    if (ind == -1) then
+      srcMissingValue = .false.
+    else
+      srcMissingValue = .true.
+      call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
+    endif
+
+    ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
+    ! file is UGRID, it only support the missing value when doing conservative regrid
+    if (srcMissingValue) then
+      if (srcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+          srcFileType /= ESMF_FILEFORMAT_UGRID) then
+        write(*,*)
+        print *, 'ERROR: --src_missingvalue is supported only when the source grid is in'
+        print *, '       UGRID or GRIDSPEC format.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+        write(*,*)
+        print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
+        print *, '       it only works with the conservative regridding if the src grid is'
+        print *, '       a UGRID'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    ! If the dst grid type is GRIDSPEC or UGRID, check if --dst_missingvalue argument is given
+    call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=ind, rc=rc)
+    if (ind == -1) then
+      dstMissingValue = .false.
+    else
+      dstMissingValue = .true.
+      call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
+    endif
+
+    ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
+    ! file is UGRID, it only support the missing value when doing conservative regrid
+    if (dstMissingValue) then
+      if (dstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+          dstFileType /= ESMF_FILEFORMAT_UGRID) then
+        write(*,*)
+        print *, 'ERROR: --dst_missingvalue is supported only when the source grid is in'
+        print *, '       UGRID or GRIDSPEC format.'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+        write(*,*)
+        print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
+        print *, '       with the conservative regridding when the dst grid is'
+        print *, '       a UGRID'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    ignoreUnmapped=.false.
+    call ESMF_UtilGetArgIndex('-i', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--ignore_unmapped', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      ignoreUnmapped=.true.
+    endif
+
+    call ESMF_UtilGetArgIndex('-r', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      srcIsRegional = .true.
+      dstIsRegional = .true.
+      pole = ESMF_POLEMETHOD_NONE
+      poleptrs = 0
+      ! print *, 'Set pole to None for regional grids.'
+    endif
+
+    call ESMF_UtilGetArgIndex('--src_regional', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      srcIsRegional = .true.
+      pole = ESMF_POLEMETHOD_NONE
+      poleptrs = 0
+      ! print *, 'Set pole to None for regional source grid.'
+    endif
+
+    call ESMF_UtilGetArgIndex('--dst_regional', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      dstIsRegional = .true.
+    endif
+
+    ! --64bit_offset for large weight file
+    call ESMF_UtilGetArgIndex('--64bit_offset', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      largeFileFlag = .true.
+    else
+      largeFileFlag = .false.
+    endif
+   
+    ! --netcdf4 for weight file format
+    call ESMF_UtilGetArgIndex('--netcdf4', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      netcdf4FileFlag = .true.
+    else
+      netcdf4FileFlag = .false.
+    endif
+   
+    if (largeFileFlag .and. netcdf4FileFlag) then
+      write(*,*)
+      print *, 'ERROR: Both --netcdf4 and --64bit_offset are specified.'
+      print *, '       Only one flag can be given.'
+      print *, "Use the --help argument to see an explanation of usage."
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+   
+    ! --user_area - to use user-defined area for the cells
+    call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      userAreaFlag = .true.
+    else
+      userAreaFlag = .false.
+    endif
+   
+    ! user area only needed for conservative regridding
+    if (userAreaFlag .and. (method .ne. 'conserve')) then
+      write(*,*)
+      print *, 'WARNING: --user_areas is only needed in conservative remapping'
+      print *, '       The flag is ignored'
+      userAreaFlag = .false.
+    endif
+
+    if (userAreaFlag .and. (srcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+        srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
+        (dstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+        dstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
+      write(*,*)
+      print *, 'ERROR: --user_areas is supported only when the source or destination'
+      print *, '       grid are in SCRIP of ESMF format.'
+      print *, "Use the --help argument to see an explanation of usage."
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
+    ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
+    ! coordinate variables
+    useSrcCoordVar = .false.
+    useDstCoordVar = .false.
+    if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      call ESMF_UtilGetArgIndex('--src_coordinates', argindex=ind, rc=rc)
+      if (ind /= -1) then
+        call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+        pos = INDEX(argStr, ',')
+        if (pos == 0) then
+          write(*,*)
+          print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
+          print *, "       variable names separated by comma" 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+        srcCoordNames(1)=argStr(1:pos-1)
+        srcCoordNames(2)=argStr(pos+1:)
+        pos = INDEX(argStr(pos+1:), ",")
+        if (pos /= 0) then
+          write(*,*)
+          print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
+          print *, "       variable names separated by comma" 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+        useSrcCoordVar = .true.
+      endif
+    endif
+
+    if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+      call ESMF_UtilGetArgIndex('--dst_coordinates', argindex=ind, rc=rc)
+      if (ind /= -1) then
+        call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+        pos = INDEX(argStr, ",")
+        if (pos == 0) then
+          write(*,*)
+          print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
+          print *, "       variable names separated by comma" 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+        dstCoordNames(1)=argStr(1:pos-1)
+        dstCoordNames(2)=argStr(pos+1:)
+        pos = INDEX(argStr(pos+1:), ",")
+        if (pos /= 0) then
+          write(*,*)
+          print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
+          print *, "       variable names separated by comma" 
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+        useDstCoordVar = .true.
+      endif
+    endif
+
+    checkFlag = .false.
+    call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
+    if (ind /= -1) checkFlag = .true.   
+
+1110 continue 
+    commandbuf2(:)=0
+    if (terminateProg) then
+      commandbuf2(1)=-9999            
+    else
+      commandbuf2(1)=srcFileType%fileformat
+      commandbuf2(2)=dstFileType%fileformat
+      if (method .eq. 'patch') commandbuf2(3)=1
+      if (method .eq. 'conserve') commandbuf2(3)=2
+      if (method .eq. 'neareststod') commandbuf2(3)=3
+      if (method .eq. 'nearestdtos') commandbuf2(3)=4
+      commandbuf2(4)=poleptrs
+      if (srcIsRegional) commandbuf2(9) = 1
+      if (dstIsRegional) commandbuf2(10) = 1
+      if (ignoreUnmapped) commandbuf2(5) = 1
+      if (userAreaFlag)   commandbuf2(6) = 1
+      if (srcMissingValue) commandbuf2(7) = 1
+      if (dstMissingValue) commandbuf2(8) = 1
+      if (srcIsRegional) commandbuf2(9) = 1
+      if (dstIsRegional) commandbuf2(10) = 1
+      if (useSrcCoordVar) commandbuf2(11) = 1
+      if (useDstCoordVar) commandbuf2(12) = 1
+      if (largeFileFlag) commandbuf2(13) = 1
+      if (netcdf4FileFlag) commandbuf2(14) = 1
+      if (checkFlag) commandbuf2(15) = 1 
+    endif 
+
+    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+    if (terminateProg) then
+      goto 1111
+    endif
+
+    ! Group the command line arguments and broadcast to other PETs
+    commandbuf1(1)=srcfile
+    commandbuf1(2)=dstfile
+    commandbuf1(3)=wgtfile
+    commandbuf3(1)=srcMeshName
+    commandbuf3(2)=dstMeshName
+    commandbuf3(3)=srcVarName
+    commandbuf3(4)=dstVarName
+    commandbuf3(5)=srcCoordNames(1)
+    commandbuf3(6)=srcCoordNames(2)
+    commandbuf3(7)=dstCoordNames(1)
+    commandbuf3(8)=dstCoordNames(2)
+
+    ! Broadcast the command line arguments to all the PETs
+    call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+  else
+    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+    if (commandbuf2(1) == -9999) then
+      goto 1111	  
+    endif
+
+    srcFileType%fileformat = commandbuf2(1)
+    dstFileType%fileformat = commandbuf2(2)
+    if (commandbuf2(3)==0) then
+      method = 'bilinear'
+    else if (commandbuf2(3)==1) then
+      method = 'patch'
+    else if (commandbuf2(3)==2) then
+      method = 'conserve'
+    else if (commandbuf2(3)==3) then
+      method = 'neareststod'
+    else
+      method = 'nearestdtos'
+    endif
+    poleptrs = commandbuf2(4)
+    if (poleptrs == -1) then 
+      pole=ESMF_POLEMETHOD_ALLAVG
+    else if (poleptrs == -2) then 
+      pole=ESMF_POLEMETHOD_TEETH
+    else if (poleptrs ==  0) then
+      pole=ESMF_POLEMETHOD_NONE
+    else
+      pole=ESMF_POLEMETHOD_NPNTAVG 
+    endif
+    if (commandbuf2(5) == 1) then
+      ignoreUnmapped=.true.
+    else
+      ignoreUnmapped=.false.
+    endif
+
+    if (commandbuf2(6) == 1) then
+      userAreaFlag=.true.
+    else
+      userAreaFlag=.false.
+    endif
+
+    if (commandbuf2(7) == 1) then
+      srcMissingValue=.true.
+    else
+      srcMissingValue=.false.
+    endif
+
+    if (commandbuf2(8) == 1) then
+      dstMissingValue=.true.
+    else
+      dstMissingValue=.false.
+    endif
+    if (commandbuf2(9)==1) then
+      srcIsRegional = .true.
+    else
+      srcIsRegional = .false.
+    endif
+    if (commandbuf2(10)==1) then
+      dstIsRegional = .true.
+    else
+      dstIsRegional = .false.
+    endif
+    if (commandbuf2(11)==1) then
+      useSrcCoordVar = .true.
+    else
+      useSrcCoordVar = .false.
+    endif
+    if (commandbuf2(12)==1) then
+      useDstCoordVar = .true.
+    else
+      useDstCoordVar = .false.
+    endif
+    if (commandbuf2(13)==1) then
+      largeFileFlag = .true.
+    else
+      largeFileFlag = .false.
+    endif
+    if (commandbuf2(14)==1) then
+      netcdf4FileFlag = .true.
+    else
+      netcdf4FileFlag = .false.
+    endif
+    if (commandbuf2(15)==1) then
+      checkFlag = .true.
+    else
+      checkFlag = .false.
+    endif
+    call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+    srcfile = commandbuf1(1)
+    dstfile = commandbuf1(2)
+    wgtfile = commandbuf1(3)
+    srcMeshName = commandbuf3(1)
+    dstMeshName = commandbuf3(2)
+    srcVarName = commandbuf3(3)
+    dstVarName = commandbuf3(4)
+    srcCoordNames(1) = commandbuf3(5)
+    srcCoordNames(2) = commandbuf3(6)
+    dstCoordNames(1) = commandbuf3(7)
+    dstCoordNames(2) = commandbuf3(8)
+  endif
+
+  if (trim(method) .eq. 'bilinear') then
+    methodflag = ESMF_REGRIDMETHOD_BILINEAR
+  else if (trim(method) .eq. 'conserve') then
+    methodflag = ESMF_REGRIDMETHOD_CONSERVE
+  else if (trim(method) .eq. 'patch') then
+    methodflag = ESMF_REGRIDMETHOD_PATCH
+  else if (trim(method) .eq. 'neareststod') then
+    methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
+  else if (trim(method) .eq. 'nearestdtos') then
+    methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
+  endif	 
+
+  if (ignoreunmapped) then
+    unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
+  else
+    unmappedaction = ESMF_UNMAPPEDACTION_ERROR
+  endif
+  call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
+                            polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
+                            srcFileType = srcFileType, dstFileType = dstFileType, &
+                            srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
+                            srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
+                            srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
+                            dstMissingvalueFlag = dstMissingValue, dstMissingvalueVar = dstVarName, &
+                            useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
+                            srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
+                            useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
+                            netcdf4FileFlag = netcdf4FileFlag, &
+                            verboseFlag = .true., rc = rc)
+
+  if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+  ! Output success
+  if (PetNo==0) then
+    write(*,*) "Completed weight generation successfully."
+    !write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
+    write(*,*) 
+  endif
+
+!  write(*,*) "Start of check routine"
+!  write(*,*) 
+
+  ! error checking
+  if (checkFlag) then
+    call ESMF_RegridWeightGenCheck(wgtfile, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+  endif
+
+1111  continue
+  call ESMF_Finalize()
 
 contains
 
+  subroutine ErrorMsgAndAbort(localPet)
+    integer ::  localPet
+  
+    if (localPet >= 0) then
+      write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.RegridWeightGen.Log files for a traceback."
+    else
+      write(*,*) "ERROR: Please see the PET*.RegridWeightGen.Log files for a traceback."
+    endif
+  
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  end subroutine ErrorMsgAndAbort
 
-subroutine ErrorMsgAndAbort(localPet)
-  integer ::  localPet
+  subroutine PrintUsage()
+    print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
+    print *, "                	     [--destination|-d] dst_grid_filename"
+    print *, "                      [--weight|-w] out_weight_file "
+    print *, "                      [--method|-m] [bilinear|patch|neareststod|nearestdtos|conserve]"
+    print *, "                      [--pole|-p] [all|none|teeth|<N>]"
+    print *, "                      [--ignore_unmapped|-i]"
+    print *, "                      --src_type [SCRIP|ESMF|UGRID|GRIDSPEC]" 
+    print *, "                      --dst_type [SCRIP|ESMF|UGRID|GRIDSPEC]"
+    print *, "                      -t [SCRIP|ESMF|UGRID|GRIDSPEC]"
+    print *, "                      -r"
+    print *, "                      --src_regional"
+    print *, "                      --dst_regional"
+    print *, "                      --64bit_offset"
+    print *, "                      --netcdf4"
+    print *, "                      --src_meshname src_mesh_variable"
+    print *, "                      --dst_meshname dst_mesh_variable"
+    print *, "                      --src_missingvalue src_var_name"
+    print *, "                      --dst_missingvalue dst_var_name"
+    print *, "                      --src_coordinates lon_var_name,lat_var_name"
+    print *, "                      --dst_coordinates lon_var_name,lat_var_name"
+    print *, "                      --user_areas"
+    print *, "                      --help"
+    print *, "                      --version"
+    print *, "                      --check"
+    print *, "where"
+    print *, "--source or -s - a required argument specifying the source grid file"
+    print *, "                 name"
+    print *, "--destination or -d - a required argument specifying the destination grid"
+    print *, "                      file name"
+    print *, "--weight or -w - a required argument specifying the output regridding weight"
+    print *, "                 file name"
+    print *, "--method or -m - an optional argument specifying which interpolation method is"
+    print *, "                 used.  The default method is bilinear"
+    print *, "--pole or -p - an optional argument indicating what to do with the pole."
+    print *, "                 The default value is all"
+    print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
+    print *, "                          the default is to stop with an error."
+    print *, "--src_type - an optional argument specifying the source grid file type."
+    print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
+    print *, "             The ESMF and UGRID types are only available for the unstructured grid."
+    print *, "             The default option is SCRIP."
+    print *, "--dst_type - an optional argument specifying the destination grid file type."
+    print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
+    print *, "             The ESMF and UGRID types are only available for the unstructured grid."
+    print *, "             The default option is SCRIP."
+    print *, "-t         - an optional argument specifying the file types for both the source"
+    print *, "             and the destination grid files.  The default option is SCRIP."
+    print *, "             If both -t and --src_type or --dst_type are given at the same time"
+    print *, "             and they disagree with each other, an error message will be"
+    print *, "             generated"
+    print *, "-r         - an optional argument specifying the source and destination grids"
+    print *, "             are regional grids.  Without this argument, the grids are assumed"
+    print *, "             to be global"
+    print *, "--src_regional   - an optional argument specifying the source grid is regional."
+    print *, "             Without this argument, the src grids is assumed to be global."
+    print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
+    print *, "             Without this argument, the dst grids is assumed to be global."
+    print *, "--64bit_offset  - an optional argument specifying the output weight file is in"
+    print *, "             NetCDF 64-bit offset format.  This option only works with NetCDF library"
+    print *, "             version 3.6 and above"
+    print *, "--netcdf4  - an optional argument specifying the output weight file is in"
+    print *, "             the NetCDF4 format. This option only works with NetCDF library"
+    print *, "             version 4.1 and above"
+    print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
+    print *, "             variable name that has all the topology information stored in its"
+    print *, "             attributes."
+    print *, "--dst_meshname  - required if the destination grid type is UGRID. It defines the"
+    print *, "             dummy variable name that has all the topology information stored in its"
+    print *, "             attributes."
+    print *, "--src_missingvalue  - an optional argument used when the src file type is GRIDSPEC"
+    print *, "             or UGRID. It defines the variable name whose 'missing_value' or"
+    print *, "             '_FillValue' attribute will be used to construct the mask for the source"
+    print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+    print *, "--dst_missingvalue  - an optional argument used when the destination file type is"
+    print *, "             GRIDSPEC or UGRID. It defines the variable name whose 'missing_value' or"
+    print *, "             '_FillValue' attribute will be used to construct the mask for the destination"
+    print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+    print *, "--src_coordinates  - an optional argument used when the source grid type is GRIDSPEC."
+    print *, "             It defines the longitude and latitude variable names separated by comma,"
+    print *, "             in case there are multiple coordinate variables defined in the file"
+    print *, "--dst_coordinates  - an optional argument used when the destination grid type is GRIDSPEC."
+    print *, "             It defines the longitude and latitude variable names separated by comma,"
+    print *, "             in case there are multiple coordinate variables defined in the file"
+    print *, "--user_areas  - an optional argument specifying that the conservation is adjusted to"
+    print *, "             hold for the user areas provided in the grid files.  If not specified,"
+    print *, "             then the conservation will hold for the ESMF calculated (great circle)"
+    print *, "             areas.  Whichever areas the conservation holds for are output to the"
+    print *, "             weight file."
+    print *, "--help     - Print this help message and exit."
+    print *, "--version  - Print ESMF version and license information and exit."
+    print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
+    print *, "             is done by calling ESMF_Regrid() on an analytic source field using the weights"
+    print *, "             generated by this application.  The mean relative error between the destination"
+    print *, "             and analytic field is computed, as well as the relative error between the mass" 
+    print *, "             of the source and destination fields in the conservative case."
+    print *, ""
+    print *, "For questions, comments, or feature requests please send email to:"
+    print *, "esmf_support@list.woc.noaa.gov"
+    print *, ""
+    print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
+    print *, "Earth System Modeling Framework."
+    print *, ""
+  end subroutine PrintUsage
 
-  if (localPet >= 0) then
-     write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.RegridWeightGen.Log files for a traceback."
-  else
-     write(*,*) "ERROR: Please see the PET*.RegridWeightGen.Log files for a traceback."
-  endif
+  subroutine PrintVersionInfo()
 
+    print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+    print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
+    print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
+    print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION
+    print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
+    print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
+    print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
+    print *, ""
+    print *, "Earth System Modeling Framework"
+    print *, ""
+    print *, "Copyright (c) 2002-2014 University Corporation for Atmospheric Research,"
+    print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
+    print *, "University of Michigan, National Centers for Environmental Prediction,"
+    print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
+    print *, "NASA Goddard Space Flight Center.  All rights reserved."
+    print *, ""
+    print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
+    print *, 'of this software and associated documentation files (the "Software"), to'
+    print *, "deal with the Software without restriction, including without limitation the"
+    print *, "rights to use, copy, modify, merge, publish, distribute, sublicense, and/or"
+    print *, "sell copies of the Software, and to permit persons to whom the Software is"
+    print *, "furnished to do so, subject to the following conditions:"
+    print *, "   1. Redistributions of source code must retain the above copyright notice,"
+    print *, "      this list of conditions and the following disclaimers."
+    print *, "   2. Redistributions in binary form must reproduce the above copyright"
+    print *, "      notice, this list of conditions and the following disclaimers in the"
+    print *, "      documentation and/or other materials provided with the distribution."
+    print *, "   3. Neither the names of the organizations developing this software, nor"
+    print *, "      its contributors may be used to endorse or promote products derived"
+    print *, "      from this Software without specific prior written permission."
+    print *, ""
+    print *, 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR'
+    print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+    print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
+    print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+    print *, "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
+    print *, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
+    print *, "WITH THE SOFTWARE."
+    print *, ""
 
-  call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-end subroutine ErrorMsgAndAbort
-
-
-
-subroutine PrintUsage()
-     print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
-     print *, "                	     [--destination|-d] dst_grid_filename"
-     print *, "                      [--weight|-w] out_weight_file "
-     print *, "                      [--method|-m] [bilinear|patch|neareststod|nearestdtos|conserve]"
-     print *, "                      [--pole|-p] [all|none|teeth|<N>]"
-     print *, "                      [--ignore_unmapped|-i]"
-     print *, "                      --src_type [SCRIP|ESMF|UGRID|GRIDSPEC]" 
-     print *, "                      --dst_type [SCRIP|ESMF|UGRID|GRIDSPEC]"
-     print *, "                      -t [SCRIP|ESMF|UGRID|GRIDSPEC]"
-     print *, "                      -r"
-     print *, "                      --src_regional"
-     print *, "                      --dst_regional"
-     print *, "                      --64bit_offset"
-     print *, "                      --netcdf4"
-     print *, "                      --src_meshname src_mesh_variable"
-     print *, "                      --dst_meshname dst_mesh_variable"
-     print *, "                      --src_missingvalue src_var_name"
-     print *, "                      --dst_missingvalue dst_var_name"
-     print *, "                      --src_coordinates lon_var_name,lat_var_name"
-     print *, "                      --dst_coordinates lon_var_name,lat_var_name"
-     print *, "                      --user_areas"
-     print *, "                      --help"
-     print *, "                      --version"
-     print *, "where"
-     print *, "--source or -s - a required argument specifying the source grid file"
-     print *, "                 name"
-     print *, "--destination or -d - a required argument specifying the destination grid"
-     print *, "                      file name"
-     print *, "--weight or -w - a required argument specifying the output regridding weight"
-     print *, "                 file name"
-     print *, "--method or -m - an optional argument specifying which interpolation method is"
-     print *, "                 used.  The default method is bilinear"
-     print *, "--pole or -p - an optional argument indicating what to do with the pole."
-     print *, "                 The default value is all"
-     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
-     print *, "                          the default is to stop with an error."
-     print *, "--src_type - an optional argument specifying the source grid file type."
-     print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
-     print *, "             The ESMF and UGRID types are only available for the unstructured grid."
-     print *, "             The default option is SCRIP."
-     print *, "--dst_type - an optional argument specifying the destination grid file type."
-     print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
-     print *, "             The ESMF and UGRID types are only available for the unstructured grid."
-     print *, "             The default option is SCRIP."
-     print *, "-t         - an optional argument specifying the file types for both the source"
-     print *, "             and the destination grid files.  The default option is SCRIP."
-     print *, "             If both -t and --src_type or --dst_type are given at the same time"
-     print *, "             and they disagree with each other, an error message will be"
-     print *, "             generated"
-     print *, "-r         - an optional argument specifying the source and destination grids"
-     print *, "             are regional grids.  Without this argument, the grids are assumed"
-     print *, "             to be global"
-     print *, "--src_regional   - an optional argument specifying the source grid is regional."
-     print *, "             Without this argument, the src grids is assumed to be global."
-     print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
-     print *, "             Without this argument, the dst grids is assumed to be global."
-     print *, "--64bit_offset  - an optional argument specifying the output weight file is in"
-     print *, "             NetCDF 64-bit offset format.  This option only works with NetCDF library"
-     print *, "             version 3.6 and above"
-     print *, "--netcdf4  - an optional argument specifying the output weight file is in"
-     print *, "             the NetCDF4 format. This option only works with NetCDF library"
-     print *, "             version 4.1 and above"
-     print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
-     print *, "             variable name that has all the topology information stored in its"
-     print *, "             attributes."
-     print *, "--dst_meshname  - required if the destination grid type is UGRID. It defines the"
-     print *, "             dummy variable name that has all the topology information stored in its"
-     print *, "             attributes."
-     print *, "--src_missingvalue  - an optional argument used when the src file type is GRIDSPEC"
-     print *, "             or UGRID. It defines the variable name whose 'missing_value' or"
-     print *, "             '_FillValue' attribute will be used to construct the mask for the source"
-     print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
-     print *, "--dst_missingvalue  - an optional argument used when the destination file type is"
-     print *, "             GRIDSPEC or UGRID. It defines the variable name whose 'missing_value' or"
-     print *, "             '_FillValue' attribute will be used to construct the mask for the destination"
-     print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
-     print *, "--src_coordinates  - an optional argument used when the source grid type is GRIDSPEC."
-     print *, "             It defines the longitude and latitude variable names separated by comma,"
-     print *, "             in case there are multiple coordinate variables defined in the file"
-     print *, "--dst_coordinates  - an optional argument used when the destination grid type is GRIDSPEC."
-     print *, "             It defines the longitude and latitude variable names separated by comma,"
-     print *, "             in case there are multiple coordinate variables defined in the file"
-     print *, "--user_areas  - an optional argument specifying that the conservation is adjusted to"
-     print *, "             hold for the user areas provided in the grid files.  If not specified,"
-     print *, "             then the conservation will hold for the ESMF calculated (great circle)"
-     print *, "             areas.  Whichever areas the conservation holds for are output to the"
-     print *, "             weight file."
-     print *, "--help     - Print this help message and exit."
-     print *, "--version  - Print ESMF version and license information and exit."
-     print *, ""
-     print *, "For questions, comments, or feature requests please send email to:"
-     print *, "esmf_support@list.woc.noaa.gov"
-     print *, ""
-     print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
-     print *, "Earth System Modeling Framework."
-     print *, ""
-end subroutine PrintUsage
-
-subroutine PrintVersionInfo()
-
-       print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
-       print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
-       print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
-       print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION
-       print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
-       print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
-       print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
-       print *, ""
-       print *, "Earth System Modeling Framework"
-       print *, ""
-       print *, "Copyright (c) 2002-2013 University Corporation for Atmospheric Research,"
-       print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
-       print *, "University of Michigan, National Centers for Environmental Prediction,"
-       print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
-       print *, "NASA Goddard Space Flight Center.  All rights reserved."
-       print *, ""
-       print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
-       print *, 'of this software and associated documentation files (the "Software"), to'
-       print *, "deal with the Software without restriction, including without limitation the"
-       print *, "rights to use, copy, modify, merge, publish, distribute, sublicense, and/or"
-       print *, "sell copies of the Software, and to permit persons to whom the Software is"
-       print *, "furnished to do so, subject to the following conditions:"
-       print *, "   1. Redistributions of source code must retain the above copyright notice,"
-       print *, "      this list of conditions and the following disclaimers."
-       print *, "   2. Redistributions in binary form must reproduce the above copyright"
-       print *, "      notice, this list of conditions and the following disclaimers in the"
-       print *, "      documentation and/or other materials provided with the distribution."
-       print *, "   3. Neither the names of the organizations developing this software, nor"
-       print *, "      its contributors may be used to endorse or promote products derived"
-       print *, "      from this Software without specific prior written permission."
-       print *, ""
-       print *, 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR'
-       print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
-       print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
-       print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
-       print *, "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
-       print *, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
-       print *, "WITH THE SOFTWARE."
-       print *, ""
-
-end subroutine PrintVersionInfo
-
+  end subroutine PrintVersionInfo
 
 end program ESMF_RegridWeightGenApp

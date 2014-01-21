@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -279,16 +279,23 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalCoords()"
-  double * MeshCXX::getLocalCoords(int *num_nodes, int *num_dims, int *rc) {
+  void MeshCXX::getLocalCoords(double *nodeCoord, int *num_nodes, int *num_dims, int *rc) {
     Mesh &mesh = *meshPointer;
 
-    // Get some info
-    int sdim=mesh.spatial_dim();
+    int sdim;
+
+    // Get coords pointer and spatial dimension depending on existence
+    // of original coordinates field.
+    MEField<> *coords = mesh.GetField("orig_coordinates");
+    if (coords) {
+      sdim = 2;
+    } else {
+      coords = mesh.GetCoordField();
+      sdim=mesh.spatial_dim();
+    }
     *num_nodes = mesh.num_nodes();
     *num_dims = sdim;
 
-    MEField<> *coords = mesh.GetCoordField();
-    
     // Make a map between data index and associated node pointer
     std::vector<std::pair<int,MeshObj *> > index_to_node;
     index_to_node.reserve(*num_nodes);
@@ -307,14 +314,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     // Sort by data index
     std::sort(index_to_node.begin(), index_to_node.end());
   
-    double *nodeCoord;
-  
-    nodeCoord = (double *) malloc (*num_nodes * sdim * sizeof(double));
-    if (nodeCoord == NULL) {
-      fprintf (stderr, "Could not allocate memory for nodeCoord\n");
-      exit(1);
-    }
-
     // Load coords in order of index
     int nodeCoordPos=0;
     for (UInt i = 0; i < index_to_node.size(); ++i) {
@@ -330,8 +329,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
 
     // Set return code 
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-
-    return nodeCoord;
 }
 
 // TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  

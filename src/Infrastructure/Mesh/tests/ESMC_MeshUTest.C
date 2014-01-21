@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research,
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -156,10 +156,18 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_owned_out;
   rc = ESMC_MeshGetOwnedNodeCount(mesh, &num_node_owned_out);
-  ESMC_Test((rc==ESMF_SUCCESS) && num_node==num_node_owned_out,
+  ESMC_Test((rc==ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshGetOwnedNodeCount_OutputCorrect");
+  strcpy(failMsg, "Returned wrong owned node count");
+  ESMC_Test((num_node==num_node_owned_out), 
+	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -177,10 +185,16 @@ int main(void){
   strcpy(name, "MeshGetCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *coords;
+  coords = (double *)malloc(num_node_owned_out*3*sizeof(double));
   int num_nodes, num_dims;
-  coords = ESMC_MeshGetCoord(mesh, &num_nodes, &num_dims, &rc);
+  ESMC_MeshGetCoord(mesh, coords, &num_nodes, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+  printf("Found num_nodes=%d, num_dims=%d\n", num_nodes, num_dims);
+  for (int i=0; i< num_nodes; i++) {
+    printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
+  }
+  free(coords);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -209,6 +223,37 @@ int main(void){
   rc = ESMC_MeshDestroy(&mesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create mesh object from SCRIP file
+  strcpy(name, "MeshCreateFromFile_SCRIP");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  mesh = ESMC_MeshCreateFromFile("data/ne4np4-pentagons.nc", ESMC_FILEFORMAT_SCRIP,
+				 NULL, NULL, "", NULL, "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_MeshDestroy(&mesh);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create mesh object from ESMFMESH file
+  strcpy(name, "MeshCreateFromFile_ESMFMESH");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  mesh = ESMC_MeshCreateFromFile("data/ne4np4-esmf.nc", ESMC_FILEFORMAT_ESMFMESH,
+				 NULL, NULL, "", NULL, "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_MeshDestroy(&mesh);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

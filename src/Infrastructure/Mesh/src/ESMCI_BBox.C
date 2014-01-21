@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -108,8 +108,10 @@ BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
       if (dist > diam) diam = dist;
     }
     
-    normexp *= diam;
+    // BOB   normexp *= diam;
     
+    normexp=2.0*diam;
+
     for (UInt n = 0; n < npe; n++) {
       for (UInt j = 0; j < dim; j++) {
         double lm;

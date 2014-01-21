@@ -600,7 +600,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(5)
+    character(ESMF_MAXSTR)            :: attrList(7)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -614,6 +614,9 @@ module NUOPC_Base
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     attrList(5) = "Updated" ! values: "true" or "false"
+    attrList(6) = "TransferOfferGeomObject" ! values: "cannot provide",
+                                            !   "can provide", "will provide"
+    attrList(7) = "TransferActionGeomObject" ! values: "provide", "accept"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
@@ -760,6 +763,22 @@ module NUOPC_Base
     ! set Updated
     call ESMF_AttributeSet(field, &
       name="Updated", value="false", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set TransferOfferGeomObject
+    call ESMF_AttributeSet(field, &
+      name="TransferOfferGeomObject", value="will provide", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set TransferActionGeomObject
+    call ESMF_AttributeSet(field, &
+      name="TransferActionGeomObject", value="provide", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1153,7 +1172,7 @@ module NUOPC_Base
 !
 !   The pointer argument {\tt cplList} must enter this method unassociated. On
 !   return, the deallocation of the potentially associated pointer becomes the
-!   user responsibility.
+!   caller's responsibility.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1576,11 +1595,19 @@ endif
     if (userRoutineFound) return ! bail out successfully
 
     ! getting down to here means that none of the attempts were successful
-    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-      msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)
+    if (present(sharedObj)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in the executable.", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    endif
       
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1690,7 +1717,7 @@ endif
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
 ! !INTERFACE:
   subroutine NUOPC_StateAdvertiseField(state, StandardName, Units, &
-    LongName, ShortName, name, rc)
+    LongName, ShortName, name, TransferOfferGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardName
@@ -1698,6 +1725,7 @@ endif
     character(*),     intent(in),  optional :: LongName
     character(*),     intent(in),  optional :: ShortName
     character(*),     intent(in),  optional :: name
+    character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Advertises a Field in a State. This call checks the provided
@@ -1731,6 +1759,11 @@ endif
 !     The actual name of the advertised Field by which it is accessed in the
 !     State object. NUOPC does not restrict the value of this variable.
 !     If omitted, the default is to use the value of the ShortName.
+!   \item[{[TransferOfferGeomObject]}]
+!     The transfer offer for the geom object (Grid, Mesh, LocStream, 
+!     XGrid) associated with the advertised Field. NUOPC controls the vocabulary
+!     of this attribute: "will provide", "can provide", "cannot provide".
+!     If omitted, the default is "will provide".
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1777,6 +1810,37 @@ endif
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
+    endif
+    if (present(TransferOfferGeomObject)) then
+      if (trim(TransferOfferGeomObject)=="will provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
+          value="will provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(TransferOfferGeomObject)=="can provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
+          value="can provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      elseif (trim(TransferOfferGeomObject)=="cannot provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
+          value="cannot provide", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="must provoide a valid string for TransferOfferGeomObject", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
     call ESMF_StateAdd(state, fieldList=(/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

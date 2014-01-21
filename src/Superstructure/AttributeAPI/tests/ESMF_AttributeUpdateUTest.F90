@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -340,7 +340,7 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttPackGet(field, convESMF, purpGen, attpack=attpack, rc=status)
+    call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
@@ -644,7 +644,7 @@ program ESMF_AttributeUpdateUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttPackGet(field, convention=convESMF, purpose=purpGen, &
+	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
     print *, "outVal = ", outVal 
@@ -655,7 +655,7 @@ program ESMF_AttributeUpdateUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttPackGet(field, convention=convESMF, purpose=purp2, &
+	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
         attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, attrList(1), value=outVal, &
       convention=convESMF, purpose=purp2, rc=rc)

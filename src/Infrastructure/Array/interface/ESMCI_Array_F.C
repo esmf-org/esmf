@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -111,7 +111,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 1
+#if 0
     printf("c_esmc_arraycreateallocate(): opt_vm=%p, actualFlag=%d\n", 
       opt_vm, actualFlag);
 #endif

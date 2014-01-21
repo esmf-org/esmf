@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -81,7 +81,7 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *f
 				      int *addUserArea, int *auapresent,
 				      int *addMask, int *ampresent, 
 				      char *varname, int *vnpresent,
-				      char *coordNames, int *cnpresent, int *rc, 
+				      char *coordNames[], int *cnpresent, int *rc, 
 				      ESMCI_FortranStrLenArg len_filename, 
 				      ESMCI_FortranStrLenArg len_varname, 
 				      ESMCI_FortranStrLenArg len_coordNames);
@@ -332,8 +332,8 @@ int setDefaultsLUA(int dimCount,
 //
 //EOP
 
-    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
-    //        filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d)\n", 
+    //        filename, fileTypeFlag);
 
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
@@ -341,22 +341,49 @@ int setDefaultsLUA(int dimCount,
 
 
     // handle the optional arguments
-    int ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
-    ispresent = isSphere != NULL;
-    acspresent = addCornerStagger != NULL;
-    auapresent = addUserArea != NULL;
-    ampresent = addMask != NULL;
+    int ispresent=0, acspresent=0, auapresent=0;
+    int ampresent=0, vnpresent=0, cnpresent=0;
+    int is_loc = 1;
+    if (isSphere != NULL) {
+      is_loc = *isSphere;
+      ispresent = 1;
+    }
+    int acs_loc = 0;
+    if (addCornerStagger != NULL) {
+      acs_loc = *addCornerStagger;
+      acspresent = 1;
+    }
+    int aua_loc = 0;
+    if (addUserArea != NULL) {
+      aua_loc = *addUserArea;
+      auapresent = 1;
+    }
+    int am_loc = 0;
+    if (addMask != NULL) {
+      am_loc = *addMask;
+      ampresent = 1;
+    }
     vnpresent = strlen(varname) > 0;
-    cnpresent = strlen(coordNames) > 0;
+
+    char *cn_loc[2];
+    int cn_len = 80;
+    cn_loc[0] = (char *) malloc(cn_len);
+    cn_loc[1] = (char *) malloc(cn_len);
+    if (strlen(coordNames) > 0) {
+      sscanf (coordNames, "%s %s", cn_loc[0], cn_loc[1]);
+      cnpresent = 1;
+    }
 
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
-				     isSphere, &ispresent, 
-				     addCornerStagger, &acspresent, addUserArea, &auapresent,
-				     addMask, &ampresent, varname, &vnpresent, 
-				     coordNames, &cnpresent, &localrc,
-				     strlen(filename), strlen(varname), strlen(coordNames));
+				     &is_loc, &ispresent, 
+				     &acs_loc, &acspresent, &aua_loc, &auapresent,
+				     &am_loc, &ampresent, varname, &vnpresent, 
+				     cn_loc, &cnpresent, &localrc,
+				     strlen(filename), strlen(varname), cn_len);
+    free(cn_loc[0]);
+    free(cn_loc[1]);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
 

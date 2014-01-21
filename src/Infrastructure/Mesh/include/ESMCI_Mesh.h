@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,6 +17,7 @@
 #include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMCI_CommReg.h>
 
+#include <map>
 #include <mpi.h>
 
 /**
@@ -103,7 +104,16 @@ void proxy_build_sym_comm_rel(UInt obj_type);
  */
 void resolve_cspec_delete_owners(UInt obj_type);
 
-private:
+  public: 
+// STUFF FOR SPLIT MESH
+// TODO: MOVE TO MESHCXX AND CALL THAT FROM F90
+ bool is_split;
+ int max_non_split_id;
+ IOField<NodalField> *node_coord;
+ std::map<UInt,UInt> split_to_orig_id;
+ std::map<UInt,double> split_id_to_frac;
+
+  private:
 void assign_new_ids();
 CommReg *sghost;
 bool committed;

@@ -79,6 +79,16 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=InitializeP4, phase=4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=InitializeP5, phase=5, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -99,7 +109,7 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(3)
+    character(len=NUOPC_PhaseMapStringLength) :: initPhases(5)
     character(ESMF_MAXSTR)                    :: name
 
     rc = ESMF_SUCCESS
@@ -109,9 +119,12 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    initPhases(1) = "IPDv01p1=1"
-    initPhases(2) = "IPDv01p2=2"
-    initPhases(3) = "IPDv01p3=3"
+    ! set IPDv03 as the default
+    initPhases(1) = "IPDv03p1=1"
+    initPhases(2) = "IPDv03p2=2"
+    initPhases(3) = "IPDv03p3=3"
+    initPhases(4) = "IPDv03p4=4"
+    initPhases(5) = "IPDv03p5=5"
     
     call ESMF_AttributeSet(cplcomp, &
       name="InitializePhaseMap", valueList=initPhases, &
@@ -156,7 +169,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
-    ! reconcile the States
+    ! reconcile the States including Attributes
     call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -212,6 +225,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
 
     rc = ESMF_SUCCESS
 
@@ -327,19 +341,118 @@ module NUOPC_Connector
         eField=exportFieldList(eMatch)
         
         ! set the connected Attribute on import Field
-        call ESMF_AttributeSet(iField, &
-          name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
+        call NUOPC_FieldAttributeSet(iField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
-        call ESMF_AttributeSet(eField, &
-          name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
+        call NUOPC_FieldAttributeSet(eField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
+        ! coordinate the transfer of geomobjects between components
+        call NUOPC_FieldAttributeGet(iField, name="TransferOfferGeomObject", &
+          value=iTransferOffer, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_FieldAttributeGet(eField, name="TransferOfferGeomObject", &
+          value=eTransferOffer, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(iTransferOffer)=="will provide") then
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> both sides must provide
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must provide, export side must accept
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> import side must provide, export side must accept
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        elseif (trim(iTransferOffer)=="can provide") then
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> import side must accept, export side must provide
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must provide, export side must accept
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> import side must provide, export side must accept
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else  ! iTransferOffer=="cannot provide"
+          if (trim(eTransferOffer)=="will provide") then
+            ! -> import side must accept, export side must provide
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (trim(eTransferOffer)=="can provide") then
+            ! -> import side must accept, export side must provide
+            call NUOPC_FieldAttributeSet(iField, &
+              name="TransferActionGeomObject", value="accept", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call NUOPC_FieldAttributeSet(eField, &
+              name="TransferActionGeomObject", value="provide", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else  ! eTransferOffer=="cannot provide"
+            ! -> neither side is able to provide -> error
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Neither side (import/export) able to provide geom object.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME)
+            return  ! bail out
+          endif
+        endif
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -363,6 +476,499 @@ module NUOPC_Connector
   !-----------------------------------------------------------------------------
 
   subroutine InitializeP3(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(ESMF_StateIntent_Flag)     :: isType, esType
+    integer                         :: isItemCount, esItemCount
+    character(ESMF_MAXSTR), pointer :: cplList(:)
+    integer                         :: cplListSize, i, j
+    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: importFieldList(:)
+    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: exportFieldList(:)
+    integer                         :: iMatch, eMatch
+    type(ESMF_Field)                :: iField, eField
+    type(ESMF_Field)                :: providerField, acceptorField
+    type(ESMF_GeomType_Flag)        :: geomtype
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_Mesh)                 :: mesh
+    type(ESMF_DistGrid)             :: providerDG, acceptorDG
+    type(ESMF_DistGrid)             :: providerDG_nodal, acceptorDG_nodal
+    type(ESMF_VM)                   :: vm
+    integer                         :: stat
+    type(type_InternalState)        :: is
+    integer                         :: localrc
+    logical                         :: existflag
+    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
+    logical                         :: verbose
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! determine verbosity
+    verbose = .false. ! initialize
+    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") &
+      verbose = .true.
+
+    ! prepare local pointer variables
+    nullify(importStdAttrNameList)
+    nullify(importFieldList)
+    nullify(exportStdAttrNameList)
+    nullify(exportFieldList)
+    
+    ! query Component for its internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! re-reconcile the States because they may have changed
+    ! (previous proxy objects are dropped before fresh reconcile)
+    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! access the state types
+    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
+      ! not ES -> IS ==> should indicate problem???
+    endif
+    
+    ! get the cplList Attribute
+    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(cplList(cplListSize), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal cplList() failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (cplListSize/=0) then
+      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! get the importState std lists
+    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
+      stdFieldList=importFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! get the exportState std lists
+    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
+      stdFieldList=exportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! prepare FieldBundles to store src and dst Fields
+    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    do i=1, cplListSize
+!print *, "cplList(",i,")=", trim(cplList(i))
+
+      iMatch = 0  ! reset
+      do j=1, size(importStdAttrNameList)
+        if (importStdAttrNameList(j) == cplList(i)) then
+          iMatch = j
+          exit
+        endif
+      enddo
+      
+      eMatch = 0  ! reset
+      do j=1, size(exportStdAttrNameList)
+        if (exportStdAttrNameList(j) == cplList(i)) then
+          ! found a matching consumer side candidate
+          ! -> see if that candidate is already targeted
+          eField=exportFieldList(j)
+          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            value=consumerConnection, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(consumerConnection)/="connected") then
+            ! the consumer side was not yet targeted
+            eMatch = j
+            exit
+          endif
+        endif
+      enddo
+      
+      if (iMatch>0 .and. eMatch>0) then
+        ! there are matching Fields in the import and export States
+        iField=importFieldList(iMatch)
+        eField=exportFieldList(eMatch)
+        
+        ! check if TransferAction of one side is "accept"
+        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+          value=iTransferAction, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+          value=eTransferAction, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          
+        if ((trim(iTransferAction)=="provide") &
+          .and.(trim(eTransferAction)=="accept")) then
+          providerField = iField
+          acceptorField = eField
+        elseif ((trim(eTransferAction)=="provide") &
+          .and.(trim(iTransferAction)=="accept")) then
+          providerField = eField
+          acceptorField = iField
+        else  ! not a situation that needs handling here
+          cycle ! continue with the next i
+        endif
+        
+        if (verbose) then
+          call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+
+        ! transfer the underlying DistGrid from provider to acceptor
+        call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (geomtype==ESMF_GEOMTYPE_GRID) then
+          call ESMF_FieldGet(providerField, grid=grid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridGet(grid, distgrid=providerDG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          grid = ESMF_GridCreate(acceptorDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+          call ESMF_FieldGet(providerField, mesh=mesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_MeshGet(mesh, elementDistgrid=providerDG, &
+            nodalDistgrid=providerDG_nodal, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          mesh = ESMF_MeshCreate(acceptorDG, acceptorDG_nodal, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, mesh=mesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Provided GeomType must be Grid or Mesh.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+
+      else
+        !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
+      endif
+
+    enddo
+
+    deallocate(cplList)
+
+    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(exportFieldList)) deallocate(exportFieldList)
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP4(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(ESMF_StateIntent_Flag)     :: isType, esType
+    integer                         :: isItemCount, esItemCount
+    character(ESMF_MAXSTR), pointer :: cplList(:)
+    integer                         :: cplListSize, i, j
+    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: importFieldList(:)
+    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: exportFieldList(:)
+    integer                         :: iMatch, eMatch
+    type(ESMF_Field)                :: iField, eField
+    type(ESMF_Field)                :: providerField, acceptorField
+    type(ESMF_GeomType_Flag)        :: geomtype
+    type(ESMF_Grid)                 :: providerGrid, acceptorGrid
+    type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
+    type(ESMF_DistGrid)             :: distgrid
+    type(ESMF_VM)                   :: vm
+    integer                         :: stat
+    type(type_InternalState)        :: is
+    integer                         :: localrc
+    logical                         :: existflag
+    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
+    logical                         :: verbose
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! determine verbosity
+    verbose = .false. ! initialize
+    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") &
+      verbose = .true.
+    
+    ! prepare local pointer variables
+    nullify(importStdAttrNameList)
+    nullify(importFieldList)
+    nullify(exportStdAttrNameList)
+    nullify(exportFieldList)
+    
+    ! query Component for its internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! re-reconcile the States because they may have changed
+    ! (previous proxy objects are dropped before fresh reconcile)
+    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! access the state types
+    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
+      ! not ES -> IS ==> should indicate problem???
+    endif
+    
+    ! get the cplList Attribute
+    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(cplList(cplListSize), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal cplList() failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (cplListSize/=0) then
+      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! get the importState std lists
+    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
+      stdFieldList=importFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! get the exportState std lists
+    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
+      stdFieldList=exportFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! prepare FieldBundles to store src and dst Fields
+    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    do i=1, cplListSize
+!print *, "cplList(",i,")=", trim(cplList(i))
+
+      iMatch = 0  ! reset
+      do j=1, size(importStdAttrNameList)
+        if (importStdAttrNameList(j) == cplList(i)) then
+          iMatch = j
+          exit
+        endif
+      enddo
+      
+      eMatch = 0  ! reset
+      do j=1, size(exportStdAttrNameList)
+        if (exportStdAttrNameList(j) == cplList(i)) then
+          ! found a matching consumer side candidate
+          ! -> see if that candidate is already targeted
+          eField=exportFieldList(j)
+          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            value=consumerConnection, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (trim(consumerConnection)/="connected") then
+            ! the consumer side was not yet targeted
+            eMatch = j
+            exit
+          endif
+        endif
+      enddo
+      
+      if (iMatch>0 .and. eMatch>0) then
+        ! there are matching Fields in the import and export States
+        iField=importFieldList(iMatch)
+        eField=exportFieldList(eMatch)
+
+        ! check if TransferAction of one side is "accept"
+        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+          value=iTransferAction, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+          value=eTransferAction, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          
+        if ((trim(iTransferAction)=="provide") &
+          .and.(trim(eTransferAction)=="accept")) then
+          providerField = iField
+          acceptorField = eField
+        elseif ((trim(eTransferAction)=="provide") &
+          .and.(trim(iTransferAction)=="accept")) then
+          providerField = eField
+          acceptorField = iField
+        else  ! not a situation that needs handling here
+          cycle ! continue with the next i
+        endif
+
+        if (verbose) then
+          call ESMF_LogWrite(trim(name)//": transferring the full Grid", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+
+        ! transfer the underlying DistGrid from provider to acceptor
+        call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (geomtype==ESMF_GEOMTYPE_GRID) then
+          call ESMF_FieldGet(providerField, grid=providerGrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridGet(acceptorGrid, distgrid=distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorGrid = ESMF_GridCreate(providerGrid, distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, grid=acceptorGrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+          call ESMF_FieldGet(providerField, mesh=providerMesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_MeshGet(acceptorMesh, elementDistgrid=distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorMesh = ESMF_MeshCreate(providerMesh, distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Provided GeomType must be Grid or Mesh.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+          
+      else
+        !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
+      endif
+
+    enddo
+
+    deallocate(cplList)
+
+    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importFieldList)) deallocate(importFieldList)
+    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(exportFieldList)) deallocate(exportFieldList)
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP5(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2013, University Corporation for Atmospheric Research, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,6 +35,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 //------------------------------------------------------------------------------
 //BOP
@@ -63,12 +64,15 @@ namespace ESMCI {
 
 
 // prototypes from below
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
 void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
 void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
 void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
-
+void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
+                                      int *iientries);
+void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
+                                      int *iientries, double *factors);
 
 // external C functions
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -80,16 +84,18 @@ extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 
 
 extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
-                   Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                   Mesh **meshdstpp, ESMCI::Array **arraydstpp,
-		   int *regridMethod, 
-                   int *regridPoleType, int *regridPoleNPnts,  
-                   int *regridScheme, int *unmappedaction, int *_ignoreDegenerate,
-                   int *srcTermProcessing, int *pipelineDepth, 
-                   ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                   int *nentries, ESMCI::TempWeights **tweights,
-                   int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                   int*rc) {
+                                            Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
+                                            Mesh **meshdstpp, ESMCI::Array **arraydstpp,
+                                            int *regridMethod, 
+                                            int *map_type,
+                                            int *regridPoleType, int *regridPoleNPnts,  
+                                            int *regridScheme, 
+                                            int *unmappedaction, int *_ignoreDegenerate,
+                                            int *srcTermProcessing, int *pipelineDepth, 
+                                            ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                                            int *nentries, ESMCI::TempWeights **tweights,
+                                            int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                                            int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
@@ -195,15 +201,15 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
+      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod, 
                         regridPoleType, regridPoleNPnts, 
-                        regridScheme, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod,
+      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod, 
                         regridPoleType, regridPoleNPnts, 
-                        regridScheme, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
 
@@ -228,11 +234,14 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // gathered onto the same proc.
     if (*unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
+        int missing_id;
+        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts, &missing_id)) {
           int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- There exist destination cells which don't overlap with any "
-            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
+          char msg[1024];
+          sprintf(msg,"- There exist destination cells (e.g. id=%d) which don't overlap with any "
+            "source cell",missing_id);
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
+             ESMC_CONTEXT, &localrc)) throw localrc;
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
@@ -245,16 +254,21 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         }
 #endif
       } else { // bilinear, patch, ...
-        if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
+        int missing_id;
+        if (!all_mesh_node_ids_in_wmat(dstmesh, wts, &missing_id)) {
           int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- There exist destination points which can't be mapped to any "
-            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
+          char msg[1024];
+          sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
+            "source cell",missing_id);
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
+             ESMC_CONTEXT, &localrc)) throw localrc;
         }
       }
     }
 
-    // We have the weights, now set up the sparsemm object
+
+
+    /////// We have the weights, now set up the sparsemm object /////
 
     // Firstly, the index list
     std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
@@ -285,8 +299,21 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-          // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
-          
+
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
+          printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+#endif          
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_SID
+          if (wc.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_SID) {
+             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          }
+#endif
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_DID
+          if (w.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_DID) {
+             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          }
+#endif
+
           i++;
         } // for j
       } // for wi
@@ -317,14 +344,12 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     }
 
 
+    ///// If conservative, translate split element weights to non-split //////
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if (srcmesh.is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
+      if (dstmesh.is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
+    }
 
-/*
-Par::Out() << "Matrix entries" << std::endl;
-for (UInt n = 0; n < num_entries; ++n) {
-  Par::Out() << std::setw(5) << iientries[2*n] << std::setw(5) << iientries[2*n+1] << std::setw(15) << factors[n] << std::endl;
-}
-wts.Print(Par::Out());
-*/
 
     // Build the ArraySMM
     if (*has_rh != 0) {
@@ -704,7 +729,7 @@ void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *miss
 }
 
  
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("mask");
@@ -742,16 +767,21 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
     if (wi==we) { 
-      // printf("1: missing node_id=%d \n",node_id);
+      *missing_id=node_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
 
     // If we're not equal to the node id then we must have passed it
     if (wi->first.id != node_id) { 
-      //      printf("2: missing node_id=%d \n",node_id);
+      *missing_id=node_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
-
   }
 
   // Still here, so must have found them all
@@ -759,10 +789,7 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
 }
 
-
-
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
-
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("elem_mask");
@@ -799,11 +826,22 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
-    if (wi==we) return false;
+    if (wi==we) {
+      *missing_id=elem_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      return false;
+    }
 
     // If we're not equal to the elem id then we must have passed it
-    if (wi->first.id != elem_id) return false;
-
+    if (wi->first.id != elem_id) {
+      *missing_id=elem_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      return false;
+    }
   }
 
   // Still here, so must have found them all
@@ -1173,10 +1211,122 @@ void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *co
 
 }
 
-
-
-
-
 #endif
+
+void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
+                                      int *iientries) {
+
+
+  // Get a list of split ids that we own
+  UInt num_gids=0;
+  UInt *gids_split=NULL;
+  UInt *gids_orig=NULL;
+
+  // Get number of split points
+  num_gids=srcmesh.split_to_orig_id.size();
+
+  // Allocate space
+  if (num_gids>0) {
+    gids_split= new UInt[num_gids];
+    gids_orig= new UInt[num_gids];
+    
+    // Loop and get split-orig id pairs
+    std::map<UInt,UInt>::iterator mi=srcmesh.split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=srcmesh.split_to_orig_id.end();
+    
+    int pos=0;
+    for ( ; mi != me; mi++) {
+      gids_split[pos]=mi->first;
+      gids_orig[pos]=mi->second;
+      pos++;
+    }
+    
+    //    for (int i=0; i<num_gids; i++) {
+    //  printf("%d# s=%d o=%d\n",Par::Rank(),gids_split[i],gids_orig[i]);
+    //}
+  }
+  
+  // Put into DDir
+  DDir<> id_map_dir;
+  id_map_dir.Create(num_gids,gids_split,gids_orig);
+
+  // Clean up 
+  if (num_gids>0) {
+    if (gids_split!= NULL) delete [] gids_split;
+    if (gids_orig != NULL) delete [] gids_orig;
+  }
+
+
+  // Gather list of spit src ids
+  //// TODO: Maybe use a std::set instead to reduce the amount of communication??
+  std::vector<UInt> src_split_gids;
+  std::vector<int> src_split_gids_idx;
+
+  // Loop through weights modifying split dst elements
+  for (int i=0; i<num_entries; i++) {
+
+      // Get src id 
+     UInt src_id=iientries[2*i];
+
+     // If a split id then add to list
+     if (src_id > srcmesh.max_non_split_id) {
+       src_split_gids.push_back(src_id);
+       src_split_gids_idx.push_back(2*i);
+     }      
+
+  }
+
+  // Do remote lookup to translate
+  UInt num_src_split_gids=src_split_gids.size();
+  UInt *src_split_gids_proc=NULL;
+  UInt *src_split_gids_orig=NULL;
+
+  if (num_src_split_gids > 0) {
+    src_split_gids_proc = new UInt[num_src_split_gids];
+    src_split_gids_orig = new UInt[num_src_split_gids];    
+  }
+  
+  // Get mapping of split ids to original ids
+  id_map_dir.RemoteGID(num_src_split_gids, &src_split_gids[0], src_split_gids_proc, src_split_gids_orig);
+
+  // Loop setting new ids
+  for (int i=0; i<num_src_split_gids; i++) {
+    iientries[src_split_gids_idx[i]]=src_split_gids_orig[i];
+  }
+  
+  // Clean up
+  if (num_src_split_gids > 0) {
+    if (src_split_gids_proc != NULL) delete [] src_split_gids_proc;
+    if (src_split_gids_orig != NULL) delete [] src_split_gids_orig;
+  }
+}
+
+
+
+void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
+                                      int *iientries, double *factors) {
+
+  // Loop through weights modifying split dst elements
+  for (int i=0; i<num_entries; i++) {
+    int dst_id=iientries[2*i+1];
+
+    // See if the element is part of a larger polygon
+    std::map<UInt,double>::iterator mi =  dstmesh.split_id_to_frac.find(dst_id);
+
+    // It is part of a larger polygon, so process
+    if (mi != dstmesh.split_id_to_frac.end()) {
+
+      // Modify weight by fraction of orig polygon
+      factors[i] *= mi->second;        
+
+      // See if the id needs to be translated, if so then translate
+      std::map<UInt,UInt>::iterator soi =  dstmesh.split_to_orig_id.find(dst_id);
+      if (soi != dstmesh.split_to_orig_id.end()) {
+        iientries[2*i+1]=soi->second;
+      }
+    }
+  }
+
+}
 
 #undef  ESMC_METHOD

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1105,7 +1105,7 @@ logical                       :: checkpoint = .FALSE.
   !         files, but in the order indicated by the problem descriptor strings
   ! decompOrder - filled with distribution sizes as specified by the dist
   !           specifier files, but in the order indicated by the PDStrings
-  ! decompType - set to either ESMF_DECOMP_DEFAULT or ESMF_DECOMP_CYCLIC
+  ! decompType - set to either ESMF_DECOMP_BALANCED or ESMF_DECOMP_CYCLIC
   !           depending on how its indicated in the problem descriptor string
   !-----------------------------------------------------------------------------
   nconnect = 0           ! assume number of connections is zero
@@ -1128,12 +1128,12 @@ logical                       :: checkpoint = .FALSE.
   ! pad the distribution with ones until its the same rank as the grid
   do k=1,Memory%DistRank
     decompOrder(k) = DistRecord%dsize( Memory%DistOrder(k) )
-    decompType(k)  = ESMF_DECOMP_DEFAULT
+    decompType(k)  = ESMF_DECOMP_BALANCED
   enddo   ! k
 
   do k=Memory%DistRank+1, Memory%GridRank
     decompOrder(k) = 1
-    decompType(k)  = ESMF_DECOMP_DEFAULT
+    decompType(k)  = ESMF_DECOMP_BALANCED
   enddo   ! k
 
   do k=1, Memory%DistRank

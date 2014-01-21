@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2013, University Corporation for Atmospheric Research,
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -360,7 +360,8 @@
 ! Create an XGrid based on the user supplied regridding parameters:
 !EOE
 !BOC
-    xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, area=xgrid_area, &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, &
+	sideBGrid=sideB, area=xgrid_area, &
         centroid=centroid, sparseMatA2X=sparseMatA2X, &
         sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
