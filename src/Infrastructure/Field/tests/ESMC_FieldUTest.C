@@ -284,6 +284,14 @@ int main(void){
   field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, "must have a name", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Field object from grid and arrayspec with null optional arguments");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
   
   free(nodeId);
   free(nodeCoord);
