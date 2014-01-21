@@ -51,9 +51,11 @@ or equal to the spatial dimension, but also must be either 2 or 3. This means th
 be either 2D elements in 2D space, 3D elements in 3D space, or a manifold constructed of 2D 
 elements embedded in 3D space. 
 
-ESMF currently supports two types of elements for each Mesh parametric dimension. For a 
-parametric dimension of 2, the supported element types are triangles or quadrilaterals. For 
-a parametric dimension of 3, the supported element types are tetrahedrons
+ESMF supports a range of elements for each Mesh parametric dimension. For a 
+parametric dimension of 2, the native supported element types are triangles and quadrilaterals.
+In addition to these, ESMF supports 2D polygons with any number of sides. Internally these
+are represented as sets of triangles, but to the user should behave like any other element. 
+For a parametric dimension of 3, the supported element types are tetrahedrons
 and hexahedrons. See Section~\ref{const:meshelemtype} for diagrams of these. The Mesh 
 supports any combination of element types within a particular dimension, but types from 
 different dimensions may not be mixed.  For example, a Mesh cannot be constructed of both 

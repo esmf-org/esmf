@@ -26,7 +26,12 @@ following are the valid Mesh element types for each valid Mesh parametric dimens
 
 \end{verbatim}
 
-For a Mesh with parametric dimension of 2 the valid element types (illustrated above) are:
+For a Mesh with parametric dimension of 2 ESMF supports two native element types (illustrated above),
+but also supports polygons with more sides. Internally these polygons are represented as a set of 
+triangles, but to the user should behave like other elements. 
+To specify the non-native polygons in the {\tt elementType} argument use the number of corners 
+of the polygon (e.g. for a pentagon use 5). The connectivity for a polygon should be specified in counter-clockwise order.
+The following table summarizes this information:
 
 \smallskip
 
@@ -36,6 +41,7 @@ Element Type &  Number of Nodes  & Description \\
 \hline
 ESMF\_MESHELEMTYPE\_TRI  & 3 & A triangle \\
 ESMF\_MESHELEMTYPE\_QUAD & 4 & A quadrilateral (e.g. a rectangle) \\
+ N & N & An N-gon  (e.g. if N=5 a pentagon) \\
 \hline
 \end{tabular}
 

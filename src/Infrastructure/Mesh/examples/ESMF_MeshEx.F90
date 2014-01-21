@@ -128,13 +128,18 @@ program ESMF_MeshEx
 ! a unique (across all PETs) integer attached to the particular element. The element type describes the topology of the element 
 ! (e.g. a triangle vs. a quadrilateral). The range of choices for the topology of the elements in a Mesh are restricted by the 
 ! Mesh's parametric dimension (e.g. a Mesh can't contain a 2D element like a triangle, when its parametric dimension is 3D), but it can contain
-! any combination of elements appropriate to its dimension. The element connectivity indicates which nodes are to be connected together to
+! any combination of elements appropriate to its dimension. In particular, in 2D ESMF supports two native element types triangle and quadrilateral, but
+! also provides support for polygons with any number of sides. These polygons are represented internally as sets of triangles, but to the user
+! should behave like other elements. To specify a polygon with more than four sides, the element type should be set to the number of corners of 
+! the polygon (e.g. element type=6 for a hexagon). 
+! The element connectivity indicates which nodes are to be connected together to
 ! form the element. The number of nodes connected together for each element is implied by the elements topology type ({\tt elementTypes}). 
 ! It is IMPORTANT to note, that the entries in this list are NOT the global ids of the nodes, but are indices into the PET local lists of
 ! node info used in the Mesh Create. In other words, the element connectivity isn't specified in terms of the global list of nodes, but instead
 ! is specified in terms of the locally described node info. One other important point about connectivities is that the order of the nodes in the 
 ! connectivity list of an element is important. Please see Section~\ref{const:meshelemtype} for diagrams illustrating the correct order of
-! nodes in an element. 
+! nodes in an element. In general, when specifying an element with parametric dimension 2, the nodes should be given in counter-clockwise order 
+! around the element. 
 !
 ! \begin{sloppypar}
 ! Mesh creation may either be performed as a one step process using the full {\tt ESMF\_MeshCreate()} call, or may be done in three steps. The
