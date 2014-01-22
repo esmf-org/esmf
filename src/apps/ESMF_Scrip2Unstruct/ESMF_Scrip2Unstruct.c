@@ -329,7 +329,7 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
 {
   int ncid2;
   int vertdimid, celldimid, vpcdimid,vdimid;
-  int vertexid, edgeid, ccoordid, cellid, caid, attid, cmid;
+  int vertexid, edgeid, ccoordid, cellid, caid, cmid;
   time_t tloc;
   int dims[2];
   int status, fillvalue;
@@ -603,11 +603,9 @@ int main(int argc, char** argv)
   int gsdimid, gcdimid, grdimid;
   size_t  gsdim, gcdim, grdim;
   int areaid, ctlatid, ctlonid, colatid, colonid, maskid;
-  int nodeXId, nodeYId, faceXId, faceYId, facenodeId;
   int status;
   int vertexid, cellid, edgeid, ccoordid, caid, cmid;
-  int vertdimid, vpcdimid, vdimid, celldimid, varid;
-  int dims[2];
+  int varid;
   double *cornerlats, *cornerlons, *nodelatlon;
   double *inbuf, *inbuf1;
   int *inbuf2;
@@ -616,7 +614,7 @@ int main(int argc, char** argv)
   int numedges, *next;
   char *totalneighbors;
   unsigned char *edges;
-  int i,i1, j, k, totalnodes, goodnodes, count, fillvalue;
+  int i,i1, j, k, totalnodes, goodnodes, count;
   int *globalnodes;
   FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
@@ -625,17 +623,16 @@ int main(int argc, char** argv)
   char *c_infile;
   char *c_outfile;
   char units[80];
-  int isRadian = 0;
   size_t len;
   double rad2deg = 180.0/M_PI;
-  int dualflag, rc;
+  int dualflag;
   int ind, startind;
   double minlat, maxlat, startlat, endlat, part;
   int nprocs, myrank;
   int *mycells;
-  int alltotal, mypart, left, offset, mystart, ind1, mystartelement;
+  int alltotal, mypart, left, offset, mystart, mystartelement;
   size_t start1[1], count1[1], start2[2], count2[2];
-  int var, doesmf = 1;
+  int doesmf = 1;
   double *coord1d;
 
   MPI_Init(&argc, &argv);
@@ -655,7 +652,6 @@ int main(int argc, char** argv)
   if (c_infile == NULL) {
     if (myrank == 0)
       fprintf(stderr, "SCRIP file name not valid \n");
-    rc = -1;
     MPI_Finalize();
     exit(1); // bail out
   }
@@ -664,7 +660,6 @@ int main(int argc, char** argv)
   if (c_outfile == NULL) {
     if (myrank == 0) 
       fprintf(stderr, "output file name from converter not valid \n");
-    rc = -1;
     MPI_Finalize();
     exit(1); // bail out
   }
@@ -706,7 +701,6 @@ int main(int argc, char** argv)
   // comment out the following check -- support the SCRIP file with grid_rank==1 and 2
   //  if (grdim > 1) {
   //  fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
-  //  rc = -1;
   //  MPI_Finalize();
   //  exit(1); // bail out
   //}
@@ -723,7 +717,6 @@ int main(int argc, char** argv)
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
     fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
-    rc = -1;
     MPI_Finalize();
     exit(1); // bail out
   }
@@ -761,14 +754,12 @@ int main(int argc, char** argv)
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
-    rc = -1;
     MPI_Finalize();
     exit(1);
   }
   minlat=180;
   maxlat=-180;
   if (!strncmp(units, "radians", 7)) {
-    isRadian=1;
     for (i = 0; i < gcdim*gsdim; i++) {
       cornerlats[i] *= rad2deg;
       cornerlons[i] *= rad2deg;
@@ -1046,7 +1037,6 @@ int main(int argc, char** argv)
 	  }
 	  if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
 	    fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-	    rc = -1;
 	    MPI_Finalize();
 	    exit(1);
 	  }
@@ -1176,7 +1166,6 @@ int main(int argc, char** argv)
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-    rc = -1;
     MPI_Finalize();
     exit(1);
   }
@@ -1212,7 +1201,6 @@ int main(int argc, char** argv)
 	dualcellcounts[i1]++;
 	if (dualcellcounts[i1] > maxconnection) {
 	  printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	  rc = -1;
 	  MPI_Finalize();
 	  exit(1); // bail out
 	}
@@ -1382,7 +1370,6 @@ int main(int argc, char** argv)
   free(dualcells);
   nc_close(ncid1);
   }   
-  rc = 0;
   printf("Done converting %s\n", c_infile);
   MPI_Finalize();
 #else
