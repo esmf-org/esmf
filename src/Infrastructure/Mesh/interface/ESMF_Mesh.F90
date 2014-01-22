@@ -1464,7 +1464,7 @@ end function ESMF_MeshCreateFromMeshes
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
-		 nodalDistGrid, elementDistGrid, rc)
+		 nodalDistgrid, elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1599,24 +1599,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return
     endif
 
-    if (present(elementDistGrid) .and. present(nodalDistGrid)) then
+    if (present(elementDistgrid) .and. present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistGrid, &
-       			       elementDistgrid=elementDistGrid, rc=localrc)
+       			       nodalDistgrid=nodalDistgrid, &
+       			       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 	call ESMF_MeshDestroy(myMesh)
-    elseif (present(elementDistGrid)) then
+    elseif (present(elementDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       elementDistgrid=elementDistGrid, rc=localrc)
+       			       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 	call ESMF_MeshDestroy(myMesh)
-    elseif (present(nodalDistGrid)) then
+    elseif (present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistGrid, rc=localrc)
+       			       nodalDistgrid=nodalDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3468,7 +3468,7 @@ end subroutine ESMF_DistGridGetIds
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistGrid, &
+    function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistgrid, &
       elementDistgrid, rc)
 !
 !
@@ -3577,7 +3577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! First fill in information not requiring redist
 
           ! Set Distgrids
-          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistgrid
           ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
 
           ! Set number of owned things
