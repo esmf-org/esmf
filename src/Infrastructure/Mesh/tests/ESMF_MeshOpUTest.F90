@@ -94,10 +94,10 @@ contains
     !  ESMF_ERR_PASSTHRU, &
     !  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_MeshDestroy(mesh, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    !call ESMF_MeshDestroy(mesh, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !  ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine test3
 
