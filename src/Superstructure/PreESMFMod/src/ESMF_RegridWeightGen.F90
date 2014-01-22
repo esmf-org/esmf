@@ -2787,8 +2787,6 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
    ! Sort the dstInd first
    call QSort(inListCount, inFactorIndexList, InFactorList)
 
-   write(*,*) "COMPACTING MATRIX"
-
    ! Put source indices for each run of destination
    ! indices in sorted order to allow weights with 
    ! the same indices to be merged below. Note
