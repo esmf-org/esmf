@@ -295,7 +295,8 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # get the destination mask
     if dst_is_mesh:
-        dst_mask = 1
+        dst_mask = np.copy(dst_coords)
+        dst_mask[...] = 1
     else:
         #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
         dstgrid.link_item_buffer(ESMF.GridItem.MASK, ESMF.StaggerLoc.CENTER)
