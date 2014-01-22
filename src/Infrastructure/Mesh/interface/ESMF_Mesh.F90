@@ -1478,8 +1478,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),           intent(in),  optional :: meshname
     type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
     character(len=*),           intent(in),  optional :: varname
-    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -3468,7 +3468,8 @@ end subroutine ESMF_DistGridGetIds
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateRedist(mesh, nodalDistGrid, elementDistgrid, rc)
+    function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistGrid, &
+      elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -3476,6 +3477,7 @@ end subroutine ESMF_DistGridGetIds
 
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     integer,             intent(out), optional :: rc
