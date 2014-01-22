@@ -1464,7 +1464,7 @@ end function ESMF_MeshCreateFromMeshes
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
-		 elementDistGrid, nodalDistGrid, rc)
+		 nodalDistGrid, elementDistGrid, rc)
 !
 !
 ! !RETURN VALUE:

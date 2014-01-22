@@ -183,7 +183,8 @@ module user_coupler
     ! only creates a formal Mesh for the purpose of being a container for
     ! the two DistGrid objects, while also identifying itself as a geom object
     ! of type Mesh. It is not a fully usable Mehs!
-    dstMesh = ESMF_MeshCreate(dstElementDistGrid, dstNodeDistGrid, rc=rc)
+    dstMesh = ESMF_MeshCreate(dstElementDistGrid, &
+      nodalDistgrid=dstNodeDistGrid, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) return ! bail out

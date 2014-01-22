@@ -697,7 +697,8 @@ module NUOPC_Connector
           acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          mesh = ESMF_MeshCreate(acceptorDG, acceptorDG_nodal, rc=rc)
+          mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, mesh=mesh, rc=rc)
@@ -938,7 +939,8 @@ module NUOPC_Connector
           call ESMF_MeshGet(acceptorMesh, elementDistgrid=distgrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorMesh = ESMF_MeshCreate(providerMesh, distgrid, rc=rc)
+          acceptorMesh = ESMF_MeshCreate(providerMesh, &
+            elementDistgrid=distgrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
