@@ -337,6 +337,7 @@ Named constants
 Named constants                                  Description
 ===============================================  ==============================
 :download:`CoordSys <CoordSys.rst>`              Specify the coordinate system of a Grid
+:download:`DecompFlag <DecompFlag.rst>`              Specify how DistGrid elements are decomposed over DEs
 :download:`FileFormat <FileFormat.rst>`          Specify the format of a data file
 :download:`GridItem <GridItem.rst>`              Specify a mask or area item on a Grid
 :download:`LogKind <LogKind.rst>`                Specify how much logging should be done
@@ -347,6 +348,7 @@ Named constants                                  Description
 :download:`StaggerLoc <StaggerLoc.rst>`          Specify the position for data in a Grid cell     
 :download:`TypeKind <TypeKind.rst>`              Specify the type and kind of data
 :download:`UnmappedAction <UnmappedAction.rst>`  Specify which action to take with respect to unmapped destination points
+:download:`PoleMethod <PoleMethod.rst>`              Specify  which type of artificial pole to construct on the source Grid for regridding
 ===============================================  ==============================
 
 
