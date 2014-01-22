@@ -45,6 +45,7 @@ class Mesh(object):
                     3D Cartesian = [2,3] \n
                     3D Spherical = [?,?] \n
             1 step creation: \n
+                filename: the name of NetCDF file containing the Mesh. \n
                 filetype: the input file type of the Mesh. \n
                     Argument values are: \n
                         FileFormat.SCRIP \n

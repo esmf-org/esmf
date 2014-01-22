@@ -66,6 +66,27 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+            fname: the name of NetCDF file containing the Grid. \n
+            fileTypeFlag: the input file type of the Grid. \n
+                Argument values are: \n
+                    FileFormat.SCRIP \n
+                    FileFormat.GRIDSPEC \n
+            isSphere: Set to True for a spherical grid, or False for regional. Defaults to True. \n
+            addCornerStagger: Set to True to use the information in the grid file to add the 
+                              corner stagger to the Grid. The coordinates for the corner stagger
+                              are required for conservative regridding. If not specified, 
+                              defaults to False. \n
+            addUserArea: Set to True to read in the cell area from the Grid file; otherwise, ESMF 
+                         will calculate it. \n
+            addMask: Set to True to generate the mask using the missing_value attribute defined 
+                     in 'varname'  \n
+            varname: If addMask is True, provide a variable name stored in the grid file and
+                     the mask will be generated using the missing value of the data value of
+                     this variable.  The first two dimensions of the variable has to be the
+                     longitude and the latitude dimension and the mask is derived from the
+                     first 2D values of this variable even if this data is 3D, or 4D array. \n
+            coordNames:  A two-element array containing the longitude and latitude variable names in a
+                         GRIDSPEC file if there are multiple coordinates defined in the file. \n
         Returns: \n
             Grid \n
         """
