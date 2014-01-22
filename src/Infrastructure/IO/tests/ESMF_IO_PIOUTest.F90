@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_PIOUTest
+program ESMF_IO_PIOUTest
 
 !------------------------------------------------------------------------------
 
@@ -745,4 +745,4 @@ program ESMF_PIOUTest
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
 
-  end program ESMF_PIOUTest
+  end program ESMF_IO_PIOUTest
