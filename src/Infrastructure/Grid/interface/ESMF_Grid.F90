@@ -6364,7 +6364,7 @@ end function ESMF_GridCreateFrmScrip
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[addMask]}]
@@ -12147,7 +12147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
