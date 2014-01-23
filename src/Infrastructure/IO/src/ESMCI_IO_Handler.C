@@ -278,6 +278,17 @@ int IO_Handler::destroy (
       ESMC_CONTEXT, &rc);
     return rc;
   }
+#ifdef ESMF_PIO
+    // PIO
+    PRINTPOS;
+    PIO_Handler::finalize(&localrc);
+    PRINTMSG("after finalize, localrc = " << localrc);
+    if (ESMF_SUCCESS != localrc) {
+      char errmsg[256];
+      sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+    }
+#endif // ESMF_PIO
 
   // return successfully
   rc = ESMF_SUCCESS;
