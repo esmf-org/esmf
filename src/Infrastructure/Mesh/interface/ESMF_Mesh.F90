@@ -175,6 +175,7 @@ module ESMF_MeshMod
   public ESMF_MeshTurnOffCellMask
   public ESMF_MeshTurnOnNodeMask
   public ESMF_MeshTurnOffNodeMask
+  public ESMF_MeshCreateDual  ! not a public interface for now
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -466,7 +467,7 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, &
-                 elementConn, elementMask, elementArea, rc)
+                 elementConn, elementMask, elementArea, elementCoords, rc)
 
 !
 ! !ARGUMENTS:
@@ -476,6 +477,7 @@ contains
     integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
+    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:)
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -531,6 +533,14 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!   \item[{[elementCoords]}] 
+!          An array containing the physical coordinates of the elements to be created on this
+!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+!          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+!          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(0) and
+!          elementCoords(1), the coordinates for element 2 are in elementCoords(2) and elementCoords(3), 
+!          etc.). 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -543,6 +553,8 @@ contains
     type(ESMF_InterfaceInt) :: elementMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
+    real(ESMF_KIND_R8) :: tmpCoords(2)
+    integer :: coordsPresent
 
 
     ! initialize return code; assume routine not implemented
@@ -584,37 +596,81 @@ contains
        return 
     endif    
 
+    ! get sizes of lists
+    num_elems = size(elementIds)
+    num_elementConn = size(elementConn)
+
+    ! If present make sure that elementCoords has the correct size
+    if (present(elementCoords)) then
+       if (size(elementCoords) .ne. &
+            mesh%spatialDim*num_elems) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+               msg="- elementCoords input array is the wrong size.", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif    
+
    ! Create interface int to wrap optional element mask
    elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    ! get sizes of lists
-    num_elems = size(elementIds)
-    num_elementConn = size(elementConn)
-    
     ! set element area if it's present.
-    if (present(elementArea)) then
-       areaPresent=1
-       call C_ESMC_MeshAddElements(mesh%this, num_elems, &
-                             elementIds, elementTypes, elementMaskII, &
-                             areaPresent, elementArea, &
-                             num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(elementCoords)) then
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=1
+          call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, elementArea, &
+               coordsPresent, elementCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               mesh%coordSys, mesh%spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=1
+          call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, tmpArea, &
+               coordsPresent, elementCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve,&
+               mesh%coordSys, mesh%spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
     else
-       areaPresent=0
-       call C_ESMC_MeshAddElements(mesh%this, num_elems, &
-                             elementIds, elementTypes, elementMaskII, &
-                             areaPresent, tmpArea, &
-                             num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=0
+          call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, elementArea, &
+               coordsPresent, tmpCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               mesh%coordSys, mesh%spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=0
+          call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, tmpArea, &
+               coordsPresent, tmpCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               mesh%coordSys, mesh%spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
     endif
-
 
     ! Create two distgrids, one for nodes and one for elements
     call C_ESMC_MeshCreateNodeDistGrid(mesh%this, mesh%nodal_distgrid, &
@@ -876,7 +932,8 @@ contains
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, nodeMask, &
                          elementIds, elementTypes, elementConn, &
-                         elementMask, elementArea, coordSys, rc)
+                         elementMask, elementArea, elementCoords, &
+                         coordSys, rc)
 !
 !
 ! !RETURN VALUE:
@@ -893,6 +950,7 @@ contains
     integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:)
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
     integer,            intent(out), optional :: rc
 !
@@ -985,6 +1043,14 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!   \item[{[elementCoords]}] 
+!          An array containing the physical coordinates of the elements to be created on this
+!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+!          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+!          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(0) and
+!          elementCoords(1), the coordinates for element 2 are in elementCoords(2) and elementCoords(3), 
+!          etc.). 
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
 !         For a full list of options, please see Section~\ref{const:coordsys}. 
@@ -1002,6 +1068,8 @@ contains
     type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
+    real(ESMF_KIND_R8) :: tmpCoords(2)
+    integer :: coordsPresent
     type(ESMF_CoordSys_Flag) :: coordSysLocal
 
 
@@ -1075,6 +1143,18 @@ contains
     ! get sizes of lists
     num_elems = size(elementIds)
     num_elementConn = size(elementConn)
+
+
+    ! If present make sure that elementCoords has the correct size
+    if (present(elementCoords)) then
+       if (size(elementCoords) .ne. &
+            spatialDim*num_elems) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+               msg="- elementCoords input array is the wrong size.", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif    
     
 
 #if 0
@@ -1089,24 +1169,62 @@ num_elems, &
 
 
     ! set element area if it's present.
-    if (present(elementArea)) then
-       areaPresent=1
-       call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
-                             elementIds, elementTypes, elementMaskII, &
-                             areaPresent, elementArea, &
-                             num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(elementCoords)) then
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=1
+          call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, &
+               num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, elementArea, &
+               coordsPresent, elementCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve,&
+               coordSysLocal, spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=1
+          call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, &
+               num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, tmpArea, &
+               coordsPresent, elementCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               coordSysLocal, spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
     else
-       areaPresent=0
-       call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
-                             elementIds, elementTypes, elementMaskII, &
-                             areaPresent, tmpArea, &
-                             num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+       if (present(elementArea)) then
+          areaPresent=1
+          coordsPresent=0
+          call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, &
+               num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, elementArea, &
+               coordsPresent, tmpCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               coordSysLocal, spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+          areaPresent=0
+          coordsPresent=0
+          call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, &
+               num_elems, &
+               elementIds, elementTypes, elementMaskII, &
+               areaPresent, tmpArea, &
+               coordsPresent, tmpCoords, &
+               num_elementConn, elementConn, &
+               lregridConserve%regridconserve, &
+               coordSysLocal, spatialDim, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
     endif
 
 
@@ -3698,6 +3816,117 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 end function ESMF_MeshCreateRedist
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateDual()"
+!BOPI
+
+! !IROUTINE: ESMF_MeshCreate - Create a dual of a mesh
+!
+! !INTERFACE:
+    function ESMF_MeshCreateDual(mesh, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                            :: ESMF_MeshCreateDual
+
+! !ARGUMENTS:
+    type(ESMF_Mesh),     intent(in)            :: mesh
+    integer,             intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!  Create the dual of an existing mesh.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The source Mesh. 
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc
+
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Check input classes
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+
+    ! We don't handle a mesh containing split elements right now, 
+    ! so complain and exit. 
+    ! TODO: Will need to do this before CESM uses with HOMME grid
+    if (mesh%hasSplitElem) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+               msg="- meshes with split elements can not be redisted right now", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+    !! Fill in information available in input mesh
+    ! Same dimensions as input mesh
+    ESMF_MeshCreateDual%spatialDim=mesh%spatialDim
+    ESMF_MeshCreateDual%parametricDim=mesh%parametricDim
+
+    ! Same coordSys
+    ESMF_MeshCreateDual%coordSys=mesh%coordSys
+
+    ! Will have same freed status as input mesh
+    ESMF_MeshCreateDual%isCMeshFreed=mesh%isCMeshFreed
+
+    ! Will have same split status as input mesh
+    ESMF_MeshCreateDual%hasSplitElem=mesh%hasSplitElem
+
+    ! Will have same created status as input mesh
+    ESMF_MeshCreateDual%isFullyCreated=mesh%isFullyCreated
+
+
+    ! Call into C
+    call C_ESMC_MeshCreateDual(mesh,     &
+         ESMF_MeshCreateDual, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Create node distgrid and get number of nodes
+    call C_ESMC_MeshCreateNodeDistGrid( &
+                      ESMF_MeshCreateDual%this, &
+                      ESMF_MeshCreateDual%nodal_distgrid, &
+                      ESMF_MeshCreateDual%numOwnedNodes, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateDual%this, &
+                                       ESMF_MeshCreateDual%element_distgrid, &
+                                       ESMF_MeshCreateDual%numOwnedElements, &
+                                       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+
+    ! Set as created
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateDual)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_MeshCreateDual
+!------------------------------------------------------------------------------
+
+
 
 
 ! -----------------------------------------------------------------------------

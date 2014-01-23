@@ -77,6 +77,7 @@ SOURCEC	  = \
            ESMCI_Phedra.C \
            ESMCI_ConserveInterp.C \
            ESMCI_MeshRedist.C \
+           ESMCI_MeshDual.C \
            ESMCI_MeshCXX.C
 
 SOURCEF	  = ESMF_SolverUtil_C.F90 \

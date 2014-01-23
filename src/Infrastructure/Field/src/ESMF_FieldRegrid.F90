@@ -575,8 +575,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: dstArray
         type(ESMF_Array)     :: fracArray
         type(ESMF_VM)        :: vm
-        type(ESMF_Mesh)      :: srcMesh
-        type(ESMF_Mesh)      :: dstMesh
+        type(ESMF_Mesh)      :: srcMesh, srcMeshDual
+        type(ESMF_Mesh)      :: dstMesh, dstMeshDual
         type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
@@ -592,6 +592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         logical :: localIgnoreDegenerate
         type(ESMF_LineType_Flag):: localLineType
+        logical :: srcDual, dstDual
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -613,7 +614,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -642,6 +642,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
+
+        ! Init variables
+        srcDual=.false.
+        dstDual=.false.
 
 
         ! Set this for now just to not have to remove it everywhere
@@ -829,13 +833,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return	  
              endif
           else
-              if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- S can currently only do bilinear or patch regridding on a mesh built on nodes", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-                 return	  
-              endif
-          endif	  
+             if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
+                if (srcMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
+                   ! Create a dual of the Mesh
+                   srcMeshDual=ESMF_MeshCreateDual(srcMesh, rc)
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+                   
+                   ! Use the dual as the srcMesh
+                   srcMesh=srcMeshDual
+                   
+                   ! Record that we created the dual
+                   srcDual=.true.
+                else
+                   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                    msg="- S can currently only do non-conservative  on a mesh built on nodes or elements", & 
+                        ESMF_CONTEXT, rcToReturn=rc) 
+                   return	  
+                endif
+             endif
+          endif
 
           ! Turn on masking
           if (present(srcMaskValues)) then
@@ -915,14 +932,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return	  
               endif
           else
-              if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do bilinear or patch regridding on a mesh built on nodes", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-                return	  
-              endif
+             if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
+                if (dstMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
+                   ! Create a dual of the Mesh
+                   dstMeshDual=ESMF_MeshCreateDual(dstMesh, rc)
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+                   
+                   ! Use the dual as the srcMesh
+                   dstMesh=dstMeshDual
+                   
+                   ! Record that we created the dual
+                   dstDual=.true.
+                else
+                   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+              msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
+                   return	  
+                endif
+             endif
           endif
-
+          
           ! Turn on masking
           if (present(dstMaskValues)) then
              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
@@ -1102,6 +1132,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
+
+           ! Get rid of dual mesh
+           if (srcDual) then
+              call ESMF_MeshDestroy(srcMeshDual,rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                   ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
         endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -1122,6 +1160,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               endif
+           endif
+
+           ! Get rid of dual mesh
+           if (dstDual) then
+              call ESMF_MeshDestroy(dstMeshDual,rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                   ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
            endif
         endif
 

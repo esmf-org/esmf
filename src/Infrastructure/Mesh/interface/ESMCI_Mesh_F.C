@@ -40,7 +40,7 @@
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_MeshRedist.h"
-
+#include "Mesh/include/ESMCI_MeshDual.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -547,7 +547,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
                                               int *_num_elems, int *elemId, int *elemType, InterfaceInt **_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
-                                              int *_num_elemConn, int *elemConn, int *regridConserve, int *rc) 
+                                              int *_coordsPresent, double *elemCoords, 
+                                              int *_num_elemConn, int *elemConn, int *regridConserve, 
+                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                                              int *rc) 
 {
    try {
 
@@ -576,6 +579,11 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     InterfaceInt *elemMaskII=*_elemMaskII;
 
     int areaPresent=*_areaPresent;
+
+    int coordsPresent=*_coordsPresent;
+
+    ESMC_CoordSys_Flag coordSys=*_coordSys;
+    int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
 
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
@@ -685,6 +693,15 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
 
+    // Don't currently support split elements with element coords
+    if (mesh.is_split && coordsPresent) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "- ESMF doesn't currently support both element coords and polygons with >4 sides in the same Mesh.",
+            ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+
     // Get number of nodes
     int num_nodes = mesh.num_nodes();
 
@@ -707,9 +724,6 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
         // Check elemConn
         if ((node_index < 0) || (node_index > num_nodes-1)) {
-
-          printf("BAD node_indes=%d\n",node_index);
-
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be greater than number of nodes on processor ",
@@ -1012,6 +1026,29 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   } 
 
 
+  // Handle element coords
+  bool has_elem_coords=false;
+  if (coordsPresent == 1) { // if coords exist
+
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element coords field
+    MEField<> *elem_coords = mesh.RegisterField("elem_coordinates",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, mesh.spatial_dim(), true);
+
+    // If not cartesian then add original coordinates field
+    if (coordSys != ESMC_COORDSYS_CART) {
+      MEField<> *elem_orig_coords = mesh.RegisterField("elem_orig_coordinates",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
+    }
+
+
+    // Record the fact that it has masks
+    has_elem_coords=true;   
+  } 
+
+
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.Commit();
@@ -1068,6 +1105,72 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   }
 
 
+  // Set coordinate values
+  if (has_elem_coords) {
+
+    if (coordSys == ESMC_COORDSYS_CART) {
+      // Get Field
+      MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
+      
+      // Get some useful information
+      int sdim = mesh.spatial_dim(); 
+      
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Set coordinate value to input array
+        double *coords=elem_coords->data(elem);
+        int data_index = sdim*elem.get_data_index();
+        for (int i = 0; i < sdim; ++i) {
+          coords[i] = elemCoords[data_index+i];    
+        }    
+        // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
+      }
+    } else {
+      // Get Fields
+      MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
+      MEField<> *elem_orig_coords=mesh.GetField("elem_orig_coordinates"); 
+      
+      // Get some useful information
+      int sdim = mesh.spatial_dim(); 
+      
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Save original coordinates
+        double *orig_coords=elem_orig_coords->data(elem);
+        int data_index = orig_sdim*elem.get_data_index();
+        for (int i = 0; i < orig_sdim; ++i) {
+          orig_coords[i] = elemCoords[data_index+i];    
+        }    
+
+        // Convert and save Cartesian coordinates
+        double *coords = elem_coords->data(elem);
+        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
+                                     orig_coords, coords);
+
+        // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
+      }
+
+
+    }
+
+
+
+ /* XMRKX */
+  }
+
+
   // Get rid of extra memory for split elements
   if (mesh.is_split) {
     if (elemConn_wsplit != NULL) delete [] elemConn_wsplit;
@@ -1084,7 +1187,6 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
   }
-
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -4175,3 +4277,47 @@ extern "C" void FTN_X(c_esmc_meshsetpoles)(Mesh **meshpp, int *_pole_val, int *_
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+
+extern "C" void FTN_X(c_esmc_meshcreatedual)(Mesh **src_meshpp, Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatedual()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    // Call C++ side
+    MeshDual(*src_meshpp, output_meshpp);
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
