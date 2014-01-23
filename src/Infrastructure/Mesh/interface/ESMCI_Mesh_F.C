@@ -2759,7 +2759,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *_num_elem, double 
         if (!GetAttr(elem).is_locally_owned()) continue;
         
         // Get the element id
-        int eid=elem.get_id();
+        UInt eid=elem.get_id();
         
         // Get frac data
         double *f=elem_frac->data(elem);
@@ -2772,12 +2772,12 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *_num_elem, double 
         if (mi == mesh.split_id_to_frac.end()) {
           int index=id_to_index[eid];
           elem_fracs[index] = frac;
+          continue;
         } 
-        
         
         // It is part of original poly, so modify by fraction 
         frac *= mi->second;
-        
+
         // Translate id if necessary
         int orig_id;
         std::map<UInt,UInt>::iterator soi =  mesh.split_to_orig_id.find(eid);

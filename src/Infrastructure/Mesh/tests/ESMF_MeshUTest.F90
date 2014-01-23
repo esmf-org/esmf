@@ -694,8 +694,9 @@ program ESMF_MeshUTest
   if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Mesh Get shouldn't work here
-  call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
-                   numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, rc=localrc)
+  call ESMF_MeshGet(mesh, nodalDistgrid=nodeDistgrid, &
+    elementDistgrid=elemDistgrid, numOwnedNodes=numOwnedNodesTst, &
+    numOwnedElements=numOwnedElemsTst, rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Try using a bad element type
@@ -1116,7 +1117,8 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create redisted mesh
-  mesh2=ESMF_MeshCreate(mesh, nodedistgrid, elemdistgrid, rc=localrc)
+  mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
+    elementDistgrid=elemdistgrid, rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1226,7 +1228,8 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create redisted mesh
-  mesh2=ESMF_MeshCreate(mesh, nodedistgrid, elemdistgrid, rc=localrc)
+  mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
+    elementDistgrid=elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -1317,7 +1320,7 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create redisted mesh
-  mesh2=ESMF_MeshCreate(mesh, elementdistgrid=elemdistgrid, rc=localrc)
+  mesh2=ESMF_MeshCreate(mesh, elementDistgrid=elemdistgrid, rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1518,7 +1521,7 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create redisted mesh
-  mesh2=ESMF_MeshCreate(mesh, elementdistgrid=elemdistgrid, rc=localrc)
+  mesh2=ESMF_MeshCreate(mesh, elementDistgrid=elemdistgrid, rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

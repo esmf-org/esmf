@@ -1462,9 +1462,9 @@ end function ESMF_MeshCreateFromMeshes
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, &
+    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
-		 elementDistGrid, nodalDistGrid, rc)
+		 nodalDistgrid, elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1472,13 +1472,14 @@ end function ESMF_MeshCreateFromMeshes
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
     type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
     character(len=*),           intent(in),  optional :: meshname
     type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
     character(len=*),           intent(in),  optional :: varname
-    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -1598,24 +1599,24 @@ end function ESMF_MeshCreateFromMeshes
        return
     endif
 
-    if (present(elementDistGrid) .and. present(nodalDistGrid)) then
+    if (present(elementDistgrid) .and. present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistGrid, &
-       			       elementDistgrid=elementDistGrid, rc=localrc)
+       			       nodalDistgrid=nodalDistgrid, &
+       			       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 	call ESMF_MeshDestroy(myMesh)
-    elseif (present(elementDistGrid)) then
+    elseif (present(elementDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       elementDistgrid=elementDistGrid, rc=localrc)
+       			       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 	call ESMF_MeshDestroy(myMesh)
-    elseif (present(nodalDistGrid)) then
+    elseif (present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistGrid, rc=localrc)
+       			       nodalDistgrid=nodalDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3467,7 +3468,8 @@ end subroutine ESMF_DistGridGetIds
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateRedist(mesh, nodalDistGrid, elementDistgrid, rc)
+    function ESMF_MeshCreateRedist(mesh, keywordEnforcer, nodalDistgrid, &
+      elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -3475,6 +3477,7 @@ end subroutine ESMF_DistGridGetIds
 
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     integer,             intent(out), optional :: rc
@@ -3574,7 +3577,7 @@ end subroutine ESMF_DistGridGetIds
           ! First fill in information not requiring redist
 
           ! Set Distgrids
-          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistgrid
           ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
 
           ! Set number of owned things
