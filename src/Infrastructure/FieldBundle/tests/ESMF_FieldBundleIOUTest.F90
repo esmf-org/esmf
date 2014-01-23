@@ -305,6 +305,12 @@
   call ESMF_FieldDestroy(fieldTst(1), rc=rc)
   call ESMF_FieldDestroy(fieldTst(2), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(Farray_1w)
+  deallocate(Farray_2w)
+  deallocate(Farray_1r)
+  deallocate(Farray_2r)
+
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
