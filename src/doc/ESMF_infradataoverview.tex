@@ -233,8 +233,9 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
- To use the bilinear method the user may create their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
- For Grids, the stagger location upon which the Field was built must contain coordinates. 
+ To use the bilinear method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ must contain coordinates. 
 
 \subsubsection{Interpolation methods: higher-order patch}\label{sec:interpolation:patch}
 
@@ -271,9 +272,9 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
- To use the patch method the user may create their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
- For Grids, the stagger location upon which the Field was built must contain coordinates. 
-
+ To use the patch method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ must contain coordinates. 
 
 \subsubsection{Interpolation methods: nearest source to destination}\label{sec:interpolation:neareststod}
 In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST\_STOD}) each destination point is mapped to the closest source point. A given source point may map to multiple destination points, but no destination point will receive input from more than one source point. If two points are equally close, then the point with the smallest sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix). 
@@ -301,8 +302,9 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
- To use the nearest source to destination method the user may create their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
- For Grids, the stagger location upon which the Field was built must contain coordinates. 
+ To use the nearest source to destination method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ must contain coordinates. 
 
 
 \subsubsection{Interpolation methods: nearest destination to source}\label{sec:interpolation:nearestdtos}
@@ -331,9 +333,9 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
- To use the nearest destination to source method the user may create their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
- For Grids, the stagger location upon which the Field was built must contain coordinates. 
-
+ To use the nearest destination to source method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ must contain coordinates. 
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
  First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method 

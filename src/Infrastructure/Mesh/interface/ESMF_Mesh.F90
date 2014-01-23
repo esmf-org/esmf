@@ -538,8 +538,8 @@ contains
 !          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
 !          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
-!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(0) and
-!          elementCoords(1), the coordinates for element 2 are in elementCoords(2) and elementCoords(3), 
+!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
+!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
 !          etc.). 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -751,8 +751,8 @@ contains
 !          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
 !          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
-!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
-!          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3), 
+!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
+!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4), 
 !          etc.). 
 !   \item[nodeOwners] 
 !         An array containing the PETs that own the nodes to be created on this PET. 
@@ -998,8 +998,8 @@ contains
 !          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
 !          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
-!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
-!          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3), 
+!          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
+!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4), 
 !          etc.). 
 !   \item[nodeOwners] 
 !         An array containing the PETs that own the nodes to be created on this PET. 
@@ -1048,8 +1048,8 @@ contains
 !          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
 !          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
-!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(0) and
-!          elementCoords(1), the coordinates for element 2 are in elementCoords(2) and elementCoords(3), 
+!          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
+!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
 !          etc.). 
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
