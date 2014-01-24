@@ -167,6 +167,13 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
+    // Currently don't support meshes with more than 4 sides
+    if (meshp->is_split) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- Meshes containing cells with >4 sides aren't supported in C or python",
+                                       ESMC_CONTEXT, &localrc)) throw localrc;
+     }
+
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
