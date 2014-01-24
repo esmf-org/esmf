@@ -950,6 +950,58 @@ def field_extraindices_mesh_test():
     return True
 
 def field_regrid_test():
+    # create grids
+    max_index = np.array([6,6])
+    srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
+    max_index = np.array([4,4])
+    dstgrid = Grid(max_index, coord_sys=CoordSys.CART)
+
+    # Add coordinates
+    srcgrid.add_coords()
+    dstgrid.add_coords()
+
+    [x,y] = [0, 1]
+    gridXCorner = srcgrid.get_coords(x)
+    gridYCorner = srcgrid.get_coords(y)
+
+    for i in xrange(gridXCorner.shape[x]):
+        gridXCorner[i, :] = float(i)/6.
+
+    for j in xrange(gridYCorner.shape[y]):
+        gridYCorner[:, j] = float(j)/6.
+
+    gridXCorner = dstgrid.get_coords(x)
+    gridYCorner = dstgrid.get_coords(y)
+
+    for i in xrange(gridXCorner.shape[x]):
+        gridXCorner[i, :] = float(i)/4.
+
+    for j in xrange(gridYCorner.shape[y]):
+        gridYCorner[:, j] = float(j)/4.
+
+    # create a Field on the Grid
+    srcfield = Field(srcgrid, "GRIDFIELD!")
+    srcfield[:, :] = 10.
+    dstfield = Field(srcgrid, "GRIDFIELD!")
+    dstfield[:, :] = 10.
+
+    # regridding
+    rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR)
+    #dstfield = rh(srcfield, dstfield)
+
+    print "kjhkjh"
+
+    # test the __repr__ functions
+    print srcgrid
+    print dstgrid
+    print repr(srcfield)
+    print "%r" % dstfield
+    #print rh
+
+    # return True from unit test
+    return True
+
+def field_regrid_gridmesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
     dstfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
@@ -1191,7 +1243,8 @@ def main():
     (8.8,'Field create and destroy with switched indices from grid') : field_switchedindices_grid_test,
     (8.9,'Field create and destroy with switched indices from mesh') : field_switchedindices_mesh_test,
     (12,'Field regridding') : field_regrid_test,
-    (12.1,'Field regridding with zeroregion') : field_regrid_zeroregion_test,
+    (12.1,'Field regridding grid and mesh') : field_regrid_gridmesh_test,
+    (12.2,'Field regridding with zeroregion') : field_regrid_zeroregion_test,
     (13.1,'Field regrid areas') : field_regrid_area_test}
 
     # here we run the tests that are in the dispatch dictionary
