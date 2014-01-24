@@ -262,7 +262,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     src_type = file_type_map[src_type_str]
     dst_type = file_type_map[dst_type_str]
     regridmethod = regrid_method_map[regrid_method]
-    convert_to_dual = (regridmethod == ESMF.RegridMethod.BILINEAR)
+    convert_to_dual = (regridmethod != ESMF.RegridMethod.CONSERVE)
     src_is_sphere = not src_regional
     dst_is_sphere = not dst_regional
     pole_method = None
