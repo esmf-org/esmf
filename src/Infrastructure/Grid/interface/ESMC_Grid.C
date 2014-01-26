@@ -122,9 +122,6 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
 				  int *addUserArea, int *addMask, char *varname,
 				  char *coordNames, int *rc) {
 
-  //printf ("Start ESMC_Grid.C : ESMC_GridCreateFromFile(%s,%d)\n", 
-  //  	    filename, fileTypeFlag);
-
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
@@ -148,23 +145,10 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
   int exLB[2]={-1,-1}, exUB[2]={-1,-1};
   double *gridXCoord;
   gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
-  printf ("ESMC_Grid.C: Xcoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
-  printf ("ESMC_Grid.C: gridXCoord = [");
-  for (int i = 0; i < 10; i++) {
-    printf ("%lf\n", gridXCoord[i]);
-  }
-  printf ("...]\n");
   
   double *gridYCoord;
   gridYCoord = (double *)ESMC_GridGetCoord(grid, 2, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
-  printf ("ESMC_Grid.C: yCoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
-  printf ("ESMC_Grid.C: gridYCoord = [");
-  for (int i = 0; i < 10; i++) {
-    printf ("%lf\n", gridYCoord[i]);
-  }
-  printf ("...]\n");
   
-  //printf ("End ESMC_Grid.C : ESMC_GridCreateFromFile()\n");
   return grid;
 }
 //-----------------------------------------------------------------------------
