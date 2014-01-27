@@ -323,26 +323,6 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
                              max_err, parallel)
     return correct
 
-# def grid_check(src_fname, options):
-#
-#     (src_type_str, dst_type_str, src_meshname, dst_meshname,
-#      unmappedaction) = parse_options(options)
-#     src_type = file_type_map[src_type_str]
-#     srcgrid = ESMF.Grid(np.array([360,300]),fname=src_fname, fileTypeFlag=src_type,
-#                         staggerloc=ESMF.StaggerLoc.CENTER)
-#     exLB, exUB = ESMF.ESMP_GridGetCoordBounds(srcgrid, ESMF.StaggerLoc.CENTER)
-#     print 'regrid_check.py: exLB =',exLB
-#     print 'regrid_check.py: exUB =',exUB
-#     [x,y] = [0,1]
-#     gridXCoord = srcgrid.get_grid_coords_from_esmc(x, ESMF.StaggerLoc.CENTER)
-#     gridYCoord = srcgrid.get_grid_coords_from_esmc(y, ESMF.StaggerLoc.CENTER)
-#
-#     print 'regrid_check.py: gridXCoord=',gridXCoord[0:10,0:10]
-#     print 'regrid_check.py: gridYCoord=',gridYCoord[0:10,0:10]
-#
-#     return True
-
-
 if __name__ == '__main__':
     #src_fname = "FVCOM_grid2d.nc"
     #dst_fname = "selfe_grid2d.nc"
