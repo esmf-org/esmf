@@ -97,7 +97,6 @@ class Mesh(object):
             self.spatial_dim = spatial_dim
         else:
             # call into ctypes layer
-            print "Calling ESMP_MeshCreateFromFile"
             self.struct = ESMP_MeshCreateFromFile(filename, filetype,
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 

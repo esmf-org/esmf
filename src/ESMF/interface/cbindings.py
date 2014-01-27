@@ -831,7 +831,6 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
-    print "Calling ESMC_MeshCreateFromFile"
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
                                          meshname, addMask, varname,
