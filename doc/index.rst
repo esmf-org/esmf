@@ -315,6 +315,7 @@ extrapolation to destination points outside the unmasked source Field.
 ============
 Create a Grid or Mesh From File
 ============
+
 ESMPy can create Grid or Mesh objects from specification in a NetCDF
 file.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
 formats.  Grid files can be in SCRIP or GRIDSPEC formats.
@@ -331,9 +332,21 @@ from the file will not be the dual. This is necessary when the Mesh is
 part of a conservative regridding operation, so the 
 weights are properly generated for the cell centers in the file.
 
-Mesh creation also supports boolean flags to specify whether or not to
-add an area property to the Mesh (add_user_area), or to add a mask (add_mask)
+A Mesh may also be created with boolean flags to specify whether or not to
+add an area property to the Mesh (add_user_area), or to add a mask
+(add_mask) held by the NetCDF variable indicated in the optional argument, varname.
 
+A number of optional boolean arguments are also supported to create a
+structured Grid from a file.  These include isSphere to indicate whether
+the grid is spherical or regional, addCornerStagger to add the corner
+stagger information to the Grid for conservative regridding,
+addUserArea to specify whether to read in the cell area from the
+NetCDF file or to calculate it, and addMask
+to add a mask held by the NetCDF variable indicated in optional
+argument, varname.   In addition, for GRIDSPEC format files,
+coordNames argument can be used to specify the coordinate variable
+names to use in the case where multiple options exist in the NetCDF
+file.
 
 ============
 Interface
