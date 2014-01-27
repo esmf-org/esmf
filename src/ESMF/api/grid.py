@@ -22,8 +22,8 @@ class Grid(object):
                  coord_sys=None,
                  coord_typekind=None,
                  staggerloc=None,
-                 fname=None,
-                 fileTypeFlag=None,
+                 filename=None,
+                 filetype=None,
                  isSphere=None,
                  addCornerStagger=None,
                  addUserArea=None,
@@ -67,8 +67,8 @@ class Grid(object):
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
         Optional arguments for creating a grid from file: \n
-            fname: the name of NetCDF file containing the Grid. \n
-            fileTypeFlag: the input file type of the Grid. \n
+            filename: the name of NetCDF file containing the Grid. \n
+            filetype: the input file type of the Grid. \n
                 Argument values are: \n
                     FileFormat.SCRIP \n
                     FileFormat.GRIDSPEC \n
@@ -135,9 +135,9 @@ class Grid(object):
         self.struct = None
 
         from_file = False
-        if fname:
-            #print 'Creating grid from ', fname
-            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag,
+        if filename:
+            #print 'Creating grid from ', filename
+            self.struct = ESMP_GridCreateFromFile(filename, filetype,
                                                   isSphere=isSphere,
                                                   addCornerStagger=addCornerStagger,
                                                   addUserArea=addUserArea,
