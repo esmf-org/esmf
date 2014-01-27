@@ -311,6 +311,30 @@ it to UnmappedAction.ERROR. At this point ESMPy does not support
 extrapolation to destination points outside the unmasked source Field.
 
 
+
+============
+Create a Grid or Mesh From File
+============
+ESMPy can create Grid or Mesh objects from specification in a NetCDF
+file.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
+formats.  Grid files can be in SCRIP or GRIDSPEC formats.
+
+When creating a Mesh from a SCRIP format file, there are a number of
+options to control the output Mesh. The data is located at the center
+of the grid cell in a SCRIP grid; whereas the data is located at the
+corner of a cell in an ESMF Mesh object. Therefore, we create a Mesh
+object by default by constructing a "dual" mesh using the coordinates
+in the file. If the user wishes to not construct the dual mesh, the
+optional argument convertToDual may be used to control this
+behavior. When convertToDual is set to False, the Mesh constructed
+from the file will not be the dual. This is necessary when the Mesh is
+part of a conservative regridding operation, so the 
+weights are properly generated for the cell centers in the file.
+
+Mesh creation also supports boolean flags to specify whether or not to
+add an area property to the Mesh (add_user_area), or to add a mask (add_mask)
+
+
 ============
 Interface
 ============
