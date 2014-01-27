@@ -59,7 +59,7 @@ class Mesh(object):
                       Mesh. \n
             add_mask: a boolean value to specify if a mask should 
                       be added to the Mesh (numpy array). \n
-            varname: a string to specify a varname? \n
+            varname: a string to specify a varname. \n
         Returns: \n
             Mesh \n
         """
