@@ -38,7 +38,7 @@ class Grid(object):
                        index of each dimension of the Grid. \n
                 type: np.array \n
                 shape: [dimCount, 1] \n
-        Optional Arguments: \n
+        Optional arguments for creating a grid in memory: \n
             num_peri_dims: the number of periodic dimensions (0 or 1). \n
             coord_sys: the coordinates system for the Grid. \n
                 Argument values are:\n
@@ -66,6 +66,7 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+        Optional arguments for creating a grid from file: \n
             fname: the name of NetCDF file containing the Grid. \n
             fileTypeFlag: the input file type of the Grid. \n
                 Argument values are: \n

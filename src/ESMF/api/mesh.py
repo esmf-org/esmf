@@ -37,30 +37,29 @@ class Mesh(object):
         CF compliant UGRID file.\n
         Required Arguments: \n
             None \n
-        Optional Arguments: \n
-            3 step creation: \n
-                parametric_dim: the parametric dimension of the Mesh. \n
-                spatial_dim: the spatial dimension of the Mesh. \n
-                    2D Cartesian = [2,2] \n
-                    3D Cartesian = [2,3] \n
-                    3D Spherical = [?,?] \n
-            1 step creation: \n
-                filename: the name of NetCDF file containing the Mesh. \n
-                filetype: the input file type of the Mesh. \n
-                    Argument values are: \n
-                        FileFormat.SCRIP \n
-                        FileFormat.ESMFMESH \n
-                        FileFormat.UGRID \n
-                convert_to_dual: a boolean value to specify if the dual 
-                                 Mesh should be calculated. \n
-                add_user_area: a boolean value to specify if an area 
-                               property should be added to the mesh 
-                               (numpy array). \n
-                meshname: a string value specifying the name of the 
-                          Mesh. \n
-                add_mask: a boolean value to specify if a mask should 
-                          be added to the Mesh (numpy array). \n
-                varname: a string to specify a varname? \n
+        Optional arguments for creating a mesh in memory: \n
+            parametric_dim: the parametric dimension of the Mesh. \n
+            spatial_dim: the spatial dimension of the Mesh. \n
+                2D Cartesian = [2,2] \n
+                3D Cartesian = [2,3] \n
+                3D Spherical = [?,?] \n
+        Optional arguments for creating a mesh from file: \n
+            filename: the name of NetCDF file containing the Mesh. \n
+            filetype: the input file type of the Mesh. \n
+                Argument values are: \n
+                    FileFormat.SCRIP \n
+                    FileFormat.ESMFMESH \n
+                    FileFormat.UGRID \n
+            convert_to_dual: a boolean value to specify if the dual 
+                             Mesh should be calculated. \n
+            add_user_area: a boolean value to specify if an area 
+                           property should be added to the mesh 
+                           (numpy array). \n
+            meshname: a string value specifying the name of the 
+                      Mesh. \n
+            add_mask: a boolean value to specify if a mask should 
+                      be added to the Mesh (numpy array). \n
+            varname: a string to specify a varname? \n
         Returns: \n
             Mesh \n
         """
