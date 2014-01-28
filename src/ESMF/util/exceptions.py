@@ -49,12 +49,36 @@ class GridSingleStaggerloc(GridException):
        where it can only be a single value."""
     pass
 
+class GridArgumentError(GridException):
+    """Raised if a Grid optional argument is used incorrectly."""
+    pass
+
+class GridWarning(ESMPyWarning):
+    """Base class for warnings in the Grid class."""
+    pass
+
+class GridArgumentWarning(GridWarning):
+    """Warning given for using extraneous Grid optional arguments"""
+    pass
+
 class MeshException(ESMPyException):
     """Base class for errors in the Mesh class."""
     pass
 
 class MeshLocationNotSupported(MeshException):
     """Raised when an undefined Mesh location is specified."""
+    pass
+
+class MeshArgumentError(MeshException):
+    """Raised if a Mesh optional argument is used incorrectly."""
+    pass
+
+class MeshWarning(ESMPyWarning):
+    """Base class for warnings in the Mesh class."""
+    pass
+
+class MeshArgumentWarning(MeshWarning):
+    """Warning given for using extraneous Mesh optional arguments"""
     pass
 
 class FieldException(ESMPyException):

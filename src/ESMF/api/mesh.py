@@ -28,42 +28,79 @@ class Mesh(object):
                  add_mask=None,
                  varname=""):
         """
-        Create an unstructured Mesh. This can be done manually in 3 
-        steps: \n
-        1. create the Mesh (specifying parametric_dim and spatial_dim), \n
-        2. add nodes, \n
-        3. add elements. \n\n
-        This can also be done in one step if creating the Mesh from a 
-        CF compliant UGRID file.\n
-        Required Arguments: \n
-            None \n
-        Optional arguments for creating a mesh in memory: \n
-            parametric_dim: the parametric dimension of the Mesh. \n
-            spatial_dim: the spatial dimension of the Mesh. \n
-                2D Cartesian = [2,2] \n
-                3D Cartesian = [2,3] \n
-                3D Spherical = [?,?] \n
-        Optional arguments for creating a mesh from file: \n
-            filename: the name of NetCDF file containing the Mesh. \n
-            filetype: the input file type of the Mesh. \n
-                Argument values are: \n
-                    FileFormat.SCRIP \n
-                    FileFormat.ESMFMESH \n
-                    FileFormat.UGRID \n
-            convert_to_dual: a boolean value to specify if the dual 
-                             Mesh should be calculated. \n
-            add_user_area: a boolean value to specify if an area 
-                           property should be added to the mesh 
-                           (numpy array). \n
-            meshname: a string value specifying the name of the 
-                      Mesh. \n
-            add_mask: a boolean value to specify if a mask should 
-                      be added to the Mesh (numpy array). \n
-            varname: a string to specify a varname. \n
+        Create an unstructured Mesh. This can be done two different ways, 
+        as a Mesh in memory, or from a SCRIP formatted or CF compliant UGRID 
+        file. The argument for each type of Mesh creation are outlined below. \n
+        Mesh in memory: \n
+            The in-memory Mesh can be created manually in 3 steps: \n
+            1. create the Mesh (specifying parametric_dim and spatial_dim), \n
+            2. add nodes, \n
+            3. add elements. \n
+            Required arguments for a Mesh in memory: \n
+                parametric_dim: the parametric dimension of the Mesh. \n
+                spatial_dim: the spatial dimension of the Mesh. \n
+                    2D Cartesian = [2,2] \n
+                    3D Cartesian = [2,3] \n
+                    3D Spherical = [?,?] \n
+            Optional arguments for creating a Mesh in memory: \n
+                None \n
+        Mesh from file: \n
+            Required arguments for creating a Mesh from file: \n
+                filename: the name of NetCDF file containing the Mesh. \n
+                filetype: the input file type of the Mesh. \n
+                    Argument values are: \n
+                        FileFormat.SCRIP \n
+                        FileFormat.ESMFMESH \n
+                        FileFormat.UGRID \n
+            Optional arguments for creating a Mesh from file: \n
+                convert_to_dual: a boolean value to specify if the dual 
+                                 Mesh should be calculated. \n
+                add_user_area: a boolean value to specify if an area 
+                               property should be added to the mesh 
+                               (numpy array). \n
+                meshname: a string value specifying the name of the 
+                          Mesh. \n
+                add_mask: a boolean value to specify if a mask should 
+                          be added to the Mesh (numpy array). \n
+                varname: a string to specify a varname. \n
         Returns: \n
             Mesh \n
         """
 
+        # handle input arguments
+        fromfile = False
+        # in memory
+        if (parametric_dim is not None) or (spatial_dim is not None):
+            # parametric_dim and spatial_dim are required for in-memory mesh creation
+            if (parametric_dim is None) or (spatial_dim is None):
+                raise MeshArgumentError("both parametric_dim and spatial_dim must be specified")
+            # raise warnings for the from-file options
+            if filename is not None:
+                raise MeshArgumentWarning("filename is only used for meshes created from file, this argument will be ignored.")
+            if filetype is not None:
+                raise MeshArgumentWarning("filetype is only used for meshes created from file, this argument will be ignored.")
+            if convert_to_dual is not None:
+                raise MeshArgumentWarning("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
+            if add_user_area is not None:
+                raise MeshArgumentWarning("add_user_area is only used for meshes created from file, this argument will be ignored.")
+            if meshname is not "":
+                raise MeshArgumentWarning("meshname is only used for meshes created from file, this argument will be ignored.")
+            if add_mask is not None:
+                raise MeshArgumentWarning("add_mask is only used for meshes created from file, this argument will be ignored.")
+            if varname is not "":
+                raise MeshArgumentWarning("varname is only used for meshes created from file, this argument will be ignored.")
+        # filename and filetype are required for from-file mesh creation
+        elif (filename is None) or (filetype is None):
+            raise MeshArgumentError ("must supply either parametric_dim and spatial_dim for an in-memory mesh or filename and filetype for a from-file mesh")
+        # from file
+        else:
+            fromfile = True
+            #raise warnings for all in-memory grid options
+            if parametric_dim is not None:
+                raise GridArgumentWarning("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
+            if spatial_dim is not None:
+                raise GridArgumentWarning("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
+        
         # ctypes stuff
         self.struct = ESMP_Mesh()
     
@@ -73,9 +110,6 @@ class Mesh(object):
         self.parametric_dim = None
         self.spatial_dim = None
 
-        fromfile = False
-        if filetype is not None:
-            fromfile = True
         
         if not fromfile:
             # initialize not fromfile variables

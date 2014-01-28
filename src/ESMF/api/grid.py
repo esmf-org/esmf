@@ -17,40 +17,73 @@ from ESMF.api.esmpymanager import *
 class Grid(object):
 
     @initialize
-    def __init__(self, max_index,
+    def __init__(self, max_index=None,
                  num_peri_dims=0,
                  coord_sys=None,
                  coord_typekind=None,
                  staggerloc=None,
                  filename=None,
                  filetype=None,
-                 isSphere=None,
-                 addCornerStagger=None,
-                 addUserArea=None,
-                 addMask=None,
+                 is_sphere=None,
+                 add_corner_stagger=None,
+                 add_user_area=None,
+                 add_mask=None,
                  varname="",
-                 coordNames=""):
+                 coord_names=""):
         """
         Create a logically rectangular Grid object and optionally 
-        allocate space for coordinates at a specified stagger location. \n
-        Required Arguments: \n
-            max_index: a numpy array which specifies the maximum
-                       index of each dimension of the Grid. \n
-                type: np.array \n
-                shape: [dimCount, 1] \n
-        Optional arguments for creating a grid in memory: \n
-            num_peri_dims: the number of periodic dimensions (0 or 1). \n
-            coord_sys: the coordinates system for the Grid. \n
-                Argument values are:\n
-                    CoordSys.CART\n
-                    (default) CoordSys.SPH_DEG\n
-                    CoordSys.SPH_RAD\n
-            coord_typekind: the type of the Grid coordinates. \n
-                Argument values are: \n
-                    TypeKind.I4\n
-                    TypeKind.I8\n
-                    TypeKind.R4\n
-                    (default) TypeKind.R8\n
+        allocate space for coordinates at a specified stagger location. 
+        A grid can be created in-memory or from file, there are two sets
+        of argument for these methods, outlined below. \n
+        Grid in memory: \n
+            Required arguments for creating a Grid in memory: \n
+                max_index: a numpy array which specifies the maximum
+                           index of each dimension of the Grid. \n
+                    type: np.array \n
+                    shape: [dimCount, 1] \n
+            Optional arguments for creating a grid in memory: \n
+                num_peri_dims: the number of periodic dimensions (0 or 1). \n
+                coord_sys: the coordinates system for the Grid. \n
+                    Argument values are:\n
+                        CoordSys.CART\n
+                        (default) CoordSys.SPH_DEG\n
+                        CoordSys.SPH_RAD\n
+                coord_typekind: the type of the Grid coordinates. \n
+                    Argument values are: \n
+                        TypeKind.I4\n
+                        TypeKind.I8\n
+                        TypeKind.R4\n
+                        (default) TypeKind.R8\n
+        Grid from file: \n
+            Required arguments for creating a Grid from file: \n
+                filename: the name of NetCDF file containing the Grid. \n
+                filetype: the input file type of the Grid. \n
+                    Argument values are: \n
+                        FileFormat.SCRIP \n
+            Optional arguments for creating a Grid from file: \n
+                is_sphere: Set to True for a spherical grid, or False for
+                           regional. Defaults to True. \n
+                add_corner_stagger: Set to True to use the information in the
+                                    grid file to add the corner stagger to the
+                                    Grid. The coordinates for the corner stagger
+                                    are required for conservative regridding. If 
+                                    not specified, defaults to False. \n
+                add_user_area: Set to True to read in the cell area from the Grid 
+                               file; otherwise, ESMF will calculate it. \n
+                add_mask: Set to True to generate the mask using the missing_value 
+                          attribute defined in 'varname'  \n
+                varname: If add_mask is True, provide a variable name stored in 
+                         the grid file and the mask will be generated using the 
+                         missing value of the data value of this variable.  The 
+                         first two dimensions of the variable has to be the 
+                         longitude and the latitude dimension and the mask is 
+                         derived from the first 2D values of this variable even 
+                         if this data is a 3D, or 4D array. \n
+                coord_names:  A two-element array containing the longitude and 
+                             latitude variable names in a GRIDSPEC file if there 
+                             are multiple coordinates defined in the file. \n
+        The following optional arguments apply to a Grid created either from file 
+        or in memory. \n
             staggerloc: the stagger location of the coordinate data. \n
                 Argument values are: \n
                     2D: \n
@@ -66,32 +99,55 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
-        Optional arguments for creating a grid from file: \n
-            filename: the name of NetCDF file containing the Grid. \n
-            filetype: the input file type of the Grid. \n
-                Argument values are: \n
-                    FileFormat.SCRIP \n
-                    FileFormat.GRIDSPEC \n
-            isSphere: Set to True for a spherical grid, or False for regional. Defaults to True. \n
-            addCornerStagger: Set to True to use the information in the grid file to add the 
-                              corner stagger to the Grid. The coordinates for the corner stagger
-                              are required for conservative regridding. If not specified, 
-                              defaults to False. \n
-            addUserArea: Set to True to read in the cell area from the Grid file; otherwise, ESMF 
-                         will calculate it. \n
-            addMask: Set to True to generate the mask using the missing_value attribute defined 
-                     in 'varname'  \n
-            varname: If addMask is True, provide a variable name stored in the grid file and
-                     the mask will be generated using the missing value of the data value of
-                     this variable.  The first two dimensions of the variable has to be the
-                     longitude and the latitude dimension and the mask is derived from the
-                     first 2D values of this variable even if this data is 3D, or 4D array. \n
-            coordNames:  A two-element array containing the longitude and latitude variable names in a
-                         GRIDSPEC file if there are multiple coordinates defined in the file. \n
         Returns: \n
             Grid \n
         """
         from operator import mul
+
+        # initialize the from_file flag to False
+        from_file = False
+        
+        # in-memory grid
+        if max_index is not None:
+            # cast max_index if not already done
+            if max_index.dtype is not np.int32:
+                self.max_index = np.array(max_index, dtype=np.int32)
+            else:
+                self.max_index = max_index
+            # raise warnings on all from file args
+            if filename is not None:
+                raise GridArgumentWarning("filename is only used for grids created from file, this argument will be ignored.")
+            if filetype is not None:
+                raise GridArgumentWarning("filetype is only used for grids created from file, this argument will be ignored.")
+            if is_sphere is not None:
+                raise GridArgumentWarning("is_sphere is only used for grids created from file, this argument will be ignored.")
+            if add_corner_stagger is not None:
+                raise GridArgumentWarning("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+            if add_user_area is not None:
+                raise GridArgumentWarning("add_user_area is only used for grids created from file, this argument will be ignored.")
+            if add_mask is not None:
+                raise GridArgumentWarning("add_mask is only used for grids created from file, this argument will be ignored.")
+            if varname is not "":
+                raise GridArgumentWarning("varname is only used for grids created from file, this argument will be ignored.")
+            if coord_names is not "":
+                raise GridArgumentWarning("coord_names is only used for grids created from file, this argument will be ignored.")
+        # filename and filetype are required for from-file grids
+        elif (filename is None) or (filetype is None):
+            # raise error, need max_index to create in memory or filename to create from file
+            raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
+        # from file
+        else:
+            # set the from_file flag to True
+            from_file = True
+            #raise errors for all in-memory grid options
+            if max_index is not None:
+                raise GridArgumentWarning("max_index is only used for grids created in memory, this argument will be ignored.")
+            if num_peri_dims is not 0:
+                raise GridArgumentWarning("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+            if coord_sys is not None:
+                raise GridArgumentWarning("coord_sys is only used for grids created in memory, this argument will be ignored.")
+            if coord_typekind is not None:
+                raise GridArgumentWarning("coord_typekind is only used for grids created in memory, this argument will be ignored.")
 
         # ctypes stuff
         self.struct = None
@@ -107,12 +163,6 @@ class Grid(object):
         self.size = [None]
         # size_local holds the sizes according to the parallel distribution
         self.size_local = [None]
-
-        # grid properties
-        if max_index.dtype is not np.int32:
-            self.max_index = np.array(max_index, dtype=np.int32)
-        else:
-            self.max_index = max_index
 
         # placeholder for staggerlocs, True if present, False if not
         self.staggerloc = [None]
@@ -134,17 +184,22 @@ class Grid(object):
         # create the correct grid
         self.struct = None
 
-        from_file = False
-        if filename:
+        if from_file:
             #print 'Creating grid from ', filename
             self.struct = ESMP_GridCreateFromFile(filename, filetype,
-                                                  isSphere=isSphere,
-                                                  addCornerStagger=addCornerStagger,
-                                                  addUserArea=addUserArea,
-                                                  addMask=addMask, varname=varname,
-                                                  coordNames=coordNames)
+                                                  isSphere=is_sphere,
+                                                  addCornerStagger=add_corner_stagger,
+                                                  addUserArea=add_user_area,
+                                                  addMask=add_mask, varname=varname,
+                                                  coordNames=coord_names)
+            # grid rank
+            self.rank = ESMP_ScripInqRank(filename)
+            
+            # grid dims            
+            self.max_index = ESMP_ScripInqDims(filename)
+            
+            # grid_bounds
             self.verify_grid_bounds(staggerloc)
-            from_file = True
         else:
             # ctypes stuff
             self.struct = ESMP_GridStruct()
@@ -159,13 +214,14 @@ class Grid(object):
             else:
                 raise TypeError("Number of periodic dimension should be 2 or 3")
 
+            # grid rank
+            self.rank = self.max_index.size
+
         # grid type
         if coord_typekind == None:
             self.type = TypeKind.R8
         else:
             self.type = coord_typekind
-        # grid rank
-        self.rank = self.max_index.size
 
         # staggerloc
         self.staggerloc = [False for a in range(2**self.rank)]

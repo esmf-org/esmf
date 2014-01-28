@@ -316,9 +316,9 @@ extrapolation to destination points outside the unmasked source Field.
 Create a Grid or Mesh From File
 ============
 
-ESMPy can create Grid or Mesh objects from specification in a NetCDF
-file.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
-formats.  Grid files can be in SCRIP or GRIDSPEC formats.
+ESMPy can create Grid or Mesh objects from NetCDF files in a variety
+of formats.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
+formats.  Grid files can be in SCRIP format.
 
 When creating a Mesh from a SCRIP format file, there are a number of
 options to control the output Mesh. The data is located at the center
@@ -334,7 +334,8 @@ weights are properly generated for the cell centers in the file.
 
 A Mesh may also be created with boolean flags to specify whether or not to
 add an area property to the Mesh (add_user_area), or to add a mask
-(add_mask) held by the NetCDF variable indicated in the optional argument, varname.
+(add_mask) held by the NetCDF variable indicated in the optional argument, 
+varname.
 
 A number of optional boolean arguments are also supported to create a
 structured Grid from a file.  These include isSphere to indicate whether
@@ -343,10 +344,7 @@ stagger information to the Grid for conservative regridding,
 addUserArea to specify whether to read in the cell area from the
 NetCDF file or to calculate it, and addMask
 to add a mask held by the NetCDF variable indicated in optional
-argument, varname.   In addition, for GRIDSPEC format files,
-coordNames argument can be used to specify the coordinate variable
-names to use in the case where multiple options exist in the NetCDF
-file.
+argument, varname.   
 
 ============
 Interface
@@ -374,7 +372,7 @@ Named constants
 Named constants                                  Description
 ===============================================  ==============================
 :download:`CoordSys <CoordSys.rst>`              Specify the coordinate system of a Grid
-:download:`DecompFlag <DecompFlag.rst>`              Specify how DistGrid elements are decomposed over DEs
+:download:`DecompFlag <DecompFlag.rst>`          Specify how DistGrid elements are decomposed over DEs
 :download:`FileFormat <FileFormat.rst>`          Specify the format of a data file
 :download:`GridItem <GridItem.rst>`              Specify a mask or area item on a Grid
 :download:`LogKind <LogKind.rst>`                Specify how much logging should be done
@@ -385,7 +383,7 @@ Named constants                                  Description
 :download:`StaggerLoc <StaggerLoc.rst>`          Specify the position for data in a Grid cell     
 :download:`TypeKind <TypeKind.rst>`              Specify the type and kind of data
 :download:`UnmappedAction <UnmappedAction.rst>`  Specify which action to take with respect to unmapped destination points
-:download:`PoleMethod <PoleMethod.rst>`              Specify  which type of artificial pole to construct on the source Grid for regridding
+:download:`PoleMethod <PoleMethod.rst>`          Specify  which type of artificial pole to construct on the source Grid for regridding
 ===============================================  ==============================
 
 
@@ -408,8 +406,8 @@ Create a Grid
 Create a Grid From File
 -----------------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/regrid_from_file_test/regrid_check.py
-        :pyobject: mesh_check
+    .. literalinclude:: /../examples/grid_create_from_file.py
+        :pyobject: grid_create
 
 --------------
 Create a Field

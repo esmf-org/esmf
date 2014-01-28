@@ -139,6 +139,7 @@ class Field(ma.MaskedArray):
 
         # link the field data
         data = cls.link_field_data(struct, grid, staggerloc2, typekind)
+        data[...] = 0
 
         # obtain the mask
         if isinstance(grid, Grid):

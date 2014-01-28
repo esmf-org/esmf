@@ -1,5 +1,5 @@
 DecompFlag
-========
+==========
 
 This flag indicates how DistGrid elements are decomposed over DEs.
 

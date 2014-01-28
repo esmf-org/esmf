@@ -50,9 +50,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         is_mesh = True
     else:
         print "Creating ESMF.Grid object"
-        grid_dims = ESMF.ESMP_ScripInqDims(filename)
-        print filename + " dims are ", grid_dims, "isSphere=", isSphere
-        grid_or_mesh = ESMF.Grid(grid_dims, filename=filename, filetype=filetype,
+        grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype,
                          staggerloc=ESMF.StaggerLoc.CENTER, isSphere=isSphere)
     return grid_or_mesh, is_mesh
 

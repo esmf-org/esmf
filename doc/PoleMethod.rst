@@ -1,5 +1,5 @@
 PoleMethod
-=======
+==========
 
 Indicates which type of artificial pole to construct on the source 
 Grid for regridding.
