@@ -7,7 +7,9 @@ building and coupling weather, climate, and related models.  ESMF has a robust,
 parallel and scalable remapping package, used to generate remapping weights.
 It can handle a wide variety of grids and options:  logically rectangular grids
 and unstructured meshes; regional or global grids; 2D or 3D; and pole and
-masking options.
+masking options.  ESMF also has capabilities to read grid information
+from NetCDF files in a variety of formats, including the evolving Climate and 
+Forecast (CF) GridSpec and UGRID conventions. 
 
 ESMPy supports a single-tile logically rectangular discretization type called
 Grid and an unstructured discretization type called Mesh (ESMF also

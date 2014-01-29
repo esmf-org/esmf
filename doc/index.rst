@@ -65,25 +65,30 @@ The following packages are *optional*:
 
 * mpi4py - python bindings to MPI
 
-================
+============
 Installation
-================
+============
 
 Installation of ESMPy requires a pointer to a file named esmf.mk inside of an
 ESMF installation.  This file resides in a directory which looks like:
 
-<ESMF_INSTALL_DIR>/lib/lib<g|O>/<platform>/esmf.mk
+<ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
 If the ESMFMKFILE flag is set when building ESMPy then it will not need to be
 referenced again.  If not, an environment variable of the same name must be set
 with the path to the esmf.mk file EVERY time that a new shell is initiated.
 
-The ESMPy installation can be built in a custom location using the
+The ESMPy build can be installed in a custom location using the
 --prefix, --home, or --install-base flags to the install command.  If this
 is done, then this location needs to be added to the PYTHONPATH environment
 variable in the user's shell EVERY time that a new shell is initiated.  If a
-customized build location is not specified, ESMPy will be built in the standard
-Python package installation directory on that particular machine.
+customized install location is not specified, ESMPy will be installed in the 
+standard Python package installation directory on that particular machine.
+
+Note: The ESMPy build does not have to be installed to be used.  The 
+PYTHONPATH environment variable can simply be pointed to the directory 
+containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone) 
+after the build command.
 
 As usual, any command followed by --help should print out some information
 on what options are available.
@@ -112,7 +117,7 @@ Use
 
 To use this package in an external program, import it with:
 
-import ESMF
+    import ESMF
 
 ----------
 Validation
@@ -120,27 +125,32 @@ Validation
 
 The setup.py file can be used to run all of the ESMPy tests, like this:
 
-python setup.py test
+    python setup.py test
 
 or:
 
-python setup.py test_regrid
+    python setup.py test_regrid
 
-python setup.py test_regrid_from_file
+    python setup.py test_regrid_from_file
 
-python setup.py test_all 
+    python setup.py test_all 
 
-NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.
+NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
+The "test_regrid_from_file_dryrun" command will simply download the test 
+files without actually running them (allowing the stress on the machine to
+be applied to bandwidth first, and then memory).
 
 Alternatively, if the nose package is available, the tests can be run with:
 
-nosetests
+    nosetests
 
 Individual tests can be run with nose using the following format:
 
-nosetests <file>:<test>
+    nosetests <file>:<test>
 
-e.g.  nosetests src/ESMF/test/unit_test.py:field_regrid_test
+e.g.  
+
+    nosetests src/ESMF/test/unit_test.py:field_regrid_test
 
 ===========
 Limitations
@@ -150,12 +160,14 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-* There is no FieldBundle class, only single Fields
-* There is no support for tripole or multi-tile Grids
-
-* ESMPy cannot use an ESMF installation that is built with external LAPACK support.
+- There is no FieldBundle class, only single Fields
+- There is no support for tripole or multi-tile Grids
+- ESMPy cannot use an ESMF installation that is built with external LAPACK 
+  support.
+- GridSpec format grids are cannot be read from file at this time.
 
 Testing related:
+
 - Only tested with gfortran on Darwin and Linux platforms
 
 
@@ -312,9 +324,9 @@ extrapolation to destination points outside the unmasked source Field.
 
 
 
-============
+===============================
 Create a Grid or Mesh From File
-============
+===============================
 
 ESMPy can create Grid or Mesh objects from NetCDF files in a variety
 of formats.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
@@ -346,9 +358,9 @@ NetCDF file or to calculate it, and addMask
 to add a mask held by the NetCDF variable indicated in optional
 argument, varname.   
 
-============
+=========
 Interface
-============
+=========
 
 -------
 Classes
@@ -452,8 +464,6 @@ Compare Field results to exact solution
 ----------------
 Field regridding
 ----------------
-
-.. automodule:: ../src/ESMF/test/regrid_test/field_regridding_test
 
 The code for this tutorial can be downloaded `here <http://esmfcontrib.cvs.sourceforge.net/viewvc/esmfcontrib/python/ESMPy/tutorial/field_regridding.py?view=log>`_.
 

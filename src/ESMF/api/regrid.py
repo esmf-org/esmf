@@ -80,6 +80,7 @@ class Regrid(object):
         Returns: \n
             Regrid \n
         """
+        
         # routehandle storage
         self.routehandle = 0
 
