@@ -2064,7 +2064,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[6.3.0] Added argument {\tt userRoutineFound}.
+! \item[6.3.0r] Added argument {\tt userRoutineFound}.
 !              The new argument provides a way to test availability without
 !              causing error conditions.
 ! \end{description}
