@@ -54,15 +54,19 @@ class Mesh(object):
                         FileFormat.UGRID \n
             Optional arguments for creating a Mesh from file: \n
                 convert_to_dual: a boolean value to specify if the dual 
-                                 Mesh should be calculated. \n
+                                 Mesh should be calculated. 
+                                 Defaults to True. \n
                 add_user_area: a boolean value to specify if an area 
                                property should be added to the mesh 
-                               (numpy array). \n
+                               (numpy array). Defaults to False. \n
                 meshname: a string value specifying the name of the 
-                          Mesh. \n
+                          Mesh metadata variable in a UGRID file. 
+                          Defaults to the empty string. \n
                 add_mask: a boolean value to specify if a mask should 
-                          be added to the Mesh (numpy array). \n
-                varname: a string to specify a varname. \n
+                          be added to the Mesh (numpy array). 
+                          Defaults to False. \n
+                varname: a string to specify a variable name for the mask
+                         if add_mask is True.  Defaults to the empty string. \n
         Returns: \n
             Mesh \n
         """

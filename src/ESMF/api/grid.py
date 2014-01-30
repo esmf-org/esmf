@@ -69,19 +69,22 @@ class Grid(object):
                                     are required for conservative regridding. If 
                                     not specified, defaults to False. \n
                 add_user_area: Set to True to read in the cell area from the Grid 
-                               file; otherwise, ESMF will calculate it. \n
+                               file; otherwise, ESMF will calculate it. 
+                               Defaults to False. \n
                 add_mask: Set to True to generate the mask using the missing_value 
-                          attribute defined in 'varname'  \n
+                          attribute defined in 'varname'.  Defaults to False. \n
                 varname: If add_mask is True, provide a variable name stored in 
                          the grid file and the mask will be generated using the 
                          missing value of the data value of this variable.  The 
                          first two dimensions of the variable has to be the 
                          longitude and the latitude dimension and the mask is 
                          derived from the first 2D values of this variable even 
-                         if this data is a 3D, or 4D array. \n
+                         if this data is a 3D, or 4D array. Defaults to the 
+                         empty string. \n
                 coord_names:  A two-element array containing the longitude and 
                              latitude variable names in a GRIDSPEC file if there 
-                             are multiple coordinates defined in the file. \n
+                             are multiple coordinates defined in the file. 
+                             Defaults to the empty string. \n
         The following optional arguments apply to a Grid created either from file 
         or in memory. \n
             staggerloc: the stagger location of the coordinate data. \n
