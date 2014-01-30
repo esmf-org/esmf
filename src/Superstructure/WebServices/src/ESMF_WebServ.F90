@@ -939,6 +939,10 @@ contains
 !   Process Controller application manages this component service, then the
 !   clientId is provided to the component service application in the command
 !   line.  Otherwise, the clientId is not necessary.
+! \item[{[registrarHost]}]
+!   Name of the host on which the Registrar is running.  Needed so the
+!   component service can notify the Registrar when it is ready to receive
+!   requests from clients.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1114,6 +1118,10 @@ contains
 !   Process Controller application manages this component service, then the
 !   clientId is provided to the component service application in the command
 !   line.  Otherwise, the clientId is not necessary.
+! \item[{[registrarHost]}]
+!   Name of the host on which the Registrar is running.  Needed so the
+!   component service can notify the Registrar when it is ready to receive
+!   requests from clients.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
