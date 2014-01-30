@@ -484,146 +484,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilIOMkDir"
-!BOP
-! !IROUTINE: ESMF_UtilIOMkDir - Create a directory in the file system
-!
-! !INTERFACE:
-  subroutine ESMF_UtilIOMkDir (pathName, keywordEnforcer,  &
-      mode, parentsFlag, relaxedFlag,  &
-      rc)
-!
-! !PARAMETERS:
-    character(*), intent(in)            :: pathName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,      intent(in),  optional :: mode
-    logical,      intent(in),  optional :: parentsFlag
-    logical,      intent(in),  optional :: relaxedFlag
-    integer,      intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Call the system-dependent routine to create a directory in the file system.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[pathName]
-!       Name of the directory to be created.
-!     \item[{[mode]}]
-!       File permission mode.  If not specified on POSIX-compliant systems,
-!       the default is {\tt o'755'}.  On native Windows, this argument is
-!       ignored and default security settings are used.
-!     \item[{[parentsFlag]}]
-!       When set to {\tt .true.}, create parent directories as needed.
-!       If not specified, the default is {\tt .false.}.
-!     \item[{[relaxedFlag]}]
-!       When set to {\tt .true.}, if the directory already exists, {\tt rc}
-!       will be set to {\tt ESMF\_SUCCESS} instead of an error.
-!       If not specified, the default is {\tt .false.}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-    integer :: mode_local
-    type(ESMF_Logical) :: pflag, rflag  
-    integer :: localrc
-
-    if (present(rc)) rc = ESMF_FAILURE
-
-    mode_local = o'755'
-    if (present (mode)) mode_local = mode
-
-    pflag = .false.
-    if (present (parentsFlag)) pflag = parentsFlag
-    if (pflag == ESMF_TRUE) then
-      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc))  &
-      return
-    end if
-
-    rflag = .false.
-    if (present (relaxedFlag)) rflag = relaxedFlag
-
-    call c_esmc_makedirectory (pathname, mode_local, rflag, localrc)
-    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc))  &
-      return
-
-    if (present (rc)) then
-      rc = localrc
-    end if
-
-  end subroutine ESMF_UtilIOMkDir
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilIORmDir"
-!BOP
-! !IROUTINE: ESMF_UtilIORmDir - Remove a directory from the file system
-!
-! !INTERFACE:
-  subroutine ESMF_UtilIORmDir (pathName, keywordEnforcer,  &
-      filesFlag, relaxedFlag, rc)
-!
-! !PARAMETERS:
-    character(*), intent(in)            :: pathName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,      intent(in),  optional :: filesFlag
-    logical,      intent(in),  optional :: relaxedFlag
-    integer,      intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Call the system-dependent routine to remove a directory from the file
-!   system.  Note that the directory must be empty in order to be successfully
-!   removed.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[pathName]
-!       Name of the directory to be removed.
-!     \item[{[filesFlag]}]
-!       When set to {\tt .true.}, remove the directory, including any contained
-!       files.  Contained directories are not removed.  If not specified,
-!       the default is {\tt .false.}.
-!     \item[{[relaxedFlag]}]
-!       If set to {\tt .true.}, and if the specified directory does not exist,
-!       the error is ignored and {\tt rc} will be set to {\tt ESMF\_SUCCESS}.
-!       If not specified, the default is {\tt .false.}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-    integer :: localrc
-    type(ESMF_Logical) :: fflag  
-    type(ESMF_Logical) :: rflag  
-
-    if (present(rc)) rc = ESMF_FAILURE
-
-    fflag = .false.
-    if (present (filesFlag)) fflag = filesFlag
-    if (fflag == ESMF_TRUE) then
-      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc))  &
-      return
-    end if
-
-    rflag = .false.
-    if (present (relaxedFlag)) rflag = relaxedFlag
-
-    call c_esmc_removedirectory (pathname, rflag, localrc)
-    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc))  &
-      return
-
-    if (present (rc)) then
-      rc = localrc
-    end if
-
-  end subroutine ESMF_UtilIORmDir
-
-!-------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilIOGetCWD"
 !BOP
 ! !IROUTINE: ESMF_UtilIOGetCWD - Get the current directory
@@ -663,6 +523,212 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
   end subroutine ESMF_UtilIOGetCWD
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIOMkDir"
+!BOP
+! !IROUTINE: ESMF_UtilIOMkDir - Create a directory in the file system
+!
+! !INTERFACE:
+!  subroutine ESMF_UtilIOMkDir (pathName, keywordEnforcer,  &
+!      mode, relaxedFlag,  &
+!      rc)
+!
+! !PARAMETERS:
+!    character(*), intent(in)            :: pathName
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,      intent(in),  optional :: mode
+!    logical,      intent(in),  optional :: relaxedFlag
+!    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to create a directory in the file system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be created.
+!     \item[{[mode]}]
+!       File permission mode.  If not specified on POSIX-compliant systems,
+!       the default is {\tt o'755'}.  On native Windows, this argument is
+!       ignored and default security settings are used.
+!     \item[{[relaxedFlag]}]
+!       When set to {\tt .true.}, if the directory already exists, {\tt rc}
+!       will be set to {\tt ESMF\_SUCCESS} instead of an error.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+!TODO: Review and implement parentsFlag for future release.
+!BOPI
+! !IROUTINE: ESMF_UtilIOMkDir - Create a directory in the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIOMkDir (pathName, keywordEnforcer,  &
+      mode, parentsFlag, relaxedFlag,  &
+      rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,      intent(in),  optional :: mode
+    logical,      intent(in),  optional :: parentsFlag
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to create a directory in the file system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be created.
+!     \item[{[mode]}]
+!       File permission mode.  If not specified on POSIX-compliant systems,
+!       the default is {\tt o'755'}.  On native Windows, this argument is
+!       ignored and default security settings are used.
+!     \item[{[parentsFlag]}]
+!       When set to {\tt .true.}, create parent directories as needed.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[relaxedFlag]}]
+!       When set to {\tt .true.}, if the directory already exists, {\tt rc}
+!       will be set to {\tt ESMF\_SUCCESS} instead of an error.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
+
+    integer :: mode_local
+    type(ESMF_Logical) :: pflag, rflag  
+    integer :: localrc
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    mode_local = o'755'
+    if (present (mode)) mode_local = mode
+
+    pflag = .false.
+    if (present (parentsFlag)) pflag = parentsFlag
+    if (pflag == ESMF_TRUE) then
+      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+    end if
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_makedirectory (pathname, mode_local, rflag, localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIOMkDir
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIORmDir"
+!BOP
+! !IROUTINE: ESMF_UtilIORmDir - Remove a directory from the file system
+!
+! !INTERFACE:
+!  subroutine ESMF_UtilIORmDir (pathName, keywordEnforcer,  &
+!      relaxedFlag, rc)
+!
+! !PARAMETERS:
+!    character(*), intent(in)            :: pathName
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    logical,      intent(in),  optional :: relaxedFlag
+!    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to remove a directory from the file
+!   system.  Note that the directory must be empty in order to be successfully
+!   removed.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be removed.
+!     \item[{[relaxedFlag]}]
+!       If set to {\tt .true.}, and if the specified directory does not exist,
+!       the error is ignored and {\tt rc} will be set to {\tt ESMF\_SUCCESS}.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+!TODO: Review and implement filesFlag for future release.
+!BOPI
+! !IROUTINE: ESMF_UtilIORmDir - Remove a directory from the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIORmDir (pathName, keywordEnforcer,  &
+      filesFlag, relaxedFlag, rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,      intent(in),  optional :: filesFlag
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to remove a directory from the file
+!   system.  Note that the directory must be empty in order to be successfully
+!   removed.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be removed.
+!     \item[{[filesFlag]}]
+!       When set to {\tt .true.}, remove the directory, including any contained
+!       files.  Contained directories are not removed.  If not specified,
+!       the default is {\tt .false.}.
+!     \item[{[relaxedFlag]}]
+!       If set to {\tt .true.}, and if the specified directory does not exist,
+!       the error is ignored and {\tt rc} will be set to {\tt ESMF\_SUCCESS}.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
+
+    integer :: localrc
+    type(ESMF_Logical) :: fflag  
+    type(ESMF_Logical) :: rflag  
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    fflag = .false.
+    if (present (filesFlag)) fflag = filesFlag
+    if (fflag == ESMF_TRUE) then
+      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+    end if
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_removedirectory (pathname, rflag, localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIORmDir
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
