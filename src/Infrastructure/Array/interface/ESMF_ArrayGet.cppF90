@@ -789,8 +789,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! Local variables @\
     integer                             :: localrc     ! local return code @\
-    integer                             :: rank @\
-    type(ESMF_TypeKind_Flag)                 :: typekind @\
+    integer                             :: localDeArg @\
     type(ESMF_LocalArray)               :: localarray @\
 @\
     ! Initialize return code @\
@@ -800,30 +799,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments @\
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc) @\
 @\
-    ! Check consistency @\
-    call ESMF_ArrayGet(array, typekind=typekind, rank=rank, rc=localrc) @\
+    ! Deal with optional localDe argument @\
+    if (present(localDe)) then @\
+      localDeArg = localDe @\
+    else @\
+      localDeArg = 0 ! default @\
+    endif @\
+    ! Call into the C++ interface to get LocalArray for localDe @\
+    call c_ESMC_ArrayGetLArray(array, localDeArg, localarray, localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    ! Require farrayPtr typekind to match Array typekind @\
-    if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-        msg="- farrayPtr typekind does not match Array typekind", & @\
-        ESMF_CONTEXT, rcToReturn=rc) @\
-      return @\
-    endif @\
-    ! Require farrayPtr rank to match Array rank @\
-    if (rank /= mrank) then @\
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-        msg="- farrayPtr rank does not match Array rank", & @\
-        ESMF_CONTEXT, rcToReturn=rc) @\
-      return @\
-    endif @\
-@\
+    ! Must set the initializer macro to satisfy Fortran interface @\
+    call ESMF_LocalArraySetInitCreated(localarray, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
     ! Obtain the native Fortran array pointer via the LocalArray interface @\
-    call ESMF_ArrayGet(array, localDe=localDe, localarray=localarray, rc=localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_LocalArrayGet(localarray, farrayPtr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) @\
+    call ESMF_LocalArrayGet(localarray, farrayPtr, & @\
+      datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\

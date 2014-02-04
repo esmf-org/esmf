@@ -781,10 +781,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       farrayPtr=farrayPtr, rc=localrc) @\
 @\
     if (ESMF_LogFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    call ESMF_FieldGetBounds(field, localDe=localDe, & @\
+    if (present(exclusiveLBound) .or. & @\
+      present(exclusiveUBound) .or. & @\
+      present(exclusiveCount) .or. & @\
+      present(computationalLBound) .or. & @\
+      present(computationalUBound) .or. & @\
+      present(computationalCount) .or. & @\
+      present(totalLBound) .or. &  @\
+      present(totalUBound) .or. &  @\
+      present(totalCount)) then  @\
+@\
+      call ESMF_FieldGetBounds(field, localDe=localDe, & @\
         exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, & @\
         exclusiveCount=exclusiveCount, & @\
         computationalLBound=computationalLBound, & @\
@@ -794,9 +804,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         totalCount=totalCount, & @\
         rc = localrc) @\
 @\
-    if (ESMF_LogFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    endif @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
 @\

@@ -219,7 +219,8 @@ extern "C" {
       // opt_localArrayList was provided
       if (*len_localArrayList < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_localArrayList must provide localDeCount elements", ESMC_CONTEXT, rc);
+          "- opt_localArrayList must provide localDeCount elements",
+          ESMC_CONTEXT, rc);
         return;
       }
       // opt_localArrayList has correct number of elements
@@ -613,6 +614,27 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_arraygetlarray)(ESMCI::Array **ptr, int *localDe,
+    ESMCI::LocalArray **localArray, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraygetlarray()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // helper variable
+    int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
+    // check localDe
+    if ((*localDe < 0) || (*localDe >= localDeCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        "- localDe is out of range.", ESMC_CONTEXT, rc);
+      return;
+    }
+    // get the LocalArray for localDe
+    *localArray = ((*ptr)->getLocalarrayList())[*localDe];
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
                                 char *file,
                                 char *variableName, int *len_variableName,
