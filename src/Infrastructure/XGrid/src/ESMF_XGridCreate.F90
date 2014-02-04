@@ -268,17 +268,20 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !  uniquely determined by the Grids or Meshes provided in {\tt sideA} and {\tt sideB}. User can supply
 !  a single {\tt ESMF\_Grid} or an array of {\tt ESMF\_Grid} on either side of the 
 !  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Grid} or {\tt ESMF\_Mesh} in {\tt sideA} or {\tt sideB},
-!  a merging process concatenates all the {\tt ESMF\_Grid}s into a super mesh represented
+!  a merging process concatenates all the {\tt ESMF\_Grid}s and {\tt ESMF\_Mesh}es 
+!  into a super mesh represented
 !  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
 !  Grid or Mesh objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
-!  the corners of a Grid cell. XGrid created this way can be potentially memory expensive, 
-!  memory can be released by destroying XGrid after communication routehandles are computed using
-!  {\tt ESMF\_FieldRegridStore()} method.
+!  the corners of a Grid or Mesh cell. XGrid creation can be potentially memory expensive given the
+!  size of the input Grid and Mesh objects. By default, the super mesh is not stored
+!  to reduce memory usage. 
+!  Once communication routehandles are computed using {\tt ESMF\_FieldRegridStore()} method through
+!  XGrid, all memory can be released by destroying the XGrid.
 ! 
 !  It is erroneous to specify identical Grid or Mesh object in {\tt sideA} and
 !  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single 
 !  Grid or Mesh object, then it's erroneous
-!  if the two Grids or Meshes do not overlap. 
+!  if the two Grids or Meshes are spatially disjoint. 
 !  It is also erroneous to specify Grid or Mesh object in {\tt sideA} or {\tt sideB} 
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}.  
 !
@@ -455,7 +458,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     endif
 
-    !TODO: need to check Meshes too.
+    !TODO: need to check Meshes are initialized properly too.
     if(present(sideAMesh)) then
       ngrid_a = size(sideAMesh, 1)
       if(present(sideAMeshPriority)) then
@@ -561,7 +564,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       enddo
     endif
 
-    ! at this point, the input priority list have valid entries within correct range.
+    ! at this point, the input priority lists have valid entries within correct range.
     ! initialize XGridType object and its base object
     nullify(xgtype)
     nullify(ESMF_XGridCreate%xgtypep)
@@ -744,8 +747,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(i .gt. 2) then
-          !call ESMF_MeshDestroy(meshA, rc=localrc)
-          ! meshA is only a pointer type of mesh at this point, call the C api to destroy it
+          ! the intermediate meshA is only a pointer type of mesh at this point, 
+          ! call the C api to destroy it
           call C_ESMC_MeshDestroy(meshA%this, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -796,7 +799,6 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(i .gt. 2) then
-          !call ESMF_MeshDestroy(meshB, rc=localrc)
           call C_ESMC_MeshDestroy(meshB%this, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -825,6 +827,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into streamlined Regrid
+    ! input:  MeshA: merged mesh on side A
+    ! input:  MeshB: merged mesh on side B
+    ! output: Meshp: merged mesh in the middle (the super mesh)
     compute_midmesh = 1
     call c_esmc_xgridregrid_create(vm, meshA, meshB, &
       meshp, compute_midmesh, &
