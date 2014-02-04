@@ -1559,6 +1559,19 @@ end function ESMF_MeshCreateFromDG
     ! The C side has been created
     ESMF_MeshCreateFromMeshes%isCMeshFreed=.false.
 
+    ! Create two distgrids, one for nodes and one for elements
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromMeshes%this, &
+         ESMF_MeshCreateFromMeshes%nodal_distgrid, &
+         ESMF_MeshCreateFromMeshes%numOwnedNodes, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromMeshes%this, &
+         ESMF_MeshCreateFromMeshes%element_distgrid, &
+         ESMF_MeshCreateFromMeshes%numOwnedElements, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
     ! Set as fully created 
     ESMF_MeshCreateFromMeshes%hasSplitElem=.false.
 
