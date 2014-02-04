@@ -56,6 +56,8 @@ program ESMF_ArrayDataUTest
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdataSlice
   integer (ESMF_KIND_I4),dimension(:), pointer :: fptr, fptrOut
+  integer (ESMF_KIND_I4),dimension(:,:), pointer  :: fptrOutWrongRank
+  real (ESMF_KIND_R4),dimension(:), pointer       :: fptrOutWrongTK
 
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Array)    :: array, arrayOut, array_new
@@ -547,6 +549,22 @@ program ESMF_ArrayDataUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   arrayOut = ESMF_ArrayCreate(distgrid, ESMF_TYPEKIND_I4, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Trying to access data with pointer of incorrect rank."
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayOut, farrayPtr=fptrOutWrongRank, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Trying to access data with pointer of incorrect typekind."
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayOut, farrayPtr=fptrOutWrongTK, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
