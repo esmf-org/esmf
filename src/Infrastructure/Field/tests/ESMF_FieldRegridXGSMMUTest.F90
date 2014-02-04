@@ -2528,6 +2528,11 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_XGridDestroy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     rc = ESMF_SUCCESS
 
   end subroutine test_regrid2xgSph
