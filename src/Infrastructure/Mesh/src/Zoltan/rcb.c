@@ -286,7 +286,7 @@ static int rcb_fn(
                                    to be assigned to each partition.    */
 )
 {
-  char    yo[] = "rcb_fn";
+  const char yo[] = "rcb_fn";
   int     proc,nprocs;              /* my proc id, total # of procs */
   struct Dot_Struct *dotpt;         /* temporary pointer to rcb->Dots. */
   int     pdotnum;                  /* # of dots - decomposition changes it */
@@ -1242,7 +1242,7 @@ static int set_preset_dir(
    determine number of cuts in each direction, and then assign those
    cuts to an order according to order of directions */
 
-char *yo = "set_preset_dir";
+const char *yo = "set_preset_dir";
 int ix[3];                        /* temporaries for preset_dir */
 double wx, wy, wz;                /* width for preset_dir */
 int tmp_nparts;
@@ -1382,7 +1382,7 @@ static int serial_rcb(
   double max_aspect_ratio 
 )
 {
-  char *yo = "serial_rcb";
+  const char *yo = "serial_rcb";
   int ierr = ZOLTAN_OK;
   int i, j;
   int dim;

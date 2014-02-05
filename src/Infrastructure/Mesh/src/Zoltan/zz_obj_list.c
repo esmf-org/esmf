@@ -41,7 +41,7 @@ int Zoltan_Get_Obj_List(
   int **parts
 )
 {
-  char *yo = "Zoltan_Get_Obj_List";
+  const char *yo = "Zoltan_Get_Obj_List";
   int i, n;
   int num_gid_entries = zz->Num_GID;
   int num_lid_entries = zz->Num_LID;

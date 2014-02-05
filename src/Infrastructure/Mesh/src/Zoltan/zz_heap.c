@@ -52,7 +52,7 @@ static void heapify (HEAP*, int);
 
 int Zoltan_Heap_Init (ZZ *zz, HEAP *h, int space)
 {
-char *yo = "Zoltan_Heap_Init";
+const char *yo = "Zoltan_Heap_Init";
 int i;
 
   h->space = space;
@@ -101,7 +101,7 @@ void Zoltan_Heap_Free (HEAP *h)
 int Zoltan_Heap_Check (HEAP *h)
 {
 int i, left, right;
-static char *yo = "Zoltan_Heap_Check";
+static const char *yo = "Zoltan_Heap_Check";
 
   for (i = 0; i < h->n; i++) {
      left  = 2*i + 1;
@@ -123,7 +123,7 @@ static char *yo = "Zoltan_Heap_Check";
 
 int Zoltan_Heap_Input (HEAP *h, int element, float value)
 {
-static char *yo = "Zoltan_Heap_Input";
+static const char *yo = "Zoltan_Heap_Input";
 
   if (element >= h->space) {
      ZOLTAN_PRINT_ERROR(0, yo, "Inserted heap element out of range!\n");

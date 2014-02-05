@@ -39,7 +39,7 @@ int Zoltan_PHG_PaToH(
   PHGPartParams *hgp     /* Input: hypergraph parameters */
 )
 {
-char *yo = "Zoltan_HG_PaToH";
+const char *yo = "Zoltan_HG_PaToH";
 
 #ifndef ZOLTAN_PATOH
   ZOLTAN_PRINT_ERROR(zz->Proc, yo, "PaToH method selected but Zoltan is not"
@@ -144,7 +144,7 @@ static int scale_round_weights(
   int *nonint;
   float *scale, *sum_wgt, *max_wgt;
   char msg[256];
-  static char *yo = "scale_round_weights";
+  static const char *yo = "scale_round_weights";
 
   ierr = ZOLTAN_OK;
 

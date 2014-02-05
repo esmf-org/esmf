@@ -83,7 +83,7 @@ int Zoltan_LB_Eval (ZZ *zz, int print_stats,
  */
 
 {
-  char *yo = "Zoltan_LB_Eval";
+  const char *yo = "Zoltan_LB_Eval";
   int i, j, k, max_edges, num_edges;
   int cuts, comm_vol;
   int num_obj = 0, num_adj, num_boundary, ierr, compute_part;
@@ -847,7 +847,7 @@ static int get_nbor_parts(
 )
 {
 /* Function to retrieve the partition number for neighboring nodes. */
-char *yo = "get_nbor_parts";
+const char *yo = "get_nbor_parts";
 struct Zoltan_DD_Struct *dd = NULL;
 int *owner = NULL;
 int ierr;

@@ -110,7 +110,7 @@ int Zoltan_PHG_CoarsePartition(
  * using different random numbers (and possibly also
  * different algorithms) and selects the best.
  */
-char *yo = "Zoltan_PHG_CoarsePartition";
+const char *yo = "Zoltan_PHG_CoarsePartition";
 int ierr = ZOLTAN_OK;
 int i, si, j;
 static PHGComm scomm;          /* Serial communicator info */
@@ -554,7 +554,7 @@ static int coarse_part_random (
 )
 {
     int i, err=0, *order=NULL;
-    char *yo = "coarse_part_random";
+    const char *yo = "coarse_part_random";
 
     if (!(order  = (int*) ZOLTAN_MALLOC (hg->nVtx*sizeof(int)))) {
         ZOLTAN_FREE ((void**) &order);
@@ -658,7 +658,7 @@ static int greedy_order (
   double damp_factor, psize_sum= 0.0;
   char msg[128];
   HEAP h[2];
-  static char *yo = "greedy_order";
+  static const char *yo = "greedy_order";
 
   bfsnumber = 0;  /* Assign next vertex this bfs number */
   pnumber = 0;    /* Assign next vertex this partition number */
@@ -907,7 +907,7 @@ static int coarse_part_greedy (
   int start, *order=NULL;
   int err = ZOLTAN_OK;
   const int pri_mode = 0;  /* set to 0; other options not supported any more  */
-  char *yo = "coarse_part_greedy";
+  const char *yo = "coarse_part_greedy";
 
   if (hg->nVtx == 0) return ZOLTAN_OK; /* Nothing to do. */
 
@@ -953,7 +953,7 @@ struct {
   int rank;
 } local[2], global[2];
 
-static char *yo = "pick_best";
+static const char *yo = "pick_best";
 int i, mybest;
 float cut, bal;
 int err = ZOLTAN_OK;

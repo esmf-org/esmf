@@ -106,7 +106,7 @@ int Zoltan_HG_Hypergraph_Pin_Callbacks(
 /* for the edges which our pins are part of, we we need to share       */
 /* those while redistributing the pins.                                */
 
-static char *yo = "Zoltan_HG_Hypergraph_Pin_Callbacks";
+static const char *yo = "Zoltan_HG_Hypergraph_Pin_Callbacks";
 int ierr = ZOLTAN_OK;
 int i, j, w;
 ZOLTAN_ID_PTR vtx_GID=NULL, edg_GID=NULL, edg_LID, egptr, elptr;
@@ -338,7 +338,7 @@ static int distribute_edges(ZZ *zz, int *num_lists, int *num_pins,
     int need_weights, int max_need_weights, char *out_need_list,
     int ew_table_size, void *htptr, float **edg_weights)
 {
-static char *yo = "distribute_edges";
+static const char *yo = "distribute_edges";
 int nprocs = zz->Num_Proc;
 int rank = zz->Proc;
 int lenGID = zz->Num_GID;
@@ -668,7 +668,7 @@ static int exchange(ZZ *zz, int proc, int *change, void *htptr,
      float *out_weights, int out_weights_size,
      float *in_weights, int in_weights_size)
 {
-static char *yo = "exchange";
+static const char *yo = "exchange";
 struct _egidNode {
   ZOLTAN_ID_PTR egidBuf;
   int idx;
@@ -1004,7 +1004,7 @@ int idx;
 static int do_transfers(ZZ *zz, int proc, void *hn, char *mine, int numMatches,
   int *myMatch, ZOLTAN_ID_PTR egid, int *yourMatch, ZOLTAN_ID_PTR inbuf)
 {
-static char *yo = "do_transfers";
+static const char *yo = "do_transfers";
 struct _egidNode {
   ZOLTAN_ID_PTR egidBuf;
   int idx;
@@ -1162,7 +1162,7 @@ int Zoltan_Call_Hypergraph_Pin_Query(ZZ *zz,
                            /*         plus num_pins in last element         */
    ZOLTAN_ID_PTR *vtx_GID) /* output: vertex global ID for each pin */
 {
-static char *yo = "Zoltan_Call_Hypergraph_Pin_Query";
+static const char *yo = "Zoltan_Call_Hypergraph_Pin_Query";
 int ierr = ZOLTAN_OK;
 int nl, np, format, have_pins, row_storage;
 ZOLTAN_ID_PTR vid, eid;
@@ -1270,7 +1270,7 @@ static int convert_to_CRS(
     int **row_ptr,
     ZOLTAN_ID_PTR *edg_GID)
 {
-static char *yo = "convert_to_CRS";
+static const char *yo = "convert_to_CRS";
 int numVerts = *num_lists;
 int numEdges, ierr, ht_size;
 ZOLTAN_ID_PTR egid, vgid;
@@ -1467,7 +1467,7 @@ int Zoltan_HG_Graph_Callbacks(
  * Each vertex has an associated hyperedge containing the vertex and its
  * graph neighbors.  Dense hyperedges are removed.
  */
-static char *yo = "Zoltan_HG_Graph_Callbacks";
+static const char *yo = "Zoltan_HG_Graph_Callbacks";
 int ierr = ZOLTAN_OK;
 int i, j, k, tmp;
 int cnt, ncnt;
@@ -1633,7 +1633,7 @@ static int ignore_some_edges (
 /* Function to remove dense edges (> esize_threshold vertices)
  * and zero-sized edges (zero vertices) from input data.
  */
-char *yo = "ignore_some_edges";
+const char *yo = "ignore_some_edges";
 int ierr = ZOLTAN_OK;
 int i, j;
 int ewgtdim = zz->Edge_Weight_Dim;

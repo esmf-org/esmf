@@ -195,7 +195,7 @@ static int rib_fn(
                                 assigned to each partition.               */
 )
 {
-  char    yo[] = "rib_fn";
+  const char yo[] = "rib_fn";
   int     proc,nprocs;        /* my proc id, total # of procs */
   struct Dot_Struct *dotpt;   /* temporary pointer to local dot arrays */
   int     pdotnum;            /* # of dots - decomposition changes it */
@@ -967,7 +967,7 @@ static int serial_rib(
                                 assigned to each partition.               */
 )
 {
-char *yo = "serial_rib";
+const char *yo = "serial_rib";
 int ierr = ZOLTAN_OK;
 double valuelo;            /* smallest value of value[i] */
 double valuehi;            /* largest value of value[i] */

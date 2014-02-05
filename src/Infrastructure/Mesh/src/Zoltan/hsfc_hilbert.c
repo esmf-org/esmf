@@ -25,7 +25,7 @@ the precision of these routines. */
 /* Given a 1-d coordinate in [0,1], returns it as the Hilbert key) */
 double Zoltan_HSFC_InvHilbert1d (ZZ *zz, double *coord)
    {
-   char *yo = "Zoltan_HSFC_InvHilbert1d";
+   const char *yo = "Zoltan_HSFC_InvHilbert1d";
 
    /* sanity check for input arguments */
    if (coord[0] < 0.0)
@@ -45,7 +45,7 @@ double Zoltan_HSFC_InvHilbert2d (ZZ *zz, double *coord)
    int level;
    unsigned int key[2], c[2], temp, state;
    const int MAXLEVEL = 28; /* 56 bits of significance, 28 per dimension */
-   char *yo = "Zoltan_HSFC_InvHilbert2d";
+   const char *yo = "Zoltan_HSFC_InvHilbert2d";
 
    /* sanity check for input arguments */
    if ((coord[0] < 0.0) || (coord[0] > 1.0) || (coord[1] < 0.0) 
@@ -98,7 +98,7 @@ double Zoltan_HSFC_InvHilbert3d (ZZ *zz, double *coord)
    int level;
    unsigned int key[2], c[3], temp, state;
    const int MAXLEVEL = 19; /* 56 bits of significance, 18+ per dimension */
-   char *yo = "Zoltan_HSFC_InvHilbert3d";
+   const char *yo = "Zoltan_HSFC_InvHilbert3d";
 
    /* sanity check for input arguments */
    if ((coord[0] < 0.0)  || (coord[0] > 1.0) || (coord[1] < 0.0)
@@ -140,7 +140,7 @@ SQA coverage requirement. */
 /* Given the Hilbert key, returns it as the coordinate in [0,1] */
 void Zoltan_HSFC_Hilbert1d (ZZ *zz, double *coord, double key)
    {
-   char *yo = "Zoltan_HSFC_Hilbert1d";
+   const char *yo = "Zoltan_HSFC_Hilbert1d";
 
    /* sanity check for input argument */
    if ((key < 0.0) || (key > 1.0))
@@ -160,7 +160,7 @@ void Zoltan_HSFC_Hilbert2d (ZZ *zz, double *coord, double key)
    unsigned int c[2], ikey[2], temp;
    double t;
    static const int MAXLEVEL = 28;  /* only 56 significant bits, 28 per dimension */
-   char *yo = "Zoltan_HSFC_Hilbert2d";
+   const char *yo = "Zoltan_HSFC_Hilbert2d";
 
    /* sanity check for input argument */
    if ((key < 0.0) || (key > 1.0))
@@ -214,7 +214,7 @@ void Zoltan_HSFC_Hilbert3d (ZZ *zz, double *coord, double key)
    unsigned int c[3], ikey[2], temp;
    double t;
    static const int MAXLEVEL = 19;   /* 56 significant bits, 18+ per dimension */
-   char *yo = "Zoltan_HSFC_Hilbert3d";
+   const char *yo = "Zoltan_HSFC_Hilbert3d";
 
    /* sanity check for input argument */
    if ((key < 0.0) || (key > 1.0))

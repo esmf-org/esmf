@@ -88,7 +88,7 @@ int index			/* index of vector parameter; -1 if scalar */
  *    ZOLTAN_FATAL signals something more serious.
  */
 
-    char     *yo = "Zoltan_Set_Param_Vec";
+    const char *yo = "Zoltan_Set_Param_Vec";
     char      msg[256];
     char     *name, *val;	/* clean versions of name1, val1 */
     int       flag;		/* return value from function */

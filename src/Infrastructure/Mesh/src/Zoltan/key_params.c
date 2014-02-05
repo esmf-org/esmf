@@ -64,7 +64,7 @@ const char *val,		/* value of variable */
 int  idx 			/* index of vector param, -1 if scalar */
 )
 {
-    char *yo = "Zoltan_Set_Key_Param";
+    const char *yo = "Zoltan_Set_Key_Param";
     char msg[256];
     int status;			/* return code */
     PARAM_UTYPE result;		/* value returned from Check_Param */

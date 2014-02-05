@@ -39,7 +39,7 @@ int Zoltan_DD_Set_Hash_Fn (
  Zoltan_DD_Directory *dd,              /* directory state information */
  ZOLTAN_HASH_FN *hash)
      {
-     char *yo = "Zoltan_DD_Set_Hash_Fn" ;
+     const char *yo = "Zoltan_DD_Set_Hash_Fn" ;
 
      /* input sanity checking */
      if (dd == NULL || hash == NULL)

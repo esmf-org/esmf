@@ -75,7 +75,7 @@ int Zoltan_Order(
  *   Zoltan error code.
  */
 
-  char *yo = "Zoltan_Order";
+  const char *yo = "Zoltan_Order";
   int ierr;
   int *vtxdist;
   double start_time, end_time;

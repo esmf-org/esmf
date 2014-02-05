@@ -53,7 +53,7 @@ int Zoltan_Comm_Info(
   int *self_msg                 /* number of self-messages in plan */
 )
 {
-static char *yo = "Zoltan_Comm_Info";
+static const char *yo = "Zoltan_Comm_Info";
 int i, j, k, my_proc;
 
   /* Check input parameters */

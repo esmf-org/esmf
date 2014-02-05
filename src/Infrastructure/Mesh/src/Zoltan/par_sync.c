@@ -58,7 +58,7 @@ void Zoltan_Print_Sync_Start(MPI_Comm communicator, int do_print_line)
 int        flag = 1, from, type;
 static int offset = 0;
 MPI_Status st;
-char *yo = "Zoltan_Print_Sync_Start";
+const char *yo = "Zoltan_Print_Sync_Start";
 char msg[256];
 int proc;
 
@@ -111,7 +111,7 @@ int         flag = 1, from, type, to;
 static int  offset = 0;
 MPI_Status  st;
 int proc, num_proc;
-char *yo = "Zoltan_Print_Sync_End";
+const char *yo = "Zoltan_Print_Sync_End";
 char msg[256];
 
   MPI_Comm_rank(communicator, &proc);

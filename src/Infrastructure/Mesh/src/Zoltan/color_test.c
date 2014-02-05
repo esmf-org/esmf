@@ -59,7 +59,7 @@ int Zoltan_Color_Test(
                               /* The application must allocate enough space */
 ) 
 {
-  static char *yo = "color_test_fn";
+  static const char *yo = "color_test_fn";
   idxtype *vtxdist, *xadj, *adjncy; /* arrays to store the graph structure */
   int *adjproc;                     
   int *input_parts;                 /* Initial partitions for objects. */

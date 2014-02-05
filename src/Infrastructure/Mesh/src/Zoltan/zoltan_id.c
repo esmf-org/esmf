@@ -48,7 +48,7 @@ ZOLTAN_ID_PTR ZOLTAN_Malloc_ID(int n, char *file, int line)
  */
 
 ZOLTAN_ID_PTR tmp;
-char *yo = "ZOLTAN_Malloc_ID";
+const char *yo = "ZOLTAN_Malloc_ID";
 
   /* 
    * Don't use ZOLTAN_MALLOC macro here; prefer to pass file and line 

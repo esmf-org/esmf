@@ -90,7 +90,7 @@ int gen_geom, int gen_graph, int gen_hg)
   ZOLTAN_ID_PTR edgeIds, vtxIds, eWgtIds, eptr, vptr;
   int lenGID = zz->Num_GID;
 
-  char *yo = "Zoltan_Generate_Files";
+  const char *yo = "Zoltan_Generate_Files";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -530,7 +530,7 @@ static int Zoltan_HG_Get_Pins(ZZ *zz, int *nEdges, int **edgeSize,
             ZOLTAN_ID_PTR *edgeIds, ZOLTAN_ID_PTR *vtxIds, 
             int *nEwgts, ZOLTAN_ID_PTR *eWgtIds, float **eWgts)
 {
-  char *yo = "Zoltan_HG_Get_Pins";
+  const char *yo = "Zoltan_HG_Get_Pins";
   ZOLTAN_ID_PTR ew_gids = NULL, egids=NULL, vgids=NULL;
   ZOLTAN_ID_PTR lids = NULL;
   float *ew_weights = NULL;

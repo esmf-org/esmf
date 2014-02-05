@@ -50,7 +50,7 @@ int Zoltan_LB_Part_To_Proc(ZZ *zz, int part, ZOLTAN_ID_PTR gid)
  * case must be removed.
  *
  */
-char *yo = "Zoltan_LB_Part_To_Proc";
+const char *yo = "Zoltan_LB_Part_To_Proc";
 int proc;
 int *pdist = zz->LB.PartDist;    /* Temporary variable */
 int num_procs_for_part;
@@ -106,7 +106,7 @@ int Zoltan_LB_Proc_To_Part(
  * of the lowest-numbered partition on a given processor.
  * If there are no partitions on a processor, nparts = 0 and fpart = -1.
  */
-char *yo = "Zoltan_LB_Proc_To_Part";
+const char *yo = "Zoltan_LB_Proc_To_Part";
 int *partdist = zz->LB.PartDist;
 int *procdist;
 int ierr = ZOLTAN_OK;
@@ -163,7 +163,7 @@ static int Zoltan_LB_Build_ProcDist(
  * Entry i of LB.ProcDist is the lowest partition number on processor i. 
  * If processor i has no partitions, ProcDist[i] = -1.
  */
-char *yo = "Zoltan_LB_Build_ProcDist";
+const char *yo = "Zoltan_LB_Build_ProcDist";
 int ierr = ZOLTAN_OK;
 int *partdist = zz->LB.PartDist;
 int *procdist;

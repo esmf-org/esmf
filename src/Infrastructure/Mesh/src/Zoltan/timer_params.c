@@ -38,7 +38,7 @@ int *timer)                     /* output: timer type */
         { "TIMER", NULL, "STRING", 0 },
         { NULL, NULL, NULL, 0 }
     };
-    char *yo = "Zoltan_Set_Timer_Param";
+    const char *yo = "Zoltan_Set_Timer_Param";
 
     (*timer) = ZOLTAN_TIME_WALL;  /* default timer value */
 

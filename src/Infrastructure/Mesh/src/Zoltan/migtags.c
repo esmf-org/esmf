@@ -57,7 +57,7 @@ int Zoltan_Oct_migrate_objects(ZZ *zz, pOctant *octs, int *newpids, int nocts,
   Region *exported_regions;
   int max_objs;
   int ierr = ZOLTAN_OK;
-  char *yo = "Zoltan_Oct_migrate_objects";
+  const char *yo = "Zoltan_Oct_migrate_objects";
   p_reg = *import_regions = exported_regions = NULL;
   exported_gids = p_gids = NULL;
   exported_lids = p_lids = NULL;
@@ -127,7 +127,7 @@ static int tag_regions(ZZ *zz,
 		       float *c2,
 		       int *max_objs)
 {
-  char *yo = "tag_regions";
+  const char *yo = "tag_regions";
   int i;               /* index counter */
   pRegion regionlist;  /* list of region on this processor */
   int index;           /* index counter */
@@ -333,7 +333,7 @@ static int malloc_new_objects(ZZ *zz, int nsentags, pRegion exported_tags,
 			      ZOLTAN_ID_PTR prev_lids, int npimtags,
 			      float *c3)
 {
-  char *yo = "malloc_new_objects";
+  const char *yo = "malloc_new_objects";
   int i;                                  /* index counter */
   int nreceives;                          /* number of messages received */
   pRegion t_b_exp;                        /* array of tags to be exported */
@@ -519,7 +519,7 @@ int Zoltan_Oct_fix_tags(ZZ *zz, ZOLTAN_ID_PTR *import_global_ids,
 			ZOLTAN_ID_PTR *import_local_ids, int **import_procs, 
 			int **import_to_part, int nrectags, 
 			pRegion import_regs) {
-  char *yo = "Zoltan_Oct_fix_tags";
+  const char *yo = "Zoltan_Oct_fix_tags";
   int i;                                  /* index counter */
   int ierr = ZOLTAN_OK;
   int num_gid_entries = zz->Num_GID;

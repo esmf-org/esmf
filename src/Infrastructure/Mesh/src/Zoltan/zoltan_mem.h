@@ -48,21 +48,21 @@ extern "C" {
 /* function declarations for dynamic array allocation */
 
 #if defined (__STDC__) || defined (__cplusplus)
-extern double *Zoltan_Array_Alloc(char *file, int lineno, int numdim, ...);
+extern double *Zoltan_Array_Alloc(const char *file, int lineno, int numdim, ...);
 #else
 extern double *Zoltan_Array_Alloc();
 #endif
 
 extern void Zoltan_Memory_Debug(int);
-extern void Zoltan_Free(void **ptr, char *file, int lineno);
-extern double *Zoltan_Calloc (int num, int size, char *filename, int lineno);
-extern double *Zoltan_Malloc(int n, char *file, int lineno);
-extern double *Zoltan_Realloc(void *ptr, int n, char *filename, int lineno);
+extern void Zoltan_Free(void **ptr, const char *file, int lineno);
+extern double *Zoltan_Calloc (int num, int size, const char *filename, int lineno);
+extern double *Zoltan_Malloc(int n, const char *file, int lineno);
+extern double *Zoltan_Realloc(void *ptr, int n, const char *filename, int lineno);
 extern void Zoltan_Memory_Stats(void);
 extern int Zoltan_Memory_Usage(int);
 
 #if defined (__STDC__) || defined (__cplusplus)
-extern void Zoltan_Multifree(char *, int, int n, ...);
+extern void Zoltan_Multifree(const char *, int, int n, ...);
 #else
 extern void Zoltan_Multifree();
 #endif

@@ -165,7 +165,7 @@ static int Zoltan_ParMetis_Shared(
 )
 {
 #ifndef ZOLTAN_PARMETIS
-  char *yo="Zoltan_ParMetis";
+  const char *yo="Zoltan_ParMetis";
   ZOLTAN_PRINT_ERROR(zz->Proc, yo, 
      "ParMetis requested but not compiled into library.");
   return ZOLTAN_FATAL;
@@ -288,7 +288,7 @@ int Zoltan_ParMetis_Order(
   ZOS *order_info       /* Ordering info for this particular ordering */
 )
 {
-  static char *yo = "Zoltan_ParMetis_Order";
+  static const char *yo = "Zoltan_ParMetis_Order";
   int n, ierr;
 
   if (!order_opt){
@@ -346,7 +346,7 @@ int Zoltan_Jostle(
 )
 {
 #ifndef ZOLTAN_JOSTLE
-  char *yo = "Zoltan_Jostle";
+  const char *yo = "Zoltan_Jostle";
   ZOLTAN_PRINT_ERROR(zz->Proc, yo, 
      "Jostle requested but not compiled into library.");
   return ZOLTAN_FATAL;
@@ -493,7 +493,7 @@ static int Zoltan_ParMetis_Jostle(
   ZOS *order_info	/* Ordering only: Zoltan ordering struct */
 )
 {
-  static char *yo = "Zoltan_ParMetis_Jostle";
+  static const char *yo = "Zoltan_ParMetis_Jostle";
   int i, j, k, ierr, tmp, flag, ndims;
   int obj_wgt_dim, edge_wgt_dim, check_graph, scatter;
   int use_timers, final_output;
@@ -1516,7 +1516,7 @@ static int scale_round_weights(float *fwgts, idxtype *iwgts, int n, int dim,
   int *nonint, *nonint_local; 
   float *scale, *sum_wgt_local, *sum_wgt, *max_wgt_local, *max_wgt;
   char msg[256];
-  static char *yo = "scale_round_weights";
+  static const char *yo = "scale_round_weights";
 
   ierr = ZOLTAN_OK;
   MPI_Comm_rank(comm, &proc);

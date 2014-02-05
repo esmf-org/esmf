@@ -44,7 +44,7 @@ int Zoltan_LB_Set_LB_Method(ZZ *zz, char *method_name)
  *    zz->LB.*           --  Appropriate fields set to designated values.
  */
 
-  char *yo = "Zoltan_LB_Set_LB_Method";
+  const char *yo = "Zoltan_LB_Set_LB_Method";
   char msg[256];
   char *method_upper;
   int error = ZOLTAN_OK;

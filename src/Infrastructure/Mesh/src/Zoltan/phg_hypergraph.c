@@ -109,7 +109,7 @@ int Zoltan_HG_Info (
   int i, size, size_min, size_max, count;
   float wgt_min, wgt_max, wgt_tot;
   double mean, var, temp;
-  char *yo = "Zoltan_HG_Info";
+  const char *yo = "Zoltan_HG_Info";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -289,7 +289,7 @@ int Zoltan_HG_Create_Mirror (
   int inlength, outlength;   /* input/output array lengths */
   int *index, *data;         /* pointers to input information */
   int *outindex, *outdata;
-  char *yo = "Zoltan_HG_Create_Mirror";
+  const char *yo = "Zoltan_HG_Create_Mirror";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -363,7 +363,7 @@ int Zoltan_HG_Check (
   int *check;
   char str[256];
   int err = ZOLTAN_OK;
-  char *yo = "Zoltan_HG_Check";
+  const char *yo = "Zoltan_HG_Check";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -487,7 +487,7 @@ int i, j;
 int num_vwgt;
 int num_ewgt;
 float *sum;
-char *yo = "Zoltan_HG_Print";
+const char *yo = "Zoltan_HG_Print";
 
   if (hg == NULL)
     return;
@@ -573,7 +573,7 @@ int i, j, k, e, roughly_e, pins, *_neigh=NULL, *degrees, current_degree,
  vertex1, vertex2, start, end, empty;
 float *w, *_ewgt=NULL, weight;
 int err = ZOLTAN_OK;
-char  *yo = "Zoltan_HG_HGraph_to_Graph";
+const char *yo = "Zoltan_HG_HGraph_to_Graph";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -725,7 +725,7 @@ int i, j;
 int *hindex = NULL, *hvertex = NULL;  /* temporary array pointers */
 int cnt;
 int err = ZOLTAN_OK;
-char *yo = "Zoltan_HG_Graph_to_HGraph";
+const char *yo = "Zoltan_HG_Graph_to_HGraph";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -847,7 +847,7 @@ void Zoltan_HG_HGraph_Print(
   int i;
   int num_gid = zz->Num_GID;
   int num_lid = zz->Num_LID;
-  char *yo = "Zoltan_PHG_HGraph_Print";
+  const char *yo = "Zoltan_PHG_HGraph_Print";
 
   if (zoltan_hg != NULL  &&  hg != &zoltan_hg->HG) {
     ZOLTAN_PRINT_WARN(zz->Proc, yo, "Input hg != Zoltan HG");

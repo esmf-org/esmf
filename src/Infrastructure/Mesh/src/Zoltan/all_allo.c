@@ -90,7 +90,7 @@ int Zoltan_Special_Malloc(ZZ *zz, void **array, int size,
                       ZOLTAN_SPECIAL_MALLOC_TYPE type)
 {
    int *ret_addr, success;
-   char *yo = "Zoltan_Special_Malloc";
+   const char *yo = "Zoltan_Special_Malloc";
 
    success = 1;
    if (zz->Fortran) {
@@ -180,7 +180,7 @@ int Zoltan_Special_Free(ZZ *zz, void **array,
                     ZOLTAN_SPECIAL_MALLOC_TYPE type)
 {
    int success;
-   char *yo = "Zoltan_Special_Free";
+   const char *yo = "Zoltan_Special_Free";
 
    success = 1;
    if (zz->Fortran) {

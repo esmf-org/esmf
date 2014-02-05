@@ -50,7 +50,7 @@ int      *sum_recv_sizes)       /* sum of the sizes of the items I'll receive */
 					/* ordered like procs_from */
     int       var_sizes;        /* items have variable sizes? */
     int       i, j, k;		/* loop counters */
-    static char *yo = "Zoltan_Comm_Resize";
+    static const char *yo = "Zoltan_Comm_Resize";
 
 
     /* If sizes vary, then I need to compute and communicate message lengths */

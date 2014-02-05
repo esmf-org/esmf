@@ -33,7 +33,7 @@ PARAM_VARS * params,		/* structure describing parameters */
 PARAM_UTYPE *result,		/* pointer to return value */
 int *matched_index)		/* where in struct the match occurs */
 {		
-    char     *yo = "Zoltan_Check_Param";
+    const char *yo = "Zoltan_Check_Param";
     char      msg[256];
     int       i;		/* loop counter */
     int       status;		/* return code: */

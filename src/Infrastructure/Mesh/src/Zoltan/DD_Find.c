@@ -55,7 +55,7 @@ int Zoltan_DD_Find (
    int              err ;           /* return error condition          */
    int              errcount ;      /* count of GIDs not found         */
 
-   char            *yo = "Zoltan_DD_Find" ;
+   const char       *yo = "Zoltan_DD_Find" ;
 
    if (dd != NULL && dd->debug_level > 1)
       ZOLTAN_TRACE_IN(dd->my_proc, yo, NULL);
@@ -237,7 +237,7 @@ static int DD_Find_Local (Zoltan_DD_Directory *dd,
    {
    DD_Node *ptr ;
    int      index ;
-   char    *yo = "DD_Find_Local" ;
+   const char *yo = "DD_Find_Local" ;
 
    /* input sanity check */
    if (dd == NULL || owner == NULL || gid == NULL)

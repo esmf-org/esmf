@@ -35,7 +35,7 @@ static int Zoltan_Oct_migreg_migrate_regions(ZZ *zz, Region *regions,
                               ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
                               int *npids, int nregions, int *c2) 
 {
-  char *yo = "Zoltan_Oct_migreg_migrate_regions";
+  const char *yo = "Zoltan_Oct_migreg_migrate_regions";
   int i;                         /* index counter */
   int ierr = ZOLTAN_OK;
   int n_import;
@@ -134,7 +134,7 @@ static int Zoltan_Oct_insert_orphan(ZZ *zz, Region reg) {
   double upper,                    /* upper bounds of the octant */
          lower;                    /* lower bounds of the octant */
   OCT_Global_Info *OCT_info = (OCT_Global_Info *)(zz->LB.Data_Structure);
-  char *yo = "Zoltan_Oct_insert_orphan";
+  const char *yo = "Zoltan_Oct_insert_orphan";
   int ierr = ZOLTAN_OK;
 
   if (OCT_info->OCT_dimension == 2)
@@ -194,7 +194,7 @@ int Zoltan_Oct_migreg_migrate_orphans(ZZ *zz, pRegion RegionList, int nregions,
   pRList  RootList;              
   pOctant RootOct;
   OCT_Global_Info *OCT_info = (OCT_Global_Info *)(zz->LB.Data_Structure);
-  char *yo = "Zoltan_Oct_migreg_migrate_orphans_static";
+  const char *yo = "Zoltan_Oct_migreg_migrate_orphans_static";
   int ierr = ZOLTAN_OK;
   ZOLTAN_ID_PTR gids2, lids2;
   int num_gid_entries = zz->Num_GID;
@@ -322,7 +322,7 @@ int Zoltan_Oct_migreg_migrate_orphans(ZZ *zz, pRegion RegionList, int nregions,
  */
 static int Zoltan_Oct_copy_info(ZZ *zz, pRegion src, pRegion *dest) {
   pRegion copy;
-  char *yo = "Zoltan_Oct_copy_info";
+  const char *yo = "Zoltan_Oct_copy_info";
   int ierr = ZOLTAN_OK;
 
   /* mallloc space for destination */

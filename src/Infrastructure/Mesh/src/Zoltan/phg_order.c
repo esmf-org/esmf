@@ -31,7 +31,7 @@ int Zoltan_PHG_Vertex_Visit_Order(
   int i, j, edge;
   int *ldegree=NULL, *gdegree=NULL; /* local/global degree */
   int *lpins=NULL, *gpins=NULL; /* local/global sum of pins */
-  char *yo= "Zoltan_PHG_Vertex_Visit_Order";
+  const char *yo= "Zoltan_PHG_Vertex_Visit_Order";
 
   /* Start with linear order. */
   for (i=0; i<hg->nVtx; i++)

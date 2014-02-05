@@ -52,7 +52,7 @@ int Zoltan_DD_Set_Neighbor_Hash_Fn3 (
  Zoltan_DD_Directory *dd,          /* directory state information */
  int total)                        /* total number of GIDS */
    {
-   char *yo = "Zoltan_DD_Set_Hash_Fn3" ;
+   const char *yo = "Zoltan_DD_Set_Hash_Fn3" ;
 
    if (dd == NULL || total < 1)
       {

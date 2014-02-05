@@ -120,7 +120,7 @@ int Zoltan_Color(
   char color_method;    /* Coloring method. (F) First fit */
 
 
-  static char *yo = "color_fn";
+  static const char *yo = "color_fn";
   idxtype *vtxdist, *xadj, *adjncy; /* arrays to store the graph structure */
   int *adjproc;                     
   int *input_parts;                 /* Initial partitions for objects. */
@@ -314,7 +314,7 @@ static int D1coloring(
                           neighbor vertices */
 )
 {
-    static char *yo = "D1coloring";
+    static const char *yo = "D1coloring";
     int i;
     int distance = 1;
     int nColor = 0;              /* Number of colors */
@@ -556,7 +556,7 @@ static int D2coloring(
                           neighbor vertices */
 )
 {
-    static char *yo = "D2coloring";
+    static const char *yo = "D2coloring";
     int i, j, p;
     int distance = 2;
     int nColor = 0;              /* Number of colors */
@@ -956,7 +956,7 @@ static int ReorderGraph(
     int *visit        /* Out: Visit order */
 )
 {
-    static char *yo = "ReorderGraph";
+    static const char *yo = "ReorderGraph";
     int *xbadj = NULL;     /* pointer to start of cut edges in the
                               adj lists of boundary vertices    */  
     int i, j, idx, nboundIdx;
@@ -1064,7 +1064,7 @@ static int InternalColoring(
 )
 {
     int i, j, k, c, u, v, w;
-    static char *yo = "InternalColoring";
+    static const char *yo = "InternalColoring";
     int ierr = ZOLTAN_OK;
  
     memset(mark, 0xff, gmaxdeg * sizeof(int));
@@ -1137,7 +1137,7 @@ static int D1ParallelColoring (
     MPI_Status *stats
 )
 {
-    static char *yo="D1ParallelColoring";
+    static const char *yo="D1ParallelColoring";
     int colortag=1001, i, j, p, q, l;
     int *colored, n=0;
     int rreqcnt=0, sreqcnt=0, repcount;
@@ -1695,7 +1695,7 @@ static int D1DetectConflicts(
 
 static int D2DetectConflicts(ZZ *zz, G2LHash *hash, int nlvtx, int *wset, int wsize, int *xadj, int *adj, int *adjproc, int *nColor, int *color, int *conflicts, int *rand_key, int *vmark, int *seen, int *where, int *pwhere, int **rcsendbuf, int **rcrecbuf, int *rcsendsize, int *rcrecsize, int **srp, MPI_Request *sreqsC, MPI_Request *rreqsC, int *rreqfromC, MPI_Status *stats, int *nconflict)
 {
-    static char *yo="D2DetectConflicts";
+    static const char *yo="D2DetectConflicts";
     int w, i, j, p;
     int rreqcntC=0, sreqcntC=0;
     int *q;

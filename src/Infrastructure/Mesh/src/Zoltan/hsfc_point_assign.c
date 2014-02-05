@@ -40,7 +40,7 @@ int Zoltan_HSFC_Point_Assign (
    int        dim;
    HSFC_Data *d;
    int        err;
-   char *yo = "Zoltan_HSFC_Point_Assign";
+   const char *yo = "Zoltan_HSFC_Point_Assign";
 
    ZOLTAN_TRACE_ENTER (zz, yo);
    d = (HSFC_Data *) zz->LB.Data_Structure;

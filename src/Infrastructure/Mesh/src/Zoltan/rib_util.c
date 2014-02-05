@@ -29,7 +29,7 @@ int Zoltan_RIB_Build_Structure(ZZ *zz, int *num_obj, int *max_obj, int wgtflag,
                            int use_ids)
 {
 /* Function to build the geometry-based data structures for RIB method. */
-char           *yo = "Zoltan_RIB_Build_Structure";
+const char     *yo = "Zoltan_RIB_Build_Structure";
 RIB_STRUCT     *rib;                  /* Data structure for RIB.             */
 struct rib_tree *treeptr;
 int            i, ierr = 0;
@@ -128,7 +128,7 @@ RIB_STRUCT    *rib;                   /* Data structure for RIB. */
 
 int Zoltan_RIB_Copy_Structure(ZZ *toZZ, ZZ const *fromZZ)
 {
-  char *yo = "Zoltan_RIB_Copy_Structure";
+  const char *yo = "Zoltan_RIB_Copy_Structure";
   RIB_STRUCT *to;
   RIB_STRUCT const *from;
 

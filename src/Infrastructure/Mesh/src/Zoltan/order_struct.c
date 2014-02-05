@@ -39,7 +39,7 @@ extern "C" {
 int Zoltan_Order_Create(ZOS **order_info, ZZ *zz)
 {
   int ierr = ZOLTAN_OK; /* Error code to return */
-  static char *yo = "Zoltan_Order_Create";
+  static const char *yo = "Zoltan_Order_Create";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -73,7 +73,7 @@ int Zoltan_Order_Create(ZOS **order_info, ZZ *zz)
 int Zoltan_Order_Destroy(ZOS **order_info)
 {
   int ierr = ZOLTAN_OK; /* Error code to return */
-  /* static char *yo = "Zoltan_Order_Destroy"; */
+  /* static const char *yo = "Zoltan_Order_Destroy"; */
 
   /* ZOLTAN_TRACE_ENTER(zz, yo); */
 

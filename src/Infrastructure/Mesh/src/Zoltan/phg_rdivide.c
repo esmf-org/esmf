@@ -49,7 +49,7 @@ int Zoltan_PHG_rdivide(
   int level
 )
 {
-  char *yo = "Zoltan_PHG_rdivide";
+  const char *yo = "Zoltan_PHG_rdivide";
   int i, j, mid, ierr=ZOLTAN_OK, leftend, rightstart; 
   int *pins[2] = {NULL,NULL}, *lpins[2] = {NULL,NULL};
   Partition part=NULL;
@@ -549,7 +549,7 @@ static int split_hypergraph (int *pins[2], HGraph *ohg, HGraph *nhg, Partition p
   int *tmap = NULL;  /* temporary array mapping from old HGraph info to new */
   int edge, i, ierr=ZOLTAN_OK;  
   PHGComm *hgc = ohg->comm;
-  char *yo = "split_hypergraph";
+  const char *yo = "split_hypergraph";
   double pw[2], tpw[2];
 
   pw[0] = pw[1] = 0; /* 0 is the part being splitted, 1 is the other part(s) */

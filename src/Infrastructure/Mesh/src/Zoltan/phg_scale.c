@@ -36,7 +36,7 @@ int Zoltan_PHG_Scale_Edges (ZZ *zz, HGraph *hg, float *new_ewgt,
 int    i, err;
 int    *lsize = NULL;  /* local edge sizes */
 int    *size = NULL;   /* edge sizes */
-static char *yo = "Zoltan_PHG_Scale_Weights";
+static const char *yo = "Zoltan_PHG_Scale_Weights";
 
   err = ZOLTAN_OK; 
 
@@ -118,7 +118,7 @@ int Zoltan_PHG_Scale_Vtx (ZZ *zz, HGraph *hg, PHGPartParams *hgp)
 {
   int i;
   int *ldegree, *gdegree; 
-  char *yo = "Zoltan_PHG_Scale_Vtx";
+  const char *yo = "Zoltan_PHG_Scale_Vtx";
 
   if ((hgp->vtx_scaling==0) || (hg->nVtx==0))
     return ZOLTAN_OK;
