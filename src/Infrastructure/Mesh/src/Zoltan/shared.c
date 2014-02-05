@@ -62,7 +62,7 @@ int Zoltan_RB_Build_Structure(
  *  Function to build the geometry-based data structures for 
  *  RCB and RIB.
  */
-char *yo = "Zoltan_RB_Build_Structure";
+const char *yo = "Zoltan_RB_Build_Structure";
 float *objs_wgt = NULL;               /* Array of object weights returned by 
                                          the application.                    */
 int *parts = NULL;
@@ -149,7 +149,7 @@ int ierr = ZOLTAN_OK;
 int i, j, tmp, np, fpart;
 double *geom_vec = NULL;
 struct Dot_Struct *dot;
-char *yo = "initialize_dot";
+const char *yo = "initialize_dot";
 
   ierr = Zoltan_Get_Coordinates(zz, num_obj, gid, lid, num_geom, &geom_vec);
   if (ierr == ZOLTAN_FATAL || ierr == ZOLTAN_MEMERR) {
@@ -219,7 +219,7 @@ int Zoltan_RB_Send_Outgoing(
 {
 /* Routine to determine new processors for outgoing dots. */
 
-  char *yo = "Zoltan_RB_Send_Outgoing";
+  const char *yo = "Zoltan_RB_Send_Outgoing";
   int keep, outgoing;               /* message exchange counters */
   int *proc_list = NULL;            /* list of processors to send dots to */
   int i, ierr = ZOLTAN_OK;
@@ -311,7 +311,7 @@ int Zoltan_RB_Send_To_Part(
  * must be sent to proc 1.
  * NOTE:  This routine changes values in dotmark.
  */
-char *yo = "Zoltan_RB_Send_To_Part";
+const char *yo = "Zoltan_RB_Send_To_Part";
 int outtop, outgoing;               /* message exchange counters */
 int *proc_list = NULL;            /* list of processors to send dots to */
 int i, ierr = ZOLTAN_OK;
@@ -396,7 +396,7 @@ int Zoltan_RB_Send_Dots(
 {
 /* Routine to send outgoing dots to their new processors. */
 
-  char *yo = "Zoltan_RB_Send_Dots";
+  const char *yo = "Zoltan_RB_Send_Dots";
   int dotnew;                       /* # of new dots after send/recv */
   int keep, incoming;               /* message exchange counters */
   ZOLTAN_ID_PTR gidbuf = NULL;      /* communication buffer for global IDs. */
@@ -611,7 +611,7 @@ int Zoltan_RB_Remap(
                                        communicated if use_ids is true.  */
 )
 {
-char *yo = "Zoltan_RB_Remap";
+const char *yo = "Zoltan_RB_Remap";
 int *old_part = NULL;    /* Array of old partition assignments for dots */
 int *new_part = NULL;    /* Array of new partition assignments for dots;
                             initially determined by partitioning algorithm;
@@ -713,7 +713,7 @@ int Zoltan_RB_Return_Arguments(
  * Allocates, fills and returns import_global_ids, import_local_ids, and
  * import_procs.
  */
-char *yo = "Zoltan_RB_Return_Arguments";
+const char *yo = "Zoltan_RB_Return_Arguments";
 int i, j;
 int ierr = ZOLTAN_OK;
 int num_gid_entries = zz->Num_GID;
@@ -860,7 +860,7 @@ int Zoltan_RB_check_geom_input(
 )
 {
 /* Routine to check input to geometric methods for consistency. */
-  char *yo = "Zoltan_RB_check_geom_input";
+  const char *yo = "Zoltan_RB_check_geom_input";
   int i, j, k, count;
   char msg[256];
   int proc = zz->Proc;
@@ -899,7 +899,7 @@ int Zoltan_RB_check_geom_output(
 {
 /* Routine to check output of geometric methods for consistency. */
 
-  char *yo = "Zoltan_RB_check_geom_output";
+  const char *yo = "Zoltan_RB_check_geom_output";
   char msg[256];
   int i,iflag,proc,nprocs,input[2],total[2];
   double *wtsum,tolerance;

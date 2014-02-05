@@ -352,7 +352,7 @@ pRegion Zoltan_Oct_regionlist(pOctant oct) {
  * add a region to oct's list
  */
 int Zoltan_Oct_addRegion(ZZ *zz, pOctant oct, pRegion region) { 
-  char *yo = "Zoltan_Oct_addRegion";
+  const char *yo = "Zoltan_Oct_addRegion";
   pRegion entry;                      /* pointer to new entry in region list */
 
   if(oct == NULL) 

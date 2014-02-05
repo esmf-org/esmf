@@ -87,7 +87,7 @@ int Zoltan_Migrate(
  *  routine (ZOLTAN_UNPACK_OBJ_FN) for each object imported.
  */
 
-char *yo = "Zoltan_Migrate";
+const char *yo = "Zoltan_Migrate";
 int num_gid_entries, num_lid_entries;  /* lengths of global & local ids */
 int *sizes = NULL;       /* sizes (in bytes) of the object data for export. */
 int id_size;             /* size (in bytes) of ZOLTAN_GID + padding for 
@@ -701,7 +701,7 @@ static int check_input(
  * set include_parts to true.
  * All processors return the same error code.
  */
-char *yo = "check_input";
+const char *yo = "check_input";
 char msg[256];
 int loc_tmp[6];
 int glob[] = {0, 0, 0, 0, 0, 0};
@@ -764,7 +764,7 @@ int Zoltan_Help_Migrate(
  *  Arguments are same as for Zoltan_Migrate.
  */
 
-char *yo = "Zoltan_Help_Migrate";
+const char *yo = "Zoltan_Help_Migrate";
 int ierr;
 
   ZOLTAN_TRACE_ENTER(zz, yo);
@@ -818,7 +818,7 @@ static int actual_arrays(
   int *actual_allocated 
 )
 {
-char *yo = "actual_arrays";
+const char *yo = "actual_arrays";
 int i, j;
 
   /*

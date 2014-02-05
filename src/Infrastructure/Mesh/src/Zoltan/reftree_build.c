@@ -119,7 +119,7 @@ int Zoltan_Reftree_Init(ZZ *zz)
  *  Function to initialize a refinement tree.  This creates the root and
  *  the first level of the tree, which corresponds to the initial coarse grid
  */
-char *yo = "Zoltan_Reftree_Init";
+const char *yo = "Zoltan_Reftree_Init";
 char msg[256];
 struct Zoltan_Reftree_data_struct *reftree_data = NULL; /* data pointed to by zz */
 ZOLTAN_REFTREE *root;          /* Root of the refinement tree */
@@ -1220,7 +1220,7 @@ int Zoltan_Reftree_Build(ZZ *zz)
 /*
  * Function to build a refinement tree
  */
-char *yo = "Zoltan_Reftree_Build";
+const char *yo = "Zoltan_Reftree_Build";
 ZOLTAN_REFTREE *root;          /* Root of the refinement tree */
 int ierr;                  /* Error code returned by called functions */
 int i;                     /* loop counter */
@@ -1297,7 +1297,7 @@ static int Zoltan_Reftree_Build_Recursive(ZZ *zz,ZOLTAN_REFTREE *subroot)
 /*
  * Recursive function to traverse a tree while building it
  */
-char *yo = "Zoltan_Reftree_Build_Recursive";
+const char *yo = "Zoltan_Reftree_Build_Recursive";
 char msg[256];
 int ierr;                  /* error code called routines */
 int final_ierr;            /* error code returned by this routine */
@@ -1680,7 +1680,7 @@ static int order_tri_bisect(ZZ *zz, int *vert1, int *order,
  * the first and second child has the in_vertex and out_vertex, and find the
  * common vertex to go between them.
  */
-char *yo = "order_tri_bisect";
+const char *yo = "order_tri_bisect";
 int i, j;                  /* loop indices */
 int parents_vert[6];       /* cross index between children and parent */
 int parent_in;             /* index of the parent in vertex */
@@ -1890,7 +1890,7 @@ static int order_quad_quad(ZZ *zz, int *vert1, int *order,
 
 int i,j,k,found,ord[4];
 ZOLTAN_ID_PTR shared;
-char *yo = "order_quad_quad";
+const char *yo = "order_quad_quad";
 int ngid_ent = zz->Num_GID;  /* number of array entries in a global ID */
 
   shared = ZOLTAN_MALLOC_GID_ARRAY(zz,3);
@@ -2077,7 +2077,7 @@ int i,j,found,ord[8],vert,count[27],lvertices[64],ecoord[8][3],vcoord[27][3];
 int nshare, nshare2, nshare4, nshare100, nshare010, share2[3];
 int element[2][2][2],elem100,elem010,elem001,vertex[3][3][3];
 ZOLTAN_ID_PTR lvertices_gid;
-char *yo = "order_hex3d_oct";
+const char *yo = "order_hex3d_oct";
 int ngid_ent = zz->Num_GID;  /* number of array entries in a global ID */
 
   /* verify that 8 vertices were given for each hexadron; if not, punt */
@@ -2575,7 +2575,7 @@ static int order_other_ref(ZZ *zz, ZOLTAN_REFTREE *parent, int num_child,
  * to solve this NP hard problem, but it should work for any refinement.
  */
 
-char *yo = "order_other_ref";
+const char *yo = "order_other_ref";
 int i, j, vi, vj;   /* loop counters */
 int *has_in;        /* flag for children having in vertex */
 int *has_out;       /* flag for children having out vertex */
@@ -2886,7 +2886,7 @@ int sum_vert;       /* sum of num_vert */
 int wdim;           /* dimension of object weights */
 int i;              /* loop counter */
 
-char *yo = "alloc_reftree_nodes";
+const char *yo = "alloc_reftree_nodes";
 
   if (zz->Obj_Weight_Dim == 0) {
     wdim = 1;
@@ -3081,7 +3081,7 @@ static int Zoltan_Reftree_Reinit_Coarse(ZZ *zz)
 /*****************************************************************************/
 /*****************************************************************************/
 
-char *yo = "Zoltan_Reftree_Reinit_Coarse";
+const char *yo = "Zoltan_Reftree_Reinit_Coarse";
 ZOLTAN_REFTREE *root;     /* Root of the refinement tree */
 struct Zoltan_Reftree_hash_node **hashtab; /* hash table */
 int hashsize;         /* dimension of hash table */
@@ -3406,7 +3406,7 @@ void Zoltan_Reftree_Get_Child_Order(ZZ *zz, int *order, int *ierr)
  * This is a hack and should not be publicized.
  */
 
-char *yo = "Zoltan_Reftree_Get_Child_Order";
+const char *yo = "Zoltan_Reftree_Get_Child_Order";
 int isub;
 ZOLTAN_REFTREE *root;
 

@@ -73,7 +73,7 @@ int Zoltan_Get_Coordinates(
                                         fn if NULL upon input. */
 )
 {
-  char *yo = "Zoltan_Get_Coordinates";
+  const char *yo = "Zoltan_Get_Coordinates";
   int i,j,rc;
   int num_gid_entries = zz->Num_GID;
   int num_lid_entries = zz->Num_LID;

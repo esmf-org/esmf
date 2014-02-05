@@ -39,7 +39,7 @@ int Zoltan_DD_Print (
    {
    int      i,j ;
    DD_Node *ptr ;
-   char    *yo = "Zoltan_DD_Print" ;
+   const char *yo = "Zoltan_DD_Print" ;
 
 
    /* input sanity checks */

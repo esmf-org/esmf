@@ -64,7 +64,7 @@ int Zoltan_Build_Machine_Desc(
    ZZ *zz              /* The Zoltan structure.                */
 )
 {
-  char *yo = "Zoltan_Build_Machine_Desc";
+  const char *yo = "Zoltan_Build_Machine_Desc";
   int ierr = ZOLTAN_OK;
   int use_mach_desc;
   char filename[256];

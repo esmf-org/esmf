@@ -1065,7 +1065,7 @@ static double eval_cut_quality(
 {
   double temp[MAX_BISECT_WGTS];
   int i;
-  static char *yo = "eval_cut_quality";
+  static const char *yo = "eval_cut_quality";
 
   if ((!scalelo) || (!scalehi))
     ZOLTAN_PRINT_ERROR(-1, yo, "Input scalelo/hi is NULL");
@@ -1100,7 +1100,7 @@ void Zoltan_bisector_merge(void *in, void *inout, int *len, MPI_Datatype *dptr)
 {
   struct bisector *med1, *med2;
   int i, nwgts;
-  char *yo="Zoltan_bisector_merge";
+  const char *yo="Zoltan_bisector_merge";
 
   med1 = (struct bisector *) in;
   med2 = (struct bisector *) inout;

@@ -84,7 +84,7 @@ int Zoltan_Reftree_Part(
   int **export_to_partition     /* list of partitions to export to */
 )
 {
-char *yo = "Zoltan_Reftree_Part";
+const char *yo = "Zoltan_Reftree_Part";
 int ierr;       /* error code returned by called routines */
 int final_ierr; /* error code returned by this routine */
 double time0, time1, time2, time3, time4;
@@ -195,7 +195,7 @@ static int Zoltan_Reftree_Sum_Weights(ZZ *zz)
  * 0 if none of the subtree is assigned to this processor
  * -1 if some of the subtree is assigned to this processor
  */
-char *yo = "Zoltan_Reftree_Sum_Weights";
+const char *yo = "Zoltan_Reftree_Sum_Weights";
 ZOLTAN_REFTREE *root;         /* Root of the refinement tree */
 int wdim;                 /* Dimension of the weight array */
 int i,j;                  /* loop counters */
@@ -574,7 +574,7 @@ static int Zoltan_Reftree_Partition(ZZ *zz, float *part_sizes, int *num_export,
  * Function to partition the grid and fill the export arrays.
  */
 
-char *yo = "Zoltan_Reftree_Partition";
+const char *yo = "Zoltan_Reftree_Partition";
 char msg[256];
 int num_exp;          /* count the number of export objects */
 ZOLTAN_REFTREE *root;     /* root of the tree */
@@ -953,7 +953,7 @@ static int get_current_partition(ZOLTAN_REFTREE *subroot, ZZ *zz, int *ierr)
  * processor's number.
  */
 
-char *yo = "get_current_partition";
+const char *yo = "get_current_partition";
 int result;
 
   *ierr = ZOLTAN_OK;

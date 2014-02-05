@@ -101,7 +101,7 @@ struct {
 
 int Zoltan_PHG_LoadBalStat(ZZ *zz, HGraph *hg)
 {
-    char    *yo = "Zoltan_PHG_LoadBalStat";
+    const char *yo = "Zoltan_PHG_LoadBalStat";
     int     ierr=ZOLTAN_OK;
     PHGComm *comm = hg->comm;
     int     *v=NULL, *n=NULL, *p=NULL, x, y, i;

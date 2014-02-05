@@ -53,7 +53,7 @@ int Zoltan_Scatter_Graph(
   ZOLTAN_COMM_OBJ **plan
 )
 {
-  static char *yo = "Zoltan_Scatter_Graph";
+  static const char *yo = "Zoltan_Scatter_Graph";
   char     msg[256];
   idxtype *old_vtxdist, *old_xadj, *old_adjncy, *old_vwgt; 
   idxtype *old_vsize, *old_adjwgt;

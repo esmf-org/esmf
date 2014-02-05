@@ -45,7 +45,7 @@ extern "C" {
 
 int Zoltan_LB_Copy_Struct(ZZ *toZZ, ZZ const *fromZZ)
 {
-char *yo = "Zoltan_LB_Copy_Struct";
+const char *yo = "Zoltan_LB_Copy_Struct";
 int proc = fromZZ->Proc;
 
   struct Zoltan_LB_Struct *to = &(toZZ->LB);

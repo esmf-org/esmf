@@ -53,7 +53,7 @@ int Zoltan_HSFC_Box_Assign (
                                 /* specific - 2^18 in 3d, 2^27 in 2d. */
    int        err = ZOLTAN_OK;
    int        *remap;
-   char      *yo = "Zoltan_HSFC_Box_Assign";
+   const char *yo = "Zoltan_HSFC_Box_Assign";
 
    ZOLTAN_TRACE_ENTER (zz, yo);
    d = (HSFC_Data *) zz->LB.Data_Structure;           /* persistant HSFC data */

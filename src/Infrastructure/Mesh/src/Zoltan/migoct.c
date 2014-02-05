@@ -104,7 +104,7 @@ int Zoltan_Oct_migrate_octants(ZZ *zz, int *newpids, pOctant *octs, int nocts, i
   OCTNEW_msg *rcv_reply = NULL;
   int ierr = ZOLTAN_OK;
   ZOLTAN_COMM_OBJ *comm_plan;        /* Object returned by communication routines */
-  char *yo = "Zoltan_Oct_migrate_octants";
+  const char *yo = "Zoltan_Oct_migrate_octants";
   pOctant *newocts = NULL;                          /* New foreign octant pointers */
 
   if((newocts = (pOctant *) ZOLTAN_MALLOC(sizeof(pOctant)*(nocts+10))) == NULL) {
@@ -274,7 +274,7 @@ int nocts)          /* number of octants leaving this processor */
 
 
   ZOLTAN_COMM_OBJ *comm_plan;           /* Object returned by communication routines */
-  char *yo = "Zoltan_Oct_Update_Connections";
+  const char *yo = "Zoltan_Oct_Update_Connections";
   OCT_Global_Info *OCT_info = (OCT_Global_Info *) zz->LB.Data_Structure;
   localcount=0;
   remotecount=0;
@@ -444,7 +444,7 @@ int nrecocts)       /* number of octants received in this processor */
   int *despid = NULL;
   int ierr = ZOLTAN_OK;
   ZOLTAN_COMM_OBJ *comm_plan;           /* Object returned by communication routines */
-  char *yo = "Zoltan_Oct_Final_Migration";
+  const char *yo = "Zoltan_Oct_Final_Migration";
   OCT_Global_Info *OCT_info = (OCT_Global_Info *) zz->LB.Data_Structure;
 
   /* count number of sends */
@@ -543,7 +543,7 @@ static int Zoltan_Oct_build_global_rootlist(ZZ *zz,Migrate_msg  **ret_rmsg, int 
   ZOLTAN_COMM_OBJ *comm_plan;                /* Object returned by communication routines */
 
   int ierr = ZOLTAN_OK;
-  char *yo = "Zoltan_Oct_build_global_rootlist";
+  const char *yo = "Zoltan_Oct_build_global_rootlist";
  
   nroots = RL_numRootOctants(Zoltan_Oct_POct_localroots(OCT_info));
 
@@ -631,7 +631,7 @@ static int Zoltan_Oct_Update_Map(ZZ *zz) {
   int mapsize = OCT_info->mapsize;
   int rlsize = 0;
   int ierr = ZOLTAN_OK;
-  char *yo = "Zoltan_Oct_Update_Map";
+  const char *yo = "Zoltan_Oct_Update_Map";
 
   if((ierr = Zoltan_Oct_build_global_rootlist(zz, &rootlists, &rlsize)) != ZOLTAN_OK) {
     ZOLTAN_TRACE_EXIT(zz, yo);

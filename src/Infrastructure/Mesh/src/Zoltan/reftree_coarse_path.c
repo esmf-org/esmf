@@ -170,7 +170,7 @@ static int init_stack(ZZ *zz)
  * allocate memory for the to_add stacks and initialize them to empty
  */
 
-char *yo = "init_stack";
+const char *yo = "init_stack";
 int i, j;
 
    to_add = (int **) ZOLTAN_MALLOC(sizeof(int *)*(MAXVERT+1));
@@ -211,7 +211,7 @@ static int push(int elem, int list, ZZ *zz)
  * Pushes element elem onto stack number list
  */
 
-char *yo = "push";
+const char *yo = "push";
 
 /* make sure there's enough memory */
 
@@ -265,7 +265,7 @@ static int set_neigh(ZOLTAN_ID_PTR vertices, int *num_vert,
  * determine the neighbor relationships and list of shared vertices
  */
 
-char *yo = "set_neigh";
+const char *yo = "set_neigh";
 struct Zoltan_Reftree_inthash_node **hashtable;
 int **temp_element_list;
 int i, j, k, l, nvert, vert, index, element, vert_count, ierr;
@@ -532,7 +532,7 @@ static int add_neigh_pair(int v,int e1,int e2, ZZ *zz)
  * and shared_vert lists
  */
 
-char *yo = "add_neigh_pair";
+const char *yo = "add_neigh_pair";
 int nshare, index, i, j, k;
 
 /* 
@@ -687,7 +687,7 @@ static int initial_cycle(ZZ *zz)
  * create the initial cycle of two elements
  */
 
-char *yo = "initial_cycle";
+const char *yo = "initial_cycle";
 int elementA, elementB, j, verta, vertb, ierr;
 
 /*
@@ -1286,7 +1286,7 @@ static int element_swap(int *ierr, ZZ *zz)
    1 shared vertex it can't have both in and out, and with more than two it
    would be already added to the path under condition 1 in add_to_cycle. */
 
-   char *yo = "element_swap";
+   const char *yo = "element_swap";
    int i, success, element;
 
    visited = (int *) ZOLTAN_MALLOC(sizeof(int)*num_obj);
@@ -1814,7 +1814,7 @@ static int sfc_coarse_grid_path(int nobj, int *num_vert, ZOLTAN_ID_PTR vertices,
  * applies to 2D problems.
  */
 
-  char *yo = "sfc_coarse_grid_path";
+  const char *yo = "sfc_coarse_grid_path";
   int ierr, num_geom, i, elem, prev, prevprev;
   int *ind, *first_vert;
   double *sfccoord, loc_coords[3];
@@ -1997,7 +1997,7 @@ static int find_inout(int elem, int prev, int prevprev,
  * and out-vertex of prevprev to make in and out be the same.
  */
 
-  char *yo = "find_inout";
+  const char *yo = "find_inout";
   int looking, i, j, ngid, shared;
 
   ZOLTAN_TRACE_ENTER(zz, yo);
@@ -2176,7 +2176,7 @@ static double InvSierpinski2d(ZZ *zz, double *coord)
  * Given x,y coordinates in [0,1]x[0,1], returns the Sierpinski key [0,1]
  */
 
-  char *yo = "InvSierpinski2d";
+  const char *yo = "InvSierpinski2d";
 
    /* sanity check for input arguments */
   if ((coord[0] < 0.0) || (coord[0] > 1.0) || (coord[1] < 0.0) ||
@@ -2347,7 +2347,7 @@ int Zoltan_Reftree_Coarse_Grid_Path(int nobj, int *num_vert,
  * element through the same vertex.
  */
 
-char *yo = "Zoltan_Reftree_Coarse_Grid_Path";
+const char *yo = "Zoltan_Reftree_Coarse_Grid_Path";
 int all_triangles = 0, i, element, success, ierr;
 
    ZOLTAN_TRACE_ENTER(zz, yo);

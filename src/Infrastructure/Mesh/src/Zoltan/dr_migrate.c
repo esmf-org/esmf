@@ -110,7 +110,7 @@ int migrate_elements(
   int *exp_to_part)
 {
 /* Local declarations. */
-char *yo = "migrate_elements";
+const char *yo = "migrate_elements";
 
 /***************************** BEGIN EXECUTION ******************************/
   DEBUG_TRACE_START(Proc, yo);

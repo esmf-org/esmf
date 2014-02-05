@@ -36,7 +36,7 @@ int      *part                  /* partition that point lands in;
 /* Locate which processor a point is inside within the tree defined
    by the recursive bisection algorithm chosen. */
 
-     char             *yo = "Zoltan_RB_Point_Assign";
+     const char        *yo = "Zoltan_RB_Point_Assign";
      int               partmid; /* 1st partition in upper half */
      RCB_STRUCT        *rcb;    /* Pointer to data structures for RCB.  */
      struct rcb_tree   *treept; /* tree of RCB cuts */

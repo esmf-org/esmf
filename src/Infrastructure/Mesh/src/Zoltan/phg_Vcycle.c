@@ -81,7 +81,7 @@ typedef struct tagVCycle {
 int Zoltan_PHG_Set_Part_Options (ZZ *zz, PHGPartParams *hgp)
 {
   int err;
-  char *yo = "Zoltan_PHG_Set_Part_Options";  
+  const char *yo = "Zoltan_PHG_Set_Part_Options";  
 
   if (hgp->bal_tol < 1.0)  {
     ZOLTAN_PRINT_ERROR(zz->Proc, yo, "Invalid PHG_BALANCE_TOLERANCE.");
@@ -193,7 +193,7 @@ int Zoltan_PHG_Partition (
   int  i, err = ZOLTAN_OK;
   int  prevVcnt     = 2*hg->dist_x[hgc->nProc_x];
   int  prevVedgecnt = 2*hg->dist_y[hgc->nProc_y];
-  char *yo = "Zoltan_PHG_Partition";
+  const char *yo = "Zoltan_PHG_Partition";
   static int timer_match = -1,    /* Timers for various stages */
              timer_coarse = -1,   /* Declared static so we can accumulate */
              timer_refine = -1,   /* times over calls to Zoltan_PHG_Partition */
@@ -522,7 +522,7 @@ double Zoltan_PHG_Compute_NetCut(
  */
   int i, j, *netpart = NULL, *allparts = NULL;    
   double cut = 0.0, totalcut=0.0;
-  char *yo = "Zoltan_PHG_Compute_NetCut";
+  const char *yo = "Zoltan_PHG_Compute_NetCut";
 
   if (hg->nEdge && !(netpart = (int*) ZOLTAN_CALLOC (hg->nEdge, sizeof(int)))) {
     ZOLTAN_PRINT_ERROR (hgc->myProc, yo, "Memory error.");
@@ -595,7 +595,7 @@ double Zoltan_PHG_Compute_ConCut(
  * decomposition (i.e., processor zero overall).
  */
     double cut = 0.0, totalcut=0.0;
-    char *yo = "Zoltan_PHG_Compute_ConCut";
+    const char *yo = "Zoltan_PHG_Compute_ConCut";
     
     if (hg->nEdge) {
         int i, j, *cuts=NULL, *rescuts=NULL, *parts, nEdge, start;
@@ -674,7 +674,7 @@ double Zoltan_PHG_Compute_Balance (
 {
   int i;
   double *lsize_w, *size_w, max_imbal, tot_w;
-  char *yo = "Zoltan_PHG_Compute_Balance";
+  const char *yo = "Zoltan_PHG_Compute_Balance";
   
   if (!hg || !hg->comm || !hg->comm->row_comm)  {
     ZOLTAN_PRINT_ERROR(zz->Proc, yo, "Unable to compute balance");

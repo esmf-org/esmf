@@ -178,7 +178,7 @@ int Zoltan_Timer_Init(
 {
 /* Function that returns the index of the next available Timer timer. */
 int ret;
-static char *yo = "Zoltan_Timer_Init";
+static const char *yo = "Zoltan_Timer_Init";
 
   TESTTIMER(zt, yo);
   
@@ -213,7 +213,7 @@ int Zoltan_Timer_Reset(
 )
 {
 /* Initialize a timer for INUSE; reset its values to zero. */
-static char *yo = "Zoltan_Timer_Reset";
+static const char *yo = "Zoltan_Timer_Reset";
 ZTIMER_TS *ts;
 
   TESTTIMER(zt, yo);
@@ -242,7 +242,7 @@ int Zoltan_Timer_ChangeFlag(
   int timer
 )
 {
-static char *yo = "Zoltan_Timer_ChangeFlag";
+static const char *yo = "Zoltan_Timer_ChangeFlag";
 
   TESTTIMER(zt, yo);
   zt->Timer_Flag = timer;
@@ -260,7 +260,7 @@ int Zoltan_Timer_Start(
 )
 {
 ZTIMER_TS *ts;
-static char *yo = "Zoltan_Timer_Start";
+static const char *yo = "Zoltan_Timer_Start";
 
   TESTTIMER(zt, yo);
   TESTINDEX(zt, ts_idx, yo);
@@ -303,7 +303,7 @@ int Zoltan_Timer_Stop(
 {
 /* Function to stop a timer and accrue its information */
 ZTIMER_TS *ts;
-static char *yo = "Zoltan_Timer_Stop";
+static const char *yo = "Zoltan_Timer_Stop";
 double my_time;
 
   TESTTIMER(zt, yo);
@@ -355,7 +355,7 @@ int Zoltan_Timer_Print(
  * its information.  This function must be called by all processors
  * within the communicator.  
  */
-static char *yo = "Zoltan_Timer_Print";
+static const char *yo = "Zoltan_Timer_Print";
 ZTIMER_TS *ts;
 int my_proc, nproc;
 double max_time;
@@ -390,7 +390,7 @@ int Zoltan_Timer_PrintAll(
 )
 {
 /* Function to print all timer information */
-static char *yo = "Zoltan_Timer_PrintAll";
+static const char *yo = "Zoltan_Timer_PrintAll";
 int i, ierr = ZOLTAN_OK;
 
   TESTTIMER(zt, yo);

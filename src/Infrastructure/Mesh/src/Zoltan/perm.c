@@ -47,7 +47,7 @@ static int owner(int *, int, int);
 int Zoltan_Get_Distribution(ZZ *zz, int **vtxdist)
 {
   int ierr, num_obj;
-  char *yo = "Zoltan_Get_Distribution";
+  const char *yo = "Zoltan_Get_Distribution";
 
   num_obj = zz->Get_Num_Obj(zz->Get_Num_Obj_Data, &ierr);
   if (ierr != ZOLTAN_OK && ierr != ZOLTAN_WARN){
@@ -90,7 +90,7 @@ int Zoltan_Inverse_Perm(
   int *proclist, *sendlist, *recvlist;
   ZOLTAN_COMM_OBJ *comm_plan;
   char msg[256];
-  char *yo = "Zoltan_Inverse_Perm";
+  const char *yo = "Zoltan_Inverse_Perm";
 
   ierr = ZOLTAN_OK;
   proclist = sendlist = recvlist = NULL;

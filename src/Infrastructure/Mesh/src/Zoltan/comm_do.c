@@ -82,7 +82,7 @@ char *recv_data)		/* array of data I'll own after comm */
     int       proc_index;	/* loop counter over procs to send to */
     int       i, j, k, jj;	/* loop counters */
 
-    static char *yo = "Zoltan_Comm_Do_Post";
+    static const char *yo = "Zoltan_Comm_Do_Post";
 
 
     /* Check input parameters */

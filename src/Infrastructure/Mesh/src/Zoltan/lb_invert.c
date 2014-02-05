@@ -69,7 +69,7 @@ int Zoltan_Invert_Lists(
  *  to satisfy its needs.
  */
 
-char *yo = "Zoltan_Invert_Lists";
+const char *yo = "Zoltan_Invert_Lists";
 char msg[256];
 ZOLTAN_COMM_OBJ *comm_plan;        /* Object returned communication routines  */
 int msgtag, msgtag2;               /* Message tags for communication routines */
@@ -239,7 +239,7 @@ static int check_invert_input(
  * zz->Num_GID and zz->Num_LID, and to compute include_parts flag globally.
  * All processors return the same error code.
  */
-char *yo = "check_invert_input";
+const char *yo = "check_invert_input";
 char msg[256];
 int loc_tmp[5];
 int glob_min[5] = {0,0,0,0,0};
@@ -337,7 +337,7 @@ int Zoltan_Compute_Destinations(
  *  Arguments are analogous to Zoltan_Invert_Lists.
  */
 
-char *yo = "Zoltan_Compute_Destinations";
+const char *yo = "Zoltan_Compute_Destinations";
 int ierr;
 
 

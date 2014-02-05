@@ -53,7 +53,7 @@ int Zoltan_Set_Fn(ZZ *zz, ZOLTAN_FN_TYPE fn_type, ZOLTAN_VOID_FN *fn,
  *    zz                --  Appropriate field set to value in void *().
  */
 
-char *yo = "Zoltan_Set_Fn";
+const char *yo = "Zoltan_Set_Fn";
 char msg[256];
 int ierr;
 

@@ -67,7 +67,7 @@ int build_elem_comm_maps(int proc, MESH_INFO_PTR mesh)
  * must communicate with more than one neighbor.
  */
 
-char *yo = "build_elem_comm_maps";
+const char *yo = "build_elem_comm_maps";
 int i, j;
 ELEM_INFO *elem;
 int iadj_elem;

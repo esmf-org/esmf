@@ -63,7 +63,7 @@ char     *recv_data)		/* array of data I'll own after reverse comm */
     int       sum_recv_sizes;	/* sum of the item sizes I receive */
     int       comm_flag;		/* status flag */
     int       i;		/* loop counter */
-    static char *yo = "Zoltan_Comm_Do_Reverse_Post";
+    static const char *yo = "Zoltan_Comm_Do_Reverse_Post";
 
     /* Check input parameters */
     if (!plan){

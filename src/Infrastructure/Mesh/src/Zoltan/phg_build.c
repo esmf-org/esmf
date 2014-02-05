@@ -73,7 +73,7 @@ int Zoltan_PHG_Build_Hypergraph(
 ZHG *zhg;                     /* Temporary pointer to Zoltan_HGraph. */
 HGraph *phgraph;             /* Temporary pointer to HG field */
 int ierr = ZOLTAN_OK;
-char *yo = "Zoltan_PHG_Build_Hypergraph";
+const char *yo = "Zoltan_PHG_Build_Hypergraph";
 
   ZOLTAN_TRACE_ENTER(zz, yo);
 
@@ -168,7 +168,7 @@ int Zoltan_PHG_Fill_Hypergraph(
  * pins (non-zeros).
  */
 
-char *yo = "Zoltan_PHG_Fill_Hypergraph";
+const char *yo = "Zoltan_PHG_Fill_Hypergraph";
 struct application_input {     /* Data provided by hypergraph callbacks. */
   int nVtx;                         /* # objects (vertices) on proc. */
   int nEdge;                        /* # hyperedges on proc. */
@@ -1134,7 +1134,7 @@ int Zoltan_PHG_Removed_Cuts(
  * pins for removed hyperedges may not have been retrieved before.
  * They must be retrieved now.
  */
-static char *yo = "Zoltan_PHG_Removed_Cuts";
+static const char *yo = "Zoltan_PHG_Removed_Cuts";
 int ierr = ZOLTAN_OK;
 int i, j, k, cnt, ncnt, nparts, max_parts;
 struct Hash_Node *hash_nodes = NULL;  /* Hash table variables for mapping   */
@@ -1388,7 +1388,7 @@ static int get_vertex_global_numbers(ZZ *zz, ZHG *zhg,
   int nVtx, struct Hash_Node **ht,
   int nPins, ZOLTAN_ID_PTR pins, int *pin_gno, int *pin_procs)
 {
-char *yo = "get_vertex_global_numbers";
+const char *yo = "get_vertex_global_numbers";
 int i, gno, maxUnSet, unSet, ngnos, ngids;
 ZOLTAN_ID_PTR p, rcvBufGids=NULL, sndBufGids=NULL;
 int *sndBufGnos=NULL, *rcvBufGnos=NULL, *pinIdx=NULL;
@@ -1674,7 +1674,7 @@ static int resolve_edge_weight_contributions(
   /* PHG_EDGE_WEIGHT_OPERATION parameter.  We also create and    */
   /* return a hash table useful for looking up edge weights.      */
 
-char *yo = "resolve_edge_weight_contributions";
+const char *yo = "resolve_edge_weight_contributions";
 ZOLTAN_ID_PTR rcvBufGids=NULL, sndBufGids=NULL, gidptr;
 float *rcvBufWeights=NULL, *sndBufWeights=NULL, *wptr;
 int rank, nprocs, right_proc, left_proc, rc;
@@ -1886,7 +1886,7 @@ static int combine_weights_for_same_edge(ZZ *zz, int ew_op,
           ZOLTAN_ID_PTR ew_gids, ZOLTAN_ID_PTR ew_lids, 
           float *ew_weights, void **ht, int *htsize)
 {
-char *yo = "combine_weights_for_same_edge";
+const char *yo = "combine_weights_for_same_edge";
 int ierr, nedges, edge_count, i, j, w;
 struct _ewht{
   ZOLTAN_ID_PTR egid;

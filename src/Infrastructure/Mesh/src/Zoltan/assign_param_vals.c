@@ -51,7 +51,7 @@ int proc,                       /* processor # (controls debug printing)  */
 int print_proc                  /* processor that should perform printing */
 )
 {	
-    char     *yo = "Zoltan_Assign_Param_Vals";
+    const char *yo = "Zoltan_Assign_Param_Vals";
     char      msg[256];
     char     *name;		/* name of parameter being reset */
     char     *val;		/* new value for parameter       */

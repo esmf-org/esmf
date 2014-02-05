@@ -114,7 +114,7 @@ int Zoltan_Octpart(
   int **export_to_part          /* Not computed. */
 ) 
 {
-char *yo = "Zoltan_Octpart";
+const char *yo = "Zoltan_Octpart";
 int oct_dim = 3;              /* Dimension of method to be used (2D or 3D)  */
 int oct_method = 2;           /* Flag specifying curve to be used.          */
 int oct_maxoctregions=MAXOCTREGIONS_DEF; /* max # of objs in leaves         */
@@ -227,7 +227,7 @@ static int lb_oct_init(
                                    assigned to each partition.              */
 ) 
 {
-  char *yo = "lb_oct_init";
+  const char *yo = "lb_oct_init";
   OCT_Global_Info *OCT_info;
   int nsentags;                    /* number of tags being sent */
   pRegion export_regs;             /* */
@@ -416,7 +416,7 @@ static void Zoltan_Oct_gen_tree_from_input_data(ZZ *zz, int oct_wgtflag,
 						int *c1, int *c2, int *c3, 
 						float *c0, int createpartree) 
 {
-  char *yo = "Zoltan_Oct_gen_tree_from_input_data";
+  const char *yo = "Zoltan_Oct_gen_tree_from_input_data";
   pRList  RootList;       /* list of all local roots */
   pOctant RootOct;        /* root octree octant */
   COORD min,              /* min coord bounds of objects */
@@ -673,7 +673,7 @@ static void Zoltan_Oct_gen_tree_from_input_data(ZZ *zz, int oct_wgtflag,
 static void Zoltan_Oct_get_bounds(ZZ *zz, pRegion *ptr1, int *num_objs, 
 		   COORD min, COORD max, int wgtflag, float *c0) 
 {
-  char *yo = "Zoltan_Oct_get_bounds";
+  const char *yo = "Zoltan_Oct_get_bounds";
   ZOLTAN_ID_PTR obj_global_ids = NULL; 
   ZOLTAN_ID_PTR obj_local_ids = NULL;
   int *parts = NULL;   /* Input partition assignments; currently unused. */

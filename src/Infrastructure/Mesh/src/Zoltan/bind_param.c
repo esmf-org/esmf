@@ -53,7 +53,7 @@ int dim				/* dimension of parameter vector */
  *    ZOLTAN_FATAL signals something more serious.
  */
 
-    char     *yo = "Zoltan_Bind_Param";
+    const char     *yo = "Zoltan_Bind_Param";
     char      msg[256];
     char     *name2;		/* clean version of name */
     int       flag;		/* return value from function */

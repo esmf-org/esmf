@@ -101,7 +101,7 @@ int gather_row(int nProc_x, int nProc_y, int myProc_x, int myProc_y,
 {
     int  i, my_proc, err;
     int  *procs;
-    static char *yo = "gather_row";
+    static const char *yo = "gather_row";
     
     /* create list of processors to send to (everyone in our row but us)     */
     /* this assumes a linear left->right numbering of processors in our grid */
@@ -143,7 +143,7 @@ int gather_col(int nProc_x, int nProc_y, int myProc_x, int myProc_y,
 {
     int  i, my_proc, err;
     int  *procs;
-    static char *yo = "gather_col";
+    static const char *yo = "gather_col";
     
     my_proc = myProc_y * nProc_x + myProc_x;
     
@@ -184,7 +184,7 @@ int gather_col_root(int nProc_x, int nProc_y, int myProc_x, int myProc_y,
    int sbuff_size, char *sbuff, int *rbuff_size, char **rbuff, MPI_Comm *comm)
 {
     int  *procs;
-    static char *yo = "gather_col_root";
+    static const char *yo = "gather_col_root";
     
     if (!(procs = (int*) ZOLTAN_MALLOC(sizeof(int)))) {
         ZOLTAN_PRINT_ERROR(myProc_y * nProc_x + myProc_x, yo, 
@@ -207,7 +207,7 @@ int gather_row_root(int nProc_x, int nProc_y, int myProc_x, int myProc_y,
    int sbuff_size, char *sbuff, int *rbuff_size, char **rbuff, MPI_Comm *comm)
 {
     int *procs;
-    static char *yo = "gather_row_root";
+    static const char *yo = "gather_row_root";
 
     if(!(procs = (int*) ZOLTAN_MALLOC(sizeof(int)))) {
         ZOLTAN_PRINT_ERROR(myProc_y * nProc_x + myProc_x, yo, 

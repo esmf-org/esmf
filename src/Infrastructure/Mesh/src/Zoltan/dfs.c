@@ -324,7 +324,7 @@ void Zoltan_Oct_dfs_migrate(ZZ *zz, int *nsentags,
   int pid;                                   /* processor id */
   int nrecocts;
   OCT_Global_Info *OCT_info = (OCT_Global_Info *)(zz->LB.Data_Structure);
-  char *yo = "Zoltan_Oct_dfs_migrate";
+  const char *yo = "Zoltan_Oct_dfs_migrate";
 
   if(Zoltan_Oct_nOctants()) {  /* allocate space for octants being migrated */
     docts = (pOctant *)ZOLTAN_MALLOC(Zoltan_Oct_nOctants() * sizeof(pOctant));

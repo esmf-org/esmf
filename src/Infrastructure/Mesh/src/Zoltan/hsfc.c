@@ -110,7 +110,7 @@ int Zoltan_HSFC(
    int        idummy;
    double     ddummy;
    int        dim;
-   char      *yo = "Zoltan_HSFC";
+   const char *yo = "Zoltan_HSFC";
 
    /* begin program with trace, timing, and initializations */
    ZOLTAN_TRACE_ENTER (zz, yo);
@@ -622,7 +622,7 @@ void Zoltan_HSFC_Free_Structure (ZZ *zz)
 
 int Zoltan_HSFC_Copy_Structure(ZZ *toZZ, ZZ const *fromZZ)
 {
-  char *yo = "Zoltan_HSFC_Copy_Structure";
+  const char *yo = "Zoltan_HSFC_Copy_Structure";
   int len;
   HSFC_Data *to;
   HSFC_Data const *from;

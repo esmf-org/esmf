@@ -32,7 +32,7 @@ int Zoltan_RCB_Build_Structure(ZZ *zz, int *num_obj, int *max_obj, int wgtflag,
  *  Function to build the geometry-based data structures for 
  *  Steve Plimpton's RCB implementation.
  */
-char *yo = "Zoltan_RCB_Build_Structure";
+const char *yo = "Zoltan_RCB_Build_Structure";
 RCB_STRUCT *rcb;                      /* Data structure for RCB.             */
 struct rcb_tree *treeptr;
 int i, ierr = 0;
@@ -138,7 +138,7 @@ RCB_STRUCT *rcb;                      /* Data structure for RCB.             */
 
 int Zoltan_RCB_Copy_Structure(ZZ *toZZ, ZZ const *fromZZ)
 {
-  char *yo = "Zoltan_RCB_Copy_Structure";
+  const char *yo = "Zoltan_RCB_Copy_Structure";
   RCB_STRUCT *to;
   RCB_STRUCT const *from;
 

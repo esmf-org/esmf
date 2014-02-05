@@ -85,7 +85,7 @@ static int findAndSaveLeftAloneVertices(ZZ *zz, HGraph *hg, int p,
                                  Partition parts,
                                  PHGPartParams *hgp) 
 {
-    char *yo="findAndSaveLeftAloneVertices";
+    const char *yo="findAndSaveLeftAloneVertices";
     int *lneigh[2]={NULL, NULL}, *neigh[2]={NULL, NULL}, i, j, ierr=ZOLTAN_OK;
     int *lpins=NULL, *pins=NULL;
     PHGComm *hgc=hg->comm;
@@ -169,7 +169,7 @@ int **exp_procs,           /* list of processors to export to */
 int **exp_to_part )         /* list of partitions to which exported objs
                                 are assigned. */
 {
-  char *yo = "Zoltan_PHG";
+  const char *yo = "Zoltan_PHG";
   ZHG *zoltan_hg = NULL;
   PHGPartParams hgp;               /* Hypergraph parameters. */
   HGraph *hg = NULL;               /* Hypergraph itself */
@@ -490,7 +490,7 @@ int Zoltan_PHG_Initialize_Params(
 )
 {
   int err = ZOLTAN_OK;
-  char *yo = "Zoltan_PHG_Initialize_Params";
+  const char *yo = "Zoltan_PHG_Initialize_Params";
   int nProc;
   int usePrimeComm;
   MPI_Comm communicator;
@@ -726,7 +726,7 @@ static int Zoltan_PHG_Output_Parts (
  * to the input distribution 
  */
 
-static char *yo = "Zoltan_PHG_Output_Parts";
+static const char *yo = "Zoltan_PHG_Output_Parts";
 int i;
 int msg_tag = 31000;
 int ierr = ZOLTAN_OK;
@@ -805,7 +805,7 @@ static int Zoltan_PHG_Return_Lists (
   int **exp_to_part)
 {
 /* Routine to build export lists of ZOLTAN_LB_FN. */
-char *yo = "Zoltan_PHG_Return_Lists";
+const char *yo = "Zoltan_PHG_Return_Lists";
 int i, j;
 int ierr = ZOLTAN_OK;
 int eproc;
@@ -884,7 +884,7 @@ void Zoltan_PHG_HGraph_Print(
   int i;
   int num_gid = zz->Num_GID;
   int num_lid = zz->Num_LID;
-  char *yo = "Zoltan_PHG_HGraph_Print";
+  const char *yo = "Zoltan_PHG_HGraph_Print";
 
   if (zoltan_hg != NULL  &&  hg != &zoltan_hg->HG) {
     ZOLTAN_PRINT_WARN(zz->Proc, yo, "Input hg != Zoltan HG");
@@ -929,7 +929,7 @@ int Zoltan_PHG_Set_2D_Proc_Distrib(
  * If nProc_x and nProc_y both equal -1 on input, compute default.
  * Otherwise, compute valid values and/or return error.
  */
-char *yo = "Zoltan_PHG_Set_2D_Proc_Distrib";
+const char *yo = "Zoltan_PHG_Set_2D_Proc_Distrib";
 int tmp;
 int ierr = ZOLTAN_OK;
     

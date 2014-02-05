@@ -52,7 +52,7 @@ int Zoltan_DD_Remove (
    int              err ;            /* error condition to return       */
    int              errcount ;       /* count of GIDs not found         */
    char             str[100] ;       /* string to build error messages  */
-   char            *yo = "Zoltan_DD_Remove" ;
+   const char       *yo = "Zoltan_DD_Remove" ;
 
 
    if (dd != NULL && dd->debug_level > 1)
@@ -193,7 +193,7 @@ static int DD_Remove_Local (Zoltan_DD_Directory *dd,
    DD_Node **ptr ;
    DD_Node  *old ;
    int index ;
-   char *yo = "DD_Remove_Local" ;
+   const char *yo = "DD_Remove_Local" ;
 
    /* input sanity checking */
    if (dd == NULL || gid == NULL)

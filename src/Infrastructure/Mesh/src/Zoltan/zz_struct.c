@@ -54,7 +54,7 @@ ZZ *Zoltan_Create(MPI_Comm communicator)
  *
  */
 
-char *yo = "Zoltan_Create";
+const char *yo = "Zoltan_Create";
 ZZ *zz;
 
   /*

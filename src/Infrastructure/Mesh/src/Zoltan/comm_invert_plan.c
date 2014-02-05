@@ -39,7 +39,7 @@ int Zoltan_Comm_Invert_Plan(
 ZOLTAN_COMM_OBJ **plan 		/* communicator object to be inverted */
 )
 {
-static char *yo = "Zoltan_Comm_Invert_Plan";
+static const char *yo = "Zoltan_Comm_Invert_Plan";
 ZOLTAN_COMM_OBJ *old = *plan, *New = NULL;
 int i, ierr = ZOLTAN_OK;
 int total_send_length;

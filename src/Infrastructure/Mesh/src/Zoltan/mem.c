@@ -146,7 +146,7 @@ void Zoltan_Memory_Debug(int new_level) {
 
 #if defined(__STDC__) || defined (__cplusplus)
 
-double *Zoltan_Array_Alloc(char *file, int lineno, int numdim, ...)
+double *Zoltan_Array_Alloc(const char *file, int lineno, int numdim, ...)
 
 #else
 
@@ -160,7 +160,7 @@ va_dcl
 /*****************************************************************************/
 
 {
-  char *yo = "Zoltan_Array_Alloc";
+  const char *yo = "Zoltan_Array_Alloc";
   int i, j;
   struct dimension {
     long index;  /* Number of elements in the dimension  */
@@ -262,7 +262,7 @@ va_dcl
 
 /* Safe version of calloc.  */
 
-double *Zoltan_Calloc (int num, int size, char *filename, int lineno)
+double *Zoltan_Calloc (int num, int size, const char *filename, int lineno)
 {
 double *p ;
   p = Zoltan_Malloc (num*size, filename, lineno) ;
@@ -276,9 +276,9 @@ double *p ;
 
 /* Safe version of malloc.  Does not initialize memory .*/
 
-double *Zoltan_Malloc(int n, char *filename, int lineno)
+double *Zoltan_Malloc(int n, const char *filename, int lineno)
 {
-  char *yo = "Zoltan_Malloc";
+  const char *yo = "Zoltan_Malloc";
   struct malloc_debug_data *new_ptr;     /* data structure for malloc data */
   int       proc;             /* processor ID for debugging msg */
   double *pntr;           /* return value */
@@ -341,9 +341,9 @@ double *Zoltan_Malloc(int n, char *filename, int lineno)
 
 /* Safe version of realloc. Does not initialize memory. */
 
-double *Zoltan_Realloc(void *ptr, int n, char *filename, int lineno)
+double *Zoltan_Realloc(void *ptr, int n, const char *filename, int lineno)
 {
-  char *yo = "Zoltan_Realloc";
+  const char *yo = "Zoltan_Realloc";
   struct malloc_debug_data *dbptr;   /* loops through debug list */
   int       proc;             /* processor ID */
   double   *p;                /* returned pointer */
@@ -401,7 +401,7 @@ double *Zoltan_Realloc(void *ptr, int n, char *filename, int lineno)
 /*****************************************************************************/
 /*****************************************************************************/
 
-void Zoltan_Free (void **ptr, char *filename, int lineno)
+void Zoltan_Free (void **ptr, const char *filename, int lineno)
 {
   struct malloc_debug_data *dbptr;   /* loops through debug list */
   struct malloc_debug_data **prev;   /* holds previous pointer */
@@ -449,7 +449,7 @@ void Zoltan_Free (void **ptr, char *filename, int lineno)
 
 #if defined(__STDC__) || defined(__cplusplus)
 
-void Zoltan_Multifree(char *filename, int lineno, int n, ...)
+void Zoltan_Multifree(const char *filename, int lineno, int n, ...)
 {
   int i;
   va_list va;

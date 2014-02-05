@@ -45,7 +45,7 @@ void Zoltan_DD_Stats (
    int      i ;
    DD_Node *ptr ;
    char     str[100] ;      /* used to build message string */
-   char    *yo = "Zoltan_DD_Stats" ;
+   const char *yo = "Zoltan_DD_Stats" ;
 
 
    /* Input sanity check */
