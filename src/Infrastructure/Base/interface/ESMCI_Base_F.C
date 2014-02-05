@@ -17,12 +17,15 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <string.h>
-#include <stdlib.h>
 
 #include "ESMCI_Base.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
+
+#include <string>
+using namespace std;
+
+#include <stdlib.h>
 
 // the interface subroutine names MUST be in lower case by ESMF convention
 extern "C" {
@@ -46,8 +49,8 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      char *superclass,         // in - F90, non-null terminated string
-      char *name,               // in (opt) - F90, non-null terminated string
+      const char *superclass,   // in - F90, non-null terminated string
+      const char *name,         // in (opt) - F90, non-null terminated string
       int *nattrs,              // in - number of initial attributes to alloc
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg sclen,  // hidden/in - strlen count for superclass
@@ -59,39 +62,18 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname = NULL;
-  char *scname = NULL;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  // copy and convert F90 strings to null terminated ones
-  if (superclass && (sclen > 0) && (superclass[0] != '\0')) {
-      scname = ESMC_F90toCstring(superclass, sclen);
-      if (!scname) {
-           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", ESMC_CONTEXT, &status);
-          if (rc) *rc = status;
-          return;
-      }
-  }
-  if (name && (nlen > 0) && (name[0] != '\0')) {
-      cname = ESMC_F90toCstring(name, nlen);
-      if (!cname) {
-          delete [] scname;
-          if (rc) *rc = status;
-          return;
-      }
-  } 
-
-  (*base) = new ESMC_Base(scname, cname, *nattrs);
+  string scname = string (superclass, ESMC_F90lentrim (superclass, sclen));
+  string cname  = string (name, ESMC_F90lentrim (name, nlen));
+  (*base) = new ESMC_Base(scname.c_str(), cname.c_str(), *nattrs);
   if (*base != NULL)
       *rc = ESMF_SUCCESS;
   else
       *rc = ESMF_FAILURE;
 
-  if (scname) delete [] scname;
-  if (cname)  delete [] cname;
   return;
 
 }  // end c_ESMC_BaseCreate
@@ -144,7 +126,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       int *level,               // in - print level for recursive prints
-      char *opts,               // in - F90, non-null terminated string
+      const char *opts,         // in - F90, non-null terminated string
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
 // 
@@ -152,8 +134,6 @@ extern "C" {
 //     Print the contents of a base object.
 //
 //EOP
-
-  char *copts = NULL;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -167,20 +147,10 @@ extern "C" {
     // for Print, it's not a failure for an uninit object to be printed
   }
 
-  // copy and convert F90 string to null terminated one
-  if (opts && (nlen > 0) && (opts[0] != '\0')) {
-      copts = ESMC_F90toCstring(opts, nlen);
-      if (!copts) {
-          if (rc) *rc = ESMF_FAILURE;
-          return;
-      }
-  }
-
-  *rc = (*base)->ESMC_Print(*level, copts);
+  string copts = string (opts, ESMC_F90lentrim (opts, nlen));
+  *rc = (*base)->ESMC_Print(*level, copts.c_str());
   fflush (stdout);
 
-  if (copts)
-      delete [] copts;
   return;
 
 }  // end c_ESMC_BasePrint
@@ -295,7 +265,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      char *opts,               // in - F90, non-null terminated string
+      const char *opts,         // in - F90, non-null terminated string
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for options
 // 
@@ -303,8 +273,6 @@ extern "C" {
 //     Validate the contents of a base object.
 //
 //EOP
-
-  char *copts = NULL;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -317,20 +285,8 @@ extern "C" {
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  if (opts && (nlen > 0) && (opts[0] != '\0')) {
-      copts = ESMC_F90toCstring(opts, nlen);
-      if (!copts) {
-          if (rc) *rc = ESMF_FAILURE;
-          return;
-      }
-  }
-
-  *rc = (*base)->ESMC_Validate(copts);
-
-  if (copts)
-      delete [] copts;
-  return;
+  string copts = string (opts, ESMC_F90lentrim (opts, nlen));
+  *rc = (*base)->ESMC_Validate(copts.c_str());
 
 }  // end c_ESMC_BaseValidate
 
@@ -429,8 +385,8 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      char *classname,          // in - F90, non-null terminated string
-      char *objname,            // in - F90, non-null terminated string
+      const char *classname,    // in - F90, non-null terminated string
+      const char *objname,      // in - F90, non-null terminated string
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg clen,   // hidden/in - max strlen count for classname
       ESMCI_FortranStrLenArg olen) { // hidden/in - max strlen count for objname
@@ -440,9 +396,6 @@ extern "C" {
 //
 //EOPI
 
-  char *oname = NULL;
-  char *cname = NULL;
-
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -451,30 +404,9 @@ extern "C" {
     return;
   }
  
-  if (classname && (clen > 0) && (classname[0] != '\0')) {
-      // copy and convert F90 string to null terminated one
-      cname = ESMC_F90toCstring(classname, clen);
-      if (!cname) {
-          if (rc) *rc = ESMF_FAILURE;
-          return;
-      }
-  }
-
-  if (objname && (olen > 0) && (objname[0] != '\0')) {
-      // copy and convert F90 string to null terminated one
-      oname = ESMC_F90toCstring(objname, olen);
-      if (!oname) {
-          if (!cname)
-              delete [] cname;
-          if (rc) *rc = ESMF_FAILURE;
-          return;
-      }
-  }
-
-  (*rc) = (*base)->ESMC_BaseSetName(oname, cname);
-
-  delete [] oname;
-  delete [] cname; 
+  string oname = string (objname, ESMC_F90lentrim (objname, olen));
+  string cname = string (classname, ESMC_F90lentrim (classname, clen));
+  (*rc) = (*base)->ESMC_BaseSetName(oname.c_str(), cname.c_str());
 
   return;
 
@@ -788,8 +720,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      ESMC_Status *status,      // in - status
+      ESMC_Base **base,         // in - base object
+      ESMC_Status *status,      // out - status
       int *rc                   // out - return code
       ){
 // 
