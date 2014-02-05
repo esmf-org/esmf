@@ -94,7 +94,7 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \item phase 5: ({\sc NUOPC Provided}, suitable for: IPDv02p5)
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
-  \item Time stamp Fields in export State for compatibility checking.
+  \item Timestamp Fields in export State for compatibility checking.
   \item Set Component metadata used to resolve initialize data dependencies.
   \end{itemize}    
 \end{itemize}
@@ -104,15 +104,25 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Allocate internal state memory.
-  \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming clock.
-  \item {\it Optional specialization} to check and set the internal clock against the incoming clock: {\tt label\_SetRunClock}.
-  \item Alternatively use the default specialization: check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
-  \item {\it Optional specialization} to check Fields in import State: {\tt label\_CheckImport}.
-  \item Alternatively use the default specialization: check that all import Fields are at the current time of the internal clock.
-  \item Model time stepping loop, starting at current time, running to stop time on the internal clock using the internal Clock time step.
-  \item {\it Required specialization} to advance the model each time step: {\tt label\_Advance}.
-  \item Timestamp all export Fields at the current time of the internal clock.
-  \item Deallocate internal state memory.
+  \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming Clock.
+  \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that internal Clock and incoming Clock agree on current time and that the time step of the incoming Clock is a multiple of the internal Clock time step. Under these conditions set the internal stop time to one time step interval of the incoming Clock. Otherwise exit with error, flagging an incompatibility.
+  \end{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_CheckImport} to check Fields in the import State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization is present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that all import Fields are at the current time of the internal Clock.
+  \end{itemize}
+  \item Time stepping loop: starting at current time, running to stop time of the internal Clock.
+  \begin{itemize}
+  \item Timestamp the Fields in the export State according to the current time of the internal Clock.
+  \item {\sc Specialization Required}: {\tt label\_Advance} to execute model code.
+  \item Advance the current time of the internal Clock according to the time step of the internal Clock.
+  \end{itemize}
+  \item Timestamp all Fields in the export State according to the current time of the internal Clock, which now is identical to the stop time of the internal Clock.
+  \item Deallocate the internal state memory.
   \end{itemize}    
 \end{itemize}
 
