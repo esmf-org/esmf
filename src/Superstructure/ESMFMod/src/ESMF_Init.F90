@@ -386,6 +386,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
+      ! Ensure that at least the version number makes it into the log
+      call ESMF_LogFlush(rc=status)
+
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=status)
       if (status .ne. ESMF_SUCCESS) then
