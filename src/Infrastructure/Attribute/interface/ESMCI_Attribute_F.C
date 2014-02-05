@@ -2009,9 +2009,7 @@ extern "C" {
     delete [] llens;
     return;
   }
-  
-  printf("~~~~~~~~~~~~~~~~~~ cvalue = %s and size = %d\n", cvalue[0].c_str(), cvalue.size());
-  
+    
   // finally we convert them all to f90 and pack them into char*
   j = 0;
   for (i=0; i<lcount; i++) {
