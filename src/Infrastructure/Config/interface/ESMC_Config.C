@@ -777,7 +777,7 @@ int ESMC_ConfigNextLine(
   if (label != NULL) {
     // call into Fortran interface
     FTN_X(f_esmf_configgetlen)(configp, wordCount, label, &localrc,
-        sizeof (label));
+        strlen (label));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
       return rc;
@@ -896,7 +896,7 @@ int ESMC_ConfigNextLine(
 
     // call Fortran interface
     FTN_X(f_esmf_configgetdim)(configp, lineCount, columnCount, label,
-        &localrc, sizeof (label));
+        &localrc, strlen (label));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
       return rc;
