@@ -1001,7 +1001,7 @@ static const char *const version = "$Id$";
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
-      ESMC_Base::ESMC_Base(char *superclass, char *name, int nattrs) {
+      ESMC_Base::ESMC_Base(const char *superclass, const char *name, int nattrs) {
 //
 // !RETURN VALUE:
 //    none
