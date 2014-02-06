@@ -26,7 +26,7 @@ SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
             par_sync.c par_tflops_special.c perm.c phg_build.c phg_build_calls.c phg.c phg_coarse.c \
             phg_comm.c phg_distrib.c phg_gather.c phg_hypergraph.c phg_match.c phg_order.c \
             phg_parkway.c phg_patoh.c phg_plot.c phg_rdivide.c phg_refinement.c phg_scale.c \
-            phg_serialpartition.c phg_util.c phg_Vcycle.c point_assign.c print_params.c queries1.c \
+            phg_serialpartition.c phg_util.c phg_Vcycle.c point_assign.c print_params.c \
             rcb_box.c rcb.c rcb_util.c reftree_build.c reftree_coarse_path.c reftree_hash.c \
             reftree_part.c rib.c rib_util.c rootlist.c scatter_graph.c set_param.c shared.c \
             timer.c timer_params.c verify_graph.c zoltan_align.c zoltan_id.c zoltan_timer.c \
