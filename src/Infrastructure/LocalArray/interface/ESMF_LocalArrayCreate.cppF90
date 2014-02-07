@@ -203,7 +203,7 @@ module ESMF_LocalArrayCreateMod
 !    (Only available from the Fortran interface.)
 !  \end{description}
 !  
-!  The concept of an ``empty'' {\tt ESMF\_LocalArray} does not exist.  To make an
+!  The concept of an {\itshape empty} {\tt ESMF\_LocalArray} does not exist.  To make an
 !  ESMF object which stores the Type/Kind/Rank information create an
 !  {\tt ESMF\_ArraySpec} object which can then be used repeatedly in
 !  subsequent {\tt ESMF\_LocalArray} Create calls.
