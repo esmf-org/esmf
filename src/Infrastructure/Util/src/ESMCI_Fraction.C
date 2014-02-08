@@ -544,12 +544,12 @@ static const char *const version = "$Id$";
     // ensure whole and fraction parts are same sign
     
     // if whole is positive and fraction is negative
-    if (w > 0 && (n < 0 && d > 0 || d < 0 && n > 0)) {
+    if (w > 0 && ((n < 0 && d > 0) || (d < 0 && n > 0))) {
       w--;     // subtract one from whole number
       n += d;  //   and add it to the fraction part
 
     // else if whole is negative and fraction is positive
-    } else if (w < 0 && (n > 0 && d > 0) || (d < 0 && n < 0)) {
+    } else if ((w < 0 && (n > 0 && d > 0)) || (d < 0 && n < 0)) {
       w++;     // add one to whole number
       n -= d;  //   and subtract it from the fraction part
     }
