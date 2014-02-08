@@ -492,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_UtilIOGetCWD (pathName, keywordEnforcer, rc)
 !
 ! !PARAMETERS:
-    character(*), intent(in)            :: pathName
+    character(*), intent(out)           :: pathName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      intent(out), optional :: rc
 !
