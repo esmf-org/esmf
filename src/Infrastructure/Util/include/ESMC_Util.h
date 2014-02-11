@@ -112,27 +112,17 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
 		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 // ESMF platform-dependent data types
-#if (ESMC_POINTER_SIZE == 4)
-  // 32-bit machine
   typedef long long ESMC_I8;
   typedef int       ESMC_I4;
   typedef short     ESMC_I2;
   typedef char      ESMC_I1;
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
+#if (ESMC_POINTER_SIZE == 4)
+  // 32-bit machine
   typedef unsigned long      ESMC_POINTER;
 #else
   // 64-bit machine
-#if defined (PARCH_mingw)
-  typedef long long ESMC_I8;
-#else
-  typedef long      ESMC_I8;
-#endif
-  typedef int       ESMC_I4;
-  typedef short     ESMC_I2;
-  typedef char      ESMC_I1;
-  typedef double    ESMC_R8;
-  typedef float     ESMC_R4;
   typedef unsigned long long ESMC_POINTER;
 #endif
 
