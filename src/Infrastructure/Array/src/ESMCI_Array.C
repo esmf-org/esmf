@@ -2649,7 +2649,7 @@ int Array::read(
 
   // cleanup
   IO::destroy(&newIO);
-  newIO == (IO *)NULL;
+  newIO = (IO *)NULL;
 
   // return
   return rc;
@@ -2737,7 +2737,7 @@ int Array::write(
 
   // cleanup
   IO::destroy(&newIO);
-  newIO == (IO *)NULL;
+  newIO = (IO *)NULL;
 
   // return 
   return rc;
