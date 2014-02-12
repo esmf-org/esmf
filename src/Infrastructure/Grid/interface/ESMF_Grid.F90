@@ -18849,7 +18849,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
 ! !INTERFACE:
-  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, rc)
+  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, global, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridMatch_Flag) :: ESMF_GridMatch
@@ -18858,6 +18858,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid),  intent(in)              :: grid1
     type(ESMF_Grid),  intent(in)              :: grid2
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),   optional  :: global
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -18876,6 +18877,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_Grid} object.
 !     \item[grid2] 
 !          {\tt ESMF\_Grid} object.
+!     \item[global] 
+!          By default this flag is set to false. When it's set to true, the
+!          function performs the match check globally.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18884,6 +18888,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer      :: localrc      ! local return code
     integer      :: matchResult
+    integer(ESMF_KIND_I4) :: localResult(1), globalResult(1)
+    logical      :: l_global
+    integer      :: npet
+    type(ESMF_VM) ::  vm
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -18913,6 +18921,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
     else
        ESMF_GridMatch = ESMF_GRIDMATCH_NONE
+    endif
+
+    l_global = .false.
+    if(present(global)) l_global = global
+    
+    if(l_global) then
+      call ESMF_VMGetCurrent(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_VMGet(vm, petCount=npet, rc=rc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      localResult(1) = matchResult
+      globalResult(1) = 0
+      call ESMF_VMAllReduce(vm, localResult, globalResult, &
+        1, ESMF_REDUCE_SUM, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if(globalResult(1) == npet) then
+        ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
+      else
+        ESMF_GridMatch = ESMF_GRIDMATCH_NONE
+      endif
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
