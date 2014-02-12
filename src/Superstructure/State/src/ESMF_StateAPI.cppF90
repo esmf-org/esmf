@@ -1555,9 +1555,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !      If the {\tt state} contains nested {\tt ESMF\_State}s,
 !      the {\tt itemName} argument may specify a fully qualified name
 !      to access the desired item with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
+!      using the '/' character to separate the names of the intermediate
 !      State names leading to the desired item.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}).
+!      {\tt itemName='state1/state12/item'}).
 !
 !      Supported values for <item> are:
 !      \begin{description}
