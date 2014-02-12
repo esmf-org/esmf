@@ -1564,18 +1564,26 @@ end subroutine ESMF_LogInitialize
   if(alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
     if (alog%logkindflag == ESMF_LOGKIND_SINGLE) then
+        if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
+            write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+                ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            if (present(rc)) then
+                rc = ESMF_RC_LONG_STR
+            endif
+            return
+        endif
         alog%nameLogErrFile=trim(filename)
     else
+        if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
+            write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+                ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            if (present(rc)) then
+                rc = ESMF_RC_LONG_STR
+            endif
+            return
+        endif
         fname = trim(alog%petNumLabel) // "." // trim(filename)
         alog%nameLogErrFile=fname
-    endif
-    if (len_trim (fname) > ESMF_MAXPATHLEN) then
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-            ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
-        if (present(rc)) then
-            rc = ESMF_RC_LONG_STR
-        endif
-        return
     endif
 
     ! find an available unit number
