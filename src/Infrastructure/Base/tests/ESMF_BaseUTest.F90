@@ -197,6 +197,7 @@
       ! commented out because it crashes
       ! Bug report 969866 opened
       !EX_UTest
+      validate_options = ''
       call ESMF_BaseValidate(base, validate_options, rc)
       write(name, *) "ESMF_BaseValidate"
       write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
