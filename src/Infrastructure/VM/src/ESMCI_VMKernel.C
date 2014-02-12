@@ -5596,7 +5596,7 @@ namespace ESMCI {
       return SOCKERR_TIMEOUT;
     }
     
-    fprintf(stderr, "socketSend: buffer size=%d, bytes sent=%d\n", size, len);
+    fprintf(stderr, "socketSend: buffer size=%lu, bytes sent=%d\n", size, len);
     
     // return successfully
     return len;
@@ -5656,7 +5656,7 @@ namespace ESMCI {
       return SOCKERR_TIMEOUT;
     }
     
-    fprintf(stderr, "socketRecv: buffer size=%d, bytes recvd=%d\n", size, len);
+    fprintf(stderr, "socketRecv: buffer size=%lu, bytes recvd=%d\n", size, len);
 
     // return successfully
     return len;
