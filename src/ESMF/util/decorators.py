@@ -68,7 +68,8 @@ def netcdf(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-
+        from ESMF.api.constants import _ESMF_NETCDF
+        
         if _ESMF_NETCDF:
             return func(*args, **kwargs)
         else:
