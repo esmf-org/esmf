@@ -3123,7 +3123,7 @@ namespace ESMCI{
       return(rc);
 
     // format everything except seconds
-    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM\0", yy_i8, mm_i8, d_i8, h, m);
+    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM", yy_i8, mm_i8, d_i8, h, m);
 
     // format seconds according to specified options
     bool isofrac = false;
@@ -3139,18 +3139,18 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {
-        sprintf(timeString, "%s%.9fS\0", timeString, (s + fractionalSeconds));
+        sprintf(timeString, "%s%.9fS", timeString, (s + fractionalSeconds));
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%dS\0", timeString, s);
+        sprintf(timeString, "%s%dS", timeString, s);
       }
     } else { // not strict ISO fractional seconds format
       // hybrid ISO 8601 format PyYmMdDThHmMs[:n/d]S 
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%d:%lld/%lldS\0", timeString, s, sN, sD);
+        sprintf(timeString, "%s%d:%lld/%lldS", timeString, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%dS\0", timeString, s);
+        sprintf(timeString, "%s%dS", timeString, s);
       }
     }
 

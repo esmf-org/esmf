@@ -195,7 +195,7 @@ int Calendar::count=0;
       }
     } else {
       // create default name "CalendarNNN"
-      sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
+      sprintf(calendar->name, "Calendar%3.3d", calendar->id);
     }
 
     returnCode = calendar->set(strlen(calendar->name), 
@@ -277,7 +277,7 @@ int Calendar::count=0;
     }
 
     // create default internal name, e.g. "InternalGregorian001"
-    sprintf((*internalCal)->name, "Internal%s%3.3d\0",
+    sprintf((*internalCal)->name, "Internal%s%3.3d",
                          Calendar::calkindflagName[calkindflag-1],
                                                     (*internalCal)->id);
 
@@ -365,7 +365,7 @@ int Calendar::count=0;
       }
     } else {
       // create default name "CalendarNNN"
-      sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
+      sprintf(calendar->name, "Calendar%3.3d", calendar->id);
     }
 
     returnCode = calendar->set(strlen(calendar->name),
