@@ -218,9 +218,9 @@ namespace ESMCI {
       localrc = ESMC_CtoF90string(name, fName, slen);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc)) {
-        if (gtfm_created) if (gtfm_created) delete gtfm;
-        if (uglb_created) if (uglb_created) delete uglb;
-        if (ugub_created) if (ugub_created) delete ugub;
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
         delete[] fName;
         return ESMC_NULL_POINTER;
       }
