@@ -126,7 +126,7 @@ int Alarm::count=0;
       }
     } else {
       // create default name "AlarmNNN"
-      sprintf(alarm->name, "Alarm%3.3d\0", alarm->id);
+      sprintf(alarm->name, "Alarm%3.3d", alarm->id);
     }
 
     if (ringTime != ESMC_NULL_POINTER) {
@@ -777,8 +777,8 @@ int Alarm::count=0;
         //  before the clock loop ended (covers case where last ringTime
         //  equals the clock->stopTime and alarm is processed before
         //  the clockAdvance()).
-        if (positive  && ringEnd > ringTime ||
-            !positive && ringEnd < ringTime) {
+        if ((positive  && ringEnd > ringTime) ||
+            (!positive && ringEnd < ringTime)) {
           ringEnd -= ringInterval;
         }
       }
@@ -1307,9 +1307,9 @@ int Alarm::count=0;
 
       // ... adjust if sticky alarm ...
       if (sticky) {
-        while ( (positive && ringEnd > clock->currTime ||
-                !positive && ringEnd < clock->currTime) &&
-                 ringTime != firstRingTime) {
+        while ( ((positive && ringEnd > clock->currTime) ||
+                (!positive && ringEnd < clock->currTime)) &&
+                 (ringTime != firstRingTime)) {
           ringEnd      -= ringInterval;
           ringTime      = prevRingTime;
           prevRingTime -= ringInterval;
@@ -1320,9 +1320,9 @@ int Alarm::count=0;
       if (clock->userChangedDirection) {
         clock->userChangedDirection = false; // reset changed flag
         if (!sticky) {
-          if ((positive && ringTime > (clock->currTime + clock->timeStep) ||
-              !positive && ringTime < (clock->currTime + clock->timeStep)) &&
-                   ringTime != firstRingTime) {
+          if (((positive && ringTime > (clock->currTime + clock->timeStep)) ||
+              (!positive && ringTime < (clock->currTime + clock->timeStep))) &&
+                   (ringTime != firstRingTime)) {
             ringTime      = prevRingTime;
             prevRingTime -= ringInterval;
             Alarm::resetRingBegin(positive);

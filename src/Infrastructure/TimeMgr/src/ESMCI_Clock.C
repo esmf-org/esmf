@@ -115,7 +115,7 @@ int Clock::count=0;
       }
     } else {
       // create default name "ClockNNN"
-      sprintf(clock->name, "Clock%3.3d\0", clock->id);
+      sprintf(clock->name, "Clock%3.3d", clock->id);
     }
 
     if (timeStep  != ESMC_NULL_POINTER) {
