@@ -278,9 +278,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !  Once communication routehandles are computed using {\tt ESMF\_FieldRegridStore()} method through
 !  XGrid, all memory can be released by destroying the XGrid.
 ! 
-!  It is erroneous to specify identical Grid or Mesh object in {\tt sideA} and
-!  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single 
-!  Grid or Mesh object, then it's erroneous
+!  If {\tt sideA} and {\tt sideB} have a single 
+!  Grid or Mesh object, it's erroneous
 !  if the two Grids or Meshes are spatially disjoint. 
 !  It is also erroneous to specify Grid or Mesh object in {\tt sideA} or {\tt sideB} 
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}.  

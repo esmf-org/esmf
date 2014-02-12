@@ -79,6 +79,22 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
+    call test_regrid2xg_online(10,10,10,10,0.1,0.1,0.06,0.06,tag='medium size test A2', &
+      maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    call test_regrid2xg_online(10,10,10,10,0.1,0.1,0.1,0.1,tag='medium size test A3', &
+      maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
     call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='reverse medium size test', &
       maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""

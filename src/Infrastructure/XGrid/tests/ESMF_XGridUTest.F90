@@ -448,6 +448,30 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Global identical Grids in index space
+    xgrid = ESMF_XGridCreate(sideAGrid=(/make_grid(4,8,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid(4,8,0.7,0.7,0.,0.,rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_XGridDestroy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Global identical Grids
+    xgrid = ESMF_XGridCreate(sideAGrid=(/make_grid(4,8,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid(4,8,1.0,1.0,0.,0.,rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_XGridDestroy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Sew mesh
     ! right, left
     xgrid = ESMF_XGridCreate(sideAGrid=(/make_grid(4,2,1.,1.,0.,0.,rc=localrc), &
