@@ -14,6 +14,10 @@ class RequiredArgs(ESMPyException):
     """Required arguments were not specified."""
     pass
 
+class NetCDFMissing(ESMPyException):
+    """ESMF was not built with the NetCDF package."""
+    pass
+
 class ESMPyWarning(Warning):
     """Base class for warnings in the ESMPy package"""
     pass

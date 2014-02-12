@@ -9,7 +9,8 @@ decorators
 import warnings
 import functools
 
-from ESMF.api.constants import LogKind
+from ESMF.api.constants import LogKind, _ESMF_NETCDF
+from ESMF.util.exceptions import NetCDFMissing
 
 try:
     import nose
@@ -34,7 +35,7 @@ except:
 
 
 def deprecated(func):
-    '''This is a decorator which can be used to mark functions
+    '''This is a decorator that can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used.  Other decorators must be upper.'''
 
@@ -50,7 +51,7 @@ def deprecated(func):
     return new_func
 
 def initialize(func):
-    '''This is a decorator which can be used to initialize ESMF, by
+    '''This is a decorator that can be used to initialize ESMF, by
     creating a Manager object, if it has not already been done.'''
 
     @functools.wraps(func)
@@ -60,3 +61,18 @@ def initialize(func):
         esmp = esmpymanager.Manager(logkind = LogKind.SINGLE, debug = False)
         return func(*args, **kwargs)
     return new_func
+
+def netcdf(func):
+    '''This is a decorator that can be used to error out of functions
+    if NetCDF is not available.'''
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+
+        if _ESMF_NETCDF:
+            return func(*args, **kwargs)
+        else:
+            raise NetCDFMissing("This function requires ESMF to have been built with NetCDF.")
+        
+    return new_func
+

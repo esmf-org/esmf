@@ -27,6 +27,9 @@ _ESMF_OS = 0
  _ESMF_OS_LINUX,
  _ESMF_OS_UNICOS) = (-5,-4,-3)
 
+# ESMF_NETCDF
+_ESMF_NETCDF = False
+
 #### NAMED CONSTANTS ##########################################################
 
 # CoordSys

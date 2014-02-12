@@ -8,7 +8,7 @@ import ctypes as ct
 import numpy as np
 
 import ESMF.api.constants as constants
-from ESMF.util.decorators import deprecated
+from ESMF.util.decorators import deprecated, netcdf
 from ESMF.interface.loadESMF import _ESMF
 
 def copy(src):
@@ -381,6 +381,8 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           ct.c_char_p,
                                           ct.POINTER(ct.c_int)]
 # TO DO: coordNames needs to be a List of Strings, not a String.
+@deprecated
+@netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag,
                             isSphere=None, addCornerStagger=None, addUserArea=None,
                             addMask=None, varname="", coordNames=""):
@@ -810,6 +812,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           OptionalNamedConstant,
                                           ct.c_char_p]
 @deprecated
+@netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
                             meshname="", addMask=None, varname=""):
@@ -1384,6 +1387,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 _ESMF.ESMC_ScripInqRank.restype = ct.c_int
 _ESMF.ESMC_ScripInqRank.argtypes = [ct.c_char_p]
 @deprecated
+@netcdf
 def ESMP_ScripInqRank(filename):
     """
     Preconditions: ESMP has been initialized.\n
@@ -1399,6 +1403,7 @@ _ESMF.ESMC_ScripInqDims.restype = ct.c_int
 _ESMF.ESMC_ScripInqDims.argtypes = [ct.c_char_p, 
                                     np.ctypeslib.ndpointer(dtype=np.int32)]
 @deprecated
+@netcdf
 def ESMP_ScripInqDims(filename):
     """
     Preconditions: ESMP has been initialized.\n
