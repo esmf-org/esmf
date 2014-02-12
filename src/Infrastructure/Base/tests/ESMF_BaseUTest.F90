@@ -193,10 +193,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. name_get .eq. name_set), &
                       name, failMsg, result, ESMF_SRCLINE)
     
-      ! test validate method via option string
-      ! commented out because it crashes
-      ! Bug report 969866 opened
       !EX_UTest
+      ! test validate method via option string
       validate_options = ''
       call ESMF_BaseValidate(base, validate_options, rc)
       write(name, *) "ESMF_BaseValidate"
