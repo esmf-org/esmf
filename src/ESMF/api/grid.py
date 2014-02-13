@@ -200,9 +200,27 @@ class Grid(object):
 
             # grid dims            
             self.max_index = ESMP_ScripInqDims(filename)
+            
+            # stagger is not required for from-file grids, but we need to 
+            # correctly allocate the space
+            if staggerloc == None:
+                staggerloc = [StaggerLoc.CENTER]
+            elif type(staggerloc) is list:
+                pass
+            elif type(staggerloc) is tuple:
+                staggerloc = list(staggerloc)
+            else:
+                staggerloc = [staggerloc]
 
-            # grid_bounds
-            self.verify_grid_bounds(staggerloc)
+            # add center
+            if StaggerLoc.CENTER not in staggerloc:
+                staggerloc.append(StaggerLoc.CENTER)
+
+            # add corner, this assumes 2D grids right?
+            if add_corner_stagger != None:
+                if StaggerLoc.CORNER not in staggerloc:
+                    staggerloc.append(StaggerLoc.CORNER)
+            
         else:
             # ctypes stuff
             self.struct = ESMP_GridStruct()
