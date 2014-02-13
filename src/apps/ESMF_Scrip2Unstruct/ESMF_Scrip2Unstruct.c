@@ -21,6 +21,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
+
 #include "mpi.h"
 
 #ifdef ESMF_NETCDF
