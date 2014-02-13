@@ -4106,7 +4106,7 @@ int DistGrid::setCollocationPDim(
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
       elementCountPCollPLocalDe[i][j] = 1;  // initialize
       for (int k=0; k<dimCount; k++){
-        if ((collocationPDim[k]==collocationTable[i])){
+        if (collocationPDim[k]==collocationTable[i]){
           elementCountPCollPLocalDe[i][j] *=
             indexCountPDimPDe[localDeToDeMap[j]*dimCount+k];
         }

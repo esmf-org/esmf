@@ -20,15 +20,16 @@
 #include <time.h>
 #include <string.h>
 #include <ctype.h>
-#ifdef ESMF_NETCDF
-#include <netcdf.h>
-#endif
 
 #ifndef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#include <mpi.h>
+#include "mpi.h"
+
+#ifdef ESMF_NETCDF
+#include "netcdf.h"
+#endif
 
 #if !defined (M_PI)
 // for Windows...

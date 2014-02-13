@@ -574,16 +574,30 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
   comm_to_home.communicate();
 
 
-  // Unpack CommData and generate results
-  vector<CommData> pnt_results;  
-  CommData init_cd;
-  init_cd.investigated = false;
-  init_cd.best_dist = std::numeric_limits<double>::max();
-  init_cd.is_in=false;
-  init_cd.elem_masked=false;
-  init_cd.elem_id=-2;
-  init_cd.proc=-1;
-  pnt_results.resize(num_pnts,init_cd); // allocate space for pnt_results and initialize
+#if 1
+  // No points so can skip rest of processing 
+  // FROM NOW ON CAN ASSUME num_pnts > 0
+  if (num_pnts <= 0)  return ESMCI_FINDPNT_SUCCESS;
+
+
+  ///// Unpack CommData and generate results /////
+  // Allocate results array
+  CommData *pnt_results = NULL;
+  pnt_results = new CommData[num_pnts];
+
+  // Init structures
+  for (int i=0; i<num_pnts; i++) {
+    CommData *cd=pnt_results+i;
+
+    cd->investigated = false;
+    cd->best_dist = std::numeric_limits<double>::max();
+    cd->is_in=false;
+    cd->elem_masked=false;
+    cd->elem_id=-2;
+    cd->proc=-1;
+  }
+
+  // Loop processing CommData from other processors
   for (std::vector<UInt>::iterator p = comm_to_home.inProc_begin(); p != comm_to_home.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm_to_home.getRecvBuffer(proc);
@@ -610,9 +624,53 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
       // next result
       j++;
     }
-    //    printf(" \n ");
+  }
+
+
+#else 
+  // OLD WAY 
+  // Unpack CommData and generate results
+  vector<CommData> pnt_results;  
+  CommData init_cd;
+  init_cd.investigated = false;
+  init_cd.best_dist = std::numeric_limits<double>::max();
+  init_cd.is_in=false;
+  init_cd.elem_masked=false;
+  init_cd.elem_id=-2;
+  init_cd.proc=-1;
+
+  pnt_results.resize(num_pnts,init_cd); // allocate space for pnt_results and initialize
+
+  for (std::vector<UInt>::iterator p = comm_to_home.inProc_begin(); p != comm_to_home.inProc_end(); ++p) {
+    UInt proc = *p;
+    SparseMsg::buffer *b = comm_to_home.getRecvBuffer(proc);
+
+    // Figure out how many messages we have
+    int num_msgs=b->msg_size()/(dim_pnts*sizeof(double));
+   
+    // Unpack everything from this processor
+    int j=0;
+    while (!b->empty()) {
+      CommData cd;
+
+      // Get sent data
+      b->pop((UChar *)&cd, (UInt)sizeof(CommData));
+
+      // Get loc of point
+      //// Can't use snd_inds because first index isn't necesarily in same order
+      //// between send and receive
+      int pnt_ind=tmp_snd_inds[proc][j]; 
+
+      // Compare and set
+      if (is_better_CommData(&cd,&(pnt_results[pnt_ind]))) pnt_results[pnt_ind]=cd;
+
+      // next result
+      j++;
+    }
 
   }
+#endif
+
 
   // Do output based on CommData
   for (int i=0; i<num_pnts; i++) {
@@ -646,10 +704,12 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
     printf(" \n");
   }
 #endif
-  
+
+  // Cleanup
+  if (pnt_results != NULL) delete [] pnt_results;
+
   // return success
   return ESMCI_FINDPNT_SUCCESS;
-
 }
   
   

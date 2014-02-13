@@ -1416,7 +1416,7 @@ namespace ESMCI{
       return(rc);
 
     // format everything except seconds
-    sprintf(timeString, "%04lld-%02d-%02dT%02d:%02d:\0", yy_i8, mm, dd, h, m);
+    sprintf(timeString, "%04lld-%02d-%02dT%02d:%02d:", yy_i8, mm, dd, h, m);
 
     // format seconds according to specified options
     bool isofrac = false;
@@ -1432,18 +1432,18 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {
-        sprintf(timeString, "%s%012.9f\0", timeString, (s + fractionalSeconds));
+        sprintf(timeString, "%s%012.9f", timeString, (s + fractionalSeconds));
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%02d\0", timeString, s);
+        sprintf(timeString, "%s%02d", timeString, s);
       }
     } else { // not strict ISO fractional seconds format
       // hybrid ISO 8601 format YYYY-MM-DDThh:mm:ss[:n/d]
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%02d:%lld/%lld\0", timeString, s, sN, sD);
+        sprintf(timeString, "%s%02d:%lld/%lld", timeString, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%02d\0", timeString, s);
+        sprintf(timeString, "%s%02d", timeString, s);
       }
     }
 

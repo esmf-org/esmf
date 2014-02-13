@@ -1785,7 +1785,7 @@ void VM::printMatchTable(
   printf("--- ESMCI::VM::printMatchTable() start ---\n");
   printf("matchTableBound = %d\n", matchTableBound);
   for (int i=0; i<matchTableBound; i++)
-    printf("matchTable_tid[%d] = %d\n", i, matchTable_tid[i]);
+    printf("matchTable_tid[%d] = %lu\n", i, matchTable_tid[i]);
   printf("--- ESMCI::VM::printMatchTable() end ---\n");
 }
 //-----------------------------------------------------------------------------

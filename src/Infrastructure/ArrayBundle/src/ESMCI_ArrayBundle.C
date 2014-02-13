@@ -377,7 +377,7 @@ int ArrayBundle::read(
 
   // cleanup
   IO::destroy(&newIO);
-  newIO == (IO *)NULL;
+  newIO = (IO *)NULL;
 
   // return
   return rc;
@@ -502,7 +502,7 @@ int ArrayBundle::write(
 
   // cleanup
   IO::destroy(&newIO);
-  newIO == (IO *)NULL;
+  newIO = (IO *)NULL;
 
   // return
   return rc;
