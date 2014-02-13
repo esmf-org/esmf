@@ -2414,9 +2414,9 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link
+!       The \textit{parent} object in the Attribute hierarchy link
 !     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link
+!       The \textit{child} object in the Attribute hierarchy link
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2589,9 +2589,9 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link
+!       The \textit{parent} object in the Attribute hierarchy link
 !     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link
+!       The \textit{child} object in the Attribute hierarchy link
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -3331,7 +3331,7 @@ contains
 !           The virtural machine over which this Attribute hierarchy
 !           should be updated
 !     \item [rootList]
-!           The list of ``root'' PETs that are to be used to update
+!           The list of \textit{root} PETs that are to be used to update
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
