@@ -398,7 +398,7 @@ int  ESMCI_WebServRegistrarClient::compStarted(
 	// Send the client id
 	//***
 printf("Client ID: %s\n", clientId);
-printf("Client ID Len: %d\n", strlen(clientId));
+printf("Client ID Len: %lu\n", strlen(clientId));
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
