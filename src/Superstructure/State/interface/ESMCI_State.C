@@ -784,8 +784,8 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
-      delete itemTypeList;
-      delete itemNameList;
+      delete[] itemTypeList;
+      delete[] itemNameList;
 
       rc = localrc;
       return rc;
@@ -878,8 +878,8 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
-      delete itemTypeList;
-      delete itemNameList;
+      delete[] itemTypeList;
+      delete[] itemNameList;
 
       rc = localrc;
       return itemNames;
