@@ -253,7 +253,7 @@ template <class TYPE>
                               int *rc);
   static Grid* createfromfile(char *filename, int fileTypeFlag, int *isSphere, int *addCornerStagger,
 			      int *addUserArea, int *addMask, char *varname,
-			      char *coordNames, int *rc);
+			      char **coordNames, int *rc);
 
   int write(ESMC_StaggerLoc staggerloc, const char *fname);
 

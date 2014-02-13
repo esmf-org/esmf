@@ -137,7 +137,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
 				  int *isSphere, int *addCornerStagger,
 				  int *addUserArea, int *addMask, char *varname,
-				  char *coordNames, int *rc);
+				  char **coordNames, int *rc);
 // !RETURN VALUE:
 //  type(ESMC_Grid)
 //

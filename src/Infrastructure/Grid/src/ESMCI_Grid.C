@@ -81,7 +81,7 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *f
 				      int *addUserArea, int *auapresent,
 				      int *addMask, int *ampresent, 
 				      char *varname, int *vnpresent,
-				      char *coordNames[], int *cnpresent, int *rc, 
+				      char *coordNames, int *cnpresent, int *rc, 
 				      ESMCI_FortranStrLenArg len_filename, 
 				      ESMCI_FortranStrLenArg len_varname, 
 				      ESMCI_FortranStrLenArg len_coordNames);
@@ -321,7 +321,7 @@ int setDefaultsLUA(int dimCount,
     int *addUserArea,
     int *addMask,
     char *varname,
-    char *coordNames,
+    char **coordNames,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -332,8 +332,7 @@ int setDefaultsLUA(int dimCount,
 //
 //EOP
 
-    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d)\n", 
-    //        filename, fileTypeFlag);
+    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d)\n", filename, fileTypeFlag);
 
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
@@ -365,13 +364,24 @@ int setDefaultsLUA(int dimCount,
     }
     vnpresent = strlen(varname) > 0;
 
-    char *cn_loc[2];
-    int cn_len = 80;
-    cn_loc[0] = (char *) malloc(cn_len);
-    cn_loc[1] = (char *) malloc(cn_len);
-    if (strlen(coordNames) > 0) {
-      sscanf (coordNames, "%s %s", cn_loc[0], cn_loc[1]);
+    // Create Fortran-style buffer to pass coordNames to Fortran if coordNames are present.
+    int cn_len = 0;
+    char *cn_buf=NULL;
+    if (coordNames) {
+      int cn_len0=0, cn_len1=0;
+      if (coordNames[0]) {
+	cn_len0 = strlen(coordNames[0]);
+      }
+      if (coordNames[1]) {
+	cn_len1 = strlen(coordNames[1]);
+      }
+      cn_len = (cn_len0 >= cn_len1) ? cn_len0 : cn_len1;
+      int fortran_buf_size = 2 * cn_len;
       cnpresent = 1;
+      cn_buf = (char *)malloc(fortran_buf_size);
+      memset(cn_buf, ' ', fortran_buf_size);
+      strcpy(&cn_buf[0], coordNames[0]);
+      strcpy(&cn_buf[cn_len], coordNames[1]);
     }
 
     // allocate the grid object
@@ -380,10 +390,11 @@ int setDefaultsLUA(int dimCount,
 				     &is_loc, &ispresent, 
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
 				     &am_loc, &ampresent, varname, &vnpresent, 
-				     cn_loc, &cnpresent, &localrc,
+				     cn_buf, &cnpresent, &localrc,
 				     strlen(filename), strlen(varname), cn_len);
-    free(cn_loc[0]);
-    free(cn_loc[1]);
+    if (cn_buf) {
+      free(cn_buf);
+    }
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
 
