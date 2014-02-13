@@ -29,7 +29,7 @@ class Grid(object):
                  add_user_area=None,
                  add_mask=None,
                  varname="",
-                 coord_names=""):
+                 coord_names=None):
         """
         Create a logically rectangular Grid object and optionally 
         allocate space for coordinates at a specified stagger location. 
@@ -84,7 +84,7 @@ class Grid(object):
                 coord_names:  A two-element array containing the longitude and 
                              latitude variable names in a GRIDSPEC file if there 
                              are multiple coordinates defined in the file. 
-                             Defaults to the empty string. \n
+                             Defaults to None. \n
         The following optional arguments apply to a Grid created either from file 
         or in memory. \n
             staggerloc: the stagger location of the coordinate data. \n
@@ -132,7 +132,7 @@ class Grid(object):
                 raise GridArgumentWarning("add_mask is only used for grids created from file, this argument will be ignored.")
             if varname is not "":
                 raise GridArgumentWarning("varname is only used for grids created from file, this argument will be ignored.")
-            if coord_names is not "":
+            if coord_names:
                 raise GridArgumentWarning("coord_names is only used for grids created from file, this argument will be ignored.")
         # filename and filetype are required for from-file grids
         elif (filename is None) or (filetype is None):
@@ -197,10 +197,10 @@ class Grid(object):
                                                   coordNames=coord_names)
             # grid rank
             self.rank = ESMP_ScripInqRank(filename)
-            
+
             # grid dims            
             self.max_index = ESMP_ScripInqDims(filename)
-            
+
             # grid_bounds
             self.verify_grid_bounds(staggerloc)
         else:

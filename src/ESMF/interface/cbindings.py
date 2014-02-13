@@ -64,6 +64,18 @@ class OptionalStructPointer(object):
                 fieldptr = ptr(ct.c_void_p(param.ptr))
                 return fieldptr
 
+# this class allows optional array of strings to be passed in plass of
+# a python list of strings
+class OptionalArrayOfStrings(object):
+        @classmethod
+        def from_param(self, param):
+            if param:
+                lparam = (ct.c_char_p * len(param))()
+                lparam[:] = param
+            else:
+                lparam = None
+            return lparam
+        
 # this class allows optional Fields to be passed in place of pointers to
 # ctypes structures
 class OptionalField(object):
@@ -378,14 +390,13 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           ct.c_char_p,
-                                          ct.c_char_p,
+                                          OptionalArrayOfStrings,
                                           ct.POINTER(ct.c_int)]
-# TO DO: coordNames needs to be a List of Strings, not a String.
 @deprecated
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag,
                             isSphere=None, addCornerStagger=None, addUserArea=None,
-                            addMask=None, varname="", coordNames=""):
+                            addMask=None, varname="", coordNames=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_GridStruct has been created.\n
@@ -406,8 +417,8 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag,
     lrc = ct.c_int(0)
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                isSphere, addCornerStagger,
-                                               addUserArea, addMask, varname, coordNames,
-                                               ct.byref(lrc))
+                                               addUserArea, addMask, varname, 
+                                               coordNames, ct.byref(lrc))
     rc = lrc.value
     if rc != constants.ESMP_SUCCESS:
         raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
