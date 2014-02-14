@@ -506,7 +506,7 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
       bool coorddiff = false;
 
       for (UInt i = 0; !coorddiff && i < npoints; i++) {
-        if (std::fabs(coord[3*i + 2] - c3) > 1e-5) coorddiff = true;
+        if (std::abs(coord[3*i + 2] - c3) > 1e-5) coorddiff = true;
       }
 
       sdim = (coorddiff ? 3 : 2);

@@ -66,7 +66,6 @@ namespace Rad2d { // "2" for 2nd derivatives, "d" for "double"
   using std::sinh;
   using std::tanh;
   using std::abs;
-  using std::fabs;
   using std::atan2;
   using std::pow;
 #endif //NO_USING_STDCC

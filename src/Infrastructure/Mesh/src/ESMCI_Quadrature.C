@@ -60,7 +60,7 @@ void gauss_legendre(UInt n, double locs[], double *wgts) {
       z1 = z;
       z=z1-p1/pp;
 //std::cout << "z-z1=" << z-z1 << std::endl;
-    } while(std::fabs(z-z1)> 1e-10);
+    } while(std::abs(z-z1)> 1e-10);
 
     locs[i-1] = -z;
     locs[n+1-i-1] = z;
