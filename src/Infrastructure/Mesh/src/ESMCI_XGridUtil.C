@@ -96,7 +96,7 @@ double polygon::area(int sdim) const {
 }
 
 xpoint polygon::centroid(int sdim) const {
-  double area = std::fabs(this->area(sdim));
+  double area = std::abs(this->area(sdim));
   int n = this->size();
   double sum[3]; for(int i = 0; i < 3; i ++) sum[i] = 0.;
 
@@ -169,14 +169,14 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
   numerb = (p2[0]-p1[0]) * (p1[1]-q1[1]) - (p2[1]-p1[1]) * (p1[0]-q1[0]);
 
   /* Are the line coincident? Do not consider the lines intersecting in this case. */
-  if (std::fabs(numera) < epsilon && std::fabs(numerb) < epsilon && std::fabs(denom) < epsilon) {
+  if (std::abs(numera) < epsilon && std::abs(numerb) < epsilon && std::abs(denom) < epsilon) {
     //intersect[0] = (p1[0] + p2[0]) / 2;
     //intersect[1] = (p1[1] + p2[1]) / 2;
     return false;
   }
 
   /* Are the line parallel */
-  if (std::fabs(denom) < epsilon) {
+  if (std::abs(denom) < epsilon) {
     intersect[0] = 0.;
     intersect[1] = 0.;
     return false;
@@ -192,10 +192,10 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
   }
 
   // if intersection is one of the end points
-  if(std::fabs(mua) < epsilon || std::fabs(mua-1.) < epsilon)
+  if(std::abs(mua) < epsilon || std::abs(mua-1.) < epsilon)
     on_p_seg = false; 
 
-  if(std::fabs(mub) < epsilon || std::fabs(mub-1.) < epsilon) 
+  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon) 
     on_q_seg = false; 
 
   intersect[0] = p1[0] + mua * (p2[0] - p1[0]);
@@ -278,7 +278,7 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   if(coincident < 1.e-15) return false;
 
   double sense = dot(cross(v1,v2), cross(v1,p1));
-  //if(std::fabs(sense) < epsilon) return false;
+  //if(std::abs(sense) < epsilon) return false;
 
   // Calculate point of intersection
   intersect[0]=q1[0] + u*(q2[0]-q1[0]);
@@ -351,7 +351,7 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
 
   denom = d2121 * d4343 - d4321 * d4321;
   /* Are the line parallel */
-  if (std::fabs(denom) < epsilon)
+  if (std::abs(denom) < epsilon)
     return false;
 
   numer = d1343 * d4321 - d1321 * d4343;
@@ -364,10 +364,10 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
     return false;
 
   // if intersection is one of the end points
-  if(std::fabs(mua) < epsilon || std::fabs(mua-1.) < epsilon)
+  if(std::abs(mua) < epsilon || std::abs(mua-1.) < epsilon)
     on_p_seg = false; 
 
-  if(std::fabs(mub) < epsilon || std::fabs(mub-1.) < epsilon) 
+  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon) 
     on_q_seg = false; 
 
   xvector a0 = a1 + mua*v1;
@@ -376,7 +376,7 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
   xvector bn = b0.normalize();
 
   // if an and bn does not coincide, then a and b does not intersect.
-  double diff = std::fabs(metric(bn-an));
+  double diff = std::abs(metric(bn-an));
   if(diff > 1.e-5) return false;
   std::memcpy(intersect, bn.c, 3*sizeof(double));
 
@@ -446,14 +446,14 @@ int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const 
       final_nodes.insert(end_point, xp);
       success = 0;
       break;
-    }else if(std::fabs(ratio) < epsilon || std::fabs(d1-d2) < epsilon){
+    }else if(std::abs(ratio) < epsilon || std::abs(d1-d2) < epsilon){
       // Don't insert a new point, simply mark start_point as an intersection point and compute new inbound value
       //final_nodes.insert(start_point, xpoint(intersect[0], intersect[1], '1'+n_inter, true, inbound));
       if(inbound > start_point->inbound) start_point->inbound=inbound;
       start_point->intersection=true;
       success = 0;
       break;
-    }else if( std::fabs(ratio-1.) < epsilon ) {
+    }else if( std::abs(ratio-1.) < epsilon ) {
       if(inbound > end_point->inbound) end_point->inbound=inbound;
       end_point->intersection=true;
       success = 0;
@@ -499,7 +499,7 @@ bool check_angle_sum(int sdim, int n, const double * const p, const double * con
 
     anglesum += acos(costheta);
   }
-  if( std::fabs(anglesum - twopi) < epsilon ) return true;
+  if( std::abs(anglesum - twopi) < epsilon ) return true;
   else return false;
 }
 
@@ -522,7 +522,7 @@ unsigned int walk_polygon(int sdim, int n, const double * const p, const double 
     //                  cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
     //                        (xvector(point, sdim)-xvector(p+i*sdim, sdim)))); 
                        
-    if(std::fabs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
+    if(std::abs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
       return 2;
     if(sense < 0.) 
       return 0;

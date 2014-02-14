@@ -113,10 +113,10 @@ void get_avgerage_nodecoord(double &diameter, double ave[], Mesh &mesh, MeshObj 
       ave[1] += coord[1];
       if (mesh.spatial_dim() == 3) ave[2] += coord[2];
       double diam = 0;
-      diam += std::fabs(coord0[0] - coord[0]);
-      diam += std::fabs(coord0[1] - coord[1]);
+      diam += std::abs(coord0[0] - coord[0]);
+      diam += std::abs(coord0[1] - coord[1]);
       if (mesh.spatial_dim() == 3)
-        diam += std::fabs(coord0[2] - coord[2]);
+        diam += std::abs(coord0[2] - coord[2]);
 
       if (diam > max_diam) max_diam = diam;
     }
@@ -199,11 +199,11 @@ void test_adapt_wave_exec(HAdapt &hadapt, Mesh &mesh) {
       // That is distance to center of circle, now refine if within the
       // tolerance.  Unrefine with a slight hysterisis, to avoid chattering between
       // the refine/unrefine state.
-      if (std::fabs(d2circle-circleRadius) < epsilon && diameter > h) { 
+      if (std::abs(d2circle-circleRadius) < epsilon && diameter > h) { 
         hadapt.MarkElement(elem, HAdapt::ELEM_REFINE);
       } else
       {
-        if (std::fabs(d2circle-circleRadius) > 2*epsilon)
+        if (std::abs(d2circle-circleRadius) > 2*epsilon)
           hadapt.MarkElement(elem, HAdapt::ELEM_UNREFINE);
       }
 

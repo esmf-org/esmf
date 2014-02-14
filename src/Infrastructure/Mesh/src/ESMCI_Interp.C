@@ -612,7 +612,7 @@ double sval = 0;
         
 double diff = sval - result[n*nrhs+d].val();
 Par::Out() << "**diff=" << diff << std::endl;
-if (std::fabs(diff) > 1e-4) {
+if (std::abs(diff) > 1e-4) {
 for (UInt s = 0; s < nlocal_dof/dfield->dim(); s++) {
   Par::Out() << fads[s*nrhs+d].val() << " ";
 }

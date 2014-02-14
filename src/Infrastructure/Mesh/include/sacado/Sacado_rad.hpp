@@ -59,7 +59,6 @@ namespace Radnt {	// nontemplated RAD
   using std::sinh;
   using std::tanh;
   using std::abs;
-  using std::fabs;
   using std::atan2;
   using std::pow;
 #endif //!RAD_NO_USING_STDCC

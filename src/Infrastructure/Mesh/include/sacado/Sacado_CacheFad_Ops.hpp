@@ -219,7 +219,7 @@ FAD_UNARYOP_MACRO(abs,
 FAD_UNARYOP_MACRO(fabs,
 		  FAbsOp, 
 		  ;,
-		  std::fabs(v),
+		  std::abs(v),
 		  v >= 0 ? value_type(+expr.dx(i)) : value_type(-expr.dx(i)),
 		  v >= 0 ? value_type(+expr.fastAccessDx(i)) : 
 		    value_type(-expr.fastAccessDx(i)))
