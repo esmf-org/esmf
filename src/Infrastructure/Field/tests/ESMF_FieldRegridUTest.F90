@@ -5325,7 +5325,7 @@ write(*,*) "LOCALRC=",localrc
 
      ! Allocate and fill the node id array.
      allocate(nodeIds(numNodes))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     nodeIds=(/100,20,30,40,50,60,70,80,90/) 
 
      ! Allocate and fill node coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
@@ -5388,7 +5388,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
+       nodeIds=(/100,20,40,50/) 
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -5430,7 +5430,7 @@ write(*,*) "LOCALRC=",localrc
 
        ! Allocate and fill the node id array.
        allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
+       nodeIds=(/20,30,50,60/) 
 
        ! Allocate and fill node coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
@@ -5473,7 +5473,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/4,5,7,8/) 
+        nodeIds=(/40,50,70,80/) 
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -5515,7 +5515,7 @@ write(*,*) "LOCALRC=",localrc
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-        nodeIds=(/5,6,8,9/) 
+        nodeIds=(/50,60,80,90/) 
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
