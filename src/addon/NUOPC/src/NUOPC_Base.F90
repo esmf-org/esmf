@@ -46,12 +46,14 @@ module NUOPC_Base
   public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
+  public NUOPC_FieldWrite
   public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
   public NUOPC_GridCompSetServices
+  public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
@@ -1158,6 +1160,57 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FieldWrite - Write Field data as a NetCDF file under the StandardName Attribute
+! !INTERFACE:
+  subroutine NUOPC_FieldWrite(field, file, overwrite, status, timeslice, &
+    iofmt, relaxedflag, rc)
+! !ARGUMENTS:
+    type(ESMF_Field),           intent(in)             :: field 
+    character(*),               intent(in)             :: file 
+    logical,                    intent(in),  optional  :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
+    integer,                    intent(in),  optional  :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional  :: iofmt
+    logical,                    intent(in),  optional  :: relaxedflag
+    integer,                    intent(out), optional  :: rc
+! !DESCRIPTION:
+!   Write Field data into a NetCDF file under the StandardName Attribute. If the
+!   {\tt relaxedflag} is provided, set to {\tt .true.}, then no error is
+!   returned even if the call cannot write the file due to library limitations.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: standardName
+    logical                 :: ioCapable
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ioCapable = (ESMF_IO_PIO_PRESENT .and. &
+      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
+      
+    if (.not.relaxedflag .or. (relaxedflag.and.ioCapable)) then
+      
+      call NUOPC_FieldAttributeGet(field, name="StandardName", &
+        value=standardName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    
+      call ESMF_FieldWrite(field, file=file, variableName=standardName, &
+        overwrite=overwrite, status=status, timeslice=timeslice, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields
 ! !INTERFACE:
   subroutine NUOPC_FillCplList(importState, exportState, cplList, rc)
@@ -1686,6 +1739,177 @@ endif
     
     NUOPC_GridCreateSimpleXY = grid
     
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCreateSimpleSph - Create a simple Spherical Grid
+! !INTERFACE:
+  function NUOPC_GridCreateSimpleSph(nx, ny, dx, dy, sx, sy, area_adj, &
+    tag, scheme, rc)
+! !RETURN VALUE:
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleSph
+! !ARGUMENTS:
+    integer,            intent(in)            :: nx, ny
+    real(ESMF_KIND_R4), intent(in)            :: dx, dy, sx, sy
+    real(ESMF_KIND_R4), intent(in),  optional :: area_adj
+    character(len=*),   intent(in),  optional :: tag
+    integer,            intent(in) , optional :: scheme
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Creates and returns a simple spherical Grid.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                                   :: localrc, i, j
+    real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
+    real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:), o_area(:,:)
+    real(ESMF_KIND_R8)                        :: startx, starty
+    integer                                   :: l_scheme
+    type(ESMF_Mesh)                           :: mesh
+    type(ESMF_Field)                          :: field
+
+    l_scheme = ESMF_REGRID_SCHEME_REGION3D
+    if(present(scheme)) l_scheme = scheme
+
+    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreate1PeriDim(maxIndex=(/nx, ny/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=localrc)
+    else
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreateNoPeriDim(maxIndex=(/nx, ny/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=localrc)
+    endif 
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, staggerloc=ESMF_STAGGERLOC_CORNER, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+    ! global indexing
+    ! atm grid is not decomposed in the y direction
+    !startx = lpet*nx/npet*dx
+    startx = sx
+    starty = sy
+    ! compute coord
+    ! X center
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    ! Y center
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    do i = lbound(coordX,1), ubound(coordX,1)
+      do j = lbound(coordX, 2), ubound(coordX, 2)
+        coordX(i,j) = startx + dx/2. + (i-1)*dx
+        coordY(i,j) = starty + dy/2. + (j-1)*dy
+      enddo
+    enddo
+    !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
+    ! X corner
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    ! Y corner
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    do i = lbound(coordX,1), ubound(coordX,1)
+      do j = lbound(coordX, 2), ubound(coordX, 2)
+        coordX(i,j) = startx + (i-1)*dx
+        coordY(i,j) = starty + (j-1)*dy
+      enddo
+    enddo
+
+    if(present(area_adj)) then
+      ! retrieve area
+
+      !mesh = ESMF_GridToMesh(NUOPC_GridCreateSimpleSph, &
+      !  ESMF_STAGGERLOC_CORNER, 0, &
+      !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !allocate(f_area_m(mesh%NumOwnedElements))
+      !call ESMF_MeshGetElemArea(mesh,  arealist=f_area_m, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !deallocate(f_area_m)
+
+      ! find out original Grid cell area
+      field = ESMF_FieldCreate(NUOPC_GridCreateSimpleSph, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_FieldRegridGetArea(field, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_FieldGet(field, farrayPtr=o_area, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      ! add area to Grid
+      call ESMF_GridAddItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER,  rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      call ESMF_GridGetItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, farrayptr=f_area, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      ! adjust Grid area
+      f_area = area_adj*o_area
+
+    endif
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
   end function
   !-----------------------------------------------------------------------------
 
