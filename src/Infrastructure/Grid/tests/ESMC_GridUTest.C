@@ -445,7 +445,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", ESMC_FILEFORMAT_SCRIP,
-					   NULL, NULL, NULL, NULL, "", "", &rc);
+					   NULL, NULL, NULL, NULL, "", NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_GridDestroy(&grid_from_file);

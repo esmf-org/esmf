@@ -1542,7 +1542,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-    attributeName = "SyncOfferGeomObject"
+    attributeName = "TransferOfferGeomObject"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1551,7 +1551,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-    attributeName = "SyncActionGeomObject"
+    attributeName = "TransferActionGeomObject"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
