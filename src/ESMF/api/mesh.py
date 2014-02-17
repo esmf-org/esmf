@@ -210,7 +210,7 @@ class Mesh(object):
                 the tuples which correspond to the 
                 element_ids.  The connectivity tuples are
                 constructed by listing the node_ids of each 
-                element counterclockwise. \n
+                element in COUNTERCLOCKWISE order. \n
                     type: numpy.array \n
                     shape: (sum(element_types[:], 1) \n
         Optional Arguments: \n
@@ -279,7 +279,7 @@ class Mesh(object):
                     shape: (node_count, 1) \n
             node_coords: a numpy array (internally cast to 
                 dtype=numpy.float64) to specify the coordinates 
-                of the Mesh.  The array should be contructed by 
+                of the Mesh.  The array should be constructed by 
                 concatenating the coordinate tuples into a numpy array 
                 which correspond to node_ids. \n
                     type: numpy.array \n

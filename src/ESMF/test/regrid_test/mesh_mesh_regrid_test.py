@@ -28,15 +28,15 @@ def mesh_create_2x2(mesh, localPet):
                    2x2 Mesh
     
     
-      2.0   7 ------- 8 -------- 9
+      2.0   31 ------ 32 ------ 33
+            |         |  22  /   |
+            |    21   |     /    |
+            |         |   /  23  |
+      1.0   21 ------ 22 ------ 23
             |         |          |
-            |    3    |    4     |
+            |    11   |    12    |
             |         |          |
-      1.0   4 ------- 5 -------- 6
-            |         |          |
-            |    1    |    2     |
-            |         |          |
-      0.0   1 ------- 2 -------- 3
+      0.0   11 ------ 12 ------ 13
     
            0.0       1.0        2.0
     
@@ -45,10 +45,9 @@ def mesh_create_2x2(mesh, localPet):
     
           (Everything owned by PET 0)
     '''
-    # set up a simple mesh
     num_node = 9
-    num_elem = 4
-    nodeId = np.array([1,2,3,4,5,6,7,8,9])
+    num_elem = 5
+    nodeId = np.array([11,12,13,21,22,23,31,32,33])
     nodeCoord = np.array([0.0,0.0,
                           1.0,0.0,
                           2.0,0.0,
@@ -60,15 +59,17 @@ def mesh_create_2x2(mesh, localPet):
                           2.0,2.0])
     nodeOwner = np.zeros(num_node)
 
-    elemId = np.array([1,2,3,4])
+    elemId = np.array([11,12,21,22,23])
     elemType=np.array([ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
-                       ESMF.MeshElemType.QUAD])
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI])
     elemConn=np.array([0,1,4,3,
                        1,2,5,4,
                        3,4,7,6,
-                       4,5,8,7])
+                       4,8,7,
+                       4,5,8])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
@@ -84,19 +85,19 @@ def mesh_create_3x3(mesh, localPet):
                    3x3 Mesh
     
     
-      2.0   13 -------14 --------15--------16
+      2.0   41 ------ 42 ------- 43 ------ 44
+            |         |          |  33 /   |
+            |    31   |    32    |    /    |
+            |         |          |  /  34  |
+      1.0   31 ------ 32 ------- 33 ------ 34
             |         |          |         |
-            |    7    |    8     |   9     |
+            |    21   |    22    |   23    |
             |         |          |         |
-      1.0   9 ------- 10 --------11--------12
+      0.5   21 ------ 22 ------- 23 ------ 24
             |         |          |         |
-            |    4    |    5     |   6     |
+            |    11   |    12    |   13    |
             |         |          |         |
-      0.5   5 ------- 6 -------- 7-------- 8
-            |         |          |         |
-            |    1    |    2     |   3     |
-            |         |          |         |
-      0.0   1 ------- 2 -------- 3-------- 4
+      0.0   11 ------ 12 ------- 13 ------ 14
     
            0.0       0.5        1.0       2.0
     
@@ -105,16 +106,15 @@ def mesh_create_3x3(mesh, localPet):
     
           (Everything owned by PET 0)
     '''
-    # set up a simple mesh
     num_node = 16
-    num_elem = 9
-    nodeId = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16])
+    num_elem = 10
+    nodeId = np.array([11,12,13,14,21,22,23,24,31,32,33,34,41,42,43,44])
     nodeCoord = np.array([0.0,0.0, 0.5,0.0, 1.0,0.0, 2.0,0.0,
                           0.0,0.5, 0.5,0.5, 1.0,0.5, 2.0,0.5,
                           0.0,1.0, 0.5,1.0, 1.0,1.0, 2.0,1.0,
                           0.0,2.0, 0.5,2.0, 1.0,2.0, 2.0,2.0])
     nodeOwner = np.zeros(num_node)
-    elemId = np.array([1,2,3,4,5,6,7,8,9])
+    elemId = np.array([11,12,13,21,22,23,31,32,33,34])
     elemType=np.array([ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
@@ -123,7 +123,8 @@ def mesh_create_3x3(mesh, localPet):
                        ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.QUAD,
-                       ESMF.MeshElemType.QUAD])
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI])
     elemConn = np.array([0,1,5,4,
                          1,2,6,5,
                          2,3,7,6,
@@ -132,7 +133,8 @@ def mesh_create_3x3(mesh, localPet):
                          6,7,11,10,
                          8,9,13,12,
                          9,10,14,13,
-                         10,11,15,14])
+                         10,15,14,
+                         10,11,15])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
@@ -144,22 +146,22 @@ def mesh_create_2x2_parallel (mesh, localPet):
     '''
     PRECONDITIONS: A Mesh has been declared.
     POSTCONDITIONS: A 2x2 Mesh has been created.
-    #  2.0   7 ------- 8        [8] ------ 9
-    #        |         |         |         |
-    #        |    3    |         |    4    |
-    #        |         |         |         |
-    #  1.0  [4] ----- [5]       [5] ----- [6]
+    #  2.0   31 ------ 32       [32] ----- 33
+    #        |         |         | 22  /   |
+    #        |    21   |         |    /    |
+    #        |         |         |  /  23  |
+    #  1.0  [21] ---- [22]      [22] ---- [23]
     #
     #       0.0       1.0       1.0       2.0
     #
     #           PET 2               PET 3
     #
     #
-    #  1.0   4 ------- 5        [5] ------ 6
+    #  1.0   21 ------ 22       [22] ----- 23
     #        |         |         |         |
-    #        |    1    |         |    2    |
+    #        |    11   |         |    12   |
     #        |         |         |         |
-    #  0.0   1 ------- 2        [2] ------ 3
+    #  0.0   11 ------ 12       [12] ----- 13
     #
     #       0.0       1.0       1.0      2.0
     #
@@ -168,76 +170,72 @@ def mesh_create_2x2_parallel (mesh, localPet):
     #               Node Id labels at corners
     #              Element Id labels in centers
     '''
-
-    # Break up what's being set by PET
-    if (localPet == 0): # This part only for PET 0
-        # Set number of nodes
+    if (localPet == 0):
         num_node=4
         num_elem=1
 
-        nodeId=np.array([1,2,4,5])
-        nodeCoord=np.array([0.0,0.0,     # node id 1
-                            1.0,0.0,     # node id 2
-                            0.0,1.0,     # node id 4
-                            1.0,1.0 ])   # node id 5
-        nodeOwner=np.zeros(num_node)     # node id 5
-        elemId=np.array([1])
-        elemType=np.array([ESMF.MeshElemType.QUAD]) # elem id 1
-        elemConn=np.array([0,1,3,2]) # elem id 1
+        nodeId=np.array([11,12,21,22])
+        nodeCoord=np.array([0.0,0.0,
+                            1.0,0.0,
+                            0.0,1.0,
+                            1.0,1.0 ])
+        nodeOwner=np.zeros(num_node)
+        elemId=np.array([11])
+        elemType=np.array([ESMF.MeshElemType.QUAD])
+        elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 1): # This part only for PET 1
-        # Set number of nodes
+    elif (localPet == 1):
         num_node=4
         num_elem=1
 
-        nodeId=np.array([2,3,5,6])
-        nodeCoord=np.array([1.0,0.0,     # node id 2
-                            2.0,0.0,     # node id 3
-                            1.0,1.0,     # node id 5
-                            2.0,1.0 ]) # node id 6
-        nodeOwner=np.array([0,     # node id 2
-                            1,     # node id 3
-                            0,     # node id 5
-                            1])    # node id 6
-        elemId=np.array([2])
-        elemType=np.array([ESMF.MeshElemType.QUAD]) # elem id 2
-        elemConn=np.array([0,1,3,2]) # elem id 2
+        nodeId=np.array([12,13,22,23])
+        nodeCoord=np.array([1.0,0.0,
+                            2.0,0.0,
+                            1.0,1.0,
+                            2.0,1.0 ])
+        nodeOwner=np.array([0,
+                            1,
+                            0,
+                            1])
+        elemId=np.array([12])
+        elemType=np.array([ESMF.MeshElemType.QUAD])
+        elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 2): # This part only for PET 2
-        # Set number of nodes
+    elif (localPet == 2):
         num_node=4
         num_elem=1
 
-        nodeId=np.array([4,5,7,8])
-        nodeCoord=np.array([0.0,1.0,     # node id 4
-                            1.0,1.0,     # node id 5
-                            0.0,2.0,     # node id 7
-                            1.0,2.0 ]) # node id 8
-        nodeOwner=np.array([0,     # node id 4
-                            0,     # node id 5
-                            2,     # node id 7
-                            2])    # node id 8
-        elemId=np.array([3])
-        elemType=np.array([ESMF.MeshElemType.QUAD]) # elem id 4
-        elemConn=np.array([0,1,3,2]) # elem id 4
+        nodeId=np.array([21,22,31,32])
+        nodeCoord=np.array([0.0,1.0,
+                            1.0,1.0,
+                            0.0,2.0,
+                            1.0,2.0 ])
+        nodeOwner=np.array([0,
+                            0,
+                            2,
+                            2])
+        elemId=np.array([21])
+        elemType=np.array([ESMF.MeshElemType.QUAD])
+        elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 3): # This part only for PET 3
-        # Set number of nodes
+    elif (localPet == 3):
         num_node=4
-        num_elem=1
+        num_elem=2
 
-        nodeId=np.array([5,6,8,9])
-        nodeCoord=np.array([1.0,1.0,     # node id 5
-                            2.0,1.0,     # node id 6
-                            1.0,2.0,     # node id 8
-                            2.0,2.0 ]) # node id 9
-        nodeOwner=np.array([0,     # node id 5
-                            1,     # node id 6
-                            2,     # node id 8
-                            3])    # node id 9
-        elemId=np.array([4])
-        elemType=np.array([ESMF.MeshElemType.QUAD]) # elem id 5
-        elemConn=np.array([0,1,3,2]) # elem id 5
+        nodeId=np.array([22,23,32,33])
+        nodeCoord=np.array([1.0,1.0,
+                            2.0,1.0,
+                            1.0,2.0,
+                            2.0,2.0 ])
+        nodeOwner=np.array([0,
+                            1,
+                            2,
+                            3])
+        elemId=np.array([22,23])
+        elemType=np.array([ESMF.MeshElemType.TRI,
+                           ESMF.MeshElemType.TRI])
+        elemConn=np.array([0,3,2,
+                           0,1,3])
 
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
@@ -249,28 +247,28 @@ def mesh_create_3x3_parallel (mesh, localPet):
     '''
     PRECONDITIONS: A Mesh has been declared.
     POSTCONDITIONS: A 3x3 Mesh has been created.
-    #  2.0   13 ------ 14 ------ 15     [15] ----------- 16
-    #        |         |         |       |               |
-    #        |         |         |       |               |
-    #        |    7    |    8    |       |       9       |
-    #        |         |         |       |               |
-    #        |         |         |       |               |
-    #  1.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
+    #  2.0   41 ------ 42 ------ 43      [43] ---------- 44
+    #        |         |         |       |          /    |
+    #        |         |         |       |  33   /       |
+    #        |    31   |    32   |       |      /        |
+    #        |         |         |       |    /    34    |
+    #        |         |         |       |  /            |
+    #  1.0  [31] ----- [32] ---- [33]    [33] ---------- [34]
     #
     #       0.0       0.5       1.0     1.0             2.0
     #
     #                PET 2                      PET 3
     #
     #
-    #  1.0   9 ------- 10 ------ 11     [11] ----------- 12
+    #  1.0   31 ------ 32 ------ 33     [33] ----------- 34
     #        |         |         |       |               |
-    #        |    4    |    5    |       |       6       |
+    #        |    21   |    22   |       |       23      |
     #        |         |         |       |               |
-    #  0.5   5 ------- 6 ------- 7      [7] -----------  8
+    #  0.5   21 ------ 22 ------ 23     [23] ----------  24
     #        |         |         |       |               |
-    #        |    1    |    2    |       |       3       |
+    #        |    11   |    12   |       |       13      |
     #        |         |         |       |               |
-    #  0.0   1 ------- 2 ------- 3      [3] ------------ 4
+    #  0.0   11 ------ 12 ------ 13     [13] ----------- 14
     #
     #       0.0       0.5       1.0     1.0             2.0
     #
@@ -279,25 +277,22 @@ def mesh_create_3x3_parallel (mesh, localPet):
     #               Node Id labels at corners
     #              Element Id labels in centers
     '''
-
-    # Break up what's being set by PET
-    if (localPet == 0): # This part only for PET 0
-        # Set number of nodes
+    if (localPet == 0):
         num_node=9
         num_elem=4
 
-        nodeId=np.array([1,2,3,5,6,7,9,10,11])
-        nodeCoord=np.array([0.0,0.0,     # node id 1
-                            0.5,0.0,     # node id 2
-                            1.0,0.0,     # node id 3
-                            0.0,0.5,     # node id 5
-                            0.5,0.5,     # node id 6
-                            1.0,0.5,     # node id 7
-                            0.0,1.0,     # node id 9
-                            0.5,1.0,     # node id 10
-                            1.0,1.0]) # node id 11
+        nodeId=np.array([11,12,13,21,22,23,31,32,33])
+        nodeCoord=np.array([0.0,0.0,
+                            0.5,0.0,
+                            1.0,0.0,
+                            0.0,0.5,
+                            0.5,0.5,
+                            1.0,0.5,
+                            0.0,1.0,
+                            0.5,1.0,
+                            1.0,1.0])
         nodeOwner=np.zeros(num_node)
-        elemId=np.array([1,2,4,5])
+        elemId=np.array([11,12,21,22])
         elemType=np.array([ESMF.MeshElemType.QUAD,
                            ESMF.MeshElemType.QUAD,
                            ESMF.MeshElemType.QUAD,
@@ -305,60 +300,59 @@ def mesh_create_3x3_parallel (mesh, localPet):
         elemConn=np.array([0,1,4,3,
                            1,2,5,4,
                            3,4,7,6,
-                           4,5,8,7]) # elem id 1
+                           4,5,8,7])
 
-    elif (localPet == 1): # This part only for PET 1
-        # Set number of nodes
+    elif (localPet == 1):
         num_node=6
         num_elem=2
 
-        nodeId=np.array([3,4,7,8,11,12])
-        nodeCoord=np.array([1.0,0.0, # node id 3
-                            2.0,0.0,     # node id 4
-                            1.0,0.5,     # node id 7
-                            2.0,0.5,     # node id 8
-                            1.0,1.0,     # node id 11
-                            2.0,1.0 ]) # node id 12
+        nodeId=np.array([13,14,23,24,33,34])
+        nodeCoord=np.array([1.0,0.0,
+                            2.0,0.0,
+                            1.0,0.5,
+                            2.0,0.5,
+                            1.0,1.0,
+                            2.0,1.0 ])
         nodeOwner=np.array([0,1,0,1,0,1])
-        elemId=np.array([3,6])
+        elemId=np.array([13,23])
         elemType=np.array([ESMF.MeshElemType.QUAD,
                            ESMF.MeshElemType.QUAD])
         elemConn=np.array([0,1,3,2,
                            2,3,5,4])
 
-    elif (localPet == 2): # This part only for PET 2
-        # Set number of nodes
+    elif (localPet == 2):
         num_node=6
         num_elem=2
 
-        nodeId=np.array([9,10,11,13,14,15])
-        nodeCoord=np.array([0.0,1.0, # node id 9
-                            0.5,1.0,     # node id 10
-                            1.0,1.0,     # node id 11
-                            0.0,2.0,     # node id 13
-                            0.5,2.0,     # node id 14
-                            1.0,2.0 ]) # node id 15
-        nodeOwner=np.array([0,0,0,2,2,2])    # node id 8
-        elemId=np.array([7,8])
+        nodeId=np.array([31,32,33,41,42,43])
+        nodeCoord=np.array([0.0,1.0,
+                            0.5,1.0,
+                            1.0,1.0,
+                            0.0,2.0,
+                            0.5,2.0,
+                            1.0,2.0 ])
+        nodeOwner=np.array([0,0,0,2,2,2])
+        elemId=np.array([31,32])
         elemType=np.array([ESMF.MeshElemType.QUAD,
-                           ESMF.MeshElemType.QUAD]) # elem id 4
+                           ESMF.MeshElemType.QUAD])
         elemConn=np.array([0,1,4,3,
-                           1,2,5,4]) # elem id 4
+                           1,2,5,4])
 
-    elif (localPet == 3): # This part only for PET 3
-        # Set number of nodes
+    elif (localPet == 3):
         num_node=4
-        num_elem=1
+        num_elem=2
 
-        nodeId=np.array([11,12,15,16])
-        nodeCoord=np.array([1.0,1.0, # node id 11
-                            2.0,1.0,     # node id 12
-                            1.0,2.0,     # node id 15
-                            2.0,2.0 ]) # node id 16
+        nodeId=np.array([33,34,43,44])
+        nodeCoord=np.array([1.0,1.0,
+                            2.0,1.0,
+                            1.0,2.0,
+                            2.0,2.0 ])
         nodeOwner=np.array([0,1,2,3])
-        elemId=np.array([9])
-        elemType=np.array([ESMF.MeshElemType.QUAD]) # elem id 5
-        elemConn=np.array([0,1,3,2]) # elem id 5
+        elemId=np.array([33,34])
+        elemType=np.array([ESMF.MeshElemType.TRI,
+                           ESMF.MeshElemType.TRI])
+        elemConn=np.array([0,3,2,
+                           0,1,3])
 
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
@@ -424,18 +418,28 @@ def build_analyticfield_meshcsrv(field, nodeCoord, elemType, elemConn):
     offset = 0
     for i in range(field.shape[0]):    # this routine assumes element field
         if (elemType[i] == ESMF.MeshElemType.TRI):
-            raise NameError("Cannot compute a non-constant analytic field \
-                             for a mesh with triangular elements!")
-        x1 = nodeCoord[(elemConn[offset])*2]
-        x2 = nodeCoord[(elemConn[offset+1])*2]
-        y1 = nodeCoord[(elemConn[offset+1])*2+1]
-        y2 = nodeCoord[(elemConn[offset+3])*2+1]
-        x = (x1+x2)/2.0
-        y = (y1+y2)/2.0
+            x1 = nodeCoord[(elemConn[offset])*2]
+            x2 = nodeCoord[(elemConn[offset+1])*2]
+            x3 = nodeCoord[(elemConn[offset+2])*2]
+            y1 = nodeCoord[(elemConn[offset])*2+1]
+            y2 = nodeCoord[(elemConn[offset+1])*2+1]
+            y3 = nodeCoord[(elemConn[offset+2])*2+1]
+            x = (x1 + x2 + x3) / 3.0
+            y = (y1 + y2 + y3) / 3.0
+            offset = offset + 3
+        elif (elemType[i] == ESMF.MeshElemType.QUAD):
+            x1 = nodeCoord[(elemConn[offset])*2]
+            x2 = nodeCoord[(elemConn[offset+1])*2]
+            y1 = nodeCoord[(elemConn[offset+1])*2+1]
+            y2 = nodeCoord[(elemConn[offset+3])*2+1]
+            x = (x1 + x2) / 2.0
+            y = (y1 + y2) / 2.0
+            offset = offset + 4
+        else:
+            raise NameError("Elem type is not supported.")
+
+        #print '[{0},{1}] = {2}'.format(x,y,field.data[i])
         field[i] = 20.0+x*y+y**2
-        #print '[{0},{1}] = {2}'.format(x,y,fieldPtr[i])
-        offset = offset + 4
-    #print "\n"
 
     return field
 

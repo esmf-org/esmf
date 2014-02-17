@@ -110,19 +110,19 @@ def mesh_create_3x3():
                    3x3 Mesh
     
     
-          4.0   13 -------14 --------15--------16
-                |         |          |         |
-                |    7    |    8     |   9     |
-                |         |          |         |
-          2.5   9 ------- 10 --------11--------12
-                |         |          |         |
-                |    4    |    5     |   6     |
-                |         |          |         |
-          1.5   5 ------- 6 -------- 7-------- 8
-                |         |          |         |
-                |    1    |    2     |   3     |
-                |         |          |         |
-          0.0   1 ------- 2 -------- 3-------- 4
+          4.0   41 ------ 42 ------- 43 ------ 44 
+                |         |          |  33 /   |  
+                |    31   |    32    |    /    |  
+                |         |          |  /  34  |  
+          2.5   31 ------ 32 ------- 33 ------ 34 
+                |         |          |         |  
+                |    21   |    22    |   23    |  
+                |         |          |         |  
+          1.5   21 ------ 22 ------- 23 ------ 24 
+                |         |          |         |  
+                |    11   |    12    |   13    |  
+                |         |          |         |  
+          0.0   11 ------ 12 ------- 13 ------ 14 
     
                0.0       1.5        2.5       4.0
     
@@ -133,16 +133,24 @@ def mesh_create_3x3():
     '''
     # set up a simple mesh
     num_node = 16
-    num_elem = 9
-    nodeId = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16])
+    num_elem = 10
+    nodeId = np.array([11,12,13,14,21,22,23,24,31,32,33,34,41,42,43,44])
     nodeCoord = np.array([0.0,0.0, 1.5,0.0, 2.5,0.0, 4.0,0.0,
                           0.0,1.5, 1.5,1.5, 2.5,1.5, 4.0,1.5,
                           0.0,2.5, 1.5,2.5, 2.5,2.5, 4.0,2.5,
                           0.0,4.0, 1.5,4.0, 2.5,4.0, 4.0,4.0])
     nodeOwner = np.zeros(num_node)
-    elemId = np.array([1,2,3,4,5,6,7,8,9])
-    elemType = np.ones(num_elem)
-    elemType*=ESMF.MeshElemType.QUAD
+    elemId = np.array([11,12,13,21,22,23,31,32,33,34])
+    elemType=np.array([ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI])
     elemConn = np.array([0,1,5,4,
                          1,2,6,5,
                          2,3,7,6,
@@ -151,9 +159,10 @@ def mesh_create_3x3():
                          6,7,11,10,
                          8,9,13,12,
                          9,10,14,13,
-                         10,11,15,14])
-    elemMask = np.array([0,0,0,0,1,0,0,0,0])
-    elemArea = np.array([5,5,5,5,5,5,5,5,5], dtype=np.float64)
+                         10,15,14,
+                         10,11,15])
+    elemMask = np.array([0,0,0,0,1,0,0,0,0,0])
+    elemArea = np.array([5,5,5,5,5,5,5,5,2.5,2.5], dtype=np.float64)
 
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
@@ -232,21 +241,46 @@ def build_analyticfield(field, nodeCoord, elemType, elemConn,
     mass = 0
     for i in range(field.shape[0]):    # this routine assumes element field
         if (elemType[i] == ESMF.MeshElemType.TRI):
-            raise NameError("Cannot compute a non-constant analytic field \
-                             for a mesh with triangular elements!")
-        x1 = nodeCoord[(elemConn[offset])*2]
-        x2 = nodeCoord[(elemConn[offset+1])*2]
-        y1 = nodeCoord[(elemConn[offset+1])*2+1]
-        y2 = nodeCoord[(elemConn[offset+3])*2+1]
-        x = (x1+x2)/2.0
-        y = (y1+y2)/2.0
-        if (elemMask[i] == 0):
-            field[i] = 20.0 + x + y
-        elif (elemMask[i] == 1):
-            field[i] = 1000000000.0
-        # calculate the mass
-        mass = mass + elemArea[i]*field[i]
-        offset = offset + 4
+            x1 = nodeCoord[(elemConn[offset])*2]
+            x2 = nodeCoord[(elemConn[offset+1])*2]
+            x3 = nodeCoord[(elemConn[offset+2])*2]
+            y1 = nodeCoord[(elemConn[offset])*2+1]
+            y2 = nodeCoord[(elemConn[offset+1])*2+1]
+            y3 = nodeCoord[(elemConn[offset+2])*2+1]
+            x = (x1 + x2 + x3) / 3.0
+            y = (y1 + y2 + y3) / 3.0
+            offset = offset + 3
+
+            # calculate field
+            if (elemMask[i] == 0):
+                field[i] = 20.0 + x + y
+            elif (elemMask[i] == 1):
+                field[i] = 1000000000.0
+ 
+            # calculate the mass
+            mass = mass + elemArea[i]*field[i]
+            
+        elif (elemType[i] == ESMF.MeshElemType.QUAD):
+            x1 = nodeCoord[(elemConn[offset])*2]
+            x2 = nodeCoord[(elemConn[offset+1])*2]
+            y1 = nodeCoord[(elemConn[offset+1])*2+1]
+            y2 = nodeCoord[(elemConn[offset+3])*2+1]
+            x = (x1 + x2) / 2.0
+            y = (y1 + y2) / 2.0
+            offset = offset + 4
+
+            # calculate field
+            if (elemMask[i] == 0):
+                field[i] = 20.0 + x + y
+            elif (elemMask[i] == 1):
+                field[i] = 1000000000.0
+ 
+            # calculate the mass
+            mass = mass + elemArea[i]*field[i]
+            
+        else:
+            raise NameError("Elem type is not supported.")
+
 
     return field, mass
 

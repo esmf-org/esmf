@@ -88,19 +88,19 @@ def create_ESMPmesh_3x3():
                  3x3 Mesh
 
 
-        3.0   13 -------14 --------15--------16
-              |         |          |         |
-              |    7    |    8     |   9     |
-              |         |          |         |
-        2.5   9 ------- 10 --------11--------12
-              |         |          |         |
-              |    4    |    5     |   6     |
-              |         |          |         |
-        1.5   5 ------- 6 -------- 7-------- 8
-              |         |          |         |
-              |    1    |    2     |   3     |
-              |         |          |         |
-        1.0   1 ------- 2 -------- 3-------- 4
+        3.0   41 ------ 42 ------- 43 ------ 44 
+              |         |          |  331 /  |  
+              |    31   |    32    |    /    |  
+              |         |          |  /  332 |  
+        2.5   31 ------ 32 ------- 33 ------ 34 
+              |         |          |         |  
+              |    21   |    22    |   23    |  
+              |         |          |         |  
+        1.5   21 ------ 22 ------- 23 ------ 24 
+              |         |          |         |  
+              |    11   |    12    |   13    |  
+              |         |          |         |  
+        1.0   11 ------ 12 ------- 13 ------ 14 
 
              1.0       1.5        2.5       3.0
 
@@ -111,16 +111,24 @@ def create_ESMPmesh_3x3():
     '''
     # set up a simple mesh
     num_node = 16
-    num_elem = 9
-    nodeId = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16])
+    num_elem = 10
+    nodeId = np.array([11,12,13,14,21,22,23,24,31,32,33,34,41,42,43,44])
     nodeCoord = np.array([1.0,1.0, 1.5,1.0, 2.5,1.0, 3.0,1.0,
                           1.0,1.5, 1.5,1.5, 2.5,1.5, 3.0,1.5,
                           1.0,2.5, 1.5,2.5, 2.5,2.5, 3.0,2.5,
                           1.0,3.0, 1.5,3.0, 2.5,3.0, 3.0,3.0])
     nodeOwner = np.zeros(num_node)
-    elemId = np.array([1,2,3,4,5,6,7,8,9])
-    elemType = np.ones(num_elem)
-    elemType*=ESMF.MeshElemType.QUAD
+    elemId = np.array([11,12,13,21,22,23,31,32,331,332])
+    elemType=np.array([ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI])
     elemConn = np.array([0,1,5,4,
                          1,2,6,5,
                          2,3,7,6,
@@ -129,7 +137,8 @@ def create_ESMPmesh_3x3():
                          6,7,11,10,
                          8,9,13,12,
                          9,10,14,13,
-                         10,11,15,14])
+                         10,15,14,
+                         10,11,15])
 
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
