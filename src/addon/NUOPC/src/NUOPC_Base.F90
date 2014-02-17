@@ -66,6 +66,7 @@ module NUOPC_Base
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
+  public NUOPC_StateWrite
   public NUOPC_TimePrint
   
 
@@ -1160,21 +1161,21 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldWrite - Write Field data as a NetCDF file under the StandardName Attribute
+! !IROUTINE: NUOPC_FieldWrite - Write Field data into a file under the StandardName Attribute
 ! !INTERFACE:
   subroutine NUOPC_FieldWrite(field, file, overwrite, status, timeslice, &
     iofmt, relaxedflag, rc)
 ! !ARGUMENTS:
-    type(ESMF_Field),           intent(in)             :: field 
-    character(*),               intent(in)             :: file 
-    logical,                    intent(in),  optional  :: overwrite
-    type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
-    integer,                    intent(in),  optional  :: timeslice
-    type(ESMF_IOFmt_Flag),      intent(in),  optional  :: iofmt
-    logical,                    intent(in),  optional  :: relaxedflag
-    integer,                    intent(out), optional  :: rc
+    type(ESMF_Field),           intent(in)            :: field 
+    character(*),               intent(in)            :: file 
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    logical,                    intent(in),  optional :: relaxedflag
+    integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write Field data into a NetCDF file under the StandardName Attribute. If the
+!   Write Field data into a file under the StandardName Attribute. If the
 !   {\tt relaxedflag} is provided, set to {\tt .true.}, then no error is
 !   returned even if the call cannot write the file due to library limitations.
 !EOP
@@ -1182,13 +1183,19 @@ module NUOPC_Base
     ! local variables
     character(ESMF_MAXSTR)  :: standardName
     logical                 :: ioCapable
+    logical                 :: doItFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     ioCapable = (ESMF_IO_PIO_PRESENT .and. &
       (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
-      
-    if (.not.relaxedflag .or. (relaxedflag.and.ioCapable)) then
+    
+    doItFlag = .true. ! default
+    if (present(relaxedFlag)) then
+      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
+    endif
+    
+    if (doItFlag) then
       
       call NUOPC_FieldAttributeGet(field, name="StandardName", &
         value=standardName, rc=rc)
@@ -1788,20 +1795,20 @@ endif
     endif 
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
     call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
     ! global indexing
@@ -1815,14 +1822,14 @@ endif
         coordDim=1, farrayPtr=coordX, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     ! Y center
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, farrayPtr=coordY, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     do i = lbound(coordX,1), ubound(coordX,1)
       do j = lbound(coordX, 2), ubound(coordX, 2)
@@ -1836,14 +1843,14 @@ endif
         coordDim=1, farrayPtr=coordX, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     ! Y corner
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
         coordDim=2, farrayPtr=coordY, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     do i = lbound(coordX,1), ubound(coordX,1)
       do j = lbound(coordX, 2), ubound(coordX, 2)
@@ -1874,17 +1881,17 @@ endif
         staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_FieldRegridGetArea(field, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_FieldGet(field, farrayPtr=o_area, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       ! add area to Grid
@@ -1892,7 +1899,7 @@ endif
         staggerloc=ESMF_STAGGERLOC_CENTER,  rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       call ESMF_GridGetItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
@@ -1900,7 +1907,7 @@ endif
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       ! adjust Grid area
@@ -2829,7 +2836,91 @@ endif
   end subroutine
   !-----------------------------------------------------------------------------
 
- !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateWrite - Write the Fields within a State to NetCDF files
+! !INTERFACE:
+  subroutine NUOPC_StateWrite(state, fieldNameList, filePrefix, overwrite, &
+    status, timeslice, relaxedflag, rc)
+! !ARGUMENTS:
+    type(ESMF_State),           intent(in)            :: state
+    character(len=*),           intent(in),  optional :: fieldNameList(:)
+    character(len=*),           intent(in),  optional :: filePrefix
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    logical,                    intent(in),  optional :: relaxedflag
+    integer,                    intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the data of the Fields within a State to NetCDF files. Each Field is
+!   written to an individual file using the StandardName Attribute as NetCDF
+!   attribute.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: i, itemCount
+    type(ESMF_Field)                :: field
+    type(ESMF_StateItem_Flag)       :: itemType
+    character(len=80)               :: fileName
+    character(len=80), allocatable  :: fieldNameList_loc(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(fieldNameList)) then
+      allocate(fieldNameList_loc(size(fieldNameList)))
+      do i=1, size(fieldNameList)
+        fieldNameList_loc(i) = trim(fieldNameList(i))
+      enddo
+    else
+      call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      allocate(fieldNameList_loc(itemCount))
+      call ESMF_StateGet(state, itemNameList=fieldNameList_loc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+
+    do i=1, size(fieldNameList_loc)
+      call ESMF_StateGet(state, itemName=fieldNameList_loc(i), &
+        itemType=itemType, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (itemType == ESMF_STATEITEM_FIELD) then
+        ! field is available in the state
+        call ESMF_StateGet(state, itemName=fieldNameList_loc(i), field=field, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! -> output to file
+        if (present(filePrefix)) then
+          write (fileName,"(A)") filePrefix//trim(fieldNameList_loc(i))//".nc"
+        else
+          write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+        endif
+        call NUOPC_FieldWrite(field, file=trim(fileName), overwrite=overwrite, &
+          status=status, timeslice=timeslice, relaxedflag=relaxedflag, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      endif
+    enddo
+    
+    deallocate(fieldNameList_loc)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_TimePrint - Formatted print ot time information
 ! !INTERFACE:
