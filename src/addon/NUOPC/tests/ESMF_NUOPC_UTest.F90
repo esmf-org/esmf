@@ -298,6 +298,33 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_GridCreateSimpleSph() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  grid = NUOPC_GridCreateSimpleSph(200, 100, 360./200, 170./100, 0., -85., &
+    scheme=ESMF_REGRID_SCHEME_FULL3D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Complete field for further testing Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldEmptySet(field, grid=grid, rc=rc)
+  call ESMF_FieldEmptyComplete(field, typekind=ESMF_TYPEKIND_R8, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldWrite() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FieldWrite(field, file="field_test.nc", &
+    status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FillCplList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(cplList)
@@ -448,6 +475,15 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_StateUpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_StateUpdateTimestamp(stateA, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_StateWrite() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_StateWrite(stateA, fieldNameList=(/"sst"/), &
+    status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

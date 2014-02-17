@@ -42,12 +42,14 @@ module NUOPC
   public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
+  public NUOPC_FieldWrite
   public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
   public NUOPC_GridCompSetServices
+  public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
@@ -60,6 +62,7 @@ module NUOPC
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
+  public NUOPC_StateWrite
   public NUOPC_TimePrint
   
   ! defined in NUOPC_RunSequenceDef
