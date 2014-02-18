@@ -1,0 +1,23 @@
+# Compiled source #
+###################
+*.pyc
+
+# Misc #
+########
+*.csv
+*.orig
+*~
+*.log
+*.nc
+
+# Eclipse #
+###########
+*.project
+*.pydevproject
+*.settings
+
+# Sphinx #
+##########
+*build*
+*esmpy_doc*
+*esmfmkfile*
