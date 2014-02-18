@@ -1,0 +1,310 @@
+================================================================================
+
+                                     README
+
+               Earth System Modeling Framework Python Interface (ESMPy)
+
+ Earth System Modeling Framework Python Interface
+ Copyright 2002-2014, University Corporation for Atmospheric Research,
+ Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+ Laboratory, University of Michigan, National Centers for Environmental
+ Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+ NASA Goddard Space Flight Center.
+ Licensed under the University of Illinois-NCSA License.
+
+================================================================================
+================================================================================
+
+HI, welcome to ESMPy :)
+
+ESMPy is a Python interface to the Earth System Modeling Framework (ESMF) 
+regridding utility.  ESMF is software for
+building and coupling weather, climate, and related models.  ESMF has a robust,
+parallel and scalable remapping package, used to generate remapping weights.
+It can handle a wide variety of grids and options:  logically rectangular grids
+and unstructured meshes; regional or global grids; 2D or 3D; and pole and
+masking options.  ESMF also has capabilities to read grid information
+from NetCDF files in a variety of formats, including the evolving Climate and 
+Forecast (CF) GridSpec and UGRID conventions.
+
+ESMPy supports a single-tile logically rectangular discretization type called
+Grid and an unstructured discretization type called Mesh (ESMF also
+supports observational data streams).
+ESMPy supports bilinear, finite element patch recovery and first-order
+conservative regridding.  There is also an option to ignore unmapped
+destination points and mask out points on either the source or destination.
+Regridding on the sphere takes place in 3D Cartesian space, so the pole
+problem is not an issue as it commonly is with many Earth system grid remapping
+softwares.  Grid and Mesh objects can be created in 2D or 3D space, and 3D
+first-order conservative regridding is fully supported.  Future plans for ESMPy
+involve the incorporation of observational data streams.
+
+Regridding, also called remapping or interpolation, is the process of changing
+the grid underneath field data values while preserving the qualities of the
+original data.  Different kinds of transformations are appropriate for
+different problems. Regridding may be needed when communicating data between
+Earth system model components such as land and atmosphere, or between
+different data sets to support analysis or visualization.
+
+Regridding can be broken into two stages. The first stage is generation of an
+interpolation weight matrix that describes how points in the source grid
+contribute to points in the destination grid. The second stage is the
+multiplication of values on the source grid by the interpolation weight matrix
+to produce the appropriate values on the destination grid.  ESMPy provides
+access to both stages through two separate interfaces.
+
+There are many different interpolation methods, suitable for different
+problems.  In ESMPy, the basic bilinear option is a two dimensional variant of
+linear interpolation.  The higher order patch recovery is a second degree
+polynomial regridding method, which uses a least squares algorithm to
+calculate the polynomial.  The first-order conservative regridding is a
+variant of a constant method which compares the proportions of overlapping
+source and destination cells to determine appropriate weights.  All of these
+methods can be broken down to a simple sparse matrix multiplication operation
+between interpolation weights and data values.
+
+================================================================================
+
+The "REQUIREMENTS" section below will give information on the software
+requirements.
+
+The "INSTALLATION" section gives directions on how to install ESMPy.
+(If you just downloaded the ESMF tarball, it is source code and you will
+have to build the ESMF library first.)
+
+The "USE" section below will give information on how to import this package.
+
+The "VALIDATION" section below will give information on how to test the package.
+
+The "LIMITATIONS" section has helpful information on which capabilities
+can be expected from the current ESMPy functionality.
+
+The "MORE HELP" section will give you links to more documentation and other
+information about the ESMF project.
+
+Documentation for the ESMPy library can also be found by running 'pydoc ESMF'
+from the terminal prompt in the top level ESMF directory.
+
+
+Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
+
+================================================================================
+
+The ESMPy package should include the following files:
+
+-- LICENSE - University of Illinois-NCSA License
+
+-- README - this file
+
+-- setup.py - standard Python build file
+
+-- doc directory - contains all Sphinx documentation files
+
+-- src directory
+
+  -- ESMF directory
+
+    -- __init__.py  - package init file
+
+    -- api directory
+
+      -- constants.py - global constants
+      -- field.py - Field class
+      -- grid.py - Grid class
+      -- manager.py - Manager class
+      -- mesh.py - Mesh class
+      -- regrid.py - Regrid class
+
+    -- fragments directory
+      -- extras.py - ESMPy routines that are not part of the library because
+      -- remap.py - interface to ESMF_RegridWeightGen application
+
+    -- interface directory
+
+      -- cbindings.py - ctypes bindings to ESMF C interface
+      -- loadESMF.py - script to load the ESMF shared library
+
+
+    -- test directory
+
+      -- run_unit_test.py - unit test run utility
+      -- unit_test.py - unit tests
+
+      -- regrid_test directory
+
+        -- field_regridding_test.py - Field regridding tutorial
+
+        -- grid_grid_regrid_csrv_mask_3D_test.py - first-order conservative regridding
+                                                   between two 3D Grids with masking
+        -- grid_grid_regrid_csrv_mask_test.py - first-order conservative regridding
+                                                between two Grids with masking
+        -- grid_mesh_regrid_csrv_mask_test.py - first-order conservative regridding
+                                                between a Grid and a Mesh with masking
+        -- grid_mesh_regrid_csrv_test.py - first-order conservative regridding
+                                           between a Grid and a Mesh
+        -- grid_mesh_regrid_mask_test.py - bilinear regridding between
+                                          a Grid and a Mesh with masking
+        -- grid_mesh_regrid_test.py - bilinear regridding between a Grid and a Mesh
+        -- mesh_mesh_regrid_test.py - first-order conservative regridding between
+                                      two Meshes
+
+        -- regrid_from_file_test directory
+  
+          -- regrid_check.py - Regrid testing program
+          -- regrid_check_driver.py - Driver program for regrid testing
+          -- regrid_test_data.txt - text file contains regridding test configurations
+          -- run_regrid_from_file.py - regrid test run utility
+
+    -- util directory
+
+      -- decorators.py - decorators for special functions
+      -- exceptions.py - warning and exception classes
+
+================================================================================
+
+REQUIREMENTS:
+-------------
+
+The following packages are *required* to work with ESMPy:
+
+-- ESMF installation
+-- python - http://python.org/
+-- numpy - http://numpy.scipy.org/
+-- ctypes (included with numpy)
+
+The following packages are *optional*:
+
+-- mpi4py - python bindings to MPI
+-- nose - nose testing
+
+INSTALLATION:
+--------
+
+Installation of ESMPy requires a pointer to a file named esmf.mk inside of an
+ESMF installation.  This file resides in a directory which looks like:
+
+<ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
+
+If the ESMFMKFILE flag is set when building ESMPy then it will not need to be
+referenced again.  If not, an environment variable of the same name must be set
+with the path to the esmf.mk file EVERY time that a new shell is initiated.
+
+The ESMPy build can be installed in a custom location using the
+--prefix, --home, or --install-base flags to the install command.  If this
+is done, then this location needs to be added to the PYTHONPATH environment
+variable in the user's shell EVERY time that a new shell is initiated.  If a
+customized install location is not specified, ESMPy will be installed in the 
+standard Python package installation directory on that particular machine.
+
+Note: The ESMPy build does not have to be installed to be used.  The 
+PYTHONPATH environment variable can simply be pointed to the directory 
+containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone) 
+after the build command.
+
+As usual, any command followed by --help should print out some information
+on what options are available.
+
+An installation of ESMPy in the default location for Python packages can be done 
+with the following command issued from the top level ESMPy directory:
+
+- default Python package installation:
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+
+- custom install location:
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>
+
+    python setup.py install --prefix=<custom_install_location>
+
+    setenv PYTHONPATH <custom_install_location>/lib/*/site_packages
+
+Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+
+
+USE:
+----
+
+To use this package in an external program, import it with:
+
+    import ESMF
+
+
+VALIDATION:
+-----------
+
+The setup.py file can be used to run all of the ESMPy tests, like this:
+
+    python setup.py test
+
+or:
+
+    python setup.py test_regrid
+
+    python setup.py test_regrid_from_file
+
+    python setup.py test_all 
+
+NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
+The "test_regrid_from_file_dryrun" command will simply download the test 
+files without actually running them (allowing the stress on the machine to
+be applied to bandwidth first, and then memory).
+
+Alternatively, if the nose package is available, the tests can be run with:
+
+    nosetests
+
+Individual tests can be run with nose using the following format:
+
+    nosetests <file>:<test>
+
+e.g.  
+
+    nosetests src/ESMF/test/unit_test.py:field_regrid_test
+
+
+================================================================================
+
+LIMITATIONS:
+------------
+
+ESMPy doesn't include many aspects of ESMF, including components, array
+interfaces, time management, etc.  The limitations listed here are relative
+to ESMF offline and integrated regridding capabilities.
+
+- There is no FieldBundle class, only single Fields
+- There is no support for tripole or multi-tile Grids
+- ESMPy cannot use an ESMF installation that is built with external LAPACK 
+support.
+- GridSpec format grids are cannot be read from file at this time.
+
+Testing related:
+- Only tested with gfortran on Darwin and Linux platforms
+
+================================================================================
+
+MORE HELP:
+----------
+
+The ESMPy home page has all of the latest information on the ESMPy project
+including release notes, known bugs, supported platforms, and download
+information.  It can be found here:
+        http://www.earthsystemcog.org/projects/esmpy/
+
+Information about the ESMF project can be found at the ESMF web site:
+        http://www.earthsystemmodeling.org
+
+The ESMF User's Guide contains information on building and installing ESMF.
+The ESMF Reference Manual contains information on the architecture of ESMF,
+example code, and details of the API (Application Programming Interface).
+
+For more information on the ESMF_RegridWeightGen application, see the ESMF
+Reference Manual:
+http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_refdoc/node3.html
+
+Contributions from ESMF users are available at:
+        http://sourceforge.net/projects/esmfcontrib
+
+Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+
+# $Id$
