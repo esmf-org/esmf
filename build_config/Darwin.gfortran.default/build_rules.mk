@@ -224,7 +224,7 @@ ESMF_CXXLINKRPATHS      =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
-ifeq ((ESMF_CLANGSTR), clang)
+ifeq ($(ESMF_CLANGSTR), clang)
 ESMF_F90LINKLIBS += -lc++
 endif
 
