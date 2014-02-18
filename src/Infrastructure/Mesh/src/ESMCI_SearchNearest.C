@@ -811,19 +811,9 @@ struct CommData {
   }
 
   // Unpack CommData and generate results
-  vector<CommData> pnt_results;  
-  CommData init_cd;
-  init_cd.closest_dist = std::numeric_limits<double>::max();
-  init_cd.closest_src_gid=-2;
-  init_cd.proc=-1;
-  pnt_results.resize(dst_nlist.size(),init_cd); // allocate space for pnt_results and initialize
-
   for (std::vector<UInt>::iterator p = comm_to_home.inProc_begin(); p != comm_to_home.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm_to_home.getRecvBuffer(proc);
-
-    // Figure out how many messages we have
-    int num_msgs=b->msg_size()/sizeof(CommData); 
    
     // Unpack everything from this processor
     int j=0;
@@ -858,7 +848,6 @@ struct CommData {
       // next result
       j++;
     }
-
   }
 
 
