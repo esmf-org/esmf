@@ -12,7 +12,7 @@ ESMF_CXXDEFAULT         = g++
 ############################################################
 # See if g++ is really clang
 #
-ESMF_CLANGSTR := $(findstr clang, $(shell $(ESMF_CXXDEFAULT) --version))
+ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXDEFAULT) --version))
 
 ############################################################
 # Default MPI setting.
