@@ -10,6 +10,11 @@ ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = g++
 
 ############################################################
+# See if g++ is really clang
+#
+ESMF_CLANGSTR := $(findstr clang, $(shell $(ESMF_CXXDEFAULT) --version))
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -171,10 +176,14 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ifneq ((ESMF_CLANGSTR), clang)
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+else
+ESMF_OPENMP=OFF
+endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -215,6 +224,9 @@ ESMF_CXXLINKRPATHS      =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
+ifeq ((ESMF_CLANGSTR), clang)
+ESMF_F90LINKLIBS += -lc++
+endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
