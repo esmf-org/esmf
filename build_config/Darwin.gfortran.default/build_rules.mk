@@ -176,7 +176,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ((ESMF_CLANGSTR), clang)
+ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
