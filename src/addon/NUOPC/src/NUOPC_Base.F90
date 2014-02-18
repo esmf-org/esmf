@@ -1674,83 +1674,6 @@ endif
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian Grid
-! !INTERFACE:
-  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
-    i_count, j_count, rc)
-! !RETURN VALUE:
-    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
-! !ARGUMENTS:
-    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
-    integer,            intent(in)            :: i_count, j_count
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Creates and returns a very simple XY cartesian Grid.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer :: i, j, imin_t, imax_t, jmin_t, jmax_t
-    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
-    real(ESMF_KIND_R8):: dx, dy
-    type(ESMF_Grid):: grid
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    dx = (x_max-x_min)/i_count
-    dy = (y_max-y_min)/j_count
-
-    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
-      coordDep1=(/1/), coordDep2=(/2/), &
-      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-      indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    ! add center stagger
-    call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_GridGetCoord(grid, localDE=0, &
-      staggerLoc=ESMF_STAGGERLOC_CENTER, &
-      coordDim=1, farrayPtr=coordX, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_GridGetCoord(grid, localDE=0, &
-      staggerLoc=ESMF_STAGGERLOC_CENTER, &
-      coordDim=2, farrayPtr=coordY, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    ! compute center stagger coordinate values
-    imin_t = lbound(CoordX,1)
-    imax_t = ubound(CoordX,1)
-    jmin_t = lbound(CoordY,1)
-    jmax_t = ubound(CoordY,1)
-      
-    coordX(imin_t) = x_min + (imin_t-1)*dx + 0.5*dx
-    do i = imin_t+1, imax_t
-      coordX(i) = coordX(i-1) + dx
-    enddo
-    coordY(jmin_t) = y_min + (jmin_t-1)*dy + 0.5*dy
-    do j = jmin_t+1, jmax_t
-      coordY(j) = coordY(j-1) + dy
-    enddo
-    
-    NUOPC_GridCreateSimpleXY = grid
-    
-  end function
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: NUOPC_GridCreateSimpleSph - Create a simple Spherical Grid
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleSph(nx, ny, dx, dy, sx, sy, area_adj, &
@@ -1917,6 +1840,83 @@ endif
 
     if(present(rc)) rc = ESMF_SUCCESS
 
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian Grid
+! !INTERFACE:
+  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
+    i_count, j_count, rc)
+! !RETURN VALUE:
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
+    integer,            intent(in)            :: i_count, j_count
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Creates and returns a very simple XY cartesian Grid.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: i, j, imin_t, imax_t, jmin_t, jmax_t
+    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
+    real(ESMF_KIND_R8):: dx, dy
+    type(ESMF_Grid):: grid
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    dx = (x_max-x_min)/i_count
+    dy = (y_max-y_min)/j_count
+
+    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
+      coordDep1=(/1/), coordDep2=(/2/), &
+      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+      indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! add center stagger
+    call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=1, farrayPtr=coordX, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=2, farrayPtr=coordY, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! compute center stagger coordinate values
+    imin_t = lbound(CoordX,1)
+    imax_t = ubound(CoordX,1)
+    jmin_t = lbound(CoordY,1)
+    jmax_t = ubound(CoordY,1)
+      
+    coordX(imin_t) = x_min + (imin_t-1)*dx + 0.5*dx
+    do i = imin_t+1, imax_t
+      coordX(i) = coordX(i-1) + dx
+    enddo
+    coordY(jmin_t) = y_min + (jmin_t-1)*dy + 0.5*dy
+    do j = jmin_t+1, jmax_t
+      coordY(j) = coordY(j-1) + dy
+    enddo
+    
+    NUOPC_GridCreateSimpleXY = grid
+    
   end function
   !-----------------------------------------------------------------------------
 
