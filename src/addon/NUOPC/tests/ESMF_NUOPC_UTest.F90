@@ -62,8 +62,10 @@ program ESMF_NUOPC_UTest
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
-  character(ESMF_MAXSTR),  pointer  :: cplList(:)
   type(ESMF_Grid)         :: grid
+  integer                 :: i, j
+  character(ESMF_MAXSTR),  pointer  :: cplList(:)
+  real(ESMF_KIND_R8),      pointer  :: xPtr(:,:), yPtr(:,:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   type(NUOPC_RunSequence), pointer  :: runSeq(:)
   type(NUOPC_RunElement),  pointer  :: runE
@@ -300,7 +302,8 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_GridCreateSimpleSph() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_GridCreateSimpleSph(200, 100, 360./200, 170./100, 0., -85., &
+  grid = NUOPC_GridCreateSimpleSph(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
+    360._ESMF_KIND_R8, 85._ESMF_KIND_R8, 500, 400, &
     scheme=ESMF_REGRID_SCHEME_FULL3D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
@@ -310,8 +313,24 @@ program ESMF_NUOPC_UTest
   write(name, *) "Complete field for further testing Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldEmptySet(field, grid=grid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field, typekind=ESMF_TYPEKIND_R8, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  ! Fill the field with coordinate dependent data
+  call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=xPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=yPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldGet(field, farrayPtr=dataPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  do j=lbound(dataPtr,2),ubound(dataPtr,2)
+  do i=lbound(dataPtr,1),ubound(dataPtr,1)
+    dataPtr(i,j) = sin(xPtr(i,j)*0.0174532925199)*cos(yPtr(i,j)*0.0174532925199)
+  enddo
+  enddo
   !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
