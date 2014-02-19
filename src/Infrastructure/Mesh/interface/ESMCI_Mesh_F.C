@@ -723,12 +723,20 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
         int node_index=elemConn[c]-1;
 
         // Check elemConn
-        if ((node_index < 0) || (node_index > num_nodes-1)) {
+        if (node_index < 0) {
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+	   "- elemConn entries should not be less than 1 ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+	}
+
+        if (node_index > num_nodes-1) {
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be greater than number of nodes on processor ",
            ESMC_CONTEXT, &localrc)) throw localrc;
 	}
+
         // Mark as used
         node_used[node_index]=1;
 
