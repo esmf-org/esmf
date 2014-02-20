@@ -20,13 +20,10 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def mesh_create_2x2(mesh, localPet):
+def mesh_create_5():
     '''
-    PRECONDITIONS: A Mesh has been declared.
-    POSTCONDITIONS: A 2x2 Mesh has been created.
-    
-                   2x2 Mesh
-    
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 5 element Mesh has been created.    
     
       2.0   31 ------ 32 ------ 33
             |         |  22  /   |
@@ -43,20 +40,23 @@ def mesh_create_2x2(mesh, localPet):
           Node Ids at corners
           Element Ids in centers
     
-          (Everything owned by PET 0)
+    Note: This mesh is not parallel, it can only be used in serial
     '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
     num_node = 9
     num_elem = 5
     nodeId = np.array([11,12,13,21,22,23,31,32,33])
-    nodeCoord = np.array([0.0,0.0,
-                          1.0,0.0,
-                          2.0,0.0,
-                          0.0,1.0,
-                          1.0,1.0,
-                          2.0,1.0,
-                          0.0,2.0,
-                          1.0,2.0,
-                          2.0,2.0])
+    nodeCoord = np.array([0.0,0.0,  # node 11
+                          1.0,0.0,  # node 12
+                          2.0,0.0,  # node 13
+                          0.0,1.0,  # node 21
+                          1.0,1.0,  # node 22
+                          2.0,1.0,  # node 23
+                          0.0,2.0,  # node 31
+                          1.0,2.0,  # node 32
+                          2.0,2.0]) # node 33
     nodeOwner = np.zeros(num_node)
 
     elemId = np.array([11,12,21,22,23])
@@ -65,11 +65,11 @@ def mesh_create_2x2(mesh, localPet):
                        ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.TRI,
                        ESMF.MeshElemType.TRI])
-    elemConn=np.array([0,1,4,3,
-                       1,2,5,4,
-                       3,4,7,6,
-                       4,8,7,
-                       4,5,8])
+    elemConn=np.array([0,1,4,3, # element 11
+                       1,2,5,4, # element 12
+                       3,4,7,6, # element 21
+                       4,8,7,   # element 22
+                       4,5,8])  # element 23
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
@@ -77,13 +77,10 @@ def mesh_create_2x2(mesh, localPet):
 
     return mesh, nodeCoord, elemType, elemConn
 
-def mesh_create_3x3(mesh, localPet):
+def mesh_create_10():
     '''
-    PRECONDITIONS: A Mesh has been declared.
-    POSTCONDITIONS: A 3x3 Mesh has been created.
-    
-                   3x3 Mesh
-    
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 10 element Mesh has been created.    
     
       2.0   41 ------ 42 ------- 43 ------ 44
             |         |          |  33 /   |
@@ -104,8 +101,11 @@ def mesh_create_3x3(mesh, localPet):
           Node Ids at corners
           Element Ids in centers
     
-          (Everything owned by PET 0)
+    Note: This mesh is not parallel, it can only be used in serial
     '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
     num_node = 16
     num_elem = 10
     nodeId = np.array([11,12,13,14,21,22,23,24,31,32,33,34,41,42,43,44])
@@ -142,10 +142,11 @@ def mesh_create_3x3(mesh, localPet):
 
     return mesh, nodeCoord, elemType, elemConn
 
-def mesh_create_2x2_parallel (mesh, localPet):
+def mesh_create_5_parallel (localPet):
     '''
-    PRECONDITIONS: A Mesh has been declared.
-    POSTCONDITIONS: A 2x2 Mesh has been created.
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 5 element Mesh has been created.
+    
     #  2.0   31 ------ 32       [32] ----- 33
     #        |         |         | 22  /   |
     #        |    21   |         |    /    |
@@ -170,6 +171,9 @@ def mesh_create_2x2_parallel (mesh, localPet):
     #               Node Id labels at corners
     #              Element Id labels in centers
     '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
     if (localPet == 0):
         num_node=4
         num_elem=1
@@ -243,10 +247,11 @@ def mesh_create_2x2_parallel (mesh, localPet):
 
     return mesh, nodeCoord, elemType, elemConn
 
-def mesh_create_3x3_parallel (mesh, localPet):
+def mesh_create_10_parallel (localPet):
     '''
-    PRECONDITIONS: A Mesh has been declared.
-    POSTCONDITIONS: A 3x3 Mesh has been created.
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 10 element Mesh has been created.
+    
     #  2.0   41 ------ 42 ------ 43      [43] ---------- 44
     #        |         |         |       |          /    |
     #        |         |         |       |  33   /       |
@@ -277,6 +282,9 @@ def mesh_create_3x3_parallel (mesh, localPet):
     #               Node Id labels at corners
     #              Element Id labels in centers
     '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
     if (localPet == 0):
         num_node=9
         num_elem=4
@@ -357,43 +365,6 @@ def mesh_create_3x3_parallel (mesh, localPet):
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
     mesh.add_elements(num_elem,elemId,elemType,elemConn)
-
-    return mesh, nodeCoord, elemType, elemConn
-
-def create_mesh_2x2(localPet, parallel=False):
-    '''
-    PRECONDITIONS: ESMPy has been initialized.
-    POSTCONDITIONS: A Mesh (2x2) has been created and returned as 
-                    'mesh'.
-    '''
-    # Two parametric dimensions, and three spatial dimensions
-    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
-
-    # this is for parallel
-    if parallel:
-        mesh, nodeCoord, elemType, elemConn = mesh_create_2x2_parallel(mesh, 
-                                                                       localPet)
-    # this is for serial
-    else:
-        mesh, nodeCoord, elemType, elemConn = mesh_create_2x2(mesh, localPet)
-
-    return mesh, nodeCoord, elemType, elemConn
-
-def create_mesh_3x3(localPet, parallel=False, othermesh=None):
-    '''
-    PRECONDITIONS: ESMPy has been initialized.
-    POSTCONDITIONS: A Mesh (3x3) has been created and returned as 'mesh'.
-    '''
-    # Two parametric dimensions, and three spatial dimensions
-    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
-
-    # this is for parallel
-    if parallel:
-        mesh, nodeCoord, elemType, elemConn = mesh_create_3x3_parallel(mesh, 
-                                                                       localPet)
-    # this is for serial
-    else:
-        mesh, nodeCoord, elemType, elemConn = mesh_create_3x3(mesh, localPet)
 
     return mesh, nodeCoord, elemType, elemConn
 
@@ -535,10 +506,16 @@ def test_main():
         print "\nmesh_mesh_regrid"
 
     # create two unique Mesh objects
-    srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
-        create_mesh_2x2(localPet, parallel)
-    dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
-        create_mesh_3x3(localPet, parallel, srcmesh)
+    if parallel:
+        srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
+            mesh_create_5_parallel(localPet)
+        dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
+            mesh_create_10_parallel(localPet)
+    else:
+        srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
+            mesh_create_5()
+        dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
+            mesh_create_10()
 
     # create ESMP_Field objects on the Meshes
     srcfield = create_field(srcmesh, 'srcfield')
