@@ -1,9 +1,10 @@
 import ESMF
 from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
-# retrieve the data files from the esmf data repository
-response = cache_data_file("T42_grid.nc")
-response = cache_data_file("ne15np4_scrip.nc")
+if ESMF.local_pet == 0:
+    # retrieve the data files from the esmf data repository
+    response = cache_data_file("T42_grid.nc")
+    response = cache_data_file("ne15np4_scrip.nc")
   
 # create a logically rectangular T42 source grid for a SCRIP format file 
 grid = ESMF.Grid(filename="T42_grid.nc", \
@@ -11,6 +12,10 @@ grid = ESMF.Grid(filename="T42_grid.nc", \
                  staggerloc=ESMF.StaggerLoc.CENTER, \
                  add_corner_stagger=True)
 
+print "PET {0}: size = {1}\n size_local = {2}".format(ESMF.local_pet(), 
+                                                      grid.size, 
+                                                      grid.size_local)
+'''
 # create a field on the center stagger locations of the source grid
 srcfield = ESMF.Field(grid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
@@ -34,3 +39,4 @@ dstfield = regrid(srcfield, dstfield)
 
 # show that the destination field data matches the initial source data
 print dstfield.data
+'''

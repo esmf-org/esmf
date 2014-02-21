@@ -29,9 +29,10 @@ def main():
     grid = 2
     prefix = 'data/'
     filename = prefix+grids[grid]
-    if not os.path.exists(prefix):
-        os.mkdir(prefix)
-    cache_data_file(filename)
+    if ESMF.local_pet == 0:
+        if not os.path.exists(prefix):
+            os.mkdir(prefix)
+        cache_data_file(filename)
 
     # Start up ESMF.
     esmp = ESMF.Manager(logkind=ESMF.LogKind.SINGLE, debug=True)
