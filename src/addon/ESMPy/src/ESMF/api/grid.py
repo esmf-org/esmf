@@ -40,7 +40,7 @@ class Grid(object):
                 max_index: a numpy array which specifies the maximum
                            index of each dimension of the Grid. \n
                     type: np.array \n
-                    shape: [dimCount, 1] \n
+                    shape: [number of dimensions, 1] \n
             Optional arguments for creating a grid in memory: \n
                 num_peri_dims: the number of periodic dimensions (0 or 1). \n
                 coord_sys: the coordinates system for the Grid. \n
@@ -102,6 +102,7 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+                    StaggerLoc.CORNER_VFACE\n
         Returns: \n
             Grid \n
         """
@@ -256,33 +257,45 @@ class Grid(object):
         self.size_local = [np.zeros(None) for a in range(2**self.rank)]
 
         # grid size according to stagger locations
+        peri_dim_offset = 1 - self.num_peri_dims
+        
         if self.rank == 2:
-            self.size = \
-                [reduce(mul,self.max_index),             # ESMF_STAGGERLOC_CENTER
-                (self.max_index[0] + 1) * self.max_index[1],  # ESMF_STAGGERLOC_EDGE1
-                self.max_index[0] * (self.max_index[1] + 1),  # ESMF_STAGGERLOC_EDGE2
-                reduce(mul,self.max_index+1)]            # ESMF_STAGGERLOC_CORNER
+            self.size = [\
+                # ESMF_STAGGERLOC_CENTER
+                reduce(mul,self.max_index),
+                # ESMF_STAGGERLOC_EDGE1
+                (self.max_index[0] + peri_dim_offset) * self.max_index[1],
+                # ESMF_STAGGERLOC_EDGE2
+                self.max_index[0] * (self.max_index[1] + 1),
+                # ESMF_STAGGERLOC_CORNER
+                (self.max_index[0] + peri_dim_offset) * (self.max_index[1] + 1)]
         elif self.rank == 3:
             self.size = [\
                 # ESMF_STAGGERLOC_CENTER_VCENTER
                 reduce(mul,self.max_index),
                 # ESMF_STAGGERLOC_EDGE1_VCENTER
-                (self.max_index[0] + 1) * self.max_index[1] * self.max_index[2],
+                (self.max_index[0] + peri_dim_offset) * 
+                self.max_index[1] * 
+                self.max_index[2],
                 # ESMF_STAGGERLOC_EDGE2_VCENTER
                 self.max_index[0] * (self.max_index[1] + 1) * self.max_index[2],
                 # ESMF_STAGGERLOC_CORNER_VCENTER
-                (self.max_index[0] + 1) * (self.max_index[1] + 1) * 
+                (self.max_index[0] + peri_dim_offset) * 
+                (self.max_index[1] + 1) * 
                 self.max_index[2],
                 # ESMF_STAGGERLOC_CENTER_VFACE
                 self.max_index[0] * self.max_index[1] * (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_EDGE1_VFACE
-                (self.max_index[0] + 1) + self.max_index[1] * 
+                (self.max_index[0] + peri_dim_offset) * 
+                self.max_index[1] * 
                 (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_EDGE2_VFACE
-                self.max_index[0] + (self.max_index[1] + 1) * 
+                self.max_index[0] * (self.max_index[1] + 1) * 
                 (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_CORNER_VFACE
-                reduce(mul,self.max_index+1)]
+                (self.max_index[0] + peri_dim_offset) * 
+                (self.max_index[1] + 1) * 
+                (self.max_index[2] + 1)]
         else:
             raise TypeError("max_index must be either a 2 or 3 dimensional \
                              Numpy array!")
@@ -423,7 +436,7 @@ class Grid(object):
                     GridItem.AREA\n
                     GridItem.MASK\n
         Optional Arguments: \n
-            staggerlocs: the stagger location of the coordinate data. \n
+            staggerloc: the stagger location of the coordinate data. \n
                 Argument values are: \n
                     2D: \n
                     (default) StaggerLoc.CENTER\n
@@ -653,6 +666,12 @@ class Grid(object):
         if self.rank == 3:
             self.link_coord_buffer(z, stagger)
 
+        # initialize to zeros, because ESMF doesn't handle that
+        self.coords[stagger][0][...] = 0
+        self.coords[stagger][1][...] = 0
+        if self.rank == 3:
+            self.coords[stagger][2][...] = 0
+
     def link_coord_buffer(self, coord_dim, stagger):
 
         if self.coords_done[stagger][coord_dim]:
@@ -706,6 +725,14 @@ class Grid(object):
 
         # link the ESMF allocations to the grid properties
         self.link_item_buffer(item, stagger)
+        
+        # initialize to zeros, because ESMF doesn't handle that
+        if item == GridItem.MASK:
+            self.mask[stagger][...] = 0
+        elif item == GridItem.AREA:
+            self.area[stagger][...] = 0
+        else:
+            raise GridItemNotSupported
 
     def link_item_buffer(self, item, stagger):
         from operator import mul
