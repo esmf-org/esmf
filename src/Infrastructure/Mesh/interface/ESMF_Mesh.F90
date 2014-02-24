@@ -504,6 +504,11 @@ contains
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          Each element id must be a number equal to or greater than 1. An id should be
+!          unique in the sense that different elements must have different ids (the same element
+!          that appears on different processors must have the same id). There may be gaps in the sequence
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
 !   \item[elementTypes] 
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
@@ -746,6 +751,11 @@ contains
 !   \item [nodeIds]
 !         An array containing the global ids of the nodes to be created on this PET. 
 !         This input consists of a 1D array the size of the number of nodes on this PET.
+!          Each node id must be a number equal to or greater than 1. An id should be
+!          unique in the sense that different nodes must have different ids (the same node
+!          that appears on different processors must have the same id). There may be gaps in the sequence
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
 !   \item[nodeCoords] 
 !          An array containing the physical coordinates of the nodes to be created on this
 !          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
@@ -993,6 +1003,11 @@ contains
 !   \item [nodeIds]
 !         An array containing the global ids of the nodes to be created on this PET. 
 !         This input consists of a 1D array the size of the number of nodes on this PET.
+!          Each node id must be a number equal to or greater than 1. An id should be
+!          unique in the sense that different nodes must have different ids (the same node
+!          that appears on different processors must have the same id). There may be gaps in the sequence
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
 !   \item[nodeCoords] 
 !          An array containing the physical coordinates of the nodes to be created on this
 !          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
@@ -1015,6 +1030,11 @@ contains
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          Each element id must be a number equal to or greater than 1. An id should be
+!          unique in the sense that different elements must have different ids (the same element
+!          that appears on different processors must have the same id). There may be gaps in the sequence
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
 !   \item[elementTypes] 
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
