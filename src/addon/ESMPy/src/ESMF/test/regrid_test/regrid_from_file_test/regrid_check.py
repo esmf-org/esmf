@@ -51,7 +51,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
     else:
         print "Creating ESMF.Grid object"
         grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype,
-                         staggerloc=ESMF.StaggerLoc.CENTER, is_sphere=isSphere)
+                         is_sphere=isSphere)
     return grid_or_mesh, is_mesh
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):

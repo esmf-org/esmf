@@ -152,6 +152,8 @@ class Grid(object):
                 raise GridArgumentWarning("coord_sys is only used for grids created in memory, this argument will be ignored.")
             if coord_typekind is not None:
                 raise GridArgumentWarning("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+            if staggerloc is not None:
+                raise GridArgumentWarning("staggerloc is only used for grids created in memory, this argument will be ignored.")
 
         # ctypes stuff
         self.struct = None
@@ -204,32 +206,28 @@ class Grid(object):
             
             # stagger is not required for from-file grids, but we need to 
             # correctly allocate the space
-            if staggerloc == None:
-                staggerloc = [StaggerLoc.CENTER]
-            elif type(staggerloc) is list:
-                pass
-            elif type(staggerloc) is tuple:
-                staggerloc = list(staggerloc)
-            else:
-                staggerloc = [staggerloc]
-
-            # add center
-            if StaggerLoc.CENTER not in staggerloc:
-                staggerloc.append(StaggerLoc.CENTER)
+            staggerloc = [StaggerLoc.CENTER]
 
             # add corner, this assumes 2D grids right?
-            if add_corner_stagger != None:
+            if add_corner_stagger:
                 if StaggerLoc.CORNER not in staggerloc:
                     staggerloc.append(StaggerLoc.CORNER)
+            
+            # set the num_peri_dims so sizes are calculated correctly
+            # is_sphere defaults to True
+            if is_sphere == False:
+                self.num_peri_dims = 0
+            else:
+                self.num_peri_dims = 1
             
         else:
             # ctypes stuff
             self.struct = ESMP_GridStruct()
-            if num_peri_dims == 0:
+            if self.num_peri_dims == 0:
                 self.struct = ESMP_GridCreateNoPeriDim(self.max_index, 
                                                        coordSys=coord_sys,
                                                        coordTypeKind=coord_typekind)
-            elif (num_peri_dims == 1):
+            elif (self.num_peri_dims == 1):
                 self.struct = ESMP_GridCreate1PeriDim(self.max_index, 
                                                       coordSys=coord_sys,
                                                       coordTypeKind=coord_typekind)
