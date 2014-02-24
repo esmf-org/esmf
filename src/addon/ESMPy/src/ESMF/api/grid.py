@@ -12,6 +12,8 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.esmpymanager import *
 
+import warnings
+
 #### Grid class #########################################################
 
 class Grid(object):
@@ -120,21 +122,21 @@ class Grid(object):
                 self.max_index = max_index
             # raise warnings on all from file args
             if filename is not None:
-                raise GridArgumentWarning("filename is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
             if filetype is not None:
-                raise GridArgumentWarning("filetype is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
-                raise GridArgumentWarning("is_sphere is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
-                raise GridArgumentWarning("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
             if add_user_area is not None:
-                raise GridArgumentWarning("add_user_area is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
-                raise GridArgumentWarning("add_mask is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
             if varname is not "":
-                raise GridArgumentWarning("varname is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
             if coord_names:
-                raise GridArgumentWarning("coord_names is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
         # filename and filetype are required for from-file grids
         elif (filename is None) or (filetype is None):
             # raise error, need max_index to create in memory or filename to create from file
@@ -145,15 +147,15 @@ class Grid(object):
             from_file = True
             #raise errors for all in-memory grid options
             if max_index is not None:
-                raise GridArgumentWarning("max_index is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
-                raise GridArgumentWarning("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
             if coord_sys is not None:
-                raise GridArgumentWarning("coord_sys is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
             if coord_typekind is not None:
-                raise GridArgumentWarning("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
             if staggerloc is not None:
-                raise GridArgumentWarning("staggerloc is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
 
         # ctypes stuff
         self.struct = None
@@ -409,7 +411,7 @@ class Grid(object):
 
         for stagger in staggerlocs:
             if self.coords_done[stagger] == 1:
-                raise Warning("This coordinate has already been added.")
+                warnings.warn("This coordinate has already been added.")
 
             # request that ESMF allocate space for the coordinates
             if not from_file:
@@ -466,7 +468,7 @@ class Grid(object):
 
         for stagger in staggerlocs:
             if self.item_done[stagger][item] == 1:
-                    raise Warning("This item has already been added.")
+                warnings.warn("This item has already been added.")
 
             # request that ESMF allocate space for this item
             ESMP_GridAddItem(self, item, staggerloc=stagger)

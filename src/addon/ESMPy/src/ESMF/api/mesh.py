@@ -12,6 +12,8 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.esmpymanager import *
 
+import warnings
+
 #### Mesh class ###############################################################
 [node, element] = [0, 1]
 
@@ -88,22 +90,22 @@ class Mesh(object):
         if (parametric_dim is not None) or (spatial_dim is not None):
             # parametric_dim and spatial_dim are required for in-memory mesh creation
             if (parametric_dim is None) or (spatial_dim is None):
-                raise MeshArgumentError("both parametric_dim and spatial_dim must be specified")
+                warning.warn("both parametric_dim and spatial_dim must be specified")
             # raise warnings for the from-file options
             if filename is not None:
-                raise MeshArgumentWarning("filename is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("filename is only used for meshes created from file, this argument will be ignored.")
             if filetype is not None:
-                raise MeshArgumentWarning("filetype is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("filetype is only used for meshes created from file, this argument will be ignored.")
             if convert_to_dual is not None:
-                raise MeshArgumentWarning("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
             if add_user_area is not None:
-                raise MeshArgumentWarning("add_user_area is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
             if meshname is not "":
-                raise MeshArgumentWarning("meshname is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("meshname is only used for meshes created from file, this argument will be ignored.")
             if add_mask is not None:
-                raise MeshArgumentWarning("add_mask is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("add_mask is only used for meshes created from file, this argument will be ignored.")
             if varname is not "":
-                raise MeshArgumentWarning("varname is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("varname is only used for meshes created from file, this argument will be ignored.")
         # filename and filetype are required for from-file mesh creation
         elif (filename is None) or (filetype is None):
             raise MeshArgumentError ("must supply either parametric_dim and spatial_dim for an in-memory mesh or filename and filetype for a from-file mesh")
@@ -112,9 +114,9 @@ class Mesh(object):
             fromfile = True
             #raise warnings for all in-memory grid options
             if parametric_dim is not None:
-                raise GridArgumentWarning("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
+                warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
             if spatial_dim is not None:
-                raise GridArgumentWarning("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
+                warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
         
         # ctypes stuff
         self.struct = ESMP_Mesh()
