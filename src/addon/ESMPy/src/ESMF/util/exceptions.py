@@ -18,10 +18,6 @@ class NetCDFMissing(ESMPyException):
     """ESMF was not built with the NetCDF package."""
     pass
 
-class ESMPyWarning(Warning):
-    """Base class for warnings in the ESMPy package"""
-    pass
-
 class MethodNotImplemented(ESMPyException):
     """Raised when an unimplemented method is called."""
     pass
@@ -57,14 +53,6 @@ class GridArgumentError(GridException):
     """Raised if a Grid optional argument is used incorrectly."""
     pass
 
-class GridWarning(ESMPyWarning):
-    """Base class for warnings in the Grid class."""
-    pass
-
-class GridArgumentWarning(GridWarning):
-    """Warning given for using extraneous Grid optional arguments"""
-    pass
-
 class MeshException(ESMPyException):
     """Base class for errors in the Mesh class."""
     pass
@@ -77,14 +65,6 @@ class MeshArgumentError(MeshException):
     """Raised if a Mesh optional argument is used incorrectly."""
     pass
 
-class MeshWarning(ESMPyWarning):
-    """Base class for warnings in the Mesh class."""
-    pass
-
-class MeshArgumentWarning(MeshWarning):
-    """Warning given for using extraneous Mesh optional arguments"""
-    pass
-
 class FieldException(ESMPyException):
     """Base class for errors in the Field class."""
     pass
@@ -92,16 +72,6 @@ class FieldException(ESMPyException):
 class FieldDOError(FieldException):
     """Raised when an attempt is made to build a Field on an undefined 
        discretization object (e.g. not a Grid or a Mesh)"""
-    pass
-
-class FieldWarning(ESMPyWarning):
-    """Base class for warnings in the Field class."""
-    pass
-
-class FieldDestroyDisabled(FieldWarning):
-    """Warning given for using a disabled version of ESMP_FieldDestroy
-       to avoid a neverending segfault resulting from clashing 
-       deallocations from ESMF and Python"""
     pass
 
 class TestException(ESMPyException):
