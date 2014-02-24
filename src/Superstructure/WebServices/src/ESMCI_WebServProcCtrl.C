@@ -1673,8 +1673,8 @@ int  ESMCI_WebServProcCtrl::processGetData(
 //    Processes the request to retrieve the export data.  This method
 //    reads the client id from the socket and uses it to lookup the client
 //    information.  It then reads the data parameters (variable name, time, 
-//    lat and lon) from the socket and uses that information to lookup the 
-//    data from a netcdf file.  The data and the component status are then 
+//    lat and lon) from the socket and uses that information to read the 
+//    data from the socket.  The data and the component status are then 
 //    written back to the socket to complete the transaction.
 //
 //    (KDS: This design is very specific to CCSM/CAM and is hardcoded for
