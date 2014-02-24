@@ -66,7 +66,7 @@ ESMCI_WebServCompSvrMgr::ESMCI_WebServCompSvrMgr(
   )
 //
 // !DESCRIPTION:
-//    Opens up the CAM NetCDF ouptut file and reads in the relevant data.
+//    Instantiates a Component Service Manager, setting the system information.
 //
 //EOPI
 //-----------------------------------------------------------------------------

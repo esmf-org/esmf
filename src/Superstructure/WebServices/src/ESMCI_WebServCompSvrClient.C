@@ -22,7 +22,7 @@
 // in the companion file ESMCI_WebServCompSvrClient.h.  This code
 // provides the functionality needed to communicate with an ESMF grid 
 // component service implemented with the ESMCI_WebServComponentSvr class.
-// This class is intended to be used only by a PassThruSvr service which
+// This class is intended to be used only by a Process Controller service which
 // is the intermediary between the client (web service) and the component
 // service.
 //
@@ -80,7 +80,7 @@ ESMCI_WebServCompSvrClient::ESMCI_WebServCompSvrClient(
                        	// component service
   int          port,   	// (in) the port number of the component service
                        	// to which this client will connect
-  int          clientId // (in) the id of the client on the PassThruSvr
+  int          clientId // (in) the id of the client on the Process Controller
   ) : ESMCI_WebServNetEsmfClient(host, port)
 //
 // !DESCRIPTION:
@@ -136,11 +136,11 @@ void  ESMCI_WebServCompSvrClient::setClientId(
 //
 // !ARGUMENTS:
 //
-  int  clientId	// (in) the unique id of the client on the PassThruSvr
+  int  clientId	// (in) the unique id of the client on the Process Controller
   )
 //
 // !DESCRIPTION:
-//    Sets the id of the client on the PassThruSvr.
+//    Sets the id of the client on the Process Controller.
 //
 //EOPI
 //-----------------------------------------------------------------------------

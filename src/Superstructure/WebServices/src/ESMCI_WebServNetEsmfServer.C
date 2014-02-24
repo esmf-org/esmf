@@ -34,7 +34,6 @@
 #include <fstream>
 
 #include "ESMCI_WebServSocketUtils.h"
-#include "ESMCI_IO_NetCDF.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 
@@ -763,63 +762,10 @@ int  ESMCI_WebServNetEsmfServer::processInit(
 
 	//***
 	// If a filename was specified, create the import state object
+   // KDS: Reading information from a file is no longer used or 
+   //      supported since the data is not streamed across the network
+   //      socket.
 	//***
-	if (numFiles > 0)
-	{
-		//clientInfo->setImportFilename(filename);
-
-		//***
-		//	Create state object from specified file
-		// TODO: Add a flag that the calling program can set to indicate whether
-		//       not there is a state to import
-		// TODO: Read from the file as part of the netCDF web service 
-		//       (instead of as a local file)
-		//***
-		if (1) // change this to if (hasExportFile) when ready
-		{
-			string localFilename("/usr/local/share/hyrax/data/nc/");
-                        localFilename.append(filename);
-	
-			int			rc = 0;
-			IO_NetCDF*	netCdfFile = ESMCI_IO_NetCDFCreate(
-												localFilename,
-												ESMC_NULL_POINTER,
-												&rc);
-
-			if (rc != ESMF_SUCCESS)
-   		{
-      		ESMC_LogDefault.MsgFoundError(
-         		rc,
-         		"Unable to open NetCDF file.",
-         		ESMC_CONTEXT, &localrc);
-
-      		return localrc;
-   		}
-
-			//printf("Reading file: %s\n", localFilename);
-			netCdfFile->read(localFilename);
-
-			//***
-			// Ideally, I'd just say theImportState = netCdfFile->getState()...
-			// however, I don't think I can override the pointer location for the
-			// import state can be changed, so instead, I'm copying over the
-			// contents from the local state object to theImportState object.
-			//***
-			State*			localState = netCdfFile->getState();
-			vector<string>	arrayNames = localState->getArrayNames();
-
-			for (int i = 0; i < arrayNames.size(); ++i)
-			{
-				Array*	thisArray;
-				localState->getArray((char*)(arrayNames[i].c_str()), &thisArray);
-
-				theImportState->addArray(thisArray);
-			}
-			//theImportState->print();
-
-			ESMCI_IO_NetCDFDestroy(&netCdfFile);
-		}
-	}
 
 	//***
 	// Call the component initialize
@@ -1085,7 +1031,7 @@ int  ESMCI_WebServNetEsmfServer::processFinal(
 //    Processes the request to finalize the component.  This method reads the
 //    client id from the socket and uses it to lookup the client information.
 //    Next, the component finalize routine is called, and then the export 
-//    state is written to a netcdf file.  Finally, the component status is 
+//    state is written to the socket.  Finally, the component status is 
 //    written to the socket to complete the transaction.
 //
 //EOPI
@@ -1156,42 +1102,9 @@ int  ESMCI_WebServNetEsmfServer::processFinal(
 
 	//***
 	// Write the export file out to the local server file location
-	// TODO: Add a flag that the calling program can set to indicate whether
-	//       not there is a state to export
-	// TODO: Write directory to the file as part of the netCDF web service 
-	//       (instead of as a local file)
+   // KDS: This functionality is no longer used since the data is now
+   //      streamed to a network socket.
 	//***
-/*
-	if (1) // change this to if (hasExportFile) when ready
-	{
-		char		localFilename[256];
-		char		exportFilename[512];
-		char*		webServer = "http://27thstsoftware.com:8080";
-		char*		openDapPath = "opendap/data/nc";
-
-		sprintf(localFilename, "/usr/local/share/hyrax/data/nc/afile_%d.nc", 
-                             clientInfo->clientId());
-		sprintf(exportFilename, "%s/%s/afile_%d.nc", 
-                              webServer, openDapPath, clientInfo->clientId());
-
-		int			rc = 0;
-		IO_NetCDF*	netCdfFile = ESMCI_IO_NetCDFCreate(
-											strlen(localFilename),
-											localFilename,
-											ESMC_NULL_POINTER,
-											&rc);
-
-		netCdfFile->setState(theExportState);
-		//theExportState->print();
-
-		//printf("Writing file: %s\n", localFilename);
-		netCdfFile->write(strlen(localFilename), localFilename);
-
-		ESMCI_IO_NetCDFDestroy(&netCdfFile);
-
-		clientInfo->setExportFilename(exportFilename);
-	}
-*/
 
 	//***
 	// Call the component finalize

@@ -5,7 +5,6 @@ ALL: build_here
 AUTOGEN   = 
 
 SOURCEC	  = ESMCI_WebServNetEsmfClient.C \
-             ESMCI_WebServCAMOutputFile.C \
              ESMCI_WebServDataDesc.C \
              ESMCI_WebServDataContent.C \
              ESMCI_WebServDataMgr.C \
@@ -32,7 +31,6 @@ STOREH    = ESMCI_WebServLowLevelSocket.h \
             ESMCI_WebServNetEsmf.h \
             ESMCI_WebServNetEsmfClient.h \
             ESMCI_WebServClientInfo.h \
-            ESMCI_WebServCAMOutputFile.h \
             ESMCI_WebServCompSvrClient.h \
             ESMCI_WebServProcCtrlClient.h \
             ESMCI_WebServProcCtrl.h \

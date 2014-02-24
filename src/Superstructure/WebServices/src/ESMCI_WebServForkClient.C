@@ -75,7 +75,8 @@ ESMCI_WebServForkClient::ESMCI_WebServForkClient(
   )
 //
 // !DESCRIPTION:
-//    Opens up the CAM NetCDF ouptut file and reads in the relevant data.
+//    Instantiates a Component Service Manager that uses the system fork
+//    method for starting a component service.
 //
 //EOPI
 //-----------------------------------------------------------------------------
