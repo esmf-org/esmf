@@ -13,7 +13,7 @@ if ESMF.local_pet() == 0:
 # create a logically rectangular source grid for a SCRIP format file 
 grid = ESMF.Grid(filename=grid1, \
                  filetype=ESMF.FileFormat.SCRIP, \
-                 add_corner_stagger=True, staggerloc=ESMF.StaggerLoc.CENTER)
+                 add_corner_stagger=True)
 
 # create a field on the center stagger locations of the source grid
 srcfield = ESMF.Field(grid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
