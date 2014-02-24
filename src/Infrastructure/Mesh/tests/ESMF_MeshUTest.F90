@@ -1562,7 +1562,7 @@ endif
   rc=ESMF_SUCCESS
 
   ! Create Test mesh
-  call createTestMeshForDual2(mesh, rc=localrc)
+  call createTestMesh3x3(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   !call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
@@ -2806,8 +2806,61 @@ end subroutine createTestMeshForDual
 
 
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 4 PETs. Returns an error 
+  ! if run on other than 1 or 4 PETs
+  ! 
+  !                     Mesh Ids
+  !
+  !   3.0   13 ------ 14 ------- 15 ------- 16
+  !         |         |          |  10    / |
+  !   2.5   |    7    |    8     |     /    |
+  !         |         |          |  /    9  |
+  !   2.0   9 ------- 10 ------- 11 ------- 12
+  !         |         |          |          |
+  !   1.5   |    4    |    5     |    6     |
+  !         |         |          |          |
+  !   1.0   5 ------- 6 -------- 7 -------- 8
+  !         |         |          |          |
+  !   0.5   |    1    |    2     |    3     |
+  !         |         |          |          |
+  !   0.0   1 ------- 2 -------- 3 -------- 4
+  !            
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  ! 
+  !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |  3    /  |
+  !         |    2    |    2     |     /    |
+  !         |         |          |  /    3  |
+  !   2.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |          |
+  !         |    2    |    2     |    3     |
+  !         |         |          |          |
+  !   1.0   0 ------- 0 -------- 1 -------- 1
+  !         |         |          |          |
+  !         |    0    |    1     |    1     |
+  !         |         |          |          |
+  !   0.0   0 ------- 0 -------- 1 -------- 1
+  !
+  !        0.0       1.0        2.0        3.0
+  !
+  !               Node Owners at corners
+  !              Element Owners in centers
+  ! 
 
-subroutine createTestMeshForDual2(mesh, rc)
+subroutine createTestMesh3x3(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
 
@@ -3170,7 +3223,7 @@ subroutine createTestMeshForDual2(mesh, rc)
    deallocate(elemCoords)
    deallocate(elemConn)
 
-end subroutine createTestMeshForDual2
+end subroutine createTestMesh3x3
 
 
 end program ESMF_MeshUTest
