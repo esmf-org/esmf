@@ -44,7 +44,7 @@ def main():
     mesh = 4
     prefix = 'data/'
     filename = prefix+meshes[mesh]
-    if ESMF.local_pet == 0:
+    if ESMF.local_pet() == 0:
         if not os.path.exists(prefix):
             os.mkdir(prefix)
         cache_data_file(filename)

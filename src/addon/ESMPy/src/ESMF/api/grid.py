@@ -665,10 +665,13 @@ class Grid(object):
             self.link_coord_buffer(z, stagger)
 
         # initialize to zeros, because ESMF doesn't handle that
-        self.coords[stagger][0][...] = 0
-        self.coords[stagger][1][...] = 0
-        if self.rank == 3:
-            self.coords[stagger][2][...] = 0
+        #RLO: this has to be removed because grids created from file
+        #     have coordinates set by the time this is called, so it
+        #     doesn't make sense to initialize them to 0.
+        #self.coords[stagger][0][...] = 0
+        #self.coords[stagger][1][...] = 0
+        #if self.rank == 3:
+        #    self.coords[stagger][2][...] = 0
 
     def link_coord_buffer(self, coord_dim, stagger):
 
@@ -725,12 +728,15 @@ class Grid(object):
         self.link_item_buffer(item, stagger)
         
         # initialize to zeros, because ESMF doesn't handle that
-        if item == GridItem.MASK:
-            self.mask[stagger][...] = 0
-        elif item == GridItem.AREA:
-            self.area[stagger][...] = 0
-        else:
-            raise GridItemNotSupported
+        #RLO: this has to be removed because grids created from file
+        #     have mask and area set by the time this is called, so it
+        #     doesn't make sense to initialize them to 0.
+        #if item == GridItem.MASK:
+        #    self.mask[stagger][...] = 0
+        #elif item == GridItem.AREA:
+        #    self.area[stagger][...] = 0
+        #else:
+        #    raise GridItemNotSupported
 
     def link_item_buffer(self, item, stagger):
         from operator import mul
