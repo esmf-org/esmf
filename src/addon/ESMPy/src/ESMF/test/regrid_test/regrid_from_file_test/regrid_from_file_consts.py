@@ -21,6 +21,7 @@ regrid_method_map = {"bilinear" : ESMF.RegridMethod.BILINEAR,
                      "nearestdtos" : ESMF.RegridMethod.NEAREST_DTOS}
 file_type_map = {"VTK" : ESMF.FileFormat.VTK,
                  "SCRIP" : ESMF.FileFormat.SCRIP,
+                 "ESMF" : ESMF.FileFormat.ESMFMESH,
                  "ESMFMESH" : ESMF.FileFormat.ESMFMESH,
                  "ESMFGRID" : ESMF.FileFormat.ESMFGRID,
                  "UGRID" : ESMF.FileFormat.UGRID,
