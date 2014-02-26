@@ -242,6 +242,7 @@ ESMF_RegridWeightGen
 	--dst_coordinates lon_name,var_name
         --user_areas
         --check
+        --no_errorlog
 where
   --help              - Print the usage message and exit.
   --version           - Print ESMF version and license information and exit.
@@ -405,6 +406,8 @@ where
                         field is computed, as well as the relative error between the
                         mass of the source and destination fields in the conservative
                         case.
+     --no_errorlog    - Turn off the ESMF Error Log.  By default, ESMF creates multiple
+                        log files, one per PET.
 
 \end{verbatim}
 

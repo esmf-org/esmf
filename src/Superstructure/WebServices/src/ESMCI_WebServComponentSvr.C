@@ -26,7 +26,7 @@
 // (Note: This class is essentially a subset of the ESMCI_WebServNetEsmfServer
 //        class.  It was created when setting up CCSM/CAM as a Component
 //        and is used in conjunction with a "Process Controller" that is
-//        implemented using the ESMCI_WebServPassThruSvr.)
+//        implemented using the ESMCI_WebServProcCtrl.)
 //
 //-----------------------------------------------------------------------------
 #include "ESMCI_WebServComponentSvr.h"
@@ -48,7 +48,6 @@ typedef uint64_t u_int64_t;
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_WebServRegistrarClient.h"
-#include <ESMCI_IO_NetCDF.h>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 
@@ -1533,8 +1532,8 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 //    Processes the request to retrieve the export data.  This method
 //    reads the client id from the socket and uses it to lookup the client
 //    information.  It then reads the data parameters (variable name, time, 
-//    lat and lon) from the socket and uses that information to lookup the 
-//    data from a netcdf file.  The data and the component status are then 
+//    lat and lon) from the socket and uses that information to read the 
+//    data from the socket.  The data and the component status are then 
 //    written back to the socket to complete the transaction.
 //
 //    (KDS: This design is very specific to CCSM/CAM and is hardcoded for
@@ -1784,8 +1783,8 @@ int  ESMCI_WebServComponentSvr::processGetData(
 //    Processes the request to retrieve the export data.  This method
 //    reads the client id from the socket and uses it to lookup the client
 //    information.  It then reads the data parameters (variable name, time, 
-//    lat and lon) from the socket and uses that information to lookup the 
-//    data from a netcdf file.  The data and the component status are then 
+//    lat and lon) from the socket and uses that information to read the 
+//    data from the socket.  The data and the component status are then 
 //    written back to the socket to complete the transaction.
 //
 //    (KDS: This design is very specific to CCSM/CAM and is hardcoded for

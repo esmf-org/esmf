@@ -20,7 +20,6 @@ module ESMF_WebServUserModel
   ! ESMF Framework module
   use ESMF
   use ESMF_TestMod
-  use ESMF_IO_NetCDFMod
 
   implicit none
     

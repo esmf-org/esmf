@@ -455,8 +455,8 @@ int MeshCXX::addElements(int numElems, int *elemId,
         if ((node_index < 0) || (node_index > num_nodes-1)) {
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be greater than number of nodes on "
-           "processor ", ESMC_CONTEXT, &localrc)) throw localrc;
+           "- bad elementConn value",
+            ESMC_CONTEXT, &localrc)) throw localrc;
 	}
 
 

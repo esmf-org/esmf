@@ -12,6 +12,8 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.esmpymanager import *
 
+import warnings
+
 #### Grid class #########################################################
 
 class Grid(object):
@@ -40,7 +42,7 @@ class Grid(object):
                 max_index: a numpy array which specifies the maximum
                            index of each dimension of the Grid. \n
                     type: np.array \n
-                    shape: [dimCount, 1] \n
+                    shape: [number of dimensions, 1] \n
             Optional arguments for creating a grid in memory: \n
                 num_peri_dims: the number of periodic dimensions (0 or 1). \n
                 coord_sys: the coordinates system for the Grid. \n
@@ -102,6 +104,7 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+                    StaggerLoc.CORNER_VFACE\n
         Returns: \n
             Grid \n
         """
@@ -119,21 +122,21 @@ class Grid(object):
                 self.max_index = max_index
             # raise warnings on all from file args
             if filename is not None:
-                raise GridArgumentWarning("filename is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
             if filetype is not None:
-                raise GridArgumentWarning("filetype is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
-                raise GridArgumentWarning("is_sphere is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
-                raise GridArgumentWarning("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
             if add_user_area is not None:
-                raise GridArgumentWarning("add_user_area is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
-                raise GridArgumentWarning("add_mask is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
             if varname is not "":
-                raise GridArgumentWarning("varname is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
             if coord_names:
-                raise GridArgumentWarning("coord_names is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
         # filename and filetype are required for from-file grids
         elif (filename is None) or (filetype is None):
             # raise error, need max_index to create in memory or filename to create from file
@@ -144,13 +147,15 @@ class Grid(object):
             from_file = True
             #raise errors for all in-memory grid options
             if max_index is not None:
-                raise GridArgumentWarning("max_index is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
-                raise GridArgumentWarning("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
             if coord_sys is not None:
-                raise GridArgumentWarning("coord_sys is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
             if coord_typekind is not None:
-                raise GridArgumentWarning("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+                warnings.warn("coord_typekind is only used for grids created in memory, this argument will be ignored.")
+            if staggerloc is not None:
+                warnings.warn("staggerloc is only used for grids created in memory, this argument will be ignored.")
 
         # ctypes stuff
         self.struct = None
@@ -203,32 +208,28 @@ class Grid(object):
             
             # stagger is not required for from-file grids, but we need to 
             # correctly allocate the space
-            if staggerloc == None:
-                staggerloc = [StaggerLoc.CENTER]
-            elif type(staggerloc) is list:
-                pass
-            elif type(staggerloc) is tuple:
-                staggerloc = list(staggerloc)
-            else:
-                staggerloc = [staggerloc]
-
-            # add center
-            if StaggerLoc.CENTER not in staggerloc:
-                staggerloc.append(StaggerLoc.CENTER)
+            staggerloc = [StaggerLoc.CENTER]
 
             # add corner, this assumes 2D grids right?
-            if add_corner_stagger != None:
+            if add_corner_stagger:
                 if StaggerLoc.CORNER not in staggerloc:
                     staggerloc.append(StaggerLoc.CORNER)
+            
+            # set the num_peri_dims so sizes are calculated correctly
+            # is_sphere defaults to True
+            if is_sphere == False:
+                self.num_peri_dims = 0
+            else:
+                self.num_peri_dims = 1
             
         else:
             # ctypes stuff
             self.struct = ESMP_GridStruct()
-            if num_peri_dims == 0:
+            if self.num_peri_dims == 0:
                 self.struct = ESMP_GridCreateNoPeriDim(self.max_index, 
                                                        coordSys=coord_sys,
                                                        coordTypeKind=coord_typekind)
-            elif (num_peri_dims == 1):
+            elif (self.num_peri_dims == 1):
                 self.struct = ESMP_GridCreate1PeriDim(self.max_index, 
                                                       coordSys=coord_sys,
                                                       coordTypeKind=coord_typekind)
@@ -256,33 +257,45 @@ class Grid(object):
         self.size_local = [np.zeros(None) for a in range(2**self.rank)]
 
         # grid size according to stagger locations
+        peri_dim_offset = 1 - self.num_peri_dims
+        
         if self.rank == 2:
-            self.size = \
-                [reduce(mul,self.max_index),             # ESMF_STAGGERLOC_CENTER
-                (self.max_index[0] + 1) * self.max_index[1],  # ESMF_STAGGERLOC_EDGE1
-                self.max_index[0] * (self.max_index[1] + 1),  # ESMF_STAGGERLOC_EDGE2
-                reduce(mul,self.max_index+1)]            # ESMF_STAGGERLOC_CORNER
+            self.size = [\
+                # ESMF_STAGGERLOC_CENTER
+                reduce(mul,self.max_index),
+                # ESMF_STAGGERLOC_EDGE1
+                (self.max_index[0] + peri_dim_offset) * self.max_index[1],
+                # ESMF_STAGGERLOC_EDGE2
+                self.max_index[0] * (self.max_index[1] + 1),
+                # ESMF_STAGGERLOC_CORNER
+                (self.max_index[0] + peri_dim_offset) * (self.max_index[1] + 1)]
         elif self.rank == 3:
             self.size = [\
                 # ESMF_STAGGERLOC_CENTER_VCENTER
                 reduce(mul,self.max_index),
                 # ESMF_STAGGERLOC_EDGE1_VCENTER
-                (self.max_index[0] + 1) * self.max_index[1] * self.max_index[2],
+                (self.max_index[0] + peri_dim_offset) * 
+                self.max_index[1] * 
+                self.max_index[2],
                 # ESMF_STAGGERLOC_EDGE2_VCENTER
                 self.max_index[0] * (self.max_index[1] + 1) * self.max_index[2],
                 # ESMF_STAGGERLOC_CORNER_VCENTER
-                (self.max_index[0] + 1) * (self.max_index[1] + 1) * 
+                (self.max_index[0] + peri_dim_offset) * 
+                (self.max_index[1] + 1) * 
                 self.max_index[2],
                 # ESMF_STAGGERLOC_CENTER_VFACE
                 self.max_index[0] * self.max_index[1] * (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_EDGE1_VFACE
-                (self.max_index[0] + 1) + self.max_index[1] * 
+                (self.max_index[0] + peri_dim_offset) * 
+                self.max_index[1] * 
                 (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_EDGE2_VFACE
-                self.max_index[0] + (self.max_index[1] + 1) * 
+                self.max_index[0] * (self.max_index[1] + 1) * 
                 (self.max_index[2] + 1),
                 # ESMF_STAGGERLOC_CORNER_VFACE
-                reduce(mul,self.max_index+1)]
+                (self.max_index[0] + peri_dim_offset) * 
+                (self.max_index[1] + 1) * 
+                (self.max_index[2] + 1)]
         else:
             raise TypeError("max_index must be either a 2 or 3 dimensional \
                              Numpy array!")
@@ -398,7 +411,7 @@ class Grid(object):
 
         for stagger in staggerlocs:
             if self.coords_done[stagger] == 1:
-                raise Warning("This coordinate has already been added.")
+                warnings.warn("This coordinate has already been added.")
 
             # request that ESMF allocate space for the coordinates
             if not from_file:
@@ -423,7 +436,7 @@ class Grid(object):
                     GridItem.AREA\n
                     GridItem.MASK\n
         Optional Arguments: \n
-            staggerlocs: the stagger location of the coordinate data. \n
+            staggerloc: the stagger location of the coordinate data. \n
                 Argument values are: \n
                     2D: \n
                     (default) StaggerLoc.CENTER\n
@@ -455,7 +468,7 @@ class Grid(object):
 
         for stagger in staggerlocs:
             if self.item_done[stagger][item] == 1:
-                    raise Warning("This item has already been added.")
+                warnings.warn("This item has already been added.")
 
             # request that ESMF allocate space for this item
             ESMP_GridAddItem(self, item, staggerloc=stagger)
@@ -653,6 +666,15 @@ class Grid(object):
         if self.rank == 3:
             self.link_coord_buffer(z, stagger)
 
+        # initialize to zeros, because ESMF doesn't handle that
+        #RLO: this has to be removed because grids created from file
+        #     have coordinates set by the time this is called, so it
+        #     doesn't make sense to initialize them to 0.
+        #self.coords[stagger][0][...] = 0
+        #self.coords[stagger][1][...] = 0
+        #if self.rank == 3:
+        #    self.coords[stagger][2][...] = 0
+
     def link_coord_buffer(self, coord_dim, stagger):
 
         if self.coords_done[stagger][coord_dim]:
@@ -706,6 +728,17 @@ class Grid(object):
 
         # link the ESMF allocations to the grid properties
         self.link_item_buffer(item, stagger)
+        
+        # initialize to zeros, because ESMF doesn't handle that
+        #RLO: this has to be removed because grids created from file
+        #     have mask and area set by the time this is called, so it
+        #     doesn't make sense to initialize them to 0.
+        #if item == GridItem.MASK:
+        #    self.mask[stagger][...] = 0
+        #elif item == GridItem.AREA:
+        #    self.area[stagger][...] = 0
+        #else:
+        #    raise GridItemNotSupported
 
     def link_item_buffer(self, item, stagger):
         from operator import mul

@@ -3,8 +3,7 @@ import ESMF
 from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
 def grid_create(filename, filetype):
-    grid = ESMF.Grid(filename=filename, filetype=filetype,
-                     staggerloc=ESMF.StaggerLoc.CENTER, is_sphere=True)
+    grid = ESMF.Grid(filename=filename, filetype=filetype)
 
     return grid
 
@@ -29,9 +28,10 @@ def main():
     grid = 2
     prefix = 'data/'
     filename = prefix+grids[grid]
-    if not os.path.exists(prefix):
-        os.mkdir(prefix)
-    cache_data_file(filename)
+    if ESMF.local_pet() == 0:
+        if not os.path.exists(prefix):
+            os.mkdir(prefix)
+        cache_data_file(filename)
 
     # Start up ESMF.
     esmp = ESMF.Manager(logkind=ESMF.LogKind.SINGLE, debug=True)

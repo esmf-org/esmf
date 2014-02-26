@@ -12,6 +12,8 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.esmpymanager import *
 
+import warnings
+
 #### Mesh class ###############################################################
 [node, element] = [0, 1]
 
@@ -37,11 +39,15 @@ class Mesh(object):
             2. add nodes, \n
             3. add elements. \n
             Required arguments for a Mesh in memory: \n
-                parametric_dim: the parametric dimension of the Mesh. \n
-                spatial_dim: the spatial dimension of the Mesh. \n
-                    2D Cartesian = [2,2] \n
-                    3D Cartesian = [2,3] \n
-                    3D Spherical = [?,?] \n
+                parametric_dim: the dimension of the topology of the Mesh (e.g.
+                a Mesh composed of squares would have a parametric dimension of 
+                2 and a Mesh composed of cubes would have a parametric dimension
+                of 3). \n
+                spatial_dim: the number of coordinate dimensions needed to
+                describe the locations of the nodes making up the Mesh.  For a
+                manifold the spatial dimension can be larger than the parametric
+                dimension (e.g. the 2D surface of a sphere in 3D space), but it
+                cannot be smaller. \n
             Optional arguments for creating a Mesh in memory: \n
                 None \n
         Mesh from file: \n
@@ -55,18 +61,25 @@ class Mesh(object):
             Optional arguments for creating a Mesh from file: \n
                 convert_to_dual: a boolean value to specify if the dual 
                                  Mesh should be calculated. 
-                                 Defaults to True. \n
+                                 Defaults to True. This argument is only
+                                 supported with filetype FileFormat.SCRIP. \n
                 add_user_area: a boolean value to specify if an area 
-                               property should be added to the mesh 
-                               (numpy array). Defaults to False. \n
+                               property should be added to the mesh.  This
+                               argument is only supported for filetype 
+                               FileFormat.SCRIP or FileFormat.ESMFMESH.  
+                               Defaults to False. \n
                 meshname: a string value specifying the name of the 
-                          Mesh metadata variable in a UGRID file. 
-                          Defaults to the empty string. \n
-                add_mask: a boolean value to specify if a mask should 
-                          be added to the Mesh (numpy array). 
-                          Defaults to False. \n
-                varname: a string to specify a variable name for the mask
-                         if add_mask is True.  Defaults to the empty string. \n
+                          Mesh metadata variable in a UGRID file.  This 
+                          argument is only supported with filetype 
+                          FileFormat.UGRID.  Defaults to the empty string. \n
+                add_mask: a boolean value to specify if a mask in a UGRID file
+                          should be added to the Mesh (numpy array).  This 
+                          argument is only supported with filetype 
+                          FileFormat.UGRID.  Defaults to False. \n
+                varname: a string to specify a variable name for the mask in a
+                         UGRID file if add_mask is True.  This argument is only
+                         supported for filetype FileFormat.UGRID.  Defaults to 
+                         the empty string. \n
         Returns: \n
             Mesh \n
         """
@@ -77,22 +90,22 @@ class Mesh(object):
         if (parametric_dim is not None) or (spatial_dim is not None):
             # parametric_dim and spatial_dim are required for in-memory mesh creation
             if (parametric_dim is None) or (spatial_dim is None):
-                raise MeshArgumentError("both parametric_dim and spatial_dim must be specified")
+                warning.warn("both parametric_dim and spatial_dim must be specified")
             # raise warnings for the from-file options
             if filename is not None:
-                raise MeshArgumentWarning("filename is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("filename is only used for meshes created from file, this argument will be ignored.")
             if filetype is not None:
-                raise MeshArgumentWarning("filetype is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("filetype is only used for meshes created from file, this argument will be ignored.")
             if convert_to_dual is not None:
-                raise MeshArgumentWarning("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("convert_to_dual is only used for meshes created from file, this argument will be ignored.")
             if add_user_area is not None:
-                raise MeshArgumentWarning("add_user_area is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
             if meshname is not "":
-                raise MeshArgumentWarning("meshname is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("meshname is only used for meshes created from file, this argument will be ignored.")
             if add_mask is not None:
-                raise MeshArgumentWarning("add_mask is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("add_mask is only used for meshes created from file, this argument will be ignored.")
             if varname is not "":
-                raise MeshArgumentWarning("varname is only used for meshes created from file, this argument will be ignored.")
+                warning.warn("varname is only used for meshes created from file, this argument will be ignored.")
         # filename and filetype are required for from-file mesh creation
         elif (filename is None) or (filetype is None):
             raise MeshArgumentError ("must supply either parametric_dim and spatial_dim for an in-memory mesh or filename and filetype for a from-file mesh")
@@ -101,9 +114,9 @@ class Mesh(object):
             fromfile = True
             #raise warnings for all in-memory grid options
             if parametric_dim is not None:
-                raise GridArgumentWarning("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
+                warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
             if spatial_dim is not None:
-                raise GridArgumentWarning("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
+                warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
         
         # ctypes stuff
         self.struct = ESMP_Mesh()
@@ -180,7 +193,7 @@ class Mesh(object):
 
         return string
     
-    def add_elements(self, element_count, 
+    def add_elements(self, element_count,
                      element_ids,
                      element_types,
                      element_conn,
@@ -199,15 +212,15 @@ class Mesh(object):
                     type: numpy.array \n
                     shape: (element_count, 1) \n
                 Argument values are: \n
-                    TRI = 2D triangular elements with 3 sides
-                    QUAD = 2D quadrilateral elements with 4 sides
-                    TETRA = 3D tetrahedral elements with 4 faces
-                    HEX = 3D hexahedral elements with 6 faces
+                    MeshElemType.TRI \n
+                    MeshElemType.QUAD \n
+                    MeshElemType.TETRA \n
+                    MeshElemType.HEX \n
             element_conn: a numpy array (internally cast to 
                 dtype=numpy.int32) to specify the connectivity 
                 of the Mesh.  The connectivity array is 
                 constructed by concatenating
-                the tuples which correspond to the 
+                the tuples that correspond to the 
                 element_ids.  The connectivity tuples are
                 constructed by listing the node_ids of each 
                 element in COUNTERCLOCKWISE order. \n
@@ -215,9 +228,9 @@ class Mesh(object):
                     shape: (sum(element_types[:], 1) \n
         Optional Arguments: \n
             element_mask: a numpy array (internally cast to 
-                dtype=numpy.int32) containing 0's and 1's to 
-                specify masked elements, where 1 specifies 
-                that the element is masked. \n
+                dtype=numpy.int32) containing integer values to 
+                specify masked elements.  The specific values that are masked
+                are specified in the Regrid() constructor.\n
                     type: numpy.array \n
                     shape: (element_count, 1) \n
             element_area: a numpy array (internally cast to 
@@ -281,12 +294,12 @@ class Mesh(object):
                 dtype=numpy.float64) to specify the coordinates 
                 of the Mesh.  The array should be constructed by 
                 concatenating the coordinate tuples into a numpy array 
-                which correspond to node_ids. \n
+                that correspond to node_ids. \n
                     type: numpy.array \n
                     shape: (spatial_dim*node_count, 1) \n
             node_owners: a numpy array (internally cast to 
                 dtype=numpy.int32) to specify the rank of the
-                processor which owns each node. \n
+                processor that owns each node. \n
                     type: numpy.array \n
                     shape: (node_count, 1) \n
         Optional Arguments: \n
