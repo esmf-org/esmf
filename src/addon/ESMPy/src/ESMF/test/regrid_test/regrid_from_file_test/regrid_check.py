@@ -28,7 +28,7 @@ from regrid_from_file_consts import regrid_method_map, file_type_map, pole_metho
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
-    if filetype == ESMF.FileFormat.UGRID:
+    if (filetype == ESMF.FileFormat.UGRID) or (filetype == ESMF.FileFormat.ESMFMESH):
         is_mesh = True
     elif filetype == ESMF.FileFormat.SCRIP:
         grid_rank = ESMF.ESMP_ScripInqRank(filename)
@@ -271,7 +271,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
         else:
             pole_method = ESMF.PoleMethod.NPNTAVG
             pole_method_npntavg = int(pole_method_str)
-            
+
     srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, meshname=src_meshname,
                                                          convert_to_dual=convert_to_dual, 
                                                          isSphere=src_is_sphere)
@@ -332,13 +332,13 @@ if __name__ == '__main__':
     #regrid_method = "conserve"
     #options = "-i --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
     #max_err = 0.06
-    src_fname = "T42_grid.nc"
-    dst_fname = "ll2.5deg_grid.nc"
-    regrid_method = "bilinear"
+    #src_fname = "T42_grid.nc"
+    #dst_fname = "ll2.5deg_grid.nc"
+    #regrid_method = "bilinear"
     #regrid_method = "conserve"
-    options = "-p none -i"
+    #options = "-p none -i"
     #options = "-p 4"
-    max_err = 10E-03
+    #max_err = 10E-03
     #src_fname = "T42_grid.nc"
     #dst_fname = "ar9v4_100920.nc"
     #regrid_method = "patch"
@@ -359,5 +359,11 @@ if __name__ == '__main__':
     #regrid_method = "bilinear"
     #options = "--dst_regional"
     #max_err = 10E-04
+    src_fname = "mpas_uniform_10242.nc"
+    dst_fname = "mpas_uniform_10242_dual.nc"
+    regrid_method = "bilinear"
+    options = " --src_type ESMF --dst_type ESMF"
+    max_err = 10E-04
+    
     sys.exit(regrid_check(src_fname, dst_fname, regrid_method, options, max_err))
 
