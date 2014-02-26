@@ -46,8 +46,8 @@ module ESMF_LogErrMod
 !------------------------------------------------------------------------------
 ! !USES:
     ! inherit from ESMF base class
-    use ESMF_IOUtilMod
-    use ESMF_UtilTypesMod
+      use ESMF_IOUtilMod
+      use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
  !!                         this is possible because since all the checks
  !!                         in this module are shallow - Bob 1/9/2007.
@@ -2164,7 +2164,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         end if
 
         if (alog%fIndex == alog%maxElements .or. &
-            alog%flushImmediately == ESMF_TRUE) then
+            alog%flushImmediately == ESMF_TRUE .or.  &
+            local_logmsgflag == ESMF_LOGMSG_ERROR) then
                 alog%fIndex = alog%fIndex + 1
                 call ESMF_LogFlush(log,rc=rc2) 
                 alog%fIndex = 1
