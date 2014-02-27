@@ -13,7 +13,6 @@
 program ESMF_RegridWeightGenApp
 
 ! !USES:
-  use mpi
   use ESMF
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
@@ -21,6 +20,10 @@ program ESMF_RegridWeightGenApp
   use ESMF_RegridWeightGenCheckMod
 
   implicit none
+
+#ifndef ESMF_MPIUNI
+  include "mpif.h"
+#endif
 
   integer            :: rc
   type(ESMF_VM)      :: vm
@@ -58,6 +61,7 @@ program ESMF_RegridWeightGenApp
   terminateProg = .false.
   
   ! Check if --no_errorlog is given, if so, call ESMF_Initialize() with ESMF_LOGKIND_NONE flag
+#ifndef ESMF_MPIUNI
   call MPI_Init(rc)
   if (rc /= MPI_SUCCESS) then
       write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
@@ -68,6 +72,10 @@ program ESMF_RegridWeightGenApp
       write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
       call MPI_Finalize(rc)
   endif
+#else
+  PetNo = 0
+#endif
+
   if (PetNo == 0) then
       count = command_argument_count()
       logflag = ESMF_LOGKIND_MULTI
@@ -80,10 +88,12 @@ program ESMF_RegridWeightGenApp
       enddo
       msgbuf(1) = logflag
    endif
+
+#ifndef ESMF_MPIUNI
    ! broadcast to all other PETs
    call MPI_Bcast(msgbuf, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,rc)
    if (PetNo /= 0)  logflag = msgbuf(1)
- 
+#endif 
   !------------------------------------------------------------------------
   ! Initialize ESMF
   !
