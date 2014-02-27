@@ -157,6 +157,7 @@ def compare_fields(field1, field2, regridmethod, dstFracField, dst_mask, max_err
     field2data = np.ravel(field2.data)
     dstFracFieldData = np.ravel(dstFracField.data)
     dst_mask_flat = np.ravel(dst_mask)
+    cnt_nodes_used = 0
     for i in range(field1.size):
         #print "i=",i
         #print "field1 %f, field2 %f" % (field1data[i], field2data[i])
@@ -169,10 +170,11 @@ def compare_fields(field1, field2, regridmethod, dstFracField, dst_mask, max_err
             dstFracFieldData[i] >= 0.999)):
             err = abs(field1data[i] - field2data[i])/abs(field2data[i])
             totalErr += err
+            cnt_nodes_used += 1
         #else:
             #print "Partial dest fraction -- skipping"
 
-    relErr = totalErr/field2.size
+    relErr = totalErr/cnt_nodes_used
     if (relErr < max_err):
         correct = True
 
