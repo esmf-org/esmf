@@ -1265,6 +1265,25 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test destroying alarm
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Destroying alarm test"
+      call ESMF_AlarmDestroy (alarm, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test destroying clock after alarm
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Destroying clock after alarm test"
+      call ESMF_ClockDestroy (clock, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
