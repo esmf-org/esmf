@@ -1143,6 +1143,7 @@
 
       ! free calendar memory
       call ESMF_CalendarDestroy(julianDayCalendar)
+      call ESMF_CalendarDestroy(modifiedJulianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
       call ESMF_CalendarDestroy(noLeapCalendar)
       call ESMF_CalendarDestroy(julianCalendar)
