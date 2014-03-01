@@ -41,18 +41,16 @@
 !     ! Local variables
       integer :: rc, localrc
       type(ESMF_VM) :: vm
-      logical :: correct
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
-      type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3),fieldGDP
-      type(ESMF_FieldBundle) :: bundle1, bundle2(1), bundle3, bundle5, bundleGDP
-      type(ESMF_State) :: state1, state2, state3, state4,stateGDP
+      type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3)
+      type(ESMF_FieldBundle) :: bundle1, bundle2(1), bundle3, bundle5
+      type(ESMF_State) :: state1, state2, state3, state4
       type(ESMF_StateItem_Flag) :: stateItemType
-      real(ESMF_KIND_R8), pointer :: ptrGDP1(:,:),ptrGDP2(:,:)
       
       type(ESMF_ArraySpec)  :: arrayspec
       type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array, array2, arrayGDP, testarray
+      type(ESMF_Array)      :: array, array2, testarray
 
 #if defined (ESMF_TESTEXHAUSTIVE)
       integer :: itemcount
@@ -88,6 +86,15 @@
       equivalence              (rndnums, rndnums2d)
       integer :: i
       integer :: linkcount
+
+#if 0
+      logical :: correct
+      type(ESMF_Field) :: fieldGDP
+      type(ESMF_FieldBundle) :: bundleGDP
+      type(ESMF_State) :: stateGDP
+      real(ESMF_KIND_R8), pointer :: ptrGDP1(:,:),ptrGDP2(:,:)
+      type(ESMF_Array)      :: arrayGDP
+#endif
 #endif
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1707,6 +1714,11 @@
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      ! Clean up
+      !------------------------------------------------------------------------
+
+      call ESMF_StateDestroy (state10)
 
 #if 0
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
