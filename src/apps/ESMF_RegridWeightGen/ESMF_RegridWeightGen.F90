@@ -77,10 +77,10 @@ program ESMF_RegridWeightGenApp
 #endif
 
   if (PetNo == 0) then
-      count = command_argument_count()
+      call ESMF_UtilGetArgC (count=count)
       logflag = ESMF_LOGKIND_MULTI
       do i=1,count
-        call get_command_argument(number=i, value=argvalue, status=rc)
+        call ESMF_UtilGetArg (argindex=i, argvalue=argvalue, rc=rc)
         if (trim(argvalue) == '--no_errorlog') then
           logflag = ESMF_LOGKIND_NONE 
           exit    
