@@ -4,10 +4,15 @@
 
 # Misc #
 ########
-*.csv
-*.orig
 *~
+*.orig
 *.log
+#.Log
+PET*.
+*.stdout
+*.out
+*.vtk
+*.csv
 *.nc
 
 # Eclipse #
@@ -16,8 +21,8 @@
 *.pydevproject
 *.settings
 
-# Sphinx #
-##########
-*build*
-*esmpy_doc*
-*esmfmkfile*
+# ESMPy build and docs #
+########################
+build
+doc/esmpy_doc
+src/ESMF/interface/esmfmkfile.py
