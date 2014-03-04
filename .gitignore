@@ -11,6 +11,7 @@ PET*.
 
 # esmf build generated directories #
 ####################################
+apps/
 examples/
 lib/
 mod/
