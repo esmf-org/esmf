@@ -98,7 +98,7 @@ endif
 include ${ESMF_DIR}/makefile
 
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD) $(CPFILES)
+CLEANFILES  = $(TESTS_BUILD) $(CPFILES) *.nc
 CLOBBERDIRS =
 
 DIRS        = 
