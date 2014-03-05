@@ -11,14 +11,14 @@ PET*.
 
 # esmf build generated directories #
 ####################################
-apps/
-examples/
-lib/
-mod/
-obj/
-doc/
-src/include
-test
+/apps/
+/examples/
+/lib/
+/mod/
+/obj/
+/doc/
+/src/include
+/test
 
 # protex generated files #
 ##########################
