@@ -16,7 +16,7 @@ examples/
 lib/
 mod/
 obj/
-src/doc
+doc/
 src/include
 test
 
