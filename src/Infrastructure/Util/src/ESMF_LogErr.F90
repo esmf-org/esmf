@@ -758,7 +758,9 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       if (alog%errorMaskCount > 0) then
         deallocate(alog%errorMask)
       endif
-      
+      if (associated (alog%logmsgAbort)) then
+        deallocate (alog%logmsgAbort)
+      end if
     endif 
 
     if (present(rc)) then
