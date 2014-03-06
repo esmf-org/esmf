@@ -218,34 +218,32 @@ as follows:
 
 \begin{verbatim}
 ESMF_RegridWeightGen  
+        --source|-s src_grid_filename
+        --destination|-d dst_grid_filename
+        --weight|-w out_weight_file
+        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
+        [--pole|-p none|all|teeth|1|2|..]
+        [--ignore_unmapped|-i]
+        [--src_type SCRIP|GRIDSPEC|ESMF|UGRID]
+        [--dst_type SCRIP|GRIDSPEC|ESMF|UGRID]
+        [-t SCRIP|GRIDSPEC|ESMF|UGRID]
+        [-r]
+        [--src_regional]
+        [--dst_regional]
+	[--64bit_offset]
+        [--netcdf4]
+        [--src_meshname dummy_var_name]
+	[--dst_meshname dummy_var_name]
+	[--src_missingvalue var_name]
+	[--dst_missingvalue var_name]
+	[--src_coordinates lon_name,lat_name]
+	[--dst_coordinates lon_name,var_name]
+        [--user_areas]
+        [--check]
+        [--no_errorlog]
 	[--help]
         [--version]
-        [--source|-s] src_grid_filename
-        [--destination|-d] dst_grid_filename
-        [--weight|-w] out_weight_file
-        [--method|-m] [bilinear|patch|nearestdtos|neareststod|conserve]
-        [--pole|-p] [none|all|teeth|1|2|..]
-        [--ignore_unmapped|-i]
-        --src_type [SCRIP|GRIDSPEC|ESMF|UGRID]
-        --dst_type [SCRIP|GRIDSPEC|ESMF|UGRID]
-        -t [SCRIP|GRIDSPEC|ESMF|UGRID]
-        -r
-        --src_regional
-        --dst_regional
-	--64bit_offset
-        --netcdf4
-        --src_meshname dummy_var_name
-	--dst_meshname dummy_var_name
-	--src_missingvalue var_name
-	--dst_missingvalue var_name
-	--src_coordinates lon_name,lat_name
-	--dst_coordinates lon_name,var_name
-        --user_areas
-        --check
-        --no_errorlog
 where
-  --help              - Print the usage message and exit.
-  --version           - Print ESMF version and license information and exit.
   --source or -s      - a required argument specifying the source grid
                         file name
 
@@ -406,8 +404,13 @@ where
                         field is computed, as well as the relative error between the
                         mass of the source and destination fields in the conservative
                         case.
+
      --no_errorlog    - Turn off the ESMF Error Log.  By default, ESMF creates multiple
                         log files, one per PET.
+
+     --help              - Print the usage message and exit.
+
+     --version           - Print ESMF version and license information and exit.
 
 \end{verbatim}
 
