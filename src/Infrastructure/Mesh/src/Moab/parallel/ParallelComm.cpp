@@ -1617,7 +1617,7 @@ ErrorCode ParallelComm::recv_entities(std::set<unsigned int>& recv_procs,
 #endif
   
     // now add others, with zero handle for now
-    for (std::set<unsigned int>::iterator sit = procs.begin();
+    for (std::set<unsigned int>::const_iterator sit = procs.begin();
          sit != procs.end(); sit++) {
 #ifndef NDEBUG
       if (tmp_ps && std::find(tmp_procs, tmp_procs+tmp_ps, *sit) != tmp_procs+tmp_ps) {
