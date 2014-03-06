@@ -37,7 +37,11 @@
  */
 #ifdef __cplusplus
 # if !defined __GNUC__ || __GNUC__ < 4 || __GNUC_MINOR__ < 5
+#  if ((__STDC_VERSION__ >= 199901L) || defined (__C99_RESTRICT))
+#   define __restrict__ restrict
+#  else
 #   define __restrict__
+#  endif
 # endif
 #endif
 
