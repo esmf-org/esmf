@@ -59,6 +59,7 @@ src/Superstructure/AttributeAPI/tests/ESMF_AttPackGridCompUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackGridUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackSciCompUTest.F90
 src/Superstructure/AttributeAPI/tests/ESMF_AttPackStateUTest.F90
+src/Superstructure/AttributeAPI/tests/ESMF_AttributeGridUTest.F90
 src/Superstructure/AttributeAPI/tests/fieldbundle.stdout
 src/Superstructure/AttributeAPI/tests/fieldbundle.xml
 src/Superstructure/State/src/ESMF_StateAPI.F90

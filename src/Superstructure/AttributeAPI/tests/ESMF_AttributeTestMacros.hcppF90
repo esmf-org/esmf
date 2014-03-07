@@ -1,0 +1,1083 @@
+^if 0
+! $Id$
+!
+! Earth System Modeling Framework
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+^endif
+
+^if 0
+!------------------------------------------------------------------------------
+! Macros for Attribute testing
+!
+! The structure of this file and these macros are compatible with the gcc
+! preprocessor - they assume the use of ## as a paste operator, require that
+! no additional spaces be added (e.g. no pre-tokenization as done by some
+! preprocessors which assume C syntax), assume an option exists to suppress
+! C-specific syntax directives such as #line or #pragma, and that an option
+! exists to produce output on stdout and not into a file.  The output of
+! the preprocessor phase is a valid .F90 file ready to be compiled by the
+! standard fortran compiler.  (gcc is *not* used for compilation.)
+!
+! The macros are intended to be written with @\ at the end of each line of
+! a multiline macro, and the output piped thru 'tr' to translate each
+! @ into <cr> to produce multiple lines of fortran code from a single
+! macro invocation.   If any preprocessor directives are to be left in the
+! output file (e.g. #include ""), the source should use ^directive (e.g.
+! ^include "header.h" ) again using 'tr' to substitute # for ^ after
+! preprocessing is completed.  
+!------------------------------------------------------------------------------
+^endif
+
+! The following macro is used to get around the first pass preprocessing,
+! which treats the string concatenation operator // as an inline comment.
+^define CONCAT /
+
+#define AttributeTestMacro(mname, mobj, mtag_ex, mtag_nex) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Empty value @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add an empty value character Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="EmptyValue", value="", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an empty value character Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an empty valGridue character from mobj Test @\
+      call ESMF_AttributeGet(mname, name="EmptyValue", value=outEmpty, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an empty value character Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Empty value from variable @\
+    !------------------------------------------------------------------------- @\
+      inEmpty = "" @\
+      !mtag_ex @\
+      ! Add an empty value character to mobj Test @\
+      call ESMF_AttributeSet(mname, name="EmptyValue", value=inEmpty, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an empty value character Attribute to mobj Test 2" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an empty value character from mobj Test @\
+      call ESMF_AttributeGet(mname, name="EmptyValue", value=outEmpty, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an empty value character Attribute from mobj Test 2" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Long value @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a long value character to mobj Test @\
+      call ESMF_AttributeSet(mname, name="LongValue", value= & @\
+        "This is a really long line " CONCAT/ & @\
+        "that's broken into multiple lines " CONCAT/ & @\
+        "to compile, and it is also a runon " CONCAT/ & @\
+        "sentence, which is bad grammar but a good" CONCAT/ & @\
+        " test of how the Attributes behave with long" CONCAT/ & @\
+        " values, yada yada yada!!!", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a long value character Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Get an Attribute which was not set @\
+    !------------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="NotHere", value=outI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET" @\
+      write(name, *) "Getting a nonexistent Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_I4 @\
+    !------------------------------------------------------------------------- @\
+      inI4 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_I4 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI4", value=inI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI4", value=outI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inI4==outI4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrI4", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_I4 Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultI4 = 7 @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI4", value=dfltoutI4, & @\
+        defaultvalue=defaultI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_I4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultI4==dfltoutI4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantI4", value=42, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant I4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantI4", value=outConstantI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant I4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(42==outConstantI4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_I4 list @\
+    !------------------------------------------------------------------------- @\
+      inI4l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_I4 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI4l", & @\
+        valueList=inI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I4l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI4l", & @\
+        valueList=outI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI4l==outI4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrI4l", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_I4l Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultI4l = (/4,2,7/) @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI4l", & @\
+        valueList=dfltoutI4l, defaultvalueList=defaultI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_I4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI4l==dfltoutI4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantI4l", & @\
+        valueList=(/1,2,3/), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant I4 list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantI4l", & @\
+        valueList=outConstantI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant I4 list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all((/1,2,3/)==outConstantI4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_I8 @\
+    !------------------------------------------------------------------------- @\
+      inI8 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_I8 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI8", value=inI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI8", value=outI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. (inI8==outI8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrI8", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_I8 Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultI8 = 7 @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI8", value=dfltoutI8, & @\
+        defaultvalue=defaultI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_I8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultI8==dfltoutI8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantI8", value=42, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant I8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      ! expect fail because this will default to I4 @\
+      call ESMF_AttributeGet(mname, name="ConstantI8", value=outConstantI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
+      write(name, *) "Getting a constant I8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_I8 list @\
+    !------------------------------------------------------------------------- @\
+      inI8l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_I8 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI8l", & @\
+        valueList=inI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I8l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI8l", & @\
+        valueList=outI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inI8l==outI8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrI8l", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_I8l Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultI8l = (/4,2,7/) @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrI8l", & @\
+        valueList=dfltoutI8l, defaultvalueList=defaultI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_I8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI8l==dfltoutI8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantI8l", & @\
+        valueList=(/1,2,3/), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant I8 list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      ! expect fail because this will default to I4 @\
+      call ESMF_AttributeGet(mname, name="ConstantI8l", & @\
+        valueList=outConstantI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
+      write(name, *) "Getting a constant I8 list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_R4 @\
+    !------------------------------------------------------------------------- @\
+      inR4 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_R4 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR4", value=inR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR4", value=outR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inR4==outR4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrR4", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_R4 Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultR4 = 7 @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR4", value=dfltoutR4, & @\
+        defaultvalue=defaultR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_R4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR4==dfltoutR4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantR4", value=4.2, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant R4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantR4", value=outConstantR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant R4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(4.2==outConstantR4), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_R4 list @\
+    !------------------------------------------------------------------------- @\
+      inR4l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_R4 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR4l", & @\
+        valueList=inR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R4l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR4l", & @\
+        valueList=outR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR4l==outR4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrR4l", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_R4l Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultR4l = (/7,8,9/) @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR4l", & @\
+        valueList=dfltoutR4l, defaultvalueList=defaultR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_R4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR4l==dfltoutR4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantR4l", & @\
+        valueList=(/1.1,2.2,3.3/), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant R4 list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantR4l", & @\
+        valueList=outConstantR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant R4 list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all((/1.1,2.2,3.3/)==outConstantR4l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+^endif @\
+       @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_R8 @\
+    !------------------------------------------------------------------------- @\
+      inR8 = 4 @\
+      !mtag_nex @\
+      ! Add an ESMF_R8 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR8", value=inR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get an ESMF_R8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8", value=outR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inR8==outR8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrR8", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_R8 Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultR8 = 7 @\
+      !mtag_nex @\
+      ! Get an ESMF_R8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8", value=dfltoutR8, & @\
+        defaultvalue=defaultR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_R8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR8==dfltoutR8), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_nex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantR8", value=4.2, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant R8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      ! expect fail because this will default to R4 @\
+      call ESMF_AttributeGet(mname, name="ConstantR8", value=outConstantR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
+      write(name, *) "Getting a constant R8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_R8 list @\
+    !------------------------------------------------------------------------- @\
+      inR8l = (/1,2,3/) @\
+      !mtag_nex @\
+      ! Add an ESMF_R8 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR8l", & @\
+        valueList=inR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R8l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8l", & @\
+        valueList=outR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="AttrR8l", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing an ESMF_R8l Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultR8l = (/7,8,9/) @\
+      !mtag_nex @\
+      ! Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8l", & @\
+        valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default ESMF_R8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR8l==dfltoutR8l), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      defaultR8lWrong = (/6,7,8,9/) @\
+      !mtag_nex @\
+      ! Get a R8 list default Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8l", & @\
+        valueList=dfltOutR8l, defaultvalueList=defaultR8lWrong, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a wrong sized default Attribute R8 list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
+        all (dfltOutR8l==defaultR8lWrong(1:size(DfltOutR8l))), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_nex @\
+      ! Add a constant numerical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantR8l", & @\
+        valueList=(/1,2,3/), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant R8 list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get a constant numerical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantR8l", & @\
+        valueList=outConstantR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE" @\
+      write(name, *) "Getting a constant R8 list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Character @\
+    !------------------------------------------------------------------------- @\
+      inChar = "charAttribute" @\
+      attrName = "char_" @\
+      !mtag_nex @\
+      ! Add a char Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name=attrname, value=inChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a char Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get a char Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name=attrname, value=outChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a char Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. (inChar==outChar), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name=attrname, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing a char Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+      defaultChar = "charAttributeDefault" @\
+      !mtag_nex @\
+      ! Get a default char Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name=attrname, value=dfltoutChar, & @\
+        defaultvalue=defaultChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a default char Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. (defaultChar==dfltoutChar), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+       @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_nex @\
+      ! Add a constant character Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantChar", value="imacharacter", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant character Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_nex @\
+      ! Get a constant character Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantChar", value=outConstantChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant character Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.("imacharacter"==outConstantChar), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Character list @\
+    !------------------------------------------------------------------------- @\
+      InCharl(1) = "Character String 1" @\
+      InCharl(2) = "Character String 2" @\
+      InCharl(3) = "Character String 3" @\
+      defaultCharl(1) = "Character String 5" @\
+      defaultCharl(2) = "Character String 6" @\
+      defaultCharl(3) = "Character String 7" @\
+      defaultCharlWrong(1) = "Character String 5" @\
+      defaultCharlWrong(2) = "Character String 6" @\
+      defaultCharlWrong(3) = "Character String 7" @\
+      defaultCharlWrong(4) = "Character String 8" @\
+ @\
+      !mtag_ex @\
+      ! Set a char list Attribute on mobj Test @\
+      call ESMF_AttributeSet(mname, name="Charl", & @\
+        valueList=InCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an Attribute char list on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+   @\
+      !mtag_ex @\
+      ! Get a char list Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname, name="Charl", & @\
+        valueList=OutCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting an Attribute char list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name="Charl", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing a Character list Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test, again @\
+      call ESMF_AttributeRemove(mname, name="Charl", rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND" @\
+      write(name, *) "Removing a Character list Attribute on mobj Test, again" @\
+      call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a char list default Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname, name="Charl", & @\
+        valueList=DfltOutCharl, defaultvalueList=defaultCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a default Attribute char list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (DfltOutCharl == defaultCharl), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a char list default Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname, name="Charl", & @\
+        valueList=DfltOutCharl, defaultvalueList=defaultCharlWrong, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a wrong sized default Attribute char list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
+        all (DfltOutCharl==defaultCharlWrong(1:size(DfltOutCharl))), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant character list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantCharList", & @\
+        valueList=(/"imachar1","imachar2","imachar3"/), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant character list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant character list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantCharList", & @\
+        valueList=outConstantCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant character list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. & @\
+                      all((/"imachar1","imachar2","imachar3"/)==outConstantCharl), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Logical @\
+    !------------------------------------------------------------------------- @\
+      attrname = "flag" @\
+      inLog = .true. @\
+ @\
+      !mtag_ex @\
+      ! Set a logical attribute - scalar version @\
+      call ESMF_AttributeSet(mname, name=attrname, value=inLog, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCESS" @\
+      write(name, *) "Setting Grid Attribute (type Fortran logical scalar)" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      outLog = .false. @\
+      !mtag_ex @\
+      ! Get a logical attribute - scalar version @\
+      call ESMF_AttributeGet(mname, name=attrname, value=outLog, rc=rc) @\
+      write(failMsg, *) "Did not return logical .TRUE." @\
+      write(name, *) "Getting Grid Attribute (type Fortran logical scalar)" @\
+      call ESMF_Test((rc == ESMF_SUCCESS).and.(inLog .eqv. outLog),   & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name=attrname, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing a logical Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      dfltoutLog = .false. @\
+      defaultLog = .true. @\
+      !mtag_ex @\
+      ! Get a logical attribute - scalar version @\
+      call ESMF_AttributeGet(mname, name=attrname, value=dfltoutLog, & @\
+        defaultvalue=defaultLog, rc=rc) @\
+      write(failMsg, *) "Did not return logical .TRUE." @\
+      write(name, *) "Getting Grid default Attribute (type Fortran logical scalar)" @\
+      call ESMF_Test((rc == ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant Logical Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantLogical", value=.true., rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant Logical Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant Logical Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantLogical", value=outConstantLogical, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant Logical Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(.true..eqv.outConstantLogical), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Logical list @\
+    !------------------------------------------------------------------------- @\
+      attrname = "flag grid" @\
+      inLogl = (/ .true., .false., .true. /) @\
+ @\
+      !mtag_ex @\
+      ! Set a logical attribute - grid version @\
+      call ESMF_AttributeSet(mname, name=attrname, & @\
+        valueList=inLogl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCESS" @\
+      write(name, *) "Setting Grid Attribute (type Fortran logical grid)" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      outLogl = .false. @\
+      itemCount = 4 @\
+      !mtag_ex @\
+      ! Get a logical attribute - grid version @\
+      call ESMF_AttributeGet(mname, name=attrname,  & @\
+        valueList=outLogl, rc=rc) @\
+      write(failMsg, *) "Did not return logical .TRUE." @\
+      write(name, *) "Getting Grid Attribute (type Fortran logical grid)" @\
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Remove an Attribute on mobj Test @\
+      call ESMF_AttributeRemove(mname, name=attrname, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Removing a logical list Attribute on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+   @\
+      dfltoutLogl = (/.false.,.false.,.false./) @\
+      defaultLogl = (/.true.,.true.,.true./) @\
+      !mtag_ex @\
+      ! Get a logical attribute - grid version @\
+      call ESMF_AttributeGet(mname, name=attrname, & @\
+        valueList=dfltoutLogl, defaultvalueList=defaultLogl, rc=rc) @\
+      write(failMsg, *) "Did not return logical .TRUE." @\
+      write(name, *) "Getting Grid default Attribute (type Fortran logical grid)" @\
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (defaultLogl .eqv. dfltoutLogl),   & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      defaultLoglWrong = (/.true.,.true.,.true.,.true./) @\
+      !mtag_ex @\
+      ! Get a logical list default Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname, name="Logl", & @\
+        valueList=dfltOutLogl, defaultvalueList=defaultLoglWrong, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a wrong sized default Attribute logical list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. & @\
+        all (dfltOutLogl.eqv.defaultLoglWrong(1:size(DfltOutLogl))), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Constant value from variable @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Add a constant Logical list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="ConstantLogicalList", & @\
+        valueList=(/.true.,.false.,.true./), rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a constant Logical list Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get a constant Logical list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="ConstantLogicalList", & @\
+        valueList=outConstantLogicall, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a constant Logical list Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. & @\
+                      all((/.true.,.false.,.true./).eqv.outConstantLogicall), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  WRONG SIZE ARRAY TESTS @\
+    !------------------------------------------------------------------------- @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  ESMF_R8 list  -  wrong size array @\
+    !------------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Add an ESMF_R8 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR8l", & @\
+        valueList=inR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R8l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      itemCount = 4 @\
+      !mtag_ex @\
+      ! Too Short Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8l", & @\
+        valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_ITEMSOFF" @\
+      write(name, *) "Getting an ESMF_R8l Attribute from mobj Test with short valueList" @\
+      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      itemCount = 3 @\
+      !mtag_ex @\
+      ! Too Long Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="AttrR8l", & @\
+        valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8l Attribute from mobj Test with long valueList" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. & @\
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Character list wrong size array @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Set a char list Attribute on mobj Test @\
+      call ESMF_AttributeSet(mname, name="Charl", & @\
+        valueList=InCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an Attribute char list on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+   @\
+      itemCount = 4 @\
+      !mtag_ex @\
+      ! Too Short Get a char list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="Charl", & @\
+        valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_ITEMSOFF" @\
+      write(name, *) "Getting an Attribute char list from mobj test with short valueList" @\
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      itemCount = 3 @\
+      !mtag_ex @\
+      ! Too Long Get a char list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name="Charl", & @\
+        valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a default Attribute char list from mobj test with long valueList" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. & @\
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !------------------------------------------------------------------------- @\
+    !  Logical wrong size array @\
+    !------------------------------------------------------------------------- @\
+      !mtag_ex @\
+      ! Set a logical attribute - grid version @\
+      call ESMF_AttributeSet(mname, name=attrname, & @\
+        valueList=inLogl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCESS" @\
+      write(name, *) "Setting an Attribute logical list on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      outLogl = .false. @\
+      !mtag_ex @\
+      ! Too Short Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name=attrname,  & @\
+        valueList=outLoglLong(1:2), rc=rc) @\
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_ITEMSOFF" @\
+      write(name, *) "Getting an logical list Attribute from mobj Test with short valueList" @\
+      call ESMF_Test((rc==ESMC_RC_ATTR_ITEMSOFF), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      itemCount = 3 @\
+      !mtag_ex @\
+      ! Too Long Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname, name=attrname, & @\
+        valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc) @\
+      write(failMsg, *) "Did not return logical .TRUE." @\
+      write(name, *) "Getting an logical list Attribute from mobj Test with long valueList" @\
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl .eqv. outLoglLong(4:6)) .and. & @\
+                    itemCount==3, name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+    !-------------------------------------------------------------------------  @\
+    !  Attribute Info @\
+    !------------------------------------------------------------------------- @\
+ @\
+      attrname="Character_name" @\
+      attrvalue="stuff" @\
+      ! Set a Character Attribute on a mobj to test the get info calls @\
+      call ESMF_AttributeSet(mname, name=attrname, value=attrvalue, rc=rc) @\
+ @\
+      !mtag_ex @\
+      ! Get the Attribute count from a mobj Test @\
+      call ESMF_AttributeGet(mname, count=count, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting the Attribute count from a mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(count.ge.0), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get Attribute info by name from a mobj Test @\
+      call ESMF_AttributeGet(mname, name=attrname, typekind=attrTK, & @\
+        itemcount=items, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting Attribute info by name from a mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                                       .and.(attrTK==ESMF_TYPEKIND_CHARACTER) & @\
+                                       .and.(items==1), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag_ex @\
+      ! Get Attribute info by num from a mobj Test @\
+      call ESMF_AttributeGet(mname, attributeIndex=count, name=attrnameOut, & @\
+        typekind=attrTK, itemcount=items, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting Attribute info by num from a mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(attrname==attrnameOut) & @\
+                                       .and.(attrTK==ESMF_TYPEKIND_CHARACTER) & @\
+                                       .and.(items==1), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+^endif @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------

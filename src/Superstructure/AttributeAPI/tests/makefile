@@ -14,6 +14,7 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 			ESMF_AttPackGridUTest.F90 \
 			ESMF_AttPackSciCompUTest.F90 \
 			ESMF_AttPackStateUTest.F90 \
+			ESMF_AttributeGridUTest.F90
 
 .PRECIOUS: %.F90
 
