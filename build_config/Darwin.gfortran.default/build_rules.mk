@@ -10,11 +10,6 @@ ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = g++
 
 ############################################################
-# See if g++ is really clang
-#
-ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXDEFAULT) --version))
-
-############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -93,6 +88,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# See if g++ is really clang
+#
+ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
 
 ############################################################
 # Gfortran runtime library on Darwin does not currently seem thread-safe

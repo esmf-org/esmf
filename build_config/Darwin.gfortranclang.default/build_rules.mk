@@ -1,13 +1,13 @@
 # $Id$
 #
-# Darwin.intelgcc.default
+# Darwin.gfortran.default
 #
 
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = ifort
-ESMF_CXXDEFAULT         = g++
+ESMF_F90DEFAULT         = gfortran
+ESMF_CXXDEFAULT         = clang
 
 ############################################################
 # Default MPI setting.
@@ -41,15 +41,15 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),intelmpi)
-# IntelMPI -------------------------------------------------
-ESMF_F90DEFAULT         = mpiifort
+ifeq ($(ESMF_COMM),mvapich2)
+# Mvapich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),lam)
-# LAM (assumed to be built with ifort) ---------------------
+# LAM (assumed to be built with gfortran) ----------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
@@ -86,18 +86,36 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# See if g++ is really clang
-#
-ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
-
-############################################################
-# Intel runtime library on Darwin does not currently seem thread-safe
+# Gfortran runtime library on Darwin does not currently seem thread-safe
 #
 ESMF_PTHREADS := OFF
+
+############################################################
+# Fortran symbol convention
+#
+ifeq ($(ESMF_FORTRANSYMBOLS),default)
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
+ESMF_F90COMPILEOPTS       += -fsecond-underscore
+ESMF_F90LINKOPTS          += -fsecond-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+else
+$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
+endif
+endif
+endif
 
 ############################################################
 # Construct the ABISTRING
@@ -139,56 +157,50 @@ ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
-ifeq ($(ESMF_ABISTRING),ia64_64)
-ESMF_CXXCOMPILEOPTS       += -size_lp64
-ESMF_CXXLINKOPTS          += -size_lp64
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
-endif
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -threads
+ESMF_F90COMPILEOPTS += -pthread
 ESMF_CXXCOMPILEOPTS += -pthread
-ESMF_F90LINKOPTS    += -threads
+ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
-ESMF_SL_LIBOPTS     += -pthread
 endif
 
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ((ESMF_CLANGSTR), clang)
-ESMF_OPENMP_F90COMPILEOPTS += -openmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -openmp
-ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-else
 ESMF_OPENMP=OFF
-endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
-ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
-ESMF_F90COMPILEFIXCPP    = -fpp
+ESMF_F90COMPILEFREENOCPP = -ffree-form
+ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
-# Determine where ifort's libraries are located
+# Set unlimited line length limit for free format files
 #
-ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
-# Link against GCC's stdc++ library (because g++ is used)
+# Determine where clang's libraries are located
 #
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
+
+############################################################
+# Determine where gfortran's libraries are located
+#
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+endif
+ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -199,14 +211,15 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lm 
+ESMF_F90LINKLIBS += -lstdc++ -lc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
+ESMF_CXXLINKLIBS += -lgfortran
 
 ############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+# Shared library options
+ESMF_SL_LIBOPTS  += -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
