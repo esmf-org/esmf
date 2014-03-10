@@ -3,7 +3,7 @@
 *~
 *.orig
 *.log
-#.Log
+ESMF_LogFile
 PET*.
 *.stdout
 *.out
