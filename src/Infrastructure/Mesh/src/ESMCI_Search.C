@@ -780,7 +780,7 @@ static int found_func_elems(void *c, void *y) {
     
     const MeshObj &meshB_elem = *meshB_elist[p];
     
-    BBox meshB_bbox(meshBcoord_field, meshB_elem);
+    BBox meshB_bbox(meshBcoord_field, meshB_elem, normexp);
 
     double min[3], max[3];       
     min[0] = meshB_bbox.getMin()[0] - stol;
