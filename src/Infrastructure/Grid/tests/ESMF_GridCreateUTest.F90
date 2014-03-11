@@ -1742,6 +1742,8 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+#ifndef ESMF_NO_GREATER_THAN_4D
+  
   write(name, *) "Test ArrayCreateFromGrid with non-default ungriddedBounds"
   write(failMsg, *) "Incorrect result"
 
@@ -1787,6 +1789,11 @@ program ESMF_GridCreateUTest
   ! destroy grid
   call ESMF_ArrayDestroy(array, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+#else
+  rc = ESMF_SUCCESS
+  write(name, *) "Skipped test because: ESMF_NO_GREATER_THAN_4D"
+#endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
