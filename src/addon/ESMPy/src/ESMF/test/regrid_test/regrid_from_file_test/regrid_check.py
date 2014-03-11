@@ -295,7 +295,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # get the destination mask
     if dst_is_mesh:
-        dst_mask = np.copy(dst_coords)
+        dst_mask = np.copy(dst_coords[:,0])
         dst_mask[...] = 1
     else:
         #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
@@ -303,7 +303,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
         dst_mask = dstgrid.get_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
     print 'dst_mask.shape = ',dst_mask.shape
     print 'dst_mask = ', dst_mask
-
+    
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', regridmethod)
     dstfield = create_field(dstgrid, 'dstfield', regridmethod)
