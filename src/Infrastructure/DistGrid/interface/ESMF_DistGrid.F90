@@ -58,7 +58,9 @@ module ESMF_DistGridMod
 
   ! Fortran type to hold pointer to C++ object
   type ESMF_DistGrid
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE

@@ -55,7 +55,9 @@ module ESMF_DELayoutMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_DELayout
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE

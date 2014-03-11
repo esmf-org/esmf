@@ -57,7 +57,9 @@
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_TimeInterval
+#ifndef ESMF_NO_SEQUENCE
         sequence
+#endif
         private                           !   (members opaque on Fortran side)
         ! allocate enough memory for the TimeInterval class data
         ! (set in C++ side) in 8 byte units: 

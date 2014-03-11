@@ -50,7 +50,9 @@
 !     !   or an actual data item - FieldBundle, Field, Array, or State. 
 !
       type ESMF_StateItem_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: ot
       end type
@@ -78,7 +80,9 @@
 !     !   to be created by the Component.
 !
       type ESMF_NeededFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: needed
       end type
@@ -91,7 +95,9 @@
 !     ! ESMF_ReadyFlag
 !
       type ESMF_ReadyFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: ready
       end type
@@ -106,7 +112,9 @@
 !     ! ESMF_ReqForRestartFlag
 !
       type ESMF_ReqForRestartFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: required4restart
       end type
@@ -120,7 +128,9 @@
 !     ! ESMF_ValidFlag
 !
       type ESMF_ValidFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: valid
       end type
@@ -142,7 +152,9 @@
 
       type ESMF_DataHolder
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 #endif
       !private
           type(ESMF_Field)        :: fp 
@@ -162,7 +174,9 @@
 
       type ESMF_StateItem
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 #endif
       !private
         type(ESMF_DataHolder) :: datap
@@ -189,7 +203,9 @@
 
       type ESMF_StateItemWrap
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 #endif
       !private
         type(ESMF_StateItem), pointer  :: si
@@ -200,7 +216,9 @@
 !     !   Enumerated value for storing Import or Export State type.
 !
       type ESMF_StateIntent_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
          integer :: state
       end type
@@ -218,7 +236,9 @@
 
       type ESMF_StateClass
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 #endif
       !private
         type(ESMF_Base) :: base

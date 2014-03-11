@@ -66,7 +66,9 @@ module ESMF_MeshMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_Mesh
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
     type(ESMF_Pointer) :: this
     type(ESMF_DistGrid) :: nodal_distgrid
     type(ESMF_DistGrid) :: element_distgrid
@@ -97,7 +99,9 @@ module ESMF_MeshMod
   end type
 
   type ESMF_MeshElement
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
     integer :: meshelement
   end type
@@ -118,7 +122,9 @@ module ESMF_MeshMod
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
 
   type ESMF_MeshLoc
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
     integer :: meshloc
   end type

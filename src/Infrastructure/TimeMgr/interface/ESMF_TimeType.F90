@@ -57,7 +57,9 @@
 !     ! Equivalent sequence and kind to C++:
 
       type ESMF_Time
+#ifndef ESMF_NO_SEQUENCE
         sequence
+#endif
         private                            !  (members opaque on Fortran side)
 #ifdef ESMF_NO_INITIALIZERS
         integer(ESMF_KIND_I8), dimension(6) :: shallowMemory
