@@ -583,7 +583,7 @@
 ! create a 7D Field from the 5D Grid and the 7D Fortran data array with
 ! other assimilating parameters.
 !EOE
-
+#ifndef ESMF_NO_GREATER_THAN_4D
 !BOC
     ! create a 5d distgrid
     distgrid5d = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), &
@@ -615,6 +615,7 @@
         rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
+#endif
 !BOE
 !  A user can allocate the Fortran array in a different manner using the lower and
 !  upper bounds returned from FieldGet through the optional totalLBound and totalUBound
@@ -622,6 +623,7 @@
 !  and allocate the Fortran array with this approach. In this scheme, indexing the
 !  Fortran array is sometimes more convenient than using the shape directly.
 !EOE
+#ifndef ESMF_NO_GREATER_THAN_4D
 !BOC
     call ESMF_GridGetFieldBounds(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
         ungriddedUBound=(/4,5/), &
@@ -643,7 +645,7 @@
         rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
-
+#endif
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
