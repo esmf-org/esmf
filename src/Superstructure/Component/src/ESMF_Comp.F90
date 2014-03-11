@@ -62,7 +62,9 @@ module ESMF_CompMod
 ! ! ESMF_CompType_Flag
 !
   type ESMF_CompType_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     private
     integer :: ctype
   end type
@@ -76,7 +78,9 @@ module ESMF_CompMod
 ! ! ESMF Method Type
 !
   type ESMF_Method_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     private
     integer :: method
   end type
@@ -103,7 +107,9 @@ module ESMF_CompMod
 ! ! ESMF_CompStatus
 !
   type ESMF_CompStatus
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 !    private
     logical :: configIsPresent
     logical :: clockIsPresent
@@ -139,7 +145,9 @@ module ESMF_CompMod
 ! ! ESMF_CompTunnel
 
   type ESMF_CompTunnel
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private
     type(ESMF_Pointer) :: this
     ! only use internally -> no init macro!
@@ -149,7 +157,9 @@ module ESMF_CompMod
 ! ! wrapper for Component objects going across F90/C++ boundary
   type ESMF_CWrap
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
@@ -163,7 +173,9 @@ module ESMF_CompMod
 
   type ESMF_CompClass
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     !private
     type(ESMF_Pointer)  :: ftable           ! C++ ftable pointer - MUST BE FIRST
@@ -214,7 +226,9 @@ module ESMF_CompMod
 
   type ESMF_CplComp
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
@@ -228,7 +242,9 @@ module ESMF_CompMod
 
   type ESMF_GridComp
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
@@ -242,7 +258,9 @@ module ESMF_CompMod
 
   type ESMF_SciComp
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp

@@ -62,7 +62,9 @@ private
 
 !     ! ESMF_LogMsg_Flag
 type ESMF_LogMsg_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     integer      :: mtype
 end type
 
@@ -107,7 +109,9 @@ type(ESMF_LogMsg_Flag), parameter :: &
 
 !     ! ESMF_LogKind_Flag
 type ESMF_LogKind_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     integer      :: ftype
 end type
     
@@ -120,7 +124,9 @@ type(ESMF_LogKind_Flag), parameter :: &
 !     ! Log Entry                            
 type ESMF_LogEntry
     private
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     integer             ::  h,m,s,ms
     integer             ::  line
     logical             ::  methodflag,lineflag,fileflag
@@ -134,7 +140,9 @@ end type ESMF_LogEntry
 
 type ESMF_Log
     private
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #ifndef ESMF_NO_INITIALIZERS
     integer                                         ::  logTableIndex = 0
 #else
@@ -145,8 +153,9 @@ end type ESMF_Log
 
 type ESMF_LogPrivate
     private
-    sequence        
-     
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
     integer                                         ::  maxElements
     integer                                         ::  fIndex
     integer                                         ::  unitNumber

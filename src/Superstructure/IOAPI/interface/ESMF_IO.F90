@@ -90,7 +90,9 @@
 !                             ESMF_IO_RWTYPE_TRUNCATE    = ESMF_IORWType(5)
 
       type ESMF_IO
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         type(ESMF_Pointer) :: this
         ESMF_INIT_DECLARE

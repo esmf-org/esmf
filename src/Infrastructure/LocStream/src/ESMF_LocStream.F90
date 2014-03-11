@@ -72,7 +72,9 @@ module ESMF_LocStreamMod
 ! ! Definition of the LocStream class.
 
   type ESMF_LocStreamType
+#ifndef ESMF_NO_SEQUENCE
      sequence
+#endif
 
     !private
      type (ESMF_Base)                     :: base             ! base class object
@@ -95,7 +97,9 @@ module ESMF_LocStreamMod
 ! ! calling languages.
 
   type ESMF_LocStream
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private       
     type (ESMF_LocStreamType), pointer :: lstypep
     ESMF_INIT_DECLARE

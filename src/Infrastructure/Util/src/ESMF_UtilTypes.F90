@@ -124,7 +124,9 @@
 !     !  constants MUST match corresponding values in ../include/ESMCI_Util.h
 
       type ESMF_Status
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: status
       end type
@@ -147,7 +149,9 @@
 !     !  constants MUST match corresponding values in ../include/ESMC_Util.h
 
       type ESMF_Pointer
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
 #if (ESMC_POINTER_SIZE == 4)
           integer(selected_int_kind( 9)) :: ptr
@@ -179,7 +183,9 @@
 !     !  constants MUST match corresponding values in ../include/ESMC_Util.h
 
       type ESMF_TypeKind_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       ! TODO: can this be made private now?
       !!private
         integer :: dkind
@@ -252,7 +258,9 @@
 !    ! actual data values will always be accessed on the C++ side.
 
       type ESMF_DataValue
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: pad
       end type
@@ -262,7 +270,9 @@
 !     ! for associative lookup name-pointer pairs.
 
       type ESMF_MapPtr
+#ifndef ESMF_NO_SEQUENCE
         sequence
+#endif
         !private
         type(ESMF_Pointer) :: this
         ! only used internally -> no init macro!
@@ -276,7 +286,9 @@
 !    ! with the C++ version!!
 
       type ESMF_ObjectID
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
           integer :: objectID
           character (len=32) :: objectName
@@ -340,7 +352,9 @@
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
 
       type ESMF_Logical
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -355,7 +369,9 @@
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
 
       type ESMF_InquireFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           type(ESMF_Logical) :: flag
       end type
@@ -370,7 +386,9 @@
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
 
       type ESMF_Reduce_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -384,7 +402,9 @@
 !     ! Typed blocking/non-blocking flag
 
       type ESMF_Sync_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -399,7 +419,9 @@
 !     ! Typed context flag
 
       type ESMF_Context_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -413,7 +435,9 @@
 !     ! Typed termination flag
 
       type ESMF_End_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -428,7 +452,9 @@
 !     ! Typed DE pinning flag
 
       type ESMF_Pin_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -442,7 +468,9 @@
 !     ! Direction type
 
       type ESMF_Direction_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: value
       end type
@@ -456,7 +484,9 @@
 !     ! PIO Format type
 
       type ESMF_IOFmt_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: io_type
       end type
@@ -473,7 +503,9 @@
 !     ! Interface flag for setting index bounds
 
       type ESMF_Index_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: i_type
       end type
@@ -489,7 +521,9 @@
 !     ! Interface flag for setting index bounds
 
       type ESMF_StartRegion_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         integer :: i_type
       end type
@@ -504,7 +538,9 @@
 !     ! Interface flag for setting index bounds
 
       type ESMF_Region_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         integer :: i_type
       end type
@@ -520,7 +556,9 @@
 !     ! Interface flag for setting communication options
 
       type ESMF_RouteSync_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         integer :: i_type
       end type
@@ -538,7 +576,9 @@
 !     ! Interface flag for Attribute write methods
 
       type ESMF_AttWriteFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: value
       end type
@@ -553,7 +593,9 @@
 !     ! Interface flag for Attribute reconcile
 
       type ESMF_AttReconcileFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: value
       end type
@@ -568,7 +610,9 @@
 !     ! Interface flag for Attribute copy
 
       type ESMF_Copy_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: value
       end type
@@ -584,7 +628,9 @@
 !     ! Interface flag for Attribute copy
 
       type ESMF_AttGetCountFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: value
       end type
@@ -601,7 +647,9 @@
 !     ! Interface flag for Attribute tree
 
       type ESMF_AttTreeFlag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       !private
         integer :: value
       end type
@@ -616,7 +664,9 @@
 !
       ! What to do when a point can't be mapped
       type ESMF_UnmappedAction_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 !  private
          integer :: unmappedaction
       end type
@@ -627,7 +677,9 @@
 
 !------------------------------------------------------------------------------
       type ESMF_RegridMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 !  private
          integer :: regridmethod
       end type
@@ -644,7 +696,9 @@
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 !  private
          integer :: linetype
       end type
@@ -657,7 +711,9 @@
 !------------------------------------------------------------------------------
 
       type ESMF_PoleMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 !  private
          integer :: polemethod
       end type
@@ -673,7 +729,9 @@
 !
 !
       type ESMF_RegridConserve
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
 !  private
          integer :: regridconserve
       end type
@@ -702,7 +760,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_CoordSys_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: coordsys
   end type
@@ -726,7 +786,9 @@
 !------------------------------------------------------------------------------
 !
   type ESMF_FileFormat_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
  ! private
     integer :: fileformat
   end type
@@ -744,7 +806,9 @@
 !     ! File status type (for ESMF_xxxWrite status input)
 
       type ESMF_FileStatus_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: status_type
       end type
@@ -758,7 +822,9 @@
 !------------------------------------------------------------------------------
 !
       type ESMF_ItemOrder_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: flag
       end type
@@ -770,7 +836,9 @@
 !------------------------------------------------------------------------------
 !
       type ESMF_TermOrder_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: flag
       end type
@@ -783,7 +851,9 @@
 !------------------------------------------------------------------------------
 !
       type ESMF_MeshOp_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
           integer :: flag
       end type
@@ -1024,7 +1094,9 @@ end interface
 ! ! ESMF_MethodTable
 
   type ESMF_MethodTable
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private
     type(ESMF_Pointer) :: this
     ! only use internally -> no init macro!

@@ -70,7 +70,9 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 
   type ESMF_FieldBundleStatus
-    sequence
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     integer :: status
   end type
 
@@ -84,7 +86,9 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 
   type ESMF_FieldBundleType
-    sequence
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     type(ESMF_Base)              :: base      ! base class object
     type(ESMF_GeomBase)          :: geombase  ! base class object
     type(ESMF_Container)         :: container ! internal storage implementation
@@ -95,7 +99,9 @@ module ESMF_FieldBundleMod
 
   ! F90 class type to hold pointer to FieldBundleType
   type ESMF_FieldBundle
-    sequence
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     type(ESMF_FieldBundleType), pointer :: this
     ESMF_INIT_DECLARE
   end type

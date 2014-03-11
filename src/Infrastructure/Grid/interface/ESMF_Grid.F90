@@ -69,7 +69,9 @@
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_Grid
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
   end type
@@ -80,7 +82,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_GridStatus_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: gridstatus
   end type
@@ -99,7 +103,9 @@
 ! There is an assignment operator for the flag, please check that
 ! if you are making changes to this flag.
   type ESMF_GridItem_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: gridItem
   end type
@@ -118,7 +124,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_GridConn_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: gridconn
   end type
@@ -135,7 +143,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_PoleKind_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: polekind
   end type
@@ -152,7 +162,9 @@
 !------------------------------------------------------------------------------
 ! TODO: eventually move this elsewhere (e.g. Util)
   type ESMF_DefaultFlag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: defaultflag
   end type
@@ -162,7 +174,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_GridDecompType
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: griddecomptype
   end type
@@ -184,7 +198,9 @@ integer,parameter :: ESMF_DIM_ARB = -1
 !
 !------------------------------------------------------------------------------
   type ESMF_GridMatch_Flag
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
 !  private
      integer :: gridmatch
   end type

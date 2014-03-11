@@ -54,7 +54,9 @@
 !     ! Fortran "enum" type to match C++ ESMC_AlarmList_Flag enum
 
       type ESMF_AlarmList_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         integer :: alarmlistflag
       end type
@@ -69,7 +71,9 @@
 !     ! ESMF_Alarm
 !
       type ESMF_Alarm
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         type(ESMF_Pointer) :: this
         ESMF_INIT_DECLARE

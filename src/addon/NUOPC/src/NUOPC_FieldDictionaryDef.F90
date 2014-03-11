@@ -21,7 +21,6 @@ module NUOPC_FieldDictionaryDef
   private
   
   type NUOPC_FieldDictionaryEntryS
-    sequence
     character(ESMF_MAXSTR)          :: standardName
     character(ESMF_MAXSTR)          :: canonicalUnits
     character(ESMF_MAXSTR), pointer :: connectedOptions(:)
@@ -30,7 +29,6 @@ module NUOPC_FieldDictionaryDef
   end type
   
   type NUOPC_FieldDictionaryEntry
-    sequence
     type(NUOPC_FieldDictionaryEntryS), pointer :: wrap
   end type
 

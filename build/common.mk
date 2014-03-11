@@ -228,6 +228,11 @@ ifndef ESMF_ETCDIR
 export ESMF_ETCDIR = default
 endif
 
+ifndef ESMF_MOAB
+export ESMF_MOAB = default
+endif
+
+
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
 # for others, look for this string and override it.
@@ -360,14 +365,6 @@ ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
 
-ifndef $(ESMF_MOAB)
-ifneq ($(ESMF_OS),MinGW)
-ifneq ($(ESMF_OS),Cygwin)
-export ESMF_MOAB=internal
-endif
-endif
-endif
-
 ifneq ($(ESMF_ARRAY_LITE),TRUE)
 export ESMF_ARRAY_LITE = FALSE
 endif
@@ -410,6 +407,17 @@ endif
 
 ifeq ($(ESMF_ETCDIR),default)
 export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
+endif
+
+
+ifeq ($(ESMF_MOAB),default)
+export ESMF_MOAB = internal
+endif
+ifeq ($(ESMF_OS),MinGW)
+export ESMF_MOAB = OFF
+endif
+ifeq ($(ESMF_OS),Cygwin)
+export ESMF_MOAB = OFF
 endif
 
 #-------------------------------------------------------------------------------
@@ -1084,7 +1092,7 @@ ESMF_MOAB_LIBS = -lMOAB
 endif
 endif
 
-ifdef ESMF_MOAB
+ifneq ($(ESMF_MOAB),OFF)
 CPPFLAGS                += -DESMF_MOAB=1
 ifdef ESMF_MOAB_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_MOAB_INCLUDE)

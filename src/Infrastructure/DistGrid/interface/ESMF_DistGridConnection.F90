@@ -45,7 +45,9 @@ module ESMF_DistGridConnectionMod
 ! ! ESMF_DistGridConnection
 
   type ESMF_DistGridConnection
-    sequence
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     private
     integer :: connection(2*7+2)  ! reserve for maximum dimCount
     integer :: elementCount       ! number of actual elements in connection

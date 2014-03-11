@@ -43,7 +43,9 @@ module ESMF_F90InterfaceMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_InterfaceInt
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_Pointer) :: this = ESMF_NULL_POINTER

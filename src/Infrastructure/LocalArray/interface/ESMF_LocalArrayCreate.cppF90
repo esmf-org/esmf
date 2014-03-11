@@ -67,7 +67,9 @@ module ESMF_LocalArrayCreateMod
   !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
   type ESMF_DataCopy_Flag
+^ifndef ESMF_NO_SEQUENCE
   sequence
+^endif
   private
     integer :: datacopyflag
   end type
@@ -86,7 +88,9 @@ module ESMF_LocalArrayCreateMod
   !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
   type, public :: ESMF_LocalArrayOrigin
+^ifndef ESMF_NO_SEQUENCE
   sequence
+^endif
   private
     integer :: origin
   end type
@@ -102,7 +106,9 @@ module ESMF_LocalArrayCreateMod
   ! the class structure.
 
   type ESMF_LocalArray
+^ifndef ESMF_NO_SEQUENCE
   sequence
+^endif
   !private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE

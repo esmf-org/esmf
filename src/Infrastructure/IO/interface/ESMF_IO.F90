@@ -94,7 +94,9 @@ module ESMF_IOMod
 
   ! Fortran class type to hold pointer to C++ object
   type ESMF_IO
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE

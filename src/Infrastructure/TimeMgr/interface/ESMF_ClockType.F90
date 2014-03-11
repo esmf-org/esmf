@@ -52,7 +52,9 @@
 !     ! ESMF_Clock
 !
       type ESMF_Clock
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         type(ESMF_Pointer) :: this
         ESMF_INIT_DECLARE

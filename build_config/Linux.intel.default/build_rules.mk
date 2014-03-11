@@ -130,6 +130,9 @@ endif
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := x86_64_small
 endif
+ifeq ($(ESMF_ABI),mic)
+ESMF_ABISTRING := x86_64_mic
+endif
 endif
 
 ############################################################
@@ -152,6 +155,15 @@ ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_mic)
+ESMF_CXXCOMPILEOPTS       += -mmic
+ESMF_CXXLINKOPTS          += -mmic
+ESMF_F90COMPILEOPTS       += -mmic
+ESMF_F90LINKOPTS          += -mmic
+ESMF_SL_LIBOPTS           += -mmic
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_SEQUENCE
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SEQUENCE
 endif
 ifeq ($(ESMF_ABISTRING),ia64_64)
 ESMF_CXXCOMPILEOPTS       += -size_lp64

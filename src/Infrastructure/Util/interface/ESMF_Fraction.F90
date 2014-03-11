@@ -53,7 +53,9 @@
 !     !  all dereferencing within class is performed by C++ implementation
 
       type ESMF_Fraction
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private  ! (members opaque on Fortran side)
         integer(ESMF_KIND_I8) :: shallowMemory(3)
         ESMF_INIT_DECLARE

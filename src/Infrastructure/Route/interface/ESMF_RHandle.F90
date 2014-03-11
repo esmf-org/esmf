@@ -58,7 +58,9 @@ module ESMF_RHandleMod
 ! !  ESMF_RouteHandle
 !
   type ESMF_RouteHandle
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     private
     type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
     ESMF_INIT_DECLARE
