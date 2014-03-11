@@ -66,8 +66,8 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
         lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER)
         print 'get_grid_coords_from_esmc returned lons = ', lons
         print 'get_grid_coords_from_esmc returned lats = ', lats
-        lats_flat = lats.ravel()
-        lons_flat = lons.ravel()
+        lats_flat = lats.ravel(order='F')
+        lons_flat = lons.ravel(order='F')
         coords = np.array([[lons_flat[i],lats_flat[i]] for i in range(len(lats_flat))])
     return coords
         
