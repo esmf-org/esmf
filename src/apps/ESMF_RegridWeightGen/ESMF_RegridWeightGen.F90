@@ -25,6 +25,8 @@ program ESMF_RegridWeightGenApp
   include "mpif.h"
 #endif
 
+  integer, parameter :: MAXNAMELEN = 64
+
   integer            :: rc
   type(ESMF_VM)      :: vm
   integer            :: PetNo, PetCnt
@@ -36,8 +38,8 @@ program ESMF_RegridWeightGenApp
   integer            :: poleptrs
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
-  character(len=256) :: commandbuf1(3)
-  character(len=64)  :: commandbuf3(8)
+  character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
+  character(len=MAXNAMELEN)  :: commandbuf3(8)
   integer            :: commandbuf2(15)
   integer            :: ind, pos
   logical            :: largeFileFlag
@@ -47,15 +49,15 @@ program ESMF_RegridWeightGenApp
   logical            :: srcMissingValue, dstMissingValue
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
   logical            :: useSrcCoordVar, useDstCoordVar
-  character(len=64) :: srcvarname, dstvarname
-  character(len=64) :: srcCoordNames(2), dstCoordNames(2)
+  character(len=MAXNAMELEN) :: srcvarname, dstvarname
+  character(len=MAXNAMELEN) :: srcCoordNames(2), dstCoordNames(2)
   character(len=256) :: argStr
   logical            :: terminateProg
   !real(ESMF_KIND_R8) :: starttime, endtime
   logical            :: checkFlag
   type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
-  character(len=80)  :: argvalue
+  character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i
   
   terminateProg = .false.
@@ -65,12 +67,13 @@ program ESMF_RegridWeightGenApp
   call MPI_Init(rc)
   if (rc /= MPI_SUCCESS) then
       write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
-      call MPI_Finalize(rc)
+      stop 1
   endif
   call MPI_Comm_rank(MPI_COMM_WORLD, PetNo, rc) 
   if (rc /= MPI_SUCCESS) then
       write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
       call MPI_Finalize(rc)
+      stop 1
   endif
 #else
   PetNo = 0
@@ -557,7 +560,7 @@ program ESMF_RegridWeightGenApp
       if (checkFlag) commandbuf2(15) = 1 
     endif 
 
-    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (terminateProg) then
@@ -578,12 +581,12 @@ program ESMF_RegridWeightGenApp
     commandbuf3(8)=dstCoordNames(2)
 
     ! Broadcast the command line arguments to all the PETs
-    call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-    call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
   else
-    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (commandbuf2(1) == -9999) then
@@ -671,9 +674,9 @@ program ESMF_RegridWeightGenApp
     else
       checkFlag = .false.
     endif
-    call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-    call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     srcfile = commandbuf1(1)
     dstfile = commandbuf1(2)
