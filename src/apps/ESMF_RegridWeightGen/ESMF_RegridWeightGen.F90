@@ -80,15 +80,11 @@ program ESMF_RegridWeightGenApp
 #endif
 
   if (PetNo == 0) then
-      call ESMF_UtilGetArgC (count=count)
       logflag = ESMF_LOGKIND_MULTI
-      do i=1,count
-        call ESMF_UtilGetArg (argindex=i, argvalue=argvalue, rc=rc)
-        if (trim(argvalue) == '--no_errorlog') then
-          logflag = ESMF_LOGKIND_NONE 
-          exit    
-        endif
-      enddo
+      call ESMF_UtilGetArgIndex ('--no_errorlog', argindex=ind)
+      if (ind > 0) then
+        logflag = ESMF_LOGKIND_NONE 
+      end if
       msgbuf(1) = logflag
    endif
 
