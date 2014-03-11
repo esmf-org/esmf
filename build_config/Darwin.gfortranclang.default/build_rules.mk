@@ -187,6 +187,12 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Determine where clang's libraries are located
 #
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
