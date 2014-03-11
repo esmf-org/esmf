@@ -53,7 +53,9 @@
 !
 !------------------------------------------------------------------------------
   type ESMF_XGridGeomType_Flag
-   sequence
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
      integer :: type
   end type
 
@@ -70,7 +72,9 @@
 
   ! F90 class type to hold pointer to object
   type ESMF_XGridGeomBaseClass
-  sequence    
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     type(ESMF_XGridGeomType_Flag) :: type
     type(ESMF_StaggerLoc) :: staggerloc
     type(ESMF_Grid) :: grid
@@ -86,7 +90,9 @@
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_XGridGeomBase
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
     
     type(ESMF_XGridGeomBaseClass),pointer :: gbcp
 

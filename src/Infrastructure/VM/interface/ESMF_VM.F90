@@ -48,7 +48,9 @@ module ESMF_VMMod
 !     ! ESMF_CommHandle
 !      
   type ESMF_CommHandle
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
@@ -58,7 +60,9 @@ module ESMF_VMMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VM
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
@@ -66,7 +70,9 @@ module ESMF_VMMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VMPlan
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE
@@ -74,7 +80,9 @@ module ESMF_VMMod
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VMId
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   private
     type(ESMF_Pointer) :: this
   end type

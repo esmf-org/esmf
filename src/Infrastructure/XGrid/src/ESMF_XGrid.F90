@@ -67,7 +67,9 @@ module ESMF_XGridMod
 
   ! defines the side relative to an XGrid, SIDEA, SIDEB, or BALANCED
   type ESMF_XGridSide_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     integer                     :: side
   end type ESMF_XGridSide_Flag
 
@@ -78,14 +80,18 @@ module ESMF_XGridMod
 
   ! package the collapsed indices and weights matrices
   type ESMF_XGridSpec
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     integer, pointer            :: factorIndexList(:,:) => null()     ! factorIndexList
     real(ESMF_KIND_R8), pointer :: factorList(:) => null()  ! factorList
   end type ESMF_XGridSpec
 
   ! the XGridType definition
   type ESMF_XGridType
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     type(ESMF_Base)                        :: base                      ! base class object
     type(ESMF_DistGrid)                    :: distgridM                 ! load balanced distgrid in the middle
     type(ESMF_DistGrid), pointer           :: distgridA(:) => null()    ! A side distgrid
@@ -119,7 +125,9 @@ module ESMF_XGridMod
 ! ! calling languages.
 
   type ESMF_XGrid
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     type (ESMF_XGridType), pointer :: xgtypep
     ESMF_INIT_DECLARE
   end type

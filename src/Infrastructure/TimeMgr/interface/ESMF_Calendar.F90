@@ -62,7 +62,9 @@
       !       to 0 (to detect unset) or possibly 8 (default 
       !       ESMF_CALKIND_NOCALENDAR)
       type ESMF_CalKind_Flag
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         integer :: calkindflag
       end type
@@ -85,7 +87,9 @@
 !     ! ESMF_Calendar
 !
       type ESMF_Calendar
+#ifndef ESMF_NO_SEQUENCE
       sequence
+#endif
       private
         type(ESMF_Pointer) :: this
         ESMF_INIT_DECLARE

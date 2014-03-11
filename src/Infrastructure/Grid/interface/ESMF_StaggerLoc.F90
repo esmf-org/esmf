@@ -47,7 +47,9 @@
 !
 
       type ESMF_StaggerLoc
-      sequence
+#ifndef ESMF_NO_SEQUENCE
+        sequence
+#endif
         integer :: staggerloc
       end type
 

@@ -59,7 +59,9 @@
 
       type ESMF_State
 #ifndef ESMF_SEQUENCE_BUG
-      sequence
+#ifndef ESMF_NO_SEQUENCE
+        sequence
+#endif
 #endif
       !private
         type(ESMF_StateClass), pointer :: statep

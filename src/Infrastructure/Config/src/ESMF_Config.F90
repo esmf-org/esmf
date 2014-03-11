@@ -180,7 +180,9 @@
        
 !------------------------------------------------------------------------------
        type ESMF_ConfigAttrUsed
+#ifndef ESMF_NO_SEQUENCE
           sequence
+#endif
           private              
           character(len=LSZ)      :: label  ! attribute label
           logical                 :: used   ! attribute used (retrieved) or not
@@ -189,7 +191,9 @@
 
        type ESMF_ConfigClass
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
           sequence
+#endif
 #endif
           !private              
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file
@@ -210,7 +214,9 @@
 !      ! Config wrapper
        type ESMF_Config
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
           sequence
+#endif
 #endif
           !private       
           type (ESMF_ConfigClass), pointer :: cptr => null ()

@@ -66,7 +66,9 @@
 
       type ESMF_StateItemInfo
 #ifndef ESMF_SEQUENCE_BUG
+#ifndef ESMF_NO_SEQUENCE
         sequence
+#endif
 #endif
         private
         type(ESMF_StateItemWrap), pointer :: siwrap(:)

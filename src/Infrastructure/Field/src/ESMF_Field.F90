@@ -68,7 +68,9 @@ module ESMF_FieldMod
 ! ! ESMF_FieldStatus_Flag
 
   type ESMF_FieldStatus_Flag
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private
     integer :: status
   end type
@@ -83,7 +85,9 @@ module ESMF_FieldMod
 ! ! Definition of the Field class.
 
   type ESMF_FieldType
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
@@ -108,7 +112,9 @@ module ESMF_FieldMod
 ! ! calling languages.
 
   type ESMF_Field
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     !private       
     type (ESMF_FieldType), pointer :: ftypep
     ESMF_INIT_DECLARE

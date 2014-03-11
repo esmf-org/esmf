@@ -59,7 +59,9 @@ module ESMF_ArraySpecMod
 !
 ! ! Data array specification, with no associated data buffer.
   type ESMF_ArraySpec
-    sequence
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
     private
     integer             :: rank       ! number of dimensions
     type(ESMF_TypeKind_Flag) :: typekind   ! fortran type and kind enum/integer

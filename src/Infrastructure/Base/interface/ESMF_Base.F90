@@ -64,7 +64,9 @@ module ESMF_BaseMod
 
   ! Contains pointer to real Base object which is defined in C++
   type ESMF_Base
+#ifndef ESMF_NO_SEQUENCE
   sequence
+#endif
   !private
     type(ESMF_Pointer) :: this
     ESMF_INIT_DECLARE

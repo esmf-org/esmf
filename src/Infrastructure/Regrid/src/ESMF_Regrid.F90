@@ -57,12 +57,16 @@
 
       ! temporarily store the weights while F90 arrays are alloc'ed
       type ESMF_TempWeights 
-      sequence
+#ifndef ESMF_NO_SEQUENCE
+        sequence
+#endif
         type(ESMF_Pointer) :: this
       end type
 
       type ESMF_TempUDL 
-      sequence
+#ifndef ESMF_NO_SEQUENCE
+        sequence
+#endif
         type(ESMF_Pointer) :: this
       end type
 
