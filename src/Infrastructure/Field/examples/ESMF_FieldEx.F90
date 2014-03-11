@@ -645,7 +645,6 @@
         rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
-#endif
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -657,6 +656,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(farray7d)
     deallocate(farray7d2)
+#endif
 
 ! TODO: remove this subsection
 !!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
