@@ -173,6 +173,7 @@ type ESMF_LogPrivate
     integer, dimension(:), pointer                  ::  errorMask(:)  => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:) => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
+    logical                                         ::  traceFlag = .false.
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
@@ -180,10 +181,10 @@ type ESMF_LogPrivate
     integer, dimension(:), pointer                  ::  errorMask(:)
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:)
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
+    logical                                         ::  traceFlag
 #endif                                          
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
-    logical                                         ::  traceFlag
     ESMF_INIT_DECLARE    
 end type ESMF_LogPrivate
 
@@ -528,6 +529,7 @@ contains
        nullify(s%errorMask)
        s%errorMaskCount=0
        s%logmsgList => null ()
+       s%traceFlag = .false.
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogPrivateInit
 
