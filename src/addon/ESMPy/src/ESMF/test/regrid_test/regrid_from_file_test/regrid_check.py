@@ -58,18 +58,21 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
     if is_mesh:
         print "Getting coords from Mesh"
         coords_interleaved, num_nodes, num_dims = ESMF.ESMP_MeshGetCoordPtr(grid_or_mesh)
-        coords = np.array([[coords_interleaved[2*i+j] 
-                            for j in range(num_dims)] for i in range(num_nodes)])
+        lons = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
+        lats = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
+        print 'Mesh lons = ', lons
+        print 'Mesh lats = ', lats
     else:
         print "Getting coords from Grid"
         lons = grid_or_mesh.get_grid_coords_from_esmc(0, ESMF.StaggerLoc.CENTER)
         lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER)
+        print 'lons.shape=',lons.shape
+        print 'lats.shape=',lats.shape
         print 'get_grid_coords_from_esmc returned lons = ', lons
         print 'get_grid_coords_from_esmc returned lats = ', lats
-        lats_flat = lats.ravel()
-        lons_flat = lons.ravel()
-        coords = np.array([[lons_flat[i],lats_flat[i]] for i in range(len(lats_flat))])
-    return coords
+    lons = np.radians(lons)
+    lats = np.radians(lats)
+    return lons,lats
         
 def create_field(grid, name, regridmethod=None):
     '''
@@ -97,10 +100,10 @@ def build_analyticfield_const(field):
 
     return field
 
-def build_analyticfield(field, coords):
-    coords = np.reshape(coords, field.shape+(coords.shape[-1],), order='F')
-    print 'coords=',coords[0:20]
-    field.data[...] = 2.0 + np.cos(coords[...,1])**2 * np.cos(2.0*coords[...,0])
+def build_analyticfield(field, lons, lats):
+    print 'lons[0:20]=',lons[0:20]
+    print 'lats[0:20]=',lons[0:20]
+    field.data[...] = 2.0 + np.cos(lats[...])**2 * np.cos(2.0*lons[...])
     print 'shape field data = ',field.data.shape
     print 'field.data = ',field.data
     return field
@@ -281,21 +284,13 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
                                                          convert_to_dual=convert_to_dual, 
                                                          isSphere=dst_is_sphere)
 
-    # Get node coordinates
-    src_coords = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
-    print 'src_coords.shape=',src_coords.shape
-    print 'src_coords = ',src_coords
-    src_coords = np.radians(src_coords)
-    #for i in range(len(src_coords)):
-    #    print src_coords[i]
-    dst_coords = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh)
-    print 'dst_coords = ',dst_coords
-    dst_coords = np.radians(dst_coords)
-    print 'dst_coords.shape=',dst_coords.shape
+    # Get node coordinates in radians
+    src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
+    dst_lons, dst_lats = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh)
 
     # get the destination mask
     if dst_is_mesh:
-        dst_mask = np.copy(dst_coords)
+        dst_mask = np.copy(dst_lons)
         dst_mask[...] = 1
     else:
         #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
@@ -303,7 +298,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
         dst_mask = dstgrid.get_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
     print 'dst_mask.shape = ',dst_mask.shape
     print 'dst_mask = ', dst_mask
-
+    
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', regridmethod)
     dstfield = create_field(dstgrid, 'dstfield', regridmethod)
@@ -311,8 +306,8 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     dstFracField = create_field(dstgrid, 'dstFracField', regridmethod)
 
     # initialize the Fields to an analytic function
-    srcfield = build_analyticfield(srcfield, src_coords)
-    dstfield2 = build_analyticfield(dstfield2, dst_coords)
+    srcfield = build_analyticfield(srcfield, src_lons, src_lats)
+    dstfield2 = build_analyticfield(dstfield2, dst_lons, dst_lats)
 
     # run the ESMF regridding
     dstfield = run_regridding(srcfield, dstfield, regridmethod, unmappedaction, dstFracField,

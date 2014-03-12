@@ -3,7 +3,7 @@
 # Input data for ESMPy regrid from file tests
 
 # total number of test cases
-9
+21
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
 #wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-06 : 10E-16
@@ -16,10 +16,10 @@
 
 # mpas_uniform_10242_dual.nc: ESMF format unstructured file that contains clockwise cells
 # mpas_uniform_10242_dual_counterclockwise.nc has clockwise cells removed
-#wr50a_090614.nc : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-#wr50a_090614.nc : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
-#wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-#wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
 
 # FVCOM_grid2d.nc:  unstructured grid in UGRID format
 #FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-03 : 10E-15
@@ -105,24 +105,24 @@ ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -p all -i : 10E-05 : 10
 #mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : conserve : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-14
 
 # mpas with regular grids
-#T42_grid.nc                : mpas_uniform_10242_dual.nc :patch    : --dst_type ESMF    : 10E-03 : 10E-16
-#mpas_uniform_10242_dual.nc : ll1deg_grid.nc             :patch    : --src_type ESMF    : 10E-04 : 10E-16
+T42_grid.nc                : mpas_uniform_10242_dual.nc :patch    : --dst_type ESMF    : 10E-03 : 10E-16
+mpas_uniform_10242_dual.nc : ll1deg_grid.nc             :patch    : --src_type ESMF    : 10E-04 : 10E-16
 #ll2.5deg_grid.nc           : mpas_uniform_10242_dual.nc :conserve : -i --dst_type ESMF : 10E-03 : 10E-14
 #mpas_uniform_10242_dual.nc : ll1deg_grid.nc             :conserve : --src_type ESMF    : 10E-03 : 10E-13
 
 # mpas with cubed sphere grid
-#mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : bilinear : --src_type ESMF : 10E-04 : 10E-16
+mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : bilinear : --src_type ESMF : 10E-04 : 10E-16
 #ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : bilinear : --dst_type ESMF : 10E-05 : 10E-16
-#mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : patch    : --src_type ESMF : 10E-04 : 10E-16
+mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : patch    : --src_type ESMF : 10E-04 : 10E-16
 #ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : patch    : --dst_type ESMF : 10E-05 : 10E-16
 #mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : conserve : --src_type ESMF : 10E-02 : 10E-13
 #ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : conserve : --dst_type ESMF : 10E-04 : 10E-13
 
 # mpas with regional grid
-#wr50a_090614.nc            : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-#mpas_uniform_10242_dual.nc : wr50a_090614.nc            : bilinear : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
-#wr50a_090614.nc            : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
-#mpas_uniform_10242_dual.nc : wr50a_090614.nc            : patch    : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
+wr50a_090614.nc            : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
+mpas_uniform_10242_dual.nc : wr50a_090614.nc            : bilinear : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
+wr50a_090614.nc            : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
+mpas_uniform_10242_dual.nc : wr50a_090614.nc            : patch    : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
 #wr50a_090614.nc            : mpas_uniform_10242_dual.nc : conserve : -i --src_regional --dst_type ESMF : 10E-03 : 10E-14
 #mpas_uniform_10242_dual.nc : wr50a_090614.nc            : conserve : --dst_regional --src_type ESMF    : 10E-02 : 10E-14
 
