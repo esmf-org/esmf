@@ -550,8 +550,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[pathName]
 !       Name of the directory to be created.
 !     \item[{[mode]}]
-!       File permission mode.  If not specified on POSIX-compliant systems,
-!       the default is {\tt o'755'}.  On native Windows, this argument is
+!       File permission mode.  Typically an octal constant is used as a value, for example:
+!       {\tt mode=o'755'}.  If not specified on POSIX-compliant systems, the default
+!       is {\tt o'755'} - corresponding to owner read/write/execute,
+!       group read/execute, and world read/execute.  On native Windows, this argument is
 !       ignored and default security settings are used.
 !     \item[{[relaxedFlag]}]
 !       When set to {\tt .true.}, if the directory already exists, {\tt rc}
