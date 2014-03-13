@@ -10,6 +10,8 @@ ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = clang
 ESMF_CPPDEFAULT		= clang -E -P -x c
 
+ESMF_CXXCOMPILECPPFLAGS += -x c++
+
 ############################################################
 # Default MPI setting.
 #
@@ -227,7 +229,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lgfortran -ldl
+ESMF_CXXLINKLIBS += -lrt -lgfortran -lstdc++ -lm -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 
