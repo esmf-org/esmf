@@ -480,7 +480,9 @@ endif
 	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
-        cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
+	if [ `ls $(ESMF_DOCDIR)`foo != "foo" ]; then \
+	cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
+	fi; \
         fi
 	$(MAKE) install_info_mk
 	-@echo " "
