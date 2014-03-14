@@ -322,7 +322,7 @@ extern "C" {
   else {
     switch (errno) {
       case ERANGE:
-        *rc = ESMF_RC_ARG_SIZE;
+        *rc = ESMF_RC_BUFFER_SHORT;
         break;
       default:
         *rc = ESMF_FAILURE;
