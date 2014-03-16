@@ -1704,7 +1704,7 @@ endif
     ! local variables
     integer                                   :: nx, ny
     real(ESMF_KIND_R8)                        :: dx, dy, sx, sy
-    integer                                   :: localrc, i, j
+    integer                                   :: i, j
     real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
     real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:)
     real(ESMF_KIND_R8), pointer               :: o_area(:,:)
@@ -1713,6 +1713,8 @@ endif
     type(ESMF_Mesh)                           :: mesh
     type(ESMF_Field)                          :: field
     
+    if (present(rc)) rc = ESMF_SUCCESS
+
     ! convert to input variables to the internal variables
     sx = x_min
     sy = y_min
@@ -1730,8 +1732,8 @@ endif
         indexflag=ESMF_INDEX_GLOBAL, &
         gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
         !regDecomp=(/npet, 1/), &
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
@@ -1740,22 +1742,22 @@ endif
         indexflag=ESMF_INDEX_GLOBAL, &
         gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
         !regDecomp=(/npet, 1/), &
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     endif 
 
     call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
-      staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
-      staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -1769,16 +1771,16 @@ endif
     ! X center
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     ! Y center
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -1792,16 +1794,16 @@ endif
     ! X corner
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, farrayPtr=coordX, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     ! Y corner
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, farrayPtr=coordY, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -1817,48 +1819,48 @@ endif
 
       !mesh = ESMF_GridToMesh(NUOPC_GridCreateSimpleSph, &
       !  ESMF_STAGGERLOC_CORNER, 0, &
-      !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
+      !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=rc)
+      !if (ESMF_LogFoundError(rc, &
       !    ESMF_ERR_PASSTHRU, &
       !    ESMF_CONTEXT, rcToReturn=rc)) return
 
       !allocate(f_area_m(mesh%NumOwnedElements))
-      !call ESMF_MeshGetElemArea(mesh,  arealist=f_area_m, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
+      !call ESMF_MeshGetElemArea(mesh,  arealist=f_area_m, rc=rc)
+      !if (ESMF_LogFoundError(rc, &
       !    ESMF_ERR_PASSTHRU, &
       !    ESMF_CONTEXT, rcToReturn=rc)) return
       !deallocate(f_area_m)
 
       ! find out original Grid cell area
       field = ESMF_FieldCreate(NUOPC_GridCreateSimpleSph, typekind=ESMF_TYPEKIND_R8, &
-        staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      call ESMF_FieldRegridGetArea(field, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      call ESMF_FieldRegridGetArea(field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      call ESMF_FieldGet(field, farrayPtr=o_area, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      call ESMF_FieldGet(field, farrayPtr=o_area, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
 
       ! add area to Grid
       call ESMF_GridAddItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
-        staggerloc=ESMF_STAGGERLOC_CENTER,  rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        staggerloc=ESMF_STAGGERLOC_CENTER,  rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
 
       call ESMF_GridGetItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
         staggerloc=ESMF_STAGGERLOC_CENTER, farrayptr=f_area, &
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
