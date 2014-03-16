@@ -126,7 +126,7 @@ module NUOPC_Comp
     integer,          intent(in),  optional :: specIndex
     interface
       subroutine specRoutine(gridcomp, rc)
-        use ESMF_CompMod
+        use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
@@ -164,7 +164,7 @@ module NUOPC_Comp
     integer,          intent(in),  optional :: specIndex
     interface
       subroutine specRoutine(cplcomp, rc)
-        use ESMF_CompMod
+        use ESMF
         implicit none
         type(ESMF_CplComp)         :: cplcomp  ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
