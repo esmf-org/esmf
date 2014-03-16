@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
 
 !TODO: make this macros available through ESMF as parameter or find other way
