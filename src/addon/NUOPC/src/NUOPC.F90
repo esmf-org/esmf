@@ -24,6 +24,7 @@ module NUOPC
   use ESMF
   use NUOPC_Base
   use NUOPC_RunSequenceDef
+  use NUOPC_Comp
 
   implicit none
   
@@ -84,4 +85,8 @@ module NUOPC
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
   
+  ! defined in NUOPC_Comp
+  public NUOPC_CompDerive
+  public NUOPC_CompSpecialize
+
 end module

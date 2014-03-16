@@ -189,6 +189,14 @@
 
 \newpage
 
+\subsection{Generic Component Methods}
+
+#ifdef STANDALONE
+\input{NUOPC_Comp_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Comp_fapi}
+#endif
+
 \subsection{Utility Class: NUOPC\_RunSequence}
 
 The {\tt NUOPC\_RunSequence} class provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
