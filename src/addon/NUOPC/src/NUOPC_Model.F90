@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Model.F90"
 !==============================================================================
 
 module NUOPC_Model
