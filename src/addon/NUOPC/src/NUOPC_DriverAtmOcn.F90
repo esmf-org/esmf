@@ -27,7 +27,8 @@ module NUOPC_DriverAtmOcn
     Driver_label_SetModelCount    => label_SetModelCount, &
     Driver_label_SetModelPetLists => label_SetModelPetLists, &
     Driver_label_SetModelServices => label_SetModelServices, &
-    Driver_label_Finalize         => label_Finalize
+    Driver_label_Finalize         => label_Finalize, &
+    NUOPC_DriverAddComp, NUOPC_DriverGetComp
 
   implicit none
   
@@ -37,6 +38,8 @@ module NUOPC_DriverAtmOcn
   public type_InternalState, type_InternalStateStruct
   public label_InternalState, label_SetModelPetLists
   public label_SetModelServices, label_Finalize
+  
+  public NUOPC_DriverAddComp, NUOPC_DriverGetComp
   
   character(*), parameter :: &
     label_InternalState = "DriverAtmOcn_InternalState"

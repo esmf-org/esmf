@@ -54,9 +54,16 @@ module NUOPC_Driver
     type(type_PetList),  pointer      :: modelPetLists(:)
     type(type_PetList),  pointer      :: connectorPetLists(:,:)
     !--- private members ----------------------------------------
+    ! - new style members
+    type(ESMF_Container)              :: componentMap
+    type(ESMF_Container)              :: connectorMap
+    integer                           :: componentMapCount
+    logical                           :: newStyleFlag
+    ! - old style members
     type(ESMF_GridComp), pointer      :: modelComp(:)
     type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
+    ! - common members
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
     type(ESMF_Clock)                  :: driverClock  ! clock of the parent
@@ -75,6 +82,40 @@ module NUOPC_Driver
     integer, pointer                                   :: phaseValue(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: phaseKey(:)
+  end type
+  
+  ! Generic methods
+  public NUOPC_DriverAddComp
+  public NUOPC_DriverGetComp
+  
+  ! interface blocks
+  !---------------------------------------------
+  interface NUOPC_DriverAddComp
+    module procedure NUOPC_DriverAddGridComp
+    module procedure NUOPC_DriverAddCplComp
+  end interface
+  !---------------------------------------------
+  interface NUOPC_DriverGetComp
+    module procedure NUOPC_DriverGetGridComp
+    module procedure NUOPC_DriverGetCplComp
+  end interface
+  
+  ! Internal drived types
+  !---------------------------------------------
+  type ComponentMapEntryT
+    character(len=160)              :: label
+    type(ESMF_GridComp)             :: component
+  end type
+  type ComponentMapEntry
+    type(ComponentMapEntryT), pointer :: wrap
+  end type
+  !---------------------------------------------
+  type ConnectorMapEntryT
+    character(len=330)              :: label
+    type(ESMF_CplComp)              :: connector
+  end type
+  type ConnectorMapEntry
+    type(ConnectorMapEntryT), pointer :: wrap
   end type
   
   !-----------------------------------------------------------------------------
@@ -223,7 +264,7 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-
+      
     ! allocate lists inside the internal state according to modelCount
     allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
@@ -264,6 +305,26 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
+    ! prepare the new style members in the internal state
+    is%wrap%newStyleFlag = .false.  ! old style by default
+    is%wrap%componentMap = ESMF_ContainerCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_ContainerGarbageOn(is%wrap%componentMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    is%wrap%componentMapCount = 0 ! reset
+    is%wrap%connectorMap = ESMF_ContainerCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_ContainerGarbageOn(is%wrap%connectorMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
     ! create modelComps and their import and export States + connectorComps
     do i=0, is%wrap%modelCount
       write (iString, *) i
@@ -1294,7 +1355,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! query Component for this internal State
+    ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1516,7 +1577,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! query Component for this internal State
+    ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1603,6 +1664,16 @@ module NUOPC_Driver
       enddo
     enddo
     
+    ! destroy the new style members
+    call ESMF_ContainerDestroy(is%wrap%componentMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_ContainerDestroy(is%wrap%connectorMap, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! deallocate lists inside the internal state
     deallocate(is%wrap%modelPetLists, is%wrap%connectorPetLists, &
       is%wrap%modelComp, is%wrap%modelIS, is%wrap%modelES, &
@@ -1625,5 +1696,294 @@ module NUOPC_Driver
       return  ! bail out
       
   end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverAddGridComp - Add a GridComp child to a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddComp()
+  subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
+    compSetServicesRoutine, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    character(len=*),    intent(in)            :: compLabel
+    interface
+      subroutine compSetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    type(ESMF_GridComp), intent(out), optional :: comp
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a GridComp (i.e. Model, Mediator, or Driver) as a child component to a 
+! Driver. The {\tt compLabel} must uniquely identify the child component within 
+! the context of the Driver component.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: stat, i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Entering this call means that the new style members are being used
+    is%wrap%newStyleFlag = .true.
+    
+    ! Add another component to the componentMap with associated compLabel
+    allocate(cmEntry%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    is%wrap%componentMapCount = is%wrap%componentMapCount + 1
+    i = is%wrap%componentMapCount
+    cmEntry%wrap%label = trim(compLabel)
+    cmEntry%wrap%component = is%wrap%modelComp(i)
+    call ESMF_ContainerAddUDT(is%wrap%componentMap, trim(compLabel), &
+      cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Call the SetServices on the added component
+    call ESMF_GridCompSetServices(cmEntry%wrap%component, &
+      compSetServicesRoutine, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Optionally return the added component
+    if (present(comp)) comp = cmEntry%wrap%component
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverAddCplComp - Add a CplComp child to a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddComp()
+  subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, dstCompLabel, &
+    compSetServicesRoutine, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    character(len=*),    intent(in)            :: srcCompLabel
+    character(len=*),    intent(in)            :: dstCompLabel
+    interface
+      subroutine compSetServicesRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    type(ESMF_CplComp),  intent(out), optional :: comp
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a CplComp (i.e. Model, Mediator, or Driver) as a child component to a 
+! Driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ConnectorMapEntry)         :: cmEntry
+    integer                         :: stat, src, dst
+    type(ESMF_GridComp)             :: srcComp, dstComp
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Entering this call means that the new style members are being used
+    is%wrap%newStyleFlag = .true.
+    
+    ! Figuring out the src/dst index into the connectorComp array.
+    !TODO: This is a pretty involved look-up, and future implementation will
+    !TODO: fully eliminate the static arrays modelComp and connectorComp, 
+    !TODO: removing the need to do this look-up here.
+    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do src=1, is%wrap%modelCount
+      if (is%wrap%modelComp(src)==srcComp) exit ! found a match
+    enddo
+    do dst=1, is%wrap%modelCount
+      if (is%wrap%modelComp(dst)==dstComp) exit ! found a match
+    enddo
+    
+    ! Add another connector to the connectorMap with associated compLabel
+    allocate(cmEntry%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    cmEntry%wrap%label = trim(srcCompLabel)//"-TO-"//trim(dstCompLabel)
+    cmEntry%wrap%connector = is%wrap%connectorComp(src,dst)
+    call ESMF_ContainerAddUDT(is%wrap%connectorMap, trim(cmEntry%wrap%label), &
+      cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Call the SetServices on the added connector
+    call ESMF_CplCompSetServices(cmEntry%wrap%connector, &
+      compSetServicesRoutine, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Optionally return the added connector
+    if (present(comp)) comp = cmEntry%wrap%connector
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverGetGridComp - Get a GridComp child from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    character(len=*),    intent(in)            :: compLabel
+    type(ESMF_GridComp), intent(out)           :: comp
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get a GridComp (i.e. Model, Mediator, or Driver) child component from a 
+! Driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Search for the entry in componentMap
+    call ESMF_ContainerGetUDT(is%wrap%componentMap, trim(compLabel), &
+      cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Return the identified component
+    comp = cmEntry%wrap%component
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverGetCplComp - Get a CplComp child from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, dstCompLabel, &
+    comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    character(len=*),    intent(in)            :: srcCompLabel
+    character(len=*),    intent(in)            :: dstCompLabel
+    type(ESMF_CplComp),  intent(out)           :: comp
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get a CplComp (i.e. Connector) child component from a Driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ConnectorMapEntry)         :: cmEntry
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Search for the entry in componentMap
+    call ESMF_ContainerGetUDT(is%wrap%componentMap, &
+      trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Return the identified component
+    comp = cmEntry%wrap%connector
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module
