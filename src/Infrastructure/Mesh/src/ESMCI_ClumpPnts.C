@@ -16,7 +16,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_PntClumper.h"
+#include "Mesh/include/ESMCI_ClumpPnts.h"
+#include "Mesh/include/ESMCI_OTree.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
@@ -152,7 +153,7 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   if (num_pnt <= 0) return;
 
   // Create Tree
-  ESMCI::OTree *tree= new ESMCI::OTree(num_pnt);
+  OTree *tree= new OTree(num_pnt);
 
   // Create list of point structures
   PNT_DATA *pd_list=new PNT_DATA[num_pnt];  
