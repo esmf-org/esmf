@@ -78,6 +78,7 @@ SOURCEC	  = \
            ESMCI_ConserveInterp.C \
            ESMCI_MeshRedist.C \
            ESMCI_MeshDual.C \
+           ESMCI_ClumpPnts.C \
            ESMCI_MeshCXX.C
 
 SOURCEF	  = ESMF_SolverUtil_C.F90 \
