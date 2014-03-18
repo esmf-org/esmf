@@ -58,7 +58,7 @@ def initialize(func):
     def new_func(*args, **kwargs):
         from ESMF.api import esmpymanager
 
-        esmp = esmpymanager.Manager(logkind = LogKind.SINGLE, debug = False)
+        esmp = esmpymanager.Manager(debug = False)
         return func(*args, **kwargs)
     return new_func
 
