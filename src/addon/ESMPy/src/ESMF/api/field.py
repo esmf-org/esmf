@@ -194,7 +194,7 @@ class Field(ma.MaskedArray):
         if isinstance(grid, Grid):
             size = reduce(mul,grid.size_local[staggerloc])
         elif isinstance(grid, Mesh):
-            size = grid.size_local[staggerloc]
+            size = grid.size[staggerloc]
         else:
             raise FieldDOError
 
@@ -205,9 +205,16 @@ class Field(ma.MaskedArray):
         fieldDataP = np.frombuffer(fieldbuffer, ESMF2PythonType[typekind])
 
         # reshape the numpy array of coordinates, account for Fortran
-        fieldDataP = np.reshape(fieldDataP,
-                                 newshape = grid.size_local[staggerloc],
-                                 order='F')
+        if isinstance(grid, Grid):
+            fieldDataP = np.reshape(fieldDataP,
+                                     newshape = grid.size_local[staggerloc],
+                                     order='F')
+        elif isinstance(grid, Mesh):
+            fieldDataP = np.reshape(fieldDataP,
+                                     newshape = grid.size[staggerloc],
+                                     order='F')
+        else:
+            raise FieldDOError
 
         return fieldDataP
 
