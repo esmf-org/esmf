@@ -481,7 +481,7 @@ void FTN_X(c_convertscrip)(
 
   totalsize = gsdim * gcdim;
   cells = (int*)malloc(sizeof(int)*totalsize);
-  ESMCI::ClumpPnts(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
+  ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
 	    &nodelons, &nodelats, &maxconnection, rc);
   
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
