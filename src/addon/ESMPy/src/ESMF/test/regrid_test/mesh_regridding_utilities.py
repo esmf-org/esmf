@@ -150,7 +150,113 @@ def mesh_create_10(domask=False, doarea=False):
     else:
         return mesh, nodeCoord, elemType, elemConn
 
-def mesh_create_5_parallel (localPet):
+def mesh_create_50(domask=False, doarea=False):
+    '''
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 50 element Mesh has been created.    
+    
+      3.75  81 ------ 82 ----- 83 ------ 84 ------ 85 ------ 86 ------ 87 ------ 88
+            |         |        |         |         |         |         |  77 /   |
+            |    71   |   72   |    73   |    74   |   75    |    76   |    /    |
+            |         |        |         |         |         |         |  /  78  |
+      3.25  71 ------ 72 ----- 73 ------ 74 ------ 75 ------ 76 ------ 77 ------ 78
+            |         |        |         |         |         |         |         |
+            |    61   |   62   |    63   |    64   |    65   |    66   |   67    |
+            |         |        |         |         |         |         |         |
+      2.75  61 ------ 62 ----- 63 ------ 64 ------ 65 ------ 66 ------ 67 ------ 68
+            |         |        |         |         |         |         |         |
+            |    51   |   52   |    53   |    54   |    55   |    56   |   57    |
+            |         |        |         |         |         |         |         |
+      2.25  51 ------ 52 ----- 53 ------ 54 ------ 55 ------ 56 ------ 57 ------ 58
+            |         |        |         |         |         |         |         |
+            |    41   |   42   |    43   |    44   |    45   |    46   |   47    |
+            |         |        |         |         |         |         |         |
+      1.75  41 ------ 42 ----- 43 ------ 44 ------ 45 ------ 46 ------ 47 ------ 48
+            |         |        |         |         |         |         |         |
+            |    31   |   32   |    33   |    34   |    35   |    36   |   37    |
+            |         |        |         |         |         |         |         |
+      1.25  31 ------ 32 ----- 33 ------ 34 ------ 35 ------ 36 ------ 37 ------ 38
+            |         |        |         |         |         |         |         |
+            |    21   |   22   |    23   |    24   |    25   |    26   |   27    |
+            |         |        |         |         |         |         |         |
+      0.75  21 ------ 22 ----- 23 ------ 24 ------ 25 ------ 26 ------ 27 ------ 28
+            |         |        |         |         |         |         |         |
+            |    11   |   12   |    13   |    14   |    15   |    16   |   17    |
+            |         |        |         |         |         |         |         |
+      0.25  11 ------ 12 ----- 13 ------ 14 ------ 15 ------ 16 ------ 17 ------ 18
+    
+           0.25      0.75     1.25      1.75      2.25      2.75      3.25      3.75
+    
+          Node Ids at corners
+          Element Ids in centers
+    
+    Note: This mesh is not parallel, it can only be used in serial
+    '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
+    num_node = 64
+    num_elem = 50
+    nodeId = np.array([11,12,13,14,15,16,17,18,
+                       21,22,23,24,25,26,27,28,
+                       31,32,33,34,35,36,37,38,
+                       41,42,43,44,45,46,47,48,
+                       51,52,53,54,55,56,57,58,
+                       61,62,63,64,65,66,67,68,
+                       71,72,73,74,75,76,77,78,
+                       81,82,83,84,85,86,87,88])
+    nodeCoord = np.array([0.25,0.25, 0.25,0.75, 0.25,1.25, 0.25,1.75, 0.25,2.25, 0.25,2.75, 0.25,3.25, 0.25,3.75,
+                          0.75,0.25, 0.75,0.75, 0.75,1.25, 0.75,1.75, 0.75,2.25, 0.75,2.75, 0.75,3.25, 0.75,3.75,
+                          1.25,0.25, 1.25,0.75, 1.25,1.25, 1.25,1.75, 1.25,2.25, 1.25,2.75, 1.25,3.25, 1.25,3.75,
+                          1.75,0.25, 1.75,0.75, 1.75,1.25, 1.75,1.75, 1.75,2.25, 1.75,2.75, 1.75,3.25, 1.75,3.75,
+                          2.25,0.25, 2.25,0.75, 2.25,1.25, 2.25,1.75, 2.25,2.25, 2.25,2.75, 2.25,3.25, 2.25,3.75,
+                          2.75,0.25, 2.75,0.75, 2.75,1.25, 2.75,1.75, 2.75,2.25, 2.75,2.75, 2.75,3.25, 2.75,3.75,
+                          3.25,0.25, 3.25,0.75, 3.25,1.25, 3.25,1.75, 3.25,2.25, 3.25,2.75, 3.25,3.25, 3.25,3.75,
+                          3.75,0.25, 3.75,0.75, 3.75,1.25, 3.75,1.75, 3.75,2.25, 3.75,2.75, 3.75,3.25, 3.75,3.75])
+    nodeOwner = np.zeros(num_node)
+    elemId = np.array([11,12,13,14,15,16,17,
+                       21,22,23,24,25,26,27,
+                       31,32,33,34,35,36,37,
+                       41,42,43,44,45,46,47,
+                       51,52,53,54,55,56,57,
+                       61,62,63,64,65,66,67,
+                       71,72,73,74,75,76,77,78])
+    elemType = np.ones(num_elem-2)*ESMF.MeshElemType.QUAD
+    elemType = np.append(elemType, [ESMF.MeshElemType.TRI, ESMF.MeshElemType.TRI])
+    elemConn = np.array([11,12,22,21,12,13,23,22,13,14,24,23,14,15,25,24,15,16,26,25,16,17,27,26,17,18,28,27,
+                         21,22,32,31,22,23,33,32,23,24,34,33,24,25,35,34,25,26,36,35,26,27,37,36,27,28,38,37,
+                         31,32,42,41,32,33,43,42,33,34,44,43,34,35,45,44,35,36,46,45,36,37,47,46,37,38,48,47,
+                         41,42,52,51,42,43,53,52,43,44,54,53,44,45,55,54,45,46,56,55,46,47,57,56,47,48,58,57,
+                         51,52,62,61,52,53,63,62,53,54,64,63,54,55,65,64,55,56,66,65,56,57,67,66,57,58,68,67,
+                         61,62,72,71,62,63,73,72,63,64,74,73,64,65,75,74,65,66,76,75,66,67,77,76,67,68,78,77,
+                         71,72,82,81,72,73,83,82,73,74,84,83,74,75,85,84,75,76,86,85,76,77,87,86, 
+                         77,88,87,
+                         77,78,88])
+    elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    elemMask = None
+    if domask:
+        elemMask = np.zeros(50)
+        elemMask[25] = 1
+    elemArea = None
+    if doarea:
+        elemArea = np.ones(48)*5
+        np.append(elemArea, [2.5, 2.5])
+
+    mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+
+    mesh.add_elements(num_elem,elemId,elemType,elemConn, 
+        element_mask=elemMask, element_area=elemArea)
+
+    if domask and doarea:
+        return mesh, nodeCoord, elemType, elemConn, elemMask, elemArea
+    elif domask and not doarea:
+        return mesh, nodeCoord, elemType, elemConn, elemMask
+    elif not domask and doarea:
+        return mesh, nodeCoord, elemType, elemConn, elemArea
+    else:
+        return mesh, nodeCoord, elemType, elemConn
+
+def mesh_create_5_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created in parallel.
@@ -182,7 +288,11 @@ def mesh_create_5_parallel (localPet):
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
-    if (localPet == 0):
+    if ESMF.pet_count() > 1:
+        if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 to build this mesh!')
+
+    if (ESMF.local_pet() == 0):
         num_node=4
         num_elem=1
 
@@ -196,7 +306,7 @@ def mesh_create_5_parallel (localPet):
         elemType=np.array([ESMF.MeshElemType.QUAD])
         elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 1):
+    elif (ESMF.local_pet() == 1):
         num_node=4
         num_elem=1
 
@@ -213,7 +323,7 @@ def mesh_create_5_parallel (localPet):
         elemType=np.array([ESMF.MeshElemType.QUAD])
         elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 2):
+    elif (ESMF.local_pet() == 2):
         num_node=4
         num_elem=1
 
@@ -230,7 +340,7 @@ def mesh_create_5_parallel (localPet):
         elemType=np.array([ESMF.MeshElemType.QUAD])
         elemConn=np.array([0,1,3,2])
 
-    elif (localPet == 3):
+    elif (ESMF.local_pet() == 3):
         num_node=4
         num_elem=2
 
@@ -255,7 +365,7 @@ def mesh_create_5_parallel (localPet):
 
     return mesh, nodeCoord, elemType, elemConn
 
-def mesh_create_10_parallel (localPet):
+def mesh_create_10_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created in parallel.
@@ -290,10 +400,14 @@ def mesh_create_10_parallel (localPet):
     #               Node Id labels at corners
     #              Element Id labels in centers
     '''
+    if ESMF.pet_count() > 1:
+        if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 to build this mesh!')
+
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
-    if (localPet == 0):
+    if (ESMF.local_pet() == 0):
         num_node=9
         num_elem=4
 
@@ -318,7 +432,7 @@ def mesh_create_10_parallel (localPet):
                            3,4,7,6,
                            4,5,8,7])
 
-    elif (localPet == 1):
+    elif (ESMF.local_pet() == 1):
         num_node=6
         num_elem=2
 
@@ -336,7 +450,7 @@ def mesh_create_10_parallel (localPet):
         elemConn=np.array([0,1,3,2,
                            2,3,5,4])
 
-    elif (localPet == 2):
+    elif (ESMF.local_pet() == 2):
         num_node=6
         num_elem=2
 
@@ -354,7 +468,7 @@ def mesh_create_10_parallel (localPet):
         elemConn=np.array([0,1,4,3,
                            1,2,5,4])
 
-    elif (localPet == 3):
+    elif (ESMF.local_pet() == 3):
         num_node=4
         num_elem=2
 
@@ -372,6 +486,158 @@ def mesh_create_10_parallel (localPet):
 
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+
+    return mesh, nodeCoord, elemType, elemConn
+
+def mesh_create_50_parallel():
+    '''
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 50 element Mesh has been created in parallel.    
+    
+      3.75  81 ------ 82 ----- 83 ------ 84   [84] ----- 85 ------ 86 ------ 87 ------ 88
+            |         |        |         |     |         |         |         |  77 /   |
+            |    71   |   72   |    73   |     |    74   |   75    |    76   |    /    |
+            |         |        |         |     |         |         |         |  /  78  |
+      3.25  71 ------ 72 ----- 73 ------ 74   [74] ----- 75 ------ 76 ------ 77 ------ 78
+            |         |        |         |     |         |         |         |         |
+            |    61   |   62   |    63   |     |    64   |    65   |    66   |   67    |
+            |         |        |         |     |         |         |         |         |
+      2.75  61 ------ 62 ----- 63 ------ 64   [64] ----- 65 ------ 66 ------ 67 ------ 68
+            |         |        |         |     |         |         |         |         |
+            |    51   |   52   |    53   |     |    54   |    55   |    56   |   57    |
+            |         |        |         |     |         |         |         |         |
+      2.25  51 ------ 52 ----- 53 ------ 54   [54] ----- 55 ------ 56 ------ 57 ------ 58
+            |         |        |         |     |         |         |         |         |
+            |    41   |   42   |    43   |     |    44   |    45   |    46   |   47    |
+            |         |        |         |     |         |         |         |         |
+      1.75 [41] ---- [42] --- [43] ---- [44]  [44] ---- [45] ---- [46] ---- [47] ---- [48]
+
+                        PET 2                                     PET 3
+
+
+      1.75  41 ------ 42 ----- 43 ------ 44   [44] ----- 45 ------ 46 ------ 47 ------ 48
+            |         |        |         |     |         |         |         |         |
+            |    31   |   32   |    33   |     |    34   |    35   |    36   |   37    |
+            |         |        |         |     |         |         |         |         |
+      1.25  31 ------ 32 ----- 33 ------ 34   [34] ----- 35 ------ 36 ------ 37 ------ 38
+            |         |        |         |     |         |         |         |         |
+            |    21   |   22   |    23   |     |    24   |    25   |    26   |   27    |
+            |         |        |         |     |         |         |         |         |
+      0.75  21 ------ 22 ----- 23 ------ 24   [24] ----- 25 ------ 26 ------ 27 ------ 28
+            |         |        |         |     |         |         |         |         |
+            |    11   |   12   |    13   |     |    14   |    15   |    16   |   17    |
+            |         |        |         |     |         |         |         |         |
+      0.25  11 ------ 12 ----- 13 ------ 14   [14] ----- 15 ------ 16 ------ 17 ------ 18
+    
+           0.25      0.75     1.25      1.75  1.75      2.25      2.75      3.25      3.75
+    
+                        PET 0                                     PET 1
+
+          Node Ids at corners
+          Element Ids in centers
+    '''
+    if ESMF.pet_count() > 1:
+        if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 to build this mesh!')
+
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    
+    if ESMF.local_pet() == 0:
+        num_node = 16
+        num_elem = 9
+        nodeId = np.array([11,12,13,14,
+                           21,22,23,24,
+                           31,32,33,34,
+                           41,42,43,44])
+        nodeCoord = np.array([0.25,0.25, 0.25,0.75, 0.25,1.25, 0.25,1.75, 
+                              0.75,0.25, 0.75,0.75, 0.75,1.25, 0.75,1.75, 
+                              1.25,0.25, 1.25,0.75, 1.25,1.25, 1.25,1.75, 
+                              1.75,0.25, 1.75,0.75, 1.75,1.25, 1.75,1.75])
+        nodeOwner = np.zeros(num_node)
+        elemId = np.array([11,12,13,
+                           21,22,23,
+                           31,32,33])
+        elemType = np.ones(num_elem)*ESMF.MeshElemType.QUAD
+        elemConn = np.array([11,12,22,21,12,13,23,22,13,14,24,23,
+                             21,22,32,31,22,23,33,32,23,24,34,33,
+                             31,32,42,41,32,33,43,42,33,34,44,43])
+        elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    elif ESMF.local_pet() == 1:
+        num_node = 20
+        num_elem = 12
+        nodeId = np.array([14,15,16,17,18,
+                           24,25,26,27,28,
+                           34,35,36,37,38,
+                           44,45,46,47,48])
+        nodeCoord = np.array([0.25,1.75, 0.25,2.25, 0.25,2.75, 0.25,3.25, 0.25,3.75,
+                              0.75,1.75, 0.75,2.25, 0.75,2.75, 0.75,3.25, 0.75,3.75,
+                              1.25,1.75, 1.25,2.25, 1.25,2.75, 1.25,3.25, 1.25,3.75,
+                              1.75,1.75, 1.75,2.25, 1.75,2.75, 1.75,3.25, 1.75,3.75])
+        nodeOwner = np.array([0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1])
+        elemId = np.array([14,15,16,17,
+                           24,25,26,27,
+                           34,35,36,37])
+        elemType = np.ones(num_elem)*ESMF.MeshElemType.QUAD
+        elemConn = np.array([14,15,25,24,15,16,26,25,16,17,27,26,17,18,28,27,
+                             24,25,35,34,25,26,36,35,26,27,37,36,27,28,38,37,
+                             34,35,45,44,35,36,46,45,36,37,47,46,37,38,48,47])
+        elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    elif ESMF.local_pet() == 2:
+        num_node = 20
+        num_elem = 12
+        nodeId = np.array([41,42,43,44,
+                           51,52,53,54,
+                           61,62,63,64,
+                           71,72,73,74,
+                           81,82,83,84])
+        nodeCoord = np.array([1.75,0.25, 1.75,0.75, 1.75,1.25, 1.75,1.75,
+                              2.25,0.25, 2.25,0.75, 2.25,1.25, 2.25,1.75,
+                              2.75,0.25, 2.75,0.75, 2.75,1.25, 2.75,1.75,
+                              3.25,0.25, 3.25,0.75, 3.25,1.25, 3.25,1.75,
+                              3.75,0.25, 3.75,0.75, 3.75,1.25, 3.75,1.75])
+        nodeOwner = np.array([0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2])
+        elemId = np.array([41,42,43,
+                           51,52,53,
+                           61,62,63,
+                           71,72,73])
+        elemType = np.ones(num_elem)*ESMF.MeshElemType.QUAD
+        elemConn = np.array([41,42,52,51,42,43,53,52,43,44,54,53,
+                             51,52,62,61,52,53,63,62,53,54,64,63,
+                             61,62,72,71,62,63,73,72,63,64,74,73,
+                             71,72,82,81,72,73,83,82,73,74,84,83])
+        elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    elif ESMF.local_pet() == 3:
+        num_node = 25
+        num_elem = 17
+        nodeId = np.array([44,45,46,47,48,
+                           54,55,56,57,58,
+                           64,65,66,67,68,
+                           74,75,76,77,78,
+                           84,85,86,87,88])
+        nodeCoord = np.array([1.75,1.75, 1.75,2.25, 1.75,2.75, 1.75,3.25, 1.75,3.75,
+                              2.25,1.75, 2.25,2.25, 2.25,2.75, 2.25,3.25, 2.25,3.75,
+                              2.75,1.75, 2.75,2.25, 2.75,2.75, 2.75,3.25, 2.75,3.75,
+                              3.25,1.75, 3.25,2.25, 3.25,2.75, 3.25,3.25, 3.25,3.75,
+                              3.75,1.75, 3.75,2.25, 3.75,2.75, 3.75,3.25, 3.75,3.75])
+        nodeOwner = np.array([0,1,1,1,1,2,3,3,3,3,2,3,3,3,3,2,3,3,3,3,2,3,3,3,3])
+        elemId = np.array([44,45,46,47,
+                           54,55,56,57,
+                           64,65,66,67,
+                           74,75,76,77,78])
+        elemType = np.ones(num_elem-2)*ESMF.MeshElemType.QUAD
+        elemType = np.append(elemType, [ESMF.MeshElemType.TRI, ESMF.MeshElemType.TRI])
+        elemConn = np.array([44,45,55,54,45,46,56,55,46,47,57,56,47,48,58,57,
+                             54,55,65,64,55,56,66,65,56,57,67,66,57,58,68,67,
+                             64,65,75,74,65,66,76,75,66,67,77,76,67,68,78,77,
+                             74,75,85,84,75,76,86,85,76,77,87,86, 
+                             77,88,87,
+                             77,78,88])
+        elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+
+    mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+
     mesh.add_elements(num_elem,elemId,elemType,elemConn)
 
     return mesh, nodeCoord, elemType, elemConn
@@ -504,6 +770,8 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = comm.reduce(totalErr, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
+        mass1_global = 0
+        mass2_global = 0
         if (mass1 and mass2):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
