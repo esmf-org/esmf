@@ -1434,6 +1434,13 @@ _ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypesl
 @deprecated
 @netcdf
 def ESMP_GridspecInq(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions:  The rank and grid dimensions of the specified GRIDSPEC NetCDF file 
+                     or an error code have been returned.\n
+    Arguments:\n
+        String :: filename\n
+    """
     lrc = ct.c_int(0)
     lndims = ct.c_int(0)
     grid_dims = np.array([0,0], dtype=np.int32)
