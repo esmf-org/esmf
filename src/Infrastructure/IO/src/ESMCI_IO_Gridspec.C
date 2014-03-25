@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
 // Prototypes of the C->Fortran interface functions.
 extern "C" {
-  void FTN_X(f_esmf_gridspec_inq)(const -char *filename, int *ndims, int *grid_dims, int *rc,
+  void FTN_X(f_esmf_gridspec_inq)(const char *filename, int *ndims, int *grid_dims, int *rc,
 				  ESMCI_FortranStrLenArg len_filename);
 }
 //-------------------------------------------------------------------------
