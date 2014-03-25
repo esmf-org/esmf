@@ -5755,6 +5755,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[regDecomp] 
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
+!      The total decounts cannot exceed the total number of PETs.  In other
+!      word, at most one DE is allowed per processor.
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
@@ -5773,7 +5775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_DEGLOBAL}
+!      to {\tt ESMF\_INDEX\_GLOBAL}
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
@@ -5795,8 +5797,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDecompFlag(2)
     type(ESMF_Index_Flag) :: localIndexFlag
+    type(ESMF_VM) :: vm
+    integer :: PetCnt
     
     if (present(rc)) rc=ESMF_FAILURE
+
+    ! check if the total DE counts in RegDecomp is not greater than total PETs
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (size(RegDecomp,1) > 2) then
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- Only 2D grid is supported in ESMF_GridCreate from file interface", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
+    if (PetCnt < RegDecomp(1)*RegDecomp(2)) then
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- The total number of DEs cannot be greater than total processor count", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
 
     if (present(isSphere)) then
 	localIsSphere = isSphere
