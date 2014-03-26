@@ -89,6 +89,7 @@ module NUOPC_Driver
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverGetComp
   public NUOPC_DriverNewRunSequence
+  public NUOPC_DriverSet
   
   ! interface blocks
   !---------------------------------------------
@@ -2181,6 +2182,48 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverSet - Set Driver internals
+!
+! !INTERFACE:
+  subroutine NUOPC_DriverSet(driver, modelCount, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in),  optional :: modelCount
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Set the number of model, mediator, and driver components that can be added to
+! this driver component.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! optionally set the modelCount
+    if (present(modelCount)) then
+      is%wrap%modelCount = modelCount
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
