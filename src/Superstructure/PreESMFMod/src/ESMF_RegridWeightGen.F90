@@ -1375,6 +1375,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
+    ! clean up
+    deallocate(factorList, factorIndexList)
+    call ESMF_FieldDestroy(srcField)
+    call ESMF_FieldDestroy(dstField)
+    if (isConserve) then
+       call ESMF_FieldDestroy(srcFracField)
+       call ESMF_FieldDestroy(dstFracField)
+    endif
+    if (srcIsReg) then
+       call ESMF_GridDestroy(srcGrid)
+    else
+       call ESMF_MeshDestroy(srcMesh)
+    endif   
+    if (dstIsReg) then
+       call ESMF_GridDestroy(dstGrid)
+    else
+       call ESMF_MeshDestroy(dstMesh)
+    endif   
     rc = ESMF_SUCCESS
     return 
 #else
@@ -1841,7 +1859,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
     endif
-      
+
+    ! clean up
+    call ESMF_FieldDestroy(srcField)
+    call ESMF_FieldDestroy(dstField)
+    if (isConserve) then
+       call ESMF_FieldDestroy(srcFracField)
+       call ESMF_FieldDestroy(dstFracField)
+    endif
+    call ESMF_MeshDestroy(srcMesh)
+    call ESMF_MeshDestroy(dstMesh) 
+    if (present(weightFile)) then
+       deallocate(factorList, factorIndexList)
+    endif     
     rc = ESMF_SUCCESS
     return 
 #else
