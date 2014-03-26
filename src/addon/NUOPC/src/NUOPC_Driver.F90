@@ -86,13 +86,20 @@ module NUOPC_Driver
   
   ! Generic methods
   public NUOPC_DriverAddComp
+  public NUOPC_DriverAddRunElement
   public NUOPC_DriverGetComp
+  public NUOPC_DriverNewRunSequence
   
   ! interface blocks
   !---------------------------------------------
   interface NUOPC_DriverAddComp
     module procedure NUOPC_DriverAddGridComp
     module procedure NUOPC_DriverAddCplComp
+  end interface
+  !---------------------------------------------
+  interface NUOPC_DriverAddRunElement
+    module procedure NUOPC_DriverAddRunElementM
+    module procedure NUOPC_DriverAddRunElementC
   end interface
   !---------------------------------------------
   interface NUOPC_DriverGetComp
@@ -1777,6 +1784,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+      
+    ! Set the default name of the component to be the label (may be overwr.)
+    call ESMF_GridCompSet(cmEntry%wrap%component, &
+      name=trim(cmEntry%wrap%label), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! Optionally return the added component
     if (present(comp)) comp = cmEntry%wrap%component
@@ -1850,10 +1864,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     do src=1, is%wrap%modelCount
-      if (is%wrap%modelComp(src)==srcComp) exit ! found a match
+      if (is%wrap%modelComp(src)==srcComp) exit ! found the match
     enddo
     do dst=1, is%wrap%modelCount
-      if (is%wrap%modelComp(dst)==dstComp) exit ! found a match
+      if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
     
     ! Add another connector to the connectorMap with associated compLabel
@@ -1879,8 +1893,146 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Set the default name of the component to be the label (may be overwr.)
+    call ESMF_CplCompSet(cmEntry%wrap%connector, &
+      name=trim(cmEntry%wrap%label), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! Optionally return the added connector
     if (present(comp)) comp = cmEntry%wrap%connector
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverAddRunElement - Add RunElement for Model, Mediator, or Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddRunElement()
+  subroutine NUOPC_DriverAddRunElementM(driver, slot, compLabel, phase, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: slot
+    character(len=*),    intent(in)            :: compLabel
+    integer,             intent(in)            :: phase
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a RunElement for a Model, Mediator, or Driver to the RunSequence of the 
+! Driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    integer                         :: i
+    type(ESMF_GridComp)             :: comp
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Figuring out the index into the modelComp array.
+    !TODO: This is a pretty involved look-up, and future implementation will
+    !TODO: fully eliminate the static array modelComp,
+    !TODO: removing the need to do this look-up here.
+    call NUOPC_DriverGetComp(driver, compLabel, comp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do i=1, is%wrap%modelCount
+      if (is%wrap%modelComp(i)==comp) exit ! found the match
+    enddo
+    
+    ! Actually add the RunElement for the identified component
+    call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=i, phase=phase, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverAddRunElement - Add RunElement for Connector
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddRunElement()
+  subroutine NUOPC_DriverAddRunElementC(driver, slot, srcCompLabel, &
+    dstCompLabel, phase, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: slot
+    character(len=*),    intent(in)            :: srcCompLabel
+    character(len=*),    intent(in)            :: dstCompLabel
+    integer,             intent(in)            :: phase
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a RunElement for a Connector to the RunSequence of the Driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    integer                         :: src, dst
+    type(ESMF_GridComp)             :: srcComp, dstComp
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Figuring out the index into the modelComp array.
+    !TODO: This is a pretty involved look-up, and future implementation will
+    !TODO: fully eliminate the static arrays modelComp and connectorComp, 
+    !TODO: removing the need to do this look-up here.
+    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do src=1, is%wrap%modelCount
+      if (is%wrap%modelComp(src)==srcComp) exit ! found the match
+    enddo
+    do dst=1, is%wrap%modelCount
+      if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
+    enddo
+    
+    ! Actually add the RunElement for the identified Connector component
+    call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=src, j=dst, &
+      phase=phase, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1982,6 +2134,53 @@ module NUOPC_Driver
     
     ! Return the identified component
     comp = cmEntry%wrap%connector
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverNewRunSequence - Replace current RunSequence with a new one
+!
+! !INTERFACE:
+  subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: slotCount
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Replace the current RunSequence of the Driver with a new one that has 
+! {\tt slotCount} slots. Each slot uses its own Clock for time keeping.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Deallocate the current RunSequence and add a new one with slotCount
+    call NUOPC_RunSequenceDeallocate(is%wrap%runSeq, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_RunSequenceAdd(is%wrap%runSeq, slotCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
