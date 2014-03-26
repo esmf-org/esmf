@@ -8,6 +8,9 @@
 #
 ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = clang
+ESMF_CPPDEFAULT         = clang -E -P -x c
+
+ESMF_CXXCOMPILECPPFLAGS += -x c++
 
 ############################################################
 # Default MPI setting.
@@ -120,13 +123,6 @@ endif
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -217,12 +213,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++ -lc++
+ESMF_F90LINKLIBS += -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran
+ESMF_CXXLINKLIBS += -lgfortran -lstdc++
 
 ############################################################
 # Shared library options

@@ -1427,3 +1427,27 @@ def ESMP_ScripInqDims(filename):
     dims = np.array(np.zeros(grid_rank),dtype=np.int32)
     status = _ESMF.ESMC_ScripInqDims(filename, dims)
     return dims
+
+_ESMF.ESMC_GridspecInq.restype = None
+_ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 
+                                   ct.POINTER(ct.c_int)]
+@deprecated
+@netcdf
+def ESMP_GridspecInq(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions:  The rank and grid dimensions of the specified GRIDSPEC NetCDF file 
+                     or an error code have been returned.\n
+    Arguments:\n
+        String :: filename\n
+    """
+    lrc = ct.c_int(0)
+    lndims = ct.c_int(0)
+    grid_dims = np.array([0,0], dtype=np.int32)
+    _ESMF.ESMC_GridspecInq(filename, ct.byref(lndims), grid_dims, ct.byref(lrc))
+    ndims = lndims.value
+    rc = lrc.value
+    if rc != constants.ESMP_SUCCESS:
+        raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
+                         constants.errmsg)
+    return ndims, grid_dims

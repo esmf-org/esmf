@@ -5487,7 +5487,7 @@ end subroutine pack_and_send_int2D
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFileDG(filename, fileFormat, distGrid, keywordEnforcer, &
        isSphere, addCornerStagger, addUserArea, addMask, &
-       varname, coordNames, rc)
+       indexflag, varname, coordNames, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFileDG
@@ -5502,6 +5502,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
     logical,                intent(in),  optional  :: addMask
+    type(ESMF_Index_Flag), intent(in), optional  :: indexflag
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
     integer,                intent(out), optional  :: rc
@@ -5536,6 +5537,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+! \item[{[indexflag]}]
+!      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
+!      to {\tt ESMF\_INDEX\_DEGLOBAL}
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
@@ -5562,6 +5566,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer         :: xdim, ydim
     integer         :: srcrank
     integer, pointer:: griddims(:)
+    type(ESMF_Index_Flag) :: localIndexFlag
 
     if (present(rc)) rc=ESMF_FAILURE
 
@@ -5575,6 +5580,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
                            ESMF_ERR_PASSTHRU, &
                            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(indexflag)) then
+        localIndexFlag = indexflag
+    else
+        localIndexFlag = ESMF_INDEX_GLOBAL
+    endif
 
     if (present(isSphere)) then
 	localIsSphere = isSphere
@@ -5645,7 +5656,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localDecompFlag(:) = ESMF_DECOMP_BALANCED
 
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
-	grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+	grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), &
+	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
@@ -5662,11 +5674,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 	if (present(addMask)) then
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
+	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
         else
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), decompflag=localDecompflag, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
+	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
@@ -5698,7 +5712,7 @@ end function ESMF_GridCreateFrmNCFileDG
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
        decompflag, isSphere, addCornerStagger, addUserArea, addMask, &
-       varname, coordNames, rc)
+       indexflag, varname, coordNames, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -5714,6 +5728,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
     logical,                intent(in),  optional  :: addMask
+    type(ESMF_Index_Flag), intent(in), optional :: indexflag
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
     integer,                intent(out), optional  :: rc
@@ -5740,6 +5755,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[regDecomp] 
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
+!      The total decounts cannot exceed the total number of PETs.  In other
+!      word, at most one DE is allowed per processor.
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
@@ -5756,6 +5773,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+! \item[{[indexflag]}]
+!      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
+!      to {\tt ESMF\_INDEX\_GLOBAL}
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
@@ -5776,8 +5796,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer         :: localrc
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    type(ESMF_Index_Flag) :: localIndexFlag
+    type(ESMF_VM) :: vm
+    integer :: PetCnt
     
     if (present(rc)) rc=ESMF_FAILURE
+
+    ! check if the total DE counts in RegDecomp is not greater than total PETs
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (size(RegDecomp,1) > 2) then
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- Only 2D grid is supported in ESMF_GridCreate from file interface", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
+    if (PetCnt < RegDecomp(1)*RegDecomp(2)) then
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- The total number of DEs cannot be greater than total processor count", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
 
     if (present(isSphere)) then
 	localIsSphere = isSphere
@@ -5797,9 +5844,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localDecompFlag(:) = ESMF_DECOMP_BALANCED
     endif
 
+    if (present(indexflag)) then
+        localIndexFlag = indexflag
+    else
+        localIndexFlag = ESMF_INDEX_GLOBAL
+    endif
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
-	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, decompflag=localDecompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, &
+	        localIndexFlag, decompflag=localDecompflag, &
+	        isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
         ! Warning about user area in GridSpec 
@@ -5815,11 +5868,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 	if (present(addMask)) then
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, &
+	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
-		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
+		addMask=addMask, varname=varname, coordNames=coordNames, &
+		rc=localrc)
         else
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, &
+	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
@@ -5844,7 +5900,7 @@ end function ESMF_GridCreateFrmNCFile
 #define ESMF_METHOD "ESMF_GridCreateFrmScrip"
 !BOPI
 ! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
-  function ESMF_GridCreateFrmScrip(filename, regDecomp, keywordEnforcer, &
+  function ESMF_GridCreateFrmScrip(filename, regDecomp, indexflag, keywordEnforcer, &
     decompflag, isSphere, addCornerStagger, addUserArea, rc)
 
 ! !RETURN VALUE:
@@ -5853,7 +5909,8 @@ end function ESMF_GridCreateFrmNCFile
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    integer,                intent(in)             :: regDecomp(:)
+    integer,                intent(in)               :: regDecomp(:)
+    type(ESMF_Index_Flag), intent(in)      :: Indexflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
@@ -6025,7 +6082,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               regDecomp=regDecomp, decompflag=decompFlagLocal, &
               coordSys=ESMF_COORDSYS_SPH_DEG, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
-            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+            indexflag=indexflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -6033,7 +6090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               regDecomp=regDecomp, decompflag=decompFlagLocal, &
               coordSys=ESMF_COORDSYS_SPH_DEG, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
-            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+            indexflag=indexflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -6339,7 +6396,7 @@ end function ESMF_GridCreateFrmScrip
 ! !INTERFACE:
   ! Private function
   function ESMF_GridCreateFrmGridspec(grid_filename, &
-                                        regDecomp, keywordEnforcer, decompflag, &
+                                        regDecomp, indexflag, keywordEnforcer, decompflag, &
 					addMask, varname, coordNames, &
                                         isSphere, addCornerStagger, rc)
 
@@ -6349,6 +6406,7 @@ end function ESMF_GridCreateFrmScrip
 ! !ARGUMENTS:
     character(len=*),      intent(in)             :: grid_filename
     integer,               intent(in)             :: regDecomp(:)
+    type(ESMF_Index_Flag), intent(in)      :: Indexflag
     type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),   optional:: decompflag(:)
     logical,                intent(in),  optional  :: addMask
@@ -6535,14 +6593,14 @@ end function ESMF_GridCreateFrmScrip
                 gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
 	        coordDep1=(/1/), coordDep2=(/2/), &
 		coordSys=ESMF_COORDSYS_SPH_DEG, &
-                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+                indexflag=indexflag, rc=localrc)
 	else 
 	    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=gridims, &
 		regDecomp=regDecomp, &
                 gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
 	        coordDep1=(/1/), coordDep2=(/2/), &
 		coordSys=ESMF_COORDSYS_SPH_DEG, &
-                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+                indexflag=indexflag, rc=localrc)
 	endif
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6630,13 +6688,13 @@ end function ESMF_GridCreateFrmScrip
 		  regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
 		  coordSys=ESMF_COORDSYS_SPH_DEG, &
-                  indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+                  indexflag=indexflag, rc=localrc)
    	else
               grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=gridims, &
 		  regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
 		  coordSys=ESMF_COORDSYS_SPH_DEG, &
-                  indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+                  indexflag=indexflag, rc=localrc)
 	endif
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

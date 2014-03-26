@@ -26,9 +26,10 @@
 
 // include associated header file
 // For ESMF
-//#include <Mesh/include/ESMCI_OTree.h>
+#include <Mesh/include/ESMCI_OTree.h>
+
 // For testing
-#include "ESMCI_OTree.h"
+//#include "ESMCI_OTree.h"
 
 #include "stdlib.h"
 #include <algorithm>
@@ -278,6 +279,73 @@ void OTree::commit(
 //-----------------------------------------------------------------------------
 
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::OTree::add_commit()"
+//BOP
+// !IROUTINE:  add_commit
+//
+// !INTERFACE:
+void OTree::add_commit(
+
+//
+// !RETURN VALUE:
+//  none
+// 
+// !ARGUMENTS:
+//
+	       double min[3],
+	       double max[3],
+	       void *data
+  ) {
+//
+// !DESCRIPTION:
+// Add an item to the OTree min,max gives the boundarys of the item and data 
+// represents the item, also commit the item to the tree. This is in contrast
+// to the add() function which just adds an item in preparation for the commit
+// which adds all of the items which have been previously added to the tree. 
+//EOP
+//-----------------------------------------------------------------------------
+   Trace __trace("OTree::add_commit()");
+
+  // Error check
+  if (curr_size_mem > max_size_mem-1) {
+    Throw() << "OTree full";
+  }
+
+  // Get a pointer to this item
+  ONode *node=mem+curr_size_mem;
+
+  // Fill item
+  node->min[0]=min[0];
+  node->min[1]=min[1];
+  node->min[2]=min[2];
+
+  node->max[0]=max[0];
+  node->max[1]=max[1];
+  node->max[2]=max[2];
+
+  node->data=data;
+
+  // Set defaults
+  node->children=NULL;
+  node->next=NULL;
+
+  // Advance to next position
+  curr_size_mem++;
+
+  // If the tree is not empty, add it to the tree...
+  if (root != NULL) {
+    _add_onode(root, node);
+  } else { // ... otherwise stick this in the root
+    root=node;
+  }
+
+  // Make sure to record that we're now committed
+  is_committed=true;
+
+}
 
 //-----------------------------------------------------------------------------
   typedef struct {

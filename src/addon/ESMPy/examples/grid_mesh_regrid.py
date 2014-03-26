@@ -1,15 +1,19 @@
+import os
 import ESMF
 from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
 grid1 = "T42_grid.nc"
+grid2 = "ne15np4_scrip.nc"         #SCRIP
 
-grid2 = "ne15np4_scrip.nc"
-
+prefix = 'data/'
+grid1 = prefix+grid1
+grid2 = prefix+grid2
 if ESMF.local_pet() == 0:
-    # retrieve the data files from the esmf data repository
+    if not os.path.exists(prefix):
+        os.mkdir(prefix)
     response = cache_data_file(grid1)
     response = cache_data_file(grid2)
-  
+    
 # create a logically rectangular source grid for a SCRIP format file 
 grid = ESMF.Grid(filename=grid1, \
                  filetype=ESMF.FileFormat.SCRIP, \
