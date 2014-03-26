@@ -188,6 +188,10 @@ ifndef ESMF_DEFER_LIB_BUILD
 export ESMF_DEFER_LIB_BUILD = default
 endif
 
+ifndef ESMF_SHARED_LIB_BUILD
+export ESMF_SHARED_LIB_BUILD = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
@@ -383,6 +387,10 @@ endif
 
 ifneq ($(ESMF_DEFER_LIB_BUILD),OFF)
 export ESMF_DEFER_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
+export ESMF_SHARED_LIB_BUILD = ON
 endif
 
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
@@ -921,7 +929,9 @@ endif
 ifeq ($(ESMF_OS),Cygwin)
 ESMF_SL_SUFFIX        = dll.a
 endif
+ifeq ($(ESMF_SHARED_LIB_BUILD),ON)
 ESMF_SL_LIBS_TO_MAKE  = libesmf
+endif
 ESMF_SL_LIBLINKER     = $(ESMF_CXXCOMPILER)
 ESMF_SL_LIBOPTS      +=
 ESMF_SL_LIBLIBS      +=
