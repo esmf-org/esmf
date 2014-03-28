@@ -55,7 +55,7 @@ program ESMF_RegridWeightGenUTest
   type(ESMF_RegridMethod_Flag) :: methodflag
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   type(ESMF_RouteHandle) :: routehandle
-  
+
   rc = ESMF_SUCCESS
 
   !-----------------------------------------------------------------------------
@@ -164,6 +164,9 @@ program ESMF_RegridWeightGenUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
+  call ESMF_FieldSMMRelease(routehandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "RegridWeightGen patch Test with route handle"
@@ -182,6 +185,9 @@ program ESMF_RegridWeightGenUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
+
+  call ESMF_FieldSMMRelease(routehandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !----------------------------------------------------------------------------
   !NEX_UTest
@@ -202,6 +208,9 @@ program ESMF_RegridWeightGenUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
+
+  call ESMF_FieldSMMRelease(routehandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
 
