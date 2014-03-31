@@ -90,6 +90,7 @@ module NUOPC_Driver
   public NUOPC_DriverGetComp
   public NUOPC_DriverNewRunSequence
   public NUOPC_DriverSet
+  public NUOPC_DriverSetModel
   
   ! interface blocks
   !---------------------------------------------
@@ -1951,7 +1952,7 @@ module NUOPC_Driver
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static array modelComp,
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, compLabel, comp, rc=rc)
+    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2224,6 +2225,55 @@ module NUOPC_Driver
     if (present(modelCount)) then
       is%wrap%modelCount = modelCount
     endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverSetModel - Set Driver internals model specific
+!
+! !INTERFACE:
+  subroutine NUOPC_DriverSetModel(driver, compIndex, petList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: compIndex
+    integer,             intent(in)            :: petList(:)
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Set the petList for a specific Model, Mediator, or Driver child component.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! sanity checking of compIndex
+    if ((compIndex<1) .or. (compIndex>is%wrap%modelCount)) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
+        msg="compIndex is out of bounds.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! Set up the associated petList member in the internal state and transfer
+    allocate(is%wrap%modelPetLists(compIndex)%petList(size(petList)))
+    is%wrap%modelPetLists(compIndex)%petList(:) = petList(:)  ! transfer entries
     
   end subroutine
   !-----------------------------------------------------------------------------

@@ -28,7 +28,7 @@ module NUOPC_DriverAtmOcn
     Driver_label_SetModelPetLists => label_SetModelPetLists, &
     Driver_label_SetModelServices => label_SetModelServices, &
     Driver_label_Finalize         => label_Finalize, &
-    NUOPC_DriverAddComp, NUOPC_DriverGetComp
+    NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel
 
   implicit none
   
@@ -39,7 +39,7 @@ module NUOPC_DriverAtmOcn
   public label_InternalState, label_SetModelPetLists
   public label_SetModelServices, label_Finalize
   
-  public NUOPC_DriverAddComp, NUOPC_DriverGetComp
+  public NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel
   
   character(*), parameter :: &
     label_InternalState = "DriverAtmOcn_InternalState"
@@ -199,10 +199,26 @@ module NUOPC_DriverAtmOcn
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
       ! set the petLists
-      superIS%wrap%modelPetLists(1)%petList => is%wrap%atmPetList
-      superIS%wrap%modelPetLists(2)%petList => is%wrap%ocnPetList
-      superIS%wrap%connectorPetLists(1,2)%petList => is%wrap%atm2ocnPetList
-      superIS%wrap%connectorPetLists(2,1)%petList => is%wrap%ocn2atmPetList
+      if (associated(is%wrap%atmPetList)) then
+        superIS%wrap%modelPetLists(1)%petList => is%wrap%atmPetList
+      else 
+        is%wrap%atmPetList => superIS%wrap%modelPetLists(1)%petList
+      endif
+      if (associated(is%wrap%ocnPetList)) then
+        superIS%wrap%modelPetLists(2)%petList => is%wrap%ocnPetList
+      else 
+        is%wrap%ocnPetList => superIS%wrap%modelPetLists(2)%petList
+      endif
+      if (associated(is%wrap%atm2ocnPetList)) then
+        superIS%wrap%connectorPetLists(1,2)%petList => is%wrap%atm2ocnPetList
+      else
+        is%wrap%atm2ocnPetList => superIS%wrap%connectorPetLists(1,2)%petList
+      endif
+      if (associated(is%wrap%ocn2atmPetList)) then
+        superIS%wrap%connectorPetLists(2,1)%petList => is%wrap%ocn2atmPetList
+      else
+        is%wrap%ocn2atmPetList => superIS%wrap%connectorPetLists(2,1)%petList
+      endif
     endif
     
   end subroutine
