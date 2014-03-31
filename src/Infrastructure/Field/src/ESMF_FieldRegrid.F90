@@ -320,6 +320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     regridmethod, &
                     polemethod, regridPoleNPnts, & 
                     lineType, &
+                    normType, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -338,6 +339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_PoleMethod_Flag),  intent(in),   optional :: polemethod
       integer,                     intent(in),   optional :: regridPoleNPnts
       type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
+      type(ESMF_NormType_Flag),    intent(in),   optional :: normType
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       logical,                     intent(in),   optional :: ignoreDegenerate
       integer,                     intent(inout),optional :: srcTermProcessing
@@ -441,6 +443,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           list of valid options for this argument. If not specified, the default depends on the 
 !           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
 !           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
+!     \item [{[normType]}] 
+!           This argument controls the type of normalization used when generating conservative weights. This option
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
+!           {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -590,6 +596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         logical :: localIgnoreDegenerate
         type(ESMF_LineType_Flag):: localLineType
+        type(ESMF_NormType_Flag):: localNormType
         logical :: srcDual, dstDual
 
         ! Initialize return code; assume failure until success is certain
@@ -665,6 +672,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            localLineType=lineType
         else     
            localLineType=ESMF_LINETYPE_CART
+        endif
+
+        ! Handle optional normType argument
+        if (present(normType)) then
+           localNormType=normType
+        else     
+           localNormType=ESMF_NORMTYPE_DSTAREA
         endif
 
 
@@ -975,6 +989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
                 localLineType, &
+                localNormType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &
@@ -1000,6 +1015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
                 localLineType, &
+                localNormType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &

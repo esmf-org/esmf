@@ -150,6 +150,7 @@ end function my_xor
                  dstMesh, dstArray, &
                  regridmethod, &
                  lineType, &
+                 normType, &
                  polemethod, regridPoleNPnts, &
                  regridScheme, &
                  unmappedaction, &
@@ -168,6 +169,7 @@ end function my_xor
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
       type(ESMF_LineType_Flag), intent(in)    :: lineType
+      type(ESMF_NormType_Flag), intent(in)    :: normType
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
@@ -306,6 +308,7 @@ end function my_xor
                    dstMesh%this, dstArray, &
                    regridmethod,  &
                    lineType, &
+                   normType, &
                    polemethod, regridPoleNPnts, &    
                    regridScheme, localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &

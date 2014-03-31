@@ -73,6 +73,8 @@ void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
                                       int *iientries);
 void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
                                       int *iientries, double *factors);
+void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
+                               int *iientries, double *factors);
 
 // external C functions
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -88,6 +90,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                                             Mesh **meshdstpp, ESMCI::Array **arraydstpp,
                                             int *regridMethod, 
                                             int *map_type,
+                                            int *norm_type,
                                             int *regridPoleType, int *regridPoleNPnts,  
                                             int *regridScheme, 
                                             int *unmappedaction, int *_ignoreDegenerate,
@@ -348,6 +351,12 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (srcmesh.is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
       if (dstmesh.is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
+    }
+
+
+    ///// If conservative then modify weights according to norm type //////
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
 
@@ -1327,6 +1336,108 @@ void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
     }
   }
 
+}
+
+void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
+                               int *iientries, double *factors) {
+
+
+  // Get frac field
+  MEField<> *elem_frac = mesh.GetField("elem_frac");
+  if (!elem_frac) Throw() << "Trying to get elem_frac when it doesn't exist";
+
+  // Process differently if mesh is split
+  if (!mesh.is_split) {
+    // Loop through weights dividing by dst_fraction
+    for (int i=0; i<num_entries; i++) {
+      int dst_id=iientries[2*i+1];
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, dst_id);
+      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+        Throw() << " destination id not found in destination mesh.";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+      
+      // Get frac data
+      double *f=elem_frac->data(elem);
+      double frac=*f;
+      
+      // If not 0.0 divide
+      if (frac != 0.0) {
+        factors[i] = factors[i]/frac;
+      }
+    }
+  } else {
+    // get map of elem ids to fraction
+    std::map<int,double> id_to_frac;
+
+    // Iterate through elements constucting id_to_frac list
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      
+      // Don't do non-local elements
+      if (!GetAttr(elem).is_locally_owned()) continue;
+        
+      // Get the element id
+      int eid=elem.get_id();
+        
+      // Get frac data
+      double *f=elem_frac->data(elem);
+      double frac=*f;
+
+      // See if the element is part of a larger polygon
+      std::map<UInt,double>::iterator mi =  mesh.split_id_to_frac.find(eid);
+        
+      // Not part of something larger, so just stick in map
+      if (mi == mesh.split_id_to_frac.end()) {
+        id_to_frac[eid] = frac;
+        continue;
+      } 
+        
+      // It is part of original poly, so modify by fraction 
+      frac *= mi->second;
+
+      // Translate id if necessary
+      int orig_id;
+      std::map<UInt,UInt>::iterator soi =  mesh.split_to_orig_id.find(eid);
+      if (soi == mesh.split_to_orig_id.end()) {
+        orig_id=eid;
+      } else {
+        orig_id=soi->second;
+      }
+
+      // either put this in or add it depending if id is in map
+      std::map<int,double>::iterator ifi =  id_to_frac.find(orig_id);
+      if (ifi == id_to_frac.end()) {
+        id_to_frac[orig_id]=frac;
+      } else {
+        ifi->second += frac;
+      }
+    }
+
+    // Loop through weights dividing by dst_fraction
+    for (int i=0; i<num_entries; i++) {
+      int dst_id=iientries[2*i+1];
+      
+      //  Find the corresponding fraction
+      std::map<int,double>::iterator ifi =  id_to_frac.find(dst_id);
+      if (ifi == id_to_frac.end()) {
+        Throw() << " destination id not found in id_to_frac map.";
+      }
+
+      // Get fraction
+      double frac=ifi->second;
+
+      // If not 0.0 divide
+      if (frac != 0.0) {
+        factors[i] = factors[i]/frac;
+      }
+    }
+  }
 }
 
 #undef  ESMC_METHOD
