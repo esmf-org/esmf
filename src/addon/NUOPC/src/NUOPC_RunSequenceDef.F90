@@ -37,8 +37,8 @@ module NUOPC_RunSequenceDef
   
   type NUOPC_RunElement
     ! - new style members
-    type(ESMF_GridComp), pointer    :: gcomp  !gjt: not yet used
-    type(ESMF_CplComp), pointer     :: ccomp  !gjt: not yet used
+!    type(ESMF_GridComp), pointer    :: gcomp  !gjt: not yet used
+!    type(ESMF_CplComp), pointer     :: ccomp  !gjt: not yet used
     ! - old style members
     integer :: i  ! i >= 0 -> model comp. index, or src model index if connector
                   ! i <  0 -> link or enddo element (depend on runSeq)
@@ -110,8 +110,8 @@ module NUOPC_RunSequenceDef
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! initialize the new run element
     ! - new style members
-    runElement%gcomp => NULL()  !gjt: not yet used
-    runElement%ccomp => NULL()  !gjt: not yet used
+!    runElement%gcomp => NULL()  !gjt: not yet used
+!    runElement%ccomp => NULL()  !gjt: not yet used
     ! - old style members
     runElement%i = i
     runElement%j = j
