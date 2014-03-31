@@ -743,6 +743,23 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_NormType_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: normtype
+      end type
+
+
+      type(ESMF_NormType_Flag), parameter :: &
+           ESMF_NORMTYPE_DSTAREA      = ESMF_NormType_Flag(0), &
+           ESMF_NORMTYPE_FRACAREA     = ESMF_NormType_Flag(1)
+
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 !
 !
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
@@ -1024,6 +1041,10 @@
 
       public ESMF_COORDSYS_DEG2RAD, &
              ESMF_COORDSYS_RAD2DEG
+
+      public ESMF_NormType_Flag
+      public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
+
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
