@@ -89,6 +89,7 @@ module NUOPC_Driver
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverGetComp
   public NUOPC_DriverNewRunSequence
+  public NUOPC_DriverSetRunSequence
   public NUOPC_DriverSet
   public NUOPC_DriverSetModel
   
@@ -102,6 +103,7 @@ module NUOPC_Driver
   interface NUOPC_DriverAddRunElement
     module procedure NUOPC_DriverAddRunElementM
     module procedure NUOPC_DriverAddRunElementC
+    module procedure NUOPC_DriverAddRunElementL
   end interface
   !---------------------------------------------
   interface NUOPC_DriverGetComp
@@ -2041,6 +2043,51 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_DriverAddRunElement - Add RunElement that links to another slot
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddRunElement()
+  subroutine NUOPC_DriverAddRunElementL(driver, slot, linkSlot, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: slot
+    integer,             intent(in)            :: linkSlot
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a RunElement that links to another RunSequence slot.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Actually add the RunElement for the identified component
+    call NUOPC_RunElementAddLink(is%wrap%runSeq(slot), slot=linkSlot, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_DriverGetGridComp - Get a GridComp child from a Driver
 !
 ! !INTERFACE:
@@ -2187,6 +2234,50 @@ module NUOPC_Driver
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverSetRunSequence - Set internals of RunSequence slot
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverSetRunSequence()
+  subroutine NUOPC_DriverSetRunSequence(driver, slot, clock, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(in)            :: slot
+    type(ESMF_Clock),    intent(in)            :: clock
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Set internals of RunSequence slot.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Set clock of the selected RunSequence slot
+    call NUOPC_RunSequenceSet(is%wrap%runSeq(slot), clock=clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_DriverSet - Set Driver internals
