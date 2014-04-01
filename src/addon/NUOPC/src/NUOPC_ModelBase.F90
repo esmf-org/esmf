@@ -36,6 +36,7 @@ module NUOPC_ModelBase
   public &
     label_InternalState, &
     label_Advance, &
+    label_AdvanceClock, &
     label_CheckImport, &
     label_SetRunClock, &
     label_TimestampExport
@@ -44,6 +45,8 @@ module NUOPC_ModelBase
     label_InternalState = "ModelBase_InternalState"
   character(*), parameter :: &
     label_Advance = "ModelBase_Advance"
+  character(*), parameter :: &
+    label_AdvanceClock = "ModelBase_AdvanceClock"
   character(*), parameter :: &
     label_CheckImport = "ModelBase_CheckImport"
   character(*), parameter :: &
@@ -300,7 +303,7 @@ module NUOPC_ModelBase
       ! SPECIALIZE required: label_Advance
       ! -> first check for the label with phase index
       call ESMF_MethodExecute(gcomp, label=label_Advance, index=phase, &
-      existflag=existflag, userRc=localrc, rc=rc)
+        existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -310,7 +313,8 @@ module NUOPC_ModelBase
         return  ! bail out
       if (.not.existflag) then
         ! -> next check for the label without phase index
-        call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, rc=rc)
+        call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, &
+          rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -320,11 +324,35 @@ module NUOPC_ModelBase
           return  ! bail out
       endif
         
-      ! advance the internalClock to the new current time
-      call ESMF_ClockAdvance(internalClock, rc=rc)
+      ! advance the internalClock to the new current time (optionally specialz)
+      call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
+        existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      if (.not.existflag) then
+        ! -> next check for the label without phase index
+        call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, &
+          existflag=existflag, userRc=localrc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (.not.existflag) then
+          ! at last use the DEFAULT implementation to advance the Clock
+          call ESMF_ClockAdvance(internalClock, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+        endif
+      endif
     
       ! conditionally output diagnostic to Log file
       if (verbose) then
@@ -344,19 +372,6 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
-    ! conditionally output diagnostic to Log file
-    if (verbose) then
-      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
-        ") with current time: ", msgString, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
-    
     ! SPECIALIZE optionally: label_TimestampExport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
@@ -381,6 +396,19 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
 
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
+        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
