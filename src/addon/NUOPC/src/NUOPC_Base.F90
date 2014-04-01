@@ -66,6 +66,7 @@ module NUOPC_Base
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
+  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateBuildStdList
@@ -1974,7 +1975,33 @@ endif
       NUOPC_ClockIsCreated = .true.
   end function
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Nop - No-Operation attachable method for GridComp
+! !INTERFACE:
+  subroutine NUOPC_Nop(gcomp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
+! !DESCRIPTION:
+!   Dummy method implementing a No-Operation with an interface that matches the
+!   requirements for a attachable method for ESMF\_GridComp objects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gcomp]
+!     The {\tt ESMF\_GridComp} object to which this method is attached.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State

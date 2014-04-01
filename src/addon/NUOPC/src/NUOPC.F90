@@ -63,6 +63,7 @@ module NUOPC
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
+  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateBuildStdList
