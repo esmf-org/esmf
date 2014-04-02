@@ -2032,11 +2032,11 @@ module NUOPC_Driver
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static arrays modelComp and connectorComp, 
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, rc=rc)
+    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, rc=rc)
+    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
