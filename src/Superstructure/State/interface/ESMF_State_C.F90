@@ -331,13 +331,13 @@
        type(ESMF_State), intent(in)              :: state                  !in
        integer, intent(in)                       :: numItems               !in
        character(len=*), intent(inout)           :: itemNameList(numItems) !out
-       type(ESMF_StateItem_Flag), intent(inout)   :: itemTypeList(numItems) !out
+       type(ESMF_StateItem_Flag), intent(inout)  :: itemTypeList(numItems) !out
        integer, intent(out)                      :: rc                     !out
 
        ! local variable
        integer                    :: itemCount
-       character(len=ESMF_MAXSTR) :: localNameList(numItems)
-       type(ESMF_StateItem_Flag)   :: localTypeList(numItems)
+       character(len (itemNameList)) :: localNameList(numItems)
+       type(ESMF_StateItem_Flag)  :: localTypeList(numItems)
 
        integer                    :: i
 
