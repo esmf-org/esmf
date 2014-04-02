@@ -107,7 +107,7 @@ class Manager(object):
             # segfault from ESMF when trying to call Destroy routines
             # on objects which have already been deallocated by the ESMF
             # garbage collector.
-            #atexit.register(self.__del__)
+            import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
             vm = ESMP_VMGetGlobal()
             self.local_pet, self.pet_count = ESMP_VMGet(vm)

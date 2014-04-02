@@ -34,8 +34,13 @@ class ESMP_InterfaceInt(object):
         arraycopy = array.copy()
         self.ptr = ESMP_InterfaceIntCreate(array, len(array))
         self.size = len(array)
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self.__finalized = False
     def __del__(self):
-        ESMP_InterfaceIntDestroy(self.ptr)
+        if not self.__finalized:
+            ESMP_InterfaceIntDestroy(self.ptr)
+            self.__finalized = True
 
 class ESMP_VM(ct.Structure):
         _fields_ = [("ptr", ct.c_void_p)]
