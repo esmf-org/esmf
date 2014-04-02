@@ -125,6 +125,9 @@ class Regrid(object):
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
 
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self.__finalized = False
 
     def __call__(self, srcfield, dstfield,
                  zero_region=None):
@@ -161,8 +164,10 @@ class Regrid(object):
         Returns: \n
             None \n
         """
-        # call into the ctypes layer
-        ESMP_FieldRegridRelease(self.routehandle)
+        if not self.__finalized:
+            ESMP_FieldRegridRelease(self.routehandle)
+            self.__finalized = True
+
 
     def __repr__(self):
         """

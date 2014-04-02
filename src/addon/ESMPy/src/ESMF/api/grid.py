@@ -318,6 +318,11 @@ class Grid(object):
         if staggerloc != None:
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
 
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self.__finalized = False
+
+
     def __del__(self):
         """
         Release the memory associated with a Grid. \n
@@ -328,7 +333,10 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        ESMP_GridDestroy(self)
+        if not self.__finalized:
+            ESMP_GridDestroy(self)
+            self.__finalized = True
+    
 
     def __repr__(self):
         """

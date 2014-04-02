@@ -162,6 +162,10 @@ class Mesh(object):
             self.size[element] = ESMP_MeshGetOwnedElementCount(self)
             self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
 
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self.__finalized = False
+
     def __del__(self):
         """
         Release the memory associated with a Mesh. \n
@@ -172,7 +176,10 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        ESMP_MeshDestroy(self)
+        if not self.__finalized:
+            ESMP_MeshDestroy(self)
+            self.__finalized = True
+
 
     def __repr__(self):
         """

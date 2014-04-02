@@ -171,6 +171,10 @@ class Field(ma.MaskedArray):
         # create the new Field instance
         obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
 
+        # register function with atexit
+        import atexit; atexit.register(obj.__del__)
+        obj.__finalized = False
+
         # initialize field data
         obj.struct = struct
         obj.type = typekind
@@ -229,7 +233,10 @@ class Field(ma.MaskedArray):
         Returns: \n
             None \n
         """
-        ESMP_FieldDestroy(self)
+        if not self.__finalized:
+            ESMP_FieldDestroy(self)
+            self.__finalized = True
+
 
     def __repr__(self):
         """
