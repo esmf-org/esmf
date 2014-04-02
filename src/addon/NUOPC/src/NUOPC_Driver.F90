@@ -1916,17 +1916,19 @@ module NUOPC_Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementM(driver, slot, compLabel, phase, rc)
+  subroutine NUOPC_DriverAddRunElementM(driver, slot, compLabel, phase, &
+    relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
     character(len=*),    intent(in)            :: compLabel
     integer,             intent(in)            :: phase
+    logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Add a RunElement for a Model, Mediator, or Driver to the RunSequence of the 
-! Driver.
+! Driver. 
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1935,6 +1937,7 @@ module NUOPC_Driver
     type(type_InternalState)        :: is
     integer                         :: i
     type(ESMF_GridComp)             :: comp
+    logical                         :: addFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1954,7 +1957,7 @@ module NUOPC_Driver
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static array modelComp,
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, rc=rc)
+    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -1962,11 +1965,22 @@ module NUOPC_Driver
       if (is%wrap%modelComp(i)==comp) exit ! found the match
     enddo
     
-    ! Actually add the RunElement for the identified component
-    call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=i, phase=phase, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    ! consider relaxed mode
+    addFlag = .true.
+    if (present(relaxedflag)) then
+      if (relaxedflag.and.(i>is%wrap%modelCount)) then
+        ! no match was found
+        addFlag = .false.
+      endif
+    endif
+    
+    if (addFlag) then
+      ! Actually add the RunElement for the identified component
+      call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=i, phase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1978,13 +1992,14 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
   subroutine NUOPC_DriverAddRunElementC(driver, slot, srcCompLabel, &
-    dstCompLabel, phase, rc)
+    dstCompLabel, phase, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
     character(len=*),    intent(in)            :: srcCompLabel
     character(len=*),    intent(in)            :: dstCompLabel
     integer,             intent(in)            :: phase
+    logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1997,6 +2012,7 @@ module NUOPC_Driver
     type(type_InternalState)        :: is
     integer                         :: src, dst
     type(ESMF_GridComp)             :: srcComp, dstComp
+    logical                         :: addFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2031,12 +2047,27 @@ module NUOPC_Driver
       if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
     
-    ! Actually add the RunElement for the identified Connector component
-    call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=src, j=dst, &
-      phase=phase, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    ! consider relaxed mode
+    addFlag = .true.
+    if (present(relaxedflag)) then
+      if (relaxedflag.and.(src>is%wrap%modelCount)) then
+        ! no match was found for src component
+        addFlag = .false.
+      endif
+      if (relaxedflag.and.(dst>is%wrap%modelCount)) then
+        ! no match was found for dst component
+        addFlag = .false.
+      endif
+    endif
+    
+    if (addFlag) then
+      ! Actually add the RunElement for the identified Connector component
+      call NUOPC_RunElementAddComp(is%wrap%runSeq(slot), i=src, j=dst, &
+        phase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2092,11 +2123,12 @@ module NUOPC_Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, rc)
+  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     type(ESMF_GridComp), intent(out)           :: comp
+    logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2108,6 +2140,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
+    logical                         :: getFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2123,12 +2156,24 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Search for the entry in componentMap
-    call ESMF_ContainerGetUDT(is%wrap%componentMap, trim(compLabel), &
-      cmEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    ! consider relaxed mode
+    getFlag = .true.
+    if (present(relaxedflag)) then
+      call ESMF_ContainerGet(is%wrap%componentMap, trim(compLabel), &
+        isPresent=getFlag, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! Conditionally access the entry in componentMap
+    if (getFlag) then
+      call ESMF_ContainerGetUDT(is%wrap%componentMap, trim(compLabel), &
+        cmEntry, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! Return the identified component
     comp = cmEntry%wrap%component
@@ -2143,12 +2188,13 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
   subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, dstCompLabel, &
-    comp, rc)
+    comp, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
     character(len=*),    intent(in)            :: dstCompLabel
     type(ESMF_CplComp),  intent(out)           :: comp
+    logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2159,6 +2205,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ConnectorMapEntry)         :: cmEntry
+    logical                         :: getFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2174,12 +2221,25 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Search for the entry in componentMap
-    call ESMF_ContainerGetUDT(is%wrap%componentMap, &
-      trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), cmEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    ! consider relaxed mode
+    getFlag = .true.
+    if (present(relaxedflag)) then
+      call ESMF_ContainerGet(is%wrap%componentMap, &
+        trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), &
+        isPresent=getFlag, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! Conditionally access the entry in componentMap
+    if (getFlag) then
+      call ESMF_ContainerGetUDT(is%wrap%componentMap, &
+        trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), cmEntry, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! Return the identified component
     comp = cmEntry%wrap%connector
