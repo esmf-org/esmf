@@ -35,9 +35,9 @@ if ESMF.local_pet() == 0:
 # create two unique Mesh objects
 if parallel:
     srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
-        mesh_create_5_parallel(ESMF.local_pet())
+        mesh_create_5_parallel()
     dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
-        mesh_create_10_parallel(ESMF.local_pet())
+        mesh_create_10_parallel()
 else:
     srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
         mesh_create_5()
