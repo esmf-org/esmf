@@ -27,7 +27,8 @@ srcfield[...] = 25
 
 # create an unstructured cubed-sphere destination mesh from a SCRIP format file
 mesh = ESMF.Mesh(filename=grid2, \
-                 filetype=ESMF.FileFormat.SCRIP)
+                 filetype=ESMF.FileFormat.SCRIP, \
+                 convert_to_dual=False)
 
 # create a field on the elements of the destination mesh
 dstfield = ESMF.Field(mesh, 'dstmesh', meshloc=ESMF.MeshLoc.ELEMENT)
