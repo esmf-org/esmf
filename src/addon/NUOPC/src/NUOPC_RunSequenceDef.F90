@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_RunSequenceDef.F90"
 !==============================================================================
 
 module NUOPC_RunSequenceDef
@@ -36,10 +36,15 @@ module NUOPC_RunSequenceDef
 !==============================================================================
   
   type NUOPC_RunElement
+    ! - new style members
+!    type(ESMF_GridComp), pointer    :: gcomp  !gjt: not yet used
+!    type(ESMF_CplComp), pointer     :: ccomp  !gjt: not yet used
+    ! - old style members
     integer :: i  ! i >= 0 -> model comp. index, or src model index if connector
                   ! i <  0 -> link or enddo element (depend on runSeq)
     integer :: j  ! j >= 0 -> connector component: i->j
                   ! j <  0 -> model component: i
+    ! - common members
     integer :: phase  ! run phase
     type(NUOPC_RunSequence), pointer:: runSeq ! point back to RunSequence
     type(NUOPC_RunElement), pointer :: next   ! next RunElement in linked list
@@ -104,8 +109,13 @@ module NUOPC_RunSequenceDef
       msg="Allocation of RunElement in NUOPC_RunElementAdd.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! initialize the new run element
+    ! - new style members
+!    runElement%gcomp => NULL()  !gjt: not yet used
+!    runElement%ccomp => NULL()  !gjt: not yet used
+    ! - old style members
     runElement%i = i
     runElement%j = j
+    ! - common members
     runElement%phase = phase
     runElement%runSeq => runSeq   ! associate for back reference
     ! append the new run element to the run sequence (but before ENDDO)

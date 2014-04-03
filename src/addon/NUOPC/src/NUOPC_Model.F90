@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Model.F90"
 !==============================================================================
 
 module NUOPC_Model
@@ -27,6 +27,7 @@ module NUOPC_Model
     type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
+    label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
     ModelBase_label_TimestampExport => label_TimestampExport
@@ -46,6 +47,7 @@ module NUOPC_Model
   public &
     label_InternalState, &
     label_Advance, &
+    label_AdvanceClock, &
     label_CheckImport, &
     label_DataInitialize, &
     label_SetClock, &

@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Mediator.F90"
 !==============================================================================
 
 module NUOPC_Mediator
@@ -27,6 +27,7 @@ module NUOPC_Mediator
     type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
+    label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
     label_TimestampExport           => label_TimestampExport
@@ -46,6 +47,7 @@ module NUOPC_Mediator
   public &
     label_InternalState, &
     label_Advance, &
+    label_AdvanceClock, &
     label_CheckImport, &
     label_DataInitialize, &
     label_SetRunClock, &
@@ -53,6 +55,9 @@ module NUOPC_Mediator
 
   character(*), parameter :: &
     label_DataInitialize = "Mediator_DataInitialize"
+
+  ! Generic methods
+  public NUOPC_MediatorGet
 
   !-----------------------------------------------------------------------------
   contains
@@ -334,4 +339,46 @@ module NUOPC_Mediator
   
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_MediatorGet - Get info from a Mediator
+!
+! !INTERFACE:
+  subroutine NUOPC_MediatorGet(mediator, driverClock, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: mediator
+    type(ESMF_Clock),    intent(out)           :: driverClock
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Get a the Clock of the parent driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(mediator, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(mediator, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Return the driverClock member
+    driverClock = is%wrap%driverClock
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module

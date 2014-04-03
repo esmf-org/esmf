@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC.F90"
 !==============================================================================
 
 !TODO: make this macros available through ESMF as parameter or find other way
@@ -24,6 +24,7 @@ module NUOPC
   use ESMF
   use NUOPC_Base
   use NUOPC_RunSequenceDef
+  use NUOPC_Comp
 
   implicit none
   
@@ -62,6 +63,7 @@ module NUOPC
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
+  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateBuildStdList
@@ -84,4 +86,8 @@ module NUOPC
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
   
+  ! defined in NUOPC_Comp
+  public NUOPC_CompDerive
+  public NUOPC_CompSpecialize
+
 end module
