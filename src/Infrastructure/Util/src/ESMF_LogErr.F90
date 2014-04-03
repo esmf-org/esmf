@@ -1029,7 +1029,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     if (alog%traceFlag) then
@@ -1138,7 +1140,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     if (alog%traceFlag) then
@@ -1261,7 +1265,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
     
     if (associated(alog)) then
