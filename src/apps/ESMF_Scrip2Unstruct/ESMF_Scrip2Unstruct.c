@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.8 2011/08/22 17:38:15 oehmke Exp $
+// $Id: ESMF_Scrip2Unstruct.C $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2014, University Corporation for Atmospheric Research, 
@@ -25,7 +25,9 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#include "mpi.h"
+#include "ESMC.h"
+#include "Mesh/include/ESMCI_ClumpPnts.h"
+//#include "mpi.h"
 
 #ifdef ESMF_NETCDF
 #include "netcdf.h"
@@ -37,191 +39,18 @@
 #endif
 
 #define TOL 0.0000000001
-
-typedef struct field {
-  double lon, lat;
-  struct field *prev, *next;
-  int rank;
-  int count;
-} FIELD;
-
-FIELD **bucket;
-int totalbuckets,nextrank,startrank;
-double interval, firstlat;
-
-int init_bucket(int num_cells, double minlat, double maxlat, int startindex) {
-  int i, len, total, factor;
-  // increase number of buckets when num_cells is big
-  total = 180;
-  factor = 1;
-  firstlat = minlat;
-  startrank=startindex;
-  nextrank = startindex+1;
-  len = num_cells/total;
-  while (len > 1000) {
-    total *=2;
-    factor *=2;
-   len = num_cells/total;
-  }
-  // need one more bucket for latitude = 90
-  //totalbuckets = total+1;
-  totalbuckets = total+1;
-  //interval = factor;
-  interval = totalbuckets/(maxlat-minlat);
-  //printf("total number of buckets: %d at interval %lf degrees\n", totalbuckets, interval);
-  bucket = (FIELD**)malloc(sizeof(FIELD*)*totalbuckets);
-  for (i=0; i<totalbuckets; i++) {
-    bucket[i]=NULL;
-  }
-  return 1;
-}
-
-void print_bucket(int bid) {
-  FIELD *curr;
-  if (bucket[bid]) {
-    curr = bucket[bid];
-    printf("Bucket %d:\n", bid);
-    while (curr) {
-      printf("%f %f %d %d\n", curr->lon, curr->lat, curr->rank, curr->count);
-      curr=curr->next;
-    }
-  }
-}
-
-FIELD* insert_bucket(double lon, double lat) {
-  int bid;
-  FIELD *me, *curr;
-  bid = (int)((lat - firstlat)*interval+TOL);
-  if (bid < 0) {
-    printf("Wrong coordinates, (%f, %f)", lon, lat);
-    return 0;
-  }
-  if (bid > totalbuckets-1) bid=bid-1;
-  if (!bucket[bid]) {
-    me = bucket[bid] = (FIELD*)malloc(sizeof(FIELD));
-    me->prev = me->next = NULL;
-    me->lon = lon;
-    me->lat = lat;
-    me->rank=nextrank++;
-    me->count = 1;
-    return me;
-  } else {
-    curr = bucket[bid];
-    while ((curr->lon+TOL) < lon) {
-      //while (curr->lon < lon) { 
-      if (!curr->next) break;
-      curr=curr->next;
-    }
-    if (fabs(lon - curr->lon) < TOL) {
-    // Advance to the item which is still has curr->lon==lon, but which is just >= lat if possible
-    //      while (curr->lon == lon && (curr->lat < lat)) {
-      while (1) {
-	if (!curr->next) break;
-        if (fabs(curr->next->lon - lon) > TOL) break;      
-        if ((curr->lat - lat) >= -1*TOL) break;
-	curr=curr->next;
-      }
-      // At this point curr->lon still == lon
-
-      // Point is in list
-      if (fabs(curr->lat-lat)<TOL) {
-	curr->count++;
-	return curr;
-      } else if (lat < curr->lat) {  // Put point just before this one
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr->prev;
-	  if (me->prev) {
-	    me->prev->next=me;
-	  } else {
-	    bucket[bid]=me;
-	  }
-	  me->next = curr;
-	  curr->prev = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-      }	else if (lat > curr->lat) { // Put point just after this one
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr;
-	  me->next = curr->next;
-          if (me->next) {
-            me->next->prev=me;
-          }
-	  curr->next = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-      }	 
-    }
-    // insert before curr
-    if (lon < curr->lon) {
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr->prev;
-	  if (me->prev) {
-	    me->prev->next=me;
-	  } else {
-	    bucket[bid]=me;
-	  }
-	  me->next = curr;
-	  curr->prev = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-    } else if (!curr->next) {
-	// insert at the end
-	me = curr->next = (FIELD*)malloc(sizeof(FIELD));
-	me->prev = curr;
-	me->next = NULL;
-	me->lon = lon;
-	me->lat = lat;
-	me->rank=nextrank++;
-	me->count = 1;
-	return me;
-    }
-  }
-  printf("insert_bucket() failed, (%f, %f)\n", lon, lat);
-  return 0;
-}
-
-// return a pointer to the FIELD if found a match
-FIELD* search_bucket(double lon, double lat) {
-  int bid;
-  FIELD *curr;
-  bid = (int)((lat + 90.0)*interval+TOL);
-  if (bid < 0) {
-    return NULL;
-  }
-  if (bid > totalbuckets-1) bid=bid-1;
-  curr = bucket[bid];
-  while (!curr && (curr->lon+TOL) < lon) {
-    curr=curr->next;
-  }
-  if (!curr || fabs(curr->lon-lon) > TOL) return NULL;
-  while (fabs(curr->lon-lon)<TOL && (curr->lat < lat)) {
-    curr = curr->next;
-  }
-  if (!curr) return NULL;
-  if (fabs(curr->lon-lon)<TOL && fabs(curr->lat-lat)<TOL) return curr;
-  return NULL;
-}
   
 void handle_error(int status) {
 #ifdef ESMF_NETCDF
   if (status != NC_NOERR) {
     fprintf(stderr, "%s\n", nc_strerror(status));
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(-1);
   }
 #endif
 }
 
-// order the vertices in celltbl (total number=numedges) in counter-clock wise order
+// order the vertices in celltbl (total number=numedges) in counter-clock wise orde
 // to find the order of the vertices, we use the anchor vertex (lon,lat) (that is supposed to located 
 // in the center of the polygon).  We sort the angle of the vector from the anchor vertex
 // to each corner vertex in ascending order (assuming 0 to 2PI) 
@@ -608,6 +437,7 @@ int main(int argc, char** argv)
   int vertexid, cellid, edgeid, ccoordid, caid, cmid;
   int varid;
   double *cornerlats, *cornerlons, *nodelatlon;
+  double *nodelats, *nodelons;
   double *inbuf, *inbuf1;
   int *inbuf2;
   int *dualcells, *dualcellcounts;
@@ -617,7 +447,6 @@ int main(int argc, char** argv)
   unsigned char *edges;
   int i,i1, j, k, totalnodes, goodnodes, count;
   int *globalnodes;
-  FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
   size_t starts[2], counts[2];
   int maxconnection;
@@ -629,16 +458,20 @@ int main(int argc, char** argv)
   int dualflag;
   int ind, startind;
   double minlat, maxlat, startlat, endlat, part;
-  int nprocs, myrank;
+  int nprocs, myrank, npes;
   int *mycells;
   int alltotal, mypart, left, offset, mystart, mystartelement;
   size_t start1[1], count1[1], start2[2], count2[2];
   int doesmf = 1;
   double *coord1d;
-
-  MPI_Init(&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  int totalsize;
+  ESMC_VM vm;
+  MPI_Comm mpi_comm;
+  int pthreadflag, openmpflag;
+  
+  ESMC_Initialize(&status, ESMC_ArgLast);
+  vm = ESMC_VMGetGlobal(&status);
+  status = ESMC_VMGet(vm, &myrank, &nprocs, &npes, &mpi_comm, &pthreadflag, &openmpflag);
 
 #ifdef ESMF_NETCDF
   if (argc < 4) {
@@ -646,14 +479,14 @@ int main(int argc, char** argv)
       fprintf(stderr, "USAGE: Scrip2Unstruct inputfile outputfile dualflag [fileformat]\n");
       fprintf(stderr,"  where dualflag = 1 or 0 and fileformat is either ESMF or UGRID\n  if fileformat is not given, the default file format is ESMF\n");
     }
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(1);
   }
   c_infile = argv[1];
   if (c_infile == NULL) {
     if (myrank == 0)
       fprintf(stderr, "SCRIP file name not valid \n");
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(1); // bail out
   }
 
@@ -661,7 +494,7 @@ int main(int argc, char** argv)
   if (c_outfile == NULL) {
     if (myrank == 0) 
       fprintf(stderr, "output file name from converter not valid \n");
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(1); // bail out
   }
   
@@ -679,7 +512,7 @@ int main(int argc, char** argv)
     } else {
       if (myrank == 0) 
 	fprintf(stderr, "File format %s is not supported, use ESMF or UGRID\n", argv[4]);
-      MPI_Finalize();
+      ESMC_Finalize();
       exit(1);
     }
   }
@@ -702,7 +535,7 @@ int main(int argc, char** argv)
   // comment out the following check -- support the SCRIP file with grid_rank==1 and 2
   //  if (grdim > 1) {
   //  fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
-  //  MPI_Finalize();
+  //  ESMC_Finalize();
   //  exit(1); // bail out
   //}
 
@@ -718,7 +551,7 @@ int main(int argc, char** argv)
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
     fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(1); // bail out
   }
 #else
@@ -755,7 +588,7 @@ int main(int argc, char** argv)
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
-    MPI_Finalize();
+    ESMC_Finalize();
     exit(1);
   }
   minlat=180;
@@ -777,7 +610,6 @@ int main(int argc, char** argv)
   }
 
   maxlat += 0.00001;
-  cells = (int*)malloc(sizeof(int)*gcdim*gsdim);
 
 #if 1
   part = (maxlat-minlat)/nprocs;
@@ -797,25 +629,15 @@ int main(int argc, char** argv)
   //  startind = gsdim*gcdim*myrank;
   startind = 0;
   // printf("myrank %d latitude range: %lf, %lf, %d\n", myrank, startlat, endlat, startind);
-  // doing a bucket sort, create totalbuckets buckets,one for each latitude degree
-  // each bucket is a sorted linked list by longitude
-  init_bucket(gsdim/nprocs, startlat, endlat,startind);
-  for (i=0; i<gcdim*gsdim; i++) {
-    if (cornerlats[i]>=startlat && cornerlats[i]<endlat) {
-        tmppt=insert_bucket(cornerlons[i],cornerlats[i]);
-	if (tmppt) {
-	  cells[i]=tmppt->rank;
-	} else {
-	  printf("insert_buket() failed at index %d\n", i);
-	  return 1;
-	}
-    } else {
-      cells[i]=0;
-    }
-  }
-  totalnodes = nextrank-startind-1;
+  
+  totalsize = gsdim * gcdim;
+  cells = (int*)malloc(sizeof(int)*totalsize);
+  ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
+		     &nodelons, &nodelats, &maxconnection, startlat, endlat, &status);
 
-  //fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
+  // cells[] are 0-based index, if not filled, the null value is -1
+  //
+  //printf("PET %d: totalnodes %d, start and end lat %f %f\n", myrank, totalnodes, startlat, endlat);
   free(cornerlats);
   free(cornerlons);
 
@@ -823,31 +645,33 @@ int main(int argc, char** argv)
   // also count the maximum cells that vertex belongs to, this
   // this value will decide the maximal edges of the dual mesh
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
-  totalneighbors=(char*)malloc(totalnodes);
-  for (j=0; j<totalbuckets; j++) {
-    curr = bucket[j];
-    while (curr) {
-      i=curr->rank-1-startind;
-      nodelatlon[i*2]=curr->lon;
-      nodelatlon[i*2+1]=curr->lat;
-      totalneighbors[i]=curr->count;
-      curr=curr->next;
+  totalneighbors=(char*)calloc(totalnodes, sizeof(char));
+  for (i=0; i<totalnodes; i++) {
+    nodelatlon[i*2]=nodelons[i];
+    nodelatlon[i*2+1]=nodelats[i];
+  }
+  free(nodelons);
+  free(nodelats);
+
+  for (i=0; i<totalsize; i++) {
+    cells[i]++;
+    if (cells[i] > 0) {
+      totalneighbors[cells[i]-1] += 1;
     }
   }
 
   //printf("PET %d: Finish creating node table\n",myrank);
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(mpi_comm);
 
   // broadcast totalnodes to all PETs, adjust the node index in cells[]
   globalnodes = (int*)malloc(sizeof(int)*nprocs);
-  MPI_Allgather(&totalnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, MPI_COMM_WORLD);
+  MPI_Allgather(&totalnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, mpi_comm);
   mystart = 0;
   for (i=0; i<myrank; i++) {
     mystart += globalnodes[i];
   }
-  offset = startind-mystart;
   for (i=0; i<gcdim*gsdim; i++) {
-    if (cells[i]>0)  cells[i]-=offset;
+    if (cells[i]>0)  cells[i]+=mystart;
   }
   
   alltotal = 0;
@@ -858,8 +682,9 @@ int main(int argc, char** argv)
   // consolidate cell table, each PET gets gsdim/nprocs cells
   // do global reduce for all the processors
 #ifndef ESMF_MPIUNI
-  MPI_Allreduce(MPI_IN_PLACE, cells, gsdim*gcdim, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, cells, gsdim*gcdim, MPI_INT, MPI_SUM, mpi_comm);
 #endif
+
   mypart = (int)(gsdim/nprocs);
   left = gsdim%nprocs;
   mystartelement = mypart*myrank;
@@ -867,74 +692,50 @@ int main(int argc, char** argv)
     mypart += left;
   }
   mycells = &cells[mystartelement*gcdim]; 
-#if 0
-  mypart = (int)(gsdim/nprocs);
-  left = gsdim%nprocs;
-  if (myrank == nprocs-1) {
-    mycells = (int*)malloc((mypart+left)*gcdim*sizeof(int));
-  } else {
-    mycells = (int*)malloc((mypart)*gcdim*sizeof(int));
-  }  
-  ind1=0;
-  for (i=0; i<nprocs; i++) {
-    if (i == nprocs-1) {
-      MPI_Reduce(&cells[ind1], mycells, (mypart+left)*gcdim, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
-    } else {
-      MPI_Reduce(&cells[ind1], mycells, mypart*gcdim, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
-    }
-    if (myrank==i) mystartelement=ind1/gcdim;
-    ind1 += mypart*gcdim;
-  }
-  free(cells);
-  if (myrank == nprocs-1) mypart += left;
-#endif
 
 #if 1
   // check for degenerated cells, remove duplicate nodes and fill cell_edges;
   edges = (unsigned char*)malloc(mypart);
-  for (i=0; i<mypart; i++) {
+  int mycount = 0;
+  for (i=0; i<gsdim; i++) {
     i1=i*gcdim;
-    temp[0]=mycells[i1];
+    temp[0]=cells[i1];
     count = 1;
 
     for (j=1; j<gcdim; j++) {
       for (k=0; k<j; k++) {
-	if (mycells[i1+j]==mycells[i1+k]) {
+	if (cells[i1+j]==cells[i1+k]) {
 	  // the two vertices belong to one cell, over-counted
-	  ind=mycells[i1+j]-1-mystart;
-	  totalneighbors[ind]--;
-	  if (totalneighbors[ind] < 0) {
-	    printf("negative neighbors: %d %d %d %f %f\n", i, j, ind+mystart+1, nodelatlon[ind*2], nodelatlon[ind*2+1]);
+	  ind=cells[i1+j]-1-mystart;
+	  if (ind >=0 && ind < totalnodes) {
+	    totalneighbors[ind]--;
+	    if (totalneighbors[ind] < 0) {
+	      printf("PET %d: negative neighbors: %d %d %d %f %f\n", myrank, i, j, ind, nodelatlon[ind*2], nodelatlon[ind*2+1]);
+	    }
 	  }
-          //printf("duplicate vertex at %d: vertex %d\n", i, mycells[i1+j]);
+	  //printf("duplicate vertex at %d: vertex %d\n", i, mycells[i1+j]);
 	  break;
 	}
       }
       if (k==j) {
-	temp[count++]=mycells[i1+j];
+	temp[count++]=cells[i1+j];
       }
     }
     // copy temp array back to cell, fill with unfilled space with -1
-    edges[i]=count;
+    if (i >= mystartelement && i < mystartelement+mypart) {
+      edges[i-mystartelement]=count;
+    }
     for (j=0; j<count; j++) {
-      mycells[i1+j]=temp[j];
+      cells[i1+j]=temp[j];
     }
     for (j=count; j<gcdim; j++) {
-      mycells[i1+j]=-1;
+      cells[i1+j]=-1;
     }
   }
 
+  //printf("PET %d: my element starts at %d for %d counts %d elements have 5 edges\n", 
+  //	 myrank, mystartelement, mypart, mycount);
 #endif
-
-  // free the buckets
-  for (j=0; j<totalbuckets; j++) {
-    curr = bucket[j];
-    while (curr) {
-      tmppt=curr->next;
-      free(curr);
-      curr=tmppt;
-    }
-  }
 
   // find the maximal number of neighbors for all the vertices
   maxconnection = 0;
@@ -945,7 +746,7 @@ int main(int argc, char** argv)
 
   // find the max of maxconnection using MPI_AllReduce
 #ifndef ESMF_MPIUNI
-  MPI_Allreduce(MPI_IN_PLACE, &maxconnection, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, &maxconnection, 1, MPI_INT, MPI_MAX, mpi_comm);
 #endif
   // global max to find the maxconnection
   //printf("Maximal connection per vertex is %d\n", maxconnection);
@@ -962,7 +763,7 @@ int main(int argc, char** argv)
       }
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(mpi_comm);
     
     // now write out node and elements in sequence
     for (i=0; i<nprocs; i++) {
@@ -1013,12 +814,11 @@ int main(int argc, char** argv)
 	}
 	status=nc_close(ncid2);
 	if (status != NC_NOERR) handle_error(status);
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(mpi_comm);
       } else 
-	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(mpi_comm);
     }
     free(edges);
-    //free(mycells);
     free(nodelatlon);
   
     if (myrank == 0) {
@@ -1038,7 +838,7 @@ int main(int argc, char** argv)
 	  }
 	  if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
 	    fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-	    MPI_Finalize();
+	    ESMC_Finalize();
 	    exit(1);
 	  }
 	  status = nc_get_var_double(ncid1, ctlatid, inbuf);
@@ -1115,135 +915,137 @@ int main(int argc, char** argv)
     nc_close(ncid1);
     free(totalneighbors);
   } else {
-  // Now create the dual mesh using the cell coordinates.  The
-  // format is the same except that the num_verts = the original num_cells (gsdim), 
-  // vert_coords will be the original center-coords. num_cells = the original
-  // num_verts (totalnodes) mask is not
-  // changed, and cell_verts will be generated here
-  // 
-  // for each vert in the original grid, find out which cell uses it, use the
-  // the center of the cells to form a new cell
-  // The dual mesh should have equal number of cells and vertices
-  //
-  // celltbl = (int*)malloc(sizeof(int)*maxconnection);
-  // the new dual mesh may not have the same topology as the original mesh
-  // it depends on how many edges are sharing a specific vertices
-  // so, this has to be calculated as well
-  
-  // First, read in the center coordinates, I need all the center coordinates to calculate the order
-  inbuf = (double*)malloc(sizeof(double)*gsdim);
-  inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
-  status = nc_inq_varid(ncid1, "grid_center_lat", &ctlatid);
-  if (status != NC_NOERR) {
-    fprintf(stderr, "grid_center_lat has to exist to create a dual mesh.\n");
-    handle_error(status);
-  }
-  status = nc_get_var_double(ncid1, ctlatid, inbuf);
-  if (status != NC_NOERR) handle_error(status);
-  // copy inbuf to inbuf1
-  for (i=0; i<gsdim; i++) {
-    inbuf1[i*2+1]=inbuf[i];
-  }
-  status = nc_inq_varid(ncid1, "grid_center_lon", &ctlatid);
-  if (status != NC_NOERR) {
-    fprintf(stderr, "grid_center_lon has to exist to create a dual mesh.\n");
-    handle_error(status);
-  }
-  status = nc_get_var_double(ncid1, ctlatid, inbuf);
-  if (status != NC_NOERR) handle_error(status);
-  // copy inbuf to inbuf1
-  for (i=0; i<gsdim; i++) {
-    inbuf1[i*2]=inbuf[i];
-  }
-  // get units of grid_center_lon
-  status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
-  if (status != NC_NOERR) handle_error(status);
-  status = nc_get_att_text(ncid1, ctlonid, "units", units);
-  if (status != NC_NOERR) handle_error(status);
-  units[len]='\0';
-  // convert radian to degree
-  for (i=0; i<len; i++) {
-    units[i]=tolower(units[i]);
-  }
-  if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
-    fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-    MPI_Finalize();
-    exit(1);
-  }
-  if (!strncmp(units, "radians", 7)) {
-    for (i=0; i<gsdim*2; i++) {
-      inbuf1[i] *= rad2deg;
-    }
-  }
-  free(inbuf);
-
-  // convert longitude to (0, 360) degrees
-  for (i = 0; i < mypart; i++) {
-    if (inbuf1[i*2] <= 0) {
-      inbuf1[i*2] += 360.0;
-    }
-  }
-
-  dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
-  dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
-  for (i=0; i<totalnodes; i++)
-    dualcellcounts[i]=0;
-  // initialize the values to -1
-  for (i=0; i<maxconnection*totalnodes; i++)
-    dualcells[i]=-1;
-  
-  // go through the cells table and put the cell id into the dualcell table
-  for (i=0,k=0; i<gsdim; i++) {
-    for (j=0; j<gcdim; j++,k++) {
-      i1 = cells[k]-1-mystart;
-      // check if this node is local
-      if (i1 >= 0 && i1 < totalnodes) { 
-	dualcells[i1*maxconnection+dualcellcounts[i1]]=i+1;
-	dualcellcounts[i1]++;
-	if (dualcellcounts[i1] > maxconnection) {
-	  printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	  MPI_Finalize();
-	  exit(1); // bail out
-	}
-      }
-    }
-  }
+    // Now create the dual mesh using the cell coordinates.  The
+    // format is the same except that the num_verts = the original num_cells (gsdim), 
+    // vert_coords will be the original center-coords. num_cells = the original
+    // num_verts (totalnodes) mask is not
+    // changed, and cell_verts will be generated here
+    // 
+    // for each vert in the original grid, find out which cell uses it, use the
+    // the center of the cells to form a new cell
+    // The dual mesh should have equal number of cells and vertices
+    //
+    // celltbl = (int*)malloc(sizeof(int)*maxconnection);
+    // the new dual mesh may not have the same topology as the original mesh
+    // it depends on how many edges are sharing a specific vertices
+    // so, this has to be calculated as well
     
-  // remove the cells with less than 3 edges in dualcells table
-  // also remove them from the node coordinates table and the totalneighbors table 
-  for (i=0, i1=0; i<totalnodes; i++) {
-    if (dualcellcounts[i] >= 3) {
-      if (i1 != i) {
-	for (k=0; k<maxconnection; k++) {
-	  dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
-	  totalneighbors[i1]=totalneighbors[i];
-	  nodelatlon[i1*2]=nodelatlon[i*2];
-	  nodelatlon[i1*2+1]=nodelatlon[i*2+1];
+    // First, read in the center coordinates, I need all the center coordinates to calculate the order
+    inbuf = (double*)malloc(sizeof(double)*gsdim);
+    inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
+    status = nc_inq_varid(ncid1, "grid_center_lat", &ctlatid);
+    if (status != NC_NOERR) {
+      fprintf(stderr, "grid_center_lat has to exist to create a dual mesh.\n");
+      handle_error(status);
+    }
+    status = nc_get_var_double(ncid1, ctlatid, inbuf);
+    if (status != NC_NOERR) handle_error(status);
+    // copy inbuf to inbuf1
+    for (i=0; i<gsdim; i++) {
+      inbuf1[i*2+1]=inbuf[i];
+    }
+    status = nc_inq_varid(ncid1, "grid_center_lon", &ctlatid);
+    if (status != NC_NOERR) {
+      fprintf(stderr, "grid_center_lon has to exist to create a dual mesh.\n");
+      handle_error(status);
+    }
+    status = nc_get_var_double(ncid1, ctlatid, inbuf);
+    if (status != NC_NOERR) handle_error(status);
+    // copy inbuf to inbuf1
+    for (i=0; i<gsdim; i++) {
+      inbuf1[i*2]=inbuf[i];
+    }
+    // get units of grid_center_lon
+    status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
+    if (status != NC_NOERR) handle_error(status);
+    status = nc_get_att_text(ncid1, ctlonid, "units", units);
+    if (status != NC_NOERR) handle_error(status);
+    units[len]='\0';
+    // convert radian to degree
+    for (i=0; i<len; i++) {
+      units[i]=tolower(units[i]);
+    }
+    if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
+      fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
+      ESMC_Finalize();
+      exit(1);
+    }
+    if (!strncmp(units, "radians", 7)) {
+      for (i=0; i<gsdim*2; i++) {
+	inbuf1[i] *= rad2deg;
+      }
+    }
+    free(inbuf);
+
+    // convert longitude to (0, 360) degrees
+    for (i = 0; i < mypart; i++) {
+      if (inbuf1[i*2] <= 0) {
+	inbuf1[i*2] += 360.0;
+      }
+    }
+    
+    dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
+    dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
+    for (i=0; i<totalnodes; i++)
+      dualcellcounts[i]=0;
+    // initialize the values to -1
+    for (i=0; i<maxconnection*totalnodes; i++)
+      dualcells[i]=-1;
+  
+    // go through the cells table and put the cell id into the dualcell table
+    int cnt=0;
+    for (i=0,k=0; i<gsdim; i++) {
+      for (j=0; j<gcdim; j++,k++) {
+	i1 = cells[k]-1-mystart;
+	// check if this node is local
+	if (i1 >= 0 && i1 < totalnodes) { 
+	  cnt++;
+	  dualcells[i1*maxconnection+dualcellcounts[i1]]=i+1;
+	  dualcellcounts[i1]++;
+	  if (dualcellcounts[i1] > maxconnection) {
+	    printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
+	    ESMC_Finalize();
+	    exit(1); // bail out
+	  }
 	}
       }
-      i1++;
     }
-  }
 
-  goodnodes = i1;
-  //printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
-  // broadcast goodnodes to get total number of good nodes and revise mystart and alltotal
-  globalnodes = (int*)malloc(sizeof(int)*nprocs);
-  MPI_Allgather(&goodnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, MPI_COMM_WORLD);
-  mystart = 0;
-  for (i=0; i<myrank; i++) {
-    mystart += globalnodes[i];
-  }
-  alltotal = 0;
-  for (i=0; i<nprocs; i++) {
-    alltotal += globalnodes[i];
-  }
+    // remove the cells with less than 3 edges in dualcells table
+    // also remove them from the node coordinates table and the totalneighbors table 
+    for (i=0, i1=0; i<totalnodes; i++) {
+      if (dualcellcounts[i] >= 3) {
+	if (i1 != i) {
+	  for (k=0; k<maxconnection; k++) {
+	    dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
+	    totalneighbors[i1]=totalneighbors[i];
+	    nodelatlon[i1*2]=nodelatlon[i*2];
+	    nodelatlon[i1*2+1]=nodelatlon[i*2+1];
+	  }
+	}
+	i1++;
+      }
+    }
 
-  // order the cell center coordinates in counter-clockwise order
-  // lonbuf and latbuf contains the center vertex coordinates
-  // next points to the cell_vertex location where we will fill
-  // in the cell id in counter clockwise order
-  for (i = 0; i < goodnodes; i++) {  
+    goodnodes = i1;
+    //printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
+    // broadcast goodnodes to get total number of good nodes and revise mystart and alltotal
+    globalnodes = (int*)malloc(sizeof(int)*nprocs);
+    MPI_Allgather(&goodnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, mpi_comm);
+    mystart = 0;
+    for (i=0; i<myrank; i++) {
+      mystart += globalnodes[i];
+    }
+    alltotal = 0;
+    for (i=0; i<nprocs; i++) {
+      alltotal += globalnodes[i];
+    }
+
+    // order the cell center coordinates in counter-clockwise order
+    // lonbuf and latbuf contains the center vertex coordinates
+    // next points to the cell_vertex location where we will fill
+    // in the cell id in counter clockwise order
+    for (i = 0; i < goodnodes; i++) {  
       next = &dualcells[i*maxconnection];
       numedges = totalneighbors[i];
       if (fabs(nodelatlon[i*2+1]) > 88.0) {
@@ -1251,134 +1053,138 @@ int main(int argc, char** argv)
       } else {
 	orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
       }
-  }
-
-  free(dualcellcounts);
-  // now write out the dual mesh in a netcdf file
-  // create the output netcdf file
-
-  totalnodes = goodnodes;
-
-  if (myrank==0) { 
-    if (doesmf == 1) {
-      create_esmf(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0, nomask, 1);
-    } else {
-      create_ugrid(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0);
     }
-  }
+
+    free(dualcellcounts);
+    // now write out the dual mesh in a netcdf file
+    // create the output netcdf file
+
+    totalnodes = goodnodes;
+
+    if (myrank==0) { 
+      if (doesmf == 1) {
+	create_esmf(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0, nomask, 1);
+      } else {
+	create_ugrid(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0);
+      }
+    }
  
-  MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(mpi_comm);
 
-  status = nc_open(c_outfile, NC_WRITE, &ncid2);
-  if (status != NC_NOERR) handle_error(status);
+    status = nc_open(c_outfile, NC_WRITE, &ncid2);
+    if (status != NC_NOERR) handle_error(status);
 
-  // now write out node and elements in sequence
-  for (i=0; i<nprocs; i++) {
-    if (myrank == i) {
-      status=nc_open(c_outfile, NC_WRITE, &ncid2);
-      if (status != NC_NOERR) handle_error(status);
-      if (myrank == 0) {
+    // now write out node and elements in sequence
+    for (i=0; i<nprocs; i++) {
+      if (myrank == i) {
+	status=nc_open(c_outfile, NC_WRITE, &ncid2);
+	if (status != NC_NOERR) handle_error(status);
+	if (myrank == 0) {
+	  if (doesmf) {
+	    status = nc_inq_varid(ncid2, "nodeCoords" ,&vertexid);
+	    if (status != NC_NOERR) handle_error(status);
+	    status = nc_put_var_double(ncid2, vertexid, inbuf1); 
+	    if (status != NC_NOERR) handle_error(status);
+	  } else {
+	    inbuf = (double*)malloc(sizeof(double)*gsdim);
+	    for (j=0; j<gsdim;j++) {
+	      inbuf[j]=inbuf1[j*2];
+	    }  
+	    status = nc_inq_varid(ncid2, "node_x" ,&vertexid);
+	    if (status != NC_NOERR) handle_error(status);
+	    status = nc_put_var_double(ncid2, vertexid, inbuf); 
+	    if (status != NC_NOERR) handle_error(status);
+	    for (j=0;  j<gsdim;j++) {
+	      inbuf[j]=inbuf1[j*2+1];
+	    }  
+	    status = nc_inq_varid(ncid2, "node_y" ,&vertexid);
+	    if (status != NC_NOERR) handle_error(status);
+	    status = nc_put_var_double(ncid2, vertexid, inbuf); 
+	    if (status != NC_NOERR) handle_error(status);
+	    free(inbuf);
+	  }
+	}
+	free(inbuf1);
 	if (doesmf) {
-	  status = nc_inq_varid(ncid2, "nodeCoords" ,&vertexid);
+	  start2[0]=mystart;
+	  start2[1]=0;
+	  count2[0]=totalnodes;
+	  count2[1]=2;
+	  //printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
+	  status = nc_inq_varid(ncid2, "centerCoords" ,&vertexid);
 	  if (status != NC_NOERR) handle_error(status);
-	  status = nc_put_var_double(ncid2, vertexid, inbuf1); 
+	  status = nc_put_vara_double(ncid2, vertexid, start2, count2, nodelatlon); 
 	  if (status != NC_NOERR) handle_error(status);
+	  // write out nodemask
+	  if (!nomask) {
+	    inbuf2=(int*)malloc(sizeof(int)*gsdim);
+	    status = nc_get_var_int(ncid1, maskid, inbuf2);
+	    if (status != NC_NOERR) handle_error(status);
+	    status = nc_inq_varid(ncid2, "nodeMask", &cmid);
+	    if (status != NC_NOERR) handle_error(status);
+	    status = nc_put_var_int(ncid2, cmid, inbuf2);
+	    if (status != NC_NOERR) handle_error(status);
+	    free(inbuf2);
+	  }
 	} else {
-	  inbuf = (double*)malloc(sizeof(double)*gsdim);
-	  for (j=0; j<gsdim;j++) {
-	    inbuf[j]=inbuf1[j*2];
+	  start1[0]=mystart;
+	  count1[0]=totalnodes;
+	  inbuf=(double*)malloc(sizeof(double)*totalnodes);
+	  for (j=0; j<totalnodes;j++) {
+	    inbuf[j]=nodelatlon[j*2];
 	  }  
-	  status = nc_inq_varid(ncid2, "node_x" ,&vertexid);
+	  status = nc_inq_varid(ncid2, "face_x" ,&vertexid);
 	  if (status != NC_NOERR) handle_error(status);
-	  status = nc_put_var_double(ncid2, vertexid, inbuf); 
+	  status = nc_put_vara_double(ncid2, vertexid, start1, count1, nodelatlon); 
 	  if (status != NC_NOERR) handle_error(status);
-	  for (j=0;  j<gsdim;j++) {
-	    inbuf[j]=inbuf1[j*2+1];
+	  for (j=0; j<totalnodes;j++) {
+	    inbuf[j]=nodelatlon[j*2+1];
 	  }  
-	  status = nc_inq_varid(ncid2, "node_y" ,&vertexid);
+	  status = nc_inq_varid(ncid2, "face_y" ,&vertexid);
 	  if (status != NC_NOERR) handle_error(status);
-	  status = nc_put_var_double(ncid2, vertexid, inbuf); 
+	  status = nc_put_vara_double(ncid2, vertexid, start1, count1, nodelatlon); 
 	  if (status != NC_NOERR) handle_error(status);
 	  free(inbuf);
 	}
-      }
-      free(inbuf1);
-      if (doesmf) {
+	free(nodelatlon);
 	start2[0]=mystart;
 	start2[1]=0;
 	count2[0]=totalnodes;
-	count2[1]=2;
-	//printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
-	status = nc_inq_varid(ncid2, "centerCoords" ,&vertexid);
+	count2[1]=maxconnection;
+	//printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
+	status = nc_inq_varid(ncid2, "elementConn" ,&cellid);
+	status = nc_put_vara_int(ncid2, cellid, start2, count2, dualcells);
 	if (status != NC_NOERR) handle_error(status);
-	status = nc_put_vara_double(ncid2, vertexid, start2, count2, nodelatlon); 
-	if (status != NC_NOERR) handle_error(status);
-        // write out nodemask
-	if (!nomask) {
-	  inbuf2=(int*)malloc(sizeof(int)*gsdim);
-	  status = nc_get_var_int(ncid1, maskid, inbuf2);
+	if (doesmf) {
+	  status = nc_inq_varid(ncid2, "numElementConn" ,&edgeid);
+	  start1[0]=mystart;
+	  count1[0]=totalnodes;
+	  status = nc_put_vara_uchar(ncid2, edgeid, start1, count1, (unsigned char*)totalneighbors);
 	  if (status != NC_NOERR) handle_error(status);
-	  status = nc_inq_varid(ncid2, "nodeMask", &cmid);
-	  if (status != NC_NOERR) handle_error(status);
-	  status = nc_put_var_int(ncid2, cmid, inbuf2);
-	  if (status != NC_NOERR) handle_error(status);
-	  free(inbuf2);
 	}
+	status=nc_close(ncid2);
+	if (status != NC_NOERR) handle_error(status);
+	MPI_Barrier(mpi_comm);
       } else {
-	start1[0]=mystart;
-	count1[0]=totalnodes;
-	inbuf=(double*)malloc(sizeof(double)*totalnodes);
-	for (j=0; j<totalnodes;j++) {
-	  inbuf[j]=nodelatlon[j*2];
-	}  
-	status = nc_inq_varid(ncid2, "face_x" ,&vertexid);
-	if (status != NC_NOERR) handle_error(status);
-	status = nc_put_vara_double(ncid2, vertexid, start1, count1, nodelatlon); 
-	if (status != NC_NOERR) handle_error(status);
-	for (j=0; j<totalnodes;j++) {
-	  inbuf[j]=nodelatlon[j*2+1];
-	}  
-	status = nc_inq_varid(ncid2, "face_y" ,&vertexid);
-	if (status != NC_NOERR) handle_error(status);
-	status = nc_put_vara_double(ncid2, vertexid, start1, count1, nodelatlon); 
-	if (status != NC_NOERR) handle_error(status);
-	free(inbuf);
+	MPI_Barrier(mpi_comm);
       }
-      free(nodelatlon);
-      start2[0]=mystart;
-      start2[1]=0;
-      count2[0]=totalnodes;
-      count2[1]=maxconnection;
-      //printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
-      status = nc_inq_varid(ncid2, "elementConn" ,&cellid);
-      status = nc_put_vara_int(ncid2, cellid, start2, count2, dualcells);
-      if (status != NC_NOERR) handle_error(status);
-      if (doesmf) {
-	status = nc_inq_varid(ncid2, "numElementConn" ,&edgeid);
-	start1[0]=mystart;
-	count1[0]=totalnodes;
-	status = nc_put_vara_uchar(ncid2, edgeid, start1, count1, (unsigned char*)totalneighbors);
-	if (status != NC_NOERR) handle_error(status);
-      }
-      status=nc_close(ncid2);
-      if (status != NC_NOERR) handle_error(status);
-      MPI_Barrier(MPI_COMM_WORLD);
-    } else {
-      MPI_Barrier(MPI_COMM_WORLD);
     }
-  }
-  free(totalneighbors);
-  free(dualcells);
-  nc_close(ncid1);
+    free(totalneighbors);
+    free(dualcells);
+    nc_close(ncid1);
   }   
-  printf("Done converting %s\n", c_infile);
-  MPI_Finalize();
+  free(cells);
+  if (myrank == 0) {
+    printf("Done converting %s\n", c_infile);
+  }
+  ESMC_Finalize();
+  
 #else
   if (myrank==0) {
     fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
   }
-  MPI_Finalize();
+  ESMC_Finalize();
   exit(1);
 #endif
-}
+  }
 
