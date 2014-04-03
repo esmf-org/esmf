@@ -729,26 +729,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldSMMStoreR8
+!------------------------------------------------------------------------------ 
 
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "ESMF_FieldSMMStoreNF" 
 !---------------------------------------------------------------------------- 
 !BOP 
 ! !IROUTINE: ESMF_FieldSMMStore - Precompute Field sparse matrix multiplication without local factors
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
-! subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
-!        routehandle, factorList, factorIndexList, keywordEnforcer, &
-!        srcTermProcessing, pipelineDepth, rc)
-! 
-! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)              :: srcField  
-!   type(ESMF_Field),         intent(inout)           :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
-!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(inout), optional :: srcTermProcessing
-!   integer,                  intent(inout), optional :: pipeLineDepth
-!   integer,                  intent(out),   optional :: rc 
-! 
+    subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
+        routehandle, keywordEnforcer, srcTermProcessing, pipelineDepth, rc) 
+!
+! !ARGUMENTS:
+        type(ESMF_Field),       intent(in)             :: srcField  
+        type(ESMF_Field),       intent(inout)          :: dstField  
+        type(ESMF_RouteHandle), intent(inout)          :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional :: srcTermProcessing
+        integer,                intent(inout),optional :: pipeLineDepth
+        integer,                intent(out),  optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -886,27 +887,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !EOP 
 !---------------------------------------------------------------------------- 
-
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldSMMStoreNF" 
-!BOPI
-! !IROUTINE: ESMF_FieldSMMStore - Precompute Field sparse matrix multiplication
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldSMMStore()
-    subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
-        routehandle, keywordEnforcer, srcTermProcessing, pipelineDepth, rc) 
-
-        ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(inout),optional:: srcTermProcessing
-        integer,                intent(inout),optional:: pipeLineDepth
-        integer,                intent(out), optional :: rc 
-
-!EOPI
         ! local variables as temporary input/output arguments 
 
         ! internal local variables 
