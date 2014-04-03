@@ -2346,7 +2346,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     end if
        
     call ESMF_VMBarrier(vm)
-    
+    deallocate(allCounts)
     if (PetNo == 0) then
        ncStatus = nf90_close(ncid)                        
        if (CDFCheckError (ncStatus, &

@@ -59,7 +59,8 @@ void ClumpPnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *p
 //
 /////
 void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *pnt_cl_ind,
-                 int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, int *rc);
+                 int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, 
+		 double start_lat, double end_lat, int *rc);
 
 
 
@@ -71,6 +72,8 @@ void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int 
 //   pnt_lon - the longitudes in deg of each point (array is of size num_pnt)
 //   pnt_lat - the latitudes in deg of each point (array is of size num_pnt)
 //   tol     - the tolerence with which to clump points (in Cartesian space on a radius=1.0 sphere)
+//   start_lat - when run in parallel, specify the range of the latitudes to be clumped
+//   end_lat   - when run in parallel, specify the range of the latitudes to be clumped
 // Outputs:
 //   pnt_cl_ind    - for each point, the index into _cl_lon and _cl_lat indicating which point it's clumped with
 //                   (array is of size num_pnt)
@@ -96,7 +99,8 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 //   _cl_lat       - the latitudes in deg of each point (array is of size num_cl)
 //   _max_size_cl  - the maximum number of a points in a clump
 void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *pnt_cl_ind,
-                     int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl);
+		   int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl,
+		   double start_lat, double end_lat);
 
 
 
