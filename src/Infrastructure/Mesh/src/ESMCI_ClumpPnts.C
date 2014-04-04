@@ -16,8 +16,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_ClumpPnts.h"
 #include "Mesh/include/ESMCI_OTree.h"
+#include "Mesh/include/ESMCI_ClumpPnts.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
@@ -89,8 +89,6 @@ void ClumpPnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *p
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-
-
 
 struct SEARCH_DATA {
   double pnt[3];
@@ -354,7 +352,8 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 //
 /////
 void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *pnt_cl_ind,
-               int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, int *rc) {
+		 int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, double start_lat, 
+		 double end_lat, int *rc) {
 
   // Initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
@@ -363,7 +362,7 @@ void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int 
   try {
 
      // Call into internal implementation
-     clump_pnts_ll(num_pnt, pnt_lon, pnt_lat, tol, pnt_cl_ind, num_cl, cl_lon, cl_lat, max_size_cl);
+    clump_pnts_ll(num_pnt, pnt_lon, pnt_lat, tol, pnt_cl_ind, num_cl, cl_lon, cl_lat, max_size_cl,start_lat,end_lat);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -447,8 +446,8 @@ int intersect_func_ll(void *_pd, void *_sd) {
 //   _cl_lon       - the longitudes in deg of each point (array is of size num_cl)
 //   _cl_lat       - the latitudes in deg of each point (array is of size num_cl)
 //   _max_size_cl  - the maximum number of a points in a clump
-void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *pnt_cl_ind,
-                  int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl) {
+void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *_pnt_cl_ind,
+		   int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl, double start_lat, double end_lat) {
 
   // Init outputs
   *_cl_lon=NULL;
@@ -464,24 +463,43 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   const double ESMC_CoordSys_Deg2Rad= 0.01745329251994329547437;
   double tol_3D=tol*ESMC_CoordSys_Deg2Rad;
 
-  // Create Tree
-  ESMCI::OTree *tree= new ESMCI::OTree(num_pnt);
-
   // Create list of point structures
-  PNT_DATA_LL *pd_list=new PNT_DATA_LL[num_pnt];  
+  PNT_DATA_LL *pd_list1=new PNT_DATA_LL[num_pnt];  
 
   // Loop and create point list
+  int ii=0;
   for (int i=0; i<num_pnt; i++) {
 
-    // Get point structure
-    PNT_DATA_LL *pd=pd_list+i;
-
-    // Set pnt data
-    pd->ll[0]=pnt_lon[i];
-    pd->ll[1]=pnt_lat[i];
-    pd->orig_index=i;
-    pd->clump_index=-1; // Init to bad value
+    if ((pnt_lat[i]>= start_lat) && (pnt_lat[i]< end_lat)) {
+      // Get point structure
+      PNT_DATA_LL *pd=pd_list1+ii;
+      // Set pnt data
+      pd->ll[0]=pnt_lon[i];
+      pd->ll[1]=pnt_lat[i];
+      pd->orig_index=i;
+      pd->clump_index=-1; // Init to bad value
+      ii++;
+    }
   }
+  PNT_DATA_LL *pd_list;
+  int num_pnt_total = num_pnt;
+  if (ii < num_pnt) {
+    pd_list=new PNT_DATA_LL[ii];
+    memcpy(pd_list, pd_list1, sizeof(PNT_DATA_LL)*ii);
+    delete [] pd_list1;
+    num_pnt = ii;
+  } else {
+    pd_list = pd_list1;
+  }
+
+  int  *orig_ind = new int[num_pnt];
+  for (int i=0; i<num_pnt; i++) {
+    orig_ind[i]=pd_list[i].orig_index;
+    pd_list[i].orig_index = i;
+  }
+
+  // Create Tree
+  ESMCI::OTree *tree= new ESMCI::OTree(num_pnt);
 
   // Scramble to reduce chance of degenerate trees
   std::random_shuffle(pd_list,pd_list+num_pnt);  
@@ -547,6 +565,7 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
     }
   }
 
+  int *pnt_cl_ind = new int[num_pnt];
   // Init pnt_cl_ind to maximum, so minimums can be calc. below
   for (int i=0; i<num_pnt; i++) {
     pnt_cl_ind[i]=num_pnt;
@@ -608,8 +627,8 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   for (int i=0; i<num_pnt; i++) {
     if (pnt_cl_ind[i] > 0) {
       // copy coordinate
-      cl_lon[j]=pnt_lon[i];
-      cl_lat[j]=pnt_lat[i];
+      cl_lon[j]=pnt_lon[orig_ind[i]];
+      cl_lat[j]=pnt_lat[orig_ind[i]];
 
       // set collapsed indices
       pnt_cl_ind[i]=j;
@@ -618,7 +637,6 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
       j++;
     }
   }
-
 
   // Switch to indices into collapsed clumps
   for (int i=0; i<num_pnt; i++) {
@@ -632,9 +650,22 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
     PNT_DATA_LL *pd=pd_list+i;    
     pnt_cl_ind[pd->orig_index]=pd->clump_index;
   }
-
+  if (num_pnt_total > num_pnt) {
+    for (int i=0; i<num_pnt_total; i++) {
+      _pnt_cl_ind[i]=-1;
+    }
+    for (int i=0; i<num_pnt; i++) {
+      _pnt_cl_ind[orig_ind[i]]=pnt_cl_ind[i];
+    }
+  } else {
+    for (int i=0; i<num_pnt; i++) {
+      _pnt_cl_ind[i]=pnt_cl_ind[i];
+    }
+  }
   // clean up point data
   if (pd_list) delete [] pd_list;
+  delete [] pnt_cl_ind;
+  delete [] orig_ind;
 
   // Clean up tree
   if (tree) delete tree;
@@ -647,8 +678,5 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   *_num_cl=num_cl;
   *_max_size_cl=max_size_cl;
 }
-
-
-
 
 } // namespace ESMCI

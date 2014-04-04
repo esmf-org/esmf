@@ -47,10 +47,14 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     gridCorner = grid.coords[ESMF.StaggerLoc.CORNER]
     
     for i in xrange(gridCorner[x].shape[x]):
-        gridCorner[x][i, :] = float(i)*cellwidth_x + lb_x    
- 
+        gridCorner[x][i, :] = float(i)*cellwidth_x + \
+            min_x + grid.lower_bounds[ESMF.StaggerLoc.CORNER][x] * cellwidth_x
+            # last line is the pet specific starting point for this stagger and dim
+
     for j in xrange(gridCorner[y].shape[y]):
-        gridCorner[y][:, j] = float(j)*cellwidth_y + lb_y
+        gridCorner[y][:, j] = float(j)*cellwidth_y + \
+            min_y + grid.lower_bounds[ESMF.StaggerLoc.CORNER][y] * cellwidth_y
+            # last line is the pet specific starting point for this stagger and dim
 
     ##     CENTERS
     grid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER])
@@ -61,10 +65,14 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     gridYCenter = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CENTER)
     
     for i in xrange(gridXCenter.shape[x]):
-        gridXCenter[i, :] = float(i)*cellwidth_x + lb_x + cellwidth_x/2.0    
+        gridXCenter[i, :] = float(i)*cellwidth_x + cellwidth_x/2.0 + \
+            min_x + grid.lower_bounds[ESMF.StaggerLoc.CENTER][x] * cellwidth_x
+            # last line is the pet specific starting point for this stagger and dim
  
     for j in xrange(gridYCenter.shape[y]):
-        gridYCenter[:, j] = float(j)*cellwidth_y + lb_y + cellwidth_y/2.0
+        gridYCenter[:, j] = float(j)*cellwidth_y + cellwidth_y/2.0 + \
+            min_y + grid.lower_bounds[ESMF.StaggerLoc.CENTER][y] * cellwidth_y
+            # last line is the pet specific starting point for this stagger and dim
 
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
