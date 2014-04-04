@@ -2174,10 +2174,12 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      ! return the identified component
+      comp = cmEntry%wrap%component
+    else
+      ! return a nullified component
+      comp%compp => null()
     endif
-    
-    ! Return the identified component
-    comp = cmEntry%wrap%component
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2240,10 +2242,12 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      ! return the identified component
+      comp = cmEntry%wrap%connector
+    else
+      ! return a nullified component
+      comp%compp => null()
     endif
-    
-    ! Return the identified component
-    comp = cmEntry%wrap%connector
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2373,7 +2377,7 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          print *, i,":  ", cmEntry%wrap%label
+          print *, i,":  ", trim(cmEntry%wrap%label)
         enddo
         
         ! Print information about the Connector components
@@ -2385,7 +2389,7 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          print *, i,":  ", cmEntry%wrap%label
+          print *, i,":  ", trim(cmEntry%wrap%label)
         enddo
         
         ! Print the RunSequence
