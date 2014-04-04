@@ -397,7 +397,7 @@ contains
                     ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, 5
                 do j = 1, 10
-                    write(*, *), i, j, farray4(i,j), i + 2 + (j+3) * 5
+                    write(*, *) i, j, farray4(i,j), i + 2 + (j+3) * 5
                     if( farray4(i, j) .ne. i + 2 + (j+3) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
@@ -433,7 +433,7 @@ contains
                     ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, 5
                 do j = 1, 10
-                    write(*, *), i, j, farray5(i,j), i + 2 + (j*2-1) * 5
+                    write(*, *) i, j, farray5(i,j), i + 2 + (j*2-1) * 5
                     if( farray5(i, j) .ne. i + 2 + (j*2-1) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
