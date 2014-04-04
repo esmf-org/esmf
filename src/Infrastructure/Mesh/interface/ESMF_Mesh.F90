@@ -3114,6 +3114,8 @@ end function ESMF_MeshCreateFromUnstruct
        end do
     endif
 
+    deallocate(nodeCoords)
+
     if (.not. haveNodeMask) then
        ! Add nodes
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
@@ -3300,7 +3302,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
-    deallocate(ElemId, ElemType, ElemConn)
+    deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
     if (haveElmtMask) deallocate(elementMask) 
     if (haveMask) deallocate(ElemMask) 
      

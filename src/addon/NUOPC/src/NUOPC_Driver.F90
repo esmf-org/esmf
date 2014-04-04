@@ -89,6 +89,7 @@ module NUOPC_Driver
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverGetComp
   public NUOPC_DriverNewRunSequence
+  public NUOPC_DriverPrint
   public NUOPC_DriverSetRunSequence
   public NUOPC_DriverSet
   public NUOPC_DriverSetModel
@@ -2296,6 +2297,117 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_DriverPrint - Print internal Driver information
+!
+! !INTERFACE:
+  subroutine NUOPC_DriverPrint(driver, orderflag, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    logical,             intent(in),  optional :: orderflag
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Print internal Driver information. If {\tt orderflag} is provided and set
+! to {\tt .true.}, the output is ordered from lowest to highest PET. Setting 
+! this flag makes the method collective.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(ESMF_VM)                   :: vm
+    logical                         :: forceOrder
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: componentMapCount, connectorMapCount
+    integer                         :: i, pet, petCount, localPet
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! get basic information about componentMap and connectorMap
+    call ESMF_ContainerGet(is%wrap%componentMap, itemCount=componentMapCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_ContainerGet(is%wrap%connectorMap, itemCount=connectorMapCount, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! deal with ordering
+    forceOrder = .false.  ! default
+    if (present(orderflag)) then
+      forceOrder = orderflag
+    endif
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    do pet=0, petCount-1
+      if (pet == localPet) then
+      
+        ! Print header
+        print *, "NUOPC_DriverPrint for PET:", localPet
+
+        ! Print information about the Model, Mediator, Driver child components
+        print *, "  Model, Mediator, and Driver components, in the order"
+        print *, "  that they were added to the Driver:"
+        do i=1, componentMapCount
+          call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
+            cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          print *, i,":  ", cmEntry%wrap%label
+        enddo
+        
+        ! Print information about the Connector components
+        print *, "  Connector components, in the order"
+        print *, "  that they were added to the Driver:"
+        do i=1, connectorMapCount
+          call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
+            cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          print *, i,":  ", cmEntry%wrap%label
+        enddo
+        
+        ! Print the RunSequence
+        call NUOPC_RunSequencePrint(is%wrap%runSeq, logflag=.false., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+
+      endif
+      if (forceOrder) then
+        call ESMF_VMBarrier(vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_DriverSetRunSequence - Set internals of RunSequence slot
 !
 ! !INTERFACE:
@@ -2338,6 +2450,7 @@ module NUOPC_Driver
     
   end subroutine
   !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_DriverSet - Set Driver internals
