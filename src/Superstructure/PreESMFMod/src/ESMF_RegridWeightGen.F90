@@ -517,7 +517,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
     ! coordinate variables
-    if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    if (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useSrcCoordFlag)) then
 	      useSrcCoordVar = useSrcCoordFlag
       else
@@ -533,7 +533,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    if (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
       if (present(useDstCoordFlag)) then
 	      useDstCoordVar = useDstCoordFlag
       else
@@ -592,7 +592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
 	      srcIsReg = .false.
       endif
-      if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
+      if (localdstFileType == ESMF_FILEFORMAT_SCRIP) then
 	      call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
 	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
           write(*,*)
