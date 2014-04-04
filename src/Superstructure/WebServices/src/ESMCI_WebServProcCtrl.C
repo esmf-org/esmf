@@ -26,20 +26,13 @@
 //-----------------------------------------------------------------------------
 #include "ESMCI_WebServProcCtrl.h"
 
-#if !defined (__mips)
 #include <stdint.h>
-#else
-// IRIX has a broken htonll definition...
-typedef unsigned long long u_int64_t;
-#endif
-
 #include <string.h>
 
 #if !defined (ESMF_OS_MinGW)
 #include <netdb.h>
 #else
 #include <Winsock.h>
-typedef uint64_t u_int64_t;
 #endif
 
 #include "ESMCI_WebServSocketUtils.h"
