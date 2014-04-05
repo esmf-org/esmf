@@ -1,4 +1,4 @@
-// $Id: ESMF_Scrip2Unstruct.C $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2014, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 
 #include "ESMC.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
-//#include "mpi.h"
+#include "mpi.h"
 
 #ifdef ESMF_NETCDF
 #include "netcdf.h"
@@ -39,7 +39,12 @@
 #endif
 
 #define TOL 0.0000000001
-  
+
+
+
+
+#ifdef ASKING_FOR_TROUBLE
+
 void handle_error(int status) {
 #ifdef ESMF_NETCDF
   if (status != NC_NOERR) {
@@ -50,7 +55,7 @@ void handle_error(int status) {
 #endif
 }
 
-// order the vertices in celltbl (total number=numedges) in counter-clock wise orde
+// order the vertices in celltbl (total number=numedges) in counter-clock wise order
 // to find the order of the vertices, we use the anchor vertex (lon,lat) (that is supposed to located 
 // in the center of the polygon).  We sort the angle of the vector from the anchor vertex
 // to each corner vertex in ascending order (assuming 0 to 2PI) 
@@ -153,6 +158,15 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
     }
   }
 }
+
+#else
+// defined in ESMC_IOScrip2ESMF.C
+bool handle_error(int status);
+void orderit(int index, double lon, double lat, int numedges, double *latlonbuf, int *next);
+void convert3D(double lon, double lat, double *x, double *y);
+void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf, int *next);
+#endif
+
 
 // Create a ESMF unstructured grid file and define all the dimension, variables and attributes
 int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, size_t nelmts, size_t maxconnection, int nocenter, int nomask, int noarea)
