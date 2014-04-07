@@ -30,7 +30,7 @@ module NUOPC_DriverAtmOcn
     Driver_label_Finalize         => label_Finalize, &
     NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel, &
     NUOPC_DriverNewRunSequence, NUOPC_DriverSetRunSequence, &
-    NUOPC_DriverAddRunElement
+    NUOPC_DriverAddRunElement, NUOPC_DriverPrint
 
   implicit none
   
@@ -43,7 +43,7 @@ module NUOPC_DriverAtmOcn
   
   public NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel
   public NUOPC_DriverNewRunSequence, NUOPC_DriverSetRunSequence
-  public NUOPC_DriverAddRunElement
+  public NUOPC_DriverAddRunElement, NUOPC_DriverPrint
 
   character(*), parameter :: &
     label_InternalState = "DriverAtmOcn_InternalState"
