@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-module ESMF_AttributeUpdate2UTestMod
+module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
   use ESMF
 
@@ -447,13 +447,13 @@ module ESMF_AttributeUpdate2UTestMod
  
 end module
 
-program ESMF_AttributeUpdate2UTest
+program ESMF_AttributeUpdateCIMRespPartyUTest
 
 #include "ESMF.h"
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeUpdate2UTest - Attribute Update Unit Tests
+! !PROGRAM: ESMF_AttributeUpdateCIMRespPartyUTest - Attribute Update Unit Tests
 !
 ! !DESCRIPTION:
 !
@@ -463,7 +463,7 @@ program ESMF_AttributeUpdate2UTest
 ! !USES:
   use ESMF
   use ESMF_TestMod
-  use ESMF_AttributeUpdate2UTestMod, only : userm1_setvm, userm1_register, &
+  use ESMF_AttributeUpdateCIMRespPartyUTestMod, only : userm1_setvm, userm1_register, &
     userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
 
 
@@ -705,4 +705,4 @@ program ESMF_AttributeUpdate2UTest
     call ESMF_TestEnd(ESMF_SRCLINE)
     !-----------------------------------------------------------------------------
 
-end program ESMF_AttributeUpdate2UTest
+end program ESMF_AttributeUpdateCIMRespPartyUTest
