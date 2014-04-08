@@ -3,23 +3,17 @@ import ESMF
 from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
 # Test setup
-grids = [
-         # global SCRIP format grid
-         "ll2.5deg_grid.nc",
-         # global SCRIP T42 grid
-         "T42_grid.nc",
-         # 1.9x2.5 CAM finite volume grid 
-         "fv1.9x2.5_050503.nc"]#,
-         # global SCRIP format grid
-         #"GRIDSPEC_ACCESS1.nc"]
+grids = ["ll2.5deg_grid.nc",    # 0) global SCRIP format grid
+         "T42_grid.nc",         # 1) global SCRIP T42 grid
+         "fv1.9x2.5_050503.nc", # 2) 1.9x2.5 CAM finite volume grid 
+         "so_Omon_GISS-E2.nc"]  # 3) GRIDSPEC grid
 
-filetype = [
-            ESMF.FileFormat.SCRIP,
-            ESMF.FileFormat.SCRIP,
-            ESMF.FileFormat.SCRIP]#,
-            #ESMF.FileFormat.GRIDSPEC]
+filetype = [ESMF.FileFormat.SCRIP,    # 0
+            ESMF.FileFormat.SCRIP,    # 1
+            ESMF.FileFormat.SCRIP,    # 2
+            ESMF.FileFormat.GRIDSPEC] # 3
 
-grid = 2
+grid = 3
 prefix = 'data/'
 filename = prefix+grids[grid]
 if ESMF.local_pet() == 0:
