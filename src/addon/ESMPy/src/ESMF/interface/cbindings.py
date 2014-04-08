@@ -578,6 +578,7 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
 
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr, lcd, staggerloc,
                                            exLB, exUB, ct.byref(lrc))
+
     # adjust bounds to be 0 based, even though it's just a placeholder..
     exLB = exLB - 1
 
@@ -1441,8 +1442,8 @@ _ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypesl
 def ESMP_GridspecInq(filename):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions:  The rank and grid dimensions of the specified GRIDSPEC NetCDF file 
-                     or an error code have been returned.\n
+    Postconditions:  The rank, dimension of the coordinates, and grid dimensions of the 
+                     specified GRIDSPEC NetCDF file or an error code have been returned.\n
     Arguments:\n
         String :: filename\n
     """
@@ -1452,7 +1453,8 @@ def ESMP_GridspecInq(filename):
     _ESMF.ESMC_GridspecInq(filename, ct.byref(lndims), grid_dims, ct.byref(lrc))
     ndims = lndims.value
     rc = lrc.value
+    rank = 2
     if rc != constants.ESMP_SUCCESS:
         raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
                          constants.errmsg)
-    return ndims, grid_dims
+    return rank, ndims, grid_dims
