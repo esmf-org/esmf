@@ -4083,52 +4083,52 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-        if (typekind == ESMC_TYPEKIND_I4) {
-            vip.clear();
-            vip.reserve(numitems);      
-            if (datap) 
-              for (i=0; i<numitems; i++)
-                vip.push_back((*(static_cast<vector<ESMC_I4>*> (datap)))[i]);  
-        } else if (typekind == ESMC_TYPEKIND_I8) {
-            vlp.clear();
-            vlp.reserve(numitems);      
-            if (datap) 
-              for (i=0; i<numitems; i++)
-                vlp.push_back((*(static_cast<vector<ESMC_I8>*> (datap)))[i]);  
-        } else if (typekind == ESMC_TYPEKIND_R4) {
-            vfp.clear();
-            vfp.reserve(numitems);      
-            if (datap) 
-              for (i=0; i<numitems; i++)
-                vfp.push_back((*(static_cast<vector<ESMC_R4>*> (datap)))[i]);  
-        } else if (typekind == ESMC_TYPEKIND_R8) {
-            vdp.clear();
-            vdp.reserve(numitems);      
-            if (datap) 
-              for (i=0; i<numitems; i++)
-                vdp.push_back((*(static_cast<vector<ESMC_R8>*> (datap)))[i]);  
-        } else if (typekind == ESMC_TYPEKIND_LOGICAL) {
-            vbp.clear();
-            vbp.reserve(numitems);      
-            if (datap) 
-              for (i=0; i<numitems; i++)
-                vbp.push_back((*(static_cast<vector<ESMC_Logical>*> (datap)))[i]);  
-        } else if (typekind == ESMC_TYPEKIND_CHARACTER) {
-            vcpp.clear();
-            vcpp.reserve(numitems);
-            if (datap) {
-              for (i=0; i<numitems; i++) 
-                vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
-            }
+    if (typekind == ESMC_TYPEKIND_I4) {
+        vip.clear();
+        vip.reserve(numitems);      
+        if (datap) 
+          for (i=0; i<numitems; i++)
+            vip.push_back((*(static_cast<vector<ESMC_I4>*> (datap)))[i]);  
+    } else if (typekind == ESMC_TYPEKIND_I8) {
+        vlp.clear();
+        vlp.reserve(numitems);      
+        if (datap) 
+          for (i=0; i<numitems; i++)
+            vlp.push_back((*(static_cast<vector<ESMC_I8>*> (datap)))[i]);  
+    } else if (typekind == ESMC_TYPEKIND_R4) {
+        vfp.clear();
+        vfp.reserve(numitems);      
+        if (datap) 
+          for (i=0; i<numitems; i++)
+            vfp.push_back((*(static_cast<vector<ESMC_R4>*> (datap)))[i]);  
+    } else if (typekind == ESMC_TYPEKIND_R8) {
+        vdp.clear();
+        vdp.reserve(numitems);      
+        if (datap) 
+          for (i=0; i<numitems; i++)
+            vdp.push_back((*(static_cast<vector<ESMC_R8>*> (datap)))[i]);  
+    } else if (typekind == ESMC_TYPEKIND_LOGICAL) {
+        vbp.clear();
+        vbp.reserve(numitems);      
+        if (datap) 
+          for (i=0; i<numitems; i++)
+            vbp.push_back((*(static_cast<vector<ESMC_Logical>*> (datap)))[i]);  
+    } else if (typekind == ESMC_TYPEKIND_CHARACTER) {
+        vcpp.clear();
+        vcpp.reserve(numitems);
+        if (datap) {
+          for (i=0; i<numitems; i++) 
+            vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
         }
-//}
+    }
  
   // if a change was made, note the new values
   if (numitems >= 1) {
-    tk = typekind;
     items = numitems;
-    valueChange = ESMF_TRUE;
   }
+
+  tk = typekind;
+  valueChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
 

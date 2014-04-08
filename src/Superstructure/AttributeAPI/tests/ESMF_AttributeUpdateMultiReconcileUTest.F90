@@ -9,22 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-module ESMF_AttributeUpdateRemoveOnlyUTestMod
-
-!  THIS unit test is to show the behavior of a known bug documented for the
-!  510, 520, 520p1, and 520r releases.  When an Attribute
-!  hierarchy is updated after ONLY removals have been performed, the newly
-!  removed Attributes are not removed on all PETs by the ESMF_AttributeUpdate()
-!
-!  The reason for this bug is that the routine inside of AttributeUpdate which
-!  unpackes the serialized Attribute hierarchy that is sent from the rootPets
-!  is received on the non-root PETs.  If only removals have happened then the
-!  missing Attributes will not be present on the non root PETs where the
-!  unpacking routine runs.  The routine is recursive, so it depends on an object
-!  hierarchy to guide the program flow.  If there is no Attribute there, it will
-!  not be able to detect that fact.
-
-!  One solution would be to use the entire buffer that is passed from the root
+module ESMF_AttributeUpdateMultiReconcileUTestMod
 
   use ESMF
 
@@ -34,14 +19,16 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
   public userm1_setvm, userm1_register
   public userm2_setvm, userm2_register
-  public usercpl_setvm, usercpl_register
+  public userm3_setvm, userm3_register
+  public usercpl1_setvm, usercpl1_register
+  public usercpl2_setvm, usercpl2_register
 
   contains
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
-
-  subroutine userm1_setvm(comp, rc)
+ 
+  subroutine userm1_setvm(comp, rc) 
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -55,11 +42,11 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
     ! threading features.
-
+    
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -105,9 +92,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -139,9 +126,59 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
   end subroutine userm2_register
 
 !-------------------------------------------------------------------------
+!   !  The SetVM Register routines for Gridcomp3
+
+  subroutine userm3_setvm(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: pthreadsEnabled
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+
+  end subroutine userm3_setvm
+
+  subroutine userm3_register(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    ! Register the callback routines.
+
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userm3_init, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userm3_run, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userm3_final, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+  end subroutine userm3_register
+
+!-------------------------------------------------------------------------
 !   !  The SetVM Register routines for cplcomp
 
-  subroutine usercpl_setvm(comp, rc)
+  subroutine usercpl1_setvm(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
@@ -155,9 +192,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -168,9 +205,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     endif
 #endif
 
-  end subroutine usercpl_setvm
+  end subroutine usercpl1_setvm
 
-  subroutine usercpl_register(comp, rc)
+  subroutine usercpl1_register(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
@@ -178,14 +215,63 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     rc = ESMF_SUCCESS
 
     ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, usercpl_init, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, usercpl1_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, usercpl_run, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, usercpl1_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, usercpl_final, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, usercpl1_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-  end subroutine usercpl_register
+  end subroutine usercpl1_register
+
+!-------------------------------------------------------------------------
+!   !  The SetVM Register routines for cplcomp
+
+  subroutine usercpl2_setvm(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: pthreadsEnabled
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
+      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+
+  end subroutine usercpl2_setvm
+
+  subroutine usercpl2_register(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    ! Register the callback routines.
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, usercpl2_init, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, usercpl2_run, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, usercpl2_final, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+  end subroutine usercpl2_register
 
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
@@ -202,7 +288,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
-                                   value3,value4,convESMF,purpGen
+                                   value3,value4,convESMF,purpGen,convCC
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: field
@@ -224,6 +310,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
+    convCC = 'CustomConvention'
     convESMF = 'ESMF'
     purpGen = 'General'
     name1 = 'ShortName'
@@ -250,7 +337,16 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
       purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
+    ! Create the Grid Attribute Package
+    call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
+    call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_FieldBundleAdd(fieldbundle, (/ field /), rc=status)
@@ -278,10 +374,26 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
   end subroutine userm2_init
 
 !-------------------------------------------------------------------------
+!   !  User Comp Component created by higher level calls, here is the
+!   !   Initialization routine.
+
+
+  subroutine userm3_init(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+   ! Initialize return code
+    rc = ESMF_SUCCESS
+
+  end subroutine userm3_init
+
+!-------------------------------------------------------------------------
 !   !User Comp Component created by higher level calls, here is the
 !   ! Initialization routine.
 
-  subroutine usercpl_init(comp, importState, exportState, clock, rc)
+  subroutine usercpl1_init(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
@@ -298,7 +410,30 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-  end subroutine usercpl_init
+  end subroutine usercpl1_init
+
+!-------------------------------------------------------------------------
+!   !User Comp Component created by higher level calls, here is the
+!   ! Initialization routine.
+
+  subroutine usercpl2_init(comp, importState, exportState, clock, rc)
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_VM)         :: vm
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_StateReconcile(importState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+  end subroutine usercpl2_init
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
@@ -310,24 +445,28 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_AttPack)        :: attpack, attpack_nested  
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: name3, name2, value32, convESMF, purpGen
-    character(ESMF_MAXSTR)      :: name_to_add, value_to_add
+    character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
+    character(ESMF_MAXSTR),dimension(2) :: attrList, valueList
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
-    type(ESMF_AttPack)        :: attpack
+    type(ESMF_Grid)             :: grid
 
     rc = ESMF_SUCCESS
 
     convESMF = 'ESMF'
     purpGen = 'General'
     name2 = 'StandardName'
+    value2 = 'default_standard_name'
     name3 = 'LongName'
-    value32 = 'CHANGED!!'
-    name_to_add = "new_attribute"
-    value_to_add = "new_att_value"
 
+    purp2 = 'Extended'
+    attrList(1) = 'Coordinates'
+    attrList(2) = 'Mask'
+    valueList(1) = "Latlon"
+    valueList(2) = "Yes"
 
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -336,13 +475,26 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-
     call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-
-    call ESMF_AttributeRemove(field, name=name2, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
+      attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeSet(field, attrList(1), valueList(1), &
+      convention=convESMF, purpose=purp2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeSet(field, attrList(2), valueList(2), &
+      convention=convESMF, purpose=purp2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
+      purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine userm1_run
@@ -351,7 +503,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 !   !  The Run routine where data is coupled.
 !   !
 
-  subroutine usercpl_run(comp, importState, exportState, clock, rc)
+  subroutine usercpl1_run(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
@@ -379,10 +531,10 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
+      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-  end subroutine usercpl_run
+  end subroutine usercpl1_run
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
@@ -394,9 +546,88 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_VM)               :: vm
+    integer                     :: petCount, status, myPet
+    character(ESMF_MAXSTR)      :: convESMF,purpGen
+
     rc = ESMF_SUCCESS
 
+    call ESMF_GridCompGet(comp, vm=vm, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+    call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
+    convESMF = 'ESMF'
+    purpGen = 'General'
+
+    ! Evolve the Field metadata?
+
   end subroutine userm2_run
+
+!-------------------------------------------------------------------------
+!   !  The Run routine where data is coupled.
+!   !
+
+  subroutine usercpl2_run(comp, importState, exportState, clock, rc)
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_VM)               :: vm
+    integer                     :: myPet
+
+    integer, dimension(2)       :: rootList
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_VMGet(vm, localPet=myPet, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+    call ESMF_StateGet(importState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_StateGet(exportState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+    rootList = (/0,1/)
+    call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+    call ESMF_AttributeCopy(importState, exportState, &
+      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+  end subroutine usercpl2_run
+
+!-------------------------------------------------------------------------
+!   !  The Run routine where data is computed.
+!   !
+
+  subroutine userm3_run(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_VM)               :: vm
+    integer                     :: petCount, status, myPet
+    character(ESMF_MAXSTR)      :: convESMF,purpGen
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_GridCompGet(comp, vm=vm, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+    call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
+    convESMF = 'ESMF'
+    purpGen = 'General'
+
+    ! Evolve the Field metadata?
+
+  end subroutine userm3_run
 
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
@@ -411,11 +642,14 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
+    integer                     :: k
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -423,6 +657,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -447,7 +682,22 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
 
-  subroutine usercpl_final(comp, importState, exportState, clock, rc)
+  subroutine userm3_final(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+  end subroutine userm3_final
+
+!-------------------------------------------------------------------------
+!   !  The Finalization routine where things are deleted and cleaned up.
+!   !
+
+  subroutine usercpl1_final(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
@@ -456,17 +706,32 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-  end subroutine usercpl_final
+  end subroutine usercpl1_final
+ 
+!-------------------------------------------------------------------------
+!   !  The Finalization routine where things are deleted and cleaned up.
+!   !
 
+  subroutine usercpl2_final(comp, importState, exportState, clock, rc)
+    type(ESMF_CplComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+  end subroutine usercpl2_final
+ 
 end module
 
-program ESMF_AttributeUpdateRemoveOnlyUTest
+program ESMF_AttributeUpdateMultiReconcileUTest
 
 #include "ESMF.h"
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeUpdateRemoveOnlyUTest - Attribute Update Unit Tests
+! !PROGRAM: ESMF_AttributeUpdateMultiReconcileUTest - Attribute Update Unit Tests
 !
 ! !DESCRIPTION:
 !
@@ -476,9 +741,9 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 ! !USES:
   use ESMF
   use ESMF_TestMod
-  use ESMF_AttributeUpdateRemoveOnlyUTestMod, &
-    only : userm1_setvm, userm1_register, &
-    userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
+  use ESMF_AttributeUpdateMultiReconcileUTestMod, only : userm1_setvm, userm1_register, &
+    userm2_setvm, userm2_register, userm3_setvm, userm3_register, &
+    usercpl1_setvm, usercpl1_register, usercpl2_setvm, usercpl2_register
 
 
   implicit none
@@ -506,16 +771,19 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
       type(ESMF_GridComp)     :: gridcomp2
-      type(ESMF_CplComp)      :: cplcomp
+      type(ESMF_GridComp)     :: gridcomp3
+      type(ESMF_CplComp)      :: cplcomp1
+      type(ESMF_CplComp)      :: cplcomp2
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	  type(ESMF_AttPack)    :: attpack
-      type(ESMF_Field)        :: field
-      type(ESMF_FieldBundle)  :: fieldbundle
+	type(ESMF_AttPack)        :: attpack
+    type(ESMF_Field)            :: field
+    type(ESMF_FieldBundle)      :: fieldbundle
+    type(ESMF_Grid)             :: grid
+    integer                     :: k
 
-      character(ESMF_MAXSTR)  :: name3, name2, value3, value2, value_out
-      character(ESMF_MAXSTR)  :: name_to_add, value_to_add, value_out_added
-      logical                 :: isPresent
+    character(ESMF_MAXSTR)      :: name2,value2,purp2,name3,outVal
+    character(ESMF_MAXSTR),dimension(2) :: attrList, valueList
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -532,7 +800,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc)
+    call ESMF_VMGetCurrent(vm, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -544,8 +812,14 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
       petList=(/2,3/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    cplcomp = ESMF_CplCompCreate(name="cplcomp", &
+    gridcomp3 = ESMF_GridCompCreate(name="gridcomp3", &
+      petList=(/4,5/), rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    cplcomp1 = ESMF_CplCompCreate(name="cplcomp1", &
       petList=(/0,1,2,3/), rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    cplcomp2 = ESMF_CplCompCreate(name="cplcomp2", &
+      petList=(/0,1,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     c1exp = ESMF_StateCreate(name="Comp1 exportState", &
@@ -559,60 +833,137 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
+    call ESMF_GridCompSetVM(gridcomp3, userm3_setvm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompSetVM(cplcomp1, usercpl1_setvm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompSetVM(cplcomp2, usercpl2_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompSetServices(gridcomp1,  &
-        userRoutine=userm1_register, rc=rc)
+    call ESMF_GridCompSetServices(gridcomp1, userRoutine=userm1_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_GridCompSetServices(gridcomp2,  &
-        userRoutine=userm2_register, rc=rc)
+    call ESMF_GridCompSetServices(gridcomp2, userRoutine=userm2_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompSetServices(cplcomp,  &
-        userRoutine=usercpl_register, rc=rc)
+    call ESMF_GridCompSetServices(gridcomp3, userRoutine=userm3_register, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompSetServices(cplcomp1, userRoutine=usercpl1_register, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompSetServices(cplcomp2, userRoutine=usercpl2_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompInitialize(cplcomp, importState=c1exp, &
+    call ESMF_GridCompInitialize(gridcomp3, importState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompInitialize(cplcomp1, importState=c1exp, &
       exportState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-    call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompRun(cplcomp, importState=c1exp, &
+    call ESMF_CplCompInitialize(cplcomp2, importState=c1exp, &
       exportState=c2imp, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Now we can start doing some testing
     convESMF = 'ESMF'
     purpGen = 'General'
-    name3 = 'LongName'
     name2 = 'StandardName'
-    value3 = 'CHANGED!!'
-    value_out = ''
-    value_out_added = ''
-
-    name_to_add = "new_attribute"
-    value_to_add = "new_att_value"
+    value2 = 'tendency_of_air_pressure'
 
     call ESMF_StateGet(c1exp, "fieldbundle", fieldbundle, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttributeGetAttPack(field, convention=convESMF, &
-                         purpose=purpGen, attpack=attpack, rc=rc)
-    call ESMF_AttributeGet(field, name2, attpack=attpack, &
-    					   isPresent=isPresent, rc=rc)
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
+        attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
+    print *, "PET: ", localPet, "outVal: ", trim(outVal)
+    print *, "                expected: ", trim(value2)
+    print *, "                      rc: ", rc
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompRun(cplcomp1, importState=c1exp, &
+      exportState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompRun(cplcomp2, importState=c1exp, &
+      exportState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_GridCompRun(gridcomp3, importState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    ! Now we can start doing some testing
+    convESMF = 'ESMF'
+    purpGen = 'General'
+    name2 = 'StandardName'
+    value2 = 'default_standard_name'
+    name3 = 'LongName'
+
+    purp2 = 'Extended'
+    attrList(1) = 'Coordinates'
+    attrList(2) = 'Mask'
+    valueList(1) = "Latlon"
+    valueList(2) = "Yes"
+
+    call ESMF_StateGet(c1exp, "fieldbundle", fieldbundle, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
+        attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
+    print *, "PET: ", localPet, "outVal: ", trim(outVal)
+    print *, "                expected: ", trim(value2)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purp2, &
+        attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, attrList(1), value=outVal, &
+      convention=convESMF, purpose=purp2, rc=rc)
+    print *, "PET: ", localPet, "outVal: ", trim(outVal)
+    print *, "                expected: ", trim(valueList(1))
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated Attribute package Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(valueList(1)==outVal), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(field, attrList(2), value=outVal, &
+      convention=convESMF, purpose=purp2, rc=rc)
+    print *, "PET: ", localPet, "outVal: ", trim(outVal)
+    print *, "                expected: ", trim(valueList(2))
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated Attribute package Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(valueList(2)==outVal), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(field, name3, value=outVal, &
+      convention=convESMF, purpose=purpGen, rc=rc)
+    print *, "PET: ", localPet, "DELETED, rc = ", rc
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a Field test"
-    call ESMF_Test((rc==ESMF_SUCCESS).and.(isPresent.eqv..false.), &
+    call ESMF_Test((rc/=ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     ! Now back to finalizing the model run
@@ -620,7 +971,12 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridCompFinalize(gridcomp2, importState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompFinalize(cplcomp, importState=c1exp, &
+    call ESMF_GridCompFinalize(gridcomp3, importState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompFinalize(cplcomp1, importState=c1exp, &
+      exportState=c2imp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompFinalize(cplcomp2, importState=c1exp, &
       exportState=c2imp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -628,7 +984,11 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridCompDestroy(gridcomp2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompDestroy(cplcomp, rc=rc)
+    call ESMF_GridCompDestroy(gridcomp3, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompDestroy(cplcomp1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_CplCompDestroy(cplcomp2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_StateDestroy(c1exp, rc=rc)
@@ -641,4 +1001,4 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     call ESMF_TestEnd(ESMF_SRCLINE)
     !-----------------------------------------------------------------------------
 
-end program ESMF_AttributeUpdateRemoveOnlyUTest
+end program ESMF_AttributeUpdateMultiReconcileUTest

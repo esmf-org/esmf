@@ -13,12 +13,11 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 			ESMF_AttPackGridCompUTest.F90 \
 			ESMF_AttPackGridUTest.F90 \
 			ESMF_AttPackSciCompUTest.F90 \
-			ESMF_AttPackStateUTest.F90
+			ESMF_AttPackStateUTest.F90 \
 
 .PRECIOUS: %.F90
 
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
-
 
 TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
@@ -42,7 +41,10 @@ TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeSciCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
-		$(ESMF_TESTDIR)/ESMF_AttributeUpdate2UTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateCIMRespPartyUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateClosedLoopTreesUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateContainerStressUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateMultiReconcileUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeWriteInternalUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
@@ -72,7 +74,10 @@ TESTS_RUN = RUN_ESMF_AttPackABundleUTest \
 		RUN_ESMF_AttributeSciCompUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
-		RUN_ESMF_AttributeUpdate2UTest \
+		RUN_ESMF_AttributeUpdateCIMRespPartyUTest \
+		RUN_ESMF_AttributeUpdateClosedLoopTreesUTest \
+		RUN_ESMF_AttributeUpdateContainerStressUTest \
+		RUN_ESMF_AttributeUpdateMultiReconcileUTest \
 		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
 		RUN_ESMF_AttributeWriteInternalUTest \
 		RUN_ESMF_AttributeXMLUTest \
@@ -362,14 +367,23 @@ RUN_ESMF_AttributeStateUTestUNI:
 
 # --- Update
 
-RUN_ESMF_AttributeUpdate2UTest:
-	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
+RUN_ESMF_AttributeUpdateUTest:
+	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
+
+RUN_ESMF_AttributeUpdateCIMRespPartyUTest:
+	$(MAKE) TNAME=AttributeUpdateCIMRespParty NP=6 ftest
+
+RUN_ESMF_AttributeUpdateClosedLoopTreesUTest:
+	$(MAKE) TNAME=AttributeUpdateClosedLoopTrees NP=4 ftest
+
+RUN_ESMF_AttributeUpdateContainerStressUTest:
+	$(MAKE) TNAME=AttributeUpdateContainerStress NP=4 ftest
+
+RUN_ESMF_AttributeUpdateMultiReconcileUTest:
+	$(MAKE) TNAME=AttributeUpdateMultiReconcile NP=6 ftest
 
 RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
 	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
-
-RUN_ESMF_AttributeUpdateUTest:
-	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
 
 # --- WriteInternal
 
