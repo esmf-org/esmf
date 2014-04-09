@@ -143,17 +143,14 @@ class _GridItem(object):
     '''
 
 # LogKind
-LogKind = namedtuple('LogKind', ['SINGLE', 'MULTI', 'NONE'])
-LogKind = LogKind(SINGLE=1, MULTI=2, NONE=3)
+LogKind = namedtuple('LogKind', ['MULTI', 'NONE'])
+LogKind = LogKind(MULTI=2, NONE=3)
 
 # This is a dummy class object used for documentation purposes only
 class _LogKind(object):
     '''
     This flag is used to specify how much logging should be done.
     Values are:
-        SINGLE = 1
-            Use a single log file, combining messages from all of the PETs.
-            Not supported on some platforms.
         MULTI = 2
             Use multiple log files -- one per PET.
         NONE = 3

@@ -86,7 +86,6 @@ class Manager(object):
             logkind: allows user to specify if there should be a single
             log file, multiple log files, or none at all.  The default
             is to not have a log file.  Argument values are: \n
-                                LogKind.SINGLE\n
                                 LogKind.MULTI\n
                                 (default) LogKind.NONE\n
             debug: allows user to log after every call, instead of the
