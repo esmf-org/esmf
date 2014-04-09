@@ -132,7 +132,6 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
     Arguments:\n
         LogKind (optional)    :: logkind\n
             Argument Values:\n
-                SINGLE\n
                 (default) MULTI\n
                 NONE\n
         """

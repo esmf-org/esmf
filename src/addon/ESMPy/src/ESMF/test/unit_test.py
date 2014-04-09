@@ -1194,7 +1194,7 @@ def version_compare_test():
 
 def main():
     # make an esmp object that won't go out of scope
-    esmp = Manager(logkind=LogKind.SINGLE, debug=True)
+    esmp = Manager(logkind=LogKind.MULTI, debug=True)
 
     try:
         vm = ESMP_VMGetGlobal()
