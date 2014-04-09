@@ -90,12 +90,10 @@ the application.  On some systems, the BLAS library must also be included.
 ESMF provides the ability to read Grid and Mesh data in 
 \htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf/} format. 
 
-In the NetCDF 4.2 released in March 2012, the C, C++, and Fortran libraries are released as separate packages.
-To compile ESMF with NetCDF 4.2, it is required to have the NetCDF 4.2 Fortran Library, 
-the NetCDF 4.2 C Library, and the NetCDF 4.2 Legacy C++ Library installed in the same directory. 
-The {\tt ESMF\_NETCDF} environement variable has to be set to {\tt "split"}.  Note that currently ESMF does not
-work with the new C++ API introduced in NetCDF 4.2, therefore, the Legacy C++ Library has to be 
-used.
+In the NetCDF 4.2 released in March 2012, the C and Fortran API libraries are released as separate packages.
+To compile ESMF with NetCDF 4.2 and newer releases, it is required to have the NetCDF C library, 
+and the NetCDF Fortran API library installed in the same directory. 
+The {\tt ESMF\_NETCDF} environement variable must be set to {\tt "split"}.
 
 The following environment variables enable, and specify the name and location
 of the desired NetCDF library and associated header files:
@@ -111,16 +109,14 @@ The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
 \item[{\tt "split"}] {\tt ESMF\_NETCDF\_LIBS} will be set to 
-{\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.  This option is useful for systems 
-which have the Fortran and C bindings archived in seperate library files; 
-the C++ bindings are always in a separate library file.  
+{\tt "-lnetcdff -lnetcdf"}.  This option is useful for systems 
+which have the Fortran and C bindings archived in seperate library files.  
 The {\tt ESMF\_NETCDF\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
 environment variables will also be used, if defined.
 
 \item[{\tt "standard"}] {\tt ESMF\_NETCDF\_LIBS} will be set to 
-{\tt "-lnetcdf\_c++ -lnetcdf"}.  This option is useful when the Fortran and 
-C bindings are archived together in the same library file, alongside the 
-always separate C++ bindings library file.  The {\tt ESMF\_NETCDF\_INCLUDE} 
+{\tt "-lnetcdf"}.  This option is useful when the Fortran and 
+C bindings are archived together in the same library file.  The {\tt ESMF\_NETCDF\_INCLUDE} 
 and {\tt ESMF\_NETCDF\_LIBPATH} environment variables will also be used, 
 if defined.
 
@@ -138,7 +134,7 @@ Specifies the path where the NetCDF header files are located.
 
 Specifies the path where the NetCDF library file is located.
 
-\item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf\_c++ -lnetcdf"} 
+\item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf"} 
 (no default).
 
 Specifies the linker directives needed to link the NetCDF library to
@@ -146,9 +142,9 @@ the application.
 
 The default value depends on the setting of {\tt ESMF\_NETCDF}.  For the 
 typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"}, 
-{\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf\_c++ -lnetcdf"}.  
+{\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf"}.  
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
-is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.
+is set to {\tt "-lnetcdff -lnetcdf"}.
 \end{description}
 
 \subsubsection{Parallel-NetCDF}
