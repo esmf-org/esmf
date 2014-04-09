@@ -38,7 +38,7 @@ def nc_is_mesh(filename, filetype):
     
 
 def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_dual=None,
-                                  isSphere=None):
+                                  isSphere=None, missingvalue=""):
     is_mesh = False
     if nc_is_mesh(filename, filetype):
         print "Creating ESMF.Mesh object"
@@ -49,8 +49,9 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         is_mesh = True
     else:
         print "Creating ESMF.Grid object"
+        add_mask = len(missingvalue) > 0
         grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype,
-                         is_sphere=isSphere)
+                                 is_sphere=isSphere, add_mask=add_mask, varname=missingvalue)
     return grid_or_mesh, is_mesh
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
@@ -195,7 +196,9 @@ def parse_options(options):
         options = options.split()
         opts, args = getopt(options,'it:p:r', ['src_type=', 'dst_type=', 
                                                'src_meshname=', 'dst_meshname=',
-                                               'ignore_unmapped', 'src_regional', 'dst_regional'])
+                                               'ignore_unmapped', 
+                                               'src_regional', 'dst_regional',
+                                               'src_missingvalue=','dst_missingvalue='])
         src_type_str = "SCRIP"
         dst_type_str = "SCRIP"
         src_meshname = "Undefined"
@@ -204,6 +207,8 @@ def parse_options(options):
         unmapped_action = ESMF.UnmappedAction.ERROR
         src_regional = False
         dst_regional = False
+        src_missingvalue = ""
+        dst_missingvalue = ""
         for opt, arg in opts:
             if opt == '--src_type':
                 src_type_str = arg
@@ -227,8 +232,13 @@ def parse_options(options):
                 src_regional = True
             elif opt == '--dst_regional':
                 dst_regional = True
+            elif opt == '--src_missingvalue':
+                src_missingvalue = arg
+            elif opt == '--dst_missingvalue':
+                dst_missingvalue = arg
         return (src_type_str, dst_type_str, src_meshname, dst_meshname,
-                unmapped_action, pole_method_str, src_regional, dst_regional)
+                unmapped_action, pole_method_str, src_regional, dst_regional,
+                src_missingvalue, dst_missingvalue)
 
 def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
@@ -245,7 +255,8 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # Settings for regrid
     (src_type_str, dst_type_str, src_meshname, dst_meshname,
-     unmappedaction, pole_method_str, src_regional, dst_regional) = parse_options(options)
+     unmappedaction, pole_method_str, src_regional, dst_regional,
+     src_missingvalue, dst_missingvalue) = parse_options(options)
     src_type = file_type_map[src_type_str]
     dst_type = file_type_map[dst_type_str]
     regridmethod = regrid_method_map[regrid_method]
@@ -261,12 +272,16 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
             pole_method = ESMF.PoleMethod.NPNTAVG
             pole_method_npntavg = int(pole_method_str)
 
-    srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, meshname=src_meshname,
+    srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, 
+                                                         meshname=src_meshname,
                                                          convert_to_dual=convert_to_dual, 
-                                                         isSphere=src_is_sphere)
-    dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, meshname=dst_meshname,
+                                                         isSphere=src_is_sphere,
+                                                         missingvalue=src_missingvalue)
+    dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, 
+                                                         meshname=dst_meshname,
                                                          convert_to_dual=convert_to_dual, 
-                                                         isSphere=dst_is_sphere)
+                                                         isSphere=dst_is_sphere,
+                                                         missingvalue=dst_missingvalue)
 
     # Get node coordinates in radians
     src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
