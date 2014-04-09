@@ -100,22 +100,27 @@ program ESMF_LocStreamCreateUTest
   rc=ESMF_SUCCESS
 
   ! First make sure validate fails for an uncreated Grid
+print *, 'calling first validate'
   call ESMF_LocStreamValidate(locstream,rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
   ! Now make sure that a created grid validates successfully
   !! Create Grid
+print *, 'creating locstream'
   locstream=ESMF_LocStreamCreate(name="ted",distgrid=distgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
   !! Check that validate returns true
+print *, 'calling second validate'
   call ESMF_LocStreamValidate(locstream, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
   
+print *, 'destroy locstream'
   call ESMF_LocStreamDestroy(locstream,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   !! Check that validate returns false
+print *, 'calling third validate'
   call ESMF_LocStreamValidate(locstream, rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
