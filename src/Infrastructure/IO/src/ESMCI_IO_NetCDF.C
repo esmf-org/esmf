@@ -670,7 +670,7 @@ void IO_NetCDF::destruct(void) {
 
     int ndims;
     char ncname[NC_MAX_NAME];
-    int nctype;
+    nc_type nctype;
     int dimIds[NC_MAX_VAR_DIMS];
     int ncnatts;
     int ncerr;
