@@ -62,6 +62,7 @@ class Grid(object):
                 filetype: the input file type of the Grid. \n
                     Argument values are: \n
                         FileFormat.SCRIP \n
+                        FileFormat.GRIDSPEC \n
             Optional arguments for creating a Grid from file: \n
                 is_sphere: Set to True for a spherical grid, or False for
                            regional. Defaults to True. \n
@@ -143,6 +144,8 @@ class Grid(object):
             raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
         # from file
         else:
+            if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
+                raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
             # set the from_file flag to True
             from_file = True
             #raise errors for all in-memory grid options
@@ -166,6 +169,7 @@ class Grid(object):
         self.rank = None
         self.num_peri_dims = num_peri_dims
         self.coord_sys = coord_sys
+        self.ndims = None # Applies to Gridspec only
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self.size = [None]
@@ -200,12 +204,13 @@ class Grid(object):
                                                   addUserArea=add_user_area,
                                                   addMask=add_mask, varname=varname,
                                                   coordNames=coord_names)
-            # grid rank
-            self.rank = ESMP_ScripInqRank(filename)
-
-            # grid dims            
-            self.max_index = ESMP_ScripInqDims(filename)
-            
+            # grid rank and dims
+            if filetype == FileFormat.SCRIP:
+                self.rank = ESMP_ScripInqRank(filename)
+                self.max_index = ESMP_ScripInqDims(filename)
+                self.ndims = self.rank
+            else: # must be GRIDSPEC
+                self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)
             # stagger is not required for from-file grids, but we need to 
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
@@ -376,6 +381,7 @@ class Grid(object):
                    self.area))
 
         return string
+
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
         Add coordinates to a Grid at the specified
@@ -696,25 +702,28 @@ class Grid(object):
         # set flag to tell this coordinate has been aliased
         self.coords_done[stagger][coord_dim] = True
 
-    def get_grid_coords_from_esmc(self, coord_dim, stagger):
+    def get_grid_coords_from_esmc(self, coord_dim, stagger, ndims=2):
         # get the pointer to the underlying ESMF data array for coordinates
         coords_out = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
 
         # find the size of the local coordinates at this stagger location
-        from operator import mul
-        size = reduce(mul,self.size_local[stagger])
+        if ndims != 1:
+            from operator import mul
+            size = reduce(mul,self.size_local[stagger])
+        else:
+            size = self.size_local[stagger][coord_dim]
 
         # create a numpy array to point to the ESMF allocation
         gridbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(coords_out.contents),
             np.dtype(ESMF2PythonType[self.type]).itemsize*size)
         gridCoordP = np.frombuffer(gridbuffer, ESMF2PythonType[self.type])
-
-        # reshape the numpy array of coordinates using Fortran ordering in Grid
-        gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
+        
+        if ndims != 1:
+            # reshape the numpy array of coordinates using Fortran ordering in Grid
+            gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
 
         return gridCoordP
-
 
     def allocate_items(self, item, stagger):
         # this could be one of several entry points to the grid,

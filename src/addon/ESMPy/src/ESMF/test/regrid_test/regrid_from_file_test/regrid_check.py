@@ -32,14 +32,13 @@ def nc_is_mesh(filename, filetype):
         is_mesh = True
     elif filetype == ESMF.FileFormat.SCRIP:
         grid_rank = ESMF.ESMP_ScripInqRank(filename)
-        print "%s rank is %d" % (filename, grid_rank)
         if grid_rank == 1:
             is_mesh = True
     return is_mesh
     
 
 def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_dual=None,
-                                  isSphere=None):
+                                  isSphere=None, missingvalue=""):
     is_mesh = False
     if nc_is_mesh(filename, filetype):
         print "Creating ESMF.Mesh object"
@@ -50,26 +49,26 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         is_mesh = True
     else:
         print "Creating ESMF.Grid object"
+        add_mask = len(missingvalue) > 0
         grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype,
-                         is_sphere=isSphere)
+                                 is_sphere=isSphere, add_mask=add_mask, varname=missingvalue)
     return grid_or_mesh, is_mesh
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
     if is_mesh:
-        print "Getting coords from Mesh"
         coords_interleaved, num_nodes, num_dims = ESMF.ESMP_MeshGetCoordPtr(grid_or_mesh)
         lons = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
         lats = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
-        print 'Mesh lons = ', lons
-        print 'Mesh lats = ', lats
     else:
-        print "Getting coords from Grid"
-        lons = grid_or_mesh.get_grid_coords_from_esmc(0, ESMF.StaggerLoc.CENTER)
-        lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER)
-        print 'lons.shape=',lons.shape
-        print 'lats.shape=',lats.shape
-        print 'get_grid_coords_from_esmc returned lons = ', lons
-        print 'get_grid_coords_from_esmc returned lats = ', lats
+        lons = grid_or_mesh.get_grid_coords_from_esmc(0, ESMF.StaggerLoc.CENTER,
+                                                      ndims=grid_or_mesh.ndims)
+        lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER,
+                                                      ndims=grid_or_mesh.ndims)
+        if grid_or_mesh.ndims == 1:
+            lons_1d = lons
+            lats_1d = lats
+            lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
+            lats = np.array([lats_1d for lon in lons_1d])
     lons = np.radians(lons)
     lats = np.radians(lats)
     return lons,lats
@@ -101,11 +100,7 @@ def build_analyticfield_const(field):
     return field
 
 def build_analyticfield(field, lons, lats):
-    print 'lons[0:20]=',lons[0:20]
-    print 'lats[0:20]=',lons[0:20]
     field.data[...] = 2.0 + np.cos(lats[...])**2 * np.cos(2.0*lons[...])
-    print 'shape field data = ',field.data.shape
-    print 'field.data = ',field.data
     return field
 
 def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
@@ -116,8 +111,6 @@ def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
     POSTCONDITIONS: A regridding operation has set the data on 'dstfield'.
     '''
     # call the regridding functions
-    print 'polemethod = ',polemethod
-    print 'regridPoleNPnts = ',regridPoleNPnts
     dstfield.data[...] = UNINITVAL
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                 regrid_method=regridmethod,
@@ -126,8 +119,6 @@ def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
                                 pole_method=polemethod,
                                 regridPoleNPnts=regridPoleNPnts)
     dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
-    print 'unmappedaction = ',unmappedaction
-    print 'dstfield=',dstfield
 
     return dstfield
 
@@ -150,12 +141,6 @@ def compare_fields(field1, field2, regridmethod, dstFracField, dst_mask, max_err
     print 'comparing fields'
     print 'field1 = ',field1
     print 'field2 = ',field2
-    print 'field1.shape=',field1.shape
-    print 'field1.size=',field1.size
-    print 'dstFracField.shape=',dstFracField.shape
-    print 'dstFracField.size=',dstFracField.size
-    print 'dst_mask.shape=',dst_mask.shape
-    print 'dst_mask.size=',dst_mask.size
     field1data = np.ravel(field1.data)
     field2data = np.ravel(field2.data)
     dstFracFieldData = np.ravel(dstFracField.data)
@@ -211,7 +196,9 @@ def parse_options(options):
         options = options.split()
         opts, args = getopt(options,'it:p:r', ['src_type=', 'dst_type=', 
                                                'src_meshname=', 'dst_meshname=',
-                                               'ignore_unmapped', 'src_regional', 'dst_regional'])
+                                               'ignore_unmapped', 
+                                               'src_regional', 'dst_regional',
+                                               'src_missingvalue=','dst_missingvalue='])
         src_type_str = "SCRIP"
         dst_type_str = "SCRIP"
         src_meshname = "Undefined"
@@ -220,6 +207,8 @@ def parse_options(options):
         unmapped_action = ESMF.UnmappedAction.ERROR
         src_regional = False
         dst_regional = False
+        src_missingvalue = ""
+        dst_missingvalue = ""
         for opt, arg in opts:
             if opt == '--src_type':
                 src_type_str = arg
@@ -243,8 +232,13 @@ def parse_options(options):
                 src_regional = True
             elif opt == '--dst_regional':
                 dst_regional = True
+            elif opt == '--src_missingvalue':
+                src_missingvalue = arg
+            elif opt == '--dst_missingvalue':
+                dst_missingvalue = arg
         return (src_type_str, dst_type_str, src_meshname, dst_meshname,
-                unmapped_action, pole_method_str, src_regional, dst_regional)
+                unmapped_action, pole_method_str, src_regional, dst_regional,
+                src_missingvalue, dst_missingvalue)
 
 def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
@@ -261,7 +255,8 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # Settings for regrid
     (src_type_str, dst_type_str, src_meshname, dst_meshname,
-     unmappedaction, pole_method_str, src_regional, dst_regional) = parse_options(options)
+     unmappedaction, pole_method_str, src_regional, dst_regional,
+     src_missingvalue, dst_missingvalue) = parse_options(options)
     src_type = file_type_map[src_type_str]
     dst_type = file_type_map[dst_type_str]
     regridmethod = regrid_method_map[regrid_method]
@@ -277,12 +272,16 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
             pole_method = ESMF.PoleMethod.NPNTAVG
             pole_method_npntavg = int(pole_method_str)
 
-    srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, meshname=src_meshname,
+    srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, 
+                                                         meshname=src_meshname,
                                                          convert_to_dual=convert_to_dual, 
-                                                         isSphere=src_is_sphere)
-    dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, meshname=dst_meshname,
+                                                         isSphere=src_is_sphere,
+                                                         missingvalue=src_missingvalue)
+    dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, 
+                                                         meshname=dst_meshname,
                                                          convert_to_dual=convert_to_dual, 
-                                                         isSphere=dst_is_sphere)
+                                                         isSphere=dst_is_sphere,
+                                                         missingvalue=dst_missingvalue)
 
     # Get node coordinates in radians
     src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
@@ -296,8 +295,6 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
         #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
         dstgrid.link_item_buffer(ESMF.GridItem.MASK, ESMF.StaggerLoc.CENTER)
         dst_mask = dstgrid.get_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
-    print 'dst_mask.shape = ',dst_mask.shape
-    print 'dst_mask = ', dst_mask
     
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', regridmethod)
