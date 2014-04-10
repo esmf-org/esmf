@@ -561,7 +561,7 @@ void VMK::abort(){
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized)
-    MPI_Abort(default_mpi_c, 0);
+    MPI_Abort(default_mpi_c, EXIT_FAILURE);
 }
 
 

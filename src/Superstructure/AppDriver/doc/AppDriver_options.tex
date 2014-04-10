@@ -19,9 +19,11 @@ The valid values are:
          LogErr of at least one PET will be completely flushed during the abort.
          This option should only be used if a condition is detected that
          prevents normal continuation or termination of the application.
-         Typical conditions that warrant the use of {\tt ESMF\_END\_ABORT} are those
-         that occur on a per PET basis where other PETs may be blocked in 
-         communication calls, unable to reach the normal termination point.
+         Typical conditions that warrant the use of {\tt ESMF\_END\_ABORT} 
+         are those that occur on a per PET basis where other PETs may be blocked
+         in communication calls, unable to reach the normal termination point.
+         An aborted application returns to the parent process with a system
+         dependent indication that a failure occured during execution.
    \item [ESMF\_END\_NORMAL]
          \begin{sloppypar}
          Normal termination of the ESMF application. Wait for all PETs of the
