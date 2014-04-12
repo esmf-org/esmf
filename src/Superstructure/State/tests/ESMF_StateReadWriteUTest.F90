@@ -43,10 +43,21 @@
     type(ESMF_Array) :: latArray, lonArray, timeArray, humidArray, &
                         tempArray, pArray, rhArray
     type(ESMF_VM) :: vm
-    integer :: rc
+    integer :: i
+    integer :: rc, localrc
     logical :: have_netcdf
 
-    character(*), parameter :: netcdf_file = 'io_netcdf_testdata.nc'
+    character(*), parameter :: netcdf_file    = 'io_netcdf_testdata.nc'
+    character(*), parameter :: netcdf_fileout = 'io_netcdf_testdata_out.nc'
+
+    integer, parameter :: narrays = 7
+    character(8), parameter :: arraynames(narrays) = (/  &
+        "lat ", "lon ", "time",  &
+        "Q   ", "TEMP", "p   ",  &
+        "rh  "  &
+    /)
+    type(ESMF_StateItem_Flag) :: itemtype
+    integer :: itemcount
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -69,7 +80,7 @@
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       call ESMF_VMGetGlobal(vm=vm, rc=rc)
-      
+
 #ifdef ESMF_TESTEXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_UTest 
@@ -81,14 +92,46 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest 
+      ! Test reading a with no file name specified
+      call ESMF_StateRead(state, filename=' ', rc=rc)
+      write(failMsg, *) "Did not return an error"
+      write(name, *) "Reading a file with no file name specified"
+      call ESMF_Test(rc /= ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
       ! Test reading a netCDF file into Arrays in a State
-      call ESMF_StateRead(state, netcdf_file, rc=rc)
+      call ESMF_StateRead(state, filename=netcdf_file, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS when reading: ", netcdf_file
-      write(name, *) "Reading a netCDF file into Arrays in a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_LIB_NOT_PRESENT), &
+      write(name, *) "Reading netCDF file ", netcdf_file, " into Arrays in a State"
+      call ESMF_Test((rc == ESMF_SUCCESS .or. rc == ESMF_RC_LIB_NOT_PRESENT), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      have_netcdf = rc == ESMF_SUCCESS
+      have_netcdf = rc /= ESMF_RC_LIB_NOT_PRESENT
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test for number of State items read from the file.
+      call ESMF_StateGet (state, itemCount=itemcount, rc=localrc)
+      write(failMsg, *) "Incorrect number of items read from file"
+      write(name, *) "Checking read-in Array item count in a State test"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. itemcount == narrays) .or. .not. have_netcdf, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test for presense of State items read from the file.
+      do, i=1, narrays
+        call ESMF_StateGet (state, itemname=arraynames(i), itemType=itemtype, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) exit
+        if (itemtype /= ESMF_STATEITEM_ARRAY) then
+          localrc = ESMF_RC_NOT_FOUND
+          exit
+        end if
+      end do
+      rc = merge (ESMF_SUCCESS, localrc, i>narrays)
+      write(failMsg, *) "Could not find read-in Array: ", trim (arraynames(min (i, narrays)))
+      write(name, *) "Checking read-in Array names in a State test"
+      call ESMF_Test((rc == ESMF_SUCCESS .or. .not. have_netcdf), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test reconciling Arrays across all PETs in a VM
@@ -99,10 +142,18 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest 
+      ! Test writing Arrays with no file name specified
+      call ESMF_StateWrite(state, filename=' ', rc=rc)
+      write(failMsg, *) "Did not return an error"
+      write(name, *) "Writing a file with no file name"
+      call ESMF_Test(rc /= ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
       ! Test writing Arrays in a State to a netCDF file
-      call ESMF_StateWrite(state, "io_netcdf_testdata_out.nc", rc=rc)
+      call ESMF_StateWrite(state, filename=netcdf_fileout, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing a netCDF file from Arrays in a State"
+      write(name, *) "Writing netCDF file ", netcdf_fileout, " from Arrays in a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_LIB_NOT_PRESENT), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
