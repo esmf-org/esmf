@@ -592,7 +592,7 @@ end subroutine ESMF_ScripGetVar
 ! !INTERFACE:
 subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFile, dstFile, srcFileType, dstFileType,&
-				      title, method, srcArea, dstArea, &
+				      title, method, normType, srcArea, dstArea, &
 				      srcFrac, dstFrac, largeFileFlag, netcdf4FileFlag, &
 				      srcmeshname, dstmeshname, & 
 			              srcMissingValue, dstMissingValue, &
@@ -609,6 +609,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_FileFormat_Flag), optional, intent(in) :: dstFileType
       character(len=*), optional, intent(in) :: title
       type(ESMF_RegridMethod_Flag), optional, intent(in) :: method
+      type(ESMF_NormType_Flag),    intent(in),   optional :: normType
       real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
       real(ESMF_KIND_R8),optional, intent(in) :: srcFrac(:), dstFrac(:)
       logical, optional, intent(in) :: largeFileFlag, netcdf4FileFlag
@@ -660,6 +661,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_Logical) :: netcdf4FileFlaglocal
       logical            :: faceCoordFlag
       logical            :: srchasbound, dsthasbound
+      type(ESMF_NormType_Flag):: localNormType
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -688,6 +690,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	netcdf4FileFlaglocal = netcdf4FileFlag
       else
         netcdf4FileFlaglocal = .false.
+      endif
+
+      ! Handle optional normType argument
+      if (present(normType)) then
+         localNormType=normType
+      else     
+         localNormType=ESMF_NORMTYPE_DSTAREA
       endif
 
       call ESMF_VMGetCurrent(vm, rc=rc)
@@ -732,12 +741,22 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 		ESMF_CONTEXT, rcToReturn=rc)) return
          
          ! global variables
-         if (present(title)) then
-	   titlelocal = trim(title)
-         else
-           titlelocal = "ESMF Offline Regridding Weight Generator"
-         endif
-         norm = "destarea"
+          if (present(title)) then
+             titlelocal = trim(title)
+          else
+             titlelocal = "ESMF Offline Regridding Weight Generator"
+          endif
+
+          ! Norm type
+          if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
+             norm = "destarea"
+          elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
+             norm = "fracarea"
+          else
+             norm = "unknown"
+          endif
+
+         ! Regrid method
          if (present(method)) then
 	   methodlocal = method
 	   if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BILINEAR%regridmethod) then

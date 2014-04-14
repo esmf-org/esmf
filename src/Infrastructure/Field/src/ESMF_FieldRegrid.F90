@@ -445,8 +445,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
 !     \item [{[normType]}] 
 !           This argument controls the type of normalization used when generating conservative weights. This option
-!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
-!           {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
+!           Section~\ref{opt:normType} for a 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
