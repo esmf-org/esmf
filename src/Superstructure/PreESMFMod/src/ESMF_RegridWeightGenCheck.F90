@@ -139,6 +139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8) :: grid1min, grid1max, grid2min, grid2max
     real(ESMF_KIND_R8), pointer :: grid1area(:), grid2area(:)
     real(ESMF_KIND_R8), pointer :: grid1areaXX(:), grid2areaXX(:)
+    type(ESMF_NormType_Flag) :: normType
 
     !--------------------------------------------------------------------------
     ! EXECUTION
@@ -170,11 +171,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc = ESMF_SUCCESS
 
     ! read in the grid dimensions
-    call NCFileInquire(weightFile, title, src_dim, dst_dim, rc=status)
+    call NCFileInquire(weightFile, title, normType, src_dim, dst_dim, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
+
+      if (normType .eq. ESMF_NORMTYPE_DSTAREA) then
+         print *, "TEST Norm Type: dstarea"
+      elseif (normType .eq. ESMF_NORMTYPE_FRACAREA) then
+         print *, "TEST Norm Type: fracarea"
+      endif
+
 
     ! only read the data on PET 0 until we get ArrayRead going...
     if (localPet == 0) then
@@ -407,7 +415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! if frac is below .999, then a significant portion of this cell is
         ! missing from the weight calculation and error is misleading here
         ! also don't look in unitialized cells, for the regional to global cases
-        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 &
+        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 & 
             .and. FdstArray(i) /= UNINITVAL) then
 
           ! compute the raw pointwise error
@@ -464,13 +472,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       allocate(grid2areaXX(dst_dim))
       grid1area = FsrcArray*src_area*src_frac
 
-      ! Only calculate dst area over region that is unmasked and initialized
+     ! Calculate dst area depending on norm option
       grid2area=0.0
-      do i=1,dst_dim
-         if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
-            grid2area(i) = FdstArray(i)*dst_area(i)
-         endif
-      enddo
+      if (normType == ESMF_NORMTYPE_DSTAREA) then
+         do i=1,dst_dim
+            ! Only calculate dst area over region that is unmasked and initialized
+            if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
+               grid2area(i) = FdstArray(i)*dst_area(i)
+            endif
+         enddo
+      else if (normType == ESMF_NORMTYPE_FRACAREA) then
+         do i=1,dst_dim
+            ! Only calculate dst area over region that is unmasked and initialized
+            if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
+               grid2area(i) = FdstArray(i)*dst_area(i)*dst_frac(i)
+            endif
+         enddo
+      endif
 
       grid1areaXX = FsrcArray*src_area
       grid2areaXX = FdstArray*dst_area*dst_frac
@@ -533,18 +551,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! The weights file should have the source and destination grid information
   ! provided.
   !****************************************************************************
-  subroutine NCFileInquire (weightFile, title, src_dim, dst_dim, rc)
+  subroutine NCFileInquire (weightFile, title, normType, src_dim, dst_dim, rc)
 
     character(len=*), intent(in)   :: weightFile
     character(len=*), intent(out)  :: title
     integer, intent(out)           :: src_dim
     integer, intent(out)           :: dst_dim
+    type(ESMF_NormType_Flag), intent(out) :: normType
     integer, intent(out), optional :: rc
 
     integer :: ncstat,  nc_file_id,  nc_srcdim_id, nc_dstdim_id
-    integer :: titleLen
+    integer :: titleLen, normLen
 
-    character(ESMF_MAXPATHLEN) :: msg
+    character(ESMF_MAXPATHLEN) :: msg, normStr
 
 #ifdef ESMF_NETCDF
     !-----------------------------------------------------------------
@@ -560,9 +579,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !-----------------------------------------------------------------
-    ! source grid dimensions
+    ! Title
     !-----------------------------------------------------------------
-
     ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'title', len=titleLen)
     if(ncstat /= 0) then
       write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
@@ -580,6 +598,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
       return
+    endif
+
+
+    !-----------------------------------------------------------------
+    ! Normalization
+    !-----------------------------------------------------------------
+    ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'normalization', &
+             len=normLen)
+    if(ncstat /= 0) then
+      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
+      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
+    if(len(normStr) < normLen) then
+      print *, "Not enough space to put normalization string."
+      return
+    end if
+    ncstat = nf90_get_att(nc_file_id, nf90_global, "normalization", normStr)
+    if(ncstat /= 0) then
+      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
+      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
+
+    ! translate normalization into normtype
+    normType=ESMF_NORMTYPE_DSTAREA
+    if (trim(normStr) .eq. "fracarea") then
+       normType=ESMF_NORMTYPE_FRACAREA
     endif
 
     !-----------------------------------------------------------------
@@ -619,6 +667,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
       return
     endif
+
+
+
 
     !------------------------------------------------------------------------
     !     close input file
