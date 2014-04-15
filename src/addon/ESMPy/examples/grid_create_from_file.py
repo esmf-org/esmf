@@ -1,3 +1,7 @@
+# This example demonstrates how to create an ESMPy grid from file
+# The grid file is required, it can be retrieved from the ESMF data repository:
+#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
+
 import ESMF
 
 # Start up ESMF, this call is only necessary to override the default parameters
