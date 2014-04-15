@@ -314,7 +314,7 @@ class Grid(object):
 
         # initialize the item structures
         # index order is [staggerLoc][itemDim]
-        self.mask = [[0] for a in range(2**self.rank)]
+        self.mask = [[1] for a in range(2**self.rank)]
         self.area = [[0] for a in range(2**self.rank)]
         self.item_done = [[False for a in range(2)] \
                            for b in range(2**self.rank)]
