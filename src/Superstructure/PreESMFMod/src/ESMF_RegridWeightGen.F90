@@ -90,7 +90,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
   subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
-    regridmethod, polemethod, regridPoleNPnts, &
+    regridmethod, polemethod, regridPoleNPnts, normType, &
     unmappedaction, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
     srcMissingvalueFlag, srcMissingvalueVar, &
@@ -109,6 +109,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
   integer,                      intent(in),  optional :: regridPoleNPnts
+  type(ESMF_NormType_Flag),    intent(in),   optional :: normType
+
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: dstFileType
@@ -173,6 +175,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[regridPoleNPnts]}]
 !     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points should be averaged over at the pole.
+!   \item [{[normType]}] 
+!    This argument controls the type of normalization used when generating conservative weights. This option
+!    only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
+!    {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !   \item [{[unmappedaction]}]
 !     specify what should happen if there are destination points that
 !     can't be mapped to a source cell. Options are 
@@ -300,6 +306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: useSrcMask, useDstMask
     integer            :: commandbuf(6)
     !real(ESMF_KIND_R8) :: starttime, endtime
+    type(ESMF_NormType_Flag):: localNormType
 
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -372,6 +379,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(dstFileType)) then
        localDstFileType = dstFileType
     endif
+
+    ! Handle optional normType argument
+    if (present(normType)) then
+       localNormType=normType
+    else     
+       localNormType=ESMF_NORMTYPE_DSTAREA
+    endif
+
 
     ! If the src grid type is UGRID, get the dummy variable name in the file
     if (localSrcFileType == ESMF_FILEFORMAT_UGRID) then
@@ -761,6 +776,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    if (localUserAreaFlag) then
 	      print *, "  Use user defined cell area for both the source and destination grids"
       endif
+      if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
+	      print *, "  Norm Type: dstarea"
+      elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
+	      print *, "  Norm Type: fracarea"
+      endif
         write(*,*)
     endif 
 
@@ -1121,6 +1141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1133,6 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1145,6 +1167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1156,6 +1179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1270,6 +1294,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, &
             srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
@@ -1281,6 +1306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, &
             srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
@@ -1292,6 +1318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, &
             srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
@@ -1303,6 +1330,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, &
             srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
@@ -1317,7 +1345,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      if (useSrcCoordVar .and. useDstCoordVar) then
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, dstFrac=dstFrac, &
 		        largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
 		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
@@ -1327,7 +1356,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      elseif (useSrcCoordVar) then
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, dstFrac=dstFrac, &
 		        largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
 		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
@@ -1337,7 +1367,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      elseif (useDstCoordVar) then
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, dstFrac=dstFrac, &
 		        largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
 		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
@@ -1347,7 +1378,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      else
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	          dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
+	          dstFileType=localDstFileType, method = localRegridMethod, &
+                  normType=localNormType, dstFrac=dstFrac, &
 		        largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, &
 		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
@@ -1416,7 +1448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
     keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
-    weightFile, regridmethod, unmappedaction, useUserAreaFlag, &
+    weightFile, regridmethod, normType, unmappedaction, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
@@ -1431,6 +1463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_DistGrid),          intent(in),  optional :: srcNodalDistgrid
   type(ESMF_DistGrid),          intent(in),  optional :: dstNodalDistgrid
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
+  type(ESMF_NormType_Flag),    intent(in),   optional :: normType
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
@@ -1479,6 +1512,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} 
 !     for a list of valid options. If not specified, defaults to 
 !     {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[normType]}] 
+!    This argument controls the type of normalization used when generating conservative weights. This option
+!    only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
+!    {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !   \item [{[unmappedaction]}]
 !     specify what should happen if there are destination points that
 !     can't be mapped to a source cell. Options are 
@@ -1534,6 +1571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
     character(len=256) :: argStr
     !real(ESMF_KIND_R8) :: starttime, endtime
+    type(ESMF_NormType_Flag):: localNormType
 
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -1583,6 +1621,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localVerboseFlag = verboseFlag
     endif
 
+    ! Handle optional normType argument
+    if (present(normType)) then
+       localNormType=normType
+    else     
+       localNormType=ESMF_NORMTYPE_DSTAREA
+    endif
+
     ! user area only needed for conservative regridding
     if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -1621,6 +1666,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 	    if (localUserAreaFlag) then
 	       print *, "  Use user defined cell area for both the source and destination grids"
+      endif
+      if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
+	      print *, "  Norm Type: dstarea"
+      elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
+	      print *, "  Norm Type: fracarea"
       endif
       write(*,*)
     endif 
@@ -1741,6 +1791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = ESMF_POLEMETHOD_NONE, &
+        normType=localNormType, &
 	      rc=localrc)
     else
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
@@ -1750,6 +1801,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = ESMF_POLEMETHOD_NONE, &
+        normType=localNormType, &
 	      rc=localrc)
     endif
 
@@ -1826,6 +1878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, method = localRegridMethod, & 
             srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+                  normType=localNormType, &
 		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -1834,6 +1887,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else
           call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, &
+                  normType=localNormType, &
 	          method = localRegridMethod, dstFrac=dstFrac, &
 		        largeFileFlag=localLargeFileFlag, &
 		        netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
@@ -1842,7 +1896,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	      endif
       else 
-	      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+	      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, &
+                  normType=localNormType, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return

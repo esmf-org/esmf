@@ -509,13 +509,37 @@ The valid values are:
       WriteRestart method.
 \end{description}
 
+
+
+\subsection{ESMF\_NORMTYPE}
+
+\label{opt:normType}
+
+{\sf DESCRIPTION:\\}  When doing conservative regridding (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}), this option allows the user to select the type of normalization used when producing the weights. 
+
+{\tt type(ESMF\_NormType\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_NORMTYPE\_DSTAREA]
+ Destination area normalization. Here the weights are calculated by dividing the area of overlap of the source and 
+ destination cells by the area of the entire destination cell. In other words, the weight is the fraction of the 
+ entire destination cell which overlaps with the given source cell. 
+\item [ESMF\_NORMTYPE\_FRACAREA]
+   Fraction area normalization. Here in addition to the weight calculation done for destination area normalization 
+({\tt ESMF\_NORMTYPE\_DSTAREA}) the weights are also divided by the fraction that the destination cell overlaps with
+  the entire source grid. In other words, the weight is the fraction of just the part of the destination cell that 
+  overlaps with the entire source mesh.  
+\end{description}
+
+
 \subsection{ESMF\_PIN}
 This flag is documented in section \ref{const:pin_flag}.
 
 \subsection{ESMF\_POLEKIND}
 This flag is documented in section \ref{const:polekind}.
 
-\subsubsection{ESMF\_POLEMETHOD}
+\subsection{ESMF\_POLEMETHOD}
 \label{const:polemethod}
 
 {\sf DESCRIPTION:\\}  
@@ -577,7 +601,7 @@ The valid values are:
 \end{description}
 
 
-\subsubsection{ESMF\_REGRIDMETHOD}
+\subsection{ESMF\_REGRIDMETHOD}
 \label{opt:regridmethod}
 
 {\sf DESCRIPTION:\\}  

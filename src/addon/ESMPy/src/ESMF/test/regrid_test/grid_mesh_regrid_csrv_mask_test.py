@@ -1,6 +1,9 @@
 # $Id$
 
 """
+This test demonstrates conservative regridding with user defined areas and 
+source masking on a mesh.
+
 Two Field objects are created, one on a Grid and the other on a Mesh.  
 A mask is set on the mesh which is used later in the regridding.  The
 source Field is set to an analytic function, and a conservative 
@@ -38,14 +41,14 @@ if ESMF.local_pet() == 0:
 
 # create a Mesh
 if parallel:
-    mesh, nodeCoord, elemType, elemConn = \
-        mesh_create_10_parallel(ESMF.local_pet())
+    mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
+        mesh_create_50_parallel(domask=True, doarea=True)
 else:
-    mesh, nodeCoord, elemType, elemConn, elemMask, elemArea = \
-        mesh_create_10(domask=True, doarea=True)
+    mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
+        mesh_create_50(domask=True, doarea=True)
 
 # create a grid
-grid = grid_create([0,0,4,4], [0,0,4,4], domask=True, doarea=True)
+grid = grid_create([0,0,8,8], [0,0,4,4], doarea=True)
 
 # create Field objects on the Meshes
 srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -53,19 +56,19 @@ srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
 srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # make gridded fields
-dstfield = ESMF.Field(grid, 'dstfield')
 exactfield = ESMF.Field(grid, 'exactfield')
+dstfield = ESMF.Field(grid, 'dstfield')
 dstfracfield = ESMF.Field(grid, 'dstfracfield')
 dstareafield = ESMF.Field(grid, 'dstareafield')
 
 # initialize the Fields to an analytic function
-srcfield = initialize_field_mesh(srcfield, nodeCoord, elemType, elemConn,
+srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn,
                                         domask=True, elemMask=elemMask)
-exactfield = initialize_field_grid(exactfield, domask=True, doarea=True)
+exactfield = initialize_field_grid(exactfield)
 
 # run the ESMF regridding
 regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                            src_mask_values=np.array([1]), \
+                            src_mask_values=np.array([0]), \
                             regrid_method=ESMF.RegridMethod.CONSERVE, \
                             unmapped_action=ESMF.UnmappedAction.ERROR, \
                             src_frac_field=srcfracfield, \

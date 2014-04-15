@@ -1,6 +1,9 @@
 # $Id$
 
 """
+This test demonstrates conservative regridding with destination masking
+on a grid.
+
 Two Field objects are created, one on a Grid and the other on a Mesh.  
 The Grid receives a mask which is used later in the regridding.  The
 source Field is set to an analytic function, and a regridding operation 
@@ -39,25 +42,24 @@ grid = grid_create([0,0,8,8], [0,0,4,4], domask=True)
 
 # create a Mesh
 if parallel:
-    mesh, nodeCoord, elemType, elemConn = \
-        mesh_create_10_parallel(ESMF.local_pet())
+    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+        mesh_create_50_parallel()
 else:
-    mesh, nodeCoord, elemType, elemConn = \
-        mesh_create_10()
+    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+        mesh_create_50()
 
 # create Field objects
 srcfield = ESMF.Field(mesh, 'srcfield')
-dstfield = ESMF.Field(grid, 'dstfield')
-exactfield = ESMF.Field(grid, 'exactfield')
+dstfield = ESMF.Field(grid, 'dstfield', mask_vals=[0])
+exactfield = ESMF.Field(grid, 'exactfield', mask_vals=[0])
 
 # initialize the Fields to an analytic function
-srcfield = initialize_field_mesh(srcfield, nodeCoord, elemType, elemConn)
+srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
 exactfield = initialize_field_grid(exactfield, domask=True)
 
 # run the ESMF regridding
 regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, 
-                            src_mask_values=np.array([1]), \
-                            dst_mask_values=np.array([1]), \
+                            dst_mask_values=np.array([0]), \
                             regrid_method=ESMF.RegridMethod.BILINEAR, 
                             unmapped_action=ESMF.UnmappedAction.IGNORE)
 dstfield = regridSrc2Dst(srcfield, dstfield)
