@@ -1,3 +1,7 @@
+# This example demonstrates how to create an ESMPy mesh from file
+# The mesh file is required, it can be retrieved from the ESMF data repository:
+#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+
 import ESMF
 
 # Start up ESMF, this call is only necessary to override the default parameters

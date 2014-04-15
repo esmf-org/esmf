@@ -166,7 +166,7 @@ class Field(ma.MaskedArray):
         #  set field_mask based on the grid mask and the mask_vals input argument
         field_mask = False
         if mask is not None and mask_vals is not None:
-            field_mask = [x if x in mask_vals else 0 for x in mask.flatten().tolist()]
+            field_mask = [True if x in mask_vals else False for x in mask.flatten().tolist()]
         
         # create the new Field instance
         obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)

@@ -1,3 +1,8 @@
+# This example demonstrates how to regrid between a grid and a mesh.
+# The grid and mesh files are required, they can be retrieved from the ESMF data repository:
+#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
+#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+
 import ESMF
 
 grid1 = "data/ll2.5deg_grid.nc"

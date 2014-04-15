@@ -1,6 +1,8 @@
 # $Id$
 
 """
+This test demonstrates conservative regridding with unstructured meshes.
+
 Two Field objects are created, both on a Mesh.  The source Field is set 
 to an analytic function, and a regridding operation is performed from 
 the source to the destination Field.  After the regridding is 
@@ -34,14 +36,14 @@ if ESMF.local_pet() == 0:
 
 # create two unique Mesh objects
 if parallel:
-    srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
+    srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
         mesh_create_5_parallel()
-    dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
+    dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
         mesh_create_10_parallel()
 else:
-    srcmesh, nodeCoordSrc, elemTypeSrc, elemConnSrc = \
+    srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
         mesh_create_5()
-    dstmesh, nodeCoordDst, elemTypeDst, elemConnDst = \
+    dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
         mesh_create_10()
 
 # create ESMP_Field objects on the Meshes
@@ -54,9 +56,9 @@ dstfracfield = ESMF.Field(dstmesh, 'dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
 exactfield = ESMF.Field(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # initialize the Fields to an analytic function
-srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, \
+srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc, \
                                         elemTypeSrc, elemConnSrc)
-exactfield = initialize_field_mesh(exactfield, nodeCoordDst, \
+exactfield = initialize_field_mesh(exactfield, nodeCoordDst, nodeOwnerDst, \
                                          elemTypeDst, elemConnDst)
 
 # run the ESMF regridding
@@ -73,5 +75,5 @@ srcmass = compute_mass_mesh(srcfield, srcareafield,
 dstmass = compute_mass_mesh(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
-compare_fields_mesh(dstfield, exactfield, 50E-2, 10E-16, parallel=parallel, 
+compare_fields_mesh(dstfield, exactfield, 10E-2, 10E-16, parallel=parallel, 
                     dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
