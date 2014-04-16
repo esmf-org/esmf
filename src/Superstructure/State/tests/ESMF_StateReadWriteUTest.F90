@@ -139,6 +139,7 @@
         end do
         rc = merge (ESMF_SUCCESS, localrc, i>narrays)
       else
+        i = 1
         rc = ESMF_SUCCESS
       end if
       write(failMsg, *) "Could not find read-in Array: ", trim (arraynames(min (i, narrays)))
