@@ -349,6 +349,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
 
+    ! compliance check Component metadata
+    call checkComponentMetadata(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     write(output,*) ">STOP InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)

@@ -985,7 +985,7 @@ module NUOPC_Driver
         ! disect the phase string into Key and Value
         do k=1, modelPhaseMap(i)%phaseCount
           tempString = modelPhaseMap(i)%phases(k)
-          ind = index (trim(tempString), "=")
+          ind = index(trim(tempString), "=")
           modelPhaseMap(i)%phaseKey(k) = tempString(1:ind-1)
           read (tempString(ind+1:ind+2), "(i1)") modelPhaseMap(i)%phaseValue(k)
 !print *, "setupModelPhaseMap", k, ":", trim(tempString), " ", &
@@ -1028,7 +1028,7 @@ module NUOPC_Driver
         ! disect the phase string into Key and Value
         do k=1, connectorPhaseMap(i,j)%phaseCount
           tempString = connectorPhaseMap(i,j)%phases(k)
-          ind = index (trim(tempString), "=")
+          ind = index(trim(tempString), "=")
           connectorPhaseMap(i,j)%phaseKey(k) = tempString(1:ind-1)
           read (tempString(ind+1:ind+2), "(i1)") connectorPhaseMap(i,j)%phaseValue(k)
 !print *, "setupConnectorPhaseMap", k, ":", trim(tempString), " ", &

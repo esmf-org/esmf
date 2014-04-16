@@ -27,7 +27,8 @@ module NUOPC_ModelBase
   
   public &
     routine_Run, &
-    routine_SetServices
+    routine_SetServices, &
+    routine_Nop
     
   public &
     type_InternalState, &
@@ -81,34 +82,33 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! set default entry points
-    
+    ! Phase 0 requires use of ESMF method.
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    
+    ! Default Run routine.
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
       userRoutine=routine_Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+    ! Default Finalize routine.
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      userRoutine=Noop, rc=rc)
+      userRoutine=routine_nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
     ! set default attachable methods
-    
+    ! Specialize default Run -> setting the run Clock
     call ESMF_MethodAdd(gcomp, label=label_SetRunClock, &
       userRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-
-    ! Specialize Run -> checking import Fields
+    ! Specialize default Run -> checking import Fields
     call ESMF_MethodAdd(gcomp, label=label_CheckImport, &
       userRoutine=CheckImport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -119,7 +119,7 @@ module NUOPC_ModelBase
 
   !-----------------------------------------------------------------------------
 
-  subroutine Noop(gcomp, importState, exportState, clock, rc)
+  subroutine routine_Nop(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -138,8 +138,10 @@ module NUOPC_ModelBase
     integer, intent(out)  :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(4)
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)  :: name
+    character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
+    integer                 :: itemCount, ii, i, stat
 
     rc = ESMF_SUCCESS
 
@@ -148,14 +150,44 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! set IPDv00 as the default
-    initPhases(1) = "IPDv00p1=1"
-    initPhases(2) = "IPDv00p2=2"
-    initPhases(3) = "IPDv00p3=3"
-    initPhases(4) = "IPDv00p4=4"
+    ! query the already existing phaseMap enties
+    call ESMF_AttributeGet(gcomp, name="InitializePhaseMap", &
+      itemCount=itemCount, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(phases(itemCount), newPhases(itemCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of temporary data structure.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (itemCount > 0) then
+      call ESMF_AttributeGet(gcomp, name="InitializePhaseMap", &
+        valueList=phases, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
+    ! filter any entries but those for IPDv00
+    ii=0 ! reset
+    do i=1, itemCount
+      if (index(trim(phases(i)), "IPDv00p") == 1) then
+        ! found an IPDv00 entry
+        ii = ii+1
+        newPhases(ii) = trim(phases(i)) ! preserve this entry
+      endif
+    enddo
     
+    ! make a fake empty entry in case everything was filtered
+    if (ii==0) then
+      ii=1
+      newPhases(1) = "IPDvDummy" ! something obvious
+    endif
+    
+    ! set the filtered phase map as the Attribute
     call ESMF_AttributeSet(gcomp, &
-      name="InitializePhaseMap", valueList=initPhases, &
+      name="InitializePhaseMap", valueList=newPhases(1:ii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
