@@ -150,7 +150,8 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                  :: i, phase, itemCount, phaseLabelCount, stat
+    integer                  :: i, ii, iii
+    integer                  :: phase, itemCount, phaseLabelCount, stat
     character(len=8)         :: phaseString
     character(len=40)        :: attributeName
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
@@ -216,14 +217,27 @@ print *, "gjt: phaseLabelList:", phaseLabelList, "     phase:", phase
     
     ! add the new entries to the phaseMap
     write(phaseString, "(I6)") phase
+    iii=0 ! initialize
     do i=1, phaseLabelCount
-      phases(itemCount+i) = trim(phaseLabelList(i))//"="//&
-        trim(adjustl(phaseString))
+      ! see if this same phaseLabel has already been used before
+      do ii=1, itemCount
+        if (index(phases(ii),trim(phaseLabelList(i))) > 0 ) exit
+      enddo
+      if (ii <= itemCount) then
+        ! overwrite an existing entry with the same phaseLabel
+        phases(ii) = trim(phaseLabelList(i))//"="//&
+          trim(adjustl(phaseString))
+      else
+        ! add a new entry for the phaseLabel at the end of the list
+        iii = iii+1
+        phases(itemCount+iii) = trim(phaseLabelList(i))//"="//&
+          trim(adjustl(phaseString))
+      endif
     enddo
     
     ! set the new phaseMap in the Attribute
     call ESMF_AttributeSet(comp, name=trim(attributeName), &
-      valueList=phases, &
+      valueList=phases(1:itemCount+iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
