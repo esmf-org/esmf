@@ -3521,6 +3521,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(attpackInstanceName)) then @\
         specList(3) = trim(attpackInstanceName) @\
         count = 4 @\
+      else @\
+        specList(3) = " " @\
       endif @\
  @\
       ! collapse the specList into a string to pass down to the C glue layer @\
