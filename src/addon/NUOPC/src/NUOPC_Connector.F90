@@ -69,33 +69,37 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! Phase 0 requires use of ESMF method.
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP1, phase=1, rc=rc)
+    ! For backward compatibility with v6 API the sequence of the following
+    ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
+    ! InitializePhaseMap.
+
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
+      userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP2, phase=2, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2"/), &
+      userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP3, phase=3, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p3", "IPDv01p3", "IPDv02p3", "IPDv03p3"/), &
+      userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP4, phase=4, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv03p4"/), userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP5, phase=5, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv03p5"/), userRoutine=InitializeP5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -108,6 +112,7 @@ module NUOPC_Connector
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -129,19 +134,12 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! set IPDv03 as the default
-    initPhases(1) = "IPDv03p1=1"
-    initPhases(2) = "IPDv03p2=2"
-    initPhases(3) = "IPDv03p3=3"
-    initPhases(4) = "IPDv03p4=4"
-    initPhases(5) = "IPDv03p5=5"
-    
-    call ESMF_AttributeSet(cplcomp, &
-      name="InitializePhaseMap", valueList=initPhases, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! filter any entries that are not of type IPDv03
+    call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
+      acceptStringList=(/"IPDv03p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
   end subroutine
   
   !-----------------------------------------------------------------------------

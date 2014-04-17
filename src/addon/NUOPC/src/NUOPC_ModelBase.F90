@@ -139,9 +139,6 @@ module NUOPC_ModelBase
     
     ! local variables    
     character(ESMF_MAXSTR)  :: name
-    character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
-    integer                 :: itemCount, ii, i, stat
 
     rc = ESMF_SUCCESS
 
@@ -149,46 +146,10 @@ module NUOPC_ModelBase
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! query the already existing phaseMap enties
-    call ESMF_AttributeGet(gcomp, name="InitializePhaseMap", &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(phases(itemCount), newPhases(itemCount), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of temporary data structure.", &
-      line=__LINE__, &
-      file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      call ESMF_AttributeGet(gcomp, name="InitializePhaseMap", &
-        valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-
-    ! filter any entries but those for IPDv00
-    ii=0 ! reset
-    do i=1, itemCount
-      if (index(trim(phases(i)), "IPDv00p") == 1) then
-        ! found an IPDv00 entry
-        ii = ii+1
-        newPhases(ii) = trim(phases(i)) ! preserve this entry
-      endif
-    enddo
     
-    ! make a fake empty entry in case everything was filtered
-    if (ii==0) then
-      ii=1
-      newPhases(1) = "IPDvDummy" ! something obvious
-    endif
-    
-    ! set the filtered phase map as the Attribute
-    call ESMF_AttributeSet(gcomp, &
-      name="InitializePhaseMap", valueList=newPhases(1:ii), &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! filter any entries that are not of type IPDv00
+    call NUOPC_CompFilterPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      acceptStringList=(/"IPDv00p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
