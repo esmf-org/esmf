@@ -128,9 +128,34 @@ bool LogErr::MsgAllocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
-    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE);
-    logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)).append(msg);
+    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    result=true;
+    return result;
+}
+
+bool LogErr::MsgAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    const string& msg,
+    int LINE,
+    const char FILE[],
+    const char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+//    Allocation error with message.
+//EOP
+{
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
+    bool result=false;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
+
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)).append(msg);
+    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -194,9 +219,34 @@ bool LogErr::MsgDeallocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
-    string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE);
-    logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)).append(msg);
+    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+    result=true;
+    return result;
+}
+
+bool LogErr::MsgDeallocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    const string& msg,
+    int LINE,
+    const char FILE[],
+    const char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+//    Deallocation error with message.
+//EOP
+{
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
+    bool result=false;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
+
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)).append(msg);
+    Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -349,6 +399,32 @@ int LogErr::Write(
     return rc;
 }
 
+int LogErr::Write(
+
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+	const string& msg,   // Log Entry
+    	int msgtype   // Msg Type   
+      )
+// !DESCRIPTION:
+// Prints log message and returns true if successful.  It takes two arguments -
+// msg which is a user message and log type.  This method does not use cpp
+// macros
+//EOP
+{
+    int rc;
+
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    FTN_X(f_esmf_logwrite0)(msg.c_str(), &msgtype, &rc, msg.size());
+
+    return rc;
+}
+
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: Write - write to log file
@@ -380,6 +456,35 @@ int LogErr::Write(
     if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
     FTN_X(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
                           strlen(msg), strlen(FILE), strlen(method));
+
+    return rc;
+}
+
+int LogErr::Write(
+
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    const string& msg,	// Log Entry
+    int msgtype,        // Msg Type   
+    int LINE,
+    const char FILE[],
+    const char method[]
+    )
+// !DESCRIPTION:
+// Prints log message and returns true if successful.  It takes two arguments -
+// msg which is a user message and log type.  This method uses cpp macros
+//EOP
+{
+    int rc;
+    
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    FTN_X(f_esmf_logwrite1)(msg.c_str(), &msgtype, &LINE, FILE, method, &rc,
+                          msg.size(), strlen(FILE), strlen(method));
 
     return rc;
 }
@@ -501,9 +606,49 @@ bool LogErr::MsgFoundError(
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
 
-        string logMsg = ESMC_LogGetErrMsg(rcToCheck);
-        logMsg += msg;
-        Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
+        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)).append(msg);
+        Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
+      }
+    }
+    return result;
+}
+
+bool LogErr::MsgFoundError(
+
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    int rcToCheck,
+    const string &msg,
+    int LINE,
+    const char FILE[],
+    const char method[],
+    int *rcToReturn
+    )
+// !DESCRIPTION:
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log with a user supplied mesage.  This method uses cpp macros.
+//EOP
+{
+    bool result=false;
+#ifdef ESMC_SUCCESSDEFAULT_ON
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
+#endif
+    if (rcToCheck!=ESMF_SUCCESS){
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
+      int i;
+      for (i=0; i<errorMaskCount; i++)
+        if (errorMask[i] == rcToCheck) break;
+      if (i==errorMaskCount){
+        // this means that rcToCheck was _not_ in the errorMask -> flag error
+        result=true;   // TODO: if this line moved to after Write()
+                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
+                       // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
+        if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
+
+        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)).append(msg);
+        Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
       }
     }
     return result;
