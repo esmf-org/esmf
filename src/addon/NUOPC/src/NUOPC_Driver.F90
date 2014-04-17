@@ -445,6 +445,12 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+
+        ! add standard NUOPC GridComp Attribute Package to the modelComp
+        call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
           
       endif
       
@@ -548,6 +554,12 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
         
+        ! add standard NUOPC CplComp Attribute Package to the connectorComp
+        call NUOPC_CplCompAttributeAdd(is%wrap%connectorComp(i,j), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+
         ! initialize the connectorPhaseMap pointer members
         nullify(connectorPhaseMap(i,j)%phaseValue)
         nullify(connectorPhaseMap(i,j)%phases)
