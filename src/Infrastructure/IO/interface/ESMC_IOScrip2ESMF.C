@@ -491,8 +491,8 @@ void FTN_X(c_convertscrip)(
     nodelatlon[i*2+1]=nodelats[i];
   }
 
-  free(nodelons);
-  free(nodelats);
+  delete[] nodelons;
+  delete[] nodelats;
 
   for (i=0; i<totalsize; i++) {
     if (cells[i] >= totalnodes) printf("out of bound cells: %d %d\n", i, cells[i]);
