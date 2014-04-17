@@ -83,17 +83,21 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
+    ! Initialize phases
+
     ! For backward compatibility with v6 API the sequence of the following
     ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
     ! InitializePhaseMap.
 
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p1"/), userRoutine=routine_Nop, rc=rc)
+      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
+      userRoutine=routine_Nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p2"/), userRoutine=routine_Nop, rc=rc)
+      phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2"/), &
+      userRoutine=routine_Nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
