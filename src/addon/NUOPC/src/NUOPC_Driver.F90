@@ -148,36 +148,52 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! add standard NUOPC GridComp Attribute Package to the Model
+    call NUOPC_GridCompAttributeAdd(gcomp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! Initialize phases
+
+    ! Phase 0 requires use of ESMF method.
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP1, phase=1, rc=rc)
+    ! For backward compatibility with v6 API the sequence of the following
+    ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
+    ! InitializePhaseMap.
+
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
+      userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Run phases
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      userRoutine=Finalize, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-      
+
+    ! Run specialization
     call ESMF_MethodAdd(gcomp, label=label_SetRunClock, &
       userRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+    ! Finalize phases
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+      userRoutine=Finalize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+          
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -189,7 +205,6 @@ module NUOPC_Driver
     integer, intent(out)  :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(1)
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -199,11 +214,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! set IPDv00p1 as the only phase by default
-    initPhases(1) = "IPDv00p1=1"
-    call ESMF_AttributeSet(gcomp, &
-      name="InitializePhaseMap", valueList=initPhases, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! filter all other entries but those of type IPDv00
+    call NUOPC_CompFilterPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      acceptStringList=(/"IPDv00p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -431,12 +444,13 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-          
+
         ! add standard NUOPC GridComp Attribute Package to the modelComp
         call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+          
       endif
       
       ! initialize the modelPhaseMap pointer members
@@ -544,7 +558,7 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        
+
         ! initialize the connectorPhaseMap pointer members
         nullify(connectorPhaseMap(i,j)%phaseValue)
         nullify(connectorPhaseMap(i,j)%phases)
@@ -985,7 +999,7 @@ module NUOPC_Driver
         ! disect the phase string into Key and Value
         do k=1, modelPhaseMap(i)%phaseCount
           tempString = modelPhaseMap(i)%phases(k)
-          ind = index (trim(tempString), "=")
+          ind = index(trim(tempString), "=")
           modelPhaseMap(i)%phaseKey(k) = tempString(1:ind-1)
           read (tempString(ind+1:ind+2), "(i1)") modelPhaseMap(i)%phaseValue(k)
 !print *, "setupModelPhaseMap", k, ":", trim(tempString), " ", &
@@ -1028,7 +1042,7 @@ module NUOPC_Driver
         ! disect the phase string into Key and Value
         do k=1, connectorPhaseMap(i,j)%phaseCount
           tempString = connectorPhaseMap(i,j)%phases(k)
-          ind = index (trim(tempString), "=")
+          ind = index(trim(tempString), "=")
           connectorPhaseMap(i,j)%phaseKey(k) = tempString(1:ind-1)
           read (tempString(ind+1:ind+2), "(i1)") connectorPhaseMap(i,j)%phaseValue(k)
 !print *, "setupConnectorPhaseMap", k, ":", trim(tempString), " ", &

@@ -88,6 +88,8 @@ module NUOPC
   
   ! defined in NUOPC_Comp
   public NUOPC_CompDerive
+  public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompSetEntryPoint
   public NUOPC_CompSpecialize
 
 end module
