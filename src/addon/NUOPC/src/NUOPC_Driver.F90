@@ -205,7 +205,6 @@ module NUOPC_Driver
     integer, intent(out)  :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(1)
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS

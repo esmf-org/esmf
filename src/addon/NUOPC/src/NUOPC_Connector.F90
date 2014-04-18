@@ -133,7 +133,6 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(5)
     character(ESMF_MAXSTR)                    :: name
 
     rc = ESMF_SUCCESS
