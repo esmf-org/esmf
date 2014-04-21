@@ -164,7 +164,7 @@ module NUOPC_Comp
       attributeName = "InitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
-    elseif (methodflag == ESMF_METHOD_RUN) then
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
     endif
     
@@ -263,7 +263,7 @@ module NUOPC_Comp
       attributeName = "InitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
-    elseif (methodflag == ESMF_METHOD_RUN) then
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
     endif
     
@@ -363,7 +363,7 @@ module NUOPC_Comp
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! determine next available phase index    
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, &
+    call ESMF_GridCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -389,7 +389,7 @@ module NUOPC_Comp
       attributeName = "InitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
-    elseif (methodflag == ESMF_METHOD_RUN) then
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
     endif
     
@@ -496,7 +496,7 @@ module NUOPC_Comp
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! determine next available phase index    
-    call ESMF_CplCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, &
+    call ESMF_CplCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -522,7 +522,7 @@ module NUOPC_Comp
       attributeName = "InitializePhaseMap"
     elseif (methodflag == ESMF_METHOD_RUN) then
       attributeName = "RunPhaseMap"
-    elseif (methodflag == ESMF_METHOD_RUN) then
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
     endif
     
