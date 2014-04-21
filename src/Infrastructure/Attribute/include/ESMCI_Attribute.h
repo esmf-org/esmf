@@ -310,6 +310,7 @@ class Attribute
       const std::vector<ESMC_I4> &nonroots) const;
     int AttributeUpdateTreeChanges(int *linkChanges,
       int *structChanges, int *valueChanges, int *deletChange, int *numKeys) const;
+    int AttributeUpdateCountPackage(int *packAttCount) const;
     bool AttributeUpdateKeyCompare(char *key1, char *key2) const;
     int AttributeUpdateKeyCreate(char *key) const;
     int AttributeUpdateNeeded(VM *vm, int &bufSize,
