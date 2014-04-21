@@ -854,17 +854,20 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
 //EOPI
 
   int localrc;
-  unsigned int i,j;
-  Attribute *attr;
-  
-  attr = NULL;
+  unsigned int i;
     
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
   ++(*numKeys);
+
+  int packAttCount = 1;
+  if ((attrPackHead == ESMF_TRUE) && (structChange == ESMF_TRUE))
+    localrc = AttributeUpdateCountPackage(&packAttCount);
+
   if (linkChange == ESMF_TRUE) ++(*linkChanges);
-  if (structChange == ESMF_TRUE) ++(*structChanges);
+  if (structChange == ESMF_TRUE) 
+    *structChanges += packAttCount;
   if (valueChange == ESMF_TRUE) ++(*valueChanges);
   if (deleteChange == ESMF_TRUE) ++(*deleteChanges);
  
@@ -883,6 +886,44 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   return ESMF_SUCCESS;
   
   } // end AttributeUpdateTreeChanges
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeUpdateCountPackage"
+//BOPI
+// !IROUTINE:  AttributeUpdateCountPackage - count the Attributes in a package
+//
+// !INTERFACE:
+      int Attribute::AttributeUpdateCountPackage(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      int *packAttCount) const{         // number of attributes in package
+//
+// !DESCRIPTION:
+//    Count the Attributes in a package.  
+//    Expected to be called internally.
+//
+//EOPI
+
+  int localrc;
+  unsigned int i;
+      
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  ++(*packAttCount);
+ 
+  for (i=0; i<attrList.size(); ++i)
+    localrc = attrList.at(i)->AttributeUpdateCountPackage(packAttCount);
+
+  for (i=0; i<packList.size(); ++i)
+    localrc = packList.at(i)->AttributeUpdateCountPackage(packAttCount);
+    
+  return ESMF_SUCCESS;
+  
+  } // end AttributeUpdateCountPackage
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeUpdateComm"
@@ -1318,8 +1359,8 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   int keySize8 = keySize/8 * 8;
   if (keySize%8) keySize8 += 8; 
   
-  bufSize = (realChangesOut+10)*sizeof(Attribute) + numKeysOut*keySize8;
-  
+  bufSize = (realChangesOut)*sizeof(Attribute) + numKeysOut*keySize8;
+
   delete [] recvBuf;
   delete [] sendBuf;
 
