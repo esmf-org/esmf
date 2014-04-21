@@ -66,6 +66,7 @@ module ESMF_CplCompMod
   public ESMF_CplCompFinalize
   public ESMF_CplCompFinalizeAct
   public ESMF_CplCompGet
+  public ESMF_CplCompGetEPPhaseCount
   public ESMF_CplCompInitialize
   public ESMF_CplCompInitializeAct
   public ESMF_CplCompIsPetLocal
@@ -900,6 +901,74 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompGet
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompGetEPPhaseCount"
+!BOPI
+! !IROUTINE: ESMF_CplCompGetEPPhaseCount - Get number of phases of an entry point
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompGetEPPhaseCount(cplcomp, methodflag, phaseCount, &
+    phaseZeroFlag, rc)
+
+! !ARGUMENTS:
+    type(ESMF_CplComp),     intent(in)            :: cplcomp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    integer,                intent(out)           :: phaseCount
+    logical,                intent(out), optional :: phaseZeroFlag
+    integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get phaseCount
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   An {\tt ESMF\_CplComp} object.
+! \item[methodflag]
+!   \begin{sloppypar}
+!   One of a set of predefined Component methods - e.g.
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
+!   for a complete list of valid method options.
+!   \end{sloppypar}
+! \item[phaseCount]
+!   The number of phases for {\tt methodflag}. The method has 1..phaseCount phases.
+! \item[phaseZeroFlag]
+!   Return .true. if a "zero" phase was registered for {\tt methodflag}. Otherwise
+!   return .false..
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    type(ESMF_Logical)::  phaseZeroFlagHelp
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    call c_ESMC_GetEntryPointPhaseCount(cplcomp, methodflag, phaseCount, &
+      phaseZeroFlagHelp, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! translate ESMF_Logical -> logical
+    if (present(phaseZeroFlag)) then
+      phaseZeroFlag = phaseZeroFlagHelp
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompGetEPPhaseCount
 !------------------------------------------------------------------------------
 
 

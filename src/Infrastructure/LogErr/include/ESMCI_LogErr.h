@@ -28,12 +28,13 @@
 //
 // !USES:
 
-#include <cstdio>
-
 #include "ESMF_LogMacros.inc"
 
 #include "ESMC_LogErr.h"
 #include "ESMCI_Util.h"
+
+#include <cstdio>
+#include <string>
 
 namespace ESMCI{
 
@@ -79,14 +80,23 @@ private:
       const char method[], int *rcToReturn);
     bool MsgAllocError(const char msg[], int LINE, const char FILE[],
       const char method[], int *rcToReturn);
+    bool MsgAllocError(const std::string& msg, int LINE, const char FILE[],
+      const char method[], int *rcToReturn);
     bool MsgDeallocError(const char msg[], int LINE, const char FILE[],
       const char method[], int *rcToReturn);
+    bool MsgDeallocError(const std::string& msg, int LINE, const char FILE[],
+      const char method[], int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const char msg[], int LINE,
+      const char FILE[], const char method[], int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const std::string& msg, int LINE,
       const char FILE[], const char method[], int *rcToReturn);
     void Open(const char filename[]);
     int Set(int flush);
     int Write(const char msg[], int msgtype);
+    int Write(const std::string& msg, int msgtype);
     int Write(const char msg[], int msgtype, int LINE, const char FILE[],
+      const char method[]);
+    int Write(const std::string& msg, int msgtype, int LINE, const char FILE[],
       const char method[]);
     
 // !PUBLIC Variables:          

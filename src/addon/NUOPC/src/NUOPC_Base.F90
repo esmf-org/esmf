@@ -89,6 +89,9 @@ module NUOPC_Base
 
   interface NUOPC_IsCreated
     module procedure NUOPC_ClockIsCreated
+    module procedure NUOPC_FieldBundleIsCreated
+    module procedure NUOPC_FieldIsCreated
+    module procedure NUOPC_GridIsCreated
   end interface
   
   !-----------------------------------------------------------------------------
@@ -1955,7 +1958,7 @@ endif
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object has been created
+! !IROUTINE: NUOPC_IsCreated - Check whether a Clock object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
   function NUOPC_ClockIsCreated(clock, rc)
@@ -1965,7 +1968,7 @@ endif
     type(ESMF_Clock)               :: clock
     integer, intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if the ESMF object (here {\tt clock}) is in the
+!   Returns {\tt .true.} if the {\tt clock} is in the
 !   created state, {\tt .false.} otherwise.
 !EOP
   !-----------------------------------------------------------------------------    
@@ -1973,6 +1976,75 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
       NUOPC_ClockIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a FieldBundle object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_FieldBundleIsCreated(fieldbundle, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldBundleIsCreated
+! !ARGUMENTS:
+    type(ESMF_FieldBundle)         :: fieldbundle
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt fieldbundle} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_FieldBundleIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldBundleGetInit(fieldbundle)==ESMF_INIT_CREATED) &
+      NUOPC_fieldbundleIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a Field object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_FieldIsCreated(field, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldIsCreated
+! !ARGUMENTS:
+    type(ESMF_Field)               :: field
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt field} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_FieldIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldGetInit(field)==ESMF_INIT_CREATED) &
+      NUOPC_fieldIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a Grid object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_GridIsCreated(grid, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_GridIsCreated
+! !ARGUMENTS:
+    type(ESMF_Grid)                :: grid
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt grid} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_GridIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_GridGetInit(grid)==ESMF_INIT_CREATED) &
+      NUOPC_gridIsCreated = .true.
   end function
   !-----------------------------------------------------------------------------
 

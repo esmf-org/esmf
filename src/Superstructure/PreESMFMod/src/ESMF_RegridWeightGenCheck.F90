@@ -177,13 +177,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-      if (normType .eq. ESMF_NORMTYPE_DSTAREA) then
-         print *, "TEST Norm Type: dstarea"
-      elseif (normType .eq. ESMF_NORMTYPE_FRACAREA) then
-         print *, "TEST Norm Type: fracarea"
-      endif
-
-
     ! only read the data on PET 0 until we get ArrayRead going...
     if (localPet == 0) then
 

@@ -968,7 +968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GridComp),    intent(in)            :: gridcomp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
     integer,                intent(out)           :: phaseCount
-    logical,                intent(out)           :: phaseZeroFlag
+    logical,                intent(out), optional :: phaseZeroFlag
     integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1012,7 +1012,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! translate ESMF_Logical -> logical
-    phaseZeroFlag = phaseZeroFlagHelp
+    if (present(phaseZeroFlag)) then
+      phaseZeroFlag = phaseZeroFlagHelp
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

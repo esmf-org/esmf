@@ -398,8 +398,8 @@ static const int keySize = 4*sizeof(int) + 1;
         delete [] thiskey;
         delete [] distkey;
         delete attr;
-        delete srckey;
-        delete dstkey;
+        delete [] srckey;
+        delete [] dstkey;
         return ESMF_FAILURE;
       }
       if (AttributeUpdateKeyCompare(srckey, dstkey) == true) break;
@@ -414,8 +414,8 @@ static const int keySize = 4*sizeof(int) + 1;
       delete [] thiskey;
       delete [] distkey;
       delete attr;
-      delete srckey;
-      delete dstkey;
+      delete [] srckey;
+      delete [] dstkey;
       return ESMF_FAILURE;
     }
 
@@ -431,15 +431,15 @@ static const int keySize = 4*sizeof(int) + 1;
       delete [] thiskey;
       delete [] distkey;
       delete attr;
-      delete srckey;
-      delete dstkey;
+      delete [] srckey;
+      delete [] dstkey;
       return ESMF_FAILURE;
     }*/
 
     // can delete this one and not call reset because this is a value copy
     delete attr;
-    delete srckey;
-    delete dstkey;
+    delete [] srckey;
+    delete [] dstkey;
   }
 
   // if pack struct change, unpack and add to end of list
