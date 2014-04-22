@@ -183,8 +183,7 @@ module NUOPC_Comp
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name="InitializePhaseMap", &
-        valueList=phases, &
+      call ESMF_AttributeGet(comp, name=attributeName, valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -211,8 +210,8 @@ module NUOPC_Comp
     endif
     
     ! set the filtered phase map as the Attribute
-    call ESMF_AttributeSet(comp, &
-      name="InitializePhaseMap", valueList=newPhases(1:iii), &
+    call ESMF_AttributeSet(comp, name=attributeName, &
+      valueList=newPhases(1:iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -282,8 +281,7 @@ module NUOPC_Comp
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name="InitializePhaseMap", &
-        valueList=phases, &
+      call ESMF_AttributeGet(comp, name=attributeName, valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -310,8 +308,8 @@ module NUOPC_Comp
     endif
     
     ! set the filtered phase map as the Attribute
-    call ESMF_AttributeSet(comp, &
-      name="InitializePhaseMap", valueList=newPhases(1:iii), &
+    call ESMF_AttributeSet(comp, name=attributeName, &
+      valueList=newPhases(1:iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
