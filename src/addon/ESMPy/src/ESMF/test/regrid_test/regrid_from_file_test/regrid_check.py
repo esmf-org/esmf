@@ -38,7 +38,7 @@ def nc_is_mesh(filename, filetype):
     
 
 def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_dual=None,
-                                  isSphere=None, missingvalue=""):
+                                  isSphere=None, add_corner_stagger=False, missingvalue=""):
     is_mesh = False
     if nc_is_mesh(filename, filetype):
         print "Creating ESMF.Mesh object"
@@ -50,8 +50,10 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
     else:
         print "Creating ESMF.Grid object"
         add_mask = len(missingvalue) > 0
-        grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype,
-                                 is_sphere=isSphere, add_mask=add_mask, varname=missingvalue)
+        grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype, 
+                                 add_corner_stagger=add_corner_stagger,
+                                 is_sphere=isSphere, add_mask=add_mask, 
+                                 varname=missingvalue)
     return grid_or_mesh, is_mesh
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
@@ -261,6 +263,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     dst_type = file_type_map[dst_type_str]
     regrid_method = regrid_method_map[regrid_method]
     convert_to_dual = (regrid_method != ESMF.RegridMethod.CONSERVE)
+    add_corner_stagger = (regrid_method == ESMF.RegridMethod.CONSERVE)
     src_is_sphere = not src_regional
     dst_is_sphere = not dst_regional
     pole_method = None
@@ -276,11 +279,13 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
                                                          meshname=src_meshname,
                                                          convert_to_dual=convert_to_dual, 
                                                          isSphere=src_is_sphere,
+                                                         add_corner_stagger=add_corner_stagger,
                                                          missingvalue=src_missingvalue)
     dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, 
                                                          meshname=dst_meshname,
                                                          convert_to_dual=convert_to_dual, 
                                                          isSphere=dst_is_sphere,
+                                                         add_corner_stagger=add_corner_stagger,
                                                          missingvalue=dst_missingvalue)
 
     # Get node coordinates in radians
