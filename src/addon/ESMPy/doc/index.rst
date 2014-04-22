@@ -407,101 +407,78 @@ The following tutorials will show you how to build all of the pieces
 necessary to regrid data between Fields built on Grids.
 
 
--------------
-Create a Grid
--------------
+----------------
+Create a 2D Grid
+----------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
-        :pyobject: create_grid
+    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+        :pyobject: grid_create
+
+----------------
+Create a 3D Grid
+----------------
+
+    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+        :pyobject: grid_create_3d
+
+----------------------
+Create a periodic Grid
+----------------------
+
+    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+        :pyobject: grid_create_periodic
 
 -----------------------
 Create a Grid From File
 -----------------------
 
-    .. literalinclude:: /../examples/grid_create_from_file.py
-        :pyobject: grid_create
+    .. literalinclude:: /../src/ESMF/test/unit_test.py
+        :pyobject: grid_create_from_file
 
--------------
-Create a Mesh
--------------
+-----------------------
+Create a 5 element Mesh
+-----------------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/mesh_mesh_regrid_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/mesh_regridding_utilities.py
         :pyobject: mesh_create_5
 
 -----------------------
 Create a Mesh From File
 -----------------------
 
-    .. literalinclude:: /../examples/mesh_create_from_file.py
-        :pyobject: mesh_create
+    .. literalinclude:: /../src/ESMF/test/unit_test.py
+        :pyobject: mesh_create_from_file
 
 --------------
 Create a Field
 --------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/unit_test.py
         :pyobject: create_field
 
 
------------------------
-Build an analytic Field
------------------------
+----------------------------
+Initialize an analytic Field
+----------------------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
-        :pyobject: build_analyticfield
+    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+        :pyobject: initialize_field_grid_periodic
 
 
 --------------------
 Run ESMPy regridding
 --------------------
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/unit_test.py
         :pyobject: run_regridding
 
 
-------------
-Compute mass
-------------
+------------------
+Compute Field mass
+------------------
 
-  .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
-    :pyobject: compute_mass
-
-
----------------------------------------
-Compare Field results to exact solution
----------------------------------------
-
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
-        :pyobject: compare_fields
-
-
-----------------
-Field regridding
-----------------
-
-The code for this tutorial can be downloaded `here <http://esmfcontrib.cvs.sourceforge.net/viewvc/esmfcontrib/python/ESMPy/tutorial/field_regridding.py?view=log>`_.
-
-~~~~~~~~~~~~~~~
-regrid_main()
-~~~~~~~~~~~~~~~
-
-    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
-        :pyobject: regrid_main
-
-Running this tutorial will yield the following results:
-
-    ::
-
-        Welcome to the Field regridding tutorial!
-        PASS
-          Total error = 1.66715782175
-          Max error   = 0.0617374010089
-          Min error   = 0.00345860933766
-          Csrv error  = 4.62592314758e-16
-          srcmass     = 23.0400304899
-          dstmass     = 23.0400304899
-        
-        Thanks for using the Field regridding tutorial.
+  .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+    :pyobject: compute_mass_grid
 
 
 .. toctree::

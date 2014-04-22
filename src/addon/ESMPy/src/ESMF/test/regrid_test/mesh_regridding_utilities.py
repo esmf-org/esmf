@@ -18,6 +18,7 @@ def mesh_create_5():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       4.0   31 ------ 32 ------ 33
             |         |  22  /   |
@@ -75,6 +76,7 @@ def mesh_create_10():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       4.0   41 ------ 42 ------- 43 ------ 44
             |         |          |  33 /   |
@@ -140,6 +142,7 @@ def mesh_create_50(domask=False, doarea=False):
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       3.75  81 ------ 82 ----- 83 ------ 84 ------ 85 ------ 86 ------ 87 ------ 88
             |         |        |         |         |         |         |  77 /   |
@@ -246,6 +249,7 @@ def mesh_create_5_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created in parallel.
+    RETURN VALUES: \n Mesh :: mesh \n
     
     #  4.0   31 ------ 32       [32] ----- 33
     #        |         |         | 22  /   |
@@ -355,6 +359,7 @@ def mesh_create_10_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created in parallel.
+    RETURN VALUES: \n Mesh :: mesh \n
     
     #  4.0   41 ------ 42 ------ 43      [43] ---------- 44
     #        |         |         |       |          /    |
@@ -480,6 +485,7 @@ def mesh_create_50_parallel(domask=False, doarea=False):
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created in parallel.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       3.75  81 ------ 82 ----- 83 ------ 84   [84] ----- 85 ------ 86 ------ 87 ------ 88
             |         |        |         |     |         |         |         |  77 /   |
@@ -669,8 +675,9 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
                           domask=False, elemMask=None):
     '''
     PRECONDITIONS: A Field has been created on the elements of a Mesh.
-    POSTCONDITIONS: The Field has been initialized to the analytic 
-                    field f(x,y) = 20.0 + x + y
+    POSTCONDITIONS: The Field has been initialized to an analytic 
+                    field.
+    RETURN VALUES: \n Field :: field \n
     '''
 
     [node, element] = [0,1]
@@ -742,7 +749,7 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
     POSTCONDITIONS: The mass of the data field is computed.\n
-    RETURN VALUES: integer :: mass \n
+    RETURN VALUES: float :: mass \n
     '''
     mass = 0.0
     areafield.get_area()
@@ -764,8 +771,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
                    'field2'.  The fields should be the same size on have
                    rank=1.
     POSTCONDITIONS: The values on 'field1' and 'field2' are 
-                    compared against the analytic function
-                    f(x,y) = 20.0 + x + y.
+                    compared against each other.
     '''
     import numpy.ma as ma
     # compare point values of field1 to field2
