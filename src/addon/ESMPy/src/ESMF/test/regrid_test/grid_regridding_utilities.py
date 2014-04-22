@@ -16,8 +16,14 @@ except:
 
 def grid_create(bounds, coords, domask=False, doarea=False):
     '''
-    PRECONDITIONS: ESMPy has been initialized.
-    POSTCONDITIONS: A Grid has been created.
+    PRECONDITIONS: 'bounds' contains the number of indices required for the 
+                   two dimensions of a 2D Grid.  'coords' contains the 
+                   upper and lower coordinate bounds of the Grid.  'domask' 
+                   is a boolean value that gives the option to put a mask 
+                   on this Grid.  'doarea' is an option to create user 
+                   defined areas on this Grid. \n
+    POSTCONDITIONS: A 2D Grid has been created.
+    RETURN VALUES: \n Grid :: grid \n
     '''
     lb_x = float(bounds[0])
     lb_y = float(bounds[1])
@@ -99,11 +105,10 @@ def grid_create(bounds, coords, domask=False, doarea=False):
 
 def grid_create_periodic(bounds, domask=False):
     '''
-    PRECONDITIONS: ESMPy has been initialized, 'bounds' contains the 
-                   number of indices required for the first two 
-                   dimensions of a Grid.  'domask' is a boolean value 
+    PRECONDITIONS: 'bounds' contains the number of indices required for the first two 
+                   dimensions of a periodic Grid.  'domask' is a boolean value 
                    that gives the option to put a mask on this Grid.\n
-    POSTCONDITIONS: An Grid has been created.\n
+    POSTCONDITIONS: A periodic Grid has been created.\n
     RETURN VALUES: \n Grid :: grid \n
     '''
 
@@ -183,8 +188,14 @@ def grid_create_periodic(bounds, domask=False):
 
 def grid_create_3d(bounds, coords, domask=False, doarea=False):
     '''
-    PRECONDITIONS: ESMPy has been initialized.
+    PRECONDITIONS: 'bounds' contains the number of indices required for the 
+                   two dimensions of a 2D Grid.  'coords' contains the 
+                   upper and lower coordinate bounds of the Grid.  'domask' 
+                   is a boolean value that gives the option to put a mask 
+                   on this Grid.  'doarea' is an option to create user 
+                   defined areas on this Grid. \n
     POSTCONDITIONS: A Grid has been created.
+    RETURN VALUES: \n Grid :: grid \n
     '''
     lb_x = float(bounds[0])
     lb_y = float(bounds[1])
@@ -289,6 +300,7 @@ def initialize_field_grid(field, domask=False, doarea=False):
     PRECONDITIONS: A Field has been created.
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.
+    RETURN VALUES: \n Field :: field \n
     '''
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
@@ -316,8 +328,8 @@ def initialize_field_grid(field, domask=False, doarea=False):
 
 def initialize_field_grid_periodic(field):
     '''
-    PRECONDITIONS: An Field has been created as 'field'.  'grid' has
-                   been created and coordinates have been set on both 
+    PRECONDITIONS: A Field has been created as 'field' with a 'grid'
+                   where coordinates have been set on both 
                    the center and corner stagger locations. \n
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.\n
@@ -344,6 +356,7 @@ def initialize_field_grid_3d(field, domask=False, doarea=False):
     PRECONDITIONS: A Field has been created.
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.
+    RETURN VALUES: \n Field :: field \n
     '''
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
@@ -382,7 +395,7 @@ def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None):
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
     POSTCONDITIONS: The mass of the data field is computed.\n
-    RETURN VALUES: integer :: mass \n
+    RETURN VALUES: float :: mass \n
     '''
     [x, y] = [0, 1]
     mass = 0.0
@@ -434,8 +447,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
                    'field2'.  The fields should be the same size on have
                    rank=2 or 3.
     POSTCONDITIONS: The values on 'field1' and 'field2' are 
-                    compared against the analytic function
-                    f(x,y) = 20.0 + x + y.
+                    compared against the each other.
     '''
     import numpy.ma as ma
 
