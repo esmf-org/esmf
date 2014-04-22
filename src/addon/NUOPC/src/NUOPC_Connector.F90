@@ -111,14 +111,14 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Run phases
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
-      userRoutine=Run, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
+      phaseLabelList=(/"RunPhase1"/), userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! Finalize phases
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
-      userRoutine=Finalize, rc=rc)
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
+      phaseLabelList=(/"FinalizePhase1"/), userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
