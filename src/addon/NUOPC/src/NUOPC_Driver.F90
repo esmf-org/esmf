@@ -31,7 +31,7 @@ module NUOPC_Driver
   public label_InternalState
   public label_SetModelCount, label_SetModelPetLists
   public label_ModifyInitializePhaseMap
-  public label_SetModelServices, label_Finalize
+  public label_SetModelServices, label_SetRunSequence, label_Finalize
   public label_SetRunClock
   
   character(*), parameter :: &
@@ -42,6 +42,8 @@ module NUOPC_Driver
     label_SetModelPetLists = "Driver_SetModelPetLists"
   character(*), parameter :: &
     label_SetModelServices = "Driver_SetModelServices"
+  character(*), parameter :: &
+    label_SetRunSequence = "Driver_SetRunSequence"
   character(*), parameter :: &
     label_ModifyInitializePhaseMap = "Driver_ModifyInitializePhaseMap"
   character(*), parameter :: &
@@ -645,6 +647,16 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    
+    ! SPECIALIZE by calling into optional attached method that sets RunSequence
+    call ESMF_MethodExecute(gcomp, label=label_SetRunSequence, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! Ingest the InitializePhaseMap
     do i=0, is%wrap%modelCount
@@ -901,6 +913,20 @@ module NUOPC_Driver
               " did not return ESMF_SUCCESS", &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+            ! need to update the Component attributes across all PETs
+            if (associated(is%wrap%modelPetLists(i)%petList)) then
+              call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
+                rootList=is%wrap%modelPetLists(i)%petList, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            else
+              call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
+                rootList=(/0/), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         enddo
       end subroutine
@@ -950,6 +976,20 @@ module NUOPC_Driver
                 trim(compName)//" did not return ESMF_SUCCESS", &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
+              ! need to update the Component attributes across all PETs
+              if (associated(is%wrap%connectorPetLists(i,j)%petList)) then
+                call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
+                  rootList=is%wrap%connectorPetLists(i,j)%petList, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
+                  return  ! bail out
+              else
+                call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
+                  rootList=(/0/), rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
+                  return  ! bail out
+              endif
             endif
           enddo
         enddo
@@ -1219,13 +1259,10 @@ module NUOPC_Driver
                 return  ! bail out
               
               ! preconditioned input variables considering petList of component
-              if (phase == 0) then
-                ! PET that is not part of component i's petList
-                helperIn = 1
-              else
-                ! PET that is part of component i's petList
-                helperIn = 0
-                if (trim(valueString)=="true") helperIn = 1
+              helperIn = 1  ! initialize
+              if (ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+                ! evaluate "InitializeDataComplete" on PETs in petList
+                if (trim(valueString)=="false") helperIn = 0
               endif
 
               ! implement a logical AND operation based on REDUCE_SUM
@@ -2130,7 +2167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="phase could not be identified.", &
+          msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
@@ -2396,7 +2433,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="phase could not be identified.", &
+          msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
@@ -2566,7 +2603,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! consider relaxed mode
     getFlag = .true.
     if (present(relaxedflag)) then
-      call ESMF_ContainerGet(is%wrap%componentMap, &
+      call ESMF_ContainerGet(is%wrap%connectorMap, &
         trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), &
         isPresent=getFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2576,7 +2613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Conditionally access the entry in componentMap
     if (getFlag) then
-      call ESMF_ContainerGetUDT(is%wrap%componentMap, &
+      call ESMF_ContainerGetUDT(is%wrap%connectorMap, &
         trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), cmEntry, rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

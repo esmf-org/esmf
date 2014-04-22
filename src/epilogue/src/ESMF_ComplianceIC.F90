@@ -1278,6 +1278,24 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
         
+      attributeName = "InitializeDataComplete"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "InitializeDataProgress"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
     elseif (comptype == ESMF_COMPTYPE_CPL) then
 
       ! set NUOPC convention and purpose specifiers
