@@ -64,12 +64,12 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateFromFile()"
-ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag, 
+ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag, 
 				  int *convertToDual,
 				  int *addUserArea,
-				  char *meshname,
+				  const char *meshname,
 				  int *addMask,
-				  char *varname,
+				  const char *varname,
 				  int *rc) {
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;

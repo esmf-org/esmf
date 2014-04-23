@@ -141,12 +141,12 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::createFromFile()"
-MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag, 
+MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag, 
 				 int *convertToDual,
 				 int *addUserArea,
-				 char *meshname,
+				 const char *meshname,
 				 int *addMask,
-				 char *varname,
+				 const char *varname,
 				 int *rc) {
    MeshCXX* meshCXXp;
    Mesh* meshp;
