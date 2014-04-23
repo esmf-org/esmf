@@ -430,14 +430,16 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(3)
+    character(ESMF_MAXSTR)  :: attrList(5)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Set up a customized list of Attributes to be added to the CplComp
     attrList(1) = "Verbosity"           ! control verbosity
     attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(3) = "CplList"
+    attrList(3) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(4) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(5) = "CplList"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
@@ -1409,7 +1411,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(7)
+    character(ESMF_MAXSTR)            :: attrList(9)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1417,10 +1419,12 @@ module NUOPC_Base
     attrList(1) = "Verbosity"           ! control verbosity
     attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
-    attrList(6) = "InitializeDataComplete"  ! values: strings "false"/"true"
-    attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(4) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(5) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(6) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(7) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(8) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
     
     ! add Attribute packages
 if (ESMF_VERSION_MAJOR >= 6) then

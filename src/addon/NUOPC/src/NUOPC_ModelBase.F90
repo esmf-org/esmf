@@ -96,8 +96,8 @@ module NUOPC_ModelBase
       return  ! bail out
 
     ! Run phases
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
-      userRoutine=routine_Run, rc=rc)
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+      phaseLabelList=(/"RunPhase1"/), userRoutine=routine_Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -116,8 +116,8 @@ module NUOPC_ModelBase
       return  ! bail out
 
     ! Finalize phases
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      userRoutine=routine_nop, rc=rc)
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+      phaseLabelList=(/"FinalizePhase1"/), userRoutine=routine_nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

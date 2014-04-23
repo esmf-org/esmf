@@ -25,7 +25,7 @@ class Regrid(object):
                  dst_mask_values=None,
                  regrid_method=None,
                  pole_method=None,
-                 regridPoleNPnts=None,
+                 regrid_pole_npoints=None,
                  unmapped_action=None,
                  src_frac_field=None,
                  dst_frac_field=None):
@@ -61,7 +61,7 @@ class Regrid(object):
                     (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
                     PoleMethod.NPNTAVG\n
                     PoleMethod.TEETH\n
-            regridPoleNPnts: specifies how many points to average over 
+            regrid_pole_npoints: specifies how many points to average over 
                              if polemethod == PoleMethod.NPNTAVG\n
             unmapped_action: specifies which action to take if a 
                              destination point is found which does not 
@@ -109,7 +109,7 @@ class Regrid(object):
                                             dstMaskValues=local_dst_mask_values,
                                             regridmethod=regrid_method,
                                             polemethod=pole_method,
-                                            regridPoleNPnts=regridPoleNPnts,
+                                            regridPoleNPnts=regrid_pole_npoints,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
                                             dstFracField=dst_frac_field)
@@ -120,7 +120,7 @@ class Regrid(object):
         self.dst_mask_values = dst_mask_values
         self.regrid_method = regrid_method
         self.pole_method = pole_method
-        self.regridPoleNPnts = regridPoleNPnts
+        self.regrid_pole_npoints = regrid_pole_npoints
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field

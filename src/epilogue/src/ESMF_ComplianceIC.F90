@@ -1242,6 +1242,24 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
         
+      attributeName = "RunPhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "FinalizePhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
       attributeName = "NestingGeneration"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -1252,6 +1270,24 @@ module ESMF_ComplianceICMod
         return  ! bail out
         
       attributeName = "Nestling"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "InitializeDataComplete"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "InitializeDataProgress"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
         rc=rc)
@@ -1293,6 +1329,24 @@ module ESMF_ComplianceICMod
         return  ! bail out
         
       attributeName = "InitializePhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "RunPhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "FinalizePhaseMap"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
         rc=rc)
