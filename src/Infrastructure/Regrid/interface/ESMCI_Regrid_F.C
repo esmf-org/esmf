@@ -929,7 +929,7 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           } else {
             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
-            sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
+            sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
@@ -957,7 +957,7 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (left_turn) { 
             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
-            sprintf(msg,"  concave elem. id=%d",elem.get_id());
+            sprintf(msg,"  concave elem. id=%ld",elem.get_id());
             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  concave elem. coords ",ESMC_LOGMSG_ERROR);
@@ -1021,7 +1021,7 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           } else {
             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
-            sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
+            sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
@@ -1053,7 +1053,7 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (left_turn) { 
             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
-            sprintf(msg,"  concave elem. id=%d",elem.get_id());
+            sprintf(msg,"  concave elem. id=%ld",elem.get_id());
             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);

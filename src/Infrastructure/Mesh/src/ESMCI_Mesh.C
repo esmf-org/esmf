@@ -1656,7 +1656,7 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
 
      if (oproc >= Par::Size()) {
        Par::Out() << "Error! rank is greater than nproc:obj:" << node;
-       std::printf(" gid= %d\n",node.get_id());
+       std::printf(" gid= %ld\n",node.get_id());
        Throw() << "Bad processor number!";
      }
    }
