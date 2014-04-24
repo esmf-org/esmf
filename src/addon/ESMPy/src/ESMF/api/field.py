@@ -198,7 +198,7 @@ class Field(ma.MaskedArray):
         if isinstance(grid, Grid):
             size = reduce(mul,grid.size_local[staggerloc])
         elif isinstance(grid, Mesh):
-            size = grid.size[staggerloc]
+            size = grid.size_local[staggerloc]
         else:
             raise FieldDOError
 
@@ -215,7 +215,7 @@ class Field(ma.MaskedArray):
                                      order='F')
         elif isinstance(grid, Mesh):
             fieldDataP = np.reshape(fieldDataP,
-                                     newshape = grid.size[staggerloc],
+                                     newshape = grid.size_local[staggerloc],
                                      order='F')
         else:
             raise FieldDOError

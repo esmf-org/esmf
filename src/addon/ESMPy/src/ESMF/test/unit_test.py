@@ -616,16 +616,16 @@ def mesh_test():
     status = True
     mesh, nodeCoord = mesh_create_2x2()
     
-    element_count = mesh.size_local[element]
+    element_count = mesh.size[element]
     print 'local element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size_local[node]
+    node_count = mesh.size[node]
     print 'local node_count = '+str(node_count)+'\n'
 
-    element_count = mesh.size[element]
+    element_count = mesh.size_local[element]
     print 'owned element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size[node]
+    node_count = mesh.size_local[node]
     print 'owned node_count = '+str(node_count)+'\n'
     
     coords, num_nodes, num_dims = ESMP_MeshGetCoordPtr(mesh)
