@@ -198,7 +198,7 @@ standard Python package installation directory on that particular machine.
 
 Note: The ESMPy build does not have to be installed to be used.  The 
 PYTHONPATH environment variable can simply be pointed to the directory 
-containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone) 
+containing the ESMF module (ESMPy/src from a default git clone) 
 after the build command.
 
 As usual, any command followed by --help should print out some information
