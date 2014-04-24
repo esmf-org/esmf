@@ -75,19 +75,24 @@ class Grid(object):
                                file; otherwise, ESMF will calculate it. 
                                Defaults to False. \n
                 add_mask: Set to True to generate the mask using the missing_value 
-                          attribute defined in 'varname'.  Defaults to False. \n
+                          attribute defined in 'varname'.  This 
+                          argument is only supported with filetype 
+                          FileFormat.GRIDSPEC.  Defaults to False. \n
                 varname: If add_mask is True, provide a variable name stored in 
                          the grid file and the mask will be generated using the 
                          missing value of the data value of this variable.  The 
                          first two dimensions of the variable has to be the 
                          longitude and the latitude dimension and the mask is 
                          derived from the first 2D values of this variable even 
-                         if this data is a 3D, or 4D array. Defaults to the 
+                         if this data is a 3D, or 4D array.  This 
+                         argument is only supported with filetype 
+                         FileFormat.GRIDSPEC.  Defaults to the 
                          empty string. \n
                 coord_names:  A two-element array containing the longitude and 
                              latitude variable names in a GRIDSPEC file if there 
-                             are multiple coordinates defined in the file. 
-                             Defaults to None. \n
+                             are multiple coordinates defined in the file. This 
+                             argument is only supported with filetype 
+                             FileFormat.GRIDSPEC.  Defaults to None. \n
         The following optional arguments apply to a Grid created either from file 
         or in memory. \n
             staggerloc: the stagger location of the coordinate data. \n
@@ -501,7 +506,8 @@ class Grid(object):
     def get_coords(self, coord_dim, staggerloc=None):
         """
         Return a numpy array of coordinates at a specified stagger 
-        location. \n
+        location. The returned array is NOT a copy, it is
+        directly aliased to the underlying memory allocated by ESMF.\n
         Required Arguments: \n
             coord_dim: the dimension number of the coordinates to return:
                        e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1) \n
@@ -540,7 +546,8 @@ class Grid(object):
     def get_item(self, item, staggerloc=None):
         """
         Return a numpy array for a Grid item at a specified stagger 
-        location. \n
+        location.  The returned array is NOT a copy, it is
+        directly aliased to the underlying memory allocated by ESMF.\n
         Required Arguments: \n
             item: the Grid item to allocate. \n
                 Argument values are: \n

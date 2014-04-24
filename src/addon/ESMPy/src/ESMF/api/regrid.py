@@ -35,7 +35,8 @@ class Regrid(object):
             srcfield: source Field associated with an underlying Grid 
                       or Mesh. \n
             dstfield: destination Field associated with an underlying 
-                      Grid or Mesh. \n
+                      Grid or Mesh.  The data in this Field may be 
+                      overwritten by this call.\n
         Optional Arguments: \n
             src_mask_values: a numpy array (internally cast to 
                              dtype=numpy.int32)of values that can be 
