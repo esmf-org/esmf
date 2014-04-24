@@ -684,7 +684,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size[element]):
+        for i in range(field.grid.size_local[element]):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -717,13 +717,13 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
     
     elif field.staggerloc == node:
         ind = 0
-        for i in range(field.grid.size_local[node]):
+        for i in range(field.grid.size[node]):
             x = nodeCoord[i*2]
             y = nodeCoord[i*2+1]
 
             if (nodeOwner[i] == ESMF.local_pet()):
-                if ind > field.grid.size[node]:
-                    raise ValueError("blahblahblah")
+                if ind > field.grid.size_local[node]:
+                    raise ValueError("Overstepped the mesh bounds!")
                 field.data[ind] = 20.0 + x**2 +x*y + y**2
                 #print '[{0},{1}] = {2}'.format(x,y,field.data[ind])
                 ind += 1
