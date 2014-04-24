@@ -73,7 +73,7 @@ class Mesh(object):
                           argument is only supported with filetype 
                           FileFormat.UGRID.  Defaults to the empty string. \n
                 add_mask: a boolean value to specify if a mask in a UGRID file
-                          should be added to the Mesh (numpy array).  This 
+                          should be added to the Mesh.  This 
                           argument is only supported with filetype 
                           FileFormat.UGRID.  Defaults to False. \n
                 varname: a string to specify a variable name for the mask in a
