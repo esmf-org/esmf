@@ -31,9 +31,9 @@ The other angle of looking at the IPD is from the driver's child components. Fro
      \hline\hline
      {\tt IPDv01p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
      {\tt IPDv01p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv01p2} & model, mediator, driver & {\em unspecified}\\ \hline
+     {\tt IPDv01p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
      {\tt IPDv01p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field.\\ \hline
-     {\tt IPDv01p3} & model, mediator, driver & Realize the import and export Fields.\\ \hline
+     {\tt IPDv01p3} & model, mediator, driver & Realize the "connected" import and export Fields.\\ \hline
      {\tt IPDv01p3} & connector               & Precompute the RouteHandle.\\ \hline
      {\tt IPDv01p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv01p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
@@ -47,9 +47,9 @@ The other angle of looking at the IPD is from the driver's child components. Fro
      \hline\hline
      {\tt IPDv02p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
      {\tt IPDv02p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv02p2} & model, mediator, driver & {\em unspecified}\\ \hline
+     {\tt IPDv02p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
      {\tt IPDv02p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field.\\ \hline
-     {\tt IPDv02p3} & model, mediator, driver & Realize the import and export Fields.\\ \hline
+     {\tt IPDv02p3} & model, mediator, driver & Realize the "connected" import and export Fields.\\ \hline
      {\tt IPDv02p3} & connector               & Precompute the RouteHandle.\\ \hline
      {\tt IPDv02p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Timestamp the export Fields.\\ \hline
@@ -69,9 +69,9 @@ The other angle of looking at the IPD is from the driver's child components. Fro
      \hline\hline
      {\tt IPDv03p1} & model, mediator, driver & Advertise the import and export Fields, setting {\tt TransferOfferGeomObject}.\\ \hline
      {\tt IPDv03p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv03p2} & model, mediator, driver & {\em unspecified}\\ \hline
+     {\tt IPDv03p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
      {\tt IPDv03p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field. Set the {\tt TransferActionGeomObject} attribute.\\ \hline
-     {\tt IPDv03p3} & model, mediator, driver & Realize the import and export Fields that have {\tt TransferActionGeomObject} equal to "provide".\\ \hline
+     {\tt IPDv03p3} & model, mediator, driver & Realize the "connected" import and export Fields that have {\tt TransferActionGeomObject} equal to "provide".\\ \hline
      {\tt IPDv03p3} & connector               & Transfer the Grid/Mesh objects (only DistGrid) for Field pairs that have a provider and an acceptor side.\\ \hline
      {\tt IPDv03p4} & model, mediator, driver & Optionally modify the decomposition and distribution information of the accepted Grid/Mesh by replacing the DistGrid.\\ \hline
      {\tt IPDv03p4} & connector               & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline

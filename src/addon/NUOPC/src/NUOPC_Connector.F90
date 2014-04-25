@@ -1075,9 +1075,11 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-
+      
+      ! find import side match
       iMatch = 0  ! reset
       do j=1, size(importStdAttrNameList)
         if (importStdAttrNameList(j) == cplList(i)) then
@@ -1086,6 +1088,7 @@ module NUOPC_Connector
         endif
       enddo
       
+      ! find export side match
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
