@@ -141,7 +141,11 @@ class TestRegridParallelCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/regrid_test/run_regrid_parallel.py')
+        try:
+            import mpi4py
+        except:
+            raise ImportError("mpi4py is required for parallel regrid testing!")
+        os.system('python src/ESMF/test/regrid_test/run_regrid.py --parallel')
 
 
 ## get package structure
