@@ -753,13 +753,10 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     '''
     mass = 0.0
     areafield.get_area()
-    frac = 0
-    for i in range(valuefield.shape[0]):
-        if dofrac:
-            mass += areafield.data[i] * valuefield.data[i] * \
-                    fracfield.data[i]
-        else:
-            mass += areafield.data[i] * valuefield.data[i]
+    if dofrac:
+        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+    else:
+        mass = np.sum(areafield.data * valuefield.data)
 
     return mass
 
