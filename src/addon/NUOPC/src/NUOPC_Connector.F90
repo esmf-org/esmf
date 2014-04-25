@@ -251,6 +251,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare local pointer variables
+    nullify(cplList)
     nullify(importStdAttrNameList)
     nullify(importFieldList)
     nullify(exportStdAttrNameList)
@@ -295,15 +296,13 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(cplList(cplListSize), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (cplListSize/=0) then
+    if (cplListSize>0) then
+      allocate(cplList(cplListSize), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal cplList() failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -318,9 +317,11 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-
+      
+      ! find import side match
       iMatch = 0  ! reset
       do j=1, size(importStdAttrNameList)
         if (importStdAttrNameList(j) == cplList(i)) then
@@ -329,6 +330,7 @@ module NUOPC_Connector
         endif
       enddo
       
+      ! find export side match
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
@@ -480,8 +482,7 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    deallocate(cplList)
-
+    if (associated(cplList)) deallocate(cplList)
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
@@ -539,6 +540,7 @@ module NUOPC_Connector
       verbose = .true.
 
     ! prepare local pointer variables
+    nullify(cplList)
     nullify(importStdAttrNameList)
     nullify(importFieldList)
     nullify(exportStdAttrNameList)
@@ -579,15 +581,13 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(cplList(cplListSize), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (cplListSize/=0) then
+    if (cplListSize>0) then
+      allocate(cplList(cplListSize), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal cplList() failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -601,18 +601,12 @@ module NUOPC_Connector
       stdFieldList=exportFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! prepare FieldBundles to store src and dst Fields
-    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+    ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-
+      
+      ! find import side match
       iMatch = 0  ! reset
       do j=1, size(importStdAttrNameList)
         if (importStdAttrNameList(j) == cplList(i)) then
@@ -621,6 +615,7 @@ module NUOPC_Connector
         endif
       enddo
       
+      ! find export side match
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
@@ -733,8 +728,7 @@ module NUOPC_Connector
 
     enddo
 
-    deallocate(cplList)
-
+    if (associated(cplList)) deallocate(cplList)
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
@@ -791,6 +785,7 @@ module NUOPC_Connector
       verbose = .true.
     
     ! prepare local pointer variables
+    nullify(cplList)
     nullify(importStdAttrNameList)
     nullify(importFieldList)
     nullify(exportStdAttrNameList)
@@ -831,15 +826,13 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(cplList(cplListSize), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (cplListSize/=0) then
+    if (cplListSize>0) then
+      allocate(cplList(cplListSize), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal cplList() failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -854,17 +847,11 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! prepare FieldBundles to store src and dst Fields
-    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-
+      
+      ! find import side match
       iMatch = 0  ! reset
       do j=1, size(importStdAttrNameList)
         if (importStdAttrNameList(j) == cplList(i)) then
@@ -873,6 +860,7 @@ module NUOPC_Connector
         endif
       enddo
       
+      ! find export side match
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
@@ -975,8 +963,7 @@ module NUOPC_Connector
 
     enddo
 
-    deallocate(cplList)
-
+    if (associated(cplList)) deallocate(cplList)
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
@@ -1018,6 +1005,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare local pointer variables
+    nullify(cplList)
     nullify(importStdAttrNameList)
     nullify(importFieldList)
     nullify(exportStdAttrNameList)
@@ -1058,15 +1046,13 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    allocate(cplList(cplListSize), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (cplListSize/=0) then
+    if (cplListSize>0) then
+      allocate(cplList(cplListSize), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of internal cplList() failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1174,8 +1160,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
-    deallocate(cplList)
-
+    if (associated(cplList)) deallocate(cplList)
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
