@@ -774,16 +774,15 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
                     compared against each other.
     '''
     import numpy.ma as ma
-    # compare point values of field1 to field2
-    # first verify they are the same size
-    if (field1.shape != field2.shape):
-        raise NameError('compare_fields: Fields must be the same size!')
 
+    # verify that the fields are the same size
+    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+
+    # deal with default values for fracfield
     if dstfracfield is None:
         dstfracfield = ma.ones(field1.shape)
 
-    # initialize to True, and check for False point values
-    correct = True
+    # compute pointwise error measures
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
@@ -799,6 +798,9 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
             if (err < min_error):
                 min_error = err
 
+    # gather error on processor 0 or set global variables in serial case
+    mass1_global = 0
+    mass2_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -807,22 +809,20 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
         field_size_global = comm.reduce(field1.shape[0], op=MPI.SUM)
-        mass1_global = 0
-        mass2_global = 0
         if (mass1 and mass2):
-            mass1_global = comm.reduce(mass1, op=MPI.SUM)
-            mass2_global = comm.reduce(mass2, op=MPI.SUM)
+            mass1_global, mass2_global = comm.reduce([mass1,mass2], op=MPI.SUM)
     else:
         total_error_global = totalErr
         max_error_global = max_error
         min_error_global = min_error
         field_size_global = field1.shape[0]
-        mass1_global = 0
-        mass2_global = 0
         if (mass1 and mass2):
             mass1_global = mass1
             mass2_global = mass2
 
+    # compute relative error measures and compare against tolerance values
+    itrp = False
+    csrv = False
     if ESMF.local_pet() == 0:
         if mass1_global == 0:
             csrv_error_global = abs(mass2_global - mass1_global)
@@ -832,20 +832,26 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         # compute mean relative error
         total_error_global = total_error_global/field_size_global
 
-        itrp = False
-        csrv = False
+        # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):
             itrp = True
         if (csrv_error_global < csrv_tol):
             csrv = True
 
-        if (itrp and csrv):
-            print " PASS"
-        else:
-            print " FAIL"
+        # print out diagnostic information
         print "  Mean relative error = "+str(total_error_global)
         print "  Max  relative error = "+str(max_error_global)
         print "  Conservation  error = "+str(csrv_error_global)
         #print "  Min error   = "+str(min_error_global)
         #print "  srcmass     = "+str(mass1_global)
         #print "  dstmass     = "+str(mass2_global)
+
+    # broadcast in parallel case
+    if parallel:
+        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+
+    # print pass or fail
+    if (itrp and csrv):
+        print "PET{0} - PASS".format(ESMF.local_pet())
+    else:
+        print "PET{0} - FAIL".format(ESMF.local_pet())
