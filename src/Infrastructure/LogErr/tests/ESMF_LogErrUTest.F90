@@ -540,7 +540,7 @@
       call random_seed()
       call random_seed(size=k)
       print *, "size of random seed = ", k
-      allocate(rndseed(k+10))
+      allocate(rndseed(k))
       call date_and_time(values=my_v)
       do i=1,k
         rndseed(i)=i*(my_v(6)+my_v(7))
