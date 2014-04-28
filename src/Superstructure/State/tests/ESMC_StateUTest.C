@@ -90,7 +90,7 @@ int main(void){
   strcpy(name, "Set up maxIndex");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   maxIndexValues = (int *)malloc(2*sizeof(int));
-  maxIndexValues[0] = petCount*2;
+  maxIndexValues[0] = 5;
   maxIndexValues[1] = 10;
   maxIndex = ESMC_InterfaceIntCreate(maxIndexValues, 2, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -152,8 +152,6 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int *arrayData = (int *) ESMC_ArrayGetPtr(array, 0,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  for (int i=0; i<2*10; i++)
-    arrayData[i] = localPet*20+i;
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
