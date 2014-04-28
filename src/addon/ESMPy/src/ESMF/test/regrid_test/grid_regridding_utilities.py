@@ -400,7 +400,8 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
         if (mass1 and mass2):
-            mass1_global, mass2_global = comm.reduce([mass1, mass2], op=MPI.SUM)
+            mass1_global = comm.reduce(mass1, op=MPI.SUM)
+            mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
         total_error_global = totalErr
         max_error_global = max_error
