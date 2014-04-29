@@ -7,83 +7,142 @@ The interaction between NUOPC compliant components during the initialization pro
 
 There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documenation.
 
-The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. The following tables document the meaning of each initialization phase for the two different child component groups for the different IPD versions. The phases are listed in the prescribed sequence used by the driver.
+The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. Child components publish their available initialze phases through the {\tt InitialzePhaseMap} attribute.
+
+The driver also calls into its own internal initialize methods. This allows the driver to participate in the initialization of its children in a structured fashion. The internal initialization phases of a driver are published via the {\tt InternalInitialzePhaseMap} attribute.
+
+The following tables document the meaning of each initialization phase of the available IPD versions for the child components and for the driver component itself. The phases are listed in the same sequence in which the driver calls them.
 \newline
 
 \vspace*{2ex}
-\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+\begin{longtable}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPDv00 label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv00 label} & {\bf Component} & {\bf Meaning}\\
      \hline\hline
-     {\tt IPDv00p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
-     {\tt IPDv00p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv00p2} & model, mediator, driver & Realize the import and export Fields.\\ \hline
-     {\tt IPDv00p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field. Precompute the RouteHandle.\\ \hline
-     {\tt IPDv00p3} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv00p4} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
+     {\tt IPDv00p1} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv00p1} & models, mediators, drivers  & Advertise their import and export Fields.\\ \hline
+     {\tt IPDv00p1} & connectors                  & Construct their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv00p2} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv00p2} & models, mediators, drivers  & Realize their import and export Fields.\\ \hline
+     {\tt IPDv00p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute and precompute the RouteHandle.\\ \hline
+     {\tt IPDv00p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv00p3} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv00p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv00p4} & models, mediators, drivers  & Handle Field data initialization. Timestamp their export Fields.\\
      \hline\hline
-\end{tabular}\newline
+\end{longtable}
 
 \vspace*{3ex}
-\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+\begin{longtable}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPDv01 label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv01 label} & {\bf Component} & {\bf Meaning}\\
      \hline\hline
-     {\tt IPDv01p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
-     {\tt IPDv01p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv01p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
-     {\tt IPDv01p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field.\\ \hline
-     {\tt IPDv01p3} & model, mediator, driver & Realize the "connected" import and export Fields.\\ \hline
-     {\tt IPDv01p3} & connector               & Precompute the RouteHandle.\\ \hline
-     {\tt IPDv01p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv01p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
+     {\tt IPDv01p1} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv01p1} & models, mediators, drivers  & Advertise their import and export Fields.\\ \hline
+     {\tt IPDv01p1} & connectors                  & Construct their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv01p2} & driver-self                 & Modify the {\tt CplList} Attributes on the Connectors.\\ \hline
+     {\tt IPDv01p2} & models, mediators, drivers  & {\em unspecified/unused by NUOPC}\\ \hline
+     {\tt IPDv01p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv01p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv01p3} & models, mediators, drivers  & Realize their "connected" import and export Fields.\\ \hline
+     {\tt IPDv01p3} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv01p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv01p4} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv01p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv01p5} & models, mediators, drivers  & Handle Field data initialization. Timestamp their export Fields.\\
      \hline\hline
-\end{tabular}\newline
+\end{longtable}
 
 \vspace*{3ex}
-\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+\begin{longtable}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPDv02 label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv02 label} & {\bf Component} & {\bf Meaning}\\
      \hline\hline
-     {\tt IPDv02p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
-     {\tt IPDv02p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv02p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
-     {\tt IPDv02p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field.\\ \hline
-     {\tt IPDv02p3} & model, mediator, driver & Realize the "connected" import and export Fields.\\ \hline
-     {\tt IPDv02p3} & connector               & Precompute the RouteHandle.\\ \hline
-     {\tt IPDv02p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Timestamp the export Fields.\\ \hline
+     {\tt IPDv02p1} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv02p1} & models, mediators, drivers  & Advertise their import and export Fields.\\ \hline
+     {\tt IPDv02p1} & connectors                  & Construct their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv02p2} & driver-self                 & Modify the {\tt CplList} Attributes on the Connectors.\\ \hline
+     {\tt IPDv02p2} & models, mediators, drivers  & {\em unspecified/unused by NUOPC}\\ \hline
+     {\tt IPDv02p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv02p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv02p3} & models, mediators, drivers  & Realize their "connected" import and export Fields.\\ \hline
+     {\tt IPDv02p3} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv02p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv02p4} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv02p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv02p5} & models, mediators, drivers  & Handle Field data initialization. Timestamp their export Fields.\\ \hline
      \multicolumn{3}{|p{13.5cm}|}{\it A loop is entered over all those model, mediator, driver Components that use IPDv02 and have
      unsatisfied data dependencies, repeating the following two steps:}\\ \hline
-     {\tt Run()}    & connector               & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
-     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\ \hline
+     {\tt Run()}    & connectors                  & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
+     {\tt IPDv02p5} & models, mediators, drivers  & Handle Field data initialization. Timestamp their export Fields and set the {\tt Updated} and {\tt InitializeDataComplete} Attributes accordingly.\\ \hline
      \multicolumn{3}{|p{13.5cm}|}{\it Repeat these two steps until all data
      dependencies have been statisfied, or a dead-lock situation is detected.}\\ 
      \hline\hline
-\end{tabular}\newline
+\end{longtable}
 
 \vspace*{3ex}
-\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+\begin{longtable}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPDv03 label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv03 label} & {\bf Component} & {\bf Meaning}\\
      \hline\hline
-     {\tt IPDv03p1} & model, mediator, driver & Advertise the import and export Fields, setting {\tt TransferOfferGeomObject}.\\ \hline
-     {\tt IPDv03p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
-     {\tt IPDv03p2} & model, mediator, driver & {\em unspecified/unused by NUOPC}\\ \hline
-     {\tt IPDv03p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field. Set the {\tt TransferActionGeomObject} attribute.\\ \hline
-     {\tt IPDv03p3} & model, mediator, driver & Realize the "connected" import and export Fields that have {\tt TransferActionGeomObject} equal to "provide".\\ \hline
-     {\tt IPDv03p3} & connector               & Transfer the Grid/Mesh objects (only DistGrid) for Field pairs that have a provider and an acceptor side.\\ \hline
-     {\tt IPDv03p4} & model, mediator, driver & Optionally modify the decomposition and distribution information of the accepted Grid/Mesh by replacing the DistGrid.\\ \hline
-     {\tt IPDv03p4} & connector               & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline
-     {\tt IPDv03p5} & model, mediator, driver & Realize all Fields that have {\tt TransferActionGeomObject} equal to "accept" on the transferred Grid/Mesh objects.\\ \hline
-     {\tt IPDv03p5} & connector               & Precompute the RouteHandle.\\ \hline
-     {\tt IPDv03p6} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv03p7} & model, mediator, driver & Handle Field data initialization. Timestamp the export Fields.\\ \hline
+     {\tt IPDv03p1} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p1} & models, mediators, drivers  & Advertise their import and export Fields and set the {\tt TransferOfferGeomObject} Attribute.\\ \hline
+     {\tt IPDv03p1} & connectors                  & Construct their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv03p2} & driver-self                 & Modify the {\tt CplList} Attributes on the Connectors.\\ \hline
+     {\tt IPDv03p2} & models, mediators, drivers  & {\em unspecified/unused by NUOPC}\\ \hline
+     {\tt IPDv03p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute. Set the {\tt TransferActionGeomObject} Attribute.\\ \hline
+     {\tt IPDv03p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p3} & models, mediators, drivers  & Realize their "connected" import and export Fields that have {\tt TransferActionGeomObject} equal to "provide".\\ \hline
+     {\tt IPDv03p3} & connectors                  & Transfer the Grid/Mesh objects (only DistGrid) for Field pairs that have a provider and an acceptor side.\\ \hline
+     {\tt IPDv03p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p4} & models, mediators, drivers  & Optionally modify the decomposition and distribution information of the accepted Grid/Mesh by replacing the DistGrid.\\ \hline
+     {\tt IPDv03p4} & connectors                  & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline
+     {\tt IPDv03p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p5} & models, mediators, drivers  & Realize all Fields that have {\tt TransferActionGeomObject} equal to "accept" on the transferred Grid/Mesh objects.\\ \hline
+     {\tt IPDv03p5} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv03p6} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p6} & models, mediators, drivers  & Check compatibility of their Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv03p7} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv03p7} & models, mediators, drivers  & Handle Field data initialization. Timestamp the export Fields.\\ \hline
      \multicolumn{3}{|p{13.5cm}|}{\it A loop is entered over all those model, mediator, driver Components that use IPDv02 and have
      unsatisfied data dependencies, repeating the following two steps:}\\ \hline
-     {\tt Run()}    & connector               & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
-     {\tt IPDv03p7} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\ \hline
+     {\tt Run()}    & connectors                  & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
+     {\tt IPDv03p7} & models, mediators, drivers  & Handle Field data initialization. Time stamp the export Fields and set the {\tt Updated} and {\tt InitializeDataComplete} Attributes accordingly.\\ \hline
      \multicolumn{3}{|p{13.5cm}|}{\it Repeat these two steps until all data
      dependencies have been statisfied, or a dead-lock situation is detected.}\\ 
      \hline\hline
-\end{tabular}\newline
+\end{longtable}
+
+\vspace*{3ex}
+\begin{longtable}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+     \hline\hline
+     {\bf IPDv04 label} & {\bf Component} & {\bf Meaning}\\
+     \hline\hline
+     {\tt IPDv04p1}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p1}   & models, mediators, drivers  & Advertise their import and export Fields and set the {\tt TransferOfferGeomObject} Attribute.\\ \hline
+     {\tt IPDv04p1a}  & connectors                  & Consider all connection possibilites for their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv04p1b}  & connectors                  & Unambiguous construction of their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv04p2}   & driver-self                 & Modify the {\tt CplList} Attributes on the Connectors.\\ \hline
+     {\tt IPDv04p2}   & models, mediators, drivers  & {\em unspecified/unused by NUOPC}\\ \hline
+     {\tt IPDv04p2}   & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute. Set the {\tt TransferActionGeomObject} Attribute.\\ \hline
+     {\tt IPDv04p3}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p3}   & models, mediators, drivers  & Realize their "connected" import and export Fields that have {\tt TransferActionGeomObject} equal to "provide".\\ \hline
+     {\tt IPDv04p3}   & connectors                  & Transfer the Grid/Mesh objects (only DistGrid) for Field pairs that have a provider and an acceptor side.\\ \hline
+     {\tt IPDv04p4}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p4}   & models, mediators, drivers  & Optionally modify the decomposition and distribution information of the accepted Grid/Mesh by replacing the DistGrid.\\ \hline
+     {\tt IPDv04p4}   & connectors                  & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline
+     {\tt IPDv04p5}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p5}   & models, mediators, drivers  & Realize all Fields that have {\tt TransferActionGeomObject} equal to "accept" on the transferred Grid/Mesh objects.\\ \hline
+     {\tt IPDv04p5}   & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv04p6}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p6}   & models, mediators, drivers  & Check compatibility of their Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv04p7}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
+     {\tt IPDv04p7}   & models, mediators, drivers  & Handle Field data initialization. Timestamp the export Fields.\\ \hline
+     \multicolumn{3}{|p{13.5cm}|}{\it A loop is entered over all those model, mediator, driver Components that use IPDv02 and have
+     unsatisfied data dependencies, repeating the following two steps:}\\ \hline
+     {\tt Run()}      & connectors                  & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
+     {\tt IPDv04p7}   & models, mediators, drivers  & Handle Field data initialization. Time stamp the export Fields and set the {\tt Updated} and {\tt InitializeDataComplete} Attributes accordingly.\\ \hline
+     \multicolumn{3}{|p{13.5cm}|}{\it Repeat these two steps until all data
+     dependencies have been statisfied, or a dead-lock situation is detected.}\\ 
+     \hline\hline
+\end{longtable}

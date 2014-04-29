@@ -69,6 +69,7 @@ module NUOPC_Base
   public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
+  public NUOPC_StateAttributeAdd
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
@@ -2260,6 +2261,42 @@ endif
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateAttributeAdd - Add the NUOPC State Attributes
+! !INTERFACE:
+  subroutine NUOPC_StateAttributeAdd(state, rc)
+! !ARGUMENTS:
+    type(ESMF_state)                      :: state
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Adds standard NUOPC Attributes to a State.
+!
+!   This adds the standard NUOPC State Attribute package: convention="NUOPC",
+!   purpose="General" to the State.
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)            :: attrList(1)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Set up a customized list of Attributes to be added to the Fields
+    attrList(1) = "Namespace"           ! namespace of this State
+    
+    ! add Attribute packages
+    call ESMF_AttributeAdd(state, convention="NUOPC", purpose="General", &
+      attrList=attrList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set Attributes to defaults
+    ! <no defaults yet>
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_StateBuildStdList - Build lists of Field information from a State
