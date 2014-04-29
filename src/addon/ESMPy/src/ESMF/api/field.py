@@ -8,13 +8,14 @@ The Field API
 
 import numpy.ma as ma
 
-from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
-
 from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
+
+import ESMF.api.constants as constants
+
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
@@ -205,8 +206,8 @@ class Field(ma.MaskedArray):
         # create a numpy array to point to the ESMF allocation
         fieldbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(data_out.contents),
-            np.dtype(ESMF2PythonType[typekind]).itemsize*size)
-        fieldDataP = np.frombuffer(fieldbuffer, ESMF2PythonType[typekind])
+            np.dtype(constants._ESMF2PythonType[typekind]).itemsize*size)
+        fieldDataP = np.frombuffer(fieldbuffer, constants._ESMF2PythonType[typekind])
 
         # reshape the numpy array of coordinates, account for Fortran
         if isinstance(grid, Grid):
@@ -291,7 +292,7 @@ class Field(ma.MaskedArray):
         # loop through and alias esmf data to numpy arrays
         buffer = np.core.multiarray.int_asbuffer(
             ct.addressof(field_data.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        esmf_coords = np.frombuffer(buffer, ESMF2PythonType[self.type])
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        esmf_coords = np.frombuffer(buffer, constants._ESMF2PythonType[self.type])
 
         print esmf_coords
