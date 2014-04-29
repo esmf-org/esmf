@@ -83,7 +83,7 @@ The "MORE HELP" section will give you links to more documentation and other
 information about the ESMF project.
 
 Documentation for the ESMPy library can also be found by running 'pydoc ESMF'
-from the terminal prompt in the top level ESMF directory.
+from the terminal prompt in the top level ESMPy directory.
 
 
 Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
@@ -100,11 +100,18 @@ The ESMPy package should include the following files:
 
 -- doc directory - contains all Sphinx documentation files
 
+-- examples directory - iPython script examples
+
+  -- grid_create_from_file.py - grid creation from file
+  -- grid_mesh_regrid.py - grid to mesh conservative regridding
+  -- hello_world.py - simple hello world example
+  -- mesh_create_from_file.py - mesh creation from file
+
 -- src directory
 
   -- ESMF directory
 
-    -- __init__.py  - package init file
+    -- __init__.py - package init file
 
     -- api directory
 
@@ -133,7 +140,6 @@ The ESMPy package should include the following files:
       -- regrid_test directory
 
         -- field_regridding_test.py - Field regridding tutorial
-
         -- grid_grid_regrid_csrv_mask_3D_test.py - first-order conservative regridding
                                                    between two 3D Grids with masking
         -- grid_grid_regrid_csrv_mask_test.py - first-order conservative regridding
@@ -150,10 +156,13 @@ The ESMPy package should include the following files:
 
         -- regrid_from_file_test directory
   
+          -- read_test_cases_from_control_file.py - utility to read test cases from file
           -- regrid_check.py - Regrid testing program
           -- regrid_check_driver.py - Driver program for regrid testing
+          -- regrid_from_file_consts.py - utility constants
           -- regrid_test_data.txt - text file contains regridding test configurations
           -- run_regrid_from_file.py - regrid test run utility
+          -- run_regrid_from_file_dryrun.py - regrid test dryrun utility
 
     -- util directory
 
@@ -170,12 +179,11 @@ The following packages are *required* to work with ESMPy:
 -- ESMF installation
 -- python - http://python.org/
 -- numpy - http://numpy.scipy.org/
--- ctypes (included with numpy)
 
 The following packages are *optional*:
 
--- mpi4py - python bindings to MPI
--- nose - nose testing
+-- mpi4py - for parallel regrid testing
+-- nose - for nose testing
 
 INSTALLATION:
 --------
@@ -198,7 +206,7 @@ standard Python package installation directory on that particular machine.
 
 Note: The ESMPy build does not have to be installed to be used.  The 
 PYTHONPATH environment variable can simply be pointed to the directory 
-containing the ESMF module (ESMPy/src from a default git clone) 
+containing the ESMF module (esmf/src/addon/ESMPy/src from a default git clone) 
 after the build command.
 
 As usual, any command followed by --help should print out some information
@@ -241,6 +249,8 @@ or:
 
     python setup.py test_regrid
 
+    python setup.py test_regrid_parallel
+
     python setup.py test_regrid_from_file
 
     python setup.py test_all 
@@ -276,7 +286,6 @@ to ESMF offline and integrated regridding capabilities.
 - There is no support for tripole or multi-tile Grids
 - ESMPy cannot use an ESMF installation that is built with external LAPACK 
 support.
-- GridSpec format grids are cannot be read from file at this time.
 
 Testing related:
 - Only tested with gfortran on Darwin and Linux platforms
