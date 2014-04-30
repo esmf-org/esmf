@@ -43,7 +43,6 @@ module NUOPC
   public NUOPC_CplCompAreServicesSet
   public NUOPC_CplCompAttributeAdd
   public NUOPC_CplCompAttributeGet
-  public NUOPC_CplCompAttributeSet
   public NUOPC_FieldAttributeAdd
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
@@ -54,7 +53,6 @@ module NUOPC
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
-  public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock

@@ -46,7 +46,6 @@ module NUOPC_Base
   public NUOPC_CplCompAreServicesSet
   public NUOPC_CplCompAttributeAdd
   public NUOPC_CplCompAttributeGet
-  public NUOPC_CplCompAttributeSet
   public NUOPC_FieldAttributeAdd
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
@@ -57,7 +56,6 @@ module NUOPC_Base
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
-  public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
@@ -502,70 +500,6 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
   
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CplCompAttributeSet - Set the NUOPC CplComp Attributes
-! !INTERFACE:
-  subroutine NUOPC_CplCompAttributeSet(comp, importState, exportState, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)         :: comp
-    type(ESMF_State),   intent(in)            :: importState
-    type(ESMF_State),   intent(in)            :: exportState
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Checks the provided importState and exportState arguments for matching Fields
-!   and sets the coupling list as "CplList" Attribute in {\tt comp}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[comp]
-!     The {\tt ESMF\_CplComp} object to which the Attributes are set.
-!   \item[importState]
-!     Import State.
-!   \item[exportState]
-!     Export State.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
-    integer                         :: count
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ! find cplList
-    nullify(cplList)
-    call NUOPC_FillCplList(importState, exportState, cplList=cplList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    ! set Attributes
-    call ESMF_AttributeSet(comp, &
-      name="ComponentLongName", value="NUOPC Generic Connector Component", &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    
-    if (associated(cplList)) then
-      count = size(cplList)
-      if (count>0) then
-        call ESMF_AttributeSet(comp, &
-          name="CplList", valueList=cplList(1:count), &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
-      endif
-      deallocate(cplList)
-    endif
-      
-  end subroutine
-  !-----------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FieldAttributeAdd - Add the NUOPC Field Attributes
@@ -1236,130 +1170,6 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields
-! !INTERFACE:
-  subroutine NUOPC_FillCplList(importState, exportState, cplList, rc)
-! !ARGUMENTS:
-    type(ESMF_State),       intent(in)            :: importState
-    type(ESMF_State),       intent(in)            :: exportState
-    character(ESMF_MAXSTR), pointer               :: cplList(:)
-    integer,                intent(out), optional :: rc
-! !DESCRIPTION:
-!   Constructs a list of matching StandardNames of Fields in the 
-!   {\tt importState} and {\tt exportState}. Returns this list in {\tt cplList}.
-!
-!   The pointer argument {\tt cplList} must enter this method unassociated. On
-!   return, the deallocation of the potentially associated pointer becomes the
-!   caller's responsibility.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer                         :: maxCount, count, i, j
-    character(ESMF_MAXSTR), pointer :: l_cplList(:)
-    character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
-    character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
-    type(ESMF_Field),       pointer :: importFieldList(:)
-    type(ESMF_Field),       pointer :: exportFieldList(:)
-    type(ESMF_Field)                :: field
-    character(ESMF_MAXSTR)          :: consumerConnection
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ! ensure cplList argument enters unassociated
-    if (associated(cplList)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="cplList must enter unassociated", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-
-    ! nullify pointers to prepare for the following calls
-    nullify(importStandardNameList)
-    nullify(exportStandardNameList)
-    nullify(importFieldList)
-    nullify(exportFieldList)
-    
-    ! build list of standard names of all Fields inside of importState
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! build list of standard names of all Fields inside of exportState
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    ! associated pointers means that there are name lists
-    if (associated(importStandardNameList) .and. &
-      associated(exportStandardNameList)) then
-      
-      ! the maximum number of matches is limited by the larger list, because
-      ! the same producer can be matched to multiple consumers
-      maxCount = max(size(importStandardNameList), size(exportStandardNameList))
-      allocate(l_cplList(maxCount)) ! temporary list
-
-      count = 0
-      ! simple linear search of items that match between both lists
-      do i=1, size(importStandardNameList)  ! producer side
-        do j=1, size(exportStandardNameList)  ! consumer side
-          if (importStandardNameList(i) == exportStandardNameList(j)) then
-            ! found matching standard name pair
-            ! -> now see if the consumer side is already satisfied
-            field = exportFieldList(j)
-            call NUOPC_FieldAttributeGet(field, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
-            if (trim(consumerConnection)/="satisfied") then
-              ! the consumer side was still open
-              call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
-                value="satisfied", rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-              count = count+1
-              if (count > maxCount) then
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                  msg="Bad internal error - should never get here!",&
-                  line=__LINE__, file=FILENAME, rcToReturn=rc)
-                return  ! bail out
-              endif
-              l_cplList(count) = importStandardNameList(i)
-              exit
-            endif
-          endif
-        enddo
-      enddo
-      
-      ! transfer info: l_cplList -> cplList
-      allocate(cplList(count))
-      do i=1, count
-        cplList(i) = l_cplList(i)
-      enddo
-      deallocate(l_cplList)
-      
-    endif
-    
-    if (associated(importStandardNameList)) deallocate(importStandardNameList)
-    if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
-    if (associated(importFieldList)) deallocate(importFieldList)
-    if (associated(exportFieldList)) deallocate(exportFieldList)
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
