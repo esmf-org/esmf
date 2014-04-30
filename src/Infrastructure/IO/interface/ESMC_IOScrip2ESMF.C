@@ -491,6 +491,8 @@ void FTN_X(c_convertscrip)(
     nodelatlon[i*2+1]=nodelats[i];
   }
 
+  free(cornerlons);
+  free(cornerlats);
   free(nodelons);
   free(nodelats);
 
@@ -734,6 +736,7 @@ void FTN_X(c_convertscrip)(
   // so, this has to be calculated as well
   
   // First, read in the center coordinates
+  free(edges);
   inbuf = (double*)malloc(sizeof(double)*gsdim);
   inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
   status = nc_get_var_double(ncid1, ctlatid, inbuf);
@@ -929,6 +932,7 @@ void FTN_X(c_convertscrip)(
   if (handle_error(status)) return; // bail out;
 
   free(totalneighbors);
+  free(cells);
   free(dualcells);
   free(nodelatlon);
   free(inbuf1);
