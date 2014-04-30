@@ -1755,6 +1755,24 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
+    attributeName = "ProducerConnection"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    attributeName = "ConsumerConnection"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
     attributeName = "Updated"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
