@@ -2933,6 +2933,10 @@ endif
     character(ESMF_MAXSTR)  :: Units
     character(ESMF_MAXSTR)  :: LongName
     character(ESMF_MAXSTR)  :: ShortName
+    character(ESMF_MAXSTR)  :: ProducerConnection
+    character(ESMF_MAXSTR)  :: ConsumerConnection
+    character(ESMF_MAXSTR)  :: TransferOfferGeomObject
+    character(ESMF_MAXSTR)  :: TransferActionGeomObject
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2964,8 +2968,55 @@ endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
+    call NUOPC_FieldAttributeGet(advertisedField, name="ProducerConnection", &
+      value=ProducerConnection, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, name="ConsumerConnection", &
+      value=ConsumerConnection, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, &
+      name="TransferOfferGeomObject", value=TransferOfferGeomObject, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, &
+      name="TransferActionGeomObject", value=TransferActionGeomObject, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
       Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! set ProducerConnection
+    call NUOPC_FieldAttributeSet(field, &
+      name="ProducerConnection", value=ProducerConnection, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set ConsumerConnection
+    call NUOPC_FieldAttributeSet(field, &
+      name="ConsumerConnection", value=ConsumerConnection, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set TransferOfferGeomObject
+    call NUOPC_FieldAttributeSet(field, &
+      name="TransferOfferGeomObject", value=TransferOfferGeomObject, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set TransferActionGeomObject
+    call NUOPC_FieldAttributeSet(field, &
+      name="TransferActionGeomObject", value=TransferActionGeomObject, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
