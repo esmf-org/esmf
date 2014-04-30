@@ -2,6 +2,7 @@
 
 import os, sys, getopt
 import ESMF
+import ESMF.api.constants as constants
 
 parallel = False
 if len(sys.argv) > 1:
@@ -26,6 +27,11 @@ regridtestfiles = [os.path.join(REGRID_TEST_DIR, a) for a in regridtestfiles_tem
 regridtestoutfile='run_regrid.log'
 num_proc = 1
 if parallel:
+    # make sure we are not in uni mode
+    if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+        raise ValueError("Cannot run parallel tests when ESMF is built with ESMF_COMM=mpiuni")
+
+    # setup the constants
     num_proc = 4
     regridtestoutfile='run_regrid_parallel.log'
 
