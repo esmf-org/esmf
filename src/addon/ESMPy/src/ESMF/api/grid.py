@@ -6,11 +6,11 @@ The Grid API
 
 #### IMPORT LIBRARIES #########################################################
 
-from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
-
 from ESMF.api.esmpymanager import *
+
+import ESMF.api.constants as constants
 
 import warnings
 
@@ -671,14 +671,14 @@ class Grid(object):
         # allocate space for the coordinates on the Python side
         self.coords[stagger][0] = np.zeros(\
                                            shape = (self.size_local[stagger]),
-                                           dtype = ESMF2PythonType[self.type])
+                                           dtype = constants._ESMF2PythonType[self.type])
         self.coords[stagger][1] = np.zeros(\
                                            shape = (self.size_local[stagger]),
-                                           dtype = ESMF2PythonType[self.type])
+                                           dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
             self.coords[stagger][2] = np.zeros(\
                                         shape = (self.size_local[stagger]),
-                                        dtype = ESMF2PythonType[self.type])
+                                        dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         [x, y, z] = [0, 1, 2]
@@ -723,8 +723,8 @@ class Grid(object):
         # create a numpy array to point to the ESMF allocation
         gridbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(coords_out.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, ESMF2PythonType[self.type])
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[self.type])
         
         if ndims != 1:
             # reshape the numpy array of coordinates using Fortran ordering in Grid
@@ -741,12 +741,12 @@ class Grid(object):
         if item == GridItem.MASK:
             self.mask[stagger] = np.zeros(\
                                           shape = (self.size_local[stagger]),
-                                          dtype = ESMF2PythonType[TypeKind.I4])
+                                          dtype = constants._ESMF2PythonType[TypeKind.I4])
         # if the item is area then it is of type R8
         elif item == GridItem.AREA:
             self.area[stagger] = np.zeros(\
                                           shape = (self.size_local[stagger]),
-                                          dtype = ESMF2PythonType[TypeKind.R8])
+                                          dtype = constants._ESMF2PythonType[TypeKind.R8])
         else:
             raise GridItemNotSupported
 
@@ -781,8 +781,8 @@ class Grid(object):
         if item == GridItem.MASK:
             gridbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(item_out.contents),
-                np.dtype(ESMF2PythonType[TypeKind.I4]).itemsize*size)
-            gridItemP = np.frombuffer(gridbuffer, ESMF2PythonType[TypeKind.I4])
+                np.dtype(constants._ESMF2PythonType[TypeKind.I4]).itemsize*size)
+            gridItemP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[TypeKind.I4])
 
             # reshape the numpy array of item with Fortran ordering in Grid
             gridItemP = np.reshape(gridItemP, self.size_local[stagger], 
@@ -793,8 +793,8 @@ class Grid(object):
         elif item == GridItem.AREA:
             gridbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(item_out.contents),
-                np.dtype(ESMF2PythonType[TypeKind.R8]).itemsize*size)
-            gridItemP = np.frombuffer(gridbuffer, ESMF2PythonType[TypeKind.R8])
+                np.dtype(constants._ESMF2PythonType[TypeKind.R8]).itemsize*size)
+            gridItemP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[TypeKind.R8])
 
             # reshape the numpy array of item with Fortran ordering in Grid
             gridItemP = np.reshape(gridItemP, self.size_local[stagger], 
@@ -862,7 +862,7 @@ class Grid(object):
         '''
         xbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(xptr.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
         '''
         xcoords = np.frombuffer(xbuffer, np.float64)
         #xcoordarray = numpy.ndarray((nrows, ncols), dtype=numpy.float32, order='F',
@@ -871,13 +871,13 @@ class Grid(object):
         yptr = ESMP_GridGetCoordPtr(self, y, staggerloc=stagger)
         ybuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(yptr.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        ycoords = np.frombuffer(ybuffer, ESMF2PythonType[self.type])
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        ycoords = np.frombuffer(ybuffer, constants._ESMF2PythonType[self.type])
 
         print "DIAGNOSTICS:"
         print "self.type = ", self.type
-        print "ESMF2PythonType", ESMF2PythonType[self.type]
-        print "ESMF2PythonType.itemsize", ESMF2PythonType[self.type].itemsize
+        print "constants._ESMF2PythonType", constants._ESMF2PythonType[self.type]
+        print "constants._ESMF2PythonType.itemsize", constants._ESMF2PythonType[self.type].itemsize
         
         
         # find the size of the local coordinates at this stagger location
@@ -917,8 +917,8 @@ class Grid(object):
             zptr = ESMP_GridGetCoordPtr(self, z, staggerloc=stagger)
             zbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(zptr.contents),
-                np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-            zcoords = np.frombuffer(zbuffer, ESMF2PythonType[self.type])
+                np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+            zcoords = np.frombuffer(zbuffer, constants._ESMF2PythonType[self.type])
 
             for i in xrange(I):
                 for j in xrange(J):

@@ -9,7 +9,7 @@ import ESMF
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # Create a uniform global latlon grid from a SCRIP formatted file
-grid = ESMF.Grid(filename="data/ll2.5deg_grid.nc", filetype=ESMF.FileFormat.SCRIP)
+grid = ESMF.Grid(filename="ll2.5deg_grid.nc", filetype=ESMF.FileFormat.SCRIP)
 
 # Create a field on the centers of the grid
 field = ESMF.Field(grid, "field", staggerloc=ESMF.StaggerLoc.CENTER)

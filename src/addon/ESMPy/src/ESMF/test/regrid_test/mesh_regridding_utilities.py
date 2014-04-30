@@ -684,7 +684,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size[element]):
+        for i in range(field.grid.size_local[element]):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -717,13 +717,13 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
     
     elif field.staggerloc == node:
         ind = 0
-        for i in range(field.grid.size_local[node]):
+        for i in range(field.grid.size[node]):
             x = nodeCoord[i*2]
             y = nodeCoord[i*2+1]
 
             if (nodeOwner[i] == ESMF.local_pet()):
-                if ind > field.grid.size[node]:
-                    raise ValueError("blahblahblah")
+                if ind > field.grid.size_local[node]:
+                    raise ValueError("Overstepped the mesh bounds!")
                 field.data[ind] = 20.0 + x**2 +x*y + y**2
                 #print '[{0},{1}] = {2}'.format(x,y,field.data[ind])
                 ind += 1
@@ -753,13 +753,10 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     '''
     mass = 0.0
     areafield.get_area()
-    frac = 0
-    for i in range(valuefield.shape[0]):
-        if dofrac:
-            mass += areafield.data[i] * valuefield.data[i] * \
-                    fracfield.data[i]
-        else:
-            mass += areafield.data[i] * valuefield.data[i]
+    if dofrac:
+        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+    else:
+        mass = np.sum(areafield.data * valuefield.data)
 
     return mass
 
@@ -774,16 +771,15 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
                     compared against each other.
     '''
     import numpy.ma as ma
-    # compare point values of field1 to field2
-    # first verify they are the same size
-    if (field1.shape != field2.shape):
-        raise NameError('compare_fields: Fields must be the same size!')
 
+    # verify that the fields are the same size
+    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+
+    # deal with default values for fracfield
     if dstfracfield is None:
         dstfracfield = ma.ones(field1.shape)
 
-    # initialize to True, and check for False point values
-    correct = True
+    # compute pointwise error measures
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
@@ -799,6 +795,9 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
             if (err < min_error):
                 min_error = err
 
+    # gather error on processor 0 or set global variables in serial case
+    mass1_global = 0
+    mass2_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -807,8 +806,6 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
         field_size_global = comm.reduce(field1.shape[0], op=MPI.SUM)
-        mass1_global = 0
-        mass2_global = 0
         if (mass1 and mass2):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
@@ -817,12 +814,13 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         max_error_global = max_error
         min_error_global = min_error
         field_size_global = field1.shape[0]
-        mass1_global = 0
-        mass2_global = 0
         if (mass1 and mass2):
             mass1_global = mass1
             mass2_global = mass2
 
+    # compute relative error measures and compare against tolerance values
+    itrp = False
+    csrv = False
     if ESMF.local_pet() == 0:
         if mass1_global == 0:
             csrv_error_global = abs(mass2_global - mass1_global)
@@ -832,20 +830,26 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         # compute mean relative error
         total_error_global = total_error_global/field_size_global
 
-        itrp = False
-        csrv = False
+        # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):
             itrp = True
         if (csrv_error_global < csrv_tol):
             csrv = True
 
-        if (itrp and csrv):
-            print " PASS"
-        else:
-            print " FAIL"
+        # print out diagnostic information
         print "  Mean relative error = "+str(total_error_global)
         print "  Max  relative error = "+str(max_error_global)
         print "  Conservation  error = "+str(csrv_error_global)
         #print "  Min error   = "+str(min_error_global)
         #print "  srcmass     = "+str(mass1_global)
         #print "  dstmass     = "+str(mass2_global)
+
+    # broadcast in parallel case
+    if parallel:
+        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+
+    # print pass or fail
+    if (itrp and csrv):
+        print "PET{0} - PASS".format(ESMF.local_pet())
+    else:
+        print "PET{0} - FAIL".format(ESMF.local_pet())

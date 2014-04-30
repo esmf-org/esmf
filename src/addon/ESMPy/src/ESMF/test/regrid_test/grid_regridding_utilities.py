@@ -82,18 +82,11 @@ def grid_create(bounds, coords, domask=False, doarea=False):
 
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
-    
-        maskregionX = [1.75, 2.25]
-        maskregionY = [1.75, 2.25]
-    
-        for i in range(mask.shape[x]):
-            for j in range(mask.shape[y]):
-                if (maskregionX[0] < gridXCenter[i, j] < maskregionX[1] and
-                        maskregionY[0] < gridYCenter[i, j] < maskregionY[1]):
-                    mask[i, j] = 0
-                else:
-                    mask[i, j] = 1
-    
+        mask[:] = 1
+        mask[np.where((1.75 < gridXCenter.data < 2.25) &
+                      (1.75 < gridYCenter.data < 2.25))] = 0
+        
+
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
     
@@ -172,17 +165,9 @@ def grid_create_periodic(bounds, domask=False):
     if domask:
         # set up the grid mask
         mask = grid.add_item(ESMF.GridItem.MASK)
-
-        maskregionX = [175.,185.]
-        maskregionY = [-5.,5.]
-
-        for i in range(mask.shape[x]):
-            for j in range(mask.shape[y]):
-                if (maskregionX[0] < gridXCenter[i,j] < maskregionX[1] and
-                    maskregionY[0] < gridYCenter[i,j] < maskregionY[1]):
-                    mask[i, j] = 0
-                else:
-                    mask[i, j] = 1
+        mask[:] = 1
+        mask[np.where((175. < gridXCenter.data < 185.) &
+                      (-5. < gridYCenter.data < 5.))] = 0
 
     return grid
 
@@ -271,21 +256,11 @@ def grid_create_3d(bounds, coords, domask=False, doarea=False):
 
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
-    
-        maskregionX = [1.75, 2.25]
-        maskregionY = [1.75, 2.25]
-        maskregionZ = [1.75, 2.25]
-    
-        for i in range(mask.shape[x]):
-            for j in range(mask.shape[y]):
-                for k in range(mask.shape[z]):
-                    if (maskregionX[0] < gridXCenter[i, j, k] < maskregionX[1] and
-                            maskregionY[0] < gridYCenter[i, j, k] < maskregionY[1] and
-                            maskregionZ[0] < gridZCenter[i, j, k] < maskregionZ[1]):
-                        mask[i, j, k] = 0
-                    else:
-                        mask[i, j, k] = 1
-    
+        mask[:] = 1
+        mask[np.where((1.75 < gridXCenter.data < 2.25) &
+                      (1.75 < gridYCenter.data < 2.25) &
+                      (1.75 < gridZCenter.data < 2.25))] = 0
+
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
     
@@ -304,25 +279,16 @@ def initialize_field_grid(field, domask=False, doarea=False):
     '''
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
-    if doarea:
-        area = field.grid.get_item(ESMF.GridItem.AREA)
 
     # get the coordinate pointers and set the coordinates
-    [x,y] = [0,1]
-    gridXCoord = field.grid.get_coords(x, ESMF.StaggerLoc.CENTER)
-    gridYCoord = field.grid.get_coords(y, ESMF.StaggerLoc.CENTER)
+    [x,y] = [0, 1]
+    gridXCoord = field.grid.get_coords(0, ESMF.StaggerLoc.CENTER)
+    gridYCoord = field.grid.get_coords(1, ESMF.StaggerLoc.CENTER)
 
-    mass = 0
-    for i in range(gridXCoord.shape[x]):
-        for j in range(gridYCoord.shape[y]):
-            field.data[i, j] = 20.0 + gridXCoord[i, j]**2 + \
-                          gridXCoord[i, j]*gridYCoord[i, j] + \
-                          gridYCoord[i, j]**2
-            if domask:
-                if mask[i, j] == 0:
-                    field.data[i, j] = 0
-            if doarea:
-                mass = mass + area[i, j] * field.data[i, j]
+    field.data[:]=20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridYCoord**2
+
+    if domask:
+        field.data[mask == 0] = 0
 
     return field
 
@@ -335,7 +301,6 @@ def initialize_field_grid_periodic(field):
                     field.\n
     RETURN VALUES: \n Field :: field \n
     '''
-    import math
     DEG2RAD = 3.141592653589793/180.0
 
     # get the coordinate pointers and set the coordinates
@@ -343,15 +308,12 @@ def initialize_field_grid_periodic(field):
     gridXCoord = field.grid.get_coords(x, ESMF.StaggerLoc.CENTER)
     gridYCoord = field.grid.get_coords(y, ESMF.StaggerLoc.CENTER)
 
-    for i in range(gridXCoord.shape[x]):
-        for j in range(gridYCoord.shape[y]):
-            theta = DEG2RAD*gridXCoord[i, j]
-            phi = DEG2RAD*(90.0 - gridYCoord[i, j])
-            field.data[i, j] = 2.0 + math.cos(theta)**2 * math.cos(2.0*phi)
+    field.data[:] = 2.0 + np.cos(DEG2RAD*gridXCoord)**2 * \
+                          np.cos(2.0*DEG2RAD*(90.0 - gridYCoord))
 
     return field
 
-def initialize_field_grid_3d(field, domask=False, doarea=False):
+def initialize_field_grid_3d(field, domask=False):
     '''
     PRECONDITIONS: A Field has been created.
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
@@ -360,8 +322,6 @@ def initialize_field_grid_3d(field, domask=False, doarea=False):
     '''
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
-    if doarea:
-        area = field.grid.get_item(ESMF.GridItem.AREA)
 
     # get the coordinate pointers and set the coordinates
     [x,y,z] = [0,1,2]
@@ -369,18 +329,10 @@ def initialize_field_grid_3d(field, domask=False, doarea=False):
     gridYCoord = field.grid.get_coords(y, ESMF.StaggerLoc.CENTER_VCENTER)
     gridZCoord = field.grid.get_coords(z, ESMF.StaggerLoc.CENTER_VCENTER)
 
-    mass = 0
-    for i in range(gridXCoord.shape[x]):
-        for j in range(gridYCoord.shape[y]):
-            for k in range(gridZCoord.shape[z]):
-                field.data[i, j, k] = 20.0 + gridXCoord[i, j, k]**2 + \
-                                 gridXCoord[i, j, k]*gridYCoord[i, j, k] + \
-                                 gridZCoord[i, j, k]**2
-                if domask:
-                    if mask[i, j, k] == 0:
-                        field.data[i, j, k] = 0
-                if doarea:
-                    mass = mass + area[i, j, k] * field.data[i, j, k]
+    field.data[:]=20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridZCoord**2
+
+    if domask:
+        field.data[mask == 0] = 0
 
     return field
 
@@ -397,45 +349,13 @@ def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None):
     POSTCONDITIONS: The mass of the data field is computed.\n
     RETURN VALUES: float :: mass \n
     '''
-    [x, y] = [0, 1]
     mass = 0.0
     areafield.get_area()
 
-    for i in range(valuefield.shape[x]):
-        for j in range(valuefield.shape[y]):
-            if dofrac:
-                mass += areafield.data[i, j] * valuefield.data[i, j] * \
-                                fracfield.data[i, j]
-            else:
-                mass += areafield.data[i, j] * valuefield.data[i, j]
-
-    return mass
-
-def compute_mass_grid_3d(valuefield, areafield, dofrac=False, fracfield=None):
-    '''
-    PRECONDITIONS: Two Fields have been created and initialized.  
-                   'valuefield' contains data values of a field built 
-                   on the cells of a grid, 'areafield' contains the 
-                   areas associated with the grid cells, and 
-                   'fracfield' contains the fractions of each cell 
-                   which contributed to a regridding operation involving
-                   'valuefield.  'dofrac' is a boolean value that gives 
-                   the option to not use the 'fracfield'.\n
-    POSTCONDITIONS: The mass of the data field is computed.\n
-    RETURN VALUES: integer :: mass \n
-    '''
-    [x, y, z] = [0, 1, 2]
-    mass = 0.0
-    areafield.get_area()
-
-    for i in range(valuefield.shape[x]):
-        for j in range(valuefield.shape[y]):
-            for k in range(valuefield.shape[z]):
-                if dofrac:
-                    mass += areafield.data[i, j, k] * valuefield.data[i, j, k] * \
-                                    fracfield.data[i, j, k]
-                else:
-                    mass += areafield.data[i, j, k] * valuefield.data[i, j, k]
+    if dofrac:
+        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+    else:
+        mass = np.sum(areafield.data * valuefield.data)
 
     return mass
 
@@ -451,14 +371,14 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     '''
     import numpy.ma as ma
 
-    # compare point values of field1 to field2
-    # first verify they are the same size
-    if (field1.shape != field2.shape): 
-        raise NameError('compare_fields: Fields must be the same size!')
+    # verify that the fields are the same size
+    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
     
+    # deal with default values for fracfield
     if dstfracfield is None:
         dstfracfield = ma.ones(field1.shape)
 
+    # compute pointwise error measures
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
@@ -469,6 +389,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     else:
         raise ValueError("field1.grid.rank is not of a supported size")
 
+    # gather error on processor 0 or set global variables in serial case
     mass1_global = 0
     mass2_global = 0
     if parallel:
@@ -478,17 +399,20 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = comm.reduce(totalErr, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        if ((mass1 is not None) and (mass2 is not None)):
+        if (mass1 and mass2):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
         total_error_global = totalErr
         max_error_global = max_error
         min_error_global = min_error
-        if ((mass1 is not None) and (mass2 is not None)):
+        if (mass1 and mass2):
             mass1_global = mass1
             mass2_global = mass2
 
+    # compute relative error measures and compare against tolerance values
+    itrp = False
+    csrv = False
     if ESMF.local_pet() == 0:
         if mass1_global == 0:
             csrv_error_global = abs(mass2_global - mass1_global)
@@ -498,23 +422,29 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         # compute mean relative error
         total_error_global = total_error_global/field2.grid.size[field2.staggerloc]
 
-        itrp = False
-        csrv = False
+        # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):
             itrp = True
         if (csrv_error_global < csrv_tol):
             csrv = True
 
-        if (itrp and csrv):
-            print " PASS"
-        else:
-            print " FAIL"
+        # print out diagnostic information
         print "  Mean relative error = "+str(total_error_global)
         print "  Max  relative error = "+str(max_error_global)
         print "  Conservation  error = "+str(csrv_error_global)
         #print "  Min error   = "+str(min_error_global)
         #print "  srcmass     = "+str(mass1_global)
         #print "  dstmass     = "+str(mass2_global)
+
+    # broadcast in parallel case
+    if parallel:
+        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+
+    # print pass or fail
+    if (itrp and csrv):
+        print "PET{0} - PASS".format(ESMF.local_pet())
+    else:
+        print "PET{0} - FAIL".format(ESMF.local_pet())
 
 def compare_fields_grid_2d(field1, field2, dstfracfield):
     # initialize to True, and check for False point values
