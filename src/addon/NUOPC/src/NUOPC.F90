@@ -67,11 +67,14 @@ module NUOPC
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateAttributeAdd
+  public NUOPC_StateAttributeGet
+  public NUOPC_StateAttributeSet
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
   public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsUpdated
+  public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp

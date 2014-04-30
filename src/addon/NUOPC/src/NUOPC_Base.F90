@@ -70,11 +70,14 @@ module NUOPC_Base
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateAttributeAdd
+  public NUOPC_StateAttributeGet
+  public NUOPC_StateAttributeSet
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
   public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsUpdated
+  public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
@@ -2299,15 +2302,94 @@ endif
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_StateAttributeGet - Get a NUOPC State Attribute
+! !INTERFACE:
+  subroutine NUOPC_StateAttributeGet(state, name, value, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(in)            :: state
+    character(*),     intent(in)            :: name
+    character(*),     intent(out)           :: value
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Accesses the Attribute {\tt name} inside of {\tt state} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   the Attribute is not present or not set.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: defaultvalue
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    defaultvalue = "CheckThisDefaultValue"
+
+    call ESMF_AttributeGet(state, name=name, value=value, &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (trim(value) == trim(defaultvalue)) then
+      ! attribute not present
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    else if (len_trim(value) == 0) then
+      ! attribute present but not set
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateAttributeSet - Set a NUOPC State Attribute
+! !INTERFACE:
+  subroutine NUOPC_StateAttributeSet(state, name, value, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                      :: state
+    character(*), intent(in)              :: name
+    character(*), intent(in)              :: value
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Set the Attribute {\tt name} inside of {\tt state} using the
+!   convention {\tt NUOPC} and purpose {\tt General}.
+!EOP
+  !-----------------------------------------------------------------------------
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_AttributeSet(state, name=name, value=value, &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_StateBuildStdList - Build lists of Field information from a State
 ! !INTERFACE:
   recursive subroutine NUOPC_StateBuildStdList(state, stdAttrNameList, &
-    stdItemNameList, stdConnectedList, stdFieldList, rc)
+    stdItemNameList, stdConnectedList, namespaceList, stdFieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer               :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer, optional     :: stdItemNameList(:)
     character(ESMF_MAXSTR), pointer, optional     :: stdConnectedList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: namespaceList(:)
     type(ESMF_Field),       pointer, optional     :: stdFieldList(:)
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -2329,7 +2411,9 @@ endif
     character(ESMF_MAXSTR), pointer         :: l_stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer         :: l_stdItemNameList(:)
     character(ESMF_MAXSTR), pointer         :: l_stdConnectedList(:)
+    character(ESMF_MAXSTR), pointer         :: l_namespaceList(:)
     type(ESMF_Field),       pointer         :: l_stdFieldList(:)
+    character(ESMF_MAXSTR)                  :: namespace
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2423,6 +2507,23 @@ endif
         endif
       endif
 
+      if (present(namespaceList)) then
+        if (associated(namespaceList)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="namespaceList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        else
+          allocate(namespaceList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating namespaceList", &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
+      endif
+
       if (present(stdFieldList)) then
         if (associated(stdFieldList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -2443,6 +2544,12 @@ endif
       fieldCount = 1  ! reset
 
       do item=1, itemCount
+        call NUOPC_StateAttributeGet(state, name="Namespace", value=namespace, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
         if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
           call ESMF_StateGet(state, itemName=itemNameList(item), &
             field=field, rc=rc)
@@ -2467,6 +2574,9 @@ endif
               file=FILENAME)) &
               return  ! bail out
           endif
+          if (present(namespaceList)) then
+            NamespaceList(fieldCount)=trim(namespace)
+          endif
           if (present(stdFieldList)) then
             stdFieldList(fieldCount)=field
           endif
@@ -2476,6 +2586,7 @@ endif
           nullify(l_stdAttrNameList)
           nullify(l_stdItemNameList)
           nullify(l_stdConnectedList)
+          nullify(l_namespaceList)
           nullify(l_stdFieldList)
           call ESMF_StateGet(state, itemName=itemNameList(item), &
             nestedState=nestedState, rc=rc)
@@ -2484,7 +2595,8 @@ endif
             file=FILENAME)) &
             return  ! bail out
           call NUOPC_StateBuildStdList(nestedState, l_stdAttrNameList, &
-            l_stdItemNameList, l_stdConnectedList, l_stdFieldList, rc=rc)
+            l_stdItemNameList, l_stdConnectedList, l_namespaceList, &
+            l_stdFieldList, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -2498,6 +2610,10 @@ endif
               if (present(stdConnectedList)) then
                 stdConnectedList(fieldCount) = l_stdConnectedList(i)
               endif
+              if (present(namespaceList)) then
+                namespaceList(fieldCount) = trim(namespace)//":"// &
+                  trim(l_namespaceList(i))
+              endif
               if (present(stdFieldList)) then
                 stdFieldList(fieldCount) = l_stdFieldList(i)
               endif
@@ -2506,6 +2622,7 @@ endif
             deallocate(l_stdAttrNameList)
             deallocate(l_stdItemNameList)
             deallocate(l_stdConnectedList)
+            deallocate(l_namespaceList)
             deallocate(l_stdFieldList)
           endif
         endif
@@ -2740,6 +2857,60 @@ endif
     if (associated(stdFieldList)) deallocate(stdFieldList)
     
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateNamespaceAdd - Add a namespace to a State
+! !INTERFACE:
+  subroutine NUOPC_StateNamespaceAdd(state, namespace, nestedStateName, &
+    nestedState, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(len=*), intent(in)            :: namespace
+    character(len=*), intent(in),  optional :: nestedStateName
+    type(ESMF_State), intent(out), optional :: nestedState
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add a namespace to {\tt state}. This creates a nested State inside of 
+!   {\tt state}. The nested State is returned as {\tt nestedState}.
+!   If provided, {\tt nestedStateName} will be used to name the newly created
+!   nested State, otherwise it will default to be identical to {\tt namespace}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_State)        :: nestedS
+    character(len=80)       :: nestedSName
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(nestedStateName)) then
+      nestedSName = trim(nestedStateName)
+    else
+      nestedSName = trim(namespace)
+    endif
+    
+    nestedS = ESMF_StateCreate(name=nestedSName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_StateAttributeAdd(nestedS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    call NUOPC_StateAttributeSet(nestedS, name="Namespace", &
+      value=trim(namespace), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    call ESMF_StateAdd(state, (/nestedS/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    if (present(nestedState)) &
+      nestedState = nestedS
+    
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
