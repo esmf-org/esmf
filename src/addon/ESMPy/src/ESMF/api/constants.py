@@ -18,17 +18,21 @@ _ESMP_ArgBaseID = 1
 _ESMP_InitArgLogKindFlagID = _ESMP_ArgBaseID + 3
 
 # ESMF ABI
-_ESMF_ABI = 0
+_ESMF_ABI = None
 (_ESMF_ABI_64,_ESMF_ABI_32) = (64, 32)
 
 # ESMF OS
-_ESMF_OS = 0
+_ESMF_OS = None
 (_ESMF_OS_DARWIN,
  _ESMF_OS_LINUX,
  _ESMF_OS_UNICOS) = (-5,-4,-3)
 
 # ESMF_NETCDF
 _ESMF_NETCDF = False
+
+# ESMF_COMM
+_ESMF_COMM = None
+_ESMF_COMM_MPIUNI = -1
 
 #### NAMED CONSTANTS ##########################################################
 
