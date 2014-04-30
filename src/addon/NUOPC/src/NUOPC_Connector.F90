@@ -160,7 +160,7 @@ module NUOPC_Connector
 
     ! filter all other entries but those of type IPDv03
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
-      acceptStringList=(/"IPDv03p"/), rc=rc)
+      acceptStringList=(/"IPDv04p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -175,8 +175,6 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)           :: isType, esType
-    integer                               :: isItemCount, esItemCount
     integer                               :: i, j
     integer                               :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR)                :: name
@@ -315,8 +313,6 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)           :: isType, esType
-    integer                               :: isItemCount, esItemCount
     integer                               :: i, j, count, maxCount
     integer                               :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR)                :: name
@@ -420,10 +416,10 @@ print *, "current bondLevel=", bondLevel
               value=consumerConnection, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "satisfied:")==1) then
-              ! this export field has already been satisfied
-              read (consumerConnection(11:len(consumerConnection)), "(i10)") &
-                bondLevelMax  ! the bondLevel that was satisfied
+            if (index(trim(consumerConnection), "targeted:")==1) then
+              ! this export field has already been targeted
+              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+                bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! ambiguity detected -> bail out
                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -434,7 +430,7 @@ print *, "current bondLevel=", bondLevel
                 return  ! bail out
               endif
             else
-              ! obtain the bondLevel that needs to be satisfied
+              ! obtain the bondLevel that needs to be targeted
               read (consumerConnection, "(i10)") bondLevelMax
               if (bondLevel == bondLevelMax) then
                 ! the connection can be satisfied here
@@ -447,8 +443,8 @@ print *, "current bondLevel=", bondLevel
                   return  ! bail out
                 endif
                 cplList(count) = importStandardNameList(i)
-                ! make the satisfied entry to the ConsumerConnection attribute
-                write (consumerConnection, "('satisfied:', i10)") bondLevel
+                ! make the targeted entry to the ConsumerConnection attribute
+                write (consumerConnection, "('targeted:', i10)") bondLevel
                 call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
                   value=consumerConnection, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -492,8 +488,6 @@ print *, "current bondLevel=", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)           :: isType, esType
-    integer                               :: isItemCount, esItemCount
     type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
 
@@ -518,38 +512,11 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
-    ! reconcile the States including Attributes
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP1 Reconcile")
-#endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    ! Simply the combination of P1a + P1b
+    call InitializeP1a(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP1 Reconcile")
-#endif
-    
-    ! access the state types
-    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
-      ! not ES -> IS ==> should indicate problem???
-    endif
-    
-    ! look for matching Fields and set as "CplList" metadata
-    call NUOPC_CplCompAttributeSet(cplcomp, importState, exportState, rc=rc)
+    call InitializeP1b(cplcomp, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -564,20 +531,20 @@ call ESMF_VMLogMemInfo("aftP1 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)     :: isType, esType
-    integer                         :: isItemCount, esItemCount
     character(ESMF_MAXSTR), pointer :: cplList(:)
-    integer                         :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    integer                         :: cplListSize, i
+    integer                         :: bondLevel, bondLevelMax
+    character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
+    character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
-    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     integer                         :: stat
     type(type_InternalState)        :: is
-    integer                         :: localrc
-    logical                         :: existflag
+    logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
@@ -591,10 +558,12 @@ call ESMF_VMLogMemInfo("aftP1 Reconcile")
     
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(importStdAttrNameList)
+    nullify(importStandardNameList)
     nullify(importFieldList)
-    nullify(exportStdAttrNameList)
+    nullify(importNamespaceList)
+    nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportNamespaceList)
     
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
@@ -623,20 +592,6 @@ call ESMF_VMLogMemInfo("befP2 Reconcile")
 call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #endif
     
-    ! access the state types
-    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
-      ! not ES -> IS ==> should indicate problem???
-    endif
-    
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -651,14 +606,13 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! get the importState std lists
-    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      stdFieldList=importFieldList, rc=rc)
+    ! get the importState and exportState std lists
+    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
+      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the exportState std lists
-    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      stdFieldList=exportFieldList, rc=rc)
+    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
+      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -666,37 +620,52 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
       
-      ! find import side match
-      iMatch = 0  ! reset
-      do j=1, size(importStdAttrNameList)
-        if (importStdAttrNameList(j) == cplList(i)) then
-          iMatch = j
-          exit
-        endif
-      enddo
-      
-      ! find export side match
-      eMatch = 0  ! reset
-      do j=1, size(exportStdAttrNameList)
-        if (exportStdAttrNameList(j) == cplList(i)) then
-          ! found a matching consumer side candidate
-          ! -> see if that candidate is already targeted
-          eField=exportFieldList(j)
-          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-            value=consumerConnection, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(consumerConnection)/="targeted") then
-            ! the consumer side was not yet targeted
-            call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
-              value="targeted", rc=rc)
+      ! find import and export side match
+      foundFlag = .false. ! reset
+      do eMatch=1, size(exportStandardNameList)  ! consumer side
+        do iMatch=1, size(importStandardNameList)  ! producer side
+          if ((importStandardNameList(iMatch) == cplList(i)).and. &
+            (exportStandardNameList(eMatch) == cplList(i))) then
+            ! found a matching standard name pair
+            ! -> determine bondLevel according to namespace matching
+            bondLevel = &
+              getBondLevel(importNamespaceList(iMatch), &
+              exportNamespaceList(eMatch))
+              
+            if (bondLevel == -1) exit  ! break out and look for next match
+            
+            ! Getting to this place in the double loop means that the 
+            ! standard name match has a connection that supports the match.
+            
+            ! -> look at the current ConsumerConnection entry to see what to do
+            eField = exportFieldList(eMatch)
+            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+              value=consumerConnection, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            eMatch = j
-            exit
+            if (index(trim(consumerConnection), "targeted:")==1) then
+              ! this export field has been targeted -> obtain targeted bondLevel
+              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+                bondLevelMax  ! the bondLevel that was targeted
+              if (bondLevel == bondLevelMax) then
+                ! this is the targeted connection
+                foundFlag = .true.
+                exit
+              endif
+            endif
+            
           endif
-        endif
+        enddo
+        if (foundFlag) exit
       enddo
+      
+      if (.not.foundFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - should never get here!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
@@ -828,10 +797,12 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     if (associated(cplList)) deallocate(cplList)
-    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
-    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(importNamespaceList)) deallocate(importNamespaceList)
+    if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
   end subroutine
   
@@ -844,13 +815,14 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)     :: isType, esType
-    integer                         :: isItemCount, esItemCount
     character(ESMF_MAXSTR), pointer :: cplList(:)
-    integer                         :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    integer                         :: cplListSize, i
+    integer                         :: bondLevel, bondLevelMax
+    character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
+    character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
-    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
@@ -863,8 +835,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     type(ESMF_VM)                   :: vm
     integer                         :: stat
     type(type_InternalState)        :: is
-    integer                         :: localrc
-    logical                         :: existflag
+    logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -886,10 +857,12 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(importStdAttrNameList)
+    nullify(importStandardNameList)
     nullify(importFieldList)
-    nullify(exportStdAttrNameList)
+    nullify(importNamespaceList)
+    nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportNamespaceList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -914,20 +887,6 @@ call ESMF_VMLogMemInfo("befP3 Reconcile")
 call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #endif
     
-    ! access the state types
-    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
-      ! not ES -> IS ==> should indicate problem???
-    endif
-    
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -942,14 +901,13 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! get the importState std lists
-    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      stdFieldList=importFieldList, rc=rc)
+    ! get the importState and exportState std lists
+    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
+      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the exportState std lists
-    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      stdFieldList=exportFieldList, rc=rc)
+    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
+      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -957,33 +915,52 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
       
-      ! find import side match
-      iMatch = 0  ! reset
-      do j=1, size(importStdAttrNameList)
-        if (importStdAttrNameList(j) == cplList(i)) then
-          iMatch = j
-          exit
-        endif
+      ! find import and export side match
+      foundFlag = .false. ! reset
+      do eMatch=1, size(exportStandardNameList)  ! consumer side
+        do iMatch=1, size(importStandardNameList)  ! producer side
+          if ((importStandardNameList(iMatch) == cplList(i)).and. &
+            (exportStandardNameList(eMatch) == cplList(i))) then
+            ! found a matching standard name pair
+            ! -> determine bondLevel according to namespace matching
+            bondLevel = &
+              getBondLevel(importNamespaceList(iMatch), &
+              exportNamespaceList(eMatch))
+              
+            if (bondLevel == -1) exit  ! break out and look for next match
+            
+            ! Getting to this place in the double loop means that the 
+            ! standard name match has a connection that supports the match.
+            
+            ! -> look at the current ConsumerConnection entry to see what to do
+            eField = exportFieldList(eMatch)
+            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+              value=consumerConnection, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (index(trim(consumerConnection), "targeted:")==1) then
+              ! this export field has been targeted -> obtain targeted bondLevel
+              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+                bondLevelMax  ! the bondLevel that was targeted
+              if (bondLevel == bondLevelMax) then
+                ! this is the targeted connection
+                foundFlag = .true.
+                exit
+              endif
+            endif
+            
+          endif
+        enddo
+        if (foundFlag) exit
       enddo
       
-      ! find export side match
-      eMatch = 0  ! reset
-      do j=1, size(exportStdAttrNameList)
-        if (exportStdAttrNameList(j) == cplList(i)) then
-          ! found a matching consumer side candidate
-          ! -> see if that candidate is already targeted
-          eField=exportFieldList(j)
-          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-            value=consumerConnection, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(consumerConnection)/="connected") then
-            ! the consumer side was not yet targeted
-            eMatch = j
-            exit
-          endif
-        endif
-      enddo
+      if (.not.foundFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - should never get here!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
@@ -1080,10 +1057,12 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     enddo
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
-    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(importNamespaceList)) deallocate(importNamespaceList)
+    if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
   end subroutine
 
@@ -1096,13 +1075,14 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)     :: isType, esType
-    integer                         :: isItemCount, esItemCount
     character(ESMF_MAXSTR), pointer :: cplList(:)
-    integer                         :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    integer                         :: cplListSize, i
+    integer                         :: bondLevel, bondLevelMax
+    character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
+    character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
-    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
@@ -1114,8 +1094,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     type(ESMF_VM)                   :: vm
     integer                         :: stat
     type(type_InternalState)        :: is
-    integer                         :: localrc
-    logical                         :: existflag
+    logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -1137,10 +1116,12 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(importStdAttrNameList)
+    nullify(importStandardNameList)
     nullify(importFieldList)
-    nullify(exportStdAttrNameList)
+    nullify(importNamespaceList)
+    nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportNamespaceList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -1165,20 +1146,6 @@ call ESMF_VMLogMemInfo("befP4 Reconcile")
 call ESMF_VMLogMemInfo("aftP4 Reconcile")
 #endif
     
-    ! access the state types
-    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
-      ! not ES -> IS ==> should indicate problem???
-    endif
-    
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1193,14 +1160,13 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! get the importState std lists
-    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      stdFieldList=importFieldList, rc=rc)
+    ! get the importState and exportState std lists
+    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
+      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the exportState std lists
-    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      stdFieldList=exportFieldList, rc=rc)
+    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
+      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1208,33 +1174,52 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
       
-      ! find import side match
-      iMatch = 0  ! reset
-      do j=1, size(importStdAttrNameList)
-        if (importStdAttrNameList(j) == cplList(i)) then
-          iMatch = j
-          exit
-        endif
+      ! find import and export side match
+      foundFlag = .false. ! reset
+      do eMatch=1, size(exportStandardNameList)  ! consumer side
+        do iMatch=1, size(importStandardNameList)  ! producer side
+          if ((importStandardNameList(iMatch) == cplList(i)).and. &
+            (exportStandardNameList(eMatch) == cplList(i))) then
+            ! found a matching standard name pair
+            ! -> determine bondLevel according to namespace matching
+            bondLevel = &
+              getBondLevel(importNamespaceList(iMatch), &
+              exportNamespaceList(eMatch))
+              
+            if (bondLevel == -1) exit  ! break out and look for next match
+            
+            ! Getting to this place in the double loop means that the 
+            ! standard name match has a connection that supports the match.
+            
+            ! -> look at the current ConsumerConnection entry to see what to do
+            eField = exportFieldList(eMatch)
+            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+              value=consumerConnection, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (index(trim(consumerConnection), "targeted:")==1) then
+              ! this export field has been targeted -> obtain targeted bondLevel
+              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+                bondLevelMax  ! the bondLevel that was targeted
+              if (bondLevel == bondLevelMax) then
+                ! this is the targeted connection
+                foundFlag = .true.
+                exit
+              endif
+            endif
+            
+          endif
+        enddo
+        if (foundFlag) exit
       enddo
       
-      ! find export side match
-      eMatch = 0  ! reset
-      do j=1, size(exportStdAttrNameList)
-        if (exportStdAttrNameList(j) == cplList(i)) then
-          ! found a matching consumer side candidate
-          ! -> see if that candidate is already targeted
-          eField=exportFieldList(j)
-          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-            value=consumerConnection, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(consumerConnection)/="connected") then
-            ! the consumer side was not yet targeted
-            eMatch = j
-            exit
-          endif
-        endif
-      enddo
+      if (.not.foundFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - should never get here!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
@@ -1321,10 +1306,12 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     enddo
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
-    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(importNamespaceList)) deallocate(importNamespaceList)
+    if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
   end subroutine
 
@@ -1337,18 +1324,20 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)     :: isType, esType
-    integer                         :: isItemCount, esItemCount
     character(ESMF_MAXSTR), pointer :: cplList(:)
-    integer                         :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    integer                         :: cplListSize, i
+    integer                         :: bondLevel, bondLevelMax
+    character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: exportNamespaceList(:)
+    character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
+    character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
-    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
     integer                         :: stat
     type(type_InternalState)        :: is
+    logical                         :: foundFlag
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
@@ -1363,10 +1352,12 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     
     ! prepare local pointer variables
     nullify(cplList)
-    nullify(importStdAttrNameList)
+    nullify(importStandardNameList)
     nullify(importFieldList)
-    nullify(exportStdAttrNameList)
+    nullify(importNamespaceList)
+    nullify(exportStandardNameList)
     nullify(exportFieldList)
+    nullify(exportNamespaceList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -1391,20 +1382,6 @@ call ESMF_VMLogMemInfo("befP5 Reconcile")
 call ESMF_VMLogMemInfo("aftP5 Reconcile")
 #endif
     
-    ! access the state types
-    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
-      ! not ES -> IS ==> should indicate problem???
-    endif
-    
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1419,14 +1396,13 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! get the importState std lists
-    call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      stdFieldList=importFieldList, rc=rc)
+    ! get the importState and exportState std lists
+    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
+      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    ! get the exportState std lists
-    call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      stdFieldList=exportFieldList, rc=rc)
+    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
+      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1442,37 +1418,52 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
       
-      ! find import side match
-      iMatch = 0  ! reset
-      do j=1, size(importStdAttrNameList)
-        if (importStdAttrNameList(j) == cplList(i)) then
-          iMatch = j
-          exit
-        endif
-      enddo
-      
-      ! find export side match
-      eMatch = 0  ! reset
-      do j=1, size(exportStdAttrNameList)
-        if (exportStdAttrNameList(j) == cplList(i)) then
-          ! found a matching consumer side candidate
-          ! -> see if that candidate is already targeted
-          eField=exportFieldList(j)
-          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-            value=consumerConnection, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(consumerConnection)/="connected") then
-            ! the consumer side was not yet targeted
-            call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
-              value="connected", rc=rc)
+      ! find import and export side match
+      foundFlag = .false. ! reset
+      do eMatch=1, size(exportStandardNameList)  ! consumer side
+        do iMatch=1, size(importStandardNameList)  ! producer side
+          if ((importStandardNameList(iMatch) == cplList(i)).and. &
+            (exportStandardNameList(eMatch) == cplList(i))) then
+            ! found a matching standard name pair
+            ! -> determine bondLevel according to namespace matching
+            bondLevel = &
+              getBondLevel(importNamespaceList(iMatch), &
+              exportNamespaceList(eMatch))
+              
+            if (bondLevel == -1) exit  ! break out and look for next match
+            
+            ! Getting to this place in the double loop means that the 
+            ! standard name match has a connection that supports the match.
+            
+            ! -> look at the current ConsumerConnection entry to see what to do
+            eField = exportFieldList(eMatch)
+            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+              value=consumerConnection, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            eMatch = j
-            exit
+            if (index(trim(consumerConnection), "targeted:")==1) then
+              ! this export field has been targeted -> obtain targeted bondLevel
+              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+                bondLevelMax  ! the bondLevel that was targeted
+              if (bondLevel == bondLevelMax) then
+                ! this is the targeted connection
+                foundFlag = .true.
+                exit
+              endif
+            endif
+            
           endif
-        endif
+        enddo
+        if (foundFlag) exit
       enddo
+      
+      if (.not.foundFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Bad internal error - should never get here!",&
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
@@ -1480,10 +1471,12 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         eField=exportFieldList(eMatch)
         
         ! add the import and export Fields to FieldBundles
-        call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
+          multiflag=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), &
+          multiflag=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
@@ -1527,10 +1520,12 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     endif
 
     if (associated(cplList)) deallocate(cplList)
-    if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
+    if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
-    if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
+    if (associated(importNamespaceList)) deallocate(importNamespaceList)
+    if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
+    if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     
   end subroutine
     
