@@ -1749,9 +1749,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (imMark2 == 0) then
         imMark2 = len(imNamespace)
       else
-        imMark2 = imMark2 - 1
+        imMark2 = imMark1 + imMark2 - 2
       endif
-      imKey2 = trim(imNamespace(imMark1:imMark1+imMark2-1))
+      imKey2 = trim(imNamespace(imMark1:imMark2))
     else
       imKey2 = "" ! empty string
     endif
@@ -1761,9 +1761,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (exMark2 == 0) then
         exMark2 = len(exNamespace)
       else
-        exMark2 = exMark2 - 1
+        exMark2 = exMark1 + exMark2 - 2
       endif
-      exKey2 = trim(exNamespace(exMark1:exMark1+exMark2-1))
+      exKey2 = trim(exNamespace(exMark1:exMark2))
     else
       exKey2 = "" ! empty string
     endif
