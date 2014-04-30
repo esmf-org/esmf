@@ -926,6 +926,7 @@ static const char *const version = "$Id$";
   
   // set ID
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
+  classID = 0;
   
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
@@ -976,6 +977,7 @@ static const char *const version = "$Id$";
   
   // set ID to objectCount;
   ID = id;
+  classID = 0;
   
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);
@@ -1023,6 +1025,7 @@ static const char *const version = "$Id$";
   
   // set ID to objectCount
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
+  classID = 0;
   
   // add object to list for automatic garbage collection
   ESMCI::VM::addObject(this, vmID);

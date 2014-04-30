@@ -3609,7 +3609,7 @@ end subroutine ESMF_LocStreamGetBounds
 
       !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
       !TODO: Remove the following dummy test when dummy argument actually used
-      if (options==options) continue
+      if (present (options)) continue
 
       if (present(rc)) rc = ESMF_SUCCESS
 

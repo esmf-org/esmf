@@ -89,6 +89,9 @@ module NUOPC_Base
 
   interface NUOPC_IsCreated
     module procedure NUOPC_ClockIsCreated
+    module procedure NUOPC_FieldBundleIsCreated
+    module procedure NUOPC_FieldIsCreated
+    module procedure NUOPC_GridIsCreated
   end interface
   
   !-----------------------------------------------------------------------------
@@ -427,14 +430,16 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(3)
+    character(ESMF_MAXSTR)  :: attrList(5)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Set up a customized list of Attributes to be added to the CplComp
     attrList(1) = "Verbosity"           ! control verbosity
     attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(3) = "CplList"
+    attrList(3) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(4) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(5) = "CplList"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
@@ -1406,7 +1411,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(7)
+    character(ESMF_MAXSTR)            :: attrList(9)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1414,10 +1419,12 @@ module NUOPC_Base
     attrList(1) = "Verbosity"           ! control verbosity
     attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
-    attrList(6) = "InitializeDataComplete"  ! values: strings "false"/"true"
-    attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(4) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(5) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(6) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(7) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(8) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
     
     ! add Attribute packages
 if (ESMF_VERSION_MAJOR >= 6) then
@@ -1955,7 +1962,7 @@ endif
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object has been created
+! !IROUTINE: NUOPC_IsCreated - Check whether a Clock object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
   function NUOPC_ClockIsCreated(clock, rc)
@@ -1965,7 +1972,7 @@ endif
     type(ESMF_Clock)               :: clock
     integer, intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if the ESMF object (here {\tt clock}) is in the
+!   Returns {\tt .true.} if the {\tt clock} is in the
 !   created state, {\tt .false.} otherwise.
 !EOP
   !-----------------------------------------------------------------------------    
@@ -1973,6 +1980,75 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
       NUOPC_ClockIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a FieldBundle object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_FieldBundleIsCreated(fieldbundle, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldBundleIsCreated
+! !ARGUMENTS:
+    type(ESMF_FieldBundle)         :: fieldbundle
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt fieldbundle} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_FieldBundleIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldBundleGetInit(fieldbundle)==ESMF_INIT_CREATED) &
+      NUOPC_fieldbundleIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a Field object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_FieldIsCreated(field, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldIsCreated
+! !ARGUMENTS:
+    type(ESMF_Field)               :: field
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt field} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_FieldIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldGetInit(field)==ESMF_INIT_CREATED) &
+      NUOPC_fieldIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether a Grid object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_GridIsCreated(grid, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_GridIsCreated
+! !ARGUMENTS:
+    type(ESMF_Grid)                :: grid
+    integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the {\tt grid} is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_GridIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_GridGetInit(grid)==ESMF_INIT_CREATED) &
+      NUOPC_gridIsCreated = .true.
   end function
   !-----------------------------------------------------------------------------
 

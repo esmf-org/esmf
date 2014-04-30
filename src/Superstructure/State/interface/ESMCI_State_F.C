@@ -24,7 +24,7 @@
 #include "ESMCI_State.h"
 
  // insert any higher level, 3rd party or system includes here
-#include <string.h>
+#include <string>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 
@@ -197,7 +197,6 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
 
 void FTN_X(c_esmc_stateread)(State *ptr,
                            ESMC_Base **base,
-                           int *fileNameLen,
                            const char *fileName,
                            int *status,
                            ESMCI_FortranStrLenArg fileName_l) {
@@ -206,10 +205,12 @@ void FTN_X(c_esmc_stateread)(State *ptr,
 
          ESMF_CHECK_POINTER(ptr, status)
 
+         std::string fn = std::string (fileName, fileName_l);
+
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::read(*base, // always present
-                          *fileNameLen, // always present internal argument.
-                          fileName);      // always present
+                          fn.size(),        // always present internal argument.
+                          fn.c_str());      // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }
@@ -218,7 +219,6 @@ void FTN_X(c_esmc_stateread)(State *ptr,
 
 void FTN_X(c_esmc_statewrite)(State *ptr,
                            ESMC_Base **base,
-                           int *fileNameLen,
                            const char *fileName,
                            int *status,
                            ESMCI_FortranStrLenArg fileName_l) {
@@ -227,10 +227,12 @@ void FTN_X(c_esmc_statewrite)(State *ptr,
 
          ESMF_CHECK_POINTER(ptr, status)
 
+         std::string fn = std::string (fileName, fileName_l);
+
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::write(*base, // always present
-                          *fileNameLen, // always present internal argument.
-                          fileName);    // always present
+                          fn.size(),         // always present internal argument.
+                          fn.c_str());       // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }

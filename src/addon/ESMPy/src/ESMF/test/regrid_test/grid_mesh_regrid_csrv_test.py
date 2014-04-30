@@ -1,6 +1,8 @@
 # $Id$
 
 """
+This test demonstrates conservative regridding between a grid and mesh.
+
 Two Field objects are created, one on a Grid and the other on a Mesh.  
 The source Field is set to an analytic function, and a conservative 
 regridding operation is performed from the source to the destination 
@@ -35,11 +37,11 @@ if ESMF.local_pet() == 0:
 
 # create a Mesh
 if parallel:
-    mesh, nodeCoord, elemType, elemConn = \
-        mesh_create_10_parallel(ESMF.local_pet())
+    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+        mesh_create_50_parallel()
 else:
-    mesh, nodeCoord, elemType, elemConn = \
-        mesh_create_10()
+    mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+        mesh_create_50()
 
 # create a grid
 grid = grid_create([0,0,8,8], [0,0,4,4])
@@ -54,7 +56,7 @@ dstfracfield = ESMF.Field(grid, 'dstfracfield')
 exactfield = ESMF.Field(grid, 'exactfield')
 
 # initialize the Fields to an analytic function
-srcfield = initialize_field_mesh(srcfield, nodeCoord, elemType, elemConn)
+srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
 exactfield = initialize_field_grid(exactfield)
 
 # run the ESMF regridding

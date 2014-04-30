@@ -75,13 +75,13 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
 
-void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *fileTypeFlag, 
+void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, const char *filename, int *fileTypeFlag, 
 				      int *isSphere, int *ispresent,
 				      int *addCornerStagger, int *acspresent,
 				      int *addUserArea, int *auapresent,
 				      int *addMask, int *ampresent, 
-				      char *varname, int *vnpresent,
-				      char *coordNames, int *cnpresent, int *rc, 
+				      const char *varname, int *vnpresent,
+				      const char *coordNames, int *cnpresent, int *rc, 
 				      ESMCI_FortranStrLenArg len_filename, 
 				      ESMCI_FortranStrLenArg len_varname, 
 				      ESMCI_FortranStrLenArg len_coordNames);
@@ -314,14 +314,14 @@ int setDefaultsLUA(int dimCount,
 //     pointer to newly allocated ESMCI::Grid object
 //
 // !ARGUMENTS:
-    char *filename,
+    const char *filename,
     int fileTypeFlag,
     int *isSphere,
     int *addCornerStagger,
     int *addUserArea,
     int *addMask,
-    char *varname,
-    char **coordNames,
+    const char *varname,
+    const char **coordNames,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:

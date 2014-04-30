@@ -121,14 +121,14 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64
+ESMF_F90LINKOPTS          += -m64
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64
+ESMF_F90LINKOPTS          += -m64
 endif
 
 ############################################################
@@ -183,7 +183,7 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
-ESMF_CXXLINKLIBS += -lifcore -limf -ldl -lirc
+ESMF_CXXLINKLIBS += -lifcore -limf -ldl -lirc -stdlib=libstdc++
 
 ############################################################
 # Blank out shared library options

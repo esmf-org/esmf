@@ -106,6 +106,7 @@ namespace ESMCI
  // < declare private interface methods here >
 
 #ifdef ESMF_NETCDF
+    int ncerrToEsmcRc (int ncerr);
     ESMC_TypeKind_Flag  ncToEsmcType(nc_type  ncTypeVal);
     nc_type         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
 

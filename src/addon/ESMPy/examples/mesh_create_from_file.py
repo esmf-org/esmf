@@ -1,61 +1,20 @@
-import os
+# This example demonstrates how to create an ESMPy mesh from file
+# The mesh file is required, it can be retrieved from the ESMF data repository:
+#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+
 import ESMF
-from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
-# Test setup
-meshes = [
-         # cubed sphere
-         "ne30np4-t2.nc", 
-         # Regional 205x275
-         "wr50a_090614.nc",
-         # Regional RACM ar9v4 grid - 1560x1080 with masking
-         "ar9v4_100920.nc",
-         # ESMF format unstructured file with clockwise cells removed
-         "mpas_uniform_10242_dual_counterclockwise.nc",
-         # unstructured grid in UGRID format
-         "FVCOM_grid2d_20120314.nc",
-         # Regional regular grid in SCRIP format
-         "scrip_regional_1140x690.nc"]
+# Start up ESMF, this call is only necessary to override the default parameters
+# for logkind (ESMF.LogKind.NONE) and debug (False)
+esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
-filetype = [
-            ESMF.FileFormat.SCRIP,
-            ESMF.FileFormat.SCRIP,
-            ESMF.FileFormat.SCRIP,
-            ESMF.FileFormat.ESMFMESH,
-            ESMF.FileFormat.UGRID,
-            ESMF.FileFormat.SCRIP]
+# create an ESMF formatted unstructured mesh with clockwise cells removed
+mesh = ESMF.Mesh(filename="mpas_uniform_10242_dual_counterclockwise.nc",
+                 filetype=ESMF.FileFormat.ESMFMESH)
 
-meshname = [
-            meshes[0]+'-mesh',
-            meshes[1]+'-mesh',
-            meshes[2]+'-mesh',
-            meshes[3]+'-mesh',
-            'fvcom_mesh',
-            meshes[5]+'-mesh']
+# create a field on the nodes of the mesh
+field = ESMF.Field(mesh, "field", meshloc=ESMF.MeshLoc.NODE)
 
-mesh = 1
-prefix = 'data/'
-filename = prefix+meshes[mesh]
-if ESMF.local_pet() == 0:
-    if not os.path.exists(prefix):
-        os.mkdir(prefix)
-    cache_data_file(filename)
-
-# Start up ESMF.
-esmp = ESMF.Manager(logkind=ESMF.LogKind.SINGLE, debug=True)
-pet_count = ESMF.pet_count()
-
-# create Mesh
-mesh = ESMF.Mesh(filename=filename,
-                 filetype=filetype[mesh],
-                 meshname=meshname[mesh])
-
-# create a field on the elements of the mesh
-name = filename+'-field'
-field = ESMF.Field(mesh, name, meshloc=ESMF.MeshLoc.NODE)
-
-# write the mesh to vtk formatted file
-#mesh._write(filename.rsplit('.',1)[0])
-
-# print the field
-#print field
+print "Successfully read a mesh and created a field!"
+print "The field values on PET (processor) # {0} are:".format(ESMF.local_pet())
+print field

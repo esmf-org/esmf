@@ -1,11 +1,16 @@
 # $Id$
 
-import os
+import os, sys, getopt
 import ESMF
+import ESMF.api.constants as constants
+
+parallel = False
+if len(sys.argv) > 1:
+    if "--parallel" in sys.argv[1]:
+        parallel = True
 
 # run regrid tests, pipe to file
 REGRID_TEST_DIR = './src/ESMF/test/regrid_test'
-regridtestoutfile='run_regrid.log'
 regridtestfiles_temp = [ \
 'grid_grid_regrid_csrv_mask_test.py',
 'grid_grid_regrid_csrv_mask_3D_test.py',
@@ -19,6 +24,17 @@ regridtestfiles_temp = [ \
 
 regridtestfiles = [os.path.join(REGRID_TEST_DIR, a) for a in regridtestfiles_temp]
 
+regridtestoutfile='run_regrid.log'
+num_proc = 1
+if parallel:
+    # make sure we are not in uni mode
+    if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+        raise ValueError("Cannot run parallel tests when ESMF is built with ESMF_COMM=mpiuni")
+
+    # setup the constants
+    num_proc = 4
+    regridtestoutfile='run_regrid_parallel.log'
+
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
     os.system("echo 'regrid test output:' > "+regridtestoutfile)
 else:
@@ -26,10 +42,13 @@ else:
 
 for test in regridtestfiles:
     if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
-        os.system("aprun -n 1 -a xt python "+test+" >> "+regridtestoutfile+" 2>&1")
+        os.system("aprun -n "+str(num_proc)+" -a xt python "+test+" >> "+regridtestoutfile+" 2>&1")
     else:
-        os.system("python "+test+" >> "+regridtestoutfile+" 2>&1")
-
+        if parallel:
+            os.system("mpirun -np "+str(num_proc)+" python "+test+" >> "+regridtestoutfile+" 2>&1")
+        else:
+            os.system("python "+test+" >> "+regridtestoutfile+" 2>&1")
+        
 # traverse output, find number of pass and fail and print report
 REGRIDTEST = open(regridtestoutfile)
 
@@ -43,6 +62,9 @@ for line in REGRIDTEST:
         rtfail=rtfail+1
 
 REGRIDTEST.close()
+
+rtpass = rtpass/num_proc
+rtfail = rtfail/num_proc
 
 rtcrash = len(regridtestfiles) - rtpass - rtfail
 

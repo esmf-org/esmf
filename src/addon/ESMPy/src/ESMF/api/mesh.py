@@ -73,7 +73,7 @@ class Mesh(object):
                           argument is only supported with filetype 
                           FileFormat.UGRID.  Defaults to the empty string. \n
                 add_mask: a boolean value to specify if a mask in a UGRID file
-                          should be added to the Mesh (numpy array).  This 
+                          should be added to the Mesh.  This 
                           argument is only supported with filetype 
                           FileFormat.UGRID.  Defaults to False. \n
                 varname: a string to specify a variable name for the mask in a
@@ -157,10 +157,10 @@ class Mesh(object):
             self.spatial_dim = spatial_dim
 
             # get the sizes
-            self.size[node] = ESMP_MeshGetOwnedNodeCount(self)
-            self.size_local[node] = ESMP_MeshGetLocalNodeCount(self)
-            self.size[element] = ESMP_MeshGetOwnedElementCount(self)
-            self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
+            self.size[node] = ESMP_MeshGetLocalNodeCount(self)
+            self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+            self.size[element] = ESMP_MeshGetLocalElementCount(self)
+            self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
@@ -280,10 +280,10 @@ class Mesh(object):
                              self.element_mask, self.element_area)
         
         # get the sizes
-        self.size[node] = ESMP_MeshGetOwnedNodeCount(self)
-        self.size_local[node] = ESMP_MeshGetLocalNodeCount(self)
-        self.size[element] = ESMP_MeshGetOwnedElementCount(self)
-        self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
+        self.size[node] = ESMP_MeshGetLocalNodeCount(self)
+        self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+        self.size[element] = ESMP_MeshGetLocalElementCount(self)
+        self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
         
     def add_nodes(self, node_count,
                   node_ids,

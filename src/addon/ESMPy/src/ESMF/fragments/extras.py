@@ -35,7 +35,7 @@ def ESMP_StateCreate(name):
     lrc = c_int(INIT)
     state = _ESMF.ESMC_StateCreate(name,byref(lrc))
     rc = lrc.value
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_StateCreate() failed with rc = '+str(rc))
     return state
 
@@ -51,7 +51,7 @@ def ESMP_StateDestroy(state):
     ptr = POINTER(c_void_p)
     stateptr = ptr(c_void_p(state))
     rc = _ESMF.ESMC_StateDestroy(stateptr)
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_StateDestroy() failed with rc = '+str(rc))
     return
 
@@ -65,7 +65,7 @@ def ESMP_StatePrint(state):
         ESMP_State :: state
     """
     rc = _ESMF.ESMC_StatePrint(state)
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_StatePrint() failed with rc = '+str(rc))
     return
 
@@ -88,7 +88,7 @@ def ESMP_ArraySpecGet(arrayspec, rank, typekind):
     lrank = c_int(INIT)
     ltk = c_uint(INIT)
     rc = _ESMF.ESMC_ArraySpecGet(las, byref(lrank), byref(ltk))
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_ArraySpecGet() failed with rc = '+str(rc))
     rank = lrank.value
     typekind.tk = ltk.value
@@ -109,7 +109,7 @@ def ESMP_ArraySpecSet(arrayspec, rank, typekind):
     las = create_string_buffer(192)
     
     rc = _ESMF.ESMC_ArraySpecSet(byref(las), rank, typekind.tk)
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_ArraySpecSet() failed with rc = '+str(rc))
     arrayspec.shallowMem = las.value
     print 'sizeof(arrayspec) = '+str(sizeof(arrayspec))
@@ -142,7 +142,7 @@ def ESMP_MeshVTKHeader(fname, num_elem, num_node, conn_size):
     nns = c_int(INIT)
     cns = c_int(INIT)
     rc = _ESMF.ESMC_MeshVTKHeader(c_char_p(fname), byref(nes), byref(nns), byref(cns))
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_MeshVTKHeader() failed with rc = '+str(rc))
     num_elem = nes.value
     num_node = nns.value
@@ -180,7 +180,7 @@ def ESMP_MeshVTKBody(fname, nodeId, nodeCoord, nodeOwner,\
     ecs = c_int(INIT)
     rc = _ESMF.ESMC_MeshVTKBody(fname, byref(nis), byref(ncs), byref(nos), \
                                 byref(eis), byref(ets), byref(ecs))
-    if rc != ESMP_SUCCESS:
+    if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_MeshVTKBody() failed with rc = '+str(rc))
     nodeId = nis.value
     nodeCoord = ncs.value
