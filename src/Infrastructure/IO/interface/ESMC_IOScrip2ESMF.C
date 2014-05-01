@@ -103,6 +103,7 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
      
 void convert3D(double lon, double lat, double *x, double *y) {
@@ -493,8 +494,8 @@ void FTN_X(c_convertscrip)(
 
   free(cornerlons);
   free(cornerlats);
-  free(nodelons);
-  free(nodelats);
+  delete[] nodelons;
+  delete[] nodelats;
 
   for (i=0; i<totalsize; i++) {
     if (cells[i] >= totalnodes) printf("out of bound cells: %d %d\n", i, cells[i]);
