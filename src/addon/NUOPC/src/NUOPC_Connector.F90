@@ -183,7 +183,7 @@ module NUOPC_Connector
     type(ESMF_Field),       pointer       :: importFieldList(:)
     type(ESMF_Field),       pointer       :: exportFieldList(:)
     type(ESMF_Field)                      :: field
-    character(ESMF_MAXSTR)                :: consumerConnection
+    character(ESMF_MAXSTR)                :: connectionString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
 
@@ -261,28 +261,28 @@ print *, "current bondLevel=", bondLevel
             ! -> get the current ConsumerConnection bondLevel highmark
             field = exportFieldList(j)
             call NUOPC_FieldAttributeGet(field, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
               return  ! bail out
-            if (trim(consumerConnection)=="open") then
+            if (trim(connectionString)=="open") then
               ! first valid connection that was found
-              write (consumerConnection, "(i10)") bondLevel
+              write (connectionString, "(i10)") bondLevel
               call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
-                value=consumerConnection, rc=rc)
+                value=connectionString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
             else
               ! see if a new bondLevel highmark was found
-              read (consumerConnection, "(i10)") bondLevelMax
+              read (connectionString, "(i10)") bondLevelMax
 #if 0
 print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
 #endif
               if (bondLevel > bondLevelMax) then
-                write (consumerConnection, "(i10)") bondLevel
+                write (connectionString, "(i10)") bondLevel
                 call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
-                  value=consumerConnection, rc=rc)
+                  value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
@@ -321,7 +321,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     type(ESMF_Field),       pointer       :: importFieldList(:)
     type(ESMF_Field),       pointer       :: exportFieldList(:)
     type(ESMF_Field)                      :: field
-    character(ESMF_MAXSTR)                :: consumerConnection
+    character(ESMF_MAXSTR)                :: connectionString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
@@ -413,12 +413,12 @@ print *, "current bondLevel=", bondLevel
             ! -> look at the current ConsumerConnection entry to see what to do
             field = exportFieldList(j)
             call NUOPC_FieldAttributeGet(field, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "targeted:")==1) then
+            if (index(trim(connectionString), "targeted:")==1) then
               ! this export field has already been targeted
-              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+              read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! ambiguity detected -> bail out
@@ -431,7 +431,7 @@ print *, "current bondLevel=", bondLevel
               endif
             else
               ! obtain the bondLevel that needs to be targeted
-              read (consumerConnection, "(i10)") bondLevelMax
+              read (connectionString, "(i10)") bondLevelMax
               if (bondLevel == bondLevelMax) then
                 ! the connection can be satisfied here
                 count = count+1
@@ -444,9 +444,9 @@ print *, "current bondLevel=", bondLevel
                 endif
                 cplList(count) = importStandardNameList(i)
                 ! make the targeted entry to the ConsumerConnection attribute
-                write (consumerConnection, "('targeted:', i10)") bondLevel
+                write (connectionString, "('targeted:', i10)") bondLevel
                 call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
-                  value=consumerConnection, rc=rc)
+                  value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
@@ -545,7 +545,7 @@ print *, "current bondLevel=", bondLevel
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
-    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
 
@@ -640,12 +640,12 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "targeted:")==1) then
+            if (index(trim(connectionString), "targeted:")==1) then
               ! this export field has been targeted -> obtain targeted bondLevel
-              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+              read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! this is the targeted connection
@@ -836,7 +836,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
-    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: verbose
@@ -935,12 +935,12 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "targeted:")==1) then
+            if (index(trim(connectionString), "targeted:")==1) then
               ! this export field has been targeted -> obtain targeted bondLevel
-              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+              read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! this is the targeted connection
@@ -1095,7 +1095,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
-    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: verbose
@@ -1194,12 +1194,12 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "targeted:")==1) then
+            if (index(trim(connectionString), "targeted:")==1) then
               ! this export field has been targeted -> obtain targeted bondLevel
-              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+              read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! this is the targeted connection
@@ -1340,7 +1340,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     logical                         :: foundFlag
     integer                         :: localrc
     logical                         :: existflag
-    character(ESMF_MAXSTR)          :: consumerConnection
+    character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name
 
     rc = ESMF_SUCCESS
@@ -1438,16 +1438,22 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
-              value=consumerConnection, rc=rc)
+              value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (index(trim(consumerConnection), "targeted:")==1) then
+            if (index(trim(connectionString), "targeted:")==1) then
               ! this export field has been targeted -> obtain targeted bondLevel
-              read (consumerConnection(10:len(consumerConnection)), "(i10)") &
+              read (connectionString(10:len(connectionString)), "(i10)") &
                 bondLevelMax  ! the bondLevel that was targeted
               if (bondLevel == bondLevelMax) then
                 ! this is the targeted connection
                 foundFlag = .true.
+                write (connectionString, "('connected:', i10)") bondLevel
+                call NUOPC_FieldAttributeSet(eField, &
+                  name="ConsumerConnection", value=connectionString, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) &
+                  return  ! bail out
                 exit
               endif
             endif
