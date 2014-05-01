@@ -6223,12 +6223,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                  ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+        deallocate(dims)
       
         ! pack the coordinate data and send it to the PETs in the same row (PET0 fills its
         ! own array and send data to PET1 to PET3, PET4 will send to 5 to 7, etc...)
         ! if there are more than 1 PET in the regdecomp(1)
         ! Get the xdim of the local array from all other PETS in the same row
-
         allocate(dims(regdecomp(1)-1))
         do i=1, regDecomp(1)-1
             call ESMF_VMRecv(vm, recv, 1, PetNo+i)
@@ -6269,7 +6269,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		cornerY, fptrCLat, dims)
            deallocate(cornerX, cornerY)
         endif
-        deallocate(dims)
 
       else 
         localroot = (PetNo/regDecomp(1))*regDecomp(1)
@@ -6371,6 +6370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           deallocate(recvbuf)
         endif
       endif
+      deallocate(dims)
     endif  ! if DECount > 0
 
     ESMF_GridCreateFrmScrip = grid

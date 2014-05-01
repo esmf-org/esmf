@@ -871,7 +871,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
  
         ! Get Source Grid dimension and variables
 	if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then 
-          allocate(src_grid_dims(2))
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
 	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
@@ -935,7 +934,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           src_grid_rank = 1    
         endif 
         if (dstFileTypelocal == ESMF_FILEFORMAT_SCRIP) then
-          allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
 	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
@@ -2258,7 +2256,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
-
+         deallocate(src_grid_dims, dst_grid_dims)
     end if
 
     ! Block all other PETs until the NetCDF file has been created
