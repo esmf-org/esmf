@@ -1252,13 +1252,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! src fraction is always 0
     ! destination fraction depends on the src mask, dst mask, and the weight
     if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-	    if (dstIsReg) then
-	      call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
+      if (dstIsReg) then
+	call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
-	      call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+	call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1294,108 +1294,108 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !! Write the weight table into a SCRIP format NetCDF file
     if (PetNo == 0) then
       if (isConserve) then
-	      if (useSrcCoordVar .and. useDstCoordVar) then
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	  if (useSrcCoordVar .and. useDstCoordVar) then
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, &
-            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	        srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-        else if (useSrcCoordVar) then	
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	 	  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+          else if (useSrcCoordVar) then	
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, &
-            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	        srccoordnames = srcCoordinateVars, rc=localrc)
-	      elseif (useDstCoordVar) then
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	 	  srccoordnames = srcCoordinateVars, rc=localrc)
+	  elseif (useDstCoordVar) then
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, &
-            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+            	  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-	 	        dstcoordnames = dstCoordinateVars, rc=localrc)
-	      else
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	 	  dstcoordnames = dstCoordinateVars, rc=localrc)
+	  else
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, &
-            srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		        dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-	      endif
-        if (ESMF_LogFoundError(localrc, &
+	  endif
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
-	      if (useSrcCoordVar .and. useDstCoordVar) then
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	  if (useSrcCoordVar .and. useDstCoordVar) then
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, dstFrac=dstFrac, &
-		        largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	        srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-	      elseif (useSrcCoordVar) then
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+ 	 	  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+	  elseif (useSrcCoordVar) then
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, dstFrac=dstFrac, &
-		        largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	        srccoordnames = srcCoordinateVars, rc=localrc)
-	      elseif (useDstCoordVar) then
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+ 	 	  srccoordnames = srcCoordinateVars, rc=localrc)
+	  elseif (useDstCoordVar) then
+             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, dstFrac=dstFrac, &
-		        largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
- 	 	        dstcoordnames = dstCoordinateVars, rc=localrc)
-	      else
-          call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+ 	 	  dstcoordnames = dstCoordinateVars, rc=localrc)
+	  else
+            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	          srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	          dstFileType=localDstFileType, method = localRegridMethod, &
                   normType=localNormType, dstFrac=dstFrac, &
-		        largeFileFlag=localLargeFileFlag, &
-		        netcdf4FileFlag = localNetcdf4FileFlag, &
-		        srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-		        srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+		  largeFileFlag=localLargeFileFlag, &
+		  netcdf4FileFlag = localNetcdf4FileFlag, &
+		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-        endif
-        if (ESMF_LogFoundError(localrc, &
+          endif
+          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	    endif
+      endif
     else 
-	    call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1406,11 +1406,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Get rid of conservative arrays
     if (isConserve) then
       if (PetNo == 0) then
-	      deallocate(srcArea)
-	      deallocate(dstArea)
-	      deallocate(dstFrac)
-	      deallocate(srcFrac)
+        deallocate(srcArea)
+	deallocate(dstArea)
       endif
+    else
+      deallocate(dstFrac)
+      deallocate(srcFrac)
     endif
 
     ! clean up
@@ -1915,8 +1916,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Get rid of conservative arrays
       if (isConserve) then
         if (PetNo == 0) then
-	        deallocate(srcArea)
-	        deallocate(dstArea)
+	   deallocate(srcArea)
+	   deallocate(dstArea)
+        endif
+      else 
+        if (PetNo == 0) then
+	   deallocate(srcFrac)
+	   deallocate(dstFrac)
         endif
       endif
     endif

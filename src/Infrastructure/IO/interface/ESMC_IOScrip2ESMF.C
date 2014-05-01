@@ -159,6 +159,7 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
 
 #undef ESMC_METHOD
