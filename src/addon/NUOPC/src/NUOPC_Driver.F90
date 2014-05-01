@@ -250,6 +250,7 @@ module NUOPC_Driver
     type(PhaseMapParser), allocatable ::  modelPhaseMap(:)
     type(PhaseMapParser), allocatable ::  connectorPhaseMap(:,:)
     character(ESMF_MAXSTR)    :: name
+    character(len=160)        :: namespace  ! long engough for component label
     logical                   :: execFlag, execFlagCollect
     integer                   :: execFlagIntReduced, execFlagInt
     type(ComponentMapEntry)   :: cmEntry
@@ -619,29 +620,42 @@ module NUOPC_Driver
     
     ! now the component labels are available -> create States with Namespace
     do i=1, is%wrap%modelCount
-      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
-        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
+      if (is%wrap%newStyleFlag) then
+        ! have component label available for namespace
+        call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
+          cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        namespace=cmEntry%wrap%label
+      else
+        ! in the old style (pre v7) there are no component labels availabl
+        namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
+      endif
       ! add State level attributes, set the namespace according to comp label
       call NUOPC_StateAttributeAdd(is%wrap%modelIS(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       call ESMF_AttributeSet(is%wrap%modelIS(i), &
-        name="Namespace", value=trim(cmEntry%wrap%label), &
+        name="Namespace", value=trim(namespace), &
         convention="NUOPC", purpose="General", &
         rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       ! add State level attributes, set the namespace according to comp label
       call NUOPC_StateAttributeAdd(is%wrap%modelES(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       call ESMF_AttributeSet(is%wrap%modelES(i), &
-        name="Namespace", value=trim(cmEntry%wrap%label), &
+        name="Namespace", value=trim(namespace), &
         convention="NUOPC", purpose="General", &
         rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     enddo
       
     ! query Component for its Clock (set during specialization)
