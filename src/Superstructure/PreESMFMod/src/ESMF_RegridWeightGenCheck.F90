@@ -326,7 +326,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-
+     
+    if (localPet == 0) then
+	deallocate(factorList, factorIndexList)
+    endif
     ! compute a Regrid from srcField to dstField
     call ESMF_FieldRegrid(srcField, dstField, routehandle, &
       zeroregion=ESMF_REGION_SELECT, rc=status)
@@ -513,6 +516,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(src_frac)
       deallocate(dst_area)
       deallocate(dst_frac)
+      deallocate(src_mask)
+      deallocate(dst_mask)
       deallocate(FsrcArray)
       deallocate(FdstArray)
       deallocate(FdstArrayX)
