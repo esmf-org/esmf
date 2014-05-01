@@ -1409,9 +1409,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         deallocate(srcArea)
 	deallocate(dstArea)
       endif
-    else
+    endif
+    if (PetNo == 0) then
       deallocate(dstFrac)
-      deallocate(srcFrac)
+      if (isConserve) deallocate(srcFrac)
     endif
 
     ! clean up
@@ -1919,11 +1920,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   deallocate(srcArea)
 	   deallocate(dstArea)
         endif
-      else 
-        if (PetNo == 0) then
-	   deallocate(srcFrac)
-	   deallocate(dstFrac)
-        endif
+      endif
+      if (PetNo == 0) then
+        if (isConserve) deallocate(srcFrac)
+	deallocate(dstFrac)
       endif
     endif
 
