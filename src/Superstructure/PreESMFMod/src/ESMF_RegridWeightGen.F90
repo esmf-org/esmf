@@ -850,6 +850,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       endif
     endif
+    deallocate(srcdims)
 
     !Read in the srcfile and create the corresponding ESMF object (either
     ! ESMF_Grid or ESMF_Mesh
@@ -979,6 +980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       endif
     endif
+    deallocate(dstdims)
     if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
 	    if (useDstCoordVar) then
  	      if (dstMissingValue) then
