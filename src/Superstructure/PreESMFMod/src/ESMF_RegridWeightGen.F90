@@ -1404,6 +1404,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (PetNo == 0) then
 	      deallocate(srcArea)
 	      deallocate(dstArea)
+	      deallocate(dstFrac)
+	      deallocate(srcFrac)
       endif
     endif
 
@@ -2554,7 +2556,7 @@ subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
 
      ! deallocate memory for 2D area
      deallocate(frac2D)
-
+     
 end subroutine gatherFracFieldGrid
 
 !------------------------------------------------------------------------------
