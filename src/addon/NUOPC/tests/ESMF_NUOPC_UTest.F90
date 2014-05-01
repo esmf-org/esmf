@@ -58,13 +58,12 @@ program ESMF_NUOPC_UTest
   type(ESMF_GridComp)     :: gridComp
   type(ESMF_CplComp)      :: cplComp
   logical                 :: flag
-  type(ESMF_State)        :: stateA, stateB
+  type(ESMF_State)        :: stateA, stateB, stateC
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
   type(ESMF_Grid)         :: grid
   integer                 :: i, j
-  character(ESMF_MAXSTR),  pointer  :: cplList(:)
   real(ESMF_KIND_R8),      pointer  :: xPtr(:,:), yPtr(:,:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   type(NUOPC_RunSequence), pointer  :: runSeq(:)
@@ -193,14 +192,6 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_CplCompAttributeGet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CplCompAttributeGet(cplComp, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "NUOPC_CplCompAttributeSet() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CplCompAttributeSet(cplComp, stateA, stateB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -344,15 +335,6 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FillCplList() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(cplList)
-  call NUOPC_FillCplList(stateA, stateB, cplList, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
   write(name, *) "NUOPC_GridCompAreServicesSet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_GridCompAreServicesSet(gridComp, rc=rc)
@@ -433,6 +415,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_StateAttributeAdd() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_StateAttributeAdd(stateA, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_StateBuildStdList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(stdAttrNameList)  ! prepare for the following call
@@ -504,6 +494,25 @@ program ESMF_NUOPC_UTest
   call NUOPC_StateWrite(stateA, fieldNameList=(/"sst"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_StateNamespaceAdd() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_StateNamespaceAdd(stateA, namespace="abc", nestedState=stateC, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_StateBuildStdList() for nested State namespace Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(stdAttrNameList)  ! prepare for the following call
+  call NUOPC_StateBuildStdList(stateC, stdAttrNameList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (associated(stdAttrNameList)) deallocate(stdAttrNameList)  ! clean up
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -607,9 +616,28 @@ program ESMF_NUOPC_UTest
   call NUOPC_RunSequenceDeallocate(runSeq, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
- 
 
-10 continue
+  !------------------------------------------------------------------------
+  ! clean-ups
+  call ESMF_ClockDestroy(clockA, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_ClockDestroy(clockB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_GridCompDestroy(gridComp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_CplCompDestroy(cplComp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_StateDestroy(stateA, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_StateDestroy(stateB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldDestroy(field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldBundleDestroy(fieldBundleA, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldBundleDestroy(fieldBundleB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
