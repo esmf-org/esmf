@@ -639,7 +639,9 @@ module NUOPC_Driver
         return  ! bail out
       call ESMF_AttributeSet(is%wrap%modelIS(i), &
         name="Namespace", value=trim(namespace), &
+#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
         convention="NUOPC", purpose="General", &
+#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -651,7 +653,9 @@ module NUOPC_Driver
         return  ! bail out
       call ESMF_AttributeSet(is%wrap%modelES(i), &
         name="Namespace", value=trim(namespace), &
+#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
         convention="NUOPC", purpose="General", &
+#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
