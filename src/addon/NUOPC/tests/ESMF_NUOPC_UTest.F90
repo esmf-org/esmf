@@ -423,6 +423,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_StateAttributeSet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_StateAttributeSet(stateA, name="Namespace", value="xyz", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_StateBuildStdList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(stdAttrNameList)  ! prepare for the following call
