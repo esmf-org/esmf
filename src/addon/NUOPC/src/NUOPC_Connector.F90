@@ -12,7 +12,7 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
-#define RECONCILE_MEMORY_DEBUG_on
+#define RECONCILE_MEMORY_DEBUG_off
 
 module NUOPC_Connector
 
