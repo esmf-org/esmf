@@ -150,7 +150,11 @@ is set to {\tt "-lnetcdff -lnetcdf"}.
 \subsubsection{Parallel-NetCDF}
 \label{sec:pnetcdf}
 ESMF provides the ability to write Mesh weights using 
-\htmladdnormallink{Parallel-NetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf}. 
+\htmladdnormallink{Parallel-NetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf}.
+
+Some file systems, for example \htmladdnormallink{Lustre}{http://wiki.lustre.org}, may need
+to have locking attributes enabled when the file system is mounted.
+
 The following environment variables enable and specify the name and 
 location of the desired Parallel-NetCDF library and associated header files:
 
