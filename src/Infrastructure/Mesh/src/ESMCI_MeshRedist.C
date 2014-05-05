@@ -96,7 +96,7 @@ namespace ESMCI {
 
     Trace __trace("MeshRedistNode()");
 
-    printf("In MeshRedistNode!!!!! \n");
+    //    printf("In MeshRedistNode!!!!! \n");
 
 
     // Create a distributed directory to figure out where 
@@ -247,7 +247,7 @@ namespace ESMCI {
     send_mesh_fields(src_mesh, output_mesh, elemComm);
 
 
-#if 1
+#if 0
   {
      // Get a list of the Mesh nodes with gids 
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
@@ -261,7 +261,7 @@ namespace ESMCI {
 
 #endif
 
-#if 1
+#if 0
 
 
   {
