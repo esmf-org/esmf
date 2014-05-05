@@ -238,14 +238,14 @@ ESMC_Mesh ESMC_MeshCreate(
 //
 // !INTERFACE:
 ESMC_Mesh ESMC_MeshCreateFromFile(
-				  char *filename,     // in (required)
-				  int fileTypeFlag,   // in (required)
-				  int *convertToDual, // in (optional)
-				  int *addUserArea,   // in (optional)
-				  char *meshname,     // in (optional)
-				  int *addMask,       // in (optional)
-				  char *varname,      // in (optional)
-				  int *rc             // out
+				  const char *filename, // in (required)
+				  int fileTypeFlag,     // in (required)
+				  int *convertToDual,   // in (optional)
+				  int *addUserArea,     // in (optional)
+				  const char *meshname, // in (optional)
+				  int *addMask,         // in (optional)
+				  const char *varname,  // in (optional)
+				  int *rc               // out
 );
 // !RETURN VALUE:
 //  type(ESMC_Mesh)         :: ESMC_MeshCreateFromFile

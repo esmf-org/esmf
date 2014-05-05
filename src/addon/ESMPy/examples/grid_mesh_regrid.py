@@ -1,22 +1,15 @@
-import os
+# This example demonstrates how to regrid between a grid and a mesh.
+# The grid and mesh files are required, they can be retrieved from the ESMF data repository:
+#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
+#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+
 import ESMF
-from ESMF.test.regrid_test.regrid_from_file_test.run_regrid_from_file_dryrun import cache_data_file
 
-grid1 = "T42_grid.nc"
-grid2 = "ne15np4_scrip.nc"         #SCRIP
-
-prefix = 'data/'
-grid1 = prefix+grid1
-grid2 = prefix+grid2
-if ESMF.local_pet() == 0:
-    if not os.path.exists(prefix):
-        os.mkdir(prefix)
-    response = cache_data_file(grid1)
-    response = cache_data_file(grid2)
+grid1 = "data/ll2.5deg_grid.nc"
+grid2 = "data/mpas_uniform_10242_dual_counterclockwise.nc"         #SCRIP
     
-# create a logically rectangular source grid for a SCRIP format file 
-grid = ESMF.Grid(filename=grid1, \
-                 filetype=ESMF.FileFormat.SCRIP, \
+# Create a uniform global latlon grid from a SCRIP formatted file
+grid = ESMF.Grid(filename="ll2.5deg_grid.nc", filetype=ESMF.FileFormat.SCRIP,
                  add_corner_stagger=True)
 
 # create a field on the center stagger locations of the source grid
@@ -25,10 +18,9 @@ srcfield = ESMF.Field(grid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 # initialize the field to a constant value
 srcfield[...] = 25
 
-# create an unstructured cubed-sphere destination mesh from a SCRIP format file
-mesh = ESMF.Mesh(filename=grid2, \
-                 filetype=ESMF.FileFormat.SCRIP, \
-                 convert_to_dual=False)
+# create an ESMF formatted unstructured mesh with clockwise cells removed
+mesh = ESMF.Mesh(filename="mpas_uniform_10242_dual_counterclockwise.nc",
+                 filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the elements of the destination mesh
 dstfield = ESMF.Field(mesh, 'dstmesh', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -41,5 +33,6 @@ regrid = ESMF.Regrid(srcfield, dstfield, \
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
 
-# show that the destination field data matches the initial source data
+print "Successfully read a grid and a mesh and did a regridding of a constant field!"
+print "The field values on PET (processor) # {0} are:".format(ESMF.local_pet())
 print dstfield.data

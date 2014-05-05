@@ -6,11 +6,11 @@ The Grid API
 
 #### IMPORT LIBRARIES #########################################################
 
-from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
-
 from ESMF.api.esmpymanager import *
+
+import ESMF.api.constants as constants
 
 import warnings
 
@@ -62,6 +62,7 @@ class Grid(object):
                 filetype: the input file type of the Grid. \n
                     Argument values are: \n
                         FileFormat.SCRIP \n
+                        FileFormat.GRIDSPEC \n
             Optional arguments for creating a Grid from file: \n
                 is_sphere: Set to True for a spherical grid, or False for
                            regional. Defaults to True. \n
@@ -74,19 +75,24 @@ class Grid(object):
                                file; otherwise, ESMF will calculate it. 
                                Defaults to False. \n
                 add_mask: Set to True to generate the mask using the missing_value 
-                          attribute defined in 'varname'.  Defaults to False. \n
+                          attribute defined in 'varname'.  This 
+                          argument is only supported with filetype 
+                          FileFormat.GRIDSPEC.  Defaults to False. \n
                 varname: If add_mask is True, provide a variable name stored in 
                          the grid file and the mask will be generated using the 
                          missing value of the data value of this variable.  The 
                          first two dimensions of the variable has to be the 
                          longitude and the latitude dimension and the mask is 
                          derived from the first 2D values of this variable even 
-                         if this data is a 3D, or 4D array. Defaults to the 
+                         if this data is a 3D, or 4D array.  This 
+                         argument is only supported with filetype 
+                         FileFormat.GRIDSPEC.  Defaults to the 
                          empty string. \n
                 coord_names:  A two-element array containing the longitude and 
                              latitude variable names in a GRIDSPEC file if there 
-                             are multiple coordinates defined in the file. 
-                             Defaults to None. \n
+                             are multiple coordinates defined in the file. This 
+                             argument is only supported with filetype 
+                             FileFormat.GRIDSPEC.  Defaults to None. \n
         The following optional arguments apply to a Grid created either from file 
         or in memory. \n
             staggerloc: the stagger location of the coordinate data. \n
@@ -143,6 +149,8 @@ class Grid(object):
             raise GridArgumentError("must supply either max_index for an in-memory grid or filename and filetype for a from-file grid")
         # from file
         else:
+            if (filetype != FileFormat.SCRIP) and (filetype != FileFormat.GRIDSPEC):
+                raise GridArgumentError("filetype must be SCRIP or GRIDSPEC for Grid objects")
             # set the from_file flag to True
             from_file = True
             #raise errors for all in-memory grid options
@@ -166,6 +174,7 @@ class Grid(object):
         self.rank = None
         self.num_peri_dims = num_peri_dims
         self.coord_sys = coord_sys
+        self.ndims = None # Applies to Gridspec only
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self.size = [None]
@@ -200,12 +209,13 @@ class Grid(object):
                                                   addUserArea=add_user_area,
                                                   addMask=add_mask, varname=varname,
                                                   coordNames=coord_names)
-            # grid rank
-            self.rank = ESMP_ScripInqRank(filename)
-
-            # grid dims            
-            self.max_index = ESMP_ScripInqDims(filename)
-            
+            # grid rank and dims
+            if filetype == FileFormat.SCRIP:
+                self.rank = ESMP_ScripInqRank(filename)
+                self.max_index = ESMP_ScripInqDims(filename)
+                self.ndims = self.rank
+            else: # must be GRIDSPEC
+                self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)
             # stagger is not required for from-file grids, but we need to 
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
@@ -309,7 +319,7 @@ class Grid(object):
 
         # initialize the item structures
         # index order is [staggerLoc][itemDim]
-        self.mask = [[0] for a in range(2**self.rank)]
+        self.mask = [[1] for a in range(2**self.rank)]
         self.area = [[0] for a in range(2**self.rank)]
         self.item_done = [[False for a in range(2)] \
                            for b in range(2**self.rank)]
@@ -376,6 +386,7 @@ class Grid(object):
                    self.area))
 
         return string
+
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
         Add coordinates to a Grid at the specified
@@ -495,7 +506,8 @@ class Grid(object):
     def get_coords(self, coord_dim, staggerloc=None):
         """
         Return a numpy array of coordinates at a specified stagger 
-        location. \n
+        location. The returned array is NOT a copy, it is
+        directly aliased to the underlying memory allocated by ESMF.\n
         Required Arguments: \n
             coord_dim: the dimension number of the coordinates to return:
                        e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1) \n
@@ -534,7 +546,8 @@ class Grid(object):
     def get_item(self, item, staggerloc=None):
         """
         Return a numpy array for a Grid item at a specified stagger 
-        location. \n
+        location.  The returned array is NOT a copy, it is
+        directly aliased to the underlying memory allocated by ESMF.\n
         Required Arguments: \n
             item: the Grid item to allocate. \n
                 Argument values are: \n
@@ -658,14 +671,14 @@ class Grid(object):
         # allocate space for the coordinates on the Python side
         self.coords[stagger][0] = np.zeros(\
                                            shape = (self.size_local[stagger]),
-                                           dtype = ESMF2PythonType[self.type])
+                                           dtype = constants._ESMF2PythonType[self.type])
         self.coords[stagger][1] = np.zeros(\
                                            shape = (self.size_local[stagger]),
-                                           dtype = ESMF2PythonType[self.type])
+                                           dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
             self.coords[stagger][2] = np.zeros(\
                                         shape = (self.size_local[stagger]),
-                                        dtype = ESMF2PythonType[self.type])
+                                        dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         [x, y, z] = [0, 1, 2]
@@ -696,25 +709,28 @@ class Grid(object):
         # set flag to tell this coordinate has been aliased
         self.coords_done[stagger][coord_dim] = True
 
-    def get_grid_coords_from_esmc(self, coord_dim, stagger):
+    def get_grid_coords_from_esmc(self, coord_dim, stagger, ndims=2):
         # get the pointer to the underlying ESMF data array for coordinates
         coords_out = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
 
         # find the size of the local coordinates at this stagger location
-        from operator import mul
-        size = reduce(mul,self.size_local[stagger])
+        if ndims != 1:
+            from operator import mul
+            size = reduce(mul,self.size_local[stagger])
+        else:
+            size = self.size_local[stagger][coord_dim]
 
         # create a numpy array to point to the ESMF allocation
         gridbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(coords_out.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, ESMF2PythonType[self.type])
-
-        # reshape the numpy array of coordinates using Fortran ordering in Grid
-        gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[self.type])
+        
+        if ndims != 1:
+            # reshape the numpy array of coordinates using Fortran ordering in Grid
+            gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
 
         return gridCoordP
-
 
     def allocate_items(self, item, stagger):
         # this could be one of several entry points to the grid,
@@ -725,12 +741,12 @@ class Grid(object):
         if item == GridItem.MASK:
             self.mask[stagger] = np.zeros(\
                                           shape = (self.size_local[stagger]),
-                                          dtype = ESMF2PythonType[TypeKind.I4])
+                                          dtype = constants._ESMF2PythonType[TypeKind.I4])
         # if the item is area then it is of type R8
         elif item == GridItem.AREA:
             self.area[stagger] = np.zeros(\
                                           shape = (self.size_local[stagger]),
-                                          dtype = ESMF2PythonType[TypeKind.R8])
+                                          dtype = constants._ESMF2PythonType[TypeKind.R8])
         else:
             raise GridItemNotSupported
 
@@ -765,8 +781,8 @@ class Grid(object):
         if item == GridItem.MASK:
             gridbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(item_out.contents),
-                np.dtype(ESMF2PythonType[TypeKind.I4]).itemsize*size)
-            gridItemP = np.frombuffer(gridbuffer, ESMF2PythonType[TypeKind.I4])
+                np.dtype(constants._ESMF2PythonType[TypeKind.I4]).itemsize*size)
+            gridItemP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[TypeKind.I4])
 
             # reshape the numpy array of item with Fortran ordering in Grid
             gridItemP = np.reshape(gridItemP, self.size_local[stagger], 
@@ -777,8 +793,8 @@ class Grid(object):
         elif item == GridItem.AREA:
             gridbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(item_out.contents),
-                np.dtype(ESMF2PythonType[TypeKind.R8]).itemsize*size)
-            gridItemP = np.frombuffer(gridbuffer, ESMF2PythonType[TypeKind.R8])
+                np.dtype(constants._ESMF2PythonType[TypeKind.R8]).itemsize*size)
+            gridItemP = np.frombuffer(gridbuffer, constants._ESMF2PythonType[TypeKind.R8])
 
             # reshape the numpy array of item with Fortran ordering in Grid
             gridItemP = np.reshape(gridItemP, self.size_local[stagger], 
@@ -846,7 +862,7 @@ class Grid(object):
         '''
         xbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(xptr.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
         '''
         xcoords = np.frombuffer(xbuffer, np.float64)
         #xcoordarray = numpy.ndarray((nrows, ncols), dtype=numpy.float32, order='F',
@@ -855,13 +871,13 @@ class Grid(object):
         yptr = ESMP_GridGetCoordPtr(self, y, staggerloc=stagger)
         ybuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(yptr.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        ycoords = np.frombuffer(ybuffer, ESMF2PythonType[self.type])
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        ycoords = np.frombuffer(ybuffer, constants._ESMF2PythonType[self.type])
 
         print "DIAGNOSTICS:"
         print "self.type = ", self.type
-        print "ESMF2PythonType", ESMF2PythonType[self.type]
-        print "ESMF2PythonType.itemsize", ESMF2PythonType[self.type].itemsize
+        print "constants._ESMF2PythonType", constants._ESMF2PythonType[self.type]
+        print "constants._ESMF2PythonType.itemsize", constants._ESMF2PythonType[self.type].itemsize
         
         
         # find the size of the local coordinates at this stagger location
@@ -901,8 +917,8 @@ class Grid(object):
             zptr = ESMP_GridGetCoordPtr(self, z, staggerloc=stagger)
             zbuffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(zptr.contents),
-                np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-            zcoords = np.frombuffer(zbuffer, ESMF2PythonType[self.type])
+                np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+            zcoords = np.frombuffer(zbuffer, constants._ESMF2PythonType[self.type])
 
             for i in xrange(I):
                 for j in xrange(J):

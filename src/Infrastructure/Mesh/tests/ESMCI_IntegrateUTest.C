@@ -150,8 +150,8 @@ int main(int argc, char *argv[]) {
   mass[1] = compute_mass(mesh,sF2,iwts);
   mass[2] = compute_mass(mesh,sF3,iwts);
 
-  double massg[5];
-  MPI_Allreduce(mass, massg, 5, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  double massg[3];
+  MPI_Allreduce(mass, massg, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
   using std::cout;
   using std::left;

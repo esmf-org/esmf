@@ -103,6 +103,7 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
      
 void convert3D(double lon, double lat, double *x, double *y) {
@@ -158,6 +159,7 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
 
 #undef ESMC_METHOD
@@ -491,8 +493,10 @@ void FTN_X(c_convertscrip)(
     nodelatlon[i*2+1]=nodelats[i];
   }
 
-  free(nodelons);
-  free(nodelats);
+  free(cornerlons);
+  free(cornerlats);
+  delete[] nodelons;
+  delete[] nodelats;
 
   for (i=0; i<totalsize; i++) {
     if (cells[i] >= totalnodes) printf("out of bound cells: %d %d\n", i, cells[i]);
@@ -734,6 +738,7 @@ void FTN_X(c_convertscrip)(
   // so, this has to be calculated as well
   
   // First, read in the center coordinates
+  free(edges);
   inbuf = (double*)malloc(sizeof(double)*gsdim);
   inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
   status = nc_get_var_double(ncid1, ctlatid, inbuf);
@@ -929,6 +934,7 @@ void FTN_X(c_convertscrip)(
   if (handle_error(status)) return; // bail out;
 
   free(totalneighbors);
+  free(cells);
   free(dualcells);
   free(nodelatlon);
   free(inbuf1);

@@ -1242,6 +1242,8 @@ void PIO_Handler::open(
     if (rc != NULL) {
       *rc = localrc;
     }
+    free (pioFileDesc);
+    pioFileDesc = NULL;
     return;
   }
   
@@ -1284,6 +1286,8 @@ void PIO_Handler::open(
     if (rc != NULL) {
       *rc = localrc;
     }
+    free (pioFileDesc);
+    pioFileDesc = NULL;
     return;
   }
   if (okToCreate) {
@@ -1299,6 +1303,8 @@ void PIO_Handler::open(
     localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
     if (!CHECKPIOWARN(localrc, "Unable to create file", (*rc))) {
+      free (pioFileDesc);
+      pioFileDesc = NULL;
       return;
     } else {
       new_file = true;
@@ -1315,6 +1321,8 @@ void PIO_Handler::open(
                                iotype, getFilename(), mode);
     PRINTMSG(", called pio_cpp_openfile on " << getFilename());
     if (!CHECKPIOWARN(localrc, "Unable to open file", (*rc))) {
+      free (pioFileDesc);
+      pioFileDesc = NULL;
       return;
     }
   }

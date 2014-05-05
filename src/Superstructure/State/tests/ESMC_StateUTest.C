@@ -51,6 +51,9 @@ int main(void){
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
+  ESMC_VM vm = ESMC_VMGetGlobal (&rc);
+  int localPet, petCount;
+  rc = ESMC_VMGet (vm, &localPet, &petCount, NULL, NULL, NULL, NULL);
   //----------------------------------------------------------------------------
   
 
@@ -141,6 +144,14 @@ int main(void){
   strcpy(failMsg, "Did not retrieve array name correctly");
   ESMC_Test(!strcmp(arrayName, "array1"), name, failMsg, &result, __FILE__,
     __LINE__, 0);
+  //----------------------------------------------------------------------------
+ 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Initialize data an ESMC_Array object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int *arrayData = (int *) ESMC_ArrayGetPtr(array, 0,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

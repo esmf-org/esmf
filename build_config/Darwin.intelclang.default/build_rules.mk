@@ -1,13 +1,16 @@
 # $Id$
 #
-# Darwin.intelgcc.default
+# Darwin.intelclang.default
 #
 
 ############################################################
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ifort
-ESMF_CXXDEFAULT         = g++
+ESMF_CXXDEFAULT         = clang
+ESMF_CPPDEFAULT         = clang -E -P -x c
+
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.6
 
 ############################################################
 # Default MPI setting.
@@ -90,11 +93,6 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# See if g++ is really clang
-#
-ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
-
-############################################################
 # Intel runtime library on Darwin does not currently seem thread-safe
 #
 ESMF_PTHREADS := OFF
@@ -102,13 +100,6 @@ ESMF_PTHREADS := OFF
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -154,14 +145,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ((ESMF_CLANGSTR), clang)
-ESMF_OPENMP_F90COMPILEOPTS += -openmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -openmp
-ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-else
 ESMF_OPENMP=OFF
-endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -175,14 +159,14 @@ ESMF_F90COMPILEFIXCPP    = -fpp
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
-# Link against GCC's stdc++ library (because g++ is used)
+# Link against the stdc++ library
 #
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
 endif
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
+ESMF_F90LINKLIBS  += -lstdc++
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -199,6 +183,7 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
+ESMF_CXXLINKLIBS += -lifcore -limf -ldl -lirc -stdlib=libstdc++
 
 ############################################################
 # Blank out shared library options

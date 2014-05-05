@@ -251,9 +251,9 @@ template <class TYPE>
                               ESMC_TypeKind_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 
                               int *rc);
-  static Grid* createfromfile(char *filename, int fileTypeFlag, int *isSphere, int *addCornerStagger,
-			      int *addUserArea, int *addMask, char *varname,
-			      char **coordNames, int *rc);
+  static Grid* createfromfile(const char *filename, int fileTypeFlag, int *isSphere, int *addCornerStagger,
+			      int *addUserArea, int *addMask, const char *varname,
+			      const char **coordNames, int *rc);
 
   int write(ESMC_StaggerLoc staggerloc, const char *fname);
 

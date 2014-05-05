@@ -445,7 +445,7 @@
 !   !  Set Internal State
     !EX_UTest
     allocate(wrap5%p)
-    wrap3%p%testnumber=9182
+    wrap5%p%testnumber=9182
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set Internal State 3rd time Test"
@@ -467,8 +467,8 @@
     !EX_UTest
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State 3rd time Test"
-    call ESMF_Test((wrap4%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
-    print *, "wrap4%p%testnumber = ", wrap6%p%testnumber
+    call ESMF_Test((wrap6%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
+    print *, "wrap6%p%testnumber = ", wrap6%p%testnumber
     
     deallocate(wrap1%p)
     deallocate(wrap3%p)

@@ -161,12 +161,12 @@ This allows the application to resolve the ambiguity in edge direction. One othe
 containing a concave cell with exactly four sides, this will cause the application to return an error. The application will work for a
 grid containing concave cells as long as all of them have more than four sides. 
 
- It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation weights by the destination fraction.
-This means that for a destination grid which only partially overlaps the source grid the destination field which is output from the regrid operation should
-be divided by the corresponding destination fraction to yield the true interpolated values for cells which are only partially covered by the source grid.
-The fraction also needs to be included when computing the total source and destination integrals.
 
-The following pseudo-code shows how to adjust a destination field ({\tt dst\_field}) by the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file:
+ It is important to note that by default (i.e. using destination area normalization) conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the true interpolated values for cells which are only partially covered by the source grid.
+The fraction also needs to be included when computing the total source and destination integrals. To include the fraction in the conservative weights, the user can specify the fraction area normalization type. This can be done by specifying "\verb+--+norm\_type fracarea'' on the command line. 
+
+For weights generated using destination area normalization (either by not specifying any normalization type or by specifying "\verb+--+norm\_type dstarea"), 
+the following pseudo-code shows how to adjust a destination field ({\tt dst\_field}) by the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file:
 
 \begin{verbatim}
  for each destination element i
@@ -176,7 +176,8 @@ The following pseudo-code shows how to adjust a destination field ({\tt dst\_fie
  end for
 \end{verbatim}
 
-The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
+For weights generated using destination area normalization (either by not specifying any normalization type or by specifying "\verb+--+norm\_type dstarea"), 
+the following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
 from the sparse matrix multiply of the weights in the weight file by the source field, the destination area ({\tt dst\_area}) called {\tt area\_b} in the
 weight file, and the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file. As in the previous paragraph, it also
 shows how to adjust the destination field ({\tt dst\_field}) resulting from the sparse matrix multiply by the fraction
@@ -194,7 +195,18 @@ shows how to adjust the destination field ({\tt dst\_field}) resulting from the 
  end for
 \end{verbatim}
 
- The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) called {\tt area\_a} in the weight file, and the source fraction ({\tt src\_frac}) called {\tt frac\_a} in the weight file:
+For weights generated using fraction area normalization (set by specifying "\verb+--+norm\_type fracarea"), no adjustment of the destination field ({\tt dst\_field}) by the destination fraction is necessary. The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
+from the sparse matrix multiply of the weights in the weight file by the source field, the destination area ({\tt dst\_area}) called {\tt area\_b} in the
+weight file, and the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file: 
+
+\begin{verbatim}
+ dst_total=0.0
+ for each destination element i
+       dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
+ end for
+\end{verbatim}
+
+For either normalization type, the following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) called {\tt area\_a} in the weight file, and the source fraction ({\tt src\_frac}) called {\tt frac\_a} in the weight file:
 
 \begin{verbatim}
  src_total=0.0
@@ -202,6 +214,8 @@ shows how to adjust the destination field ({\tt dst\_field}) resulting from the 
     src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
  end for
 \end{verbatim}
+
+
 
 The interpolation weights generated by this application are output to a NetCDF file (specified by the "-w" or "\verb+--+weight"
 keywords). The format of this file is the same as that generated by SCRIP. See Section~\ref{sec:weightfileformat} for a description of the format.
@@ -223,6 +237,7 @@ ESMF_RegridWeightGen
         --weight|-w out_weight_file
         [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
         [--pole|-p none|all|teeth|1|2|..]
+        [--norm_type dstarea|fracarea]
         [--ignore_unmapped|-i]
         [--src_type SCRIP|GRIDSPEC|ESMF|UGRID]
         [--dst_type SCRIP|GRIDSPEC|ESMF|UGRID]
@@ -240,7 +255,7 @@ ESMF_RegridWeightGen
 	[--dst_coordinates lon_name,var_name]
         [--user_areas]
         [--check]
-        [--no_errorlog]
+        [--no_log]
 	[--help]
         [--version]
 where
@@ -295,6 +310,11 @@ where
                                 point (i.e.  the value may differ for each
                                 destination point. Here N ranges from 1 to
                                 the number of nodes around the pole.
+
+    --norm_type       - an optional argument indicating the type of normalization to
+                        do when generating conserative weights. The default value is 
+                        dstarea.
+
     --ignore_unmapped
            or
            -i         - ignore unmapped destination points. If not specified
@@ -405,7 +425,7 @@ where
                         mass of the source and destination fields in the conservative
                         case.
 
-     --no_errorlog    - Turn off the ESMF Error Log.  By default, ESMF creates multiple
+     --no_log    - Turn off the ESMF Log files.  By default, ESMF creates multiple
                         log files, one per PET.
 
      --help              - Print the usage message and exit.

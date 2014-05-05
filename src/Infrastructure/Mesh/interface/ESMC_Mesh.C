@@ -64,12 +64,12 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateFromFile()"
-ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag, 
+ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag, 
 				  int *convertToDual,
 				  int *addUserArea,
-				  char *meshname,
+				  const char *meshname,
 				  int *addMask,
-				  char *varname,
+				  const char *varname,
 				  int *rc) {
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -91,17 +91,6 @@ ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag,
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
   return mesh;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetCoord()"
-void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
-		       double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
-  // typecast into ESMCI type
-  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
 }
 //-----------------------------------------------------------------------------
 
@@ -231,6 +220,18 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
   return rc;
 }
 //--------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetCoord()"
+void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
+           double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------

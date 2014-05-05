@@ -18,6 +18,7 @@ def mesh_create_5():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       4.0   31 ------ 32 ------ 33
             |         |  22  /   |
@@ -69,12 +70,13 @@ def mesh_create_5():
 
     mesh.add_elements(num_elem,elemId,elemType,elemConn)
 
-    return mesh, nodeCoord, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
-def mesh_create_10(domask=False, doarea=False):
+def mesh_create_10():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       4.0   41 ------ 42 ------- 43 ------ 44
             |         |          |  33 /   |
@@ -129,31 +131,18 @@ def mesh_create_10(domask=False, doarea=False):
                          9,10,14,13,
                          10,15,14,
                          10,11,15])
-    elemMask = None
-    if domask:
-        elemMask = np.array([0,0,0,0,1,0,0,0,0,0])
-    elemArea = None
-    if doarea:
-        elemArea = np.array([5,5,5,5,5,5,5,5,2.5,2.5], dtype=np.float64)
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
-    mesh.add_elements(num_elem,elemId,elemType,elemConn, 
-        element_mask=elemMask, element_area=elemArea)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn)
 
-    if domask and doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemMask, elemArea
-    elif domask and not doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemMask
-    elif not domask and doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemArea
-    else:
-        return mesh, nodeCoord, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_50(domask=False, doarea=False):
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       3.75  81 ------ 82 ----- 83 ------ 84 ------ 85 ------ 86 ------ 87 ------ 88
             |         |        |         |         |         |         |  77 /   |
@@ -235,12 +224,12 @@ def mesh_create_50(domask=False, doarea=False):
     elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
     elemMask = None
     if domask:
-        elemMask = np.zeros(50)
-        elemMask[25] = 1
+        elemMask = np.ones(50)
+        elemMask[1] = 0
     elemArea = None
     if doarea:
         elemArea = np.ones(48)*5
-        np.append(elemArea, [2.5, 2.5])
+        elemArea = np.append(elemArea, [2.5, 2.5])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
@@ -248,18 +237,19 @@ def mesh_create_50(domask=False, doarea=False):
         element_mask=elemMask, element_area=elemArea)
 
     if domask and doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemMask, elemArea
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea
     elif domask and not doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemMask
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask
     elif not domask and doarea:
-        return mesh, nodeCoord, elemType, elemConn, elemArea
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemArea
     else:
-        return mesh, nodeCoord, elemType, elemConn
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_5_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created in parallel.
+    RETURN VALUES: \n Mesh :: mesh \n
     
     #  4.0   31 ------ 32       [32] ----- 33
     #        |         |         | 22  /   |
@@ -363,12 +353,13 @@ def mesh_create_5_parallel ():
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
     mesh.add_elements(num_elem,elemId,elemType,elemConn)
 
-    return mesh, nodeCoord, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_10_parallel ():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created in parallel.
+    RETURN VALUES: \n Mesh :: mesh \n
     
     #  4.0   41 ------ 42 ------ 43      [43] ---------- 44
     #        |         |         |       |          /    |
@@ -488,12 +479,13 @@ def mesh_create_10_parallel ():
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
     mesh.add_elements(num_elem,elemId,elemType,elemConn)
 
-    return mesh, nodeCoord, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
-def mesh_create_50_parallel():
+def mesh_create_50_parallel(domask=False, doarea=False):
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created in parallel.    
+    RETURN VALUES: \n Mesh :: mesh \n
     
       3.75  81 ------ 82 ----- 83 ------ 84   [84] ----- 85 ------ 86 ------ 87 ------ 88
             |         |        |         |     |         |         |         |  77 /   |
@@ -564,6 +556,14 @@ def mesh_create_50_parallel():
                              21,22,32,31,22,23,33,32,23,24,34,33,
                              31,32,42,41,32,33,43,42,33,34,44,43])
         elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+        elemMask = None
+        if domask:
+            elemMask = np.ones(num_elem)
+            elemMask[1] = 0
+        elemArea = None
+        if doarea:
+            elemArea = np.ones(num_elem)*5
+
     elif ESMF.local_pet() == 1:
         num_node = 20
         num_elem = 12
@@ -584,6 +584,13 @@ def mesh_create_50_parallel():
                              24,25,35,34,25,26,36,35,26,27,37,36,27,28,38,37,
                              34,35,45,44,35,36,46,45,36,37,47,46,37,38,48,47])
         elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+        elemMask = None
+        if domask:
+            elemMask = np.ones(num_elem)
+        elemArea = None
+        if doarea:
+            elemArea = np.ones(num_elem)*5
+
     elif ESMF.local_pet() == 2:
         num_node = 20
         num_elem = 12
@@ -608,6 +615,13 @@ def mesh_create_50_parallel():
                              61,62,72,71,62,63,73,72,63,64,74,73,
                              71,72,82,81,72,73,83,82,73,74,84,83])
         elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+        elemMask = None
+        if domask:
+            elemMask = np.ones(num_elem)
+        elemArea = None
+        if doarea:
+            elemArea = np.ones(num_elem)*5
+
     elif ESMF.local_pet() == 3:
         num_node = 25
         num_elem = 17
@@ -635,26 +649,42 @@ def mesh_create_50_parallel():
                              77,88,87,
                              77,78,88])
         elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+        elemMask = None
+        if domask:
+            elemMask = np.ones(num_elem)
+        elemArea = None
+        if doarea:
+            elemArea = np.ones(num_elem-2)*5
+            elemArea = np.append(elemArea, [2.5, 2.5])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
-    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn, 
+        element_mask=elemMask, element_area=elemArea)
 
-    return mesh, nodeCoord, elemType, elemConn
+    if domask and doarea:
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea
+    elif domask and not doarea:
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask
+    elif not domask and doarea:
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemArea
+    else:
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
-def initialize_field_mesh(field, nodeCoord, elemType, elemConn, 
+def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn, 
                           domask=False, elemMask=None):
     '''
     PRECONDITIONS: A Field has been created on the elements of a Mesh.
-    POSTCONDITIONS: The Field has been initialized to the analytic 
-                    field f(x,y) = 20.0 + x + y
+    POSTCONDITIONS: The Field has been initialized to an analytic 
+                    field.
+    RETURN VALUES: \n Field :: field \n
     '''
 
     [node, element] = [0,1]
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size[element]):    # this loop should go through elements
+        for i in range(field.grid.size_local[element]):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -677,26 +707,31 @@ def initialize_field_mesh(field, nodeCoord, elemType, elemConn,
                 raise ValueError("Elem type is not supported.")
 
             #print '[{0},{1}] = {2}'.format(x,y,field.data[i])
-            field[i] = 20.0 + x**2 +x*y
+            field.data[i] = 20.0 + x**2 +x*y + y**2
 
             if domask:
                 # calculate field
-                if (elemMask[i] == 1):
-                    field[i] = 1000000000.0
+                if (elemMask[i] == 0):
+                    field.data[i] = 0
 
     
     elif field.staggerloc == node:
-        for i in range(field.grid.size[node]):    # this loop should go through elements
+        ind = 0
+        for i in range(field.grid.size[node]):
             x = nodeCoord[i*2]
             y = nodeCoord[i*2+1]
 
-            #print '[{0},{1}] = {2}'.format(x,y,field.data[i])
-            field[i] = 20.0 + x**2 +x*y
+            if (nodeOwner[i] == ESMF.local_pet()):
+                if ind > field.grid.size_local[node]:
+                    raise ValueError("Overstepped the mesh bounds!")
+                field.data[ind] = 20.0 + x**2 +x*y + y**2
+                #print '[{0},{1}] = {2}'.format(x,y,field.data[ind])
+                ind += 1
 
             if domask:
                 # calculate field
-                if (elemMask[i] == 1):
-                    field[i] = 1000000000.0
+                if (elemMask[i] == 0):
+                    field.data[i] = 0
 
     else:
         raise ValueError("Field staggerloc is not supported")
@@ -714,17 +749,14 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
     POSTCONDITIONS: The mass of the data field is computed.\n
-    RETURN VALUES: integer :: mass \n
+    RETURN VALUES: float :: mass \n
     '''
     mass = 0.0
     areafield.get_area()
-    frac = 0
-    for i in range(valuefield.shape[0]):
-        if dofrac:
-            mass += areafield[i] * valuefield[i] * \
-                    fracfield[i]
-        else:
-            mass += areafield[i] * valuefield[i]
+    if dofrac:
+        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+    else:
+        mass = np.sum(areafield.data * valuefield.data)
 
     return mass
 
@@ -736,33 +768,36 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
                    'field2'.  The fields should be the same size on have
                    rank=1.
     POSTCONDITIONS: The values on 'field1' and 'field2' are 
-                    compared against the analytic function
-                    f(x,y) = 20.0 + x + y.
+                    compared against each other.
     '''
-    # compare point values of field1 to field2
-    # first verify they are the same size
-    if (field1.shape != field2.shape):
-        raise NameError('compare_fields: Fields must be the same size!')
+    import numpy.ma as ma
 
+    # verify that the fields are the same size
+    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+
+    # deal with default values for fracfield
     if dstfracfield is None:
-        dstfracfield = np.ones(field1.shape)
+        dstfracfield = ma.ones(field1.shape)
 
-    # initialize to True, and check for False point values
-    correct = True
+    # compute pointwise error measures
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
     for i in range(field1.shape[0]):
-        if (field2[i] != 0.0):
-            err = abs(field1[i]/dstfracfield[i] - field2[i])/abs(field2[i])
-        else:
-            err = abs(field1[i]/dstfracfield[i]) - field2[i]
-        totalErr += err
-        if (err > max_error):
-            max_error = err
-        if (err < min_error):
-            min_error = err
+        if not field1.mask[i]:
+            if (field2.data[i] != 0.0):
+                err = abs(field1.data[i]/dstfracfield.data[i] - field2.data[i])/abs(field2.data[i])
+            else:
+                err = abs(field1.data[i]/dstfracfield.data[i]) - field2.data[i]
+            totalErr += err
+            if (err > max_error):
+                max_error = err
+            if (err < min_error):
+                min_error = err
 
+    # gather error on processor 0 or set global variables in serial case
+    mass1_global = 0
+    mass2_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -770,8 +805,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = comm.reduce(totalErr, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        mass1_global = 0
-        mass2_global = 0
+        field_size_global = comm.reduce(field1.shape[0], op=MPI.SUM)
         if (mass1 and mass2):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
@@ -779,32 +813,43 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = totalErr
         max_error_global = max_error
         min_error_global = min_error
-        mass1_global = 0
-        mass2_global = 0
+        field_size_global = field1.shape[0]
         if (mass1 and mass2):
             mass1_global = mass1
             mass2_global = mass2
 
+    # compute relative error measures and compare against tolerance values
+    itrp = False
+    csrv = False
     if ESMF.local_pet() == 0:
         if mass1_global == 0:
             csrv_error_global = abs(mass2_global - mass1_global)
         else:
             csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
 
-        itrp = False
-        csrv = False
+        # compute mean relative error
+        total_error_global = total_error_global/field_size_global
+
+        # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):
             itrp = True
         if (csrv_error_global < csrv_tol):
             csrv = True
 
-        if (itrp and csrv):
-            print " PASS"
-        else:
-            print " FAIL"
-        print "  Total error = "+str(total_error_global)
-        print "  Max error   = "+str(max_error_global)
-        print "  Min error   = "+str(min_error_global)
-        print "  Csrv error  = "+str(csrv_error_global)
-        print "  srcmass     = "+str(mass1_global)
-        print "  dstmass     = "+str(mass2_global)
+        # print out diagnostic information
+        print "  Mean relative error = "+str(total_error_global)
+        print "  Max  relative error = "+str(max_error_global)
+        print "  Conservation  error = "+str(csrv_error_global)
+        #print "  Min error   = "+str(min_error_global)
+        #print "  srcmass     = "+str(mass1_global)
+        #print "  dstmass     = "+str(mass2_global)
+
+    # broadcast in parallel case
+    if parallel:
+        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+
+    # print pass or fail
+    if (itrp and csrv):
+        print "PET{0} - PASS".format(ESMF.local_pet())
+    else:
+        print "PET{0} - FAIL".format(ESMF.local_pet())

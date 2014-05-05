@@ -1,6 +1,9 @@
 # $Id$
 
 """
+This test demonstrates conservative regridding between 2d grids
+with source masking.
+
 Two Field objects are created on Grids.  The source Field is set to an 
 analytic function, and a conservative regridding operation is 
 performed from the source to the destination Field with masking enabled 
@@ -33,14 +36,11 @@ if ESMF.local_pet() == 0:
     print "\ngrid_grid_regrid_csrv_mask"
 
 # create two unique Grid objects
-srcgrid = grid_create([0,0,21,21], [0,0,21,21])
+srcgrid = grid_create([0,0,21,21], [0,0,21,21], domask=True)
 dstgrid = grid_create([0.5,0.5,19.5,19.5], [0.5,0.5,19.5,19.5])
 
-#srcgrid._write("srcgrid")
-#dstgrid._write("dstgrid")
-
 # create Field objects on the Meshes
-srcfield = ESMF.Field(srcgrid, 'srcfield')
+srcfield = ESMF.Field(srcgrid, 'srcfield', mask_vals=[0])
 srcareafield = ESMF.Field(srcgrid, 'srcareafield')
 srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
 dstfield = ESMF.Field(dstgrid, 'dstfield')
@@ -54,8 +54,7 @@ dstfield2 = initialize_field_grid(exactfield)
 
 # run the ESMF regridding
 regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                            src_mask_values=np.array([1]), \
-                            dst_mask_values=np.array([1]), \
+                            src_mask_values=np.array([0]), \
                             regrid_method=ESMF.RegridMethod.CONSERVE, \
                             unmapped_action=ESMF.UnmappedAction.ERROR, \
                             src_frac_field=srcfracfield, \
@@ -68,5 +67,5 @@ srcmass = compute_mass_grid(srcfield, srcareafield,
 dstmass = compute_mass_grid(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
-compare_fields_grid(dstfield, dstfield2, 80E-2, 10E-16, parallel=parallel,
+compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
                     dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)

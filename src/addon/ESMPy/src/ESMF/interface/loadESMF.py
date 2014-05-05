@@ -37,9 +37,10 @@ try:
     MKFILE = open(esmfmk, 'r')
     
     # investigate esmf.mk
-    libsdir = 0
-    esmfos = 0
-    esmfabi = 0
+    libsdir = None
+    esmfos = None
+    esmfabi = None
+    esmfcomm = None
     netcdf = [False, False, False, False]
     
     for line in MKFILE:
@@ -57,6 +58,8 @@ try:
             netcdf[2] = True
         elif 'ESMF_NETCDF_LIBPATH:' in line:
             netcdf[3] = True
+        elif 'ESMF_COMM:' in line:
+            esmfcomm = line.split(":")[1]
         
             
     MKFILE.close()
@@ -88,11 +91,15 @@ try:
     # set _ESMF_NETCDF
     if all(netcdf):
         constants._ESMF_NETCDF = True
+
+    # set _ESMF_COMM
+    if "mpiuni" in esmfcomm:
+        constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
+
 except:
     raise ValueError('There is no ESMF shared library object available \
            (libesmf_fullylinked.so).\nPlease set ESMFMKFILE to a current \
            ESMF installation to proceed.')
-
 #### SHARED LIBRARY ###########################################################
 
 # load the shared library for esmf
@@ -104,4 +111,4 @@ try:
                         mode=ct.RTLD_GLOBAL)
 except:
     traceback.print_exc(file=sys.stdout)
-    raise ImportError('The ESMF shared library did not load!')
+    raise ValueError('The ESMF shared library did not load properly.')

@@ -1125,13 +1125,13 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
-ESMF_NETCDF_LIBS = -lnetcdf_c++ -lnetcdf
+ESMF_NETCDF_LIBS = -lnetcdf
 endif
 endif
 
 ifeq ($(ESMF_NETCDF),split)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
-ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf_c++ -lnetcdf
+ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
 endif
 endif
 

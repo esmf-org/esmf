@@ -371,17 +371,23 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  an extra node, or by breaking the large target grid cells 
  into two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
 
- It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation 
- weights by the destination fraction. This means that for a destination
- grid which only partially overlaps the source grid the destination field that is output from the regrid operation 
- should be divided by the corresponding destination fraction to yield the 
- true interpolated values for cells which are only partially covered by the source grid. The fraction also needs to be 
- included when computing the total source and destination integrals. 
+ It is important to note that by default (i.e. using destination area normalization) 
+conservative regridding doesn't normalize the interpolation weights by the destination fraction. 
+This means that for a destination grid which only partially overlaps the source grid
+the destination field that is output from the regrid operation 
+should be divided by the corresponding destination fraction to yield the 
+true interpolated values for cells which are only partially covered by the source grid. 
+The fraction also needs to be included when computing the total source and destination integrals. 
+(To include the fraction in the conservative weights, the user can specify 
+the fraction area normalization type. This can be done by specifying {\tt normType=ESMF\_NORMTYPE\_FRACAREA} when
+invoking {\tt ESMF\_FieldRegridStore()}.)
 
- When a destination field extends outside the unmasked source field, then the values of the cells which extend partway outside 
- the unmasked source field are decreased by the fraction they extend outside. To correct these values, the destination field ({\tt dst\_field}) resulting
- from the {\tt ESMF\_FieldRegrid()} call can be divided by the destination fraction {\tt dst\_frac} from
- the {\tt ESMF\_FieldRegridStore()} call. The following pseudocode demonstrates  how to do this:
+For weights generated using destination area normalization (either by not specifying any normalization type or by specifying {\tt normType=ESMF\_NORMTYPE\_DSTAREA}), if a destination field extends 
+outside the unmasked source field, then the values of the cells which 
+extend partway outside the unmasked source field are decreased by the fraction they extend outside. 
+To correct these values, the destination field ({\tt dst\_field}) resulting
+from the {\tt ESMF\_FieldRegrid()} call can be divided by the destination fraction {\tt dst\_frac} 
+from the {\tt ESMF\_FieldRegridStore()} call. The following pseudocode demonstrates  how to do this:
 
 \begin{verbatim}
 
@@ -392,12 +398,13 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  end for
 \end{verbatim}
 
- The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the
- destination field values ({\tt dst\_field}) resulting
- from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
- call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. As shown in the previous paragraph, it also 
- shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the
- fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
+For weights generated using destination area normalization (either by not specifying any normalization type or by specifying {\tt normType=ESMF\_NORMTYPE\_DSTAREA}), 
+the following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the
+destination field values ({\tt dst\_field}) resulting
+from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
+call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. As shown in the previous paragraph, it also 
+shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the
+fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
 
 \begin{verbatim}
 
@@ -406,14 +413,27 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
     if (dst_frac(i) not equal to 0.0) then
        dst_total=dst_total+dst_field(i)*dst_area(i) 
        dst_field(i)=dst_field(i)/dst_frac(i)
-        If mass computed here after dst_field adjust, would need to be:
-        dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i) 
+       ! If mass computed here after dst_field adjust, would need to be:
+       ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i) 
     end if
  end for
 \end{verbatim}
 
+For weights generated using fraction area normalization (by specifying {\tt normType=ESMF\_NORMTYPE\_FRACAREA}),
+no adjustment of the destination field is necessary. The following pseudo-code shows how to compute 
+the total destination integral ({\tt dst\_total}) given the
+destination field values ({\tt dst\_field}) resulting
+from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
+call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
 
- The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values
+\begin{verbatim}
+ dst_total=0.0
+ for each destination element i
+      dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i) 
+ end for
+\end{verbatim}
+
+ For both normalization types, the following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values
  ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and
  the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
 

@@ -2068,21 +2068,22 @@ StateGetMacro(ESMF_State,State,nestedState,spp)
 !EOP
 !       TODO: use item flag ESMF_STATEITEM_ARRAY<BUNDLE>
 
-        integer :: fileNameLen, localrc
+        integer :: localrc
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
         localrc = ESMF_RC_NOT_IMPL
 
-        ! get length of given fileName for C++ validation
-        fileNameLen = len_trim(fileName)
-
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
+        if (fileName == ' ') then
+          if (ESMF_LogFoundError (ESMF_RC_ARG_VALUE, msg='File name required',  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+
         ! invoke C to C++ entry point 
-        call c_ESMC_StateRead(state, state%statep%base, &
-                              fileNameLen, fileName, localrc)
+        call c_ESMC_StateRead(state, state%statep%base, trim (fileName), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

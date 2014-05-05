@@ -86,7 +86,7 @@ class TestCommand(Command):
         os.system('python src/ESMF/test/run_unit_test.py')
 
 class TestRegridCommand(Command):
-    description = "test"
+    description = "test regrid"
     user_options = []
     def initialize_options(self):
         self.cwd = None
@@ -97,7 +97,7 @@ class TestRegridCommand(Command):
         os.system('python src/ESMF/test/regrid_test/run_regrid.py')
 
 class TestRegridFromFileCommand(Command):
-    description = "test"
+    description = "test regrid from file"
     user_options = []
     def initialize_options(self):
         self.cwd = None
@@ -108,7 +108,7 @@ class TestRegridFromFileCommand(Command):
         os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py')
 
 class TestRegridFromFileDryrunCommand(Command):
-    description = "test"
+    description = "test regrid from file dryrun"
     user_options = []
     def initialize_options(self):
         self.cwd = None
@@ -130,6 +130,23 @@ class TestAllCommand(Command):
         os.system('python src/ESMF/test/run_unit_test.py')
         os.system('python src/ESMF/test/regrid_test/run_regrid.py')
         os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py')
+
+# and now in parallel
+class TestRegridParallelCommand(Command):
+    description = "test regrid parallel"
+    user_options = []
+    def initialize_options(self):
+        self.cwd = None
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+    def run(self):
+        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
+        try:
+            import mpi4py
+        except:
+            raise ImportError("mpi4py is required for parallel regrid testing!")
+        os.system('python src/ESMF/test/regrid_test/run_regrid.py --parallel')
+
 
 ## get package structure
 def _get_dot_(path,root='src'):
@@ -176,5 +193,6 @@ setup(\
                 'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
-                'test_all': TestAllCommand}
+                'test_all': TestAllCommand,
+                'test_regrid_parallel': TestRegridParallelCommand}
      )

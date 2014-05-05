@@ -29,6 +29,8 @@ except:
 
 from ESMF.test.regrid_test.grid_regridding_utilities import *
 
+esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+
 parallel = False
 if ESMF.pet_count() > 1:
     if ESMF.pet_count() != 4:
@@ -40,14 +42,11 @@ if ESMF.local_pet() == 0:
     print "\nfield_regridding"
 
 # create a grid
-srcgrid = grid_create_periodic([18,10], domask=True)
-dstgrid = grid_create_periodic([10,8])
-
-#srcgrid._write("srcgridSphPer")
-#dstgrid._write("dstgridSphPer")
+srcgrid = grid_create_periodic([60,30], domask=True)
+dstgrid = grid_create_periodic([55,28])
 
 # create the Fields
-srcfield = ESMF.Field(srcgrid, 'srcfield')
+srcfield = ESMF.Field(srcgrid, 'srcfield', mask_vals=[0])
 dstfield = ESMF.Field(dstgrid, 'dstfield')
 exactfield = ESMF.Field(dstgrid, 'exactfield')
 
@@ -65,8 +64,7 @@ exact_field = initialize_field_grid_periodic(exactfield)
 
 # run the ESMF regridding
 regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                            src_mask_values=np.array([1]), \
-                            dst_mask_values=np.array([1]), \
+                            src_mask_values=np.array([0]), \
                             regrid_method=ESMF.RegridMethod.CONSERVE, \
                             unmapped_action=ESMF.UnmappedAction.ERROR, \
                             src_frac_field=srcfracfield, \
@@ -79,5 +77,5 @@ srcmass = compute_mass_grid(srcfield, srcareafield,
 dstmass = compute_mass_grid(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
-compare_fields_grid(dstfield, exact_field, 20E-1, 10e-16, parallel=parallel, 
+compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel, 
                     dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)

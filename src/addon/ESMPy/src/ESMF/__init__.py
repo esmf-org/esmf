@@ -9,7 +9,7 @@ It can handle a wide variety of grids and options:  logically rectangular grids
 and unstructured meshes; regional or global grids; 2D or 3D; and pole and
 masking options.  ESMF also has capabilities to read grid information
 from NetCDF files in a variety of formats, including the evolving Climate and 
-Forecast (CF) GridSpec and UGRID conventions. 
+Forecast (CF) GridSpec and UGRID conventions.
 
 ESMPy supports a single-tile logically rectangular discretization type called
 Grid and an unstructured discretization type called Mesh (ESMF also
@@ -34,7 +34,7 @@ Regridding can be broken into two stages. The first stage is generation of an
 interpolation weight matrix that describes how points in the source grid
 contribute to points in the destination grid. The second stage is the
 multiplication of values on the source grid by the interpolation weight matrix
-to produce the appropriate values on the destination grid.  ESMP provides
+to produce the appropriate values on the destination grid.  ESMPy provides
 access to both stages through two separate interfaces.
 
 There are many different interpolation methods, suitable for different

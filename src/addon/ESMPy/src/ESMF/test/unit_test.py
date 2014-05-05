@@ -616,16 +616,16 @@ def mesh_test():
     status = True
     mesh, nodeCoord = mesh_create_2x2()
     
-    element_count = mesh.size_local[element]
+    element_count = mesh.size[element]
     print 'local element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size_local[node]
+    node_count = mesh.size[node]
     print 'local node_count = '+str(node_count)+'\n'
 
-    element_count = mesh.size[element]
+    element_count = mesh.size_local[element]
     print 'owned element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size[node]
+    node_count = mesh.size_local[node]
     print 'owned node_count = '+str(node_count)+'\n'
     
     coords, num_nodes, num_dims = ESMP_MeshGetCoordPtr(mesh)
@@ -1192,9 +1192,74 @@ def version_compare_test():
     # return correct from unit test
     return correct
 
+# The next two functions are not tested, they are just here for documentation
+
+def grid_create_from_file(filename, filetype):
+    '''
+    PRECONDITIONS: filename contains the name of a grid file in an appropriate
+                   format, and filetype is the corresponding type of the file.\n
+    POSTCONDITIONS: A Grid has been created.\n
+    RETURN VALUES: \n Grid :: grid \n
+    '''
+    grid = ESMF.Grid(filename=filename, filetype=filetype,
+                     staggerloc=ESMF.StaggerLoc.CENTER, is_sphere=True)
+
+    return grid
+
+def mesh_create_from_file(filename, filetype, meshname):
+    '''
+    PRECONDITIONS: filename contains the name of a mesh file in an appropriate
+                   format, and filetype is the corresponding type of the file.
+                   The meshname cooresponds to the variable to use to define 
+                   the mesh in a UGRID formatted file.\n
+    POSTCONDITIONS: A Mesh has been created.\n
+    RETURN VALUES: \n Mesh :: mesh \n
+    '''
+    mesh = ESMF.Mesh(filename=filename,
+                     filetype=filetype,
+                     meshname=meshname)
+
+    return mesh
+
+def create_field(grid_or_mesh, name):
+    '''
+    PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+                   will be used to initialize the name of a new Field.\n
+    POSTCONDITIONS: A Field has been created.\n
+    RETURN VALUES: \n Field :: field \n
+    '''
+    field = ESMF.Field(grid_or_mesh, name)
+
+    return field
+
+def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
+    '''
+    PRECONDITIONS: Two Fields have been created and a regridding 
+                   operation is desired from 'srcfield' to 'dstfield'.  
+                   The 'srcfracfield' and 'dstfractfield' are Fields 
+                   created to hold the fractions of the source and 
+                   destination fields which contribute to conservative 
+                   regridding.\n
+    POSTCONDITIONS: A regridding operation has set the data on 
+                    'dstfield', 'srcfracfield', and 'dstfracfield'.\n
+    RETURN VALUES: \n Field :: dstfield \n 
+                      Field :: srcfracfield \n
+                      Field :: dstfracfield \n
+    '''
+    # call the regridding functions
+    regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
+                                regrid_method=ESMF.RegridMethod.CONSERVE, \
+                                unmapped_action=ESMF.UnmappedAction.ERROR, \
+                                src_frac_field=srcfracfield, \
+                                dst_frac_field=dstfracfield)
+    dstfield = regridSrc2Dst(srcfield, dstfield)
+
+    return dstfield, srcfracfield, dstfracfield
+
 def main():
+
     # make an esmp object that won't go out of scope
-    esmp = Manager(logkind=LogKind.SINGLE, debug=True)
+    esmp = Manager(logkind=LogKind.MULTI, debug=True)
 
     try:
         vm = ESMP_VMGetGlobal()
