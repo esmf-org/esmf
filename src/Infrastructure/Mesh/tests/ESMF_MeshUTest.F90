@@ -1356,6 +1356,89 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist with just node distgrid "
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMesh1(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Setup lists
+  if (petCount .eq. 1) then  
+     allocate(nodeIds(9))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  else if (petCount .eq. 4) then  
+     if (localPet .eq. 0) then
+
+        allocate(nodeIds(5))
+        nodeIds=(/5,6,8,9,7/)
+
+     else if (localPet .eq. 1) then
+
+        allocate(nodeIds(1))
+        nodeIds=(/4/)        
+        
+     else if (localPet .eq. 2) then
+        
+        allocate(nodeIds(2))
+        nodeIds=(/2,3/)
+        
+     else if (localPet .eq. 3) then
+        allocate(nodeIds(1))
+        nodeIds=(/1/)
+     endif
+  endif
+
+
+  ! Create node Distgrid
+  nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  ! Create redisted mesh
+  mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
+                        rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Make sure nodes in nodeIds are the same as local nodes in mesh2
+   sizeOfList=size(nodeIds)
+   call c_esmc_meshchecknodelist(mesh2%this, sizeOfList, nodeIds, &
+                                 localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Deallocate
+  deallocate(nodeIds)
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, parametricDim=parametricDim, &
+                    spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Distgrids
+  call ESMF_DistgridDestroy(nodedistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test Mesh Create with coordSys ESMF_COORDSYS_SPH_DEG"
