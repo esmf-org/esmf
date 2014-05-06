@@ -307,6 +307,7 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     std::vector<std::pair<int,MeshObj *> > index_to_node;
     index_to_node.reserve(*num_nodes);
     
+    int num_owned = 0;
     // iterate through local nodes collecting indices and node pointers
     Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
     for (; ni != ne; ++ni) {
@@ -314,9 +315,12 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
       
       if (!GetAttr(node).is_locally_owned()) continue;
       
+      num_owned++;
       int idx = node.get_data_index();
       index_to_node.push_back(std::make_pair(idx,&node));
     }
+
+    printf("num_nodes = %d, num_owned_nodes = %d\n", *num_nodes, num_owned);
   
     // Sort by data index
     std::sort(index_to_node.begin(), index_to_node.end());
