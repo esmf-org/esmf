@@ -102,6 +102,13 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
 #endif
 
+\subsubsection{State Metadata}
+#ifdef STANDALONE
+\input{NUOPC_State_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_State_metadata}
+#endif
+
 \subsubsection{Field Metadata}
 #ifdef STANDALONE
 \input{NUOPC_Field_metadata}
