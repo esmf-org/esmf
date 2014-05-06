@@ -3,7 +3,7 @@
 
 \label{DataDepInit}
 
-For multi-model applications it is not uncommon that during start-up one or more components depends on data from one or more other components. These type of data-dependencies during initialize can become very complex very quickly. Finding the "correct" sequence to initialize all components for a complex dependency graph is not trivial. The NUOPC Layer deals with this issue by repeatedly looping over all components that indicate that their initialization has data dependencies on other components. The loop is finally exited when either all components have indicated completion of their initialization, or a dead-lock situation is being detected by the NUOPC Layer.
+For multi-model applications it is not uncommon that during start-up one or more components depends on data from one or more other components. These types of data-dependencies during initialize can become very complex very quickly. Finding the "correct" sequence to initialize all components for a complex dependency graph is not trivial. The NUOPC Layer deals with this issue by repeatedly looping over all components that indicate that their initialization has data dependencies on other components. The loop is finally exited when either all components have indicated completion of their initialization, or a dead-lock situation is being detected by the NUOPC Layer.
 
 The data-dependency resolution loop is implemented as part of Initialize Phase Definition version 2 (IPDv02) as defined in section \ref{IPD}. Participating components communicate their current status to the NUOPC Layer via Field and Component metadata. Participants are those components that contain an {\tt IPDv02p5} assignment in their {\tt InitializePhaseMap} Attribute according to section \ref{CompMeta}.  
 

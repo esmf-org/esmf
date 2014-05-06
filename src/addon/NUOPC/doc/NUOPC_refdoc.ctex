@@ -102,6 +102,13 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
 #endif
 
+\subsubsection{State Metadata}
+#ifdef STANDALONE
+\input{NUOPC_State_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_State_metadata}
+#endif
+
 \subsubsection{Field Metadata}
 #ifdef STANDALONE
 \input{NUOPC_Field_metadata}
@@ -113,11 +120,32 @@
 
 \subsection{Initialization}
 
+\subsubsection{Phase Maps and Component Labels}
+#ifdef STANDALONE
+\input{NUOPC_PhaseMaps}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_PhaseMaps}
+#endif
+
 \subsubsection{Initialize Phase Definitions}
 #ifdef STANDALONE
 \input{NUOPC_IPD}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_IPD}
+#endif
+
+\subsubsection{Field Pairing}
+#ifdef STANDALONE
+\input{NUOPC_FieldPairing}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldPairing}
+#endif
+
+\subsubsection{Namespaces}
+#ifdef STANDALONE
+\input{NUOPC_Namespaces}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Namespaces}
 #endif
 
 \subsubsection{Data-Dependencies during Initialize}

@@ -1,0 +1,23 @@
+% $Id$
+%
+
+\label{Namespaces}
+
+Namespaces are used to control and fine-tune the disambiguation of Field pairs during the initialization. The general procedure of Field pairing and disambiguation is outlined in section \ref{FieldPairing}, here the use of namespaces is described.
+
+The NUOPC Layer implements namespaces through the {\tt Namespace} attribute on {\tt ESMF\_State} objects. The value of this attribute is a simple character string. The NUOPC Layer automatically creates the import and export States of every Model and Mediator component that is added to a Driver. The {\tt Namespace} attribute of these States is automatically set to the {\tt compLabel} string that was provided during {\tt NUOPC\_DriverAdd()}. Doing this places every Field that is advertised through these States inside the component's unique namespace.
+
+A secondary namespace can be added to a State using the {\tt NUOPC\_StateNamespaceAdd()} method. This creates a new State that is nested inside of an existing State, and sets the {\tt Namespace} attribute of the new State. Fields that are advertised inside of such a nested State are in a namespace with two parts: {\tt NS1:NS2}. Here {\tt NS1} is the preset namespace of the import or export State (equal to the compLabel), and {\tt NS2} is a freely chosen namespace string.
+
+During Field pairing the namespace on each side of the connection is considered in the two part format {\tt NS1:NS2}. The first part is equal to the compLabel of the corresponding component, and NS2 is either the namespace of a nested State, or empty if the Field is not inside a nested State. Using this format, the calculation of the {\em bondLevel} during Field pairing is governed by the following rules:
+
+\begin{itemize}
+\item Namespace matching is done in a cross wise fashion, meaning NS1 from one side is compared to NS2 of the other side, and vice versa.
+\item The bondLevel is incremented by one counter for each cross-wise match between namespaces. (Considering that the bondLevel starts out as 1 for any Field pair with matching standard names, the maximum bondLevel that can be reached is 3.)
+\item Finding one side of the cross-wise comparison being an empty string is neither counted as a match nor a mis-match. The bondLevel remains unchanged.
+\item A Field pair for which a mis-match in either of the two cross-wise namespace comparisons is detected is discarded from the possible pairs. It is not further considered.
+\end{itemize}
+
+In practice then, a component that targets a specific other component with its advertised Fields would add a secondary namespace to its import or export State, and set that namespace to the compLabel of the targeted component. This increases the bondLevel for each pair from 1 to 2. An even higher bondLevel of 3 is achieved when both sides target each other by specifying the other component's compLabel through a secondary namespace.
+
+In conclusion, namespaces can affect the bondLevel calculation for each pair, but they do not affect how pairs are constructed and disambiguated. In particular, the requirement for unambiguous Field pairs for each consumer Field remains unchanged, and it is an error condition if the highest bondLevel for a consumer Field does not correspond to a unique Field pair.
