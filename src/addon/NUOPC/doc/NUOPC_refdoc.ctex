@@ -134,6 +134,20 @@
 \input{../addon/NUOPC/doc/NUOPC_IPD}
 #endif
 
+\subsubsection{Field Pairing}
+#ifdef STANDALONE
+\input{NUOPC_FieldPairing}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldPairing}
+#endif
+
+\subsubsection{Namespaces}
+#ifdef STANDALONE
+\input{NUOPC_Namespaces}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Namespaces}
+#endif
+
 \subsubsection{Data-Dependencies during Initialize}
 #ifdef STANDALONE
 \input{NUOPC_DataDepInit}
