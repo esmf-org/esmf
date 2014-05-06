@@ -120,6 +120,13 @@
 
 \subsection{Initialization}
 
+\subsubsection{Phase Maps and Component Labels}
+#ifdef STANDALONE
+\input{NUOPC_PhaseMaps}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_PhaseMaps}
+#endif
+
 \subsubsection{Initialize Phase Definitions}
 #ifdef STANDALONE
 \input{NUOPC_IPD}
