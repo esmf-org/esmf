@@ -493,11 +493,8 @@ void FTN_X(c_convertscrip)(
     nodelatlon[i*2+1]=nodelats[i];
   }
 
-<<<<<<< HEAD
   free(cornerlons);
   free(cornerlats);
-=======
->>>>>>> 0cb4750... Change free calls to delete[] as indicated by valgrind.
   delete[] nodelons;
   delete[] nodelats;
 
