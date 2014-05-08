@@ -130,20 +130,14 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64
+ESMF_F90LINKOPTS          += -m64
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
-endif
-ifeq ($(ESMF_ABISTRING),ia64_64)
-ESMF_CXXCOMPILEOPTS       += -size_lp64
-ESMF_CXXLINKOPTS          += -size_lp64
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
+ESMF_F90COMPILEOPTS       += -m64
+ESMF_F90LINKOPTS          += -m64
 endif
 
 ############################################################

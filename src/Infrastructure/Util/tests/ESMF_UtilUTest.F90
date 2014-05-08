@@ -102,7 +102,8 @@
       character(8), parameter :: sort_descend(4) =  &
           (/ "this", "test", "is  ", "a   " /)
 
-      character(ESMF_MAXSTR) :: pathname
+      character(ESMF_MAXPATHLEN) :: pathname
+      character(1) :: pathname_tooshort
 #endif
 
 !-------------------------------------------------------------------------------
@@ -593,6 +594,14 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     call ESMF_UtilIOGetCWD (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    print *, 'current directory name =>', trim (pathname), '<'
+
+    !EX_UTest
+    ! Test getting the current directory
+    write (name, *) "Testing getting the current directory with small string"
+    write (failMsg, *) "did not return failure"
+    call ESMF_UtilIOGetCWD (pathname_tooshort, rc=rc)
+    call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 

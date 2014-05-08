@@ -134,10 +134,10 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 // !IROUTINE: ESMC_GridCreateFromFile - Create a Grid from a NetCDF file specification.
 //
 // !INTERFACE:
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
+ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
 				  int *isSphere, int *addCornerStagger,
-				  int *addUserArea, int *addMask, char *varname,
-				  char **coordNames, int *rc);
+				  int *addUserArea, int *addMask, const char *varname,
+				  const char **coordNames, int *rc);
 // !RETURN VALUE:
 //  type(ESMC_Grid)
 //

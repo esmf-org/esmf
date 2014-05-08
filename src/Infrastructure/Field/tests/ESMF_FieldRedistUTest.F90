@@ -85,17 +85,27 @@ program ESMF_FieldRedistUTest
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
+#ifndef ESMF_NO_GREATER_THAN_4D
         call test_redist_5d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist congruent 5d fields with ungridded bounds and halos"
+#else
+        rc = ESMF_SUCCESS
+        write(name, *) "Skipped test because: ESMF_NO_GREATER_THAN_4D"
+#endif
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
+#ifndef ESMF_NO_GREATER_THAN_4D
         call test_redist_5dt(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist congruent 5d fields with ungridded bounds and halos " // &
             " srcToDstTransposeMap"
+#else
+        rc = ESMF_SUCCESS
+        write(name, *) "Skipped test because: ESMF_NO_GREATER_THAN_4D"
+#endif
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -510,6 +520,8 @@ contains
         rc = ESMF_SUCCESS
     end subroutine test_redist_3d
 
+#ifndef ESMF_NO_GREATER_THAN_4D
+
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_redist_5d"
     subroutine test_redist_5d(rc)
@@ -799,7 +811,7 @@ contains
 
         rc = ESMF_SUCCESS
     end subroutine test_redist_5dt
-
+#endif
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_redist_mesh"

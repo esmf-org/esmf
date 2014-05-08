@@ -86,7 +86,6 @@ class Manager(object):
             logkind: allows user to specify if there should be a single
             log file, multiple log files, or none at all.  The default
             is to not have a log file.  Argument values are: \n
-                                LogKind.SINGLE\n
                                 LogKind.MULTI\n
                                 (default) LogKind.NONE\n
             debug: allows user to log after every call, instead of the
@@ -107,7 +106,7 @@ class Manager(object):
             # segfault from ESMF when trying to call Destroy routines
             # on objects which have already been deallocated by the ESMF
             # garbage collector.
-            #import atexit; atexit.register(self.__del__)
+            import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
             vm = ESMP_VMGetGlobal()
             self.local_pet, self.pet_count = ESMP_VMGet(vm)

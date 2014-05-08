@@ -42,8 +42,10 @@
 #include <string>
 
 #ifdef ESMF_NETCDF
-#include <netcdfcpp.h>
-#include <ncvalues.h>
+#include "netcdf.h"
+typedef int NcFile;
+typedef int NcDim;
+#define NC_UNSPECIFIED ((nc_type)0)
 #endif
 
 namespace ESMCI
@@ -104,15 +106,16 @@ namespace ESMCI
  // < declare private interface methods here >
 
 #ifdef ESMF_NETCDF
-    ESMC_TypeKind_Flag  ncToEsmcType(NcType  ncTypeVal);
-    NcType         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
+    int ncerrToEsmcRc (int ncerr);
+    ESMC_TypeKind_Flag  ncToEsmcType(nc_type  ncTypeVal);
+    nc_type         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
 
-    Array*  readArray(NcFile*  netCdfFile,
-                      int      varIndex);
-    int     writeArray(NcFile*  netCdfFile,
-                       Array*   thisArray,
-                       int      numDims,
-                       NcDim**  dimensions);
+    Array*  readArray(NcFile  netCdfFile,
+                       int    varIndex);
+    int     writeArray(NcFile netCdfFile,
+                       Array* thisArray,
+                       int    numDims,
+                       int*   dimensions);
 #endif
 
 //

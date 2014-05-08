@@ -3898,6 +3898,125 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
 
 
+extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                                    Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredistelems()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    // Dereference
+    Mesh *src_mesh=*src_meshpp;
+
+    // if not split mesh, then just do the usual thing
+    if (!src_mesh->is_split) {
+      MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
+    } else {
+
+      Throw() << "Split meshes not supported in MeshRedistNodes right now! \n";
+
+#if 0 
+     // If split mesh expand ids
+      int num_elem_gids_ws;
+      int *elem_gids_ws=NULL;
+      std::map<UInt,UInt> split_to_orig_id;
+      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
+      
+      // Call into redist with expanded ids
+      MeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+
+      // dereference output mesh
+      Mesh *output_mesh=*output_meshpp;
+
+      // if split mesh add info
+      output_mesh->is_split=src_mesh->is_split;
+      output_mesh->max_non_split_id=src_mesh->max_non_split_id;
+      output_mesh->split_to_orig_id=split_to_orig_id;
+
+      // calculate split_id_to_frac map from other info
+      calc_split_id_to_frac(output_mesh); 
+
+#endif
+#if 0
+      // DEBUG OUTPUT
+    // Loop and get split-orig id pairs
+    std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
+    
+    for ( ; mi != me; mi++) {
+      printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
+    }
+#endif
+
+
+#if 0
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
+    
+    for ( ; si != se; si++) {
+      printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+    {
+      // DEBUG OUTPUT
+    // Loop and get split-frac id pairs
+    std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
+    std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
+    
+    for ( ; si != se; si++) {
+      printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
+    }
+    }
+
+    /* XMRKX */
+
+      // Free split gids
+      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
+#endif
+
+    }
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+
 extern "C" void FTN_X(c_esmc_meshcreateredist)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
                                                int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD

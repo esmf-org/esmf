@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_ModelBase.F90"
 !==============================================================================
 
 module NUOPC_ModelBase
@@ -27,7 +27,8 @@ module NUOPC_ModelBase
   
   public &
     routine_Run, &
-    routine_SetServices
+    routine_SetServices, &
+    routine_Nop
     
   public &
     type_InternalState, &
@@ -36,6 +37,7 @@ module NUOPC_ModelBase
   public &
     label_InternalState, &
     label_Advance, &
+    label_AdvanceClock, &
     label_CheckImport, &
     label_SetRunClock, &
     label_TimestampExport
@@ -44,6 +46,8 @@ module NUOPC_ModelBase
     label_InternalState = "ModelBase_InternalState"
   character(*), parameter :: &
     label_Advance = "ModelBase_Advance"
+  character(*), parameter :: &
+    label_AdvanceClock = "ModelBase_AdvanceClock"
   character(*), parameter :: &
     label_CheckImport = "ModelBase_CheckImport"
   character(*), parameter :: &
@@ -77,37 +81,43 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! set default entry points
+    ! add standard NUOPC GridComp Attribute Package to the Model
+    call NUOPC_GridCompAttributeAdd(gcomp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! Initialize phases
     
+    ! Phase 0 requires use of ESMF method.
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
-      userRoutine=routine_Run, rc=rc)
+
+    ! Run phases
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+      phaseLabelList=(/"RunPhase1"/), userRoutine=routine_Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      userRoutine=Noop, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-      
-    ! set default attachable methods
     
+    ! Specialize default Run -> setting the run Clock
     call ESMF_MethodAdd(gcomp, label=label_SetRunClock, &
       userRoutine=SetRunClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-
-    ! Specialize Run -> checking import Fields
+    ! Specialize default Run -> checking import Fields
     call ESMF_MethodAdd(gcomp, label=label_CheckImport, &
       userRoutine=CheckImport, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! Finalize phases
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+      phaseLabelList=(/"FinalizePhase1"/), userRoutine=routine_nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -116,7 +126,7 @@ module NUOPC_ModelBase
 
   !-----------------------------------------------------------------------------
 
-  subroutine Noop(gcomp, importState, exportState, clock, rc)
+  subroutine routine_Nop(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -135,8 +145,7 @@ module NUOPC_ModelBase
     integer, intent(out)  :: rc
     
     ! local variables    
-    character(len=NUOPC_PhaseMapStringLength) :: initPhases(4)
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)  :: name
 
     rc = ESMF_SUCCESS
 
@@ -144,16 +153,10 @@ module NUOPC_ModelBase
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! set IPDv00 as the default
-    initPhases(1) = "IPDv00p1=1"
-    initPhases(2) = "IPDv00p2=2"
-    initPhases(3) = "IPDv00p3=3"
-    initPhases(4) = "IPDv00p4=4"
     
-    call ESMF_AttributeSet(gcomp, &
-      name="InitializePhaseMap", valueList=initPhases, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! filter all other entries but those of type IPDv00
+    call NUOPC_CompFilterPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+      acceptStringList=(/"IPDv00p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -300,7 +303,7 @@ module NUOPC_ModelBase
       ! SPECIALIZE required: label_Advance
       ! -> first check for the label with phase index
       call ESMF_MethodExecute(gcomp, label=label_Advance, index=phase, &
-      existflag=existflag, userRc=localrc, rc=rc)
+        existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
@@ -310,7 +313,8 @@ module NUOPC_ModelBase
         return  ! bail out
       if (.not.existflag) then
         ! -> next check for the label without phase index
-        call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, rc=rc)
+        call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, &
+          rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -320,11 +324,35 @@ module NUOPC_ModelBase
           return  ! bail out
       endif
         
-      ! advance the internalClock to the new current time
-      call ESMF_ClockAdvance(internalClock, rc=rc)
+      ! advance the internalClock to the new current time (optionally specialz)
+      call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
+        existflag=existflag, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      if (.not.existflag) then
+        ! -> next check for the label without phase index
+        call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, &
+          existflag=existflag, userRc=localrc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (.not.existflag) then
+          ! at last use the DEFAULT implementation to advance the Clock
+          call ESMF_ClockAdvance(internalClock, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+        endif
+      endif
     
       ! conditionally output diagnostic to Log file
       if (verbose) then
@@ -344,19 +372,6 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
-    ! conditionally output diagnostic to Log file
-    if (verbose) then
-      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
-        ") with current time: ", msgString, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
-    
     ! SPECIALIZE optionally: label_TimestampExport
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
@@ -381,6 +396,19 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
 
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
+        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &

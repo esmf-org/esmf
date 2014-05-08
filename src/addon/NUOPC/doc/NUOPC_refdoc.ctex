@@ -16,7 +16,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
-\newcommand{\myauthors}{\large {\it CSC Committee Members}}
+\newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
 \newcommand{\myversion}{ESMF v7.0.0 beta snapshot}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
@@ -102,6 +102,13 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
 #endif
 
+\subsubsection{State Metadata}
+#ifdef STANDALONE
+\input{NUOPC_State_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_State_metadata}
+#endif
+
 \subsubsection{Field Metadata}
 #ifdef STANDALONE
 \input{NUOPC_Field_metadata}
@@ -113,11 +120,32 @@
 
 \subsection{Initialization}
 
+\subsubsection{Phase Maps and Component Labels}
+#ifdef STANDALONE
+\input{NUOPC_PhaseMaps}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_PhaseMaps}
+#endif
+
 \subsubsection{Initialize Phase Definitions}
 #ifdef STANDALONE
 \input{NUOPC_IPD}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_IPD}
+#endif
+
+\subsubsection{Field Pairing}
+#ifdef STANDALONE
+\input{NUOPC_FieldPairing}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldPairing}
+#endif
+
+\subsubsection{Namespaces}
+#ifdef STANDALONE
+\input{NUOPC_Namespaces}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Namespaces}
 #endif
 
 \subsubsection{Data-Dependencies during Initialize}
@@ -141,8 +169,10 @@
 \subsection{Generic Component: NUOPC\_Driver}
 #ifdef STANDALONE
 \input{NUOPC_Driver_manual_fapi}
+\input{NUOPC_Driver_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Driver_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Driver_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_DriverAtmOcn}
@@ -176,8 +206,10 @@
 \subsection{Generic Component: NUOPC\_Mediator}
 #ifdef STANDALONE
 \input{NUOPC_Mediator_manual_fapi}
+\input{NUOPC_Mediator_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Mediator_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Mediator_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_Connector}
@@ -188,6 +220,14 @@
 #endif
 
 \newpage
+
+\subsection{General Generic Component Methods}
+
+#ifdef STANDALONE
+\input{NUOPC_Comp_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Comp_fapi}
+#endif
 
 \subsection{Utility Class: NUOPC\_RunSequence}
 

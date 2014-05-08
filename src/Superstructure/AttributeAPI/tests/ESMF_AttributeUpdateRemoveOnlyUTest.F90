@@ -342,15 +342,6 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
-#if 0
-    call ESMF_AttributeSet(field, name_to_add, value_to_add, rc=status)
-    if (rc/=ESMF_SUCCESS) return
-
-    call ESMF_AttributeSet(field, name3, value32, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    if (rc/=ESMF_SUCCESS) return
-#endif
-
     call ESMF_AttributeRemove(field, name=name2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
@@ -613,29 +604,6 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-#if 0
-    !EX_disabled_UTest_Multi_Proc_Only
-    call ESMF_AttributeGet(field, name_to_add, value=value_out_added, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated deleted Attribute value from a Field test"
-    call ESMF_Test((rc==ESMF_SUCCESS).and. &
-                    value_to_add == value_out_added, &
-                    name, failMsg, result, ESMF_SRCLINE)
-
-    print *, "value_out_added = ", trim(value_out_added)
-
-    !EX_disabled_UTest_Multi_Proc_Only
-    call ESMF_AttributeGet(field, name3, value=value_out, convention=convESMF, &
-      purpose=purpGen, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Getting an updated deleted Attribute value from a Field test"
-    call ESMF_Test((rc==ESMF_SUCCESS).and. &
-                    value3 == value_out, &
-                    name, failMsg, result, ESMF_SRCLINE)
-
-    print *, "value_out = ", trim(value_out)
-#endif
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGetAttPack(field, convention=convESMF, &

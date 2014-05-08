@@ -117,10 +117,10 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
+ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
 				  int *isSphere, int *addCornerStagger,
-				  int *addUserArea, int *addMask, char *varname,
-				  char **coordNames, int *rc) {
+				  int *addUserArea, int *addMask, const char *varname,
+				  const char **coordNames, int *rc) {
 
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;

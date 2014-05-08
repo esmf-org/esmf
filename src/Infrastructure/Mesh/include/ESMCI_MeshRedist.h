@@ -29,6 +29,9 @@ class Mesh;
   void MeshRedistElem(Mesh *src_mesh, int num_elem_gids, int *elem_gids, 
                       Mesh **_output_mesh);
 
+  void MeshRedistNode(Mesh *src_mesh, int num_node_gids, int *node_gids, 
+                      Mesh **_output_mesh);
+
 } //namespace
 
 #endif

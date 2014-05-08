@@ -40,7 +40,7 @@ namespace ESMCI
   // Functions to convert endianness of 64-bit values
   //***
 #ifndef ntohll
-  #define ntohll(x) (((u_int64_t)(ntohl((int)((x << 32) >> 32))) << 32) | (unsigned int)ntohl(((int)(x >> 32))))
+  #define ntohll(x) (((uint64_t)(ntohl((int)((x << 32) >> 32))) << 32) | (unsigned int)ntohl(((int)(x >> 32))))
 #endif
 
 #ifndef htonll

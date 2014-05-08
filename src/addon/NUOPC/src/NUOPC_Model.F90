@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Model.F90"
 !==============================================================================
 
 module NUOPC_Model
@@ -23,10 +23,12 @@ module NUOPC_Model
   use NUOPC_ModelBase, only: &
     ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
+    routine_Nop                     => routine_Nop, &
     type_InternalState              => type_InternalState, &
     type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
+    label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
     ModelBase_label_TimestampExport => label_TimestampExport
@@ -46,6 +48,7 @@ module NUOPC_Model
   public &
     label_InternalState, &
     label_Advance, &
+    label_AdvanceClock, &
     label_CheckImport, &
     label_DataInitialize, &
     label_SetClock, &
@@ -74,33 +77,49 @@ module NUOPC_Model
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! SetServices of generic component deriving from
-    call ModelBase_routine_SS(gcomp, rc=rc)
+    ! Derive from ModelBase
+    call NUOPC_CompDerive(gcomp, ModelBase_routine_SS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+      
+    ! Initialize phases
+
+    ! For backward compatibility with v6 API the sequence of the following
+    ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
+    ! InitializePhaseMap.
+
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
+      userRoutine=routine_Nop, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2"/), &
+      userRoutine=routine_Nop, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p3", "IPDv01p4", "IPDv02p4", "IPDv03p6"/), &
+      userRoutine=InitializeP3, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p4", "IPDv01p5"/), &
+      userRoutine=InitializeP4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv02p5", "IPDv03p7"/), &
+      userRoutine=InitializeP5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! Override InitP3 -> compatibility checking
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP3, phase=3, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
-    ! Override InitP4 -> data initialize callback + initial time stamping
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP4, phase=4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
-    ! Override InitP5 -> data initialize callback + initial time stamping
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP5, phase=5, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
     ! Specialize Run -> timestamp export Fields
     call ESMF_MethodAdd(gcomp, label=ModelBase_label_TimestampExport, &
       userRoutine=TimestampExport, rc=rc)

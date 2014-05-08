@@ -24,6 +24,7 @@
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
 #include "ESMC_CoordSys.h"
+#include "Mesh/include/ESMCI_ClumpPnts.h"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -35,174 +36,6 @@
 #endif
 
 #define TOL 0.0000000001
-
-typedef struct field {
-  double lon, lat;
-  struct field *prev, *next;
-  int rank;
-  int count;
-} FIELD;
-
-FIELD **bucket;
-int totalbuckets,interval,nextrank;
-
-int init_bucket(int num_cells) {
-  int i, len, total, factor;
-  // increase number of buckets when num_cells is big
-  total = 180;
-  factor = 1;
-  nextrank = 1;
-  len = num_cells/total;
-  while (len > 5000) {
-    total *=2;
-    factor *=2;
-    len = num_cells/total;
-  }
-  //printf("total number of buckets: %d\n", total);
-  // need one more bucket for latitude = 90
-  totalbuckets = total+1;
-  interval = factor;
-  bucket = (FIELD**)malloc(sizeof(FIELD*)*totalbuckets);
-  for (i=0; i<totalbuckets; i++) {
-    bucket[i]=NULL;
-  }
-  return 1;
-}
-
-void print_bucket(int bid) {
-  FIELD *curr;
-  if (bucket[bid]) {
-    printf("Bucket %d:\n", bid);
-    curr = bucket[bid];
-    while (curr) {
-      printf("%f %f %d %d\n", curr->lon, curr->lat, curr->rank, curr->count);
-      curr=curr->next;
-    }
-  }
-}
-
-FIELD* insert_bucket(double lon, double lat) {
-  int bid;
-  FIELD *me, *curr;
-  bid = (int)((lat + 90.0)*interval+TOL);
-  if (bid < 0) {
-    printf("Wrong coordinates, (%f, %f)", lon, lat);
-    return 0;
-  }
-  if (bid > totalbuckets-1) bid=bid-1;
-  if (!bucket[bid]) {
-    me = bucket[bid] = (FIELD*)malloc(sizeof(FIELD));
-    me->prev = me->next = NULL;
-    me->lon = lon;
-    me->lat = lat;
-    me->rank=nextrank++;
-    me->count = 1;
-    return me;
-  } else {
-    curr = bucket[bid];
-    while ((curr->lon+TOL) < lon) {
-      //while (curr->lon < lon) { 
-      if (!curr->next) break;
-      curr=curr->next;
-    }
-    if (fabs(lon - curr->lon) < TOL) {
-    // Advance to the item which is still has curr->lon==lon, but which is just >= lat if possible
-    //      while (curr->lon == lon && (curr->lat < lat)) {
-      while (true) {
-	if (!curr->next) break;
-        if (fabs(curr->next->lon - lon) > TOL) break;      
-        if ((curr->lat - lat) >= -1*TOL) break;
-	curr=curr->next;
-      }
-      // At this point curr->lon still == lon
-
-      // Point is in list
-      if (fabs(curr->lat-lat)<TOL) {
-	curr->count++;
-	return curr;
-      } else if (lat < curr->lat) {  // Put point just before this one
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr->prev;
-	  if (me->prev) {
-	    me->prev->next=me;
-	  } else {
-	    bucket[bid]=me;
-	  }
-	  me->next = curr;
-	  curr->prev = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-      }	else if (lat > curr->lat) { // Put point just after this one
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr;
-	  me->next = curr->next;
-          if (me->next) {
-            me->next->prev=me;
-          }
-	  curr->next = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-      }	 
-    }
-    // insert before curr
-    if (lon < curr->lon) {
-	  me = (FIELD*)malloc(sizeof(FIELD));
-	  me->prev = curr->prev;
-	  if (me->prev) {
-	    me->prev->next=me;
-	  } else {
-	    bucket[bid]=me;
-	  }
-	  me->next = curr;
-	  curr->prev = me;
-	  me->lon = lon;
-	  me->lat = lat;
-	  me->rank=nextrank++;
-	  me->count = 1;
-	  return me;
-    } else if (!curr->next) {
-	// insert at the end
-	me = curr->next = (FIELD*)malloc(sizeof(FIELD));
-	me->prev = curr;
-	me->next = NULL;
-	me->lon = lon;
-	me->lat = lat;
-	me->rank=nextrank++;
-	me->count = 1;
-	return me;
-    }
-  }
-  printf("insert_bucket() failed, (%f, %f)\n", lon, lat);
-  return 0;
-}
-
-// return a pointer to the FIELD if found a match
-FIELD* search_bucket(double lon, double lat) {
-  int bid;
-  FIELD *curr;
-  bid = (int)((lat + 90.0)*interval+TOL);
-  if (bid < 0) {
-    return NULL;
-  }
-  if (bid > totalbuckets-1) bid=bid-1;
-  curr = bucket[bid];
-  while (!curr && (curr->lon+TOL) < lon) {
-    curr=curr->next;
-  }
-  if (!curr || fabs(curr->lon-lon) > TOL) return NULL;
-  while (fabs(curr->lon-lon)<TOL && (curr->lat < lat)) {
-    curr = curr->next;
-  }
-  if (!curr) return NULL;
-  if (fabs(curr->lon-lon)<TOL && fabs(curr->lat-lat)<TOL) return curr;
-  return NULL;
-}
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "handle_error"
@@ -270,6 +103,7 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
      
 void convert3D(double lon, double lat, double *x, double *y) {
@@ -325,6 +159,7 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
       *(next+min)=temp1;
     }
   }
+  free(angles);
 }
 
 #undef ESMC_METHOD
@@ -529,7 +364,6 @@ void FTN_X(c_convertscrip)(
   unsigned char *edges, *totalneighbors;
   int i,i1, i2, j, k, totalnodes, count, fillvalue;
   int goodnodes;
-  FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
   const char *strbuf;
   char *strbuf2;
@@ -541,6 +375,8 @@ void FTN_X(c_convertscrip)(
   char units[80];
   int isRadian = 0;
   size_t len;
+  double *nodelons,  *nodelats;
+  int totalsize;
 
   *rc = 1;
 #ifdef ESMF_NETCDF
@@ -644,52 +480,28 @@ void FTN_X(c_convertscrip)(
       cornerlons[i] *= ESMC_CoordSys_Rad2Deg;
     }
   }
-  
-  // convert longitude to (0, 360) degrees
-  for (i = 0; i < gcdim*gsdim; i++) {
-    if (cornerlons[i] <= 0) {
-      cornerlons[i] += 360.0;
-    }
-  }
-  
-  cells = (int*)malloc(sizeof(int)*gcdim*gsdim);
-  
-  // doing a bucket sort, create totalbuckets buckets,one for each latitude degree
-  // each bucket is a sorted linked list by longitude
-  init_bucket(gsdim);
-  for (i=0; i<gcdim*gsdim; i++) {
-    tmppt=insert_bucket(cornerlons[i],cornerlats[i]);
-    if (tmppt) {
-      cells[i]=tmppt->rank;
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "insert_bucket() failed", ESMC_CONTEXT, rc);
-      //printf("insert_buket() failed at index %d\n", i);
-      return;
-    }
-  }
-  totalnodes = nextrank-1;
 
-  //fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
-  free(cornerlats);
-  free(cornerlons);
-
-  // create node table
-  // also count the maximum cells that vertex belongs to, this
-  // this value will decide the maximal edges of the dual mesh
+  totalsize = gsdim * gcdim;
+  cells = (int*)malloc(sizeof(int)*totalsize);
+  ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
+		     &nodelons, &nodelats, &maxconnection,-91.0, 91.0, rc);
+  
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
-  totalneighbors=(unsigned char*)malloc(totalnodes);
-  for (j=0; j<totalbuckets; j++) {
-    curr = bucket[j];
-    while (curr) {
-      i=curr->rank-1;
-      nodelatlon[i*2]=curr->lon;
-      nodelatlon[i*2+1]=curr->lat;
-      totalneighbors[i]=curr->count;
-      curr=curr->next;
-    }
+  totalneighbors = (unsigned char*)calloc(totalnodes, sizeof(unsigned char));
+  for (i=0; i<totalnodes; i++) {
+    nodelatlon[i*2]=nodelons[i];
+    nodelatlon[i*2+1]=nodelats[i];
   }
 
+  free(cornerlons);
+  free(cornerlats);
+  delete[] nodelons;
+  delete[] nodelats;
+
+  for (i=0; i<totalsize; i++) {
+    if (cells[i] >= totalnodes) printf("out of bound cells: %d %d\n", i, cells[i]);
+    totalneighbors[cells[i]] += 1;
+  }
   // check for degenerated cells, remove duplicate nodes and fill cell_edges;
   edges = (unsigned char*)malloc(gsdim);
   for (i=0; i<gsdim; i++) {
@@ -701,7 +513,7 @@ void FTN_X(c_convertscrip)(
       for (k=0; k<j; k++) {
 	if (cells[i1+j]==cells[i1+k]) {
 	  // the two vertices belong to one cell, over-counted
-	  totalneighbors[cells[i1+j]-1]--;
+	  totalneighbors[cells[i1+j]]--;
           //  printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
 	  break;
 	}
@@ -717,33 +529,23 @@ void FTN_X(c_convertscrip)(
         "A cell with less than 3 edges were found", ESMC_CONTEXT, rc);
       return;
     }
+
+    // change 0 based index to 1 based for Fortran
     edges[i]=count;
     for (j=0; j<count; j++) {
-      cells[i1+j]=temp[j];
+      cells[i1+j]=temp[j]+1;
     }
     for (j=count; j<gcdim; j++) {
       cells[i1+j]=-1;
     }
   }
-
-  // free the buckets
-  for (j=0; j<totalbuckets; j++) {
-    curr = bucket[j];
-    while (curr) {
-      tmppt=curr->next;
-      free(curr);
-      curr=tmppt;
-    }
-  }
-
   // find the maximal number of neighbors for all the vertices
   maxconnection = 0;
   for (i=0; i< totalnodes; i++) {
     if (totalneighbors[i]>maxconnection)
       maxconnection=totalneighbors[i];
   }
-
-  // printf("Maximal connection per vertex is %d\n", maxconnection);
+  //printf("Maximal connection per vertex is %d\n", maxconnection);
 
   if (*dualflag == 0) {
     // create the output netcdf file
@@ -936,6 +738,7 @@ void FTN_X(c_convertscrip)(
   // so, this has to be calculated as well
   
   // First, read in the center coordinates
+  free(edges);
   inbuf = (double*)malloc(sizeof(double)*gsdim);
   inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
   status = nc_get_var_double(ncid1, ctlatid, inbuf);
@@ -1131,6 +934,7 @@ void FTN_X(c_convertscrip)(
   if (handle_error(status)) return; // bail out;
 
   free(totalneighbors);
+  free(cells);
   free(dualcells);
   free(nodelatlon);
   free(inbuf1);

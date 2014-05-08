@@ -583,7 +583,8 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
           //for (UInt d = 0; d < fdim; d++) {
           for (UInt d = 0; d < 1; d++) { // weights are redundant per entry
             
-            data[d] = result[n*nrhs+d].val();
+            // DON'T ACTUALLY DO REGRID BECAUSE WE DON'T USE IT
+            // data[d] = result[n*nrhs+d].val();
         
             IWeights::Entry row(snode.get_id(), d, 0.0, elem.get_id());
         
@@ -1405,7 +1406,8 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
       
       for (UInt d = 0; d < 1; d++) {
         
-        ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d].val();
+        // DON'T ACTUALLY DO REGRID BECAUSE WE DON'T USE IT
+        // ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d].val();
         
         IWeights::Entry row(node.get_id(), d, 0.0, elem.get_id());
         
@@ -1868,24 +1870,27 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
     
     MEField<> *sFR = src_rend_Fields[fpair_num], *sF = srcF[fpair_num];
-    
-    grend.GetSrcComm().SendFields(1, &sF, &sFR);
-    
-    // Perform the interpolation
+
+    // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM. VALUES    
+    // grend.GetSrcComm().SendFields(1, &sF, &sFR);
+
+    // Get fields for bilinear and patch calc.
+    // TODO: think about pulling these out of subroutines below 
     const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
-    
     _field *dfR = dst_rend_fields[fpair_num], *df = dstf[fpair_num]; 
     
+    // Calc. Matrix for bilinear and patch
     if (fpairs[fpair_num].idata == INTERP_STD)
       mat_point_serial_transfer(*sFR, *dfR, sres, iw);
     else if (fpairs[fpair_num].idata == INTERP_PATCH)
       mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, grend.GetSrcRend(), iw);
     
+    // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM VALUES    
     // Retrieve the interpolated data
-    CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
-    
+    //CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
+    //
     // Send the data back (comm has been transposed in GeomRend::Build)
-    dst_node_rel.send_fields(1, &dfR, &df);
+    //dst_node_rel.send_fields(1, &dfR, &df);
   }
 }
 

@@ -305,7 +305,7 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 //
 // !ARGUMENTS:
-      char *pathname,           // in - path name
+      char *pathname,           // out - path name
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
 //
@@ -319,8 +319,15 @@ extern "C" {
 #if !defined (ESMF_OS_MinGW)
   if (getcwd (pathname, pathname_l) != NULL)
     *rc = ESMF_SUCCESS;
-  else
-    *rc = ESMF_FAILURE;
+  else {
+    switch (errno) {
+      case ERANGE:
+        *rc = ESMF_RC_BUFFER_SHORT;
+        break;
+      default:
+        *rc = ESMF_FAILURE;
+    }
+  }
 #else
   int winrt = GetCurrentDirectory (pathname_l, pathname)
   if (winrt == 0 || winrt > pathname_l)
@@ -328,10 +335,9 @@ extern "C" {
   else
     *rc = ESMF_SUCCESS;
 #endif
-  if (strlen(pathname) < pathname_l)
-    for (int i = strlen(pathname); i < pathname_l; ++i)
-      pathname[i] = ' ';
-
+  int len = strlen (pathname);
+  if (len < pathname_l)
+    memset (pathname+len, ' ', pathname_l-len);
 }
 
 //-----------------------------------------------------------------------------

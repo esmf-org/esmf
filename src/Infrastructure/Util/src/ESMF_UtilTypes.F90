@@ -743,6 +743,23 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_NormType_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: normtype
+      end type
+
+
+      type(ESMF_NormType_Flag), parameter :: &
+           ESMF_NORMTYPE_DSTAREA      = ESMF_NormType_Flag(0), &
+           ESMF_NORMTYPE_FRACAREA     = ESMF_NormType_Flag(1)
+
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 !
 !
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
@@ -1024,6 +1041,10 @@
 
       public ESMF_COORDSYS_DEG2RAD, &
              ESMF_COORDSYS_RAD2DEG
+
+      public ESMF_NormType_Flag
+      public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
+
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
@@ -1055,6 +1076,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_CoordSysEqual
+  module procedure ESMF_NormTypeEqual
 end interface
 
 interface operator (/=)
@@ -1072,6 +1094,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_CoordSysNotEqual
+  module procedure ESMF_NormTypeNotEqual
 end interface
 
 interface assignment (=)
@@ -1702,5 +1725,76 @@ end function
                                  CoordSys2%coordsys)
 
       end function ESMF_CoordSysNotEqual
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NormTypeEqual"
+!BOPI
+! !IROUTINE: ESMF_NormTypeEqual - Equality of Coordinate Systems
+!
+! !INTERFACE:
+      function ESMF_NormTypeEqual(NormType1, NormType2)
+
+! !RETURN VALUE:
+      logical :: ESMF_NormTypeEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_NormType_Flag), intent(in) :: &
+         NormType1,      &! Two igrid statuses to compare for
+         NormType2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF NormType statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[NormType1, NormType2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_NormTypeEqual = (NormType1%normtype == &
+                              NormType2%normtype)
+
+      end function ESMF_NormTypeEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NormTypeNotEqual"
+!BOPI
+! !IROUTINE: ESMF_NormTypeNotEqual - Non-equality of NormType statuses
+!
+! !INTERFACE:
+      function ESMF_NormTypeNotEqual(NormType1, NormType2)
+
+! !RETURN VALUE:
+      logical :: ESMF_NormTypeNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_NormType_Flag), intent(in) :: &
+         NormType1,      &! Two NormType Statuses to compare for
+         NormType2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF NormType statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[NormType1, NormType2]
+!          Two statuses of NormTypes to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_NormTypeNotEqual = (NormType1%normtype /= &
+                                 NormType2%normtype)
+
+      end function ESMF_NormTypeNotEqual
 
       end module ESMF_UtilTypesMod

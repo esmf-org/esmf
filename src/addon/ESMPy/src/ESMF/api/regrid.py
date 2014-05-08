@@ -25,7 +25,7 @@ class Regrid(object):
                  dst_mask_values=None,
                  regrid_method=None,
                  pole_method=None,
-                 regridPoleNPnts=None,
+                 regrid_pole_npoints=None,
                  unmapped_action=None,
                  src_frac_field=None,
                  dst_frac_field=None):
@@ -35,7 +35,8 @@ class Regrid(object):
             srcfield: source Field associated with an underlying Grid 
                       or Mesh. \n
             dstfield: destination Field associated with an underlying 
-                      Grid or Mesh. \n
+                      Grid or Mesh.  The data in this Field may be 
+                      overwritten by this call.\n
         Optional Arguments: \n
             src_mask_values: a numpy array (internally cast to 
                              dtype=numpy.int32)of values that can be 
@@ -61,7 +62,7 @@ class Regrid(object):
                     (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
                     PoleMethod.NPNTAVG\n
                     PoleMethod.TEETH\n
-            regridPoleNPnts: specifies how many points to average over 
+            regrid_pole_npoints: specifies how many points to average over 
                              if polemethod == PoleMethod.NPNTAVG\n
             unmapped_action: specifies which action to take if a 
                              destination point is found which does not 
@@ -109,7 +110,7 @@ class Regrid(object):
                                             dstMaskValues=local_dst_mask_values,
                                             regridmethod=regrid_method,
                                             polemethod=pole_method,
-                                            regridPoleNPnts=regridPoleNPnts,
+                                            regridPoleNPnts=regrid_pole_npoints,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
                                             dstFracField=dst_frac_field)
@@ -120,11 +121,14 @@ class Regrid(object):
         self.dst_mask_values = dst_mask_values
         self.regrid_method = regrid_method
         self.pole_method = pole_method
-        self.regridPoleNPnts = regridPoleNPnts
+        self.regrid_pole_npoints = regrid_pole_npoints
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
 
+        # regist with atexit
+        import atexit; atexit.register(self.__del__)
+        self.__finalized = False
 
     def __call__(self, srcfield, dstfield,
                  zero_region=None):
@@ -161,8 +165,10 @@ class Regrid(object):
         Returns: \n
             None \n
         """
-        # call into the ctypes layer
-        ESMP_FieldRegridRelease(self.routehandle)
+        if not self.__finalized:
+            ESMP_FieldRegridRelease(self.routehandle)
+            self.__finalized = True
+
 
     def __repr__(self):
         """

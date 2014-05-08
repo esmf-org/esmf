@@ -40,7 +40,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(15)
+  integer            :: commandbuf2(16)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -59,10 +59,12 @@ program ESMF_RegridWeightGenApp
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i
+  type(ESMF_NormType_Flag) :: normType
+
   
   terminateProg = .false.
   
-  ! Check if --no_errorlog is given, if so, call ESMF_Initialize() with ESMF_LOGKIND_NONE flag
+  ! Check if --no_log is given, if so, call ESMF_Initialize() with ESMF_LOGKIND_NONE flag
 #ifndef ESMF_MPIUNI
   call MPI_Init(rc)
   if (rc /= MPI_SUCCESS) then
@@ -80,15 +82,11 @@ program ESMF_RegridWeightGenApp
 #endif
 
   if (PetNo == 0) then
-      call ESMF_UtilGetArgC (count=count)
       logflag = ESMF_LOGKIND_MULTI
-      do i=1,count
-        call ESMF_UtilGetArg (argindex=i, argvalue=argvalue, rc=rc)
-        if (trim(argvalue) == '--no_errorlog') then
-          logflag = ESMF_LOGKIND_NONE 
-          exit    
-        endif
-      enddo
+      call ESMF_UtilGetArgIndex ('--no_log', argindex=ind)
+      if (ind > 0) then
+        logflag = ESMF_LOGKIND_NONE 
+      end if
       msgbuf(1) = logflag
    endif
 
@@ -473,6 +471,23 @@ program ESMF_RegridWeightGenApp
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
+    ! Norm type
+    normType = ESMF_NORMTYPE_DSTAREA ! Default to DSTAREA
+    call ESMF_UtilGetArgIndex('--norm_type', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=flag)
+      if (trim(flag) .eq. 'dstarea') then
+        normType = ESMF_NORMTYPE_DSTAREA
+      else if (trim(flag) .eq. 'fracarea') then
+        normType = ESMF_NORMTYPE_FRACAREA
+      else 
+        write(*,*)
+        print *, 'ERROR: Unknown --norm_type: must be either dstarea or fracarea'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
     ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
     ! coordinate variables
     useSrcCoordVar = .false.
@@ -545,8 +560,6 @@ program ESMF_RegridWeightGenApp
       if (method .eq. 'neareststod') commandbuf2(3)=3
       if (method .eq. 'nearestdtos') commandbuf2(3)=4
       commandbuf2(4)=poleptrs
-      if (srcIsRegional) commandbuf2(9) = 1
-      if (dstIsRegional) commandbuf2(10) = 1
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
       if (srcMissingValue) commandbuf2(7) = 1
@@ -558,7 +571,9 @@ program ESMF_RegridWeightGenApp
       if (largeFileFlag) commandbuf2(13) = 1
       if (netcdf4FileFlag) commandbuf2(14) = 1
       if (checkFlag) commandbuf2(15) = 1 
+      commandbuf2(16) = normType%normtype
     endif 
+
 
     call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -674,6 +689,8 @@ program ESMF_RegridWeightGenApp
     else
       checkFlag = .false.
     endif
+    normType%normtype=commandbuf2(16)
+
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
@@ -711,6 +728,7 @@ program ESMF_RegridWeightGenApp
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
+                            normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
                             srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
@@ -763,6 +781,7 @@ contains
     print *, "                      --weight|-w out_weight_file "
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
+    print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC]" 
     print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC]"
@@ -779,7 +798,7 @@ contains
     print *, "                      [--src_coordinates lon_var_name,lat_var_name]"
     print *, "                      [--dst_coordinates lon_var_name,lat_var_name]"
     print *, "                      [--user_areas]"
-    print *, "                      [--no_errorlog]"
+    print *, "                      [--no_log]"
     print *, "                      [--check]"
     print *, "                      [--help]"
     print *, "                      [--version]"
@@ -791,9 +810,11 @@ contains
     print *, "--weight or -w - a required argument specifying the output regridding weight"
     print *, "                 file name"
     print *, "--method or -m - an optional argument specifying which interpolation method is"
-    print *, "                 used.  The default method is bilinear"
+    print *, "                 used.  The default method is bilinear."
     print *, "--pole or -p - an optional argument indicating what to do with the pole."
-    print *, "                 The default value is all"
+    print *, "                 The default value is all."
+    print *, "--norm_type - an optional argument indicating the type of normalization to"
+    print *, "              do when generating conserative weights. The default value is dstarea."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--src_type - an optional argument specifying the source grid file type."
@@ -847,7 +868,7 @@ contains
     print *, "             then the conservation will hold for the ESMF calculated (great circle)"
     print *, "             areas.  Whichever areas the conservation holds for are output to the"
     print *, "             weight file."
-    print *, "--no_errorlog    - Turn off the ESMF error log."
+    print *, "--no_log    - Turn off the ESMF logs."
     print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
     print *, "             is done by calling ESMF_Regrid() on an analytic source field using the weights"
     print *, "             generated by this application.  The mean relative error between the destination"

@@ -8,6 +8,9 @@
 #
 ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = clang
+ESMF_CPPDEFAULT         = clang -E -P -x c
+
+ESMF_CXXCOMPILECPPFLAGS += -x c++
 
 ############################################################
 # Default MPI setting.
@@ -120,13 +123,6 @@ endif
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -187,6 +183,12 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Determine where clang's libraries are located
 #
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
@@ -211,12 +213,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++ -lc++
+ESMF_F90LINKLIBS += -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran
+ESMF_CXXLINKLIBS += -lgfortran -lstdc++
 
 ############################################################
 # Shared library options

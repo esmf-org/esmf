@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC.F90"
 !==============================================================================
 
 !TODO: make this macros available through ESMF as parameter or find other way
@@ -24,6 +24,7 @@ module NUOPC
   use ESMF
   use NUOPC_Base
   use NUOPC_RunSequenceDef
+  use NUOPC_Comp
 
   implicit none
   
@@ -42,7 +43,6 @@ module NUOPC
   public NUOPC_CplCompAreServicesSet
   public NUOPC_CplCompAttributeAdd
   public NUOPC_CplCompAttributeGet
-  public NUOPC_CplCompAttributeSet
   public NUOPC_FieldAttributeAdd
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
@@ -53,7 +53,6 @@ module NUOPC
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
-  public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
@@ -62,13 +61,18 @@ module NUOPC
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
+  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
+  public NUOPC_StateAttributeAdd
+  public NUOPC_StateAttributeGet
+  public NUOPC_StateAttributeSet
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
   public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsUpdated
+  public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
@@ -84,4 +88,10 @@ module NUOPC
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
   
+  ! defined in NUOPC_Comp
+  public NUOPC_CompDerive
+  public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompSetEntryPoint
+  public NUOPC_CompSpecialize
+
 end module

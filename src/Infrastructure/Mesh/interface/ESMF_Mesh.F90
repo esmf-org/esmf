@@ -3114,6 +3114,8 @@ end function ESMF_MeshCreateFromUnstruct
        end do
     endif
 
+    deallocate(nodeCoords)
+
     if (.not. haveNodeMask) then
        ! Add nodes
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
@@ -3300,7 +3302,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
-    deallocate(ElemId, ElemType, ElemConn)
+    deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
     if (haveElmtMask) deallocate(elementMask) 
     if (haveMask) deallocate(ElemMask) 
      
@@ -3781,11 +3783,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           deallocate(nodeIds)
           deallocate(elemIds)
        else  !! JUST NODE DISTGRID PRESENT !!
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-               msg="- this method currently will not work with just the nodalDistgrid specified", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-          return 
-       endif
+          call ESMF_DistGridGetNumIds(nodalDistgrid, numNodeIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! First fill in elem information not requiring redist
+          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistgrid
+          ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+
+
+          ! If the C side doesn't exist, then return an error 
+          ! because I don't know how to distribute nodes without elem info 
+          if (mesh%isCMeshFreed) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+   msg="- method does not work if the input Mesh has no " // &
+       "C Mesh attached and just the nodeDistgrid is specified", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+             return
+          endif
+
+          ! Allocate space for node Ids
+          allocate(nodeIds(numNodeIds))
+
+          ! Get node Ids
+          call ESMF_DistGridGetIds(nodalDistgrid, &
+               nodeIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+          ! Call into C
+          call C_ESMC_MeshCreateRedistNodes(mesh,                  &
+               numNodeIds, nodeIds,   & 
+               ESMF_MeshCreateRedist, &
+               localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Deallocate gid arrays
+          deallocate(nodeIds)
+
+           ! Create node distgrid and get number of nodes
+          call C_ESMC_MeshCreateElemDistGrid( &
+                      ESMF_MeshCreateRedist%this, &
+                      ESMF_MeshCreateRedist%element_distgrid, &
+                      ESMF_MeshCreateRedist%numOwnedElements, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return    
+     endif
     else
        !! JUST ELEMENT DISTGRID PRESENT !!
        if (present(elementDistgrid)) then

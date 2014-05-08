@@ -93,6 +93,9 @@ class OTree {    // inherits from ESMC_Base class
  // Add item to tree
  void add(double min[3], double max[3], void *data);
 
+ // Add item to tree and commit it at the same time
+ void add_commit(double min[3], double max[3], void *data);
+
  // Build tree
  void commit();
 
@@ -101,6 +104,8 @@ class OTree {    // inherits from ESMC_Base class
  int runon_mm_chng(double [], double [],
         int (*func)(void *, void *, double *, double *),void *);
    
+
+
 };  // end class ESMC_OTree
 
  

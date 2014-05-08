@@ -2502,6 +2502,7 @@ logical                       :: checkpoint = .FALSE.
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
+#ifndef ESMF_NO_GREATER_THAN_4D
      case(5)
      !--------------------------------------------------------------------------
      ! rank = 5
@@ -2579,12 +2580,13 @@ logical                       :: checkpoint = .FALSE.
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
+#endif
      case default
      !--------------------------------------------------------------------------
      ! error
      !--------------------------------------------------------------------------
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount inot between 1 and 7", &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount out of range", &
                  rcToReturn=localrc)
         return
      end select
@@ -2782,6 +2784,7 @@ logical                       :: checkpoint = .FALSE.
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
+#ifndef ESMF_NO_GREATER_THAN_4D
      case(5)
      !--------------------------------------------------------------------------
      ! rank = 5
@@ -2854,12 +2857,13 @@ logical                       :: checkpoint = .FALSE.
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
+#endif
      case default
      !--------------------------------------------------------------------------
      ! error
      !--------------------------------------------------------------------------
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount inot between 1 and 7", &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount out of range", &
                  rcToReturn=localrc)
         return
      end select
@@ -3208,6 +3212,7 @@ logical                       :: checkpoint = .FALSE.
              enddo   !   i2
            enddo    !   i1
         enddo    ! de
+#ifndef ESMF_NO_GREATER_THAN_4D    
      case(5)
      !--------------------------------------------------------------------------
      ! rank = 5
@@ -3319,11 +3324,11 @@ logical                       :: checkpoint = .FALSE.
              enddo   !   i2
            enddo    !   i1
         enddo    ! de
-
+#endif
      case default
         ! error
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount not between 1 and 7",  &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount out of range",  &
                  rcToReturn=localrc)
         return
      end select

@@ -8,13 +8,14 @@ The Field API
 
 import numpy.ma as ma
 
-from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
-
 from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
+
+import ESMF.api.constants as constants
+
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
@@ -118,54 +119,67 @@ class Field(ma.MaskedArray):
 
 
         # switch on grid or mesh
+        data = 0
+        mask = None
         if isinstance(grid, Grid):
             # check some stuff
             assert (grid.staggerloc[staggerloc])
-            staggerloc2 = staggerloc
+
             # call into ctypes layer
-            struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc2,
+            struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc,
                                           local_grid_to_field_map, 
                                           local_ungridded_lower_bound, 
                                           local_ungridded_upper_bound)
+
+            # link the field data
+            data = cls.link_field_data(struct, grid, staggerloc, typekind)
+            data[...] = 0
+
+            # set the mask
+            if (grid.item_done[staggerloc][GridItem.MASK]):
+                if (grid.mask[staggerloc].shape == data.shape):
+                    mask = grid.mask[staggerloc]
+
         elif isinstance(grid, Mesh):
+            # deal with the wacky ESMF node/element convention
+            if meshloc == MeshLoc.NODE:
+                staggerloc = node
+            elif meshloc == MeshLoc.ELEMENT:
+                staggerloc = element
+            else:
+                raise MeshLocationNotSupported
+
             # call into ctypes layer
-            staggerloc2 = meshloc
-            struct = ESMP_FieldCreate(grid, name, typekind, staggerloc2,
+            struct = ESMP_FieldCreate(grid, name, typekind, meshloc,
                                       local_grid_to_field_map, 
                                       local_ungridded_lower_bound, 
                                       local_ungridded_upper_bound)
-        else:
-            raise ValueError("Field must be created on a Grid or Mesh")
 
-        # link the field data
-        data = cls.link_field_data(struct, grid, staggerloc2, typekind)
-        data[...] = 0
+            # link the field data
+            data = cls.link_field_data(struct, grid, staggerloc, typekind)
+            data[...] = 0
 
-        # obtain the mask
-        if isinstance(grid, Grid):
-            if (grid.item_done[staggerloc2][GridItem.MASK]):
-                if (grid.mask[staggerloc2].shape == data.shape):
-                    mask = grid.mask[staggerloc2]
-            else:
-                mask = None
-        elif isinstance(grid, Mesh):
             # No masking on a Mesh
             mask = None
         else:
-            raise ValueError("Field must be created on a Grid or Mesh")
+            raise FieldDOError
      
+        #  set field_mask based on the grid mask and the mask_vals input argument
         field_mask = False
         if mask is not None and mask_vals is not None:
-            field_mask = [x if x in mask_vals else 0 for x in mask.flatten().tolist()]
+            field_mask = [True if x in mask_vals else False for x in mask.flatten().tolist()]
         
         # create the new Field instance
         obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
+
+        # register function with atexit
+        import atexit; atexit.register(obj.__del__)
+        obj.__finalized = False
 
         # initialize field data
         obj.struct = struct
         obj.type = typekind
         obj.staggerloc = staggerloc
-        obj.meshloc = meshloc
         obj.grid_to_field_map = local_grid_to_field_map
         obj.ungridded_lower_bound = local_ungridded_lower_bound
         obj.ungridded_upper_bound = local_ungridded_upper_bound
@@ -180,27 +194,20 @@ class Field(ma.MaskedArray):
         # request the ESMF pointer to the Field coordinates
         data_out = ESMP_FieldGetPtr(struct)
 
-        size = 0
-        ind = 0
         # find the size of the local coordinates at this stagger location
+        size = 0
         if isinstance(grid, Grid):
             size = reduce(mul,grid.size_local[staggerloc])
         elif isinstance(grid, Mesh):
-            if staggerloc == MeshLoc.NODE:
-                ind = node
-            elif staggerloc == MeshLoc.ELEMENT:
-                ind = element
-            else:
-                raise MeshLocationNotSupported
-            size = grid.size_local[ind]
+            size = grid.size_local[staggerloc]
         else:
             raise FieldDOError
 
         # create a numpy array to point to the ESMF allocation
         fieldbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(data_out.contents),
-            np.dtype(ESMF2PythonType[typekind]).itemsize*size)
-        fieldDataP = np.frombuffer(fieldbuffer, ESMF2PythonType[typekind])
+            np.dtype(constants._ESMF2PythonType[typekind]).itemsize*size)
+        fieldDataP = np.frombuffer(fieldbuffer, constants._ESMF2PythonType[typekind])
 
         # reshape the numpy array of coordinates, account for Fortran
         if isinstance(grid, Grid):
@@ -209,7 +216,7 @@ class Field(ma.MaskedArray):
                                      order='F')
         elif isinstance(grid, Mesh):
             fieldDataP = np.reshape(fieldDataP,
-                                     newshape = grid.size_local[ind],
+                                     newshape = grid.size_local[staggerloc],
                                      order='F')
         else:
             raise FieldDOError
@@ -227,7 +234,10 @@ class Field(ma.MaskedArray):
         Returns: \n
             None \n
         """
-        ESMP_FieldDestroy(self)
+        if not self.__finalized:
+            ESMP_FieldDestroy(self)
+            self.__finalized = True
+
 
     def __repr__(self):
         """
@@ -282,7 +292,7 @@ class Field(ma.MaskedArray):
         # loop through and alias esmf data to numpy arrays
         buffer = np.core.multiarray.int_asbuffer(
             ct.addressof(field_data.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        esmf_coords = np.frombuffer(buffer, ESMF2PythonType[self.type])
+            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
+        esmf_coords = np.frombuffer(buffer, constants._ESMF2PythonType[self.type])
 
         print esmf_coords

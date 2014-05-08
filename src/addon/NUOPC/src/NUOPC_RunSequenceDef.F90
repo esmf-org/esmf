@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_RunSequenceDef.F90"
 !==============================================================================
 
 module NUOPC_RunSequenceDef
@@ -36,10 +36,15 @@ module NUOPC_RunSequenceDef
 !==============================================================================
   
   type NUOPC_RunElement
+    ! - new style members
+!    type(ESMF_GridComp), pointer    :: gcomp  !gjt: not yet used
+!    type(ESMF_CplComp), pointer     :: ccomp  !gjt: not yet used
+    ! - old style members
     integer :: i  ! i >= 0 -> model comp. index, or src model index if connector
                   ! i <  0 -> link or enddo element (depend on runSeq)
     integer :: j  ! j >= 0 -> connector component: i->j
                   ! j <  0 -> model component: i
+    ! - common members
     integer :: phase  ! run phase
     type(NUOPC_RunSequence), pointer:: runSeq ! point back to RunSequence
     type(NUOPC_RunElement), pointer :: next   ! next RunElement in linked list
@@ -104,8 +109,13 @@ module NUOPC_RunSequenceDef
       msg="Allocation of RunElement in NUOPC_RunElementAdd.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! initialize the new run element
+    ! - new style members
+!    runElement%gcomp => NULL()  !gjt: not yet used
+!    runElement%ccomp => NULL()  !gjt: not yet used
+    ! - old style members
     runElement%i = i
     runElement%j = j
+    ! - common members
     runElement%phase = phase
     runElement%runSeq => runSeq   ! associate for back reference
     ! append the new run element to the run sequence (but before ENDDO)
@@ -235,23 +245,34 @@ module NUOPC_RunSequenceDef
 !BOP
 ! !IROUTINE: NUOPC_RunElementPrint - Print info about a RunElement object
 ! !INTERFACE:
-  subroutine NUOPC_RunElementPrint(runElement, rc)
+  subroutine NUOPC_RunElementPrint(runElement, logflag, rc)
 ! !ARGUMENTS:
     type(NUOPC_RunElement),  intent(in)  :: runElement
+    logical, optional,       intent(in)  :: logflag
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
-!   Write information about {\tt runElement} into the default log file.
+!   Write information about {\tt runElement}. If {\tt logflag} is set to 
+!   {\tt .true.}, the output goes to the default log file. By default the 
+!   output goes to stdout.
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)    :: msgString
+    logical                   :: logflagL
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    logflagL = .false.  ! default
+    if (present(logflag)) logflagL = logflag
 
     write (msgString,"(A, I6, I6, I6)") "runElementPrint: ", &
       runElement%i, runElement%j, runElement%phase
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (logflagL) then
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    else
+      print *, msgString
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -483,35 +504,54 @@ module NUOPC_RunSequenceDef
 ! !IROUTINE: NUOPC_RunSequencePrint - Print info about a single RunSequence object
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequencePrint()
-  subroutine NUOPC_RunSequenceSinglePrint(runSeq, rc)
+  subroutine NUOPC_RunSequenceSinglePrint(runSeq, logflag, rc)
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), intent(in)  :: runSeq
+    logical, optional,       intent(in)  :: logflag
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
-!   Write information about {\tt runSeq} into the default log file.
+!   Write information about {\tt runSeq}. If {\tt logflag} is set to 
+!   {\tt .true.}, the output goes to the default log file. By default the 
+!   output goes to stdout.
 !EOP
   !-----------------------------------------------------------------------------
-    type(NUOPC_RunElement), pointer :: searchElement
     character(ESMF_MAXSTR)          :: msgString
+    logical                         :: logflagL
+    type(NUOPC_RunElement), pointer :: searchElement
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    logflagL = .false.  ! default
+    if (present(logflag)) logflagL = logflag
+
     if (.not.associated(runSeq%first)) then
       write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint: no runElements"
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (logflagL) then
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+        print *, msgString
+      endif
     else
       write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint:"
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (logflagL) then
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+        print *, msgString
+      endif
       searchElement => runSeq%first
       do while (associated(searchElement%next))
-        call NUOPC_RunElementPrint(searchElement)
+        call NUOPC_RunElementPrint(searchElement, logflag, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         searchElement => searchElement%next
       enddo
-      call NUOPC_RunElementPrint(searchElement)
+      call NUOPC_RunElementPrint(searchElement, logflag, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif
 
   end subroutine
@@ -522,27 +562,37 @@ module NUOPC_RunSequenceDef
 ! !IROUTINE: NUOPC_RunSequencePrint - Print info about a RunSequence vector
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequencePrint()
-  subroutine NUOPC_RunSequenceArrayPrint(runSeq, rc)
+  subroutine NUOPC_RunSequenceArrayPrint(runSeq, logflag, rc)
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
+    logical, optional,       intent(in)  :: logflag
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
-!   Write information about the whole {\tt runSeq} vector into the default log 
-!   file.
+!   Write information about the whole {\tt runSeq} vector. If {\tt logflag} is
+!   set to {\tt .true.}, the output goes to the default log file. By default
+!   the output goes to stdout.
 !EOP
   !-----------------------------------------------------------------------------
-    integer :: i
     character(ESMF_MAXSTR)          :: msgString
+    logical                         :: logflagL
+    integer                         :: i
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    logflagL = .false.  ! default
+    if (present(logflag)) logflagL = logflag
     
     do i=1, size(runSeq)
       write (msgString,"(A, I6, A, I6)") &
         "NUOPC_RunSequenceArrayPrint: element", i, " out of ", size(runSeq)
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call NUOPC_RunSequenceSinglePrint(runSeq(i))
+      if (logflagL) then
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+        print *, msgString
+      endif
+      call NUOPC_RunSequenceSinglePrint(runSeq(i), logflag)
     enddo
     
   end subroutine

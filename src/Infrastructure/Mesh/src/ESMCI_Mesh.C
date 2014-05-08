@@ -33,12 +33,12 @@ static const char *const version = "$Id$";
 
 extern "C" {
   void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp, 
-					char *filename, int *fileTypeFlag, 
+					const char *filename, int *fileTypeFlag, 
  					int *convertToDual, int *ctodpresent,
  					int *addUserArea, int *auapresent,
-					char *meshname, int *mnpresent,
+					const char *meshname, int *mnpresent,
  					int *addMask, int *ampresent,
- 					char *varname, int *vnpresent,
+ 					const char *varname, int *vnpresent,
 					int *rc,
 					ESMCI_FortranStrLenArg len_filename,
 					ESMCI_FortranStrLenArg len_meshname,
@@ -66,12 +66,12 @@ Mesh::~Mesh() {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::createfromfile()"
-Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag, 
+Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag, 
 			   int *convertToDual,
 			   int *addUserArea,
-			   char *meshname,
+			   const char *meshname,
 			   int *addMask,
-			   char *varname,
+			   const char *varname,
 			   int *rc) {
 
     // Initialize return code. Assume routine not implemented
@@ -1656,7 +1656,7 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
 
      if (oproc >= Par::Size()) {
        Par::Out() << "Error! rank is greater than nproc:obj:" << node;
-       std::printf(" gid= %d\n",node.get_id());
+       std::printf(" gid= %ld\n",node.get_id());
        Throw() << "Bad processor number!";
      }
    }

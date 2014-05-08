@@ -958,8 +958,56 @@ extern "C" {
 
       ESMCI::F90ClassHolder f90CH = (*ptr)->get(std::string(itemName, nlen));
       
-      // cast C++ Field object into Fortran
+      // cast C++ UDT object into Fortran
       localrc = f90CH.castToFortranUDT(udtPtr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN_X(esmf_containergetudtbyindex)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    int const *itemIndex, void **udtPtr, ESMC_ItemOrder_Flag *itemorderflag,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_containergetudtlistall()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+      
+      std::vector<ESMCI::F90ClassHolder> vector;
+      (*ptr)->getVector(vector, *itemorderflag);
+
+      int index = *itemIndex - 1; // shift index to base 0 on the C++ side      
+      if ((index < 0) || (index >= vector.size())){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- index out of range.",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      
+      // cast C++ UDT object into Fortran
+      localrc = (vector[index]).castToFortranUDT(udtPtr);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
       
@@ -1043,7 +1091,7 @@ extern "C" {
       
       ESMCI::F90ClassHolder f90CH = garbage[*item-1];
       
-      // cast C++ Field object into Fortran
+      // cast C++ UDT object into Fortran
       localrc = f90CH.castToFortranUDT(udtPtr);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
