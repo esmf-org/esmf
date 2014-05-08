@@ -18,6 +18,10 @@
 #include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/include/ESMCI_OTree.h>
+
+#ifdef PNTLIST
+#include <Mesh/include/ESMCI_PntList.h>
+#endif
  
 #include <iostream>
 #include <fstream>
@@ -132,7 +136,7 @@ public:
 /*--------------------------------------------------------------------------*/
 // Octree node search
 /*--------------------------------------------------------------------------*/
-
+ /* XMRKX */
 
 static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
   
@@ -308,8 +312,13 @@ static int found_func(void *c, void *y) {
 
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
+#ifdef PNTLIST
+  if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],dist,elem.get_id());
+#else
   if (si.snr.node->get_id()== ESMF_REGRID_DEBUG_MAP_NODE) {
     printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.node->get_id(),in,pcoord[0],pcoord[1],dist,elem.get_id());
+#endif
 
     double coords[3*40];
     int num_nds;
@@ -859,5 +868,223 @@ void DestroySearchResult(SearchResult &result) {
   // Empty search results
   result.clear();
 }
+
+#ifdef PNTLIST
+BBox bbox_from_pl(PntList &pl) {
+
+    // Init min to biggest double
+    double min[3];
+    min[0]=std::numeric_limits<double>::max();
+    min[1]=std::numeric_limits<double>::max();
+    min[2]=std::numeric_limits<double>::max();
+
+    // Init max to smallest double
+    double max[3];
+    max[0]=-std::numeric_limits<double>::max();
+    max[1]=-std::numeric_limits<double>::max();
+    max[2]=-std::numeric_limits<double>::max();
+
+    // Calc min max from point list depending on dim
+    if (dst_pl.get_coord_dim()==2) {   
+      for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+        const double *coords=dst_pl.get_coord_ptr(i);
+        
+        if (coords[0] < min[0]) min[0]=coords[0];      
+        if (coords[1] < min[1]) min[1]=coords[1];      
+        
+        if (coords[0] > max[0]) max[0]=coords[0];      
+        if (coords[1] > max[1]) max[1]=coords[1];      
+      }
+    } else if (dst_pl.get_coord_dim()==3) { 
+      for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+        const double *coords=dst_pl.get_coord_ptr(i);
+        
+        if (coords[0] < min[0]) min[0]=coords[0];      
+        if (coords[1] < min[1]) min[1]=coords[1];      
+        if (coords[2] < min[2]) min[0]=coords[2];      
+        
+        if (coords[0] > max[0]) max[0]=coords[0];      
+        if (coords[1] > max[1]) max[1]=coords[1];      
+        if (coords[2] > max[2]) max[0]=coords[2];      
+      }      
+    } else {
+      Throw() << "unsupported number of coordinate dimensions \n";
+    }
+
+    // Create BBox
+    return BBox(dst_pl.get_coord_dim(), min, max);
+  }
+
+
+// The main routine
+// dst_pl is assumed to only contain non-masked points
+void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+  Trace __trace("OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+
+
+  MEField<> &coord_field = *src.GetCoordField();
+
+  MEField<> *src_mask_field_ptr = src.GetField("mask");
+
+  // Set some parameters to control search
+  const double normexp = 0.15;
+  const double dstint = 1e-8;
+
+  // Get spatial dim  and error check
+  UInt sdim = src.spatial_dim();
+  if (sdim != dst_pl.get_coord_dim()) {
+    Throw() << "Mesh and points must have same spatial dim for search";
+  }
+
+
+  // Fill search box tree
+  OTree *box;    
+  if (!box_in) {
+    // Get a bounding box for the dst point list
+    BBox dstBBox=bbox_from_pl(dst_pl);
+  
+    // Count number of elements to go into tree
+    int num_box = num_intersecting(src, dstBBox, dstint, normexp);
+  
+    // Create tree
+    box=new OTree(num_box); 
+
+    // Fill tree
+    populate_box(box, src, dstBBox, dstint, normexp);
+
+    // Commit
+    box->commit();
+  } else box = box_in;
+
+
+  // Get list of destination points to look at. 
+  std::vector<int> *dst_loc;  
+
+  // vector to hold new location if necessary
+  std::vector<int> dst_loc_new;  
+
+  // Either create a new one or use list from the finer search
+  if (dst_loc_again) dst_loc=dst_loc_again; 
+  else {  
+    dst_loc_new.resize(dst_pl.get_curr_num_pnts(),-1);
+
+    for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+      dst_loc_new.push_back(i);
+    }
+    
+    dst_loc=&dst_loc_new;
+  }
+
+  // vector to hold loc to search in future  
+  std::vector<int> again;  
+  
+  // temp search results
+  std::set<Search_result> tmp_sr; 
+
+
+  // Loop the destination loc, find hosts.
+  for (p = 0; p < dst_loc.size(); ++p) {
+    int loc = dst_loc[p];
+        
+    // Get info out of point list
+    const double *pnt_crd=dst_pl.get_coord_ptr(loc);
+    int pnt_id=dst_pl.get_id(loc);
+    
+    // Calc min max box around point 
+    double pmin[3], pmax[3];    
+    pmin[0] = pnt_crd[0]-stol;
+    pmin[1] = pnt_crd[1] - stol;
+    pmin[2] = sdim == 3 ? pnt_crd[2]-stol : -stol;
+    
+    pmax[0] = pnt_crd[0] + stol;
+    pmax[1] = pnt_crd[1] + stol;
+    pmax[2] = sdim == 3 ? pnt_crd[2]+stol : +stol;
+    
+    OctSearchNodesData si;
+    si.snr.dst_gid = pnt_id; 
+    si.investigated = false;
+    si.best_dist = std::numeric_limits<double>::max();
+    si.src_cfield = &coord_field; 
+    si.src_mask_field_ptr = src_mask_field_ptr; 
+    si.is_in=false;
+    si.elem_masked=false;
+    si.elem=NULL;  
+
+    // The point coordinates.
+    si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+
+    // STOPPED HERE //
+        
+    // Set global map_type
+    // TODO: pass this directly to is_in_cell mapping function
+    MAP_TYPE old_sph_map_type=sph_map_type;
+    sph_map_type=mtype;
+
+    // Do Search and mapping
+    box->runon(pmin, pmax, found_func, (void*)&si);
+    
+    // Reset global map_type
+    sph_map_type=old_sph_map_type;
+
+    if (!si.investigated) {
+      again.push_back(loc);
+    } else {
+      if (si.elem_masked) {
+	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+	  Throw() << " Some destination points cannot be mapped to source grid";
+	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+	  // don't do anything
+	} else {
+	  Throw() << " Unknown unmappedaction option";
+	}
+      } else {
+	Search_result sr; sr.elem = si.elem;
+	std::set<Search_result>::iterator sri =
+	  tmp_sr.lower_bound(sr);
+	if (sri == tmp_sr.end() || *sri != sr) {
+	  sr.nodes.push_back(si.snr);
+	  tmp_sr.insert(sri, sr);
+	} else {
+	  // std::cout << "second choice" << std::endl;
+	  std::vector<Search_node_result> &r
+	    = const_cast<std::vector<Search_node_result>&>(sri->nodes);
+	  r.push_back(si.snr);	  
+	  //std::cout << "size=" << sri->nodes.size() << std::endl;
+	}
+      }
+    }
+    
+  } // for dest nodes
+  
+  {
+    // Build seach res
+    std::set<Search_result>::iterator si = 
+      tmp_sr.begin(), se = tmp_sr.end();
+    
+    for (; si != se; ++si)
+      result.push_back(new Search_result(*si));
+  }
+  
+  std::set<Search_result>().swap(tmp_sr);
+  std::vector<int>().swap(dst_loc);
+
+  if (!again.empty()) {
+     if (stol > 1e-6) {
+	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+	  // don't do anything
+	} else {
+	  Throw() << " Unknown unmappedaction option";
+	}
+     } else {
+      OctSearch_w_dst_pl(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
+     }
+  }
+
+  if (!box_in) delete box;
+
+}
+#endif
+
 
 } // namespace

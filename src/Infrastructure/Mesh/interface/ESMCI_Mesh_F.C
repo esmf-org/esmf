@@ -41,7 +41,9 @@
 #include "Mesh/include/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
-
+#ifdef PNTLIST
+#include "Mesh/include/ESMCI_PntList.h"
+#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -4329,3 +4331,81 @@ extern "C" void FTN_X(c_esmc_meshcreatedual)(Mesh **src_meshpp, Mesh **output_me
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
+
+#ifdef PNTLIST
+// This method converts a Mesh to a PntList
+extern "C" void FTN_X(c_esmc_meshtopntlist)(Mesh **meshpp, PntList **plpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshtopntlist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // For convenience deref input
+    Mesh *meshp = *meshpp;
+
+    // Get coord field
+    MEField<> *cfield = meshp->GetCoordField();
+    
+    // Loop through counting local nodes
+    int num_local_nodes=0;
+    Mesh::iterator ni = meshp->node_begin(), ne = meshp->node_end();
+    for (;ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+
+      if (GetAttr(node).is_locally_owned()) {
+        num_local_nodes++;
+      }
+    }
+
+    // Create PntList
+    PntList *plp = new PntList(meshp->spatial_dim(),num_local_nodes); 
+ 
+    // Loop through adding local nodes
+    ni = meshp->node_begin();
+    for (;ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+ 
+      if (GetAttr(node).is_locally_owned()) {
+        double *coords=cfield->data(node);
+
+        plp->add(node.get_id(),coords);
+      }
+    }
+
+    // Output PntList
+    *plpp=plp;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+#endif

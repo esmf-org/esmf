@@ -34,6 +34,10 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
 
+#ifdef PNTLIST
+#include "Mesh/include/ESMCI_PntList.h"
+#endif
+
 #include <limits>
 #include <iostream>
 #include <vector>
@@ -977,7 +981,64 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
 #undef  ESMC_METHOD
 
+ /* XMRKX */
 
+#ifdef PNTLIST
+
+  // Convert Grid To PntList
+  // TODO: pnt_list should only contain non-masked points.
+void GridToPntList(Grid &grid, int staggerLoc, ESMCI::PntList **_pl) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "GridToPntList()" 
+  Trace __trace("GridToPntList()");
+
+ int localrc;
+ int rc;
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+
+ // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
+   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
+
+   // Count all local pnts in the Grid
+   int num_local_pnts=0;
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+     if(!gni->isLocal()) continue;
+       num_local_pnts++;
+   }
+
+   // Create PntList
+   // (Put Cartesian coordinates in list) 
+   ESMCI::PntList *pl=new PntList(grid.getCartCoordDimCount(), num_local_pnts);
+
+   // loop through all nodes in the Grid
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+     if(!gni->isLocal()) continue;
+
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID(); 
+
+       // get cartesian coordinates
+       double cart_coord[ESMF_MAXDIM];
+       gni->getCartCoord(cart_coord);
+
+       // Add Point
+       pl->add(gid,cart_coord);
+   }
+
+
+   // delete Grid Iters
+   delete gni;
+
+   // Output point list
+   *_pl=pl;
+}
+
+#undef  ESMC_METHOD
+#endif
 
 } // namespace
 
