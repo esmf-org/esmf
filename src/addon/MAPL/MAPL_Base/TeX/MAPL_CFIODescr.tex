@@ -1,0 +1,146 @@
+% +-======-+ 
+%  Copyright (c) 2003-2007 United States Government as represented by 
+%  the Admistrator of the National Aeronautics and Space Administration.  
+%  All Rights Reserved.
+%  
+%  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+%  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+%  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+%  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+%  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+%  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+%  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+%  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+%  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+%  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+%  
+%  Government Agency: National Aeronautics and Space Administration
+%  Government Agency Original Software Designation: GSC-15354-1
+%  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+%  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+%  Government Agency Point of Contact for Original Software:  
+%  			Dale Hithon, SRA Assistant, (301) 286-2691
+%  
+% +-======-+ 
+%
+% This is the !DESCRIPTION entry for MAPL_CFIO.
+%
+
+      {\tt MAPL\_CFIO} provides {\em Climate and Forecast} (CF)
+      compliant I/O methods for high level ESMF data types by using the
+      CFIO Library. It currently includes read-write support for ESMF
+      Bundles and States, and read-only support for ESMF Fields and
+      Fortran arrays. The API consists of 4 basic methods:
+\bi
+      \item MAPL\_CFIORead
+      \item MAPL\_CFIOCreate
+      \item MAPL\_CFIOWrite
+      \item MAPL\_CFIODestroy
+\ei 
+
+      {\bf Reading a file.}  When reading data from a CFIO compliant file, 
+      in the very least the user needs to specify the file name, the time, 
+      and an ESMF object to receive the data. There is no need to explicitly
+      involve the {\tt MAPL\_CFIO} object in this case. For example, assuming that 
+      one has already defined an ESMF grid and clock, here is how to
+      read a single time instance of all variables from a file into an
+      ESMF Bundle: 
+\bv
+      bundle = ESMF_BundleCreate ( name='Mary', grid=grid )
+      call MAPL_CFIORead ( 'forecast_data.nc', clock, bundle )
+\end{verbatim}
+      This method will read all variables on file, doing any necessary 
+      (horizontal) regriding to the ESMF {\tt grid} used to create the
+      bundle, and allocating memory for each variable, as necessary. 
+      Currently, the file is open, read from and subsequently closed.
+      {\tt MAPL\_CFIO} also provides methods to read single variables into a
+      simple fortran arrays:
+\bv
+      real :: ps(im,jm)
+      call MAPL_CFIORead ( 'surfp', 'forecast_data.nc', clock, grid, ps )
+\end{verbatim}
+      This method will read the variable named 'surfp' into the 2D Fortran
+      array {\tt ps}, performing any necessary (horizontal) interpolation
+      to the destination {\tt grid}. Consult the API reference below
+      for several optional parameters to the MAPL\_CFIORead() method,
+      including the ability to select the variables to read and
+      transparently perform time interpolation.
+
+      {\bf Writing to a file.} For writing, a new file is created, written to,
+      and explicitly closed. Assuming one has already defined an ESMF {\tt bundle} 
+      and {\tt clock} here is how to save a bundle to a new file:
+\bv
+      type(MAPL_CFIO) :: mcfio
+      call MAPL_CFIOcreate  ( mcfio, 'climate_data', clock, bundle )
+      call MAPL_CFIOwrite   ( mcfio, clock )
+      call MAPL_CFIOdestroy ( mcfio )
+\end{verbatim}
+      Consult the API reference below for many optional parameters controling
+      the behavior of these methods.  As of this writing, a {\tt MAPL\_CFIOopen()} 
+      function to write to an already existing file has not been implemented. 
+
+      {\bf File formats.} {\tt MAPL\_CFIO} is designed to work with a variety of
+      file formats, provided these files can be annotaded with the necessary
+      CF metadata. The particularities of the specific file format is handled
+      by the backend CFIO library. As of this writing the backend CFIO library 
+      supports self-describing formats such as NetCDF and HDF, and support for
+      GrADS compatible binary files is in alpha testing. There are
+      also plans to add support for GRIB versions 1, 2 or both.
+
+      {\bf Self-desbring (SDF) formats.} The support for SDF formats is implemented
+      in the backend CFIO library using the NetCDF Version 2 API. This API is
+      currently supported by NetCDF versions 2 through 4 and HDF version 4.
+      By selecting one of these libraries at build time it is possible to read/write
+      several versions of NetCDF/HDF as summarized in the following table:
+\bv
+        Library        Reads           Writes 
+      -----------  -------------   ---------------- 
+      HDF-4        NetCDF, HDF-4   HDF-4          
+      NetCDF-2     NetCDF          NetCDF
+      NetCDF-3     NetCDF          NetCDF
+      NetCDF-4     NetCDF, HDF-5   NetCDF, HDF-5 
+\end{verbatim}
+      NetCDF versions 2 and 3 can only read/write its own native {\tt NetCDF}
+      format. HDF version 4 offers some form of interoperability with NetCDF,
+      but it can only write HDF-4 files. The new NetCDF version 4 is written
+      on top of the HDF-5 library. This version of NetCDF still retains the
+      ability of reading and writing its legacy {\tt NetCDF} format,
+      but advanced features such as compression is only available when
+      writing in HDF-5 format. Beware that NetCDF-4 can only read
+      the particular kind of HDF-5 files it writes; it cannot read generic
+      HDF-5 files such has HDF-5 EOS. Because the standard HDF-5 
+      library (without NetCDF-4) no longer supports the NetCDF 2 API (or the 
+      native HDF-4 API for that matter) it cannot be used with the SDF
+      backend of the CFIO library.  It is important to notice that because
+      of conflicts in the API one cannot load more than one NetCDF or HDF
+      library in one application. 
+
+      {\bf API Design Issues.} The {\tt MAPL\_CFIO} package is still under active
+      development. The current state of the API was dictated by the
+      features needed to build the GEOS-5 model at NASA/GSFC, and some
+      asymmetry still remains in the API. In particular, the {\em read methods}
+      utilize file names to specify the file object, while the {\em
+      write methods} uses the {\tt MAPL\_CFIO} object much like a file
+      handle. Both methods of access are valid and useful under different
+      circunstances, and ought to be supported for both read and
+      write operations. When using {\em file name} access mode the following should 
+      be possible:
+\bv
+      call MAPL_CFIORead  ( 'forecast_data.nc', clock, bundle )
+      call MAPL_CFIOWrite ( 'new_file.nc', clock, bundle )
+      call MAPL_CFIOWrite ( 'existing_file.nc', clock, bundle, append=.true. )
+\end{verbatim}
+      In this case, the file is opened, read from/written to and closed 
+      on exit. For users desiring to keep files open in between operations
+      a {\em file handle} mode should be provided for both read and write. Here is a 
+      typical use case for reading: 
+\bv      
+      mcfio = MAPL_CFIOopen ( 'forecast_data.nc' )
+      call MAPL_CFIORead    ( mcfio, clock_now,   bundle )
+      ...
+      call MAPL_CFIORead    ( mcfio, clock_later, bundle )
+      call MAPL_CFIOdestroy ( mcfio )
+\end{verbatim}
+      Future versions of {\tt MAPL\_CFIO} may support these features.
+
+
