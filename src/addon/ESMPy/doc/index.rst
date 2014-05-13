@@ -65,7 +65,7 @@ The following packages are *optional*:
 
 * mpi4py - python bindings to MPI, needed to run the parallel regridding tests
 * ESMF installation with NetCDF - required to create grids and meshes from file
-  - NetCDF must be built as a shared library for ESMPy installation to succeed
+    - NetCDF must be built as a shared library for ESMPy installation to succeed
 
 ============
 Installation
@@ -137,7 +137,13 @@ or:
 
     python setup.py test_all
 
+    python setup.py test_parallel
+    
     python setup.py test_regrid_parallel
+
+    python setup.py test_regrid_from_file_parallel
+
+    python setup.py test_all_parallel
 
 NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
 The "test_regrid_from_file_dryrun" command will simply download the test 
@@ -171,7 +177,7 @@ to ESMF offline and integrated regridding capabilities.
 
 Testing related:
 
-- Only tested with gfortran on Darwin and Linux platforms
+- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI
 
 
 ================
