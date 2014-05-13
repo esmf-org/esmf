@@ -83,8 +83,8 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((1.75 < gridXCenter.data < 2.25) &
-                      (1.75 < gridYCenter.data < 2.25))] = 0
+        mask[np.where((1.75 <= gridXCenter.data < 2.25) &
+                      (1.75 <= gridYCenter.data < 2.25))] = 0
         
 
     if doarea:
