@@ -42,8 +42,8 @@ def main():
     # the test subroutine.
     for test_case in test_cases:
         (src_fname, dst_fname, regrid_method, options, max_err, max_area_err) = test_case
-        test_str = 'Regrid %s to %s as %s with %s and max_err = %f' % \
-          (src_fname, dst_fname, regrid_method, options, max_err)
+        test_str = 'Regrid %s to %s as %s with %s and max_err=%f, max_area_err=%f' % \
+          (src_fname, dst_fname, regrid_method, options, max_err, max_area_err)
         print '\n' + test_str + ' - START\n'
         src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
         dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
@@ -52,7 +52,7 @@ def main():
         correct = False
         try:
             correct = regrid_check(src_fname_full, dst_fname_full,
-                                   regrid_method, options, max_err)
+                                   regrid_method, options, max_err, max_area_err)
         except:
             print "Regridding ERROR:\n"
             traceback.print_exc(file=sys.stdout)
