@@ -4034,7 +4034,7 @@ int Array::haloStore(
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
     
-#ifdef HALOSTOREMEMLOG_on
+#ifdef HALOSTOREMEMLOG_off
     VM::logMemInfo(std::string("HaloStore1"));
 #endif
     
@@ -6683,6 +6683,8 @@ void serverResponse(T *t, int count, int i, char **requestStreamServer,
 template<typename T>
 void clientProcess(T *t, char *responseStream, int responseStreamSize);
 
+#define WORKAROUND_NONBLOCKPROGRESSBUG
+
 template<typename T>
 void accessLookup(
   ESMCI::VM *vm,
@@ -6705,15 +6707,21 @@ void accessLookup(
   int *responseStreamSizeServer = new int[petCount];
   char **responseStreamClient = new char*[petCount];
   char **responseStreamServer = new char*[petCount];
+  
+char msg[1024];
+  
   // t-specific routine
   int requestFactor = requestSizeFactor(t);
   // localPet acts as server, posts non-blocking recvs for all client requests
+ESMC_LogDefault.Write("accessLookup: step 1", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     // receive request from Pet "i"
     int count = localIntervalPerPetCount[i];
     if (count>0){
+sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, requestFactor*count);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
       requestStreamServer[i] = new char[requestFactor*count];
       recv3commhList[i] = NULL;
       vm->recv(requestStreamServer[i], requestFactor*count, i,
@@ -6721,6 +6729,7 @@ void accessLookup(
     }
   }
   // localPet acts as a client, sends its requests to the appropriate servers
+ESMC_LogDefault.Write("accessLookup: step 2", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -6732,25 +6741,39 @@ void accessLookup(
       clientRequest(t, i, requestStreamClient);
       // send information to the serving Pet
       send1commhList[i] = NULL;
+sprintf(msg, "posting nb-send to PET %d size=%d", i, requestFactor*localElementsPerIntervalCount[i]);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+      vm->send(requestStreamClient[i],
+        requestFactor*localElementsPerIntervalCount[i], i); 
+#else
       vm->send(requestStreamClient[i],
         requestFactor*localElementsPerIntervalCount[i], i, 
         &(send1commhList[i]));
+#endif
       // post receive to obtain response size from server Pet
       recv1commhList[i] = NULL;
+sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, sizeof(int));
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+
       vm->recv(&(responseStreamSizeClient[i]), sizeof(int), i,
         &(recv1commhList[i]));
     }
   }
   // localPet locally acts as server and client to fill its own request
   // t-specific client-server routine
+ESMC_LogDefault.Write("accessLookup: step 3", ESMC_LOGMSG_INFO); 
   localClientServerExchange(t);
   // localPet acts as server, processing requests from clients, send response sz
+ESMC_LogDefault.Write("accessLookup: step 4", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     int count = localIntervalPerPetCount[i];
     if (count>0){
       // wait for request from Pet "i"
+sprintf(msg, "waiting on nb-recv for message from PET %d", i);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
       vm->commwait(&(recv3commhList[i]));
       // t-specific server routine
       int responseStreamSize =
@@ -6758,12 +6781,20 @@ void accessLookup(
       // send response size to client Pet "i"
       responseStreamSizeServer[i] = responseStreamSize;
       send2commhList[i] = NULL;
+sprintf(msg, "posting nb-send to PET %d size=%d", i, sizeof(int));
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+
+#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+      vm->send(&(responseStreamSizeServer[i]), sizeof(int), i);
+#else
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
         &(send2commhList[i]));
+#endif
     }
   }
   // localPet acts as a client, waits for response size from server and posts
   // receive for response stream
+ESMC_LogDefault.Write("accessLookup: step 5", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -6775,12 +6806,16 @@ void accessLookup(
       if (responseStreamSize>0){
         responseStreamClient[i] = new char[responseStreamSize];
         recv2commhList[i] = NULL;
+sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, responseStreamSize);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+
         vm->recv(responseStreamClient[i], responseStreamSize, i,
           &(recv2commhList[i]));
       }
     }
   }
   // localPet acts as server, send response stream
+ESMC_LogDefault.Write("accessLookup: step 6", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -6794,14 +6829,22 @@ void accessLookup(
         serverResponse(t, count, i, requestStreamServer, responseStreamServer);
         // send response stream to client Pet "i"
         send3commhList[i] = NULL;
+sprintf(msg, "posting nb-send to PET %d size=%d", i, responseStreamSize);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
+
+#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+        vm->send(responseStreamServer[i], responseStreamSize, i);
+#else
         vm->send(responseStreamServer[i], responseStreamSize, i,
           &(send3commhList[i]));
+#endif
       }
       // garbage collection
       delete [] requestStreamServer[i];
     }
   }
   // localPet acts as a client, waits for response stream from server, process
+ESMC_LogDefault.Write("accessLookup: step 7", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -6810,6 +6853,8 @@ void accessLookup(
       int responseStreamSize = responseStreamSizeClient[i];
       if (responseStreamSize>0){
         // wait to receive response stream from the serving Pet "i"
+sprintf(msg, "commwait for message from PET %d, of size %d, with localElements: %d", i, responseStreamSize, localElementsPerIntervalCount[i]);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
         vm->commwait(&(recv2commhList[i]));
         // process responseStream and complete t[][] info
         char *responseStream = responseStreamClient[i];
@@ -6821,26 +6866,34 @@ void accessLookup(
     }
   }
   // localPet acts as a client, wait for sends to complete and collect garbage
+ESMC_LogDefault.Write("accessLookup: step 8", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
       // localPet has elements that are located in interval of server Pet i
+#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
       // wait for send
       vm->commwait(&(send1commhList[i]));
+#endif
       // garbage collection
       delete [] requestStreamClient[i];
     }
   }
   // localPet acts as server, wait for sends to complete and collect garbage
+ESMC_LogDefault.Write("accessLookup: step 9", ESMC_LOGMSG_INFO); 
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     int count = localIntervalPerPetCount[i];
     if (count>0){
+#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
       vm->commwait(&(send2commhList[i]));
+#endif
       if (responseStreamSizeServer[i]>0){
+#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
         vm->commwait(&(send3commhList[i]));
+#endif
         // garbage collection
         delete [] responseStreamServer[i];
       }
@@ -6859,6 +6912,7 @@ void accessLookup(
   delete [] recv1commhList;
   delete [] recv2commhList;
   delete [] recv3commhList;
+ESMC_LogDefault.Write("accessLookup: step 10", ESMC_LOGMSG_INFO); 
 }
 
 // --------------------------------------------------
@@ -7897,7 +7951,7 @@ int Array::sparseMatMulStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-#define ASMMSTOREMEMLOG_off
+#define ASMMSTOREMEMLOG_on
   try{
   
   //---------------------------------------------------------------------------
@@ -9306,6 +9360,10 @@ int sparseMatMulStoreEncodeXXE(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE1.0"));
+#endif
+
   // allocate XXE and attach to RouteHandle
   XXE *xxe;
   try{
@@ -9396,6 +9454,10 @@ int sparseMatMulStoreEncodeXXE(
   VMK::wtime(t8);   //gjt - profile
 #endif
     
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE2.0"));
+#endif
+
   // determine recv pattern for all localDEs on dst side
   vector<ArrayHelper::RecvnbElement> recvnbVector;
   for (int j=0; j<dstLocalDeCount; j++){
@@ -9452,6 +9514,10 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     VMK::wtime(&t9b);   //gjt - profile
 #endif
         
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE3.0"));
+#endif
+
     // invert the look-up direction
     vector<vector<ArrayHelper::DstInfo> >
       dstInfoTable(recvnbDiffPartnerDeCount);
@@ -9492,7 +9558,11 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
         (void *)(localDeFactorBufferEntry);
     }
     
-    // garbage collection
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE4.0"));
+#endif
+
+      // garbage collection
     delete [] index2Ref;
     delete [] index2Ref2;
     delete [] factorIndexRef;
@@ -9571,6 +9641,10 @@ fflush(asmmstoreprintfp);
         dstInfoTable[i].erase(rangeWrite, dstInfoTable[i].end());
       }
     }
+
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE5.0"));
+#endif
 
 #ifdef ASMMSTOREPRINT
     // print:
@@ -9685,6 +9759,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   VMK::wtime(t9);   //gjt - profile
 #endif
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE6.0"));
+#endif
+
   // determine send pattern for all localDEs on src side
   vector<ArrayHelper::SendnbElement> sendnbVector;
   for (int j=0; j<srcLocalDeCount; j++){
@@ -9948,6 +10026,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     delete [] sendnbPartnerDeCount;
   } // for j - srcLocalDeCount
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE7.0"));
+#endif
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(t10);   //gjt - profile
 #endif
@@ -9995,6 +10077,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   VMK::wtime(t11);   //gjt - profile
 #endif
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE8.0"));
+#endif
+  
   // store current XXE parameter in order to efficiently rewrite multiple times
   const int startCount = xxe->count;
   const int startStorageCount = xxe->storageCount;
@@ -10033,7 +10119,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // Optimize srcTermProcessing, finding srcTermProcessingOpt:
   int srcTermProcessingOpt; // optimium src term processing ... to be determined
 
-#define FORCE_SRCTERMPROCESSING___disable
+#define FORCE_SRCTERMPROCESSING
 #ifdef FORCE_SRCTERMPROCESSING
   int dummyVar = 0; // force to do all processing on the dst side
   srcTermProcessingArg = &dummyVar; // ignore optionally incoming value
@@ -10158,7 +10244,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   
   } // finished finding srcTermProcessingOpt
 
-
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.0"));
+#endif
+  
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d "
     "(majority vote)\n", localPet, srcTermProcessingOpt);
@@ -10171,9 +10260,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // Optimize pipelineDepth, finding pipelineDepthOpt:
   int pipelineDepthOpt;     // optimium pipeline depth ... to be determined
 
-#define FORCE_PIPELINEDEPTH___disable
+#define FORCE_PIPELINEDEPTH
 #ifdef FORCE_PIPELINEDEPTH
-  int dummyVar2 = petCount; // force pipeline depth to be "petCount" deep
+//  int dummyVar2 = petCount; // force pipeline depth to be "petCount" deep
+  int dummyVar2 = 1; // force pipeline depth to be only "1" deep
   pipelineDepthArg = &dummyVar2; // ignore optionally incoming value
 #endif
 
@@ -10289,6 +10379,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   
   } // finished finding pipelineDepthOpt
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.0"));
+#endif
+
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d "
     "(majority vote)\n", localPet, pipelineDepthOpt);
@@ -10330,6 +10424,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE11.0"));
+#endif
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(t14);   //gjt - profile
 #endif
