@@ -1,6 +1,6 @@
 # $Id$
 
-import os, sys, getopt
+import os, sys
 import ESMF
 import ESMF.api.constants as constants
 
