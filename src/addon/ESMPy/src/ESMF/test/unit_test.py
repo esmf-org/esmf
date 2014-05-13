@@ -628,9 +628,19 @@ def mesh_test():
     node_count = mesh.size_local[node]
     print 'owned node_count = '+str(node_count)+'\n'
     
+    '''
     coords, num_nodes, num_dims = ESMP_MeshGetCoordPtr(mesh)
     print 'ESMP_MeshGetCoordPtr() - num_nodes = '+str(num_nodes)+', num_dims = '+str(num_dims)+'\n'
     status = all([coords[i] == nodeCoord[i] for i in range(num_nodes*2)])
+    '''
+
+    xcoords = mesh.get_coords(0)
+    ycoords = mesh.get_coords(1)
+
+    xcoords2 = np.array([nodeCoord[2*i] for i in range(mesh.size_local[node])])
+    ycoords2 = np.array([nodeCoord[2*i+1] for i in range(mesh.size_local[node])])
+
+    status = all(xcoords == xcoords2) and all(ycoords == ycoords2)
 
     # this call fails if nodes and elements have not been added first
     #mesh.free_memory()
