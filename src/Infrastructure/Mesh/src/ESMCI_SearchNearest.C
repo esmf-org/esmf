@@ -46,7 +46,7 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
-
+  bool sn_debug=false;
 
 struct SearchData {
   int sdim;
@@ -220,6 +220,7 @@ struct SearchData {
     for (; ni != ne; ++ni) {
       const MeshObj &node = *ni;
 
+
       // Get mask value
       double *m=dst_mask->data(node);
       
@@ -279,7 +280,6 @@ struct SearchData {
       sr->src_gid=sd.closest_src_node->get_id();
       result.push_back(sr);
     } else { // ...otherwise deal with the unmapped point
-
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
         Throw() << " Some destination points cannot be mapped to the source grid";
       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
@@ -313,7 +313,6 @@ struct CommData {
   Trace __trace("Search(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result)");
   //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
   //  Trace __trace("FindPnts()");
-
 
   // Get src fields
   MEField<> *src_coord = src.GetCoordField();
@@ -493,6 +492,7 @@ struct CommData {
     sd.closest_dist2=std::numeric_limits<double>::max();
     sd.src_coord=src_coord;
 
+
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
     
@@ -514,25 +514,35 @@ struct CommData {
     // Get destination node pnt
     double *pnt = dst_coord->data(node);
 
-    // Get minimum distance found so far
-    double dist=closest_dist[i];
-
-    //// Point min max we expand the point by the
+    // Get search box based on what we've found so far
     double pnt_min[3], pnt_max[3];
-    
-    pnt_min[0] = pnt[0]-dist;
-    pnt_min[1] = pnt[1]-dist;
-    pnt_min[2] = (sdim == 3) ? pnt[2]-dist : 0.0;
 
-    pnt_max[0] = pnt[0]+dist;
-    pnt_max[1] = pnt[1]+dist;
-    pnt_max[2] = (sdim == 3) ? pnt[2]+dist : 0.0;
+    // If we've found a point, then search box is based on distance to it
+    if (closest_src_gid[i] != -1) { 
+      double dist=closest_dist[i];
+
+      pnt_min[0] = pnt[0]-dist;
+      pnt_min[1] = pnt[1]-dist;
+      pnt_min[2] = (sdim == 3) ? pnt[2]-dist : 0.0;
+      
+      pnt_max[0] = pnt[0]+dist;
+      pnt_max[1] = pnt[1]+dist;
+      pnt_max[2] = (sdim == 3) ? pnt[2]+dist : 0.0;
+    } else {  // ...nothing so far, so just make maxium
+      pnt_min[0] = min;  pnt_min[1] = min;  pnt_min[2] = min;
+      pnt_max[0] = max;  pnt_max[1] = max;  pnt_max[2] = max;
+    }
 
     //// Init vector
     proc_lists[i].clear();
 
     //// Search on point, plus or minus search_tolerence
     spacedir->get_procs(pnt_min, pnt_max, &(proc_lists[i])); // Definitely need () around proc_lists
+
+    //  if (node.get_id()==110581) {
+    //printf("%d# BOB FOUND %d other procs for node=%d\n",Par::Rank(),proc_lists[i].size(),node.get_id());
+    // }
+
 
 #if 0
     printf(" %d# Pnt=[%f %f %f] sending to = ",Par::Rank(),pnt[0],pnt[1],pnt[2]);
@@ -542,6 +552,7 @@ struct CommData {
     printf(" \n");
 #endif
   }
+
 
   // Get the number of processors used below
   int num_procs=Par::Size();
