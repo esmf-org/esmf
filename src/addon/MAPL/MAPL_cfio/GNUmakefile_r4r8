@@ -1,0 +1,192 @@
+# +-======-+ 
+#  Copyright (c) 2003-2007 United States Government as represented by 
+#  the Admistrator of the National Aeronautics and Space Administration.  
+#  All Rights Reserved.
+#  
+#  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+#  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+#  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+#  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+#  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+#  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+#  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+#  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+#  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+#  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+#  
+#  Government Agency: National Aeronautics and Space Administration
+#  Government Agency Original Software Designation: GSC-15354-1
+#  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+#  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+#  Government Agency Point of Contact for Original Software:  
+#  			Dale Hithon, SRA Assistant, (301) 286-2691
+#  
+# +-======-+ 
+#
+# Makefile for ESMA components.
+#
+# REVISION HISTORY:
+#
+# 03mar2004  Zaslavsky  Initial imlementation.
+# 20Oct2004  da Silva   Standardization
+# 29mar2005  da Silva   Added dependencies, cleaned up.
+# 16mar2009  Kokron     Set optz level 3 for C-programs
+#
+
+# Make sure ESMADIR is defined
+# ----------------------------
+ifndef ESMADIR
+       ESMADIR := $(shell pwd)/../../../..
+endif
+
+# Compilation rules, flags, etc
+# -----------------------------
+  include $(ESMADIR)/Config/ESMA_base.mk  # Generic stuff
+  include $(ESMADIR)/Config/ESMA_arch.mk  # System dependencies
+  include $(ESMADIR)/Config/GMAO_base.mk 
+
+#                   ------------------
+#                   Subdirectory Flags
+#                   ------------------
+
+RN := $(shell basename $(PWD))
+NTHIS := GMAO_cfio
+
+DOING_R4  := $(findstring r4,  $(RN))
+DOING_EOS := $(findstring eos, $(RN))
+
+ifeq ($(DOING_EOS),eos)
+  MTHIS = $(NTHIS)_eos
+else
+  MTHIS = $(NTHIS)
+endif
+NLIB = lib$(MTHIS).a
+THIS = $(NTHIS)_$(RN)
+LIB  = lib$(THIS).a
+BINS = 
+
+NREAL := $(FREAL)
+
+COPT = $(COPT3) 
+
+ifeq ($(DOING_R4),r4)
+  override FREAL = $(FREAL4)
+else
+  override FREAL = $(FREAL8)
+endif
+
+#                  ---------------------
+#                  Standard ESMA Targets
+#                  ---------------------
+
+esma_install install: $(DEPS) $(LIB) $(BINS)
+	$(MKDIR) $(ESMALIB) $(ESMAETC) $(ESMAINC)/$(THIS) $(ESMABIN)
+	$(CP) -p *.a         $(ESMALIB)
+	$(CP) -p *.[Mm][Oo][Dd] $(ESMAINC)/$(THIS)
+ifeq ($(NREAL),$(FREAL))
+	$(RM) -r $(ESMALIB)/$(NLIB) $(ESMAINC)/$(MTHIS)
+	cd $(ESMALIB); $(LN) -s ./$(LIB)  $(NLIB)
+	cd $(ESMAINC); $(LN) -s ./$(THIS) $(MTHIS)
+endif
+#	$(CP) -p *.rc        $(ESMAETC)
+#	$(CP) -p $(BINS)     $(ESMABIN)
+
+esma_clean clean:
+	$(RM) *~ *.[aox] *.[Mm][Oo][Dd]
+
+esma_distclean distclean:
+	$(RM) *~ *.[aoxd] *.[Mm][Oo][Dd]
+
+esma_doc doc:
+	@echo "Target $@ not implemented yet in `pwd`"
+
+esma_help help:
+	@echo "Standard ESMA targets:"
+	@echo "% make esma_install    (builds and install under ESMADIR)"
+	@echo "% make esma_clean      (removes deliverables: *.[aox], etc)"
+	@echo "% make esma_distclean  (leaves in the same state as cvs co)"
+	@echo "% make esma_doc        (generates PDF, installs under ESMADIR)"
+	@echo "% make esma_help       (this message)"
+	@echo "Environment:"
+	@echo "      ESMADIR = $(ESMADIR)"
+	@echo "      BASEDIR = $(BASEDIR)"
+	@echo "         ARCH = $(ARCH)"
+	@echo "         SITE = $(SITE)"
+	@echo "        FREAL = $(FREAL)"
+
+#                  --------------------
+#                    NetCDF-3 Stubs?
+#                  --------------------
+
+ifeq ($(LIB_HDF),$(LIB_SDF))
+  ifeq ($(wildcard $(LIB_MFHDF3)), $(null))
+     STUBS := netcdf_stub.F90 # CFIO only needs NetCDF-2, so MFHDF is enough
+     $(warning Building CFIO with HDF but MFHDF3 not present --- providing stubs)
+  endif
+endif
+
+ifeq ($(DOING_EOS),eos)
+   USER_FDEFS = $(MPFLAGS) -DHDFEOS # -mp
+   HDFEOS_SRCS = ESMF_CFIOEosMod.F90
+else
+   USER_FDEFS = $(MPFLAGS) # -mp
+endif
+
+#                  --------------------
+#                  User Defined Targets
+#                  --------------------
+
+TESTS = testw_st.x testr_st.x testw_ex1.x testw_ex2.x \
+	testw_ex3.x testw_ex5.x testw_ex4.x testr_gd.x \
+	testw2.x testw3.x testr.x testr_gd_wr.x
+
+SRCS  = ESMF_CFIOBaseMod.f      \
+        $(HDFEOS_SRCS)          \
+	ESMF_CFIOFileMod.F90    \
+	ESMF_CFIOGrADSMod.F90   \
+	ESMF_CFIOGridMod.F90    \
+	ESMF_CFIOMod.F90        \
+	ESMF_CFIOSdfMod.F90     \
+	ESMF_CFIOUtilMod.F90    \
+	ESMF_CFIOVarInfoMod.F90 \
+	ESMF_CFIOrGrADSMod.F90  \
+	ESMF_CFIOwGrADSMod.F90  \
+	ShaveMantissa.c $(STUBS) 
+
+OBJS := $(addsuffix .o, $(basename $(SRCS)))
+DEPS := $(addsuffix .d, $(basename $(SRCS))) \
+        $(addsuffix .d, $(basename $(BINS))) 
+
+INC_DIRS = . .. $(INC_SDF) $(INC_MPEU)
+MOD_DIRS = . $(INC_MPEU)
+
+BIG_ENDIAN =
+
+USER_FINCS  = $(foreach dir,$(INC_DIRS),$(I)$(dir)) 
+USER_FMODS  = $(foreach dir,$(MOD_DIRS),$(M)$(dir)) 
+USER_FFLAGS =  $(PP) $(BIG_ENDIAN)
+
+
+vpath % $(INC_DIRS) ../examples /usr/include # $(MOD_DIRS)
+
+$(LIB) lib : $(DEPS) $(OBJS)
+	$(RM) $(LIB)
+	$(AR) $(AR_FLAGS) $(LIB) $(OBJS)
+
+%.x : $(LIB) %.o
+	$(FC) $(LDFLAGS) -o $@ $*.o $(LIB) \
+              $(LIB_EU) $(LIB_SDF) $(LIB_MPI) $(LIB_SYS)
+
+test: $(TESTS)
+	  @ argv="$(TESTS)" ;\
+	  for test in $$argv; do			 \
+	    ( echo " "; echo "---- Starting $(RN) test $$test"; ./$$test ) \
+	  done
+
+# Hack to prevent remaking dep files during cleaning
+# --------------------------------------------------
+  ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
+    -include $(DEPS)
+  endif
+
+#.

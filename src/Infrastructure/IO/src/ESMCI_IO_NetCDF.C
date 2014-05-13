@@ -313,7 +313,7 @@ namespace ESMCI
 
     for (int i = 0; i < numVars; ++i)
     {
-      Array*  thisArray = readArray(netCdfFile, i);
+      Array*  thisArray = readArray(netCdfFile, i, &localrc);
       if (thisArray != NULL)
       {
         //thisArray->print();
@@ -509,9 +509,12 @@ namespace ESMCI
 //             dimensions[j] = netCdfFile->add_dim(dimName, dimLengths[j]);
            }
 
-           writeArray(netCdfFile, thisArray, numDims, dimensions);
-
+           localrc = writeArray(netCdfFile, thisArray, numDims, dimensions);
            delete[] dimensions;
+           if (ESMC_LogDefault.MsgFoundError(localrc,
+               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) {
+             return localrc;
+           }
         }
 #else
     // netcdf library not present
@@ -689,7 +692,7 @@ void IO_NetCDF::destruct(void) {
 //-------------------------------------------------------------------------
 
   Array*  IO_NetCDF::readArray(NcFile  netCdfFile,
-                               int      varIndex) 
+                               int      varIndex, int *rc) 
   {
 
 #undef  ESMC_METHOD
@@ -707,15 +710,11 @@ void IO_NetCDF::destruct(void) {
     if ((ncerr = nc_inq_var (netCdfFile, varIndex, ncname, &nctype, &ndims, dimIds, &ncnatts)) != NC_NOERR) {
       string errstr = string(": nc_inq_var failure: ").append(nc_strerror(ncerr));
       ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+      *rc = ESMF_FAILURE;
       return NULL;
     }
 //    NcVar*  thisVar = netCdfFile->get_var(varIndex);
     Array*  thisArray = NULL;
-
-    if (ncerr != NC_NOERR)
-    {
-       return thisArray;
-    }
 
     if (trace) {
       std::cerr << ESMC_METHOD << ": Variable Name: " << ncname << std::endl;
@@ -726,8 +725,6 @@ void IO_NetCDF::destruct(void) {
 
     size_t* dimSizes   = new size_t[ndims];
     int*    dimSizes_int = new int[ndims];
-    size_t* minIndices = new size_t[ndims]();
-    int*    minIndices_int = new int[ndims]();
     size_t* maxIndices = new size_t[ndims];
     int*    maxIndices_int = new int[ndims];
     size_t numValues = 1;
@@ -735,6 +732,12 @@ void IO_NetCDF::destruct(void) {
       if ((ncerr = nc_inq_dimlen (netCdfFile, dimIds[j], &dimSizes[j])) != NC_NOERR) {
         string errstr = string(": nc_inq_dimlen failure: ").append(nc_strerror(ncerr));
         ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        *rc = ESMF_FAILURE;
+        delete[] maxIndices_int;
+        delete[] maxIndices;
+        delete[] dimSizes_int;
+        delete[] dimSizes;
+        *rc = ESMF_FAILURE;
         return thisArray;
       }
       if (trace)
@@ -749,16 +752,25 @@ void IO_NetCDF::destruct(void) {
 
     if (trace)
       std::cerr << ESMC_METHOD << ": allocating values buffer, numValues = " << numValues << std::endl;
+    size_t* minIndices = new size_t[ndims]();
+    int*    minIndices_int = new int[ndims]();
     void * values = new double[numValues];
     if ((ncerr = nc_get_vara (netCdfFile, varIndex, minIndices, dimSizes, values)) != NC_NOERR) {
         string errstr = string(": nc_get_vera failure: ").append(nc_strerror(ncerr));
         ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        delete[] minIndices_int;
+        delete[] minIndices;
+        delete[] maxIndices_int;
+        delete[] maxIndices;
+        delete[] dimSizes_int;
+        delete[] dimSizes;
+        *rc = ESMF_FAILURE;
         return thisArray;
     }
 
 //    NcValues*	values = thisVar->values();
 
-    int      arrayRc = 0;
+    int      localrc;
     if (trace)
       std::cerr << ESMC_METHOD << ": creating locArray" << std::endl;
     LocalArray*	locArray = LocalArray::create(
@@ -769,8 +781,8 @@ void IO_NetCDF::destruct(void) {
                                    maxIndices_int,
                                    values,
                                    DATA_COPY,
-                                   &arrayRc);
-    //printf("*** LocalArray RC: %d\n", arrayRc);
+                                   &localrc);
+    //printf("*** LocalArray RC: %d\n", localrc);
     //locArray->print("full");
 
     InterfaceInt*	minIndex = new InterfaceInt(minIndices_int, ndims);
@@ -782,8 +794,8 @@ void IO_NetCDF::destruct(void) {
     delete[] dimSizes_int;
     delete[] dimSizes;
 
-    if (arrayRc != ESMF_SUCCESS)
-    {
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       delete[] minIndices_int;
       delete[] maxIndices_int;
       delete minIndex;
@@ -799,17 +811,16 @@ void IO_NetCDF::destruct(void) {
                                (InterfaceInt*)NULL, (InterfaceInt*)NULL,
                                (InterfaceInt*)NULL, (ESMC_IndexFlag*)NULL,
                                (InterfaceInt*)NULL, 
-                               (DELayout*)NULL, (VM*)NULL, &arrayRc);
-    //printf("*** DistGrid RC: %d\n", arrayRc);
+                               (DELayout*)NULL, (VM*)NULL, &localrc);
+    //printf("*** DistGrid RC: %d\n", localrc);
 
     delete[] minIndices_int;
     delete[] maxIndices_int;
     delete minIndex;
     delete maxIndex;
 
-    if (arrayRc != ESMF_SUCCESS)
-    {
-      std::cerr << ESMC_METHOD << ": distGrid create error. rc = " << arrayRc << std::endl;
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       return thisArray;
     }
 
@@ -822,11 +833,11 @@ void IO_NetCDF::destruct(void) {
                               (InterfaceInt*)NULL, (InterfaceInt*)NULL,
                               (InterfaceInt*)NULL, (ESMC_IndexFlag*)NULL,
                               (InterfaceInt*)NULL, (InterfaceInt*)NULL,
-                              &arrayRc);
+                              &localrc);
 
-    //printf("*** Array RC: %d\n", arrayRc);
-    if (arrayRc != ESMF_SUCCESS)
-    {
+    //printf("*** Array RC: %d\n", localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       return NULL;
     }
 
@@ -840,6 +851,7 @@ void IO_NetCDF::destruct(void) {
       if ((ncerr = nc_inq_attname (netCdfFile, varIndex, j, attname)) != NC_NOERR) {
         string errstr = string(": nc_inq_attname failure: ").append(nc_strerror(ncerr));
         ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        *rc = ESMF_FAILURE;
         return thisArray;
       }
       if (trace)
@@ -849,6 +861,7 @@ void IO_NetCDF::destruct(void) {
       if ((ncerr = nc_inq_att (netCdfFile, varIndex, attname, &atttype, &attlen)) != NC_NOERR) {
         string errstr = string(": nc_inq_att failure: ").append(nc_strerror(ncerr));
         ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        *rc = ESMF_FAILURE;
         return thisArray;
       }
 //      NcAtt*	thisAtt = thisVar->get_att(j);
@@ -877,6 +890,7 @@ void IO_NetCDF::destruct(void) {
          if ((ncerr = nc_get_att_text (netCdfFile, varIndex, attname, att_str)) != NC_NOERR) {
         string errstr = string(": nc_get_att_text failure: ").append(nc_strerror(ncerr));
         ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+          *rc = ESMF_FAILURE;
            return thisArray;
          }
          attValString = string(att_str, attlen);
@@ -894,6 +908,7 @@ void IO_NetCDF::destruct(void) {
          if ((ncerr = nc_get_att_int (netCdfFile, varIndex, attname, att_int)) != NC_NOERR) {
            string errstr = string(": nc_get_att_int failure: ").append(nc_strerror(ncerr));
            ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+           *rc = ESMF_FAILURE;
            return thisArray;
          }
          attValInt = att_int[0];
@@ -910,6 +925,7 @@ void IO_NetCDF::destruct(void) {
          if ((ncerr = nc_get_att_float (netCdfFile, varIndex, attname, att_float)) != NC_NOERR) {
            string errstr = string(": nc_get_att_float failure: ").append(nc_strerror(ncerr));
            ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+           *rc = ESMF_FAILURE;
            return thisArray;
          }
          attValFloat = att_float[0];
@@ -926,6 +942,7 @@ void IO_NetCDF::destruct(void) {
          if ((ncerr = nc_get_att_double (netCdfFile, varIndex, attname, att_double)) != NC_NOERR) {
            string errstr = string(": nc_get_att_double failure: ").append(nc_strerror(ncerr));
            ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+           *rc = ESMF_FAILURE;
            return thisArray;
          }
          attValDouble = att_double[0];
@@ -951,6 +968,7 @@ void IO_NetCDF::destruct(void) {
       //thisArray->root.ESMC_Print();
     }
 
+    *rc = ESMF_SUCCESS;
     return thisArray;
   }
 

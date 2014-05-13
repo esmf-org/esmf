@@ -1,0 +1,280 @@
+% +-======-+ 
+%  Copyright (c) 2003-2007 United States Government as represented by 
+%  the Admistrator of the National Aeronautics and Space Administration.  
+%  All Rights Reserved.
+%  
+%  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+%  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+%  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+%  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+%  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+%  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+%  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+%  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+%  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+%  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+%  
+%  Government Agency: National Aeronautics and Space Administration
+%  Government Agency Original Software Designation: GSC-15354-1
+%  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+%  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+%  Government Agency Point of Contact for Original Software:  
+%  			Dale Hithon, SRA Assistant, (301) 286-2691
+%  
+% +-======-+ 
+
+\def\m#1{{\tt \_\_#1\_\_}}
+\def\f#1#2{{\tt \_\_#1\_\_(#2)}}
+
+\subsection*{Introduction}
+
+\paragraph{Definitions.} In Object Oriented languages such as C++, Java or
+Python, the term {\em exception} is used to describe an event, which
+occurs during the execution of a program, that disrupts the normal
+flow of the program. The simple macros presented here attempt to
+simulate some of the exception handling functionality within the
+constraints of a Fortran programming environment.
+
+When an error occurs in a MAPL or ESMF subroutine or function, the
+subprogram usually returns with a non-zero error condition. It is
+common practice in MAPL applications to {\em bubble up} this error
+condition, , returning this error to all subprograms in the call
+stack. Creating an exception by means of a nonzero error code and
+handing it to the MAPL runtime system is called {\em raising an exception}
+(as in Python; the term {\em throwing an exception} is used in Java.)
+
+As the nonzero error condition travels up the call stack, one of these
+subprograms may examine this error condition and decide to take
+appropriate action.  In this case, we say that the subprgram {\em
+catches} the exception. However, if each subprogram simply returns,
+passing up the same nonzero error condition, when control reaches the
+top of the call stack the program terminates.
+
+\paragraph{Advantages of Exceptions.} Using the concept of exceptions
+to manage errors has some advantages over traditional error-management
+techniques. You can learn more in the {\em Advantages of Exceptions}
+section in the Java tutorial:
+\begin{verbatim}
+http://java.sun.com/docs/books/tutorial/essential/exceptions/advantages.html
+\end{verbatim}
+These advantages also apply to Fortran codes, specifically,
+\begin{description}
+
+\item[Separating Error-Handling Code from Regular Code.] Exceptions
+  provide the means to separate the details of what to do when
+  something out of the ordinary happens from the main logic of a
+  program. In traditional programming, error detection, reporting, and
+  handling often lead to confusing spaghetti code.
+  
+\item[Propagating Errors Up the Call Stack].  A second advantage of
+  exceptions is the ability to propagate error reporting up the call
+  stack of subprograms, producing a traceback in the process,
+  something that Fortran compilers are not good at.
+
+\item[Grouping and Differentiating Error Types.] Although exceptions
+  can be raised in very diverse circunstances, they are assigned
+  generic codes such as {\tt ESMF\_RC\_ARG\_SIZE} which can help you
+  decide how to handle such an exception in the calling
+  subprograms. Notice that an {\em exception code} is meant to
+  describe generic error categories, not necessarily something
+  particular to a given subprogram.
+\end{description}
+
+\subsection*{Usage}
+
+The {\tt MAPL\_Exceptions} function is implemented by means of C
+pre-processor macros defined in {\tt MAPL\_Exceptions.h}. This must be
+the first file included at the top of your source code file:
+\begin{verbatim}
+ #include "MAPL_Exceptions.h"
+\end{verbatim}
+Another possibility is to include
+\begin{verbatim}
+ #include "MAPL_Generic.h"
+\end{verbatim}
+which implicitly includes {\tt MAPL\_Exceptions.h}. 
+
+\paragraph{Important Remark.} Never include {\tt MAPL\_Exceptions.h}
+after {\tt MAPL\_ErrLog.h} or a compilation error will result. 
+
+\paragraph{Reserved variables: {\tt STATUS} and {\tt Iam}.} Most
+macros in {\tt MAPL\_Exceptions.h} assume that the following
+(reserved) variables have been locally declared:
+\begin{verbatim}
+    integer                     :: STATUS
+    character(len=ESMF_MAXSTR)  :: Iam
+\end{verbatim}
+For convenience, the \f{Iam}{name} macro-function is provided as a
+short-hand and should be invoked at the declaration section of your
+subprogram. The string {\tt name} is used to initialize the variable
+{\tt Iam}. For example,
+\begin{verbatim}
+    type(ESMF_Grid) :: Grid
+    __Iam__('Initialize')
+\end{verbatim}
+is equivalent to
+\begin{verbatim}
+    type(ESMF_Grid) :: Grid
+    integer                     :: STATUS
+    character(len=ESMF_MAXSTR)  :: Iam='Initialize'
+\end{verbatim}
+Of course, you can redefine {\tt Iam} later if you wish.
+
+\paragraph{Automatic handling of exceptions.}
+
+Both MAPL and the ESMF use the optional variable {\tt RC} to return
+the {\em error code} associated with a subprogram. It is common
+practice to specify {\tt RC} as the the last argument of the subprogram. MAPL
+applications using the lower level {\tt MAPL\_ErrLog} rely on the
+macro-function {\tt VERIFY\_()} for exception handling. {\tt
+  VERIFY\_(STATUS)} checks the value {\tt STATUS}, and in case of an
+abnormal STATUS (really, {\tt STATUS/=ESMF\_SUCCESS)}, prints out the line
+number and the contents of the string {\tt Iam}, returning to the caller, e.g.,
+\begin{verbatim}
+   call ESMF_ConfigGetAttribute(CF, provider, Label=Label, RC=STATUS)
+   VERIFY_(STATUS)
+\end{verbatim}
+This error code {\em bubbles up} to the the main program, producing a
+traceback in the process.
+
+As a form of {\em syntatic sugar}, {\tt MAPL\_Exceptions} provide the
+macro \m{RC} for accomplishing exactly the same without the need for
+the extra {\tt VERIFY\_(STATUS)} line:
+\begin{verbatim}
+   call ESMF_ConfigGetAttribute(CF, provider, Label=Label, __RC__)
+\end{verbatim}
+Make sure that \m{RC} always comes in place of the {\em last} argument.
+Another convenience macro is \m{STAT} which can be used with {\tt
+  allocate statements}, viz.
+\begin{verbatim}
+   call allocate(uwnd(im,jm,lm), __STAT__)
+\end{verbatim}
+as a short-hand for
+\begin{verbatim}
+   call allocate(uwnd(im,jm,lm), stat=STATUS)
+   VERIFY_(STATUS)
+\end{verbatim}
+
+
+
+\paragraph{Simple exception handling with \m{try}. }
+
+The \m{try} macro allows you to define a block of code that executes
+until the end of the block or up to the line where an abnormal error
+condition occurs. Take a look at this code fragment,
+\begin{verbatim}
+ __try__
+    AERO_PROVIDER = GetProvider_(CF,'AERO_PROVIDER:',__rc__)
+    call ESMF_StateGetBundle(EXPORT, 'AERO', xBUNDLE, __rc__ )
+    call ESMF_BundleGet(xBUNDLE, fieldCount=NA, __rc__ )
+    call ESMF_StateGetBundle (GEX(AERO_PROVIDER), 'AERO', cBUNDLE, __rc__ )
+    call ESMF_BundleGet(cBUNDLE, fieldCount=pNA, __rc__ )
+__except__
+    AERO_PROVIDER = PCHEM
+__endtry__
+\end{verbatim}
+(Notice the lower case macro \m{rc}, which is not to be confused with
+\m{RC} used above for automatic exception handling.) For the sake of
+argument, let's say that an error occurs at the third line
+\begin{verbatim}
+    call ESMF_BundleGet(xBUNDLE, fieldCount=NA, __rc__ )
+\end{verbatim}
+then the subsequent lines will not be executed, with execution
+resuming after \m{except} until an \m{endtry} is found. The integer
+variable {\tt STATUS} holds the value of the last abnormal error condition.
+
+\paragraph{VERY IMPORTANT.} In the current implementation, you cannot
+have Fortran do-loops inside a \m{try}/\m{endtry} block. Use the
+alternative construct \m{Try}/\m{endTry} in such cases.
+
+\paragraph{Catching multiple exceptions.}
+
+The example above {\em catches} all the exceptions under the
+\m{except} block. Use the \m{catch}/\m{endcatch} macros when you need
+to catch multiple exceptions as in this example:
+\begin{verbatim}
+ __try__
+    AERO_PROVIDER = GetProvider_(CF,'AERO_PROVIDER:',__rc__)
+    call ESMF_StateGetBundle(EXPORT, 'AERO', xBUNDLE, __rc__ )
+    call ESMF_BundleGet(xBUNDLE, fieldCount=NA, __rc__ )
+    call ESMF_StateGetBundle (GEX(AERO_PROVIDER), 'AERO', cBUNDLE, __rc__ )
+    call ESMF_BundleGet(cBUNDLE, fieldCount=pNA, __rc__ )
+ __endtry__
+ 
+    __catch__
+       case (MAPL_RC_RESOURCE_NOT_FOUND) 
+                                          AERO_PROVIDER = PCHEM
+       case (ESMF_RC_CANNOT_GET) 
+                                          AERO_PROVIDER = GOCART
+       case (ESMF_RC_MEM)
+                                          AERO_PROVIDER = GMI
+       case DEFAULT
+                                          AERO_PROVIDER = NONE
+   __endcatch__
+\end{verbatim}
+The \m{catch}/\m{endcatch} block is nothing more than a straighforward
+wrapper around the Fortran {\tt select case/end select}
+construct. These macros simply offer syntatic sugar to make it clear
+that one is catching exceptions associated with the previous \m{try} block.
+
+\paragraph{Named exception blocks with \m{Try}. } The current
+implementation use Fortran do-loops with the \tt {exit} statement 
+for implementing the \m{try} blocks. This prevents user do-loops
+inside these blocks as the {\tt exit} would jump out of the user
+do-loop, not the do-loop associated with exception block. In such
+cases, use the alternative named \m{Try} blocks:
+\begin{verbatim}
+     __Try__(p)
+        do i = 1, nLabel
+          call ESMF_ConfigGetAttribute(CF, provider, Label=Lab(i), __Rc__(p) )
+          select case ( trim(provider) )
+           case ('PCHEM')
+                                    GetProvider_ = PCHEM
+           case ('GOCART')
+                                    GetProvider_ = GOCART
+           case ('STRATCHEM')
+                                    GetProvider_ = STRATCHEM
+           case ('GMI')
+                                    GetProvider_ = GMI
+           case DEFAULT
+                __raise__(MAPL_RC_ERROR,'unknown provider '//trim(provider))
+          end select
+        end do
+     __endTry__(p)
+\end{verbatim}
+Notice the use of \f{Rc}{p} to specify that when an exception
+occurs the control should jump out of the \m{Try} block named {\tt
+  p}. Currently there is no equivalent of \m{except} for named
+exception blocks. However, \m{catch} works as usual.
+
+\paragraph{Raising exceptions.} Use the \f{raise}{name,description}
+macro-function to raise an exception, printing along an explanatory
+error message. For example, if your code says
+\begin{verbatim}
+   __raise__(ESMF_RC_ARG_RANK,'2D arrays are required here')
+\end{verbatim}
+the following message will be printed:
+\begin{verbatim}
+ESMF_RC_ARG_RANK: 2D arrays are required here
+\end{verbatim}
+followed by the regular traceback information.
+
+\paragraph{Error codes.} {\tt MAPL\_Exceptions} automatically includes
+the file {\tt ESMF\_ErrReturnCodes.inc} which defines all possible
+error codes returned by the ESMF. Consult the Appendix of the {\em ESMF
+Reference Manual for Fortran} for a list of these error codes. In
+addition, a handful of MAPL specific error codes are defined,
+\begin{verbatim}
+   MAPL_RC_ERROR                     2000
+   MAPL_RC_RESOURCE_NOT_FOUND        2001
+   MAPL_RC_FIELD_NOT_FOUND           2002
+   MAPL_RC_BUNDLE_NOT_FOUND          2003
+   MAPL_RC_FORTRAN_ARRAY_NOT_FOUND   2004
+\end{verbatim}
+Please examine the contents of {\tt MAPL\_Exceptions.h} for the most up
+to date list of these error codes.
+
+
+
+
+

@@ -1,0 +1,41 @@
+#
+# Resource FIle for the H2O Grid Component.
+#
+#--------------------------------------------------------------------------------
+
+verbose: .TRUE.
+debug: .TRUE.
+
+
+#                            ----------------
+#                            Mask Definitions
+#                            ----------------
+Nominal_Orbits::               
+#                              Swath
+# Instrument   Satellite       (km)                  Long Name
+# ----------  -----------   ----------  ---------------------------------------------------
+   TERRA       TERRA               0    Orbital Mask for TERRA (Satellite Sub-point)
+   MOPITT      TERRA             616    Orbital Mask for MOPITT
+   ASTER       TERRA              60    Orbital Mask for ASTER
+   MODIS_T     TERRA            2330    Orbital Mask for MODIS TERRA
+   MODIS_TDAY  TERRA            2330    Orbital Mask for MODIS TERRA (Day-time only)
+   MISR        TERRA             380    Orbital Mask for MISR 
+   MISR_DAY    TERRA             380    Orbital Mask for MISR (Day-time only)
+#
+   AQUA        AQUA                0    Orbital Mask for AQUA (Satellite Sub-point)
+   AIRS        AQUA             1650    Orbital Mask for AIRS        
+   AMSU_A      AQUA             1650    Orbital Mask for AMSU-A
+   AMSR_E      AQUA             1445    Orbital Mask for AMSR-E
+   HSB         AQUA             1650    Orbital Mask for Humidity Sounder of Brazil (HSB)
+   MODIS_A     AQUA             2330    Orbital Mask for MODIS AQUA
+   MODIS_ADAY  AQUA             2330    Orbital Mask for MODIS AQUA (Day-time only)
+#
+   AURA        AURA                0    Orbital Mask for AURA (Satellite Sub-point)
+   HIRDLS      AURA             3000    Orbital Mask for HIRDLS
+   OMI         AURA             2600    Orbital Mask for OMI
+   OMI_DAY     AURA             2600    Orbital Mask for OMI (Day-time only)
+   TES         AURA              180    Orbital Mask for TES
+#
+   CALIPSO     CALIPSO             0    Orbital Mask for CALIPSO 
+   CLOUDSAT    CLOUDSAT            0    Orbital Mask for CLOUDSAT
+::

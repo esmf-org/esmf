@@ -111,7 +111,8 @@ namespace ESMCI
     nc_type         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
 
     Array*  readArray(NcFile  netCdfFile,
-                       int    varIndex);
+                       int    varIndex,
+                       int    *rc);
     int     writeArray(NcFile netCdfFile,
                        Array* thisArray,
                        int    numDims,
