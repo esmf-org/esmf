@@ -6708,7 +6708,7 @@ void accessLookup(
   char **responseStreamClient = new char*[petCount];
   char **responseStreamServer = new char*[petCount];
   
-char msg[1024];
+//char msg[1024];
   
   // t-specific routine
   int requestFactor = requestSizeFactor(t);
@@ -9307,11 +9307,11 @@ int sparseMatMulStoreEncodeXXE(
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
 #endif
-  int *srcTermProcessingArg,              // inout (optional)
+  int *srcTermProcessingArg,    // inout (optional)
                                 // if (NULL) -> auto-tune, no pass back
                                 // if (!NULL && -1) -> auto-tune, pass back
                                 // if (!NULL && >=0) -> no auto-tune, use input
-  int *pipelineDepthArg                   // inout (optional)
+  int *pipelineDepthArg         // inout (optional)
                                 // if (NULL) -> auto-tune, no pass back
                                 // if (!NULL && -1) -> auto-tune, pass back
                                 // if (!NULL && >=0) -> no auto-tune, use input
@@ -9346,7 +9346,7 @@ int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO____disable
+#define SMMSTOREENCODEXXEINFO_off
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -10119,15 +10119,18 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // Optimize srcTermProcessing, finding srcTermProcessingOpt:
   int srcTermProcessingOpt; // optimium src term processing ... to be determined
 
-#define FORCE_SRCTERMPROCESSING
-#ifdef FORCE_SRCTERMPROCESSING
+#define FORCE_SRCTERMPROCESSING_off
+#ifdef FORCE_SRCTERMPROCESSING_on
   int dummyVar = 0; // force to do all processing on the dst side
-  srcTermProcessingArg = &dummyVar; // ignore optionally incoming value
+  if (srcTermProcessingArg && *srcTermProcessingArg < 0)
+    *srcTermProcessingArg = dummyVar; // replace incoming value
+  else
+    srcTermProcessingArg = &dummyVar; // ignore incoming value
 #endif
   
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
     // use the provided srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     char msg[160];
     sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
       *srcTermProcessingArg);
@@ -10136,14 +10139,18 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
     // optimize srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     char msg[160];
     sprintf(msg, "srcTermProcessingArg was NOT provided -> tuning...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
+#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+    int pipelineDepth = 1;// only allow one outstanding connection as workaround
+#else
     int pipelineDepth = petCount/2; // tricky to pick a good value here for all
                                     // cases (different interconnects!!!)
                                     // therefore need a concurrent opt scheme!!
+#endif
     const int srcTermProcMax = 8; // 8 different values in the srcTermProcList[]
     const int srcTermProcList[] = {0, 1, 2, 3, 4, 6, 8, 20};  // trial settings
     for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
@@ -10235,7 +10242,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       // new high vote found
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     sprintf(msg, "... finished tuning, found srcTermProcessingOpt = %d",
       srcTermProcessingOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -10260,16 +10267,26 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // Optimize pipelineDepth, finding pipelineDepthOpt:
   int pipelineDepthOpt;     // optimium pipeline depth ... to be determined
 
-#define FORCE_PIPELINEDEPTH
-#ifdef FORCE_PIPELINEDEPTH
-//  int dummyVar2 = petCount; // force pipeline depth to be "petCount" deep
-  int dummyVar2 = 1; // force pipeline depth to be only "1" deep
-  pipelineDepthArg = &dummyVar2; // ignore optionally incoming value
+#define FORCE_PIPELINEDEPTH_off
+#if (defined FORCE_PIPELINEDEPTH_on && !defined WORKAROUND_NONBLOCKPROGRESSBUG)
+  int dummyVar2 = petCount; // force pipeline depth to be "petCount" deep
+  if (pipelineDepthArg && *pipelineDepthArg < 0)
+    *pipelineDepthArg = dummyVar2; // replace incoming value
+  else
+    pipelineDepthArg = &dummyVar2; // ignore incoming value
+#endif
+
+#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+  int dummyVar2 = 1; // force pipeline depth to be only "1" deep as workaround
+  if (pipelineDepthArg && *pipelineDepthArg < 0)
+    *pipelineDepthArg = dummyVar2; // replace incoming value
+  else
+    pipelineDepthArg = &dummyVar2; // ignore incoming value
 #endif
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
     // use the provided pipelineDepthArg
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     char msg[160];
     sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
       *pipelineDepthArg);
@@ -10278,7 +10295,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
     // optimize pipeline depth
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     char msg[160];
     sprintf(msg, "pipelineDepthArg was NOT provided -> tuning...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -10370,7 +10387,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       // new high vote found
       pipelineDepthOpt = pipelineDepthOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO
+#ifdef SMMSTOREENCODEXXEINFO_on
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
