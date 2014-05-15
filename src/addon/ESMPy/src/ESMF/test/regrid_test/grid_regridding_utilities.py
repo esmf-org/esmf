@@ -382,10 +382,13 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
+    num_nodes = 0
     if field1.grid.rank == 2:
-        totalErr, min_error, max_error = compare_fields_grid_2d(field1, field2, dstfracfield)
+        totalErr, min_error, max_error, num_nodes = \
+            compare_fields_grid_2d(field1, field2, dstfracfield, num_nodes)
     elif field1.grid.rank == 3:
-        totalErr, min_error, max_error = compare_fields_grid_3d(field1, field2, dstfracfield)
+        totalErr, min_error, max_error, num_nodes = \
+            compare_fields_grid_3d(field1, field2, dstfracfield, num_nodes)
     else:
         raise ValueError("field1.grid.rank is not of a supported size")
 
@@ -397,6 +400,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
         total_error_global = comm.reduce(totalErr, op=MPI.SUM)
+        num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
         if (mass1 and mass2):
@@ -404,6 +408,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
         total_error_global = totalErr
+        num_nodes_global = num_nodes
         max_error_global = max_error
         min_error_global = min_error
         if (mass1 and mass2):
@@ -420,7 +425,8 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
             csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
 
         # compute mean relative error
-        total_error_global = total_error_global/field2.grid.size[field2.staggerloc]
+        if num_nodes != 0:
+            total_error_global = total_error_global/num_nodes_global
 
         # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):
@@ -446,7 +452,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     else:
         print "PET{0} - FAIL".format(ESMF.local_pet())
 
-def compare_fields_grid_2d(field1, field2, dstfracfield):
+def compare_fields_grid_2d(field1, field2, dstfracfield, num_nodes):
     # initialize to True, and check for False point values
     [x, y] = [0, 1]
     totalErr = 0.0
@@ -462,15 +468,16 @@ def compare_fields_grid_2d(field1, field2, dstfracfield):
                 else:
                     err = abs(field1.data[i, j]/dstfracfield.data[i, j] - \
                                 field2.data[i, j])
+                num_nodes += 1
                 totalErr += err
                 if (err > max_error):
                     max_error = err
                 if (err < min_error):
                     min_error = err
 
-    return totalErr, min_error, max_error
+    return totalErr, min_error, max_error, num_nodes
 
-def compare_fields_grid_3d(field1, field2, dstfracfield):
+def compare_fields_grid_3d(field1, field2, dstfracfield, num_nodes):
     # initialize to True, and check for False point values
     [x, y, z] = [0, 1, 2]
     totalErr = 0.0
@@ -489,11 +496,12 @@ def compare_fields_grid_3d(field1, field2, dstfracfield):
                     else:
                         err = abs(field1.data[i, j, k]/dstfracfield.data[i, j, k] - \
                                     field2.data[i, j, k])
+                    num_nodes += 1
                     totalErr += err
                     if (err > max_error):
                         max_error = err
                     if (err < min_error):
                         min_error = err
 
-    return totalErr, min_error, max_error
+    return totalErr, min_error, max_error, num_nodes
 
