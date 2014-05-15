@@ -141,7 +141,7 @@
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-        if (ichar(attstr(len:len)) == 0) len=len-1
+        if (attstr(len:len) .eq. achar(0)) len = len-1
 	if (.not. (attstr(1:len) .eq. 'degrees_east' .or. &
 	        attstr(1:len) .eq. 'degree_east' .or. &
 	        attstr(1:len) .eq. 'degree_E' .or. &
@@ -173,7 +173,7 @@
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-        if (ichar(attstr(len:len)) == 0) len=len-1
+         if (attstr(len:len) .eq. achar(0)) len = len-1
 	if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
 	        attstr(1:len) .eq. 'degree_north' .or. &
 	        attstr(1:len) .eq. 'degree_N' .or. &
@@ -210,7 +210,7 @@
         	errmsg, &
 	        rc)) return
 
-	   if (ichar(attstr(len:len)) == 0) len=len-1
+           if (attstr(len:len) .eq. achar(0)) len = len-1
            if (len >= 6 .and. (attstr(1:6) .eq. "degree")) then
   	      if (attstr(1:len) .eq. "degrees_east" .or. &
 	          attstr(1:len) .eq. "degree_east" .or. &
