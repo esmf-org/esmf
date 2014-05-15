@@ -1411,6 +1411,10 @@ program ESMF_RHandleBitForBitEx
 !
 !EOE
 
+! repeat the following code a few times to test bfb between SMM with fixed
+! parameters
+do i=1,5
+
 !BOC
   ! precondition the arguments for auto-tuning and overwriting
   srcTermProcessing = -1  ! init negative value
@@ -1435,8 +1439,10 @@ program ESMF_RHandleBitForBitEx
     close(unit=iounit)
   endif
   
-  if (iostat == 0) then
+  if ((localPet == 0) .and. (iostat == 0)) then
     print *, "SMM parameters successfully read from file"
+    print *, " srcTermProcessing=", srcTermProcessing, " pipelineDepth=", &
+      pipelineDepth, " ==>> sumCompare=", sumCompare
   endif
 
   call ESMF_ArraySMMStore(srcArray, dstArray, &
@@ -1458,7 +1464,7 @@ program ESMF_RHandleBitForBitEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
-  if ((localPet==0) .and. (iostat /= 0)) then
+  if ((localPet == 0) .and. (iostat /= 0)) then
     print *, "SMM parameters determined via auto-tuning -> dump to file"
     open(unit=iounit, file="smmParameters.dat", status="unknown", &
       action="write")
@@ -1479,11 +1485,21 @@ program ESMF_RHandleBitForBitEx
   endif
 !EOC
 
+  ! barrier ensures that file is written before any PET tries to read
+  call ESMF_VMBarrier(vm, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! release RH before the next pre-compute
   call ESMF_ArraySMMRelease(rh, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+enddo
 
 !BOE
 ! Running this example for the first time exercises the auto-tuning branch. The
