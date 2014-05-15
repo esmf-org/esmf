@@ -65,9 +65,9 @@ regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
 dstfield = regridSrc2Dst(srcfield, dstfield)
 
 # compute the mass
-srcmass = compute_mass_grid_3d(srcfield, srcareafield, 
+srcmass = compute_mass_grid(srcfield, srcareafield, 
                             dofrac=True, fracfield=srcfracfield)
-dstmass = compute_mass_grid_3d(dstfield, dstareafield)
+dstmass = compute_mass_grid(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
 compare_fields_grid(dstfield, exactfield, 10E-03, 10E-16, parallel=parallel, 

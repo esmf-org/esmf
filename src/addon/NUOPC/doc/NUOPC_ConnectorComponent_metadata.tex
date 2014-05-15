@@ -12,10 +12,12 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
 
 \begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
      {\tt Verbosity} & String value controlling the verbosity of INFO messages.& high, low\\ \hline
      {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
-     {\tt CplList} & List of StandardNames of the connected Fields.& N/A\\ \hline
+     {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
+     {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
+     {\tt CplList} & List of StandardNames of the connected Fields.& {\em standard names as per field dictionary}\\ \hline
      \hline
 \end{tabular}

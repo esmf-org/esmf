@@ -51,7 +51,8 @@ class Mesh(object):
             Optional arguments for creating a Mesh in memory: \n
                 None \n
         Mesh from file: \n
-            Required arguments for creating a Mesh from file: \n
+            Note that Meshes created from file do not have the parametric_dim and
+            spatial dim set.  Required arguments for creating a Mesh from file: \n
                 filename: the name of NetCDF file containing the Mesh. \n
                 filetype: the input file type of the Mesh. \n
                     Argument values are: \n
@@ -152,15 +153,16 @@ class Mesh(object):
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 
                                                   add_mask, varname)
-            # save info
-            self.parametric_dim = parametric_dim
-            self.spatial_dim = spatial_dim
-
             # get the sizes
-            self.size[node] = ESMP_MeshGetOwnedNodeCount(self)
-            self.size_local[node] = ESMP_MeshGetLocalNodeCount(self)
-            self.size[element] = ESMP_MeshGetOwnedElementCount(self)
-            self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
+            self.size[node] = ESMP_MeshGetLocalNodeCount(self)
+            self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+            self.size[element] = ESMP_MeshGetLocalElementCount(self)
+            self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
+
+            # link the coords here for meshes created from file, in add_elements for others
+            self._link_coords()
+
+        # TODO: parametric_dim and spatial_dim are not set for meshes from file
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
@@ -280,11 +282,14 @@ class Mesh(object):
                              self.element_mask, self.element_area)
         
         # get the sizes
-        self.size[node] = ESMP_MeshGetOwnedNodeCount(self)
-        self.size_local[node] = ESMP_MeshGetLocalNodeCount(self)
-        self.size[element] = ESMP_MeshGetOwnedElementCount(self)
-        self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
+        self.size[node] = ESMP_MeshGetLocalNodeCount(self)
+        self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+        self.size[element] = ESMP_MeshGetLocalElementCount(self)
+        self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
         
+        # link the coords here for meshes not created from file
+        self._link_coords()
+
     def add_nodes(self, node_count,
                   node_ids,
                   node_coords,
@@ -348,6 +353,28 @@ class Mesh(object):
         # call into ctypes layer
         ESMP_MeshFreeMemory(self)
 
+    def get_coords(self, coord_dim, meshloc=node):
+        """
+        Return a numpy array of coordinates at a specified Mesh 
+        location (coordinates can only be returned for the Mesh NODES 
+        at this time). The returned array is NOT a copy, it is
+        directly aliased to the underlying memory allocated by ESMF.\n
+        Required Arguments: \n
+           coord_dim: the dimension number of the coordinates to return:
+                       e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1) \n
+        Optional Arguments: \n
+             meshloc: the mesh location of the coordinates. \n
+                Argument values are: \n
+                    node=0 (default) \n
+                    element=1 (not implemented) \n
+        Returns: \n
+            None \n
+        """
+
+        # only nodes for now
+        assert(self.coords_done[meshloc][coord_dim])
+        return self.coords[meshloc][coord_dim]
+
     def _write(self, filename):
         """
         Write the Mesh to a vtk formatted file. \n
@@ -361,3 +388,45 @@ class Mesh(object):
 
         # call into ctypes layer
         ESMP_MeshWrite(self, filename)
+
+    def _link_coords(self, meshloc=node):
+        """
+        Link Python Mesh to ESMC Mesh coordinates.
+        Required Arguments: \n
+           None \n
+        Optional Arguments: \n
+             meshloc: the mesh location of the coordinates. \n
+                Argument values are: \n
+                    node=0 (default) \n
+                    element=1 (not implemented) \n
+        Returns: \n
+            None \n
+        """
+
+        # get the pointer to the underlying ESMF data array for coordinates
+        coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
+
+        # initialize the coordinates structures
+        # index order is [meshloc][coord_dim]
+        self.coords = [[np.zeros(None) for a in range(num_dims)] \
+                        for b in range(2)]
+        self.coords_done = [[False for a in range(num_dims)] \
+                             for b in range(2)]
+
+        dim1 = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
+        dim2 = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
+        dim3 = None
+        if num_dims == 3:
+            dim3 = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
+
+        # alias the coordinates to a grid property
+        self.coords[meshloc][0] = dim1.view()
+        self.coords[meshloc][1] = dim2.view()
+        if num_dims == 3:
+            self.coords[meshloc][2] = dim3.view()
+
+        # set flag to tell these coordinate has been aliased
+        self.coords_done[meshloc][0] = True
+        self.coords_done[meshloc][1] = True
+        if num_dims == 3:
+            self.coords_done[meshloc][2] = True

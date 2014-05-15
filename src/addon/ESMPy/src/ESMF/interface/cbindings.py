@@ -139,9 +139,9 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
 
     rc = _ESMF.ESMC_Initialize(None, constants._ESMP_InitArgLogKindFlagID, 
                                logkind, constants._ESMP_ArgLast)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_Initialize() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_Finalize.restype = ct.c_int
 _ESMF.ESMC_Finalize.argtypes = []
@@ -156,9 +156,9 @@ def ESMP_Finalize():
                     ESMP_Initialize(). \n
     """
     rc = _ESMF.ESMC_Finalize()
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_Finalize() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 #### INTERFACEINT #############################################################
 
@@ -180,9 +180,9 @@ def ESMP_InterfaceIntCreate(arrayArg, lenArg):
     interfaceInt = _ESMF.ESMC_InterfaceIntCreate(arrayArg, lenArg, 
                                                  ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_InterfaceIntCreate() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
     return interfaceInt.ptr
 
 _ESMF.ESMC_InterfaceIntDestroy.restype = ct.c_int
@@ -198,9 +198,9 @@ def ESMP_InterfaceIntDestroy(interfaceInt):
     # segfault in Python with 'pointer being freed was not allocated' 
     # without ct.byref()
     rc = _ESMF.ESMC_InterfaceIntDestroy(ct.byref(ct.c_void_p(interfaceInt)))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_InterfaceIntDestroy() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 #### VM #######################################################################
 
@@ -228,9 +228,9 @@ def ESMP_VMGet(vm):
                           None, None, None, ct.byref(ltemp))
     # TODO: workaround for a pointer off-by-one problem on Jaguarpf
 
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_VMGet() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
     localPet = lpet.value
     petCount = lcount.value
 
@@ -249,9 +249,9 @@ def ESMP_VMGetGlobal():
     lrc = ct.c_int(0)
     vm = _ESMF.ESMC_VMGetGlobal(ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_VMGetGlobal() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
     return vm.ptr
 
 _ESMF.ESMC_VMPrint.restype = ct.c_int
@@ -266,9 +266,9 @@ def ESMP_VMPrint(vm):
         ESMP_VM :: vm\n
     """
     rc = _ESMF.ESMC_VMPrint(vm)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_VMPrint() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 #### LOG ######################################################################
 
@@ -284,9 +284,9 @@ def ESMP_LogSet(flush):
     """
     lflush = ct.c_int(flush)
     rc = _ESMF.ESMC_LogSet(lflush)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_LogSet() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 #### GRID #####################################################
 
@@ -332,9 +332,9 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 
     # check the return code from ESMF
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridCreate() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
@@ -380,9 +380,9 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 
     # check the return code from ESMF
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridCreateNoPeriDim() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
@@ -424,7 +424,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag,
                                                addUserArea, addMask, varname, 
                                                coordNames, ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
     return gridstruct
     
@@ -441,9 +441,9 @@ def ESMP_GridDestroy(grid):
     ptr = ct.POINTER(ct.c_void_p)
     gridptr = ptr(ct.c_void_p(grid.struct.ptr))
     rc = _ESMF.ESMC_GridDestroy(gridptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridDestroy() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_GridAddCoord.restype = ct.c_int
 _ESMF.ESMC_GridAddCoord.argtypes = [ct.c_void_p, ct.c_uint]
@@ -473,9 +473,9 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
                     StaggerLoc.CORNER_VFACE\n
     """
     rc = _ESMF.ESMC_GridAddCoord(grid.struct.ptr, staggerloc)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridAddCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     # now we have to get the coordinate array bounds to set the grid.size
     coordDim = ct.c_int(1)
@@ -487,9 +487,9 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
                                            lbound, ubound,
                                            ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     # adjust for 0 based bounds
     lbound = lbound - 1
@@ -529,9 +529,9 @@ def ESMP_GridAddItem(grid, item,
                     StaggerLoc.EDGE2_VFACE\n
     """
     rc = _ESMF.ESMC_GridAddItem(grid.struct.ptr, item, staggerloc)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridAddItem() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
@@ -582,9 +582,9 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
     exLB = exLB - 1
 
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     return gridCoordPtr
 
@@ -632,9 +632,9 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
     exclusiveLBound = exclusiveLBound - 1
 
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     return exclusiveLBound, exclusiveUBound
 
@@ -679,9 +679,9 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
                                          ct.byref(lrc))
 
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridGetItem() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     return gridItemPtr
 
@@ -712,9 +712,9 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
                     StaggerLoc.EDGE2_VFACE\n
     """
     rc = _ESMF.ESMC_GridWrite(grid.struct.ptr, staggerloc, filename)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridWrite() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 #### MESH #####################################################
 
@@ -758,9 +758,9 @@ def ESMP_MeshAddElements(mesh, elementCount,
     rc = _ESMF.ESMC_MeshAddElements(mesh.struct.ptr, lec,
                                     elementIds, elementTypes,
                                     elementConn, elementMask, elementArea)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddElement() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 _ESMF.ESMC_MeshAddNodes.restype = ct.c_int
 _ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
@@ -794,9 +794,9 @@ def ESMP_MeshAddNodes(mesh, nodeCount, \
 
     rc = _ESMF.ESMC_MeshAddNodes(mesh.struct.ptr, lnc, \
                                  nodeIdsD, nodeCoordsD, nodeOwnersD)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddNodes() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_MeshCreate.restype = ESMP_Mesh
 _ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int, ct.POINTER(ct.c_int)]
@@ -813,9 +813,9 @@ def ESMP_MeshCreate(parametricDim, spatialDim):
     lrc = ct.c_int(0)
     mesh = _ESMF.ESMC_MeshCreate(parametricDim, spatialDim, ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshCreate() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     # handle the ctypes structure
     return mesh
@@ -855,9 +855,9 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                                          meshname, addMask, varname,
                                          ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshCreateFromFile() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
     # copy to the mesh struct
     return mesh
@@ -877,9 +877,9 @@ def ESMP_MeshDestroy(mesh):
     ptr = ct.POINTER(ct.c_void_p)
     meshptr = ptr(ct.c_void_p(mesh.struct.ptr))
     rc = _ESMF.ESMC_MeshDestroy(meshptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshDestroy() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_MeshFreeMemory.restype = ct.c_int
 _ESMF.ESMC_MeshFreeMemory.argtypes = [ct.c_void_p]
@@ -898,9 +898,9 @@ def ESMP_MeshFreeMemory(mesh):
     ptr = ct.POINTER(ct.c_void_p)
     meshptr = ptr(ct.c_void_p(mesh.struct.ptr))
     rc = _ESMF.ESMC_MeshFreeMemory(meshptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshFreeMemory() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 _ESMF.ESMC_MeshGetCoord.restype = None
 _ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, 
@@ -932,9 +932,9 @@ def ESMP_MeshGetCoordPtr(mesh):
     num_nodes = lnum_nodes.value
     num_dims = lnum_dims.value
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
     return nodeCoords, num_nodes, num_dims
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
@@ -952,9 +952,9 @@ def ESMP_MeshGetLocalElementCount(mesh):
     """
     lec = ct.c_int(0)
     rc = _ESMF.ESMC_MeshGetLocalElementCount(mesh.struct.ptr, ct.byref(lec))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetLocalElementCount() failed with rc = '+
-                        str(rc)+'.    '+constants.errmsg)
+                        str(rc)+'.    '+constants._errmsg)
     elementCount = lec.value
     return elementCount
 
@@ -971,9 +971,9 @@ def ESMP_MeshGetLocalNodeCount(mesh):
     """
     lnc = ct.c_int(0)
     rc = _ESMF.ESMC_MeshGetLocalNodeCount(mesh.struct.ptr, ct.byref(lnc))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetLocalNodeCount() failed with rc = '+
-                        str(rc)+'.    '+constants.errmsg)
+                        str(rc)+'.    '+constants._errmsg)
     nodeCount = lnc.value
     return nodeCount
 
@@ -992,9 +992,9 @@ def ESMP_MeshGetOwnedElementCount(mesh):
     """
     lec = ct.c_int(0)
     rc = _ESMF.ESMC_MeshGetOwnedElementCount(mesh.struct.ptr, ct.byref(lec))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetOwnedElementCount() failed with rc = '+
-                        str(rc)+'.    '+constants.errmsg)
+                        str(rc)+'.    '+constants._errmsg)
     elementCount = lec.value
     return elementCount
 
@@ -1011,9 +1011,9 @@ def ESMP_MeshGetOwnedNodeCount(mesh):
     """
     lnc = ct.c_int(0)
     rc = _ESMF.ESMC_MeshGetOwnedNodeCount(mesh.struct.ptr, ct.byref(lnc))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetOwnedNodeCount() failed with rc = '+
-                        str(rc)+'.    '+constants.errmsg)
+                        str(rc)+'.    '+constants._errmsg)
     nodeCount = lnc.value
     return nodeCount
 
@@ -1029,9 +1029,9 @@ def ESMP_MeshWrite(mesh, filename):
         string    :: filename\n
     """
     rc = _ESMF.ESMC_MeshWrite(mesh.struct.ptr, filename)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshWrite() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 #### Field #####################################################
 
@@ -1114,9 +1114,9 @@ def ESMP_FieldCreateGrid(grid, name,
                                                ungriddedUBound_i, 
                                                name, ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldCreateGridTK() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
     return field
 
@@ -1188,9 +1188,9 @@ def ESMP_FieldCreate(mesh, name,
                                                ungriddedUBound_i, name,
                                                ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldCreateMeshTK() failed with rc = ' + \
-                        str(rc) + '.    ' + constants.errmsg)
+                        str(rc) + '.    ' + constants._errmsg)
 
     return field
 
@@ -1207,9 +1207,9 @@ def ESMP_FieldDestroy(field):
     ptr = ct.POINTER(ct.c_void_p)
     fieldptr = ptr(ct.c_void_p(field.struct.ptr))
     rc = _ESMF.ESMC_FieldDestroy(fieldptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldDestroy() failed with rc = ' + \
-                                        str(rc) + '.    ' + constants.errmsg)
+                                        str(rc) + '.    ' + constants._errmsg)
 
 _ESMF.ESMC_FieldPrint.restype = ct.c_int
 _ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
@@ -1223,9 +1223,9 @@ def ESMP_FieldPrint(field):
         ESMP_Field :: field\n
     """
     rc = _ESMF.ESMC_FieldPrint(field.ptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldPrint() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
 _ESMF.ESMC_FieldGetPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_FieldGetPtr.argtypes = [ct.c_void_p, ct.c_int, ct.POINTER(ct.c_int)]
@@ -1243,9 +1243,9 @@ def ESMP_FieldGetPtr(field, localDe=0):
     lrc = ct.c_int(0)
     fieldPtr = _ESMF.ESMC_FieldGetPtr(field.ptr, localDe, ct.byref(lrc))
     rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldGetPtr failed! rc = \n'+str(rc)+'.    '+
-                        constants.errmsg)
+                        constants._errmsg)
 
     return fieldPtr
 
@@ -1264,9 +1264,9 @@ def ESMP_FieldRegridGetArea(field):
         ESMP_Field :: field\n
     """
     rc = _ESMF.ESMC_FieldRegridGetArea(field.struct.ptr)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridGetArea failed! rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 
 #### Regrid #####################################################
@@ -1285,9 +1285,9 @@ def ESMP_FieldRegridRelease(routehandle):
         ESMP_RouteHandle :: routehandle\n
     """
     rc = _ESMF.ESMC_FieldRegridRelease(ct.byref(routehandle))
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridRelease() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 _ESMF.ESMC_FieldRegridStore.restype = ct.c_int
 _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
@@ -1374,9 +1374,9 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      unmappedaction, \
                                      srcFracField, \
                                      dstFracField)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
     return routehandle
 
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
@@ -1396,9 +1396,9 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
     """
     rc = _ESMF.ESMC_FieldRegrid(srcField.struct.ptr, dstField.struct.ptr, \
                                 routehandle, zeroregion)
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
-                        '.    '+constants.errmsg)
+                        '.    '+constants._errmsg)
 
 _ESMF.ESMC_ScripInqRank.restype = ct.c_int
 _ESMF.ESMC_ScripInqRank.argtypes = [ct.c_char_p]
@@ -1453,7 +1453,7 @@ def ESMP_GridspecInq(filename):
     ndims = lndims.value
     rc = lrc.value
     rank = 2
-    if rc != constants.ESMP_SUCCESS:
+    if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
-                         constants.errmsg)
+                         constants._errmsg)
     return rank, ndims, grid_dims

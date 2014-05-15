@@ -326,7 +326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-
+     
     ! compute a Regrid from srcField to dstField
     call ESMF_FieldRegrid(srcField, dstField, routehandle, &
       zeroregion=ESMF_REGION_SELECT, rc=status)
@@ -453,6 +453,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       maxpos = 0
       maxpos = maxval(factorList)
 
+      deallocate(factorList, factorIndexList)
       ! error measures
       meanRelError = totErrDif/REAL(numRelError,ESMF_KIND_R8)
       lsRelError = sqrt(twoErrDif)/sqrt(twoErrX)
@@ -513,6 +514,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(src_frac)
       deallocate(dst_area)
       deallocate(dst_frac)
+      deallocate(src_mask)
+      deallocate(dst_mask)
       deallocate(FsrcArray)
       deallocate(FdstArray)
       deallocate(FdstArrayX)

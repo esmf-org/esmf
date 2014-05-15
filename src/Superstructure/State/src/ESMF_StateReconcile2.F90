@@ -2618,6 +2618,7 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+            itemList(i)%si => null ()
           end if
         end do
       endif
@@ -2679,41 +2680,53 @@ contains
     if (associated(itemList).and.associated(zapList)) then
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
-          itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+            itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
           call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           
           do k=1, size(zapList)
-            if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
-              call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) &
-                return
+            if (associated (zapList(k)%si)) then
+              if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
+                call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) &
+                    return
 !print *, "ESMF_ReconcileZappedProxies() checking: ", trim(name)
-              if (trim(name) == trim(thisname)) then
+                if (name == thisname) then
 !print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
                 ! Bend pointers and copy contents to result in the desired
                 ! behavior for re-reconcile. From a user perspective of
                 ! Reconcile() proxies should persist when a State is 
                 ! re-reconciled, and the same proxies are needed. Basically
                 ! a user should be able to hang on to a proxy.
-                tempField%ftypep => itemList(i)%si%datap%fp%ftypep
-                zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
-                itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
-                zapList(k)%si%datap%fp%ftypep => tempField%ftypep
-              endif
-            endif
-          enddo
+                  tempField%ftypep => itemList(i)%si%datap%fp%ftypep
+                  zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
+                  itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
+                  zapList(k)%si%datap%fp%ftypep => tempField%ftypep
+                end if
+              end if
+            end if
+          end do ! k
         end if
-      end do
-      deallocate(itemList, zaplist, stat=memstat)
+      end do ! i
+    endif
+
+    if (associated (itemList)) then
+      deallocate(itemList, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    end if
+
+    if (associated (zaplist)) then
+      deallocate(zaplist, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_ReconcileZappedProxies

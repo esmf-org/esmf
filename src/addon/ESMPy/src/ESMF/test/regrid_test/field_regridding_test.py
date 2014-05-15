@@ -77,5 +77,5 @@ srcmass = compute_mass_grid(srcfield, srcareafield,
 dstmass = compute_mass_grid(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
-compare_fields_grid(dstfield, exact_field, 10E-2, 10e-16, parallel=parallel, 
+compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel, 
                     dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)

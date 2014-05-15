@@ -5,10 +5,10 @@ import numpy as np
 from collections import namedtuple
 
 # error message
-errmsg = 'Please check the log files (named "*ESMF_LogFile").'
-ESMP_SUCCESS = 0
+_errmsg = 'Please check the log files (named "*ESMF_LogFile").'
+_ESMP_SUCCESS = 0
 # ESMF TYPEKINDS mapped to Python types
-ESMF2PythonType = (0,0,0, np.int32, np.int64, np.float32, np.float64)
+_ESMF2PythonType = (0,0,0, np.int32, np.int64, np.float32, np.float64)
 
 #### CONSTANTS ################################################################
 
@@ -18,17 +18,21 @@ _ESMP_ArgBaseID = 1
 _ESMP_InitArgLogKindFlagID = _ESMP_ArgBaseID + 3
 
 # ESMF ABI
-_ESMF_ABI = 0
+_ESMF_ABI = None
 (_ESMF_ABI_64,_ESMF_ABI_32) = (64, 32)
 
 # ESMF OS
-_ESMF_OS = 0
+_ESMF_OS = None
 (_ESMF_OS_DARWIN,
  _ESMF_OS_LINUX,
  _ESMF_OS_UNICOS) = (-5,-4,-3)
 
 # ESMF_NETCDF
 _ESMF_NETCDF = False
+
+# ESMF_COMM
+_ESMF_COMM = None
+_ESMF_COMM_MPIUNI = -1
 
 #### NAMED CONSTANTS ##########################################################
 

@@ -1,0 +1,21 @@
+% $Id$
+%
+
+\label{FieldPairing}
+
+The NUOPC Model and Mediator components are required to advertise their import and export Fields with a standard set of Field metadata. This set includes the {\tt StandardName} attribute. The NUOPC Layer implements a strategy of pairing advertised Fields that is based primarily on the {\tt StandardName} of the Fields, and in more complex situations further utilizes the {\tt Namespace} attribute on States.
+
+Field pairing is accomplished as part of the initialization procedure and is a collective effort of the Driver and its child components: Models, Mediator, Connectors. The exact handshakes between these components is outlined as part of the Initialize Phase Definition in section \ref{IPD}.
+
+The Connectors are the most active players when it comes to Field pairing. The end result of the process is where each Connector has a list of Fields that it connects between its importState and its exportState. Each connector keeps this list in its component level metadata as {\tt CplList} attribute.
+
+During the first stage of Field pairing, each Connector matches all of the Fields in its importState to all of the Fields in its exportState by looking at their {\tt StandardName} attribute. For every match a {\em bondLevel} is calculated and stored in the Field on the export side, i.e. on the consumer side of the connection, in the Field's {\tt ConsumerConnection} attribute. The larges found bondLevel is kept for each Field on the export side.
+
+The bondLevel is a measure of how strong the pairing is considering the namespace rules explained in section \ref{Namespaces}. Without the use of namespaces the bondLevel for all Field pairs that match by their {\tt StandardName} is equal to 1.
+
+After the first stage, there may be umbiguous Field pairs present. Ambiguous Field pairs are those that map different producer Fields (i.e. Fields in the importState of a Connector) to the {\em same} consumer Field (i.e. a Field in the exportState of a Connector). While the NUOPC Layer support having multiple comsumer Fields connected to a single producer Field, it does not support the opposite condition. The second stage of Field pairing is responsible for disambiguating Field pairs with the same consumer Field.
+
+Field pair disambiguation is based on the {\em bondLevel} that was calculated and stored on the consumer side Field for each pair during the first stage. The disambiguation rule simply selects the connection with the highest bondLevel and discards all lesser connection to the same consumer side Field. However, if the highest bondLevel is not unique, i.e. there are multiple pairs with the same bondLevel, disambiguation is not possible and an error is returned to the Driver by the Connector that finds the ambiguity first.
+
+Assuming that the disambiguation step was successful, each Connector holds a valid {\tt CplList} attribute with entries that correspond to the Field pairs that it is responsible for. At this stage the Driver can still overwrite this attribute and implement custom pairs if that is desired.
+

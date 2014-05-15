@@ -300,7 +300,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
       coords = mesh.GetCoordField();
       sdim=mesh.spatial_dim();
     }
-    *num_nodes = mesh.num_nodes();
+    *num_nodes = this->numOwnedNodes;
     *num_dims = sdim;
 
     // Make a map between data index and associated node pointer
@@ -329,8 +329,8 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
       // Copy coords into output array
       double *c = coords->data(node);    
       for (int j=0; j<sdim; j++) {
-	nodeCoord[nodeCoordPos]=c[j];
-	nodeCoordPos++;
+	    nodeCoord[nodeCoordPos]=c[j];
+	    nodeCoordPos++;
       } 
     } 
 

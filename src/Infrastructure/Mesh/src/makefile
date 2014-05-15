@@ -8,6 +8,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = \
            ESMCI_Attr.C \
+           ESMCI_PntList.C \
            ESMCI_BBox.C \
            ESMCI_CommReg.C \
            ESMCI_CommRel.C \

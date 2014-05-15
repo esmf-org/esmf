@@ -10,6 +10,8 @@ import logging
 
 try:
     from ESMF import *
+    from ESMF.test.regrid_test.mesh_regridding_utilities import mesh_create_50, mesh_create_50_parallel
+    from ESMF.test.regrid_test.grid_regridding_utilities import grid_create
 except:
     traceback.print_exc(file=sys.stdout)
     raise ImportError('The ESMF library cannot be found!')
@@ -554,83 +556,47 @@ def grid_field_3D_cornervface_test():
     # return True from unit test
     return True
 
-def mesh_create_2x2():
-    '''
-    PRECONDITIONS: A Mesh has been declared.
-    POSTCONDITIONS: A 2x2 Mesh has been created.
-    
-                   2x2 Mesh
-    
-    
-      2.0   7 ------- 8 -------- 9
-            |         |          |
-            |    3    |    4     |
-            |         |          |
-      1.0   4 ------- 5 -------- 6
-            |         |          |
-            |    1    |    2     |
-            |         |          |
-      0.0   1 ------- 2 -------- 3
-    
-           0.0       1.0        2.0
-    
-          Node Ids at corners
-          Element Ids in centers
-    
-          (Everything owned by PET 0)
-    '''
-    # set up a simple mesh
-    num_node = 9
-    num_elem = 4
-    nodeId = np.array([1,2,3,4,5,6,7,8,9])
-    # change to 0 based indexing
-    nodeCoord = np.array([0.0,0.0,
-                          1.0,0.0,
-                          2.0,0.0,
-                          0.0,1.0,
-                          1.0,1.0,
-                          2.0,1.0,
-                          0.0,2.0,
-                          1.0,2.0,
-                          2.0,2.0])
-    nodeOwner = np.zeros(num_node)
-
-    elemId = np.array([1,2,3,4])
-    elemType = np.ones(num_elem)
-    elemType*=MeshElemType.QUAD
-    elemConn = np.array([0,1,4,3,
-                         1,2,5,4,
-                         3,4,7,6,
-                         4,5,8,7])
-
-    mesh = Mesh(parametric_dim=2, spatial_dim=2)
-
-    mesh.add_nodes(num_node, nodeId, nodeCoord, nodeOwner)
-
-    mesh.add_elements(num_elem, elemId, elemType, elemConn)
-
-    return mesh, nodeCoord
-
-
 def mesh_test():
     status = True
-    mesh, nodeCoord = mesh_create_2x2()
+
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
     
-    element_count = mesh.size_local[element]
+    element_count = mesh.size[element]
     print 'local element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size_local[node]
+    node_count = mesh.size[node]
     print 'local node_count = '+str(node_count)+'\n'
 
-    element_count = mesh.size[element]
+    element_count = mesh.size_local[element]
     print 'owned element_count = '+str(element_count)+'\n'
 
-    node_count = mesh.size[node]
+    node_count = mesh.size_local[node]
     print 'owned node_count = '+str(node_count)+'\n'
-    
-    coords, num_nodes, num_dims = ESMP_MeshGetCoordPtr(mesh)
-    print 'ESMP_MeshGetCoordPtr() - num_nodes = '+str(num_nodes)+', num_dims = '+str(num_dims)+'\n'
-    status = all([coords[i] == nodeCoord[i] for i in range(num_nodes*2)])
+
+    xcoords = mesh.get_coords(0)
+    ycoords = mesh.get_coords(1)
+
+    # use size here because nodeCoord has all nodes (owned and non-owned)
+    xcoords2 = np.array([nodeCoord[2*i] for i in range(mesh.size[node])])
+    ycoords2 = np.array([nodeCoord[2*i+1] for i in range(mesh.size[node])])
+
+    # find only the owned coords to compare with what comes back from the mesh
+    xcoords3 = xcoords2[np.where(nodeOwner==local_pet())]
+    ycoords3 = ycoords2[np.where(nodeOwner==local_pet())]
+
+    status = all(xcoords == xcoords3) and all(ycoords == ycoords3)
 
     # this call fails if nodes and elements have not been added first
     #mesh.free_memory()
@@ -639,7 +605,19 @@ def mesh_test():
     return status
 
 def meshvtk_test():
-    mesh, _ = mesh_create_2x2()
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     #mesh._write("mesh")
 
@@ -772,7 +750,19 @@ def field_i4_grid_test():
 
 def field_r8_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     field = Field(mesh, 'Field!', \
                   TypeKind.R8, \
@@ -793,7 +783,19 @@ def field_r8_mesh_test():
 
 def field_r4_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     field = Field(mesh, 'Field!',
                   typekind=TypeKind.R4)
@@ -813,7 +815,19 @@ def field_r4_mesh_test():
 
 def field_i8_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     field = Field(mesh, 'Field!',
                   TypeKind.I8,
@@ -834,7 +848,19 @@ def field_i8_mesh_test():
 
 def field_i4_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     field = Field(mesh, 'Field!',
                   TypeKind.I4,
@@ -855,7 +881,19 @@ def field_i4_mesh_test():
 
 def field_uniqueness_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     field = Field(mesh, 'Field!',
                   TypeKind.I4,
@@ -903,7 +941,19 @@ def field_switchedindices_grid_test():
 
 def field_switchedindices_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     gridtofieldmap = np.array([1])
 
@@ -926,7 +976,19 @@ def field_switchedindices_mesh_test():
 
 def field_extraindices_mesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     gridtofieldmap = np.array([1])
 
@@ -951,9 +1013,9 @@ def field_extraindices_mesh_test():
 
 def field_regrid_test():
     # create grids
-    max_index = np.array([6,6])
+    max_index = np.array([20,20])
     srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
-    max_index = np.array([4,4])
+    max_index = np.array([25,25])
     dstgrid = Grid(max_index, coord_sys=CoordSys.CART)
 
     # Add coordinates
@@ -987,27 +1049,37 @@ def field_regrid_test():
 
     # regridding
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR)
-    #dstfield = rh(srcfield, dstfield)
-
-    print "kjhkjh"
+    dstfield = rh(srcfield, dstfield)
 
     # test the __repr__ functions
     print srcgrid
     print dstgrid
     print repr(srcfield)
     print "%r" % dstfield
-    #print rh
+    print rh
 
     # return True from unit test
     return True
 
 def field_regrid_gridmesh_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
     dstfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
 
     # create grid
-    max_index = np.array([4,4])
+    max_index = np.array([16,16])
     grid = Grid(max_index, coord_sys=CoordSys.CART)
 
     # Add coordinates
@@ -1043,8 +1115,22 @@ def field_regrid_gridmesh_test():
     return True
 
 def field_regrid_zeroregion_test():
+    correct = True
+
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     # create a field on the mesh
     srcfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
@@ -1054,87 +1140,52 @@ def field_regrid_zeroregion_test():
         srcfield[i] = 20.0
 
     # create grid
-    lb_x = float(0)
-    lb_y = float(0)
-    ub_x = float(2)
-    ub_y = float(2)
-
-    cellwidth_x = 1.0
-    cellwidth_y = 1.0
-    cellcenter_x = cellwidth_x/2.0
-    cellcenter_y = cellwidth_y/2.0
-
-    max_index = np.array([ub_x,ub_y])
-    grid = Grid(max_index, coord_sys=CoordSys.CART)
-
-    # Add coordinates
-    grid.add_coords(staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER])
+    grid = grid_create([0,0,8,8], [0,0,4,4], domask=True)
 
     [x,y] = [0, 1]
 
-    gridXCorner = grid.get_coords(x, staggerloc=StaggerLoc.CORNER)
-    gridYCorner = grid.get_coords(y, staggerloc=StaggerLoc.CORNER)
-
-    for i in xrange(gridXCorner.shape[x]):
-        gridXCorner[i, :] = float(i)
-
-    for j in xrange(gridYCorner.shape[y]):
-        gridYCorner[:, j] = float(j)
-
-    # set up the grid mask
-    grid.add_item(GridItem.MASK)
-
-    mask = grid.get_item(GridItem.MASK)
-
-    for i in range(mask.shape[x]):
-        if (i == 2.0):
-            mask[i, :] = 1
-        else:
-            mask[i, :] = 0;
-
     # create a Field on the Grid
-    dstfield = Field(grid, "GRIDFIELD!")
+    dstfield = Field(grid, "GRIDFIELD!", mask_vals=[0])
 
     # initialize the destination field according to the mask
-    dstfield[:, :] = -1
+    dstfield[:, :] = -100
 
     # regridding
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE,
-                dst_mask_values=np.array([1]))
+                dst_mask_values=np.array([0]))
     dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
     # validate that the masked values were not zeroed out
-    for i in range(mask.shape[x]):
-        for j in range(mask.shape[y]):
-            if mask[i, j] == 1:
+    for i in range(dstfield.mask.shape[x]):
+        for j in range(dstfield.mask.shape[y]):
+            if dstfield.mask[i, j] == True:
                 if dstfield[i, j] >= 0:
                     print "DING: {0}".format(dstfield[i, j])
-                    return False
+                    correct = False
 
     # return True from unit test
-    return True
+    return correct
 
 def field_regrid_area_test():
     # create mesh
-    mesh = mesh_create_2x2()[0]
+    parallel = False
+    if pet_count() > 1:
+        if pet_count() > 4:
+            raise NameError('MPI rank must be 4 in parallel mode!')
+        parallel = True
+
+    mesh = None
+    if parallel:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50_parallel()
+    else:
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_50()
 
     # create grid
-    max_index = np.array([4,4])
-    grid = Grid(max_index, coord_sys=CoordSys.CART)
-
-    # Add coordinates
-    grid.add_coords(staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER])
+    grid = grid_create([0,0,8,8], [0,0,4,4], doarea=True)
 
     [x,y] = [0, 1]
-
-    gridXCorner = grid.get_coords(x, staggerloc=StaggerLoc.CORNER)
-    gridYCorner = grid.get_coords(y, staggerloc=StaggerLoc.CORNER)
-
-    for i in xrange(gridXCorner.shape[x]):
-        gridXCorner[i, :] = float(i)
-
-    for j in xrange(gridYCorner.shape[y]):
-        gridYCorner[:, j] = float(j)
 
     # create area field
     dstarea = Field(mesh, 'DESTINATION AREAS!',
@@ -1149,11 +1200,16 @@ def field_regrid_area_test():
 
     for i in range(srcarea.shape[x]):
         for j in range(srcarea.shape[y]):
-            if (srcarea[i, j] != 1):
+            if (srcarea[i, j] != 5):
+                print "Cell area is {0}, but expected 5".format(srcarea[i,j])
                 correct = False
 
+    # subtract two because the last two cells of mesh are triangles with half area
     for i in range(dstarea.shape[0]):
-        if (dstarea[i] != 1):
+        if (dstarea[i] != 0.25):
+            if (dstarea[i] == 0.125):
+                continue
+            print "Cell area is {0}, but expected 0.25 or 0.125".format(dstarea[i])
             correct = False
 
     # return correct from unit test

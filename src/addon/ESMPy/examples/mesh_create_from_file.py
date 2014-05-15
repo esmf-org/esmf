@@ -9,7 +9,7 @@ import ESMF
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = ESMF.Mesh(filename="data/mpas_uniform_10242_dual_counterclockwise.nc",
+mesh = ESMF.Mesh(filename="mpas_uniform_10242_dual_counterclockwise.nc",
                  filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the nodes of the mesh

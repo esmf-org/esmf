@@ -560,8 +560,6 @@ program ESMF_RegridWeightGenApp
       if (method .eq. 'neareststod') commandbuf2(3)=3
       if (method .eq. 'nearestdtos') commandbuf2(3)=4
       commandbuf2(4)=poleptrs
-      if (srcIsRegional) commandbuf2(9) = 1
-      if (dstIsRegional) commandbuf2(10) = 1
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
       if (srcMissingValue) commandbuf2(7) = 1

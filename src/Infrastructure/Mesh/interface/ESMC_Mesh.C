@@ -96,17 +96,6 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetCoord()"
-void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
-		       double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
-  // typecast into ESMCI type
-  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddNodes"
 int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   double *nodeCoords, int *nodeOwners){
@@ -231,6 +220,18 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
   return rc;
 }
 //--------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetCoord()"
+void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
+           double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
+}
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------

@@ -864,6 +864,9 @@ module ESMF_ComplianceICMod
     type(ESMF_FieldBundle)                :: fieldbundle
     type(ESMF_State)                      :: nestedState
     character(ESMF_MAXSTR)                :: nestedPrefix
+    character(ESMF_MAXSTR)                :: attributeName
+    character(ESMF_MAXSTR)                :: convention
+    character(ESMF_MAXSTR)                :: purpose
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -909,6 +912,28 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
+
+      ! set NUOPC convention and purpose specifiers
+      convention = "NUOPC"
+      purpose = "General"
+      
+      call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
+        "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+        ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      attributeName = "Namespace"
+      call checkStateAttribute(prefix, state=state, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
       write (tempString, *) itemCount
       call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
@@ -1040,6 +1065,142 @@ module ESMF_ComplianceICMod
         deallocate(itemNameList)
       endif
     endif      
+  end subroutine
+
+  recursive subroutine checkStateAttribute(prefix, state, attributeName, &
+    convention, purpose, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_State)                      :: state
+    character(*), intent(in)              :: attributeName
+    character(*), intent(in)              :: convention
+    character(*), intent(in)              :: purpose
+    integer,      intent(out), optional   :: rc
+    
+    type(ESMF_AttPack)                    :: attpack
+    type(ESMF_TypeKind_Flag)              :: typekind
+    integer                               :: itemCount, i
+    logical                               :: isPresent
+    character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
+    character(ESMF_MAXSTR)                :: iStr, vStr
+    integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+
+    call ESMF_AttributeGetAttPack(state, attpack=attpack, &
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (.not.isPresent) then      
+      ! attpack not present
+      call ESMF_LogWrite(trim(prefix)//" ==> State level attpack: <"// &
+        "convention: "//trim(convention)// &
+        "purpose: "//trim(purpose)//"> is NOT present!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
+      typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (.not.isPresent) then      
+      ! attribute not present
+      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+        trim(attributeName)//"> is NOT present!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else if (itemCount == 0) then
+      ! attribute present but not set
+      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
+        trim(attributeName)//"> present but NOT set!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      ! attribute present and set
+      if (typekind == ESMF_TYPEKIND_CHARACTER) then
+        allocate(valueStringList(itemCount))
+        call ESMF_AttributeGet(state, name=attributeName, &
+          valueList=valueStringList, &
+          convention=convention, purpose=purpose, rc=rc)
+        if (itemCount == 1) then
+          ! single valued
+          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: "// trim(valueStringList(1)), &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        else
+          ! multi valued -> requires loop
+          do i=1, itemCount
+            write(iStr,*) i
+            call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              "present and set: "// trim(valueStringList(i)), &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          enddo
+        endif
+        deallocate(valueStringList)
+      else if (typekind == ESMF_TYPEKIND_I4) then
+        allocate(valueI4List(itemCount))
+        call ESMF_AttributeGet(state, name=attributeName, &
+          valueList=valueI4List, &
+          convention=convention, purpose=purpose, rc=rc)
+        if (itemCount == 1) then
+          ! single valued
+          write(vStr,*) valueI4List(1)
+          call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: "// vStr, &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        else
+          ! multi valued -> requires loop
+          do i=1, itemCount
+            write(iStr,*) i
+            write(vStr,*) valueI4List(i)
+            call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              "present and set: "// vStr, &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          enddo
+        endif
+        deallocate(valueI4List)
+      else
+        call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
+          trim(attributeName)//"> "// &
+          "present and set: <unsupported data type>", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      endif
+    endif
+    
   end subroutine
 
 !-------------------------------------------------------------------------
@@ -1387,7 +1548,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-  	call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+    call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1594,6 +1755,24 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
+    attributeName = "ProducerConnection"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    attributeName = "ConsumerConnection"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
     attributeName = "Updated"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -1640,7 +1819,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-	  call ESMF_AttributeGetAttPack(field, attpack=attpack, &
+    call ESMF_AttributeGetAttPack(field, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
