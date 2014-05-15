@@ -259,17 +259,9 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
 	errmsg,&
         rc)) return
     
-    units = buffer(1:len)
-    ! if len != 7, something is wrong, check the value.  If it starts 
-    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
-    ! word.  Otherwise, return the whole thing
+    if (buffer(len:len) .eq. achar(0)) len = len-1
     call ESMF_StringLowerCase(buffer(1:len), rc=rc)
-    if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
-      buffer(1:7) .eq. 'radians')) then
-      units = buffer(1:7)
-    else
-      units = buffer(1:len)
-    endif
+    units = buffer(1:len)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -379,8 +371,9 @@ end subroutine ESMF_ScripInqUnits
         errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
+      if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len), rc=rc)
-      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+      if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -388,7 +381,7 @@ end subroutine ESMF_ScripInqUnits
       endif
       ! if units is "radians", convert it to degrees
       if (convertToDegLocal) then
-         if (units(1:7) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             grid_center_lon(:) = &
                    grid_center_lon(:)*ESMF_COORDSYS_RAD2DEG
          endif
@@ -423,8 +416,9 @@ end subroutine ESMF_ScripInqUnits
 	errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
+     if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len), rc=rc)
-      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+      if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -432,7 +426,7 @@ end subroutine ESMF_ScripInqUnits
       endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:7) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             grid_center_lat(:) = &
                  grid_center_lat(:)*ESMF_COORDSYS_RAD2DEG
          endif
@@ -486,8 +480,9 @@ end subroutine ESMF_ScripInqUnits
 	errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
+     if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len), rc=rc)
-      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+      if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -495,7 +490,7 @@ end subroutine ESMF_ScripInqUnits
       endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:7) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             grid_corner_lon(:,:) = &
                grid_corner_lon(:,:)*ESMF_COORDSYS_RAD2DEG
          endif
@@ -530,8 +525,9 @@ end subroutine ESMF_ScripInqUnits
         errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
+     if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len), rc=rc)
-      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+      if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -539,7 +535,7 @@ end subroutine ESMF_ScripInqUnits
       endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:7) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             grid_corner_lat(:,:) = &
                 grid_corner_lat(:,:)*ESMF_COORDSYS_RAD2DEG
          endif
@@ -2677,16 +2673,10 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
         ESMF_METHOD, &
         ESMF_SRCLINE,errmsg,&
         rc)) return
-    ! if len != 7, something is wrong, check the value.  If it starts 
-    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
-    ! word.  Otherwise, return the whole thing
+
+    if (buffer(len:len) .eq. achar(0)) len = len-1
     call ESMF_StringLowerCase(buffer(1:len), rc=rc)
-    if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
-      buffer(1:7) .eq. 'radians')) then
-      units = buffer(1:7)
-    else
-      units = buffer(1:len)
-    endif
+    units = buffer(1:len)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -2807,9 +2797,10 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        ! if len != 7, something is wrong, check the value.  If it starts 
        ! with Degres/degrees/Radians/radians, ignore the garbage after the
        ! word.  Otherwise, return the whole thing
+     if (units(len:len) .eq. achar(0)) len = len-1
        call ESMF_StringLowerCase(units(1:len), rc=rc)
-       if ((len > 7) .and. (units(1:7) .ne. 'degrees' .and. &
-            units(1:7) .ne. 'radians')) then
+       if (units(1:len) .ne. 'degrees' .and. &
+            units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -2818,7 +2809,7 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
 
        ! if units is "radians", convert it to degree
        if (convertToDegLocal) then
-          if (units(1:7) .eq. "radians") then
+          if (units(1:len) .eq. "radians") then
              nodeCoords(:,:) = &
                  nodeCoords(:,:)*ESMF_COORDSYS_RAD2DEG
           endif
