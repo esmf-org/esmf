@@ -3,8 +3,8 @@
 *~
 *.orig
 *.log
-#.Log
-PET*.
+ESMF_LogFile
+PET*.ESMF_Logfile
 *.stdout
 *.out
 *.csv
