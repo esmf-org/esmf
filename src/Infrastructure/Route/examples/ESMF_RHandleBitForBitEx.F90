@@ -38,6 +38,7 @@ program ESMF_RHandleBitForBitEx
   type(ESMF_RouteHandle):: rh
   
   integer               :: srcTermProcessing, pipelineDepth
+  character(len=128)    :: msg
 
   ! result code
   integer :: finalrc, result
@@ -1430,11 +1431,11 @@ do i=1,5
 !BOC
   ! try to open the file that holds the SMM paramters
   open(unit=iounit, file="smmParameters.dat", status="old", action="read", &
-    iostat=iostat)
+    form="unformatted", iostat=iostat)
   
   if (iostat == 0) then
     ! the file was present -> read from it and close it again
-    read(unit=iounit, iostat=iostat, fmt=*) srcTermProcessing, pipelineDepth, &
+    read(unit=iounit, iostat=iostat) srcTermProcessing, pipelineDepth, &
       sumCompare
     close(unit=iounit)
   endif
@@ -1467,8 +1468,8 @@ do i=1,5
   if ((localPet == 0) .and. (iostat /= 0)) then
     print *, "SMM parameters determined via auto-tuning -> dump to file"
     open(unit=iounit, file="smmParameters.dat", status="unknown", &
-      action="write")
-    write(unit=iounit, fmt=*) srcTermProcessing, pipelineDepth, farrayPtr(1)
+      action="write", form="unformatted")
+    write(unit=iounit) srcTermProcessing, pipelineDepth, farrayPtr(1)
     close(unit=iounit)
   endif
   
@@ -1479,8 +1480,12 @@ do i=1,5
     else
       ! do bfb comparison of the result against reference
       print *, "result SRCPET#11 = ", farrayPtr(1), " expect: ", sumCompare
-      if (farrayPtr(1) /= sumCompare) &
+      if (farrayPtr(1) /= sumCompare) then
         finalrc = ESMF_FAILURE
+	write (msg, *) "Numerical difference detected: ", &
+	  farrayPtr(1)-sumCompare
+	call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO)
+      endif
     endif
   endif
 !EOC
