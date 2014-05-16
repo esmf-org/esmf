@@ -965,7 +965,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ! if units is not "degrees" or "radians" return errors
      if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len))
-      if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
+      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -973,7 +973,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       endif
       ! if units is "radians", convert it to degrees
       if (convertToDegLocal) then
-         if (units(1:len) .eq. "radians") then
+         if (units(1:7) .eq. "radians") then
             nodeCoords(i,:) = &
                  nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
          endif
@@ -1206,14 +1206,14 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         ! if units is not "degrees" or "radians" return errors
         call ESMF_StringLowerCase(units(1:len))
 	if (units(len:len) .eq. achar(0)) len = len-1
-        if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
+        if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
         endif
         ! if units is "degrees", convert it to radians
-        if (units(1:len) .eq. "radians") then
+        if (units(1:7) .eq. "radians") then
             nodeCoords(i,:) = nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
         endif
       else	   
@@ -1737,7 +1737,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
         call ESMF_StringLowerCase(units(1:len))
-        if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
+        if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -1745,14 +1745,14 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
         endif
         ! if units is "radians", convert it to degrees
         if (meshDim == 2 .and. convertToDegLocal) then
-          if (units(1:len) .eq. "radians") then
+          if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             !print *, 'Convert radians to degree ', rad2deg
             nodeCoords(i,:) = nodeCoords(i,:)*rad2deg
           endif
         elseif (meshDim == 3) then	   
           ! if units is "degrees", convert it to radians
-          if (units(1:len) .eq. "degrees") then
+          if (units(1:7) .eq. "degrees") then
              deg2rad = 3.141592653589793238/180.0
              nodeCoords(i,:) = nodeCoords(i,:)*deg2rad
           endif
