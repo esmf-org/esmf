@@ -30,7 +30,7 @@ class Field(ma.MaskedArray):
                 grid_to_field_map=None,
                 ungridded_lower_bound=None,
                 ungridded_upper_bound=None,
-                mask_vals=None):
+                mask_values=None):
         """
         Create a Field from a Grid or Mesh. \n
         Required Arguments: \n
@@ -85,7 +85,7 @@ class Field(ma.MaskedArray):
                                    ungridded dimensions of the field. \n
                 type: np.array \n
                 shape: [number of ungridded dimensions, 1] \n
-            mask_vals: A Python list of integer values to use for masking. \n
+            mask_values: A Python list of integer values to use for masking. \n
                 type: Python list \n
                 shape: [grid.shape, 1] \n
         Returns: \n
@@ -164,10 +164,10 @@ class Field(ma.MaskedArray):
         else:
             raise FieldDOError
      
-        #  set field_mask based on the grid mask and the mask_vals input argument
+        #  set field_mask based on the grid mask and the mask_values input argument
         field_mask = False
-        if mask is not None and mask_vals is not None:
-            field_mask = [True if x in mask_vals else False for x in mask.flatten().tolist()]
+        if mask is not None and mask_values is not None:
+            field_mask = [True if x in mask_values else False for x in mask.flatten().tolist()]
         
         # create the new Field instance
         obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
