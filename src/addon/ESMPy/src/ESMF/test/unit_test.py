@@ -281,7 +281,7 @@ def field_mask_test():
                 mask[i, j] = 0;
 
     # create a Field on the Grid, should inherit the mask
-    field = Field(grid, "FIELD!", mask_vals = [2])
+    field = Field(grid, "FIELD!", mask_values = [2])
      
     if(not field.mask[2][0]):
         correct = False
@@ -1145,7 +1145,7 @@ def field_regrid_zeroregion_test():
     [x,y] = [0, 1]
 
     # create a Field on the Grid
-    dstfield = Field(grid, "GRIDFIELD!", mask_vals=[0])
+    dstfield = Field(grid, "GRIDFIELD!", mask_values=[0])
 
     # initialize the destination field according to the mask
     dstfield[:, :] = -100
