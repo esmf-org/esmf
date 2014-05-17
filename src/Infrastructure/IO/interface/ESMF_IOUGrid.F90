@@ -177,7 +177,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
           rc)) return
         call ESMF_StringLowerCase(units(1:len))
         if (units(len:len) .eq. achar(0)) len = len-1
-	units = units(1:len)
+	units = units(1:7)
       endif
     end if
 
