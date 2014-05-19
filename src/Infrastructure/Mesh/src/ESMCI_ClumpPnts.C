@@ -413,10 +413,17 @@ int intersect_func_ll(void *_pd, void *_sd) {
   // Calculate longitude difference
   double dist_lon=std::abs(sd->ll[0]-pd->ll[0]);
 
+  // Handle case where points are bigger than 360.0 apart
+  // take out all the 360's, could use fmod(), but
+  // it sounds like it can be sensitive, so do via ints.
+  if (dist_lon > 360.0) {
+    int d=((int)dist_lon)/((int)360);
+    dist_lon=dist_lon-360.0*((double)d);
+  }
+
   // The furthest apart two points can be
   // in longitude is 180. If bigger than 
   // than then measure the shorter way around
-  // TODO: what to do if dist_lon > 360.0???
   if (dist_lon > 180.0) {
     dist_lon=360.0-dist_lon; 
   }
