@@ -360,7 +360,8 @@ def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None):
     return mass
 
 def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False, 
-                        dstfracfield=None, mass1=None, mass2=None):
+                        dstfracfield=None, mass1=None, mass2=None, 
+                        regrid_method=ESMF.RegridMethod.CONSERVE):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'field1' and 
@@ -371,6 +372,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     '''
     import numpy.ma as ma
 
+    correct = False
     # verify that the fields are the same size
     assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
     
@@ -383,14 +385,33 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     max_error = 0.0
     min_error = 1000000.0
     num_nodes = 0
-    if field1.grid.rank == 2:
-        totalErr, min_error, max_error, num_nodes = \
-            compare_fields_grid_2d(field1, field2, dstfracfield, num_nodes)
-    elif field1.grid.rank == 3:
-        totalErr, min_error, max_error, num_nodes = \
-            compare_fields_grid_3d(field1, field2, dstfracfield, num_nodes)
-    else:
-        raise ValueError("field1.grid.rank is not of a supported size")
+
+    # allow fields of all dimensions
+    field1_flat = np.ravel(field1.data)
+    field2_flat = np.ravel(field2.data)
+    field2mask_flat = np.ravel(field2.mask)
+    dstfracfield_flat = np.ravel(dstfracfield.data)
+
+    for i in range(field2_flat.size):     
+        if ((not field2mask_flat[i]) and 
+            (regrid_method != ESMF.RegridMethod.CONSERVE or
+            dstfracfield_flat[i] >= 0.999)):
+            if (field2_flat.data[i] != 0.0):
+                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                            field2_flat[i])/abs(field2_flat[i])
+            else:
+                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                            field2_flat[i])
+
+            if err > 1:
+                print field1_flat[i], field2_flat[i], dstfracfield_flat[i]
+            num_nodes += 1
+            totalErr += err
+            if (err > max_error):
+                max_error = err
+            if (err < min_error):
+                min_error = err
+
 
     # gather error on processor 0 or set global variables in serial case
     mass1_global = 0
@@ -449,59 +470,8 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # print pass or fail
     if (itrp and csrv):
         print "PET{0} - PASS".format(ESMF.local_pet())
+        correct = True
     else:
         print "PET{0} - FAIL".format(ESMF.local_pet())
 
-def compare_fields_grid_2d(field1, field2, dstfracfield, num_nodes):
-    # initialize to True, and check for False point values
-    [x, y] = [0, 1]
-    totalErr = 0.0
-    max_error = 0.0
-    min_error = 1000000.0
-
-    for i in range(field1.shape[x]):
-        for j in range(field2.shape[y]):
-            if not field1.mask[i,j]:
-                if (field2.data[i, j] != 0.0):
-                    err = abs(field1.data[i, j]/dstfracfield.data[i, j] - \
-                                field2.data[i, j])/abs(field2.data[i, j])
-                else:
-                    err = abs(field1.data[i, j]/dstfracfield.data[i, j] - \
-                                field2.data[i, j])
-                num_nodes += 1
-                totalErr += err
-                if (err > max_error):
-                    max_error = err
-                if (err < min_error):
-                    min_error = err
-
-    return totalErr, min_error, max_error, num_nodes
-
-def compare_fields_grid_3d(field1, field2, dstfracfield, num_nodes):
-    # initialize to True, and check for False point values
-    [x, y, z] = [0, 1, 2]
-    totalErr = 0.0
-    max_error = 0.0
-    min_error = 1000000.0
-
-    for i in range(field1.shape[x]):
-        for j in range(field2.shape[y]):
-            for k in range(field2.shape[z]):
-                if not field1.mask[i,j,k]:
-                    if (field2.data[i, j, k] != 0.0):
-                        if dstfracfield[i,j,k] == 0:
-                            raise ValueError("dstfracfield cannot be 0 on a masked point!")
-                        err = abs(field1.data[i, j, k]/dstfracfield.data[i, j, k] - \
-                                    field2.data[i, j, k])/abs(field2.data[i, j, k])
-                    else:
-                        err = abs(field1.data[i, j, k]/dstfracfield.data[i, j, k] - \
-                                    field2.data[i, j, k])
-                    num_nodes += 1
-                    totalErr += err
-                    if (err > max_error):
-                        max_error = err
-                    if (err < min_error):
-                        min_error = err
-
-    return totalErr, min_error, max_error, num_nodes
-
+    return correct
