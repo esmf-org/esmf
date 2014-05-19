@@ -25,6 +25,8 @@ except:
     raise ImportError('The ESMF library cannot be found!')
 
 from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL, EPSILON
+from ESMF.test.regrid_test.grid_regridding_utilities import compare_fields_grid as compare_fields2
+from ESMF.test.regrid_test.grid_regridding_utilities import compute_mass_grid as compute_mass
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
@@ -105,8 +107,8 @@ def build_analyticfield(field, lons, lats):
     field.data[...] = 2.0 + np.cos(lats[...])**2 * np.cos(2.0*lons[...])
     return field
 
-def run_regridding(srcfield, dstfield, regrid_method, unmapped_action,
-                   dst_frac_field, pole_method=None, regrid_pole_npoints=None):
+def run_regridding(srcfield, dstfield, regrid_method, unmapped_action, srcfracfield, 
+                   dstfracfield, pole_method=None, regrid_pole_npoints=None):
     '''
     PRECONDITIONS: Two Fields have been created and a regridding operation
                    is desired from 'srcfield' to 'dstfield'.
@@ -117,83 +119,129 @@ def run_regridding(srcfield, dstfield, regrid_method, unmapped_action,
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                 regrid_method=regrid_method,
                                 unmapped_action=unmapped_action,
-                                dst_frac_field=dst_frac_field,
+                                src_frac_field=srcfracfield,
+                                dst_frac_field=dstfracfield,
                                 pole_method=pole_method,
                                 regrid_pole_npoints=regrid_pole_npoints)
     dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
     return dstfield
 
-def compare_fields(field1, field2, regrid_method, dst_frac_field, dst_mask, max_err,
-                   parallel=False):
+def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False, 
+                   dstfracfield=None, mass1=None, mass2=None, 
+                   regrid_method=ESMF.RegridMethod.CONSERVE):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'srcfield' and 'dstfield'.
     POSTCONDITIONS: The values on 'srcfield' and 'dstfield' are compared.
     '''
+    import numpy.ma as ma
 
-    # compare point values of field1 to field2
-    # first verify they are the same size
-    if (field1.shape != field2.shape):
-        raise NameError('compare_fields: Fields must be the same size!')
-
-    # initialize to True, and check for False point values
     correct = False
+    # verify that the fields are the same size
+    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+    
+    # deal with default values for fracfield
+    if dstfracfield is None:
+        dstfracfield = ma.ones(field1.shape)
+
+    # compute pointwise error measures
     totalErr = 0.0
-    print 'comparing fields'
-    print 'field1 = ',field1
-    print 'field2 = ',field2
-    field1data = np.ravel(field1.data)
-    field2data = np.ravel(field2.data)
-    dst_frac_fieldData = np.ravel(dst_frac_field.data)
-    dst_mask_flat = np.ravel(dst_mask)
-    cnt_nodes_used = 0
-    for i in range(field1.size):
-        #print "i=",i
-        #print "field1 %f, field2 %f" % (field1data[i], field2data[i])
-        #print "dst_frac_field %f" % dst_frac_fieldData[i]
-        #print "dst_mask %d" % dst_mask_flat[i]
-        if ((field1data[i] != UNINITVAL) and 
-            (abs(field2data[i]) > EPSILON) and
-            (dst_mask_flat[i] == 1) and 
+    max_error = 0.0
+    min_error = 1000000.0
+    num_nodes = 0
+
+    # allow fields of all dimensions
+    field1_flat = np.ravel(field1.data)
+    field2_flat = np.ravel(field2.data)
+    field2mask_flat = np.ravel(field2.mask)
+    dstfracfield_flat = np.ravel(dstfracfield.data)
+
+    for i in range(field2_flat.size):     
+        if ((not field2mask_flat[i]) and 
+            (field1_flat[i] != UNINITVAL) and 
+            (abs(field2_flat[i]) > EPSILON) and
             (regrid_method != ESMF.RegridMethod.CONSERVE or
-            dst_frac_fieldData[i] >= 0.999)):
-            err = abs(field1data[i] - field2data[i])/abs(field2data[i])
+            dstfracfield_flat[i] >= 0.999)):
+            if (field2_flat.data[i] != 0.0):
+                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                            field2_flat[i])/abs(field2_flat[i])
+            else:
+                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                            field2_flat[i])
+
+            if err > 1:
+                print field1_flat[i], field2_flat[i], dstfracfield_flat[i]
+            num_nodes += 1
             totalErr += err
-            cnt_nodes_used += 1
-        #else:
-            #print "Partial dest fraction -- skipping"
+            if (err > max_error):
+                max_error = err
+            if (err < min_error):
+                min_error = err
 
-    relErr = totalErr/cnt_nodes_used
-    if (relErr < max_err):
-        correct = True
 
-    # this is for parallel
+    # gather error on processor 0 or set global variables in serial case
+    mass1_global = 0
+    mass2_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
-
         comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
-
-        rel_error_global = comm.reduce(relErr, op=MPI.SUM)
-
-        if rank == 0:
-
-            if correct:
-                print " - PASS - Total error = "+str(rel_error_global)
-            else:
-                print " - FAIL - Total error = "+str(rel_error_global)
-
-    # this is for serial
+        total_error_global = comm.reduce(totalErr, op=MPI.SUM)
+        num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
+        max_error_global = comm.reduce(max_error, op=MPI.MAX)
+        min_error_global = comm.reduce(min_error, op=MPI.MIN)
+        if (mass1 and mass2):
+            mass1_global = comm.reduce(mass1, op=MPI.SUM)
+            mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
-        if correct:
-            print " - PASS - Total Error = "+str(relErr)
+        total_error_global = totalErr
+        num_nodes_global = num_nodes
+        max_error_global = max_error
+        min_error_global = min_error
+        if (mass1 and mass2):
+            mass1_global = mass1
+            mass2_global = mass2
+
+    # compute relative error measures and compare against tolerance values
+    itrp = False
+    csrv = False
+    if ESMF.local_pet() == 0:
+        if mass1_global == 0:
+            csrv_error_global = abs(mass2_global - mass1_global)
         else:
-            print " - FAIL - Total Error = "+str(relErr)
+            csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
+
+        # compute mean relative error
+        if num_nodes != 0:
+            total_error_global = total_error_global/num_nodes_global
+
+        # determine if interpolation and conservation are up to spec
+        if (total_error_global < itrp_tol):
+            itrp = True
+        if (csrv_error_global < csrv_tol):
+            csrv = True
+
+        # print out diagnostic information
+        print "  Mean relative error = "+str(total_error_global)
+        print "  Max  relative error = "+str(max_error_global)
+        print "  Conservation  error = "+str(csrv_error_global)
+        #print "  Min error   = "+str(min_error_global)
+        #print "  srcmass     = "+str(mass1_global)
+        #print "  dstmass     = "+str(mass2_global)
+
+    # broadcast in parallel case
+    if parallel:
+        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+
+    # print pass or fail
+    if (itrp and csrv):
+        print "PET{0} - PASS".format(ESMF.local_pet())
+        correct = True
+    else:
+        print "PET{0} - FAIL".format(ESMF.local_pet())
 
     return correct
-
 def parse_options(options):
         options = options.split()
         opts, args = getopt(options,'it:p:r', ['src_type=', 'dst_type=', 
@@ -242,18 +290,13 @@ def parse_options(options):
                 unmapped_action, pole_method_str, src_regional, dst_regional,
                 src_missingvalue, dst_missingvalue)
 
-def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
+def regrid_check(src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err):
 
 #    print "\nregrid_weight_gen_check.py: mesh_check()"
 
     parallel = False
-#    if petCount > 1:
-#        if petCount != 4:
-#            raise NameError('PET count must be 4 in parallel mode!')
-#        parallel = True
-#
-#    if localPet == 0:
-#        print "\nmesh_test"
+    if ESMF.pet_count() > 1:
+        parallel = True
 
     # Settings for regrid
     (src_type_str, dst_type_str, src_meshname, dst_meshname,
@@ -305,19 +348,45 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     srcfield = create_field(srcgrid, 'srcfield', regrid_method)
     dstfield = create_field(dstgrid, 'dstfield', regrid_method)
     dstfield2 = create_field(dstgrid, 'dstfield_exact', regrid_method)
-    dst_frac_field = create_field(dstgrid, 'dst_frac_field', regrid_method)
+
+    #create the frac fields
+    srcfracfield = create_field(srcgrid, 'src_frac_field', regrid_method)
+    dstfracfield = create_field(dstgrid, 'dst_frac_field', regrid_method)
 
     # initialize the Fields to an analytic function
     srcfield = build_analyticfield(srcfield, src_lons, src_lats)
     dstfield2 = build_analyticfield(dstfield2, dst_lons, dst_lats)
 
     # run the ESMF regridding
-    dstfield = run_regridding(srcfield, dstfield, regrid_method, unmapped_action, dst_frac_field,
-                              pole_method=pole_method, regrid_pole_npoints=pole_method_npntavg)
+    dstfield = run_regridding(srcfield, dstfield, 
+                              regrid_method, unmapped_action, 
+                              srcfracfield, dstfracfield,
+                              pole_method=pole_method, 
+                              regrid_pole_npoints=pole_method_npntavg)
 
     # compare results and output PASS or FAIL
-    correct = compare_fields(dstfield, dstfield2, regrid_method, dst_frac_field, dst_mask,
-                             max_err, parallel)
+    #correct = compare_fields(dstfield, dstfield2, regrid_method, dstfracfield, dst_mask,
+    #                         max_err, parallel)
+
+    srcmass = None
+    dstmass = None
+    if regrid_method == ESMF.RegridMethod.CONSERVE:
+        # create the area fields
+        srcareafield = create_field(srcgrid, 'srcareafield', regrid_method)
+        dstareafield = create_field(dstgrid, 'dstareafield', regrid_method)
+
+        srcmass = compute_mass(srcfield, srcareafield, 
+                            dofrac=True, fracfield=srcfracfield)
+        dstmass = compute_mass(dstfield, dstareafield)
+    else:
+        srcfracfield = None
+        dstfracfield = None
+
+    correct = compare_fields(dstfield, dstfield2, itrp_err, csrv_err, 
+                              parallel=parallel, dstfracfield=dstfracfield,
+                              mass1=srcmass, mass2=dstmass, 
+                              regrid_method=regrid_method)
+
     return correct
 
 if __name__ == '__main__':

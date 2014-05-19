@@ -761,7 +761,8 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     return mass
 
 def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False, 
-                        dstfracfield=None, mass1=None, mass2=None):
+                        dstfracfield=None, mass1=None, mass2=None, 
+                        regrid_method=ESMF.RegridMethod.CONSERVE):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'field1' and 
@@ -785,7 +786,9 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     min_error = 1000000.0
     num_nodes = 0
     for i in range(field1.shape[0]):
-        if not field1.mask[i]:
+        if ((not field2.mask[i]) and 
+            (regrid_method != ESMF.RegridMethod.CONSERVE or
+            dstfracfield[i] >= 0.999)):
             if (field2.data[i] != 0.0):
                 err = abs(field1.data[i]/dstfracfield.data[i] - field2.data[i])/abs(field2.data[i])
             else:
