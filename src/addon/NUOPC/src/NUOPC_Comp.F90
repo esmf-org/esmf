@@ -25,6 +25,7 @@ module NUOPC_Comp
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompSetEntryPoint
+  public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSpecialize
   
   ! interface blocks
@@ -41,6 +42,10 @@ module NUOPC_Comp
   interface NUOPC_CompSetEntryPoint
     module procedure NUOPC_GridCompSetEntryPoint
     module procedure NUOPC_CplCompSetEntryPoint
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompSetInternalEntryPoint
+    module procedure NUOPC_GridCompSetIntEntryPoint
   end interface
   !---------------------------------------------
   interface NUOPC_CompSpecialize
@@ -359,7 +364,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
-
+    
     ! determine next available phase index    
     call ESMF_GridCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
@@ -522,6 +527,140 @@ module NUOPC_Comp
       attributeName = "RunPhaseMap"
     elseif (methodflag == ESMF_METHOD_FINALIZE) then
       attributeName = "FinalizePhaseMap"
+    endif
+    
+    ! determine how many phaseLabels are contained in the incoming list
+    phaseLabelCount = size(phaseLabelList)
+    
+    ! query the already existing phaseMap enties
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+      itemCount=itemCount, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of temporary data structure.", &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (itemCount > 0) then
+      call ESMF_AttributeGet(comp, name=trim(attributeName), &
+        valueList=phases, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    
+    ! add the new entries to the phaseMap
+    write(phaseString, "(I6)") phase
+    iii=0 ! initialize
+    do i=1, phaseLabelCount
+      ! see if this same phaseLabel has already been used before
+      do ii=1, itemCount
+        if (index(phases(ii),trim(phaseLabelList(i))) > 0 ) exit
+      enddo
+      if (ii <= itemCount) then
+        ! overwrite an existing entry with the same phaseLabel
+        phases(ii) = trim(phaseLabelList(i))//"="//&
+          trim(adjustl(phaseString))
+      else
+        ! add a new entry for the phaseLabel at the end of the list
+        iii = iii+1
+        phases(itemCount+iii) = trim(phaseLabelList(i))//"="//&
+          trim(adjustl(phaseString))
+      endif
+    enddo
+    
+    ! set the new phaseMap in the Attribute
+    call ESMF_AttributeSet(comp, name=trim(attributeName), &
+      valueList=phases(1:itemCount+iii), &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    ! clean-up
+    deallocate(phases)
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSetInternalEntryPoint - Set internal entry point for a GridComp
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSetInternalEntryPoint()
+  subroutine NUOPC_GridCompSetIntEntryPoint(comp, methodflag, phaseLabelList, &
+    userRoutine, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                     :: comp
+    type(ESMF_Method_Flag), intent(in)      :: methodflag
+    character(len=*),       intent(in)      :: phaseLabelList(:)
+    interface
+      subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
+        use ESMF_CompMod
+        use ESMF_StateMod
+        use ESMF_ClockMod
+        implicit none
+        type(ESMF_GridComp)         :: gridcomp     ! must not be optional
+        type(ESMF_State)            :: importState  ! must not be optional
+        type(ESMF_State)            :: exportState  ! must not be optional
+        type(ESMF_Clock)            :: clock        ! must not be optional
+        integer, intent(out)        :: rc           ! must not be optional
+      end subroutine
+    end interface
+    integer,          intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Set the internal entry point for a GridComp (i.e. Driver). Only Drivers 
+! utilize internal entry points.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                  :: i, ii, iii
+    integer                  :: phase, itemCount, phaseLabelCount, stat
+    character(len=8)         :: phaseString
+    character(len=40)        :: attributeName
+    character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! determine next available phase index    
+    call ESMF_GridCompGetEPPhaseCount(comp, methodflag, &
+      phaseCount=phase, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    phase = phase + 1
+
+    ! set the entry point with this phase index
+    call ESMF_GridCompSetEntryPoint(comp, methodflag, userRoutine=userRoutine, &
+      phase=phase, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+!print *, "NUOPC_GridCompSetEntryPoint: phaseLabelList:", &
+!phaseLabelList, "     phase:", phase
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      attributeName = "InternalInitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+      attributeName = "InternalRunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+      attributeName = "InternalFinalizePhaseMap"
     endif
     
     ! determine how many phaseLabels are contained in the incoming list

@@ -92,6 +92,7 @@ module NUOPC
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompSetEntryPoint
+  public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSpecialize
 
 end module
