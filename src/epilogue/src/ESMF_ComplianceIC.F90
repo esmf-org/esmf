@@ -2015,6 +2015,15 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
       (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
+    ! Further ensure that the clockCopy is a valid object
+    ! Clock has deep C++ implementation, thus must also check this pointer here
+    call ESMF_ClockGetThis(clockCopy, clockThis, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if ((ESMF_ClockGetInit(clockCopy) /= ESMF_INIT_CREATED) .or. &
+      (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
     
     if (clockValid) then
       clockModified = .false.
