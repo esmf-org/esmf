@@ -40,7 +40,7 @@ srcgrid = grid_create([0,0,21,21], [0,0,21,21], domask=True)
 dstgrid = grid_create([0.5,0.5,19.5,19.5], [0.5,0.5,19.5,19.5])
 
 # create Field objects on the Meshes
-srcfield = ESMF.Field(srcgrid, 'srcfield', mask_vals=[0])
+srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
 srcareafield = ESMF.Field(srcgrid, 'srcareafield')
 srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
 dstfield = ESMF.Field(dstgrid, 'dstfield')

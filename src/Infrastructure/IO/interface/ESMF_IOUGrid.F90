@@ -176,6 +176,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
           errmsg,&
           rc)) return
         call ESMF_StringLowerCase(units(1:len))
+        if (units(len:len) .eq. achar(0)) len = len-1
 	units = units(1:7)
       endif
     end if
@@ -962,6 +963,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
+     if (units(len:len) .eq. achar(0)) len = len-1
       call ESMF_StringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
@@ -1203,6 +1205,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
         call ESMF_StringLowerCase(units(1:len))
+	if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -1215,6 +1218,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         endif
       else	   
         ! normalize the height using the earth radius
+	if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:len) .eq. "meters") then
 	  earthradius = 6371000.0
         else if (units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
@@ -1428,7 +1432,6 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
           rc)) return
     endif
 
-    print *, PetNo, 'Before nf90_inquire_attribute()'
     if (meshDim == 2) then
        ! Get element connectivity, if it does not exist, bail out
        errmsg = "Attribute face_node_connectivity in "//trim(filename)
@@ -1730,6 +1733,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
           ESMF_SRCLINE,&
           errmsg,&
           rc)) return
+      if (units(len:len) .eq. achar(0)) len = len-1
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
         call ESMF_StringLowerCase(units(1:len))

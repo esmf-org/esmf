@@ -761,7 +761,8 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     return mass
 
 def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False, 
-                        dstfracfield=None, mass1=None, mass2=None):
+                        dstfracfield=None, mass1=None, mass2=None, 
+                        regrid_method=ESMF.RegridMethod.CONSERVE):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'field1' and 
@@ -783,12 +784,16 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     totalErr = 0.0
     max_error = 0.0
     min_error = 1000000.0
+    num_nodes = 0
     for i in range(field1.shape[0]):
-        if not field1.mask[i]:
+        if ((not field2.mask[i]) and 
+            (regrid_method != ESMF.RegridMethod.CONSERVE or
+            dstfracfield[i] >= 0.999)):
             if (field2.data[i] != 0.0):
                 err = abs(field1.data[i]/dstfracfield.data[i] - field2.data[i])/abs(field2.data[i])
             else:
                 err = abs(field1.data[i]/dstfracfield.data[i]) - field2.data[i]
+            num_nodes += 1
             totalErr += err
             if (err > max_error):
                 max_error = err
@@ -805,7 +810,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = comm.reduce(totalErr, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        field_size_global = comm.reduce(field1.shape[0], op=MPI.SUM)
+        num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
         if (mass1 and mass2):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
@@ -813,7 +818,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         total_error_global = totalErr
         max_error_global = max_error
         min_error_global = min_error
-        field_size_global = field1.shape[0]
+        num_nodes_global = num_nodes
         if (mass1 and mass2):
             mass1_global = mass1
             mass2_global = mass2
@@ -828,7 +833,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
             csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
 
         # compute mean relative error
-        total_error_global = total_error_global/field_size_global
+        total_error_global = total_error_global/num_nodes_global
 
         # determine if interpolation and conservation are up to spec
         if (total_error_global < itrp_tol):

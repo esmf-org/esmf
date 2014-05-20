@@ -46,7 +46,7 @@ srcgrid = grid_create_periodic([60,30], domask=True)
 dstgrid = grid_create_periodic([55,28])
 
 # create the Fields
-srcfield = ESMF.Field(srcgrid, 'srcfield', mask_vals=[0])
+srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
 dstfield = ESMF.Field(dstgrid, 'dstfield')
 exactfield = ESMF.Field(dstgrid, 'exactfield')
 
