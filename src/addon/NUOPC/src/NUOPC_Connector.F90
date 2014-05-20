@@ -531,7 +531,8 @@ print *, "current bondLevel=", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -616,16 +617,25 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! prepare chopStringList
+    nullify(chopStringList)
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-      
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -815,7 +825,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -911,16 +922,25 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! prepare chopStringList
+    nullify(chopStringList)
+    
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1075,7 +1095,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1170,16 +1191,25 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! prepare chopStringList
+    nullify(chopStringList)
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1324,7 +1354,8 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1413,17 +1444,26 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! prepare chopStringList
+    nullify(chopStringList)
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1817,6 +1857,58 @@ print *, "found match:"// &
       print *, "stringList is unassociated!!!"
     endif
     
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine chopString(string, chopChar, chopStringList, rc)
+    character(len=*)                              :: string
+    character                                     :: chopChar
+    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
+    integer,                intent(out), optional :: rc
+    
+    integer               :: i, j, count
+    integer, allocatable  :: chopPos(:)
+    
+    ! check the incoming pointer
+    if (associated(chopStringList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="chopStringList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! determine how many times chopChar is found in string
+    count=0 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) count=count+1
+    enddo
+    
+    ! record positions where chopChar is found in string
+    allocate(chopPos(count))
+    j=1 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) then
+        chopPos(j)=i
+        j=j+1
+      endif
+    enddo
+    
+    ! chop up the string
+    allocate(chopStringList(count+1))
+    j=1 ! reset
+    do i=1, count
+      chopStringList(i) = string(j:chopPos(i)-1)
+      j=chopPos(i)+1
+    enddo
+    chopStringList(count+1) = trim(string(j:len(string)))
+    deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine
     
   !-----------------------------------------------------------------------------
