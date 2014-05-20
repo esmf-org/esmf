@@ -114,6 +114,8 @@ module NUOPC_Driver
   interface NUOPC_DriverGetComp
     module procedure NUOPC_DriverGetGridComp
     module procedure NUOPC_DriverGetCplComp
+    module procedure NUOPC_DriverGetAllGridComp
+    module procedure NUOPC_DriverGetAllCplComp
   end interface
   
   ! Internal drived types
@@ -2086,7 +2088,6 @@ module NUOPC_Driver
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: iComp
@@ -2169,7 +2170,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: iComp, i
@@ -2305,7 +2305,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: src, dst
@@ -2407,7 +2406,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: src, dst, i
@@ -2567,7 +2565,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
 
@@ -2730,6 +2727,158 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_DriverGetAllGridComp - Get all the GridComp child components from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetAllGridComp(driver, compList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    type(ESMF_GridComp), pointer               :: compList(:)
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get all the GridComp (i.e. Model, Mediator, or Driver) child components from a
+! Driver. The incoming {\tt compList} argument must be unassociated. On return
+! it becomes the responsibility of the caller to deallocate the associated
+! {\tt compList} argument.
+! 
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: stat
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: mapCount
+    integer                         :: i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! check the incoming pointer
+    if (associated(compList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="compList must enter unassociated", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)
+      return  ! bail out
+    endif
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! get basic information about map
+    call ESMF_ContainerGet(is%wrap%componentMap, itemCount=mapCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+      
+    ! allocate memory for the compList
+    allocate(compList(mapCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of compList failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! fill the compList
+    do i=1, mapCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
+        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      compList(i) = cmEntry%wrap%component
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverGetAllCplComp - Get all the CplComp child components from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    type(ESMF_CplComp),  pointer               :: compList(:)
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get all the CplComp (i.e. Connector) child components from a
+! Driver. The incoming {\tt compList} argument must be unassociated. On return
+! it becomes the responsibility of the caller to deallocate the associated
+! {\tt compList} argument.
+! 
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: stat
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ConnectorMapEntry)         :: cmEntry
+    integer                         :: mapCount
+    integer                         :: i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! check the incoming pointer
+    if (associated(compList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="compList must enter unassociated", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)
+      return  ! bail out
+    endif
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! get basic information about map
+    call ESMF_ContainerGet(is%wrap%connectorMap, itemCount=mapCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+      
+    ! allocate memory for the compList
+    allocate(compList(mapCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of compList failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! fill the compList
+    do i=1, mapCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
+        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      compList(i) = cmEntry%wrap%connector
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_DriverNewRunSequence - Replace current RunSequence with a new one
 !
 ! !INTERFACE:
@@ -2793,12 +2942,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(ESMF_VM)                   :: vm
     logical                         :: forceOrder
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
+    type(ConnectorMapEntry)         :: cnEntry
     integer                         :: componentMapCount, connectorMapCount
     integer                         :: i, pet, petCount, localPet
 
@@ -2861,11 +3010,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "  that they were added to the Driver:"
         do i=1, connectorMapCount
           call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
-            cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+            cnEntry, ESMF_ITEMORDER_ADDORDER, rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          print *, i,":  ", trim(cmEntry%wrap%label)
+          print *, i,":  ", trim(cnEntry%wrap%label)
         enddo
         
         ! Print the RunSequence
@@ -2904,7 +3053,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
 
