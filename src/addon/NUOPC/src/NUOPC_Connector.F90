@@ -1931,6 +1931,8 @@ print *, "found match:"// &
     character(len=480)              :: tempString
     type(ESMF_RegridMethod_Flag)    :: regridmethod
     type(ESMF_UnmappedAction_Flag)  :: unmappedaction
+    type(ESMF_PoleMethod_Flag)      :: polemethod
+    integer                         :: regridPoleNPnts
     logical                         :: dumpWeightsFlag
     integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
     type(ESMF_VM)                   :: vm
@@ -2013,7 +2015,7 @@ print *, "found match:"// &
             chopStringList=chopSubString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (size(chopSubString)==2) then
+          if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="bilinear") then
               regridmethod = ESMF_REGRIDMETHOD_BILINEAR
             else if (trim(chopSubString(2))=="patch") then
@@ -2037,6 +2039,40 @@ print *, "found match:"// &
         endif
       enddo
       
+      ! determine "polemethod" and "regridPoleNPnts"
+      polemethod = ESMF_POLEMETHOD_NONE ! default
+      regridPoleNPnts = 1 ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"polemethod=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="none") then
+              polemethod = ESMF_POLEMETHOD_NONE
+            else if (trim(chopSubString(2))=="allavg") then
+              polemethod = ESMF_POLEMETHOD_ALLAVG
+            else if (trim(chopSubString(2))=="npntavg") then
+              polemethod = ESMF_POLEMETHOD_NPNTAVG
+              if (size(chopSubString)>=3) then
+                read(chopSubString(3), "(i10)") regridPoleNPnts
+              endif
+            else if (trim(chopSubString(2))=="teeth") then
+              polemethod = ESMF_POLEMETHOD_TEETH
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to NONE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
       ! determine "unmappedaction"
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
       do j=2, size(chopStringList)
@@ -2045,7 +2081,7 @@ print *, "found match:"// &
             chopStringList=chopSubString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (size(chopSubString)==2) then
+          if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="error") then
               unmappedaction = ESMF_UNMAPPEDACTION_ERROR
             else if (trim(chopSubString(2))=="ignore") then
@@ -2071,7 +2107,7 @@ print *, "found match:"// &
             chopStringList=chopSubString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (size(chopSubString)==2) then
+          if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="on") then
               dumpWeightsFlag = .true.
             else if (trim(chopSubString(2))=="off") then
@@ -2097,13 +2133,12 @@ print *, "found match:"// &
         endif
       enddo
       
-      ! actual regrid store call
+      ! the actual regrid store call
       call ESMF_FieldRegridStore(srcField=srcFields(i), dstField=dstFields(i), &
 !        srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
         regridmethod=regridmethod, &
-!        polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+        polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
         unmappedaction=unmappedaction, &
-        polemethod=ESMF_POLEMETHOD_NONE, &
         routehandle=rhh, &
         factorIndexList=factorIndexList, factorList=factorList, &
         rc=rc)
@@ -2160,7 +2195,7 @@ print *, "found match:"// &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_ArrayWrite(array, &
           "weights_"//trim(name)//"_"//trim(chopStringList(1))//".nc", &
-          overwrite=.true., rc=rc)
+          status=ESMF_FILESTATUS_REPLACE, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_ArrayDestroy(array, rc=rc)
