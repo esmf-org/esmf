@@ -4,7 +4,7 @@
 *.orig
 *.log
 ESMF_LogFile
-PET*.
+PET*.ESMF_Logfile
 *.stdout
 *.out
 *.csv

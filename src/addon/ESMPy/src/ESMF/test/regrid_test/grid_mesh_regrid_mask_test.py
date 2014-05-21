@@ -50,8 +50,8 @@ else:
 
 # create Field objects
 srcfield = ESMF.Field(mesh, 'srcfield')
-dstfield = ESMF.Field(grid, 'dstfield', mask_vals=[0])
-exactfield = ESMF.Field(grid, 'exactfield', mask_vals=[0])
+dstfield = ESMF.Field(grid, 'dstfield', mask_values=[0])
+exactfield = ESMF.Field(grid, 'exactfield', mask_values=[0])
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -65,4 +65,4 @@ regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
 dstfield = regridSrc2Dst(srcfield, dstfield)
 
 # compare results and output PASS or FAIL
-compare_fields_grid(dstfield, exactfield, 20E-1, 10E-16, parallel=parallel)
+compare_fields_grid(dstfield, exactfield, 20E-1, 10E-16, parallel=parallel, regrid_method=ESMF.RegridMethod.BILINEAR)

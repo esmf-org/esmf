@@ -108,14 +108,14 @@ contains
                    termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),       intent(in),    optional :: srcField
-      type(ESMF_Field),       intent(inout), optional :: dstField
-      type(ESMF_RouteHandle), intent(inout)           :: routehandle
+      type(ESMF_Field),          intent(in),    optional :: srcField
+      type(ESMF_Field),          intent(inout), optional :: dstField
+      type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Region_Flag), intent(in),    optional :: zeroregion
-      type(ESMF_TermOrder_Flag), intent(in), optional :: termorderflag
-      logical,                intent(in),    optional :: checkflag
-      integer,                intent(out),   optional :: rc 
+      type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
+      type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
+      logical,                   intent(in),    optional :: checkflag
+      integer,                   intent(out),   optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -330,29 +330,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcFracField, dstFracField, unmappedDstList, rc)
 !      
 ! !ARGUMENTS:
-      type(ESMF_Field),            intent(in)             :: srcField
-      type(ESMF_Field),            intent(inout)          :: dstField
+      type(ESMF_Field),               intent(in)              :: srcField
+      type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer(ESMF_KIND_I4),       intent(in),   optional :: srcMaskValues(:)
-      integer(ESMF_KIND_I4),       intent(in),   optional :: dstMaskValues(:)
-      type(ESMF_RegridMethod_Flag),intent(in),   optional :: regridmethod
-      type(ESMF_PoleMethod_Flag),  intent(in),   optional :: polemethod
-      integer,                     intent(in),   optional :: regridPoleNPnts
-      type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
-      type(ESMF_NormType_Flag),    intent(in),   optional :: normType
-      type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
-      logical,                     intent(in),   optional :: ignoreDegenerate
-      integer,                     intent(inout),optional :: srcTermProcessing
-      integer,                     intent(inout),optional :: pipeLineDepth
-      type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
-      real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
-      integer(ESMF_KIND_I4), pointer, optional :: factorIndexList(:,:)
-      real(ESMF_KIND_R8),   pointer, optional::weights(:)  ! DEPRECATED ARG
-      integer(ESMF_KIND_I4), pointer,optional::indices(:,:) !DEPRECATED ARG 
-      type(ESMF_Field),            intent(inout),optional :: srcFracField
-      type(ESMF_Field),            intent(inout),optional :: dstFracField
-      integer(ESMF_KIND_I4),       pointer, optional      :: unmappedDstList(:)
-      integer,                     intent(out),  optional :: rc 
+      integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
+      integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
+      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
+      type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
+      integer,                        intent(in),    optional :: regridPoleNPnts
+      type(ESMF_LineType_Flag),       intent(in),    optional :: lineType
+      type(ESMF_NormType_Flag),       intent(in),    optional :: normType
+      type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
+      logical,                        intent(in),    optional :: ignoreDegenerate
+      integer,                        intent(inout), optional :: srcTermProcessing
+      integer,                        intent(inout), optional :: pipeLineDepth
+      type(ESMF_RouteHandle),         intent(inout), optional :: routehandle
+      real(ESMF_KIND_R8),             pointer,       optional :: factorList(:)
+      integer(ESMF_KIND_I4),          pointer,       optional :: factorIndexList(:,:)
+      real(ESMF_KIND_R8),    pointer, optional :: weights(:)   ! DEPRECATED ARG
+      integer(ESMF_KIND_I4), pointer, optional :: indices(:,:) ! DEPRECATED ARG
+      type(ESMF_Field),               intent(inout), optional :: srcFracField
+      type(ESMF_Field),               intent(inout), optional :: dstFracField
+      integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
+      integer,                        intent(out),   optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}

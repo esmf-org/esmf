@@ -14,7 +14,7 @@ Forecast (CF) GridSpec and UGRID conventions.
 ESMPy supports a single-tile logically rectangular discretization type called
 Grid and an unstructured discretization type called Mesh (ESMF also
 supports observational data streams).
-ESMPy supports bilinear, finite element patch recovery and first-order
+ESMPy supports bilinear, higher order patch recovery and first-order
 conservative regridding.  There is also an option to ignore unmapped
 destination points and mask out points on either the source or destination.
 Regridding on the sphere takes place in 3D Cartesian space, so the pole

@@ -59,13 +59,13 @@ The following packages are *required* to work with ESMPy:
 * `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc>`_
 * `python <http://python.org/>`_
 * `numpy <http://www.numpy.org/>`_
-* ctypes (included with numpy)
 
 The following packages are *optional*:
 
 * mpi4py - python bindings to MPI, needed to run the parallel regridding tests
 * ESMF installation with NetCDF - required to create grids and meshes from file
-  - NetCDF must be built as a shared library for ESMPy installation to succeed
+    - NetCDF must be built as a shared library for ESMPy installation to succeed
+* nose - for nose testing
 
 ============
 Installation
@@ -125,19 +125,26 @@ To use this package in an external program, import it with:
 Validation
 ----------
 
-The setup.py file can be used to run all of the ESMPy tests, like this:
+The setup.py file can be used to run all of the ESMPy tests (in serial or 
+parallel), like this:
+
+    python setup.py test_all
+
+    python setup.py test_all_parallel
+
+or subsets of the tests individually, like this:
 
     python setup.py test
-
-or:
 
     python setup.py test_regrid
 
     python setup.py test_regrid_from_file
 
-    python setup.py test_all
+    python setup.py test_parallel
 
     python setup.py test_regrid_parallel
+
+    python setup.py test_regrid_from_file_parallel
 
 NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
 The "test_regrid_from_file_dryrun" command will simply download the test 
@@ -164,15 +171,105 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-- There is no FieldBundle class, only single Fields
-- There is no support for tripole or multi-tile Grids
+- There is no FieldBundle class, only single Fields.
+- There is no support for tripole or multi-tile Grids.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK 
   support.
+- Conservative regridding with a source Mesh created from file is not supported, because the Mesh cannot retrieve
+  coordinates from the elements.
 
 Testing related:
 
-- Only tested with gfortran on Darwin and Linux platforms
+- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI.
 
+
+===============================
+Create a Grid or Mesh From File
+===============================
+
+ESMPy can create Grid or Mesh objects from NetCDF files in a variety
+of formats.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
+formats.  Grid files can be in SCRIP and GRIDSPEC format.
+
+------------
+File Formats
+------------
+
+~~~~~
+SCRIP
+~~~~~
+
+This file format is used by the SCRIP [4] package, grid files that 
+work with that package should also work here.  SCRIP format files are 
+capable of storing either 2D logically rectangular grids or 2D 
+unstructured grids.  More information can be found in the ESMF reference
+manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03024000000000000000>`_.
+
+~~~~
+ESMF
+~~~~
+
+ESMF has custom unstructured grid file format for describing meshes. 
+This format is more compatible than the SCRIP format with the methods 
+used to create a Mesh object, so less conversion needs to be done to 
+create a Mesh. The ESMF format is thus more efficient than SCRIP when 
+used with ESMPy.  More information can be found in the ESMF reference
+manual section on the `ESMF Unstructured Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03025000000000000000>`_.
+
+~~~~~~~~
+GRIDSPEC
+~~~~~~~~
+
+GRIDSPEC is an extension to the Climate and Forecast (CF) metadata 
+conventions for the representation of gridded data for Earth System 
+Models.  ESMPy supports NetCDF files that follow the CF GRIDSPEC 
+convention to support logically rectangular lat/lon grids.  More 
+information can be found in the ESMF reference manual section on the 
+`CF Convention GRIDSPEC File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03026000000000000000>`_.
+
+~~~~~
+UGRID
+~~~~~
+
+UGRID is an extension to the CF metadata 
+conventions for the unstructured grid data model.  ESMPy support 
+NetCDF files that follow the CF UGRID convention for unstructured grids.
+More information can be found in the ESMF reference manual section on 
+the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
+
+----------------
+Meshes From File
+----------------
+
+When creating a Mesh from a SCRIP format file, there are a number of
+options to control the output Mesh. The data is located at the center
+of the grid cell in a SCRIP grid; whereas the data is located at the
+corner of a cell in an ESMF Mesh object. Therefore, we create a Mesh
+object by default by constructing a "dual" mesh using the coordinates
+in the file. If the user wishes to not construct the dual mesh, the
+optional argument 'convert_to_dual' may be used to control this
+behavior. When 'convert_to_dual' is set to False, the Mesh constructed
+from the file will not be the dual. This is necessary when the Mesh is
+part of a conservative regridding operation, so the 
+weights are properly generated for the cell centers in the file.
+
+A Mesh may also be created with boolean flags to specify whether or not to
+add an area property to the Mesh 'add_user_area', or to add a mask
+'add_mask' held by the NetCDF variable indicated in the optional argument, 
+'varname'.
+
+----------------
+Grids From File
+----------------
+
+A number of optional boolean arguments are also supported to create a
+structured Grid from a file.  These include 'is_sphere' to indicate whether
+the grid is spherical or regional, 'add_corner_stagger' to add the corner
+stagger information to the Grid for conservative regridding,
+'add_user_area' to specify whether to read in the cell area from the
+NetCDF file or to calculate them, and 'add_mask'
+to add a mask held by the NetCDF variable indicated in optional
+argument, 'varname'.   
 
 ================
 Field regridding
@@ -252,76 +349,6 @@ contain coordinates describing the outer perimeter of the Grid cells.
 
 See reference [3] for more information.
 
-
-=================================
-File Formats for Grids and Meshes
-=================================
-
-ESMPy supports Grids and Meshes created from a variety of NetCDF file
-formats: SCRIP, ESMF, GRIDSPEC, and UGRID.  Each of these formats is
-briefly described below.
-
-SCRIP - the file format used by the SCRIP [4] package, grid files that 
-work with that package should also work here.  SCRIP format files are 
-capable of storing either 2D logically rectangular grids or 2D 
-unstructured grids.  More information can be found in the ESMF reference
-manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03024000000000000000>`_.
-
-ESMF - a custom unstructured grid file format for describing meshes. 
-This format is more compatible than the SCRIP format with the methods 
-used to create a Mesh object, so less conversion needs to be done to 
-create a Mesh. The ESMF format is thus more efficient than SCRIP when 
-used with ESMPy.  More information can be found in the ESMF reference
-manual section on the `ESMF Unstructured Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03025000000000000000>`_.
-
-GRIDSPEC - an extension to the Climate and Forecast (CF) metadata 
-conventions for the representation of gridded data for Earth System 
-Models.  ESMPy supports NetCDF files that follow the CF GRIDSPEC 
-convention to support logically rectangular lat/lon grids.  More 
-information can be found in the ESMF reference manual section on the 
-`CF Convention GRIDSPEC File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03026000000000000000>`_.
-
-UGRID - an extension to the CF metadata 
-conventions for the unstructured grid data model.  ESMPy support 
-NetCDF files that follow the CF UGRID convention for unstructured grids.
-More information can be found in the ESMF reference manual section on 
-the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
-
-
-===============================
-Create a Grid or Mesh From File
-===============================
-
-ESMPy can create Grid or Mesh objects from NetCDF files in a variety
-of formats.  A Mesh can be created from files in SCRIP, ESMF, and UGRID
-formats.  Grid files can be in SCRIP and GRIDSPEC format.
-
-When creating a Mesh from a SCRIP format file, there are a number of
-options to control the output Mesh. The data is located at the center
-of the grid cell in a SCRIP grid; whereas the data is located at the
-corner of a cell in an ESMF Mesh object. Therefore, we create a Mesh
-object by default by constructing a "dual" mesh using the coordinates
-in the file. If the user wishes to not construct the dual mesh, the
-optional argument 'convert_to_dual' may be used to control this
-behavior. When 'convert_to_dual' is set to False, the Mesh constructed
-from the file will not be the dual. This is necessary when the Mesh is
-part of a conservative regridding operation, so the 
-weights are properly generated for the cell centers in the file.
-
-A Mesh may also be created with boolean flags to specify whether or not to
-add an area property to the Mesh 'add_user_area', or to add a mask
-'add_mask' held by the NetCDF variable indicated in the optional argument, 
-'varname'.
-
-A number of optional boolean arguments are also supported to create a
-structured Grid from a file.  These include 'is_sphere' to indicate whether
-the grid is spherical or regional, 'add_corner_stagger' to add the corner
-stagger information to the Grid for conservative regridding,
-'add_user_area' to specify whether to read in the cell area from the
-NetCDF file or to calculate them, and 'add_mask'
-to add a mask held by the NetCDF variable indicated in optional
-argument, 'varname'.   
-
 -------
 Masking
 -------
@@ -343,7 +370,7 @@ Numpy Array returned from the Grid.get_item() call using the 'item'
 variable.  A Mesh mask is initialized by passing mask values into
 the Mesh.add_elements() call using the 'element_mask' variable.  The 
 Field mask can then be setup by indicating the values to use for
-the mask in the 'mask_vals' variable of the Field constructor.  However,
+the mask in the 'mask_values' variable of the Field constructor.  However,
 the Field mask does not need to be setup to mask values in the
 regridding operation.  Regrid masking is handled by passing the
 mask values into the 'src_mask_values' or 'dst_mask_values' 
@@ -443,79 +470,99 @@ Named constants                                  Description
 Tutorials
 =========
 
+The first few tutorials are stand-alone scripts that can be run from any Python
+interpeter.
+
+---------------
+Script examples
+---------------
+
+~~~~~~~~~~~
+Hello World
+~~~~~~~~~~~
+
+    .. literalinclude:: ../examples/hello_world.py
+
+~~~~~~~~~~~~~~~~~~~~~
+Grid Create From File
+~~~~~~~~~~~~~~~~~~~~~
+
+    .. literalinclude:: ../examples/grid_create_from_file.py
+
+~~~~~~~~~~~~~~~~~~~~~
+Mesh Create From File
+~~~~~~~~~~~~~~~~~~~~~
+
+    .. literalinclude:: ../examples/mesh_create_from_file.py
+
+~~~~~~~~~~~~~~~~
+Grid Mesh Regrid
+~~~~~~~~~~~~~~~~
+
+    .. literalinclude:: ../examples/grid_mesh_regrid.py
+
+----------------------
+Field Regridding Tools
+----------------------
+
 The following tutorials will show you how to build all of the pieces
-necessary to regrid data between Fields built on Grids.
+necessary to regrid data between Fields built on Grids and Meshes.
 
-
-----------------
+~~~~~~~~~~~~~~~~
 Create a 2D Grid
-----------------
+~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
         :pyobject: grid_create
 
-----------------
+~~~~~~~~~~~~~~~~
 Create a 3D Grid
-----------------
+~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
         :pyobject: grid_create_3d
 
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 Create a periodic Grid
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
         :pyobject: grid_create_periodic
 
------------------------
-Create a Grid From File
------------------------
-
-    .. literalinclude:: /../src/ESMF/test/unit_test.py
-        :pyobject: grid_create_from_file
-
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 Create a 5 element Mesh
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/regrid_test/mesh_regridding_utilities.py
         :pyobject: mesh_create_5
 
------------------------
-Create a Mesh From File
------------------------
-
-    .. literalinclude:: /../src/ESMF/test/unit_test.py
-        :pyobject: mesh_create_from_file
-
---------------
+~~~~~~~~~~~~~~
 Create a Field
---------------
+~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/unit_test.py
         :pyobject: create_field
 
 
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Initialize an analytic Field
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
         :pyobject: initialize_field_grid_periodic
 
 
---------------------
+~~~~~~~~~~~~~~~~~~~~
 Run ESMPy regridding
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
     .. literalinclude:: ../src/ESMF/test/unit_test.py
         :pyobject: run_regridding
 
 
-------------------
+~~~~~~~~~~~~~~~~~~
 Compute Field mass
-------------------
+~~~~~~~~~~~~~~~~~~
 
   .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
     :pyobject: compute_mass_grid
