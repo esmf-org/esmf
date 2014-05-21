@@ -1920,19 +1920,22 @@ print *, "found match:"// &
     character(*),           intent(in)            :: name
     integer,                intent(out), optional :: rc
     ! local variables
-    integer                         :: i, j, count, stat, localDeCount
+    integer                         :: i, j, k, count, stat, localDeCount
     type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
     integer                         :: rraShift, vectorLengthShift
     type(ESMF_RouteHandle)          :: rhh
     integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
     real(ESMF_KIND_R8), pointer     :: factorList(:)
-    character(ESMF_MAXSTR), pointer :: chopStringList(:), chopSubString(:)
+    character(ESMF_MAXSTR), pointer :: chopStringList(:)
+    character(ESMF_MAXSTR), pointer :: chopSubString(:), chopSubSubString(:)
     character(len=160)              :: msgString
     character(len=480)              :: tempString
     type(ESMF_RegridMethod_Flag)    :: regridmethod
     type(ESMF_UnmappedAction_Flag)  :: unmappedaction
     type(ESMF_PoleMethod_Flag)      :: polemethod
     integer                         :: regridPoleNPnts
+    integer(ESMF_KIND_I4), pointer  :: srcMaskValues(:)
+    integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
     logical                         :: dumpWeightsFlag
     integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
     type(ESMF_VM)                   :: vm
@@ -1989,8 +1992,11 @@ print *, "found match:"// &
     vectorLengthShift = 0     ! reset
     nullify(chopStringList)   ! reset
     nullify(chopSubString)    ! reset
+    nullify(chopSubSubString) ! reset
     nullify(factorIndexList)  ! reset
     nullify(factorList)       ! reset
+    nullify(srcMaskValues)    ! reset
+    nullify(dstMaskValues)    ! reset
     
     ! loop over all fields
     do i=1, count
@@ -2006,6 +2012,56 @@ print *, "found match:"// &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+      ! determine "srcMaskValues"
+      allocate(srcMaskValues(0))  ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"srcmaskvalues=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            call chopString(chopSubString(2), chopChar=",", &
+              chopStringList=chopSubSubString, rc=rc)
+            if (size(chopSubSubString)>0) then
+              deallocate(srcMaskValues)
+              allocate(srcMaskValues(size(chopSubSubString)))
+              do k=1, size(chopSubSubString)
+                read(chopSubSubString(k), "(i10)") srcMaskValues(k)
+              enddo
+            endif
+            deallocate(chopSubSubString)
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "dstMaskValues"
+      allocate(dstMaskValues(0))  ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"dstmaskvalues=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            call chopString(chopSubString(2), chopChar=",", &
+              chopStringList=chopSubSubString, rc=rc)
+            if (size(chopSubSubString)>0) then
+              deallocate(dstMaskValues)
+              allocate(dstMaskValues(size(chopSubSubString)))
+              do k=1, size(chopSubSubString)
+                read(chopSubSubString(k), "(i10)") dstMaskValues(k)
+              enddo
+            endif
+            deallocate(chopSubSubString)
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
       
       ! determine "regridmethod"
       regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
@@ -2135,7 +2191,7 @@ print *, "found match:"// &
       
       ! the actual regrid store call
       call ESMF_FieldRegridStore(srcField=srcFields(i), dstField=dstFields(i), &
-!        srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+        srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
         regridmethod=regridmethod, &
         polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
         unmappedaction=unmappedaction, &
@@ -2210,6 +2266,7 @@ print *, "found match:"// &
       ! local garbage collection
       deallocate(factorIndexList, factorList)
       deallocate(chopStringList)
+      deallocate(srcMaskValues, dstMaskValues)
       
     enddo
     
