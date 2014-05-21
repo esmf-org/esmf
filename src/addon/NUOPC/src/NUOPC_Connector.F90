@@ -1936,6 +1936,7 @@ print *, "found match:"// &
     integer                         :: regridPoleNPnts
     integer(ESMF_KIND_I4), pointer  :: srcMaskValues(:)
     integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
+    integer                         :: srcTermProcessing, pipelineDepth
     logical                         :: dumpWeightsFlag
     integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
     type(ESMF_VM)                   :: vm
@@ -2155,6 +2156,38 @@ print *, "found match:"// &
         endif
       enddo
       
+      ! determine "srcTermProcessing"
+      srcTermProcessing = -1  ! default -> force auto-tuning
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"srctermprocessing=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            read(chopSubString(2), "(i10)") srcTermProcessing
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "pipelineDepth"
+      pipelineDepth = -1  ! default -> force auto-tuning
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"pipelinedepth=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            read(chopSubString(2), "(i10)") pipelineDepth
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
       ! determine "dumpWeightsFlag"
       dumpWeightsFlag = .false. ! default
       do j=2, size(chopStringList)
@@ -2195,6 +2228,7 @@ print *, "found match:"// &
         regridmethod=regridmethod, &
         polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
         unmappedaction=unmappedaction, &
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         routehandle=rhh, &
         factorIndexList=factorIndexList, factorList=factorList, &
         rc=rc)
