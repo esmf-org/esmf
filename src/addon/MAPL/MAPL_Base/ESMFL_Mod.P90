@@ -1,0 +1,4230 @@
+! +-======-+ 
+!  Copyright (c) 2003-2007 United States Government as represented by 
+!  the Admistrator of the National Aeronautics and Space Administration.  
+!  All Rights Reserved.
+!  
+!  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+!  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+!  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+!  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+!  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+!  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+!  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+!  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+!  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+!  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+!  
+!  Government Agency: National Aeronautics and Space Administration
+!  Government Agency Original Software Designation: GSC-15354-1
+!  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+!  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+!  Government Agency Point of Contact for Original Software:  
+!  			Dale Hithon, SRA Assistant, (301) 286-2691
+!  
+! +-======-+ 
+! $Id: ESMFL_Mod.P90,v 1.28 2014-01-31 16:11:09 atrayano Exp $
+#include "MAPL_ErrLog.h"
+
+#if 0
+stubbed routines
+ ESMFL_RegridStore
+ FieldRegrid1 
+ BundleRegrid1 
+ BundlePrep_ (no grid attributes)
+ ESMFL_FieldGetDims
+ ESMFL_GridDistBlockSet
+#endif
+
+module ESMFL_MOD
+
+  !BOP
+  ! !MODULE: ESMFL_MOD
+
+  !USES:
+  use ESMF
+  use MAPL_ConstantsMod
+  use MAPL_BaseMod
+  use MAPL_CommsMod
+
+  implicit none
+  private
+
+!
+!ALT These need to be changed!!! values here are just to compile 
+!
+
+  !DEFINED PARAMETERS:
+  integer, parameter, public :: ESMFL_UnitsRadians = 99
+
+  !PUBLIC MEMBER FUNCTIONS:
+  public ESMFL_StateGetField
+  public ESMFL_StateGetFieldArray
+  public ESMFL_StateGetPointerToData
+  public ESMFL_BundleGetPointerToData
+  public ESMFL_BundleCpyField
+  public ESMFL_GridCoordGet
+  ! public ESMFL_Connect2STATE
+  public ESMFL_FCOLLECT
+  public ESMF_GRID_INTERIOR
+  public ESMFL_StateFreePointers
+  public ESMFL_StateSetFieldNeeded
+  public ESMFL_StateFieldIsNeeded
+  public ESMFL_FieldGetDims
+  public ESMFL_GridDistBlockSet
+
+  public ESMFL_FieldRegrid ! alt: this should be MAPL_FieldRegrid 
+                           !      (topo_bin may need to be here)
+
+  public ESMFL_RegridStore ! only used for regridding using ESMF_FieldRegrid
+  public ESMFL_Regrid      
+  public ESMFL_Diff      
+  public ESMFL_State2Bundle
+  public ESMFL_Bundle2State
+  public ESMFL_Bundles2Bundle
+  public ESMFL_Add2Bundle
+  public ESMFL_HALO
+  public ESMFL_BundleAddState
+  public MAPL_AreaMean
+  !EOP
+
+  ! regridding
+  interface ESMFL_Regrid          
+
+     module procedure BundleRegrid  ! Uses Larry's hinterp
+     module procedure StateRegrid   ! Uses Larry's hinterp
+
+     module procedure FieldRegrid1  ! Uses ESMF regrid
+     module procedure BundleRegrid1 ! Uses ESMF regrid
+
+  end interface
+
+  ! compare two states or bundles
+  interface ESMFL_Diff
+    module procedure StateDiff
+    module procedure BundleDiff
+  end interface
+
+  ! Extract fields from a State and place them in a Bundle
+  interface ESMFL_State2Bundle
+    module procedure State2Bundle
+  end interface
+  ! Extract fields from a Bundle and place them in a State
+  interface ESMFL_Bundle2State
+    module procedure Bundle2State
+  end interface
+  ! Extract fields from Bundles and place them in a single Bundle
+  interface ESMFL_Bundles2Bundle
+    module procedure Bundles2Bundle
+  end interface
+  interface ESMFL_Add2Bundle
+    module procedure Add2Bundle
+  end interface
+  interface ESMFL_BundleAddState
+    module procedure BundleAddState_
+  end interface
+
+  interface ESMFL_StateGetPointerToData
+     module procedure ESMFL_StateGetPtrToDataR4_1
+     module procedure ESMFL_StateGetPtrToDataR4_2
+     module procedure ESMFL_StateGetPtrToDataR4_3
+     module procedure ESMFL_StateGetPtrToDataR4_4
+     module procedure ESMFL_StateGetPtrToDataR8_1
+     module procedure ESMFL_StateGetPtrToDataR8_2
+     module procedure ESMFL_StateGetPtrToDataR8_3
+     module procedure ESMFL_StateGetPtrToDataR8_4
+  end interface
+  
+  interface ESMFL_BundleGetPointerToData
+     module procedure ESMFL_BundleGetPointerByIndex2
+     module procedure ESMFL_BundleGetPointerByIndex3
+     module procedure ESMFL_BundleGetPointerByName2
+     module procedure ESMFL_BundleGetPointerByName3
+  end interface
+
+  interface ESMFL_FCOLLECT
+     module procedure ESMFL_FCOLLECT_I4
+     module procedure ESMFL_FCOLLECT_R4
+     module procedure ESMFL_FCOLLECT_R8
+  end interface
+
+  interface ESMFL_HALO
+     module procedure ESMFL_HALO_R4_2D
+  end interface
+
+  interface AdjustPtrBounds
+     module procedure AdjustPtrBounds1dr4
+     module procedure AdjustPtrBounds1dr8
+     module procedure AdjustPtrBounds3dr4
+     module procedure AdjustPtrBounds3dr8
+  end interface
+
+  interface MAPL_AreaMean
+     module procedure MAPL_AreaMean_2d_r8_bitrep
+     module procedure MAPL_AreaMean_2d_r8
+  end interface
+
+  Logical            :: verbose
+
+!EOP
+!
+! !REVISION HISTORY:
+!
+!  17Aug2007  Todling  Implemented verbose
+!
+!-------------------------------------------------------------------------
+
+contains
+
+ subroutine ESMFL_StateGetFieldArray(state, NAME, ARRAY, RC)
+   type(ESMF_State),  intent(IN)  :: state
+   type(ESMF_Array),  intent(OUT) :: array
+   character(len=*),   intent(IN) :: name
+   integer, optional, intent(OUT) :: rc
+
+
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_StateGetFieldArray"
+   integer          :: status
+   type(ESMF_Field) :: field
+
+   call ESMF_StateGet(state, name, field, rc=status)
+   if (STATUS /= ESMF_SUCCESS) then
+      if (present(RC)) then
+         RC=STATUS
+         return
+      end if
+   end if
+!ALT   VERIFY_(STATUS)
+   call ESMF_FieldGet(field, Array=array, rc=status)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_StateGetFieldArray
+
+
+ subroutine ESMFL_StateGetField(State, FieldName, Bundle, FieldAlias, RC)
+   type(ESMF_State),           intent(IN   ) :: State
+   character(len=*),           intent(IN   ) :: FieldName(:)
+   type(ESMF_FieldBundle),     intent(INOUT) :: Bundle
+   character(len=*), optional, intent(IN   ) :: FieldAlias(:)
+   integer, optional,  intent(OUT)   :: rc
+
+   character(len=ESMF_MAXSTR) :: Iam="ESMFL_StateGetField"
+   integer                    :: status
+
+   character(len=ESMF_MAXSTR) :: NameInBundle
+   character(len=ESMF_MAXSTR) :: NameInState
+   type(ESMF_Field)           :: field
+   type(ESMF_Field)           :: Bundlefield
+   type(ESMF_Field)           :: Statefield
+   type(ESMF_Grid)            :: grid
+   integer                    :: rank, DIMS
+   integer                    :: I
+   logical                    :: NotInState
+   logical                    :: NeedNewField
+   
+!   integer                    :: gridRank
+
+!  Adds fields from a state to a bundle. If a field
+!  is not in the state, it adds a dummy field. It fails
+!  if it tries to add a dummy field to an empty bundle,
+!  since it does not know what grid to use in the dummy.
+!  The name of the field in the bundle can be reset with
+!  FieldAlias
+
+   RequestedFields: do i=1,size(FIELDNAME)
+
+      NameInState = FieldName (I)
+
+      if(present(FieldAlias)) then
+         NameInBundle = FieldAlias(I)
+      else
+         NameInBundle = NameInState
+      end if
+
+! Make sure field is not in bundle
+
+      call ESMF_FieldBundleGet(BUNDLE, FIELDNAME=NameInBundle, FIELD=BundleFIELD, rc=STATUS)
+      ASSERT_(STATUS/=ESMF_SUCCESS)
+
+! Get Field from State
+
+      call ESMF_StateGet (STATE, NameInState, StateFIELD,  RC=STATUS)
+      NotInState = (STATUS /= ESMF_SUCCESS)
+      
+      NeedNewField = NotInState .or. (NameInState/=NameInBundle)
+
+      if (.not. NotInState) then
+         call MAPL_AllocateCoupling(stateField, rc=status)
+         VERIFY_(STATUS)
+      end if
+
+      if(NeedNewField) then
+
+         ! Define Grid and Array for new field
+
+         if(NotInState) then
+
+            ! Create a new empty field
+            BundleField = ESMF_FieldEmptyCreate(name=NameInBundle, rc=status)
+            VERIFY_(STATUS)
+
+         else
+
+            ! Use the grid and array in the State Field, just rename it
+            BundleField = MAPL_FieldCreate(stateField, name=NameInBundle, RC=STATUS)
+            VERIFY_(STATUS)
+         end if
+
+      else
+
+         BundleField = StateField
+
+      end if
+
+      call MAPL_FieldBundleAdd(BUNDLE, bundleField, rc=STATUS)
+      VERIFY_(STATUS)
+
+   end do RequestedFields
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_StateGetField
+
+
+
+!BOP
+
+! !IROUTINE: ESMFL_GridCoordGet - retrieves the coordinates of a particular axis 
+
+! !INTERFACE:
+subroutine ESMFL_GridCoordGet(GRID, coord, name, Location, Units, rc)
+
+  !ARGUMENTS:
+   type(ESMF_Grid),   intent(INout ) :: GRID
+   real, dimension(:,:), pointer  :: coord
+   character (len=*) , intent(IN) :: name
+   type(ESMF_StaggerLoc)          :: location
+   integer                        :: units
+   integer, optional              :: rc
+ !EOP
+
+!	local variables
+  integer                   :: rank
+  type(ESMF_TypeKind_Flag)  :: tk
+  integer                   :: counts(ESMF_MAXDIM)
+  integer                   :: crdOrder
+  real(ESMF_KIND_R4), pointer :: r4d1(:)
+  real(ESMF_KIND_R4), pointer :: r4d2(:,:)
+  real(ESMF_KIND_R8), pointer :: r8d1(:)
+  real(ESMF_KIND_R8), pointer :: r8d2(:,:)
+  integer                   :: STATUS
+  integer                   :: i
+  integer                   :: j
+!ALT  integer                   :: i1, in, j1, jn
+  integer                   :: coordDimCount(ESMF_MAXDIM)
+  character(len=ESMF_MAXSTR):: gridname
+  character(len=ESMF_MAXSTR):: IAm="ESMFL_GridCoordGet" 
+
+
+  call ESMF_GridGet(grid, coordTypeKind=tk, &
+          dimCount=rank, coordDimCount=coordDimCount, rc=status)
+  VERIFY_(STATUS) 
+
+  if (name == "Longitude") then
+    crdOrder = 1
+  else if (name == "Latitude") then
+    crdOrder = 2
+  else
+   STATUS=ESMF_FAILURE
+   VERIFY_(STATUS)
+  endif
+
+  call ESMF_GridGet(grid, name=gridname, rc=status)
+  VERIFY_(STATUS)
+
+  if (gridname(1:10) == 'tile_grid_') then
+
+     call MAPL_GridGet(GRID, localCellCountPerDim=counts, rc=status)
+     VERIFY_(STATUS)
+     allocate(coord(counts(1), counts(2)), STAT=status)
+     VERIFY_(STATUS)
+     coord = 0.0 ! initialize just in case
+
+!ALT     call ESMF_GRID_INTERIOR(GRID,I1,IN,J1,JN)
+
+     do I=1, counts(1)
+        do J=1, counts(2)
+           if (crdOrder == 1) then
+              coord(i,j) = i !ALT + I1 - 1
+           else 
+              coord(i,j) = j !ALT + J1 - 1
+           end if
+        end do
+     end do
+
+     coord = coord * (MAPL_PI_R8 / 180._8)
+
+     RETURN_(ESMF_SUCCESS)
+  end if
+
+  if (tk == ESMF_TYPEKIND_R4) then
+     if (coordDimCount(crdOrder)==2) then
+        call ESMF_GridGetCoord(grid, localDE=0, coordDim=crdOrder, &
+             staggerloc=location, &
+             computationalCount=COUNTS,  &
+             farrayPtr=R4D2, rc=status)
+        VERIFY_(STATUS) 
+        allocate(coord(counts(1), counts(2)), STAT=status)
+        VERIFY_(STATUS)
+        coord = R4D2
+     else
+        RETURN_(ESMF_FAILURE)
+     endif
+  else if (tk == ESMF_TYPEKIND_R8) then
+     if (coordDimCount(crdOrder)==2) then
+        call ESMF_GridGetCoord(grid, localDE=0, coordDim=crdOrder, &
+             staggerloc=location, &
+             computationalCount=COUNTS,  &
+             farrayPtr=R8D2, rc=status)
+        VERIFY_(STATUS) 
+        allocate(coord(counts(1), counts(2)), STAT=status)
+        VERIFY_(STATUS)
+        coord = R8D2
+     else
+        RETURN_(ESMF_FAILURE)
+     endif
+  else
+     RETURN_(ESMF_FAILURE)
+  endif
+  RETURN_(ESMF_SUCCESS)
+  
+ end subroutine ESMFL_GridCoordGet
+
+ subroutine ESMFL_StateFreePointers(STATE, RC)
+   type(ESMF_State),  intent(INOUT) :: STATE
+   integer, optional, intent(  OUT) :: RC
+   
+   character(len=ESMF_MAXSTR)       :: IAm="ESMFL_StateFreePointer"
+   integer                          :: STATUS
+
+   type(ESMF_Array)                 :: ARRAY
+   type(ESMF_Field)                 :: FIELD
+   integer                          :: RANK
+   integer                          :: I
+   integer                          :: ITEMCOUNT
+   real, pointer                    :: PTR1(:)
+   real, pointer                    :: PTR2(:,:)
+   real, pointer                    :: PTR3(:,:,:)
+   real, pointer                    :: PTR4(:,:,:,:)
+   logical                          :: NEEDED
+
+   character (len=ESMF_MAXSTR), pointer :: ITEMNAMELIST(:)
+   type(ESMF_StateItem_Flag)  , pointer :: ITEMTYPELIST(:)
+
+   type (ESMF_LocalArray), target  :: larrayList(1)
+   type (ESMF_LocalArray), pointer :: larray
+   integer        :: localDeCount
+
+! Get information from state
+!---------------------------
+
+   call ESMF_StateGet(STATE,ITEMCOUNT=ITEMCOUNT,RC=STATUS)
+   VERIFY_(STATUS)
+
+   if(ITEMCOUNT==0) then
+      RETURN_(ESMF_SUCCESS)
+   end if
+
+   allocate(ITEMNAMELIST(ITEMCOUNT),STAT=STATUS)
+   VERIFY_(STATUS)
+   allocate(ITEMTYPELIST(ITEMCOUNT),STAT=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_StateGet(STATE,ITEMNAMELIST=ITEMNAMELIST,ITEMTYPELIST=ITEMTYPELIST,RC=STATUS)
+   VERIFY_(STATUS)
+
+   do I=1,ITEMCOUNT
+      if(ITEMTYPELIST(I)==ESMF_STATEITEM_FIELD) then
+         call ESMF_StateGet(STATE, trim(ITEMNAMELIST(I)), FIELD, RC=STATUS)
+         VERIFY_(STATUS)
+
+         call ESMF_AttributeGet  (FIELD, NAME="Needed",VALUE=NEEDED, RC=STATUS)
+         if(STATUS /= ESMF_SUCCESS) NEEDED = .false.
+
+         if(NEEDED==.false.) then
+            call ESMF_FieldGet(FIELD, Array=ARRAY, RC=STATUS)
+            VERIFY_(STATUS)
+            call ESMF_ArrayGet     (ARRAY, rank=RANK,   RC=STATUS)
+            VERIFY_(STATUS)
+
+            call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=status)
+            VERIFY_(STATUS)
+            ASSERT_(localDeCount == 1) !ALT: currently MAPL supports only 1 local array
+            call ESMF_ArrayGet(array, localarrayList=larrayList, rc=status)
+            VERIFY_(STATUS)
+            larray => lArrayList(1) ! alias
+
+            select case (rank)
+            case (1)
+               call ESMF_LocalArrayGet(larray, PTR1, RC=status)
+               VERIFY_(STATUS)
+               if(associated(PTR1)) deallocate(PTR1)
+            case (2)
+               call ESMF_LocalArrayGet(larray, PTR2, RC=status)
+               VERIFY_(STATUS)
+               if(associated(PTR2)) deallocate(PTR2)
+            case (3)
+               call ESMF_LocalArrayGet(larray, PTR3, RC=status)
+               VERIFY_(STATUS)
+               if(associated(PTR3)) deallocate(PTR3)
+            case (4)
+               call ESMF_LocalArrayGet(larray, PTR4, RC=status)
+               VERIFY_(STATUS)
+               if(associated(PTR4)) deallocate(PTR4)
+            end select
+         end if
+      end if
+   end do
+
+   deallocate(itemNameList,STAT=STATUS)
+   VERIFY_(STATUS)
+   deallocate(itemtypeList,STAT=STATUS)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+   
+ end subroutine ESMFL_StateFreePointers
+
+
+ subroutine ESMFL_StateSetFieldNeeded(STATE, NAME, RC)
+   type(ESMF_State),  intent(INOUT) :: STATE
+   character(len=*),  intent(IN   ) :: NAME
+   integer, optional, intent(  OUT) :: RC
+   
+   character(len=ESMF_MAXSTR)       :: IAm="ESMFL_StateSetFieldNeeded"
+   integer                          :: STATUS
+
+   type(ESMF_Field)                 :: FIELD
+
+   call ESMF_StateGet(STATE, trim(NAME), FIELD, RC=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_AttributeSet  (FIELD, NAME="Needed",VALUE=.false., RC=STATUS)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+   
+ end subroutine ESMFL_StateSetFieldNeeded
+
+function ESMFL_StateFieldIsNeeded(STATE, NAME, RC) result(NEEDED)
+   type(ESMF_State),  intent(INOUT) :: STATE
+   character(len=*),  intent(IN   ) :: NAME
+   integer, optional, intent(  OUT) :: RC
+   logical                          :: NEEDED
+   
+   character(len=ESMF_MAXSTR)       :: IAm="ESMFL_StateFieldIsNeeded"
+   integer                          :: STATUS
+
+   type(ESMF_Field)                 :: FIELD
+
+   call ESMF_StateGet(STATE, trim(NAME), FIELD, RC=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_AttributeSet  (FIELD, NAME="Needed",VALUE=NEEDED, RC=STATUS)
+   if(STATUS /= ESMF_SUCCESS) NEEDED = .false.
+
+   RETURN_(ESMF_SUCCESS)
+   
+ end function ESMFL_StateFieldIsNeeded
+
+
+
+#define VARTYPE_ 3
+
+#define RANK_ 1
+#include "GetPointer.H"
+#define RANK_ 2
+#include "GetPointer.H"
+#define RANK_ 3
+#include "GetPointer.H"
+#define RANK_ 4
+#include "GetPointer.H"
+
+#undef VARTYPE_
+
+#define VARTYPE_ 4
+
+#define RANK_ 1
+#include "GetPointer.H"
+#define RANK_ 2
+#include "GetPointer.H"
+#define RANK_ 3
+#include "GetPointer.H"
+#define RANK_ 4
+#include "GetPointer.H"
+
+#undef VARTYPE_
+
+ subroutine AdjustPtrBounds1dr4(PTR, A, I1, IN)
+   real(KIND=ESMF_KIND_R4), pointer :: PTR(:)
+   real(KIND=ESMF_KIND_R4), target  :: A(I1:IN)
+   integer                          :: I1, IN
+
+   ptr => A
+ end subroutine AdjustPtrBounds1dr4
+
+ subroutine AdjustPtrBounds1dr8(PTR, A, I1, IN)
+   real(KIND=ESMF_KIND_R8), pointer :: PTR(:)
+   real(KIND=ESMF_KIND_R8), target  :: A(I1:IN)
+   integer                          :: I1, IN
+
+   ptr => A
+ end subroutine AdjustPtrBounds1dr8
+
+ subroutine AdjustPtrBounds3dr4(PTR, A, I1, IN, J1, JN, L1, LN)
+   real(KIND=ESMF_KIND_R4), pointer :: PTR(:,:,:)
+   real(KIND=ESMF_KIND_R4), target  :: A(I1:IN,J1:JN,L1:LN)
+   integer                          :: I1, IN, J1, JN, L1, LN
+   
+
+   ptr => A
+ end subroutine AdjustPtrBounds3dr4
+
+ subroutine AdjustPtrBounds3dr8(PTR, A, I1, IN, J1, JN, L1, LN)
+   real(KIND=ESMF_KIND_R8), pointer :: PTR(:,:,:)
+   real(KIND=ESMF_KIND_R8), target  :: A(I1:IN,J1:JN,L1:LN)
+   integer                          :: I1, IN, J1, JN, L1, LN
+   
+
+   ptr => A
+ end subroutine AdjustPtrBounds3dr8
+
+
+   subroutine ESMFL_BundleGetPointerByIndex2(BUNDLE,INDEX,PTR,RC)
+     type(ESMF_FieldBundle), intent(INOUT) :: BUNDLE !ALT: intent(in)
+     integer,           intent(IN) :: INDEX
+     real, pointer                 :: PTR(:,:)
+     integer, optional, intent(OUT):: RC
+
+     type(ESMF_FIELD)              :: FIELD
+     character(len=ESMF_MAXSTR), parameter     :: IAm="ESMFL_BundleGetPointerByIndex2"
+     integer                       :: status
+     type(ESMF_FieldStatus_Flag)   :: fieldStatus
+
+! ESMF 5 reorders items, be careful!
+! ==================================
+
+     call ESMF_FieldBundleGet (BUNDLE, INDEX, FIELD, RC=STATUS)
+     VERIFY_(STATUS)
+
+     call ESMF_FieldGet(field, status=fieldStatus, rc=status)
+     VERIFY_(STATUS)
+     if (fieldStatus == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_FieldGet(field, 0, Ptr, rc=status)
+        VERIFY_(STATUS)
+     else
+        NULLIFY(ptr)
+     end if
+
+     RETURN_(ESMF_SUCCESS)
+   end subroutine ESMFL_BundleGetPointerByIndex2
+
+   subroutine ESMFL_BundleGetPointerByIndex3(BUNDLE,INDEX,PTR,RC)
+     type(ESMF_FieldBundle), intent(INOUT) :: BUNDLE !ALT: intent(in)
+     integer,           intent(IN) :: INDEX
+     real, pointer                 :: PTR(:,:,:)
+     integer, optional, intent(OUT):: RC
+
+     type(ESMF_FIELD)              :: FIELD
+     type(ESMF_FieldStatus_Flag)   :: fieldStatus
+     character(len=ESMF_MAXSTR), parameter     :: IAm="ESMFL_BundleGetPointerByIndex3"
+     integer                       :: status
+
+! ESMF 5 reorders items, be careful!
+! ==================================
+
+     call ESMF_FieldBundleGet (BUNDLE, INDEX, FIELD, RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldGet(field, status=fieldStatus, rc=status)
+     VERIFY_(STATUS)
+     if (fieldStatus == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_FieldGet(field, 0, Ptr, rc=status)
+        VERIFY_(STATUS)
+     else
+        NULLIFY(ptr)
+     end if
+
+     RETURN_(ESMF_SUCCESS)
+   end subroutine ESMFL_BundleGetPointerByIndex3
+
+
+   subroutine ESMFL_BundleGetPointerByName2(BUNDLE,NAME,PTR,RC)
+     type(ESMF_FieldBundle), intent(INOUT) :: BUNDLE !ALT: intent(in)
+     character(len=*), intent(IN) :: NAME
+     real, pointer                 :: PTR(:,:)
+     integer, optional, intent(OUT):: RC
+
+     type(ESMF_FIELD)              :: FIELD
+     type(ESMF_FieldStatus_Flag)   :: fieldStatus
+     character(len=ESMF_MAXSTR), parameter     :: IAm="ESMFL_BundleGetPointerByName2"
+     integer                       :: status
+
+     call ESMF_FieldBundleGet (BUNDLE, NAME, FIELD=FIELD, RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldGet(field, status=fieldStatus, rc=status)
+     VERIFY_(STATUS)
+     if (fieldStatus == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_FieldGet(field, 0, Ptr, rc=status)
+        VERIFY_(STATUS)
+     else
+        NULLIFY(ptr)
+     end if
+
+     RETURN_(ESMF_SUCCESS)
+   end subroutine ESMFL_BundleGetPointerByName2
+
+   subroutine ESMFL_BundleGetPointerByName3(BUNDLE,NAME,PTR,RC)
+     type(ESMF_FieldBundle), intent(INOUT) :: BUNDLE !ALT: intent(in)
+     character(len=*), intent(IN) :: NAME
+     real, pointer                 :: PTR(:,:,:)
+     integer, optional, intent(OUT):: RC
+
+     type(ESMF_FIELD)              :: FIELD
+     type(ESMF_FieldStatus_Flag)   :: fieldStatus
+     character(len=ESMF_MAXSTR), parameter     :: IAm="ESMFL_BundleGetPointerByName3"
+     integer                       :: status
+
+     call ESMF_FieldBundleGet (BUNDLE, NAME, FIELD=FIELD, RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldGet(field, status=fieldStatus, rc=status)
+     VERIFY_(STATUS)
+     if (fieldStatus == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_FieldGet(field, 0, Ptr, rc=status)
+        VERIFY_(STATUS)
+     else
+        NULLIFY(ptr)
+     end if
+
+     RETURN_(ESMF_SUCCESS)
+   end subroutine ESMFL_BundleGetPointerByName3
+
+
+
+    subroutine ESMFL_BundleCpyField (BUNDLE, FIELD, NAME, RC)
+     type(ESMF_FieldBundle), intent(INOUT) :: BUNDLE
+     type(ESMF_FIELD ), intent(INOUT) :: FIELD ! ALT: intent(in)
+     character(len=ESMF_MAXSTR), optional, intent(IN) :: NAME
+     integer, optional, intent(OUT)   :: RC
+
+     type(ESMF_FIELD )       :: FIELD1
+
+
+     character(len=ESMF_MAXSTR)     :: Iam="ESMFL_BundleCpyField"
+     integer          :: status
+
+     FIELD1 = MAPL_FieldCreate(FIELD, name = name, RC=STATUS )
+     VERIFY_(STATUS)
+ 
+     call MAPL_FieldBundleAdd (BUNDLE, FIELD1, RC=STATUS )
+     VERIFY_(STATUS)
+
+     RETURN_(ESMF_SUCCESS)
+
+   end subroutine  ESMFL_BundleCpyField
+
+
+#ifdef DO_WE_NEED_THIS
+ subroutine ESMFL_Connect2STATE(STATE, FIELD, RC)
+   type(ESMF_State),  intent(INOUT) :: STATE
+   type(ESMF_Field),  intent(INOUT) :: FIELD ! ALT: intent(in)
+   integer, optional, intent(  OUT) :: rc
+
+! local vars
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_Connect2STATE"
+   integer          :: status
+   character(len=ESMF_MAXSTR)     :: NAME
+   type (ESMF_Field)              :: f
+
+   call ESMF_FieldGet(FIELD, NAME=NAME, RC=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_StateGet(STATE, NAME, F, RC=STATUS)
+   VERIFY_(STATUS)
+
+   call MAPL_ConnectCoupling(F, FIELD, RC=STATUS)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_Connect2STATE
+#endif
+
+ subroutine ESMFL_FCOLLECT_I4(GRID, FULLINPUT, INPUT, RC )
+   type(ESMF_GRID), intent(IN   )     :: GRID
+   integer,             intent(INOUT) :: FULLINPUT(:)
+   integer,             intent(IN   ) :: INPUT(:)
+   integer, optional,   intent(  OUT) :: rc
+
+! local vars
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_FCOLLECT_I4"
+   integer          :: status
+
+   type (ESMF_DistGrid)                  :: distGrid
+   type(ESMF_DELayout)                   :: LAYOUT
+   integer,               allocatable    :: AL(:,:)
+   integer,               allocatable    :: AU(:,:)
+   integer                               :: deList(1)
+
+   integer, pointer, dimension(:)            :: recvcounts, displs
+   integer                                       :: nDEs
+   integer                                       :: sendcount
+   
+   integer                                       :: I, J, de, deId
+   integer                                       :: NX, NY
+   integer                                       :: I1, IN
+   integer                                       :: J1, JN
+   integer                                       :: gridRank
+    
+    
+   call ESMF_GridGet(GRID, dimCount=gridRank, rc=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGet    (GRID,   distGrid=distGrid, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DistGridGet(distGRID, delayout=layout, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DELayoutGet(layout, deCount =nDEs, localDeList=deList, rc=status)
+   VERIFY_(STATUS)
+   deId = deList(1)
+
+   allocate (AL(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+   allocate (AU(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+
+   call ESMF_DistGridGet(distgrid, &
+        minIndexPDe=AL, maxIndexPDe=AU, rc=status)
+   VERIFY_(STATUS)
+
+   allocate (recvcounts(nDEs), displs(0:nDEs), stat=status)
+   VERIFY_(STATUS)
+
+   displs(0) = 0
+   do I = 1,nDEs
+      J = I - 1
+      de = J
+      I1 = AL(1,J)
+      IN = AU(1,J)
+      recvcounts(I) = (IN - I1 + 1)
+      if (de == deId) then
+         sendcount = recvcounts(I)
+      endif
+      displs(I) = displs(J) + recvcounts(I)
+   enddo
+           
+
+   ASSERT_(sendcount == size(input))
+   ASSERT_(sum(recvcounts) == size(fullinput))
+
+   call MAPL_CommsAllGatherV(layout, input, sendcount, &
+                             fullinput, recvcounts, displs, rc=status)
+   VERIFY_(STATUS)
+
+   deallocate(recvcounts, displs, AU, AL, stat=status)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_FCOLLECT_I4
+
+ subroutine ESMFL_FCOLLECT_R4(GRID, FULLINPUT, INPUT, RC )
+   type(ESMF_GRID), intent(IN   )     :: GRID
+   real,             intent(INOUT) :: FULLINPUT(:)
+   real,             intent(IN   ) :: INPUT(:)
+   integer, optional,   intent(  OUT) :: rc
+
+! local vars
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_FCOLLECT_R4"
+   integer          :: status
+
+   type (ESMF_DistGrid)                  :: distGrid
+   type(ESMF_DELayout)                   :: LAYOUT
+   integer,               allocatable    :: AL(:,:)
+   integer,               allocatable    :: AU(:,:)
+   integer                               :: deList(1)
+
+   integer, pointer, dimension(:)            :: recvcounts, displs
+   integer                                       :: nDEs
+   integer                                       :: sendcount
+   
+   integer                                       :: I, J, de, deId
+   integer                                       :: NX, NY
+   integer                                       :: I1, IN
+   integer                                       :: J1, JN
+   integer                                       :: gridRank
+    
+    
+   call ESMF_GridGet(GRID, dimCount=gridRank, rc=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGet    (GRID,   distGrid=distGrid, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DistGridGet(distGRID, delayout=layout, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DELayoutGet(layout, deCount =nDEs, localDeList=deList, rc=status)
+   VERIFY_(STATUS)
+   deId = deList(1)
+
+   allocate (AL(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+   allocate (AU(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+
+   call ESMF_DistGridGet(distgrid, &
+        minIndexPDe=AL, maxIndexPDe=AU, rc=status)
+   VERIFY_(STATUS)
+
+   allocate (recvcounts(nDEs), displs(0:nDEs), stat=status)
+   VERIFY_(STATUS)
+
+   displs(0) = 0
+   do I = 1,nDEs
+      J = I - 1
+      de = J
+      I1 = AL(1,J)
+      IN = AU(1,J)
+      recvcounts(I) = (IN - I1 + 1)
+      if (de == deId) then
+         sendcount = recvcounts(I)
+      endif
+      displs(I) = displs(J) + recvcounts(I)
+   enddo
+           
+   ASSERT_(sendcount == size(input))
+   ASSERT_(sum(recvcounts) == size(fullinput))
+
+   call MAPL_CommsAllGatherV(layout, input, sendcount, &
+                             fullinput, recvcounts, displs, rc=status)
+   VERIFY_(STATUS)
+
+   deallocate(recvcounts, displs, AU, AL, stat=status)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_FCOLLECT_R4
+
+ subroutine ESMFL_FCOLLECT_R8(GRID, FULLINPUT, INPUT, RC )
+   type(ESMF_GRID), intent(IN   )     :: GRID
+   real(kind= ESMF_KIND_R8), intent(INOUT) :: FULLINPUT(:)
+   real(kind= ESMF_KIND_R8), intent(IN   ) :: INPUT(:)
+   integer, optional,   intent(  OUT) :: rc
+
+! local vars
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_FCOLLECT_R8"
+   integer          :: status
+
+   type (ESMF_DistGrid)                  :: distGrid
+   type(ESMF_DELayout)                   :: LAYOUT
+   integer,               allocatable    :: AL(:,:)
+   integer,               allocatable    :: AU(:,:)
+   integer                               :: deList(1)
+
+   integer, pointer, dimension(:)            :: recvcounts, displs
+   integer                                       :: nDEs
+   integer                                       :: sendcount
+   
+   integer                                       :: I, J, de, deId
+   integer                                       :: NX, NY
+   integer                                       :: I1, IN
+   integer                                       :: J1, JN
+   integer                                       :: gridRank
+    
+    
+   call ESMF_GridGet(GRID, dimCount=gridRank, rc=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGet    (GRID,   distGrid=distGrid, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DistGridGet(distGRID, delayout=layout, rc=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_DELayoutGet(layout, deCount =nDEs, localDeList=deList, rc=status)
+   VERIFY_(STATUS)
+   deId = deList(1)
+
+   allocate (AL(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+   allocate (AU(gridRank,0:nDEs-1),  stat=status)
+   VERIFY_(STATUS)
+
+   call ESMF_DistGridGet(distgrid, &
+        minIndexPDe=AL, maxIndexPDe=AU, rc=status)
+   VERIFY_(STATUS)
+
+   allocate (recvcounts(nDEs), displs(0:nDEs), stat=status)
+   VERIFY_(STATUS)
+
+   displs(0) = 0
+   do I = 1,nDEs
+      J = I - 1
+      de = J
+      I1 = AL(1,J)
+      IN = AU(1,J)
+      recvcounts(I) = (IN - I1 + 1)
+      if (de == deId) then
+         sendcount = recvcounts(I)
+      endif
+      displs(I) = displs(J) + recvcounts(I)
+   enddo
+           
+   ASSERT_(sendcount == size(input))
+   ASSERT_(sum(recvcounts) == size(fullinput))
+
+   call MAPL_CommsAllGatherV(layout, input, sendcount, &
+                             fullinput, recvcounts, displs, rc=status)
+   VERIFY_(STATUS)
+
+   deallocate(recvcounts, displs, AU, AL, stat=status)
+   VERIFY_(STATUS)
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_FCOLLECT_R8
+
+ subroutine ESMFL_FieldRegrid(src, dst, RC)
+   type(ESMF_Field) :: src
+   type(ESMF_Field) :: dst
+   integer, optional, intent(OUT) :: rc
+
+
+! local vars
+   character(len=ESMF_MAXSTR)     :: Iam="ESMFL_FieldRegrid"
+   integer          :: status
+#if 0
+   type (ESMF_Grid) :: srcgrid, dstgrid
+   type (ESMF_DELayout) :: layout
+   type (ESMF_Array)    :: array
+   integer              :: DIMS(3) 
+   integer              :: IM_SRC, JM_SRC
+   integer              :: IM_DST, JM_DST
+   integer              :: J
+   real, dimension(:,:), pointer :: lats, lons, z0, z, h
+   real, parameter               :: EPS=1.0E-3
+   real                          :: ZPOLE
+
+! begin
+   call ESMF_FieldGetGrid(src, srcgrid, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGet(SRCGRID, global_cell_dim=dims, RC=STATUS)
+   VERIFY_(STATUS)
+
+   IM_SRC = DIMS(1)
+   JM_SRC = DIMS(2)
+
+   call ESMF_GridGetDELayout(srcgrid, layout=layout, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_FieldGetGrid(dst, dstgrid, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGetDELocalInfo(DSTGRID, LOCAL_AXIS_LENGTH=DIMS, RC=STATUS)
+   VERIFY_(STATUS)
+
+   IM_DST = DIMS(1)
+   JM_DST = DIMS(2)
+
+   call ESMFL_GridCoordGet(   DSTGRID, LATS                   , &
+                              Name     = "Latitude"              , &
+                              Location = ESMF_CELL_CENTER        , &
+                              Units    = ESMFL_UnitsRadians      , &
+                              RC       = STATUS                    )
+   VERIFY_(STATUS)
+
+   call ESMFL_GridCoordGet(   DSTGRID, LONS                   , &
+                              Name     = "Longitude"             , &
+                              Location = ESMF_CELL_CENTER        , &
+                              Units    = ESMFL_UnitsRadians      , &
+                              RC       = STATUS                    )
+   VERIFY_(STATUS)
+
+
+   
+   call ESMF_FieldAllGather(src, array=array, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_ArrayGetData(array, z0, RC=status)
+   VERIFY_(STATUS)
+
+   call ESMF_FieldGetData(dst, array, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_ArrayGetData(array, z, RC=status)
+   VERIFY_(STATUS)
+
+! binning
+
+   call topo_bin (z0, im_src, jm_src, z, lons(:,1), lats(1,:), &
+                  im_dst,jm_dst)
+!   VERIFY_(STATUS)
+
+
+! do I have the pole?
+   call ESMF_FieldAllGather(dst, array=array, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_ArrayGetData(array, h, RC=status)
+   VERIFY_(STATUS)
+
+   DO J = 1, JM_DST
+      IF (ABS(ABS(LATS(1,J)) - 0.5*PI) .LT. EPS) then
+! yes, I have the pole
+         ZPOLE = SUM(h(:,J))/SIZE(H,1)
+         Z(:,J) = ZPOLE
+      end IF
+   END DO
+#endif
+
+   RETURN_(ESMF_SUCCESS)
+ end subroutine ESMFL_FieldRegrid
+
+  subroutine ESMF_GRID_INTERIOR(GRID,I1,IN,J1,JN)
+    type (ESMF_Grid), intent(IN) :: grid
+    integer, intent(OUT)         :: I1, IN, J1, JN
+
+! local vars
+    integer                               :: status
+    character(len=ESMF_MAXSTR)            :: IAm='ESMF_GridInterior'
+
+    type (ESMF_DistGrid)                  :: distGrid
+    type(ESMF_DELayout)                   :: LAYOUT
+    integer,               allocatable    :: AL(:,:)
+    integer,               allocatable    :: AU(:,:)
+    integer                               :: nDEs
+    integer                               :: deId
+    integer                               :: gridRank
+    integer                               :: deList(1)
+
+    call ESMF_GridGet    (GRID, dimCount=gridRank, distGrid=distGrid, rc=STATUS)
+    call ESMF_DistGridGet(distGRID, delayout=layout, rc=STATUS)
+    call ESMF_DELayoutGet(layout, deCount =nDEs, localDeList=deList, rc=status)
+    deId = deList(1)
+
+    allocate (AL(gridRank,0:nDEs-1),  stat=status)
+    allocate (AU(gridRank,0:nDEs-1),  stat=status)
+
+    call ESMF_DistGridGet(distgrid, &
+         minIndexPDe=AL, maxIndexPDe=AU, rc=status)
+
+    I1 = AL(1, deId)
+    IN = AU(1, deId)
+!    ASSERT_(gridRank > 1) !ALT: tilegrid is 1d (without RC this only for info)
+    J1 = AL(2, deId)
+    JN = AU(2, deId)
+    deallocate(AU, AL)
+
+  end subroutine ESMF_GRID_INTERIOR
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: ESMFL_RegridStore
+
+! !INTERFACE:
+
+   subroutine ESMFL_RegridStore (srcFLD, SRCgrid2D, dstFLD, DSTgrid2D, &
+                                 vm, rh, rc)
+!
+! !USES:
+!
+   implicit NONE
+
+! !ARGUMENTS:
+
+   type(ESMF_Field), intent(inout)       :: srcFLD
+   type(ESMF_Field), intent(inout)       :: dstFLD
+   type(ESMF_Grid), intent(out)          :: SRCgrid2D
+   type(ESMF_Grid), intent(out)          :: DSTgrid2D
+   type(ESMF_RouteHandle), intent(inout) :: rh
+   type(ESMF_VM), intent(in)             :: vm  ! should be intent IN
+   integer, optional, intent(OUT)        :: rc
+
+! !DESCRIPTION:
+!
+! Given a srcFLD and its associated 3dGrid and a dstFLD and its associated
+! 3DGrid create their corresponding 2DGrids and a 2D routehandle.
+
+!EOP
+!
+! !REVISION HISTORY:
+!
+!  17Oct2005  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+#if 0
+! local vars
+
+   type(ESMF_DELayout)     :: layout
+   type(ESMF_Field)        :: dstFld2D
+   type(ESMF_Field)        :: srcFld2D
+   type(ESMF_ArraySpec)    :: arrayspec
+   type(ESMF_Array)        :: dstARR
+   type(ESMF_Array)        :: srcARR
+   type(ESMF_FieldDataMap) :: dmap
+   type(ESMF_Grid)         :: grid3D
+   real(4), pointer        :: Sptr2d(:,:)
+   real(4), pointer        :: Dptr2d(:,:)
+   real                    :: pi
+   real(ESMF_KIND_R8)      :: deltaX, deltaY
+   real(ESMF_KIND_R8)      :: min(2), max(2)
+   integer :: status, rank
+   integer :: sCPD(3), dCPD(3) ! localCellCountPerDim
+   integer :: gccpd(3)         ! globalCellCountPerDim
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'ESMFL_FieldRegridStore3D'
+
+   type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+   integer, allocatable, dimension(:)            :: ims, jms
+   integer                                   :: nDEs, de
+   integer                                   :: NX, NY
+   integer                                   :: IX, JY
+   integer                                   :: gridRank
+   integer                                   :: decpd(7)
+
+
+! start
+
+   ! can get the rank from either srcFLD or dstFLD
+   call ESMF_FieldGetArray(srcFLD, srcARR, rc=status)
+   VERIFY_(status)
+   call ESMF_ArrayGet(srcARR, RANK=rank, rc=status)
+   VERIFY_(status)
+   ! datamap - with rank=2!!!
+   call ESMF_FieldDataMapSetDefault(dmap, 2, rc=status)
+   VERIFY_(STATUS)
+
+   ! Create 2D grids and fields
+
+   ! SOURCE FIELD
+
+   call ESMF_FieldGet(srcFLD, grid=grid3D, rc=status)
+   VERIFY_(status)
+
+   call ESMF_GridGet(GRID3d, dimCount=gridRank, rc=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_GridGetDELayout(grid3D, layout, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_DELayoutGet(layout, deCount=nDEs, deCountPerDim = decpd, rc=status)
+
+   NX = decpd(1)
+   NY = decpd(2)
+   
+   allocate (ims(NX), jms(NY), stat=status)
+   VERIFY_(STATUS)
+   
+   call ESMF_GridGet(grid3D, & 
+                     horzRelLoc=ESMF_CELL_CENTER, vertRelLoc=ESMF_CELL_CELL, &
+                     globalCellCountPerDim=gccpd, &
+                     minGlobalCoordPerDim=min, &
+                     maxGlobalCoordPerDim=max, & 
+                     rc=status)
+   VERIFY_(status)
+   
+#if 0
+   ! kludge min,max DEGREE/RADIANS conversion
+   if (min(1) < 0.0) then
+      min(1) = min(1) * 180./MAPL_PI
+      min(2) = min(2) * 180./MAPL_PI
+      max(1) = max(1) * 180./MAPL_PI
+      max(2) = max(2) * 180./MAPL_PI
+   end if
+   ! overide min,max - just create a simple 2-D grid
+   min(1) = 0.0
+   min(2) = 0.0
+   max(1) = 360.0
+   max(2) = 180.0
+#endif
+
+   ! this is probably incorrect unless parent grid is XYuni
+   !SRCGrid2D = ESMF_GridCreateHorzXYUni( &
+   !                           counts=gccpd(1:2), &
+   !                           minGlobalCoordPerDim=min, &
+   !                           maxGlobalCoordPerDim=max, &
+   !                           horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+   !                           periodic=(/ESMF_TRUE, ESMF_FALSE/),     &
+   !                           name="SRC 2D grid", rc=status)
+   !VERIFY_(status)
+   ! instead use the following...
+   pi = 4.0 * atan(1.0)
+   deltaX = 2.0*pi/gccpd(1)
+   deltaY = pi/(gccpd(2)-1) 
+   SRCGrid2D = ESMF_GridCreateHorzLatLonUni(         &
+         counts = gccpd(1:2),        &
+         minGlobalCoordPerDim=min(1:2),     &
+         deltaPerDim=(/deltaX, deltaY /),        &
+         horzStagger=ESMF_Grid_Horz_Stagger_A,   &
+         periodic=(/ESMF_TRUE, ESMF_FALSE/),     &
+         name='SRC 2D grid', rc=status)
+   VERIFY_(STATUS)
+  
+   allocate (AI(nDEs,gridRank), stat=status)
+   VERIFY_(STATUS)
+   
+   if (gridRank == 3) then
+      call ESMF_GridGetAllAxisIndex(grid3d, &
+                                    horzRelLoc=ESMF_CELL_CENTER, &
+                                    vertRelLoc=ESMF_CELL_CELL, &
+                                    globalAI=AI, rc=status)
+   else
+      call ESMF_GridGetAllAxisIndex(grid3d, &
+                                    horzRelLoc=ESMF_CELL_CENTER, &
+                                    globalAI=AI, rc=status)
+   end if
+   VERIFY_(STATUS)
+
+   JY = 1
+   DO IX = 1, NX
+
+!ALT: this is a workaround to compute deId from Layout coords
+      de = (jy-1)*NX + ix
+
+      ims(IX) = AI(de,1)%max - AI(de,1)%min + 1
+   END DO
+
+   IX = 1
+   DO JY = 1, NY
+
+!ALT: same workaround as above
+      de = (jy-1)*NX + ix
+
+      jms(JY) = AI(de,2)%max - AI(de,2)%min + 1
+   END DO
+
+   deallocate(AI)
+
+   if (verbose .and. MAPL_AM_I_Root()) then
+      print *, 'ims=', ims
+      print *, 'jms=', jms
+   end if
+
+   call ESMF_GridDistribute(SRCGrid2D, delayout=layout, &
+                            countsPerDEDim1=ims,        &
+                            countsPerDEDim2=jms,        &
+                            rc=status)
+   VERIFY_(status)
+
+   deallocate(jms, ims)
+
+   call ESMF_GridGetDELocalInfo(SRCGrid2D, &
+         horzRelLoc=ESMF_CELL_CENTER, &
+!         vertRelLoc=ESMF_CELL_CELL, &
+         localCellCountPerDim=sCPD,RC=STATUS)
+   VERIFY_(STATUS)
+   allocate(Sptr2d(1:sCPD(1),1:sCPD(2)), STAT=STATUS)
+   srcArr = ESMF_ArrayCreate(Sptr2d, ESMF_DATA_REF, RC=STATUS)
+   VERIFY_(STATUS)
+   srcFLD2D = ESMF_FieldCreate(SRCGrid2D, srcARR,    &
+                 horzRelloc = ESMF_CELL_CENTER,         &
+                 datamap=dmap,                       &
+                 haloWidth=0, &
+                 name   = "PS", rc=status )  ! can be any name, all we want
+   VERIFY_(STATUS)                           ! is the route handle
+   
+   ! DESTINATION FIELD
+
+   call ESMF_FieldGet(dstFLD, grid=grid3D, rc=status)
+   VERIFY_(status)
+
+   call ESMF_GridGetDELayout(grid3D, layout, rc=status)
+   VERIFY_(STATUS)
+
+   call ESMF_DELayoutGet(layout, deCount=nDEs, deCountPerDim = decpd, rc=status)
+   
+   NX = decpd(1)
+   NY = decpd(2)
+
+   allocate (ims(NX), jms(NY), stat=status)
+   VERIFY_(STATUS)
+   
+   call ESMF_GridGet(grid3D, &
+                     horzRelLoc=ESMF_CELL_CENTER, vertRelLoc=ESMF_CELL_CELL, &
+                     globalCellCountPerDim=gccpd, &
+                     minGlobalCoordPerDim=min, &
+                     maxGlobalCoordPerDim=max, &
+                     rc=status)
+   VERIFY_(status)
+   
+   ! this is probably incorrect unless parent grid is XYuni
+   !DSTGrid2D = ESMF_GridCreateHorzXYUni( &
+   !                           counts=gccpd(1:2), &
+   !                           minGlobalCoordPerDim=min, &
+   !                           maxGlobalCoordPerDim=max, &
+   !                           horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+   !                           periodic=(/ESMF_TRUE, ESMF_FALSE/),     &
+   !                           name="DST 2D grid", rc=status)
+   !VERIFY_(status)
+   ! instead use the following ...
+   deltaX = 2.0*pi/gccpd(1)
+   deltaY = pi/(gccpd(2)-1)
+   DSTGrid2D = ESMF_GridCreateHorzLatLonUni(         &
+         counts = gccpd(1:2),        &
+         minGlobalCoordPerDim=min(1:2),     &
+         deltaPerDim=(/deltaX, deltaY /),        &
+         horzStagger=ESMF_Grid_Horz_Stagger_A,   &
+         periodic=(/ESMF_TRUE, ESMF_FALSE/),     &
+         name='DST 2D grid', rc=status)
+   VERIFY_(STATUS)
+
+   allocate (AI(nDEs,gridRank), stat=status)
+   VERIFY_(STATUS)
+
+   if (gridRank == 3) then
+      call ESMF_GridGetAllAxisIndex(grid3d, &
+                                    horzRelLoc=ESMF_CELL_CENTER, &
+                                    vertRelLoc=ESMF_CELL_CELL, &
+                                    globalAI=AI, rc=status)
+   else
+      call ESMF_GridGetAllAxisIndex(grid3d, &
+                                    horzRelLoc=ESMF_CELL_CENTER, &
+                                    globalAI=AI, rc=status)
+   end if
+   VERIFY_(STATUS)
+
+   JY = 1
+   DO IX = 1, NX
+
+!ALT: this is a workaround to compute deId from Layout coords
+      de = (jy-1)*NX + ix
+
+      ims(IX) = AI(de,1)%max - AI(de,1)%min + 1
+   END DO
+
+   IX = 1
+   DO JY = 1, NY
+
+!ALT: same workaround as above
+      de = (jy-1)*NX + ix
+
+      jms(JY) = AI(de,2)%max - AI(de,2)%min + 1
+   END DO
+
+   deallocate(AI)
+
+   if (verbose .and. MAPL_AM_I_Root()) then
+      print *, 'ims=', ims
+      print *, 'jms=', jms
+   end if
+
+   call ESMF_GridDistribute(DSTGrid2D, delayout=layout, &
+                            countsPerDEDim1=ims,        &
+                            countsPerDEDim2=jms,        &
+                            rc=status)
+   VERIFY_(status)
+
+   deallocate(jms, ims)
+
+   call ESMF_GridGetDELocalInfo(DSTGrid2D, &
+         horzRelLoc=ESMF_CELL_CENTER, &
+!         vertRelLoc=ESMF_CELL_CELL, &
+         localCellCountPerDim=dCPD,RC=STATUS)
+   VERIFY_(STATUS)
+   allocate(Dptr2d(1:dCPD(1),1:dCPD(2)), STAT=STATUS)
+   VERIFY_(STATUS)
+   dstArr = ESMF_ArrayCreate(Dptr2d, ESMF_DATA_REF, RC=STATUS)
+   VERIFY_(STATUS)
+   dstFLD2D = ESMF_FieldCreate(DSTGrid2D, dstARR,    &
+                 horzRelloc = ESMF_CELL_CENTER,         &
+                 datamap=dmap,                       &
+                 haloWidth=0, &
+                 name   = "PS", rc=status )  ! can be any name, all we want
+   VERIFY_(STATUS)                           ! is the correct route handle
+   
+   call ESMF_FIELDRegridStore(srcFLD2D, dstFLD2D, vm, rh,  &
+                             regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
+                             rc=status)
+   VERIFY_(status)
+
+   deallocate(Sptr2d, stat=status)
+   VERIFY_(STATUS)
+   deallocate(Dptr2d, stat=status)
+   VERIFY_(STATUS)
+#endif
+
+   if (present(rc)) then
+      rc = 0
+   end if
+
+   end subroutine ESMFL_RegridStore
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: FieldRegrid1
+
+! !INTERFACE:
+
+   subroutine FieldRegrid1 (srcFLD, Sgrid2D, dstFLD, Dgrid2D, &
+                                   vm, rh, fname, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_Field), intent(in)          :: srcFLD
+   type(ESMF_Field), intent(inout)       :: dstFLD
+   type(ESMF_Grid), intent(in)           :: Sgrid2D 
+   type(ESMF_Grid), intent(in)           :: Dgrid2D
+   type(ESMF_RouteHandle), intent(inout) :: rh
+   type(ESMF_VM), intent(inout)          :: vm
+   ! assumes name of src and dst are the same!!
+   character(len=*), intent(in)          :: fname
+   integer, optional, intent(out)        :: rc
+
+! !DESCRIPTION:
+!     Regrid 3D fields using ESMF\_FieldRegrid
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  17Oct2005  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! local vars
+#if 0
+   type(ESMF_Field)        :: dstFLD2D
+   type(ESMF_Field)        :: srcFLD2D
+   type(ESMF_Array)        :: srcARR
+   type(ESMF_Array)        :: dstARR
+   type(ESMF_Array)        :: newSrcARR
+   type(ESMF_Array)        :: newDstARR
+   type(ESMF_Grid)         :: grid3D
+   type(ESMF_FieldDataMap) :: dmap
+   real(4), dimension(:,:), pointer   :: sptr, dptr
+   real(4), dimension(:,:), pointer   :: sptr2d, dptr2d
+   real(4), dimension(:,:,:), pointer :: sptr3d, dptr3d
+   integer :: sCPD(3), dCPD(3) ! localCellCountPerDim
+   integer :: rank, k, deid, kmax, status
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'FieldRegrid1'
+
+! begin
+
+   call ESMF_VMGet(vm, localPet=deid, rc=status)
+   VERIFY_(status)
+
+   ! get rank (get from any FLD)
+   call ESMF_FieldGetArray(dstFLD, dstARR, rc=status)
+   VERIFY_(status)
+   call ESMF_ArrayGet(dstARR, RANK=rank, rc=status)
+   VERIFY_(status)
+
+   ! datamap - with rank=2!!!
+   call ESMF_FieldDataMapSetDefault(dmap, 2, rc=status)
+   VERIFY_(STATUS)
+
+   ! get sCPD from srcFLD, Sgrid2D does not have correct 3rd dim
+   call ESMF_FieldGet(srcFLD, grid=grid3D, rc=status)
+   VERIFY_(STATUS)
+   call ESMF_GridGetDELocalInfo(grid3D, &
+         horzRelLoc=ESMF_CELL_CENTER, &
+         vertRelLoc=ESMF_CELL_CELL, &
+         localCellCountPerDim=sCPD,RC=STATUS)
+   VERIFY_(STATUS)
+   ! get dCPD from Dgrid2D
+   call ESMF_FieldGet(dstFLD, grid=grid3D, rc=status)
+   VERIFY_(STATUS)  
+   call ESMF_GridGetDELocalInfo(grid3D, &
+         horzRelLoc=ESMF_CELL_CENTER, &
+         vertRelLoc=ESMF_CELL_CELL, &
+         localCellCountPerDim=dCPD,RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! for MAPL and GSI sCPD(3) = dCPD(3)
+   
+   ! assume 2D field
+   kmax=1
+   ! if rank is three then km = # levels in srcFLD
+   if (rank==3) kmax=sCPD(3)
+   
+   ! get array from srcFLD and dstFLD
+   call ESMF_FieldGetArray(srcFLD, srcARR, rc=status)
+   VERIFY_(status)
+   call ESMF_FieldGetArray(dstFLD, dstARR, rc=status)
+   VERIFY_(status)
+   
+   ! allocate f90 pointer to hold data
+   ! note halo width = 0
+   if(rank==3) then
+     call ESMF_ArrayGetData(srcARR, sptr3d, rc=status)
+     VERIFY_(status)
+     call ESMF_ArrayGetData(dstARR, dptr3d, rc=status)
+     VERIFY_(status)
+   else
+     call ESMF_ArrayGetData(srcARR, sptr2d, rc=status)
+     VERIFY_(status)
+     call ESMF_ArrayGetData(dstARR, dptr2d, rc=status)
+     VERIFY_(status)
+   end if
+
+   ! these are 2d pointers used to create 2d fields
+   allocate(sptr(1:sCPD(1),1:sCPD(2)), STAT=STATUS)
+   VERIFY_(status)
+   allocate(dptr(1:dCPD(1),1:dCPD(2)), STAT=STATUS)
+   VERIFY_(status)
+   ! 2d ESMF arrays associated with pointers sptr and dptr
+   newSrcARR = ESMF_ArrayCreate(sptr, ESMF_DATA_REF, RC=STATUS)
+   VERIFY_(STATUS)
+   newDstARR = ESMF_ArrayCreate(dptr, ESMF_DATA_REF, RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! local fields built with 2d sized arrays and 2D grids
+   srcFLD2D = ESMF_FieldCreate(Sgrid2D, newSrcARR,    &
+                 horzRelloc = ESMF_CELL_CENTER,         &
+!                 vertRelloc = ESMF_CELL_CELL,         &
+                 datamap=dmap,                       &
+                 haloWidth=0, &
+                 name   = fname, rc=status )
+   VERIFY_(STATUS)
+   dstFLD2D = ESMF_FieldCreate(Dgrid2D, newDstARR,    &
+                 horzRelloc = ESMF_CELL_CENTER,         &
+!                 vertRelloc = ESMF_CELL_CELL,         &
+                 datamap=dmap,                       &
+                 haloWidth=0, &
+                 name   = fname, rc=status )
+   VERIFY_(STATUS)
+
+   ! loop over field's vertical levels
+   do k=1, kmax
+
+     ! modify field's pointer by reference
+     if (rank==3) then
+       sptr(:,:) = sptr3d(:,:,k)
+     else
+       sptr(:,:) = sptr2d(:,:)
+     end if
+
+     call ESMF_FieldRegrid(srcFLD2D, dstFLD2D, rh, rc=status)
+     VERIFY_(STATUS)
+
+     !  Update contents (array pointer) of dstFLD
+     call ESMF_FieldGetArray(dstFLD2D, dstARR, rc=status)
+     VERIFY_(status)
+     call ESMF_ArrayGetData(dstARR, dptr, rc=status)
+     VERIFY_(status)
+
+     if (rank==3) then
+       dptr3d(:,:,k) = dptr(:,:)
+     else
+       dptr2d(:,:) = dptr(:,:)
+     end if
+
+   end do
+   
+   deallocate(sptr, dptr, stat=status)
+   VERIFY_(STATUS)
+#endif   
+
+   if (present(rc)) then
+      rc = 0
+   end if
+
+   end subroutine FieldRegrid1
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: BundleRegrid1
+
+! !INTERFACE:
+
+   subroutine BundleRegrid1 (srcBUN, Sgrid2D, dstBUN, Dgrid2D, &
+                             vm, rh, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inOUT)      :: srcBUN
+   type(ESMF_FieldBundle), intent(inout)      :: dstBUN
+   type(ESMF_Grid), intent(in)           :: Sgrid2D 
+   type(ESMF_Grid), intent(in)           :: Dgrid2D
+   type(ESMF_RouteHandle), intent(inout) :: rh
+   type(ESMF_VM), intent(inout)          :: vm
+   integer, optional, intent(out)        :: rc
+
+! !DESCRIPTION:
+!     ESMF\_Regrid a bundle
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  17Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! local vars
+   type(ESMF_Field)        :: dstFLD2D
+   type(ESMF_Field)        :: srcFLD2D
+   type(ESMF_Field)        :: dstFLD
+   type(ESMF_Field)        :: srcFLD
+   type(ESMF_Array)        :: srcARR
+   type(ESMF_Array)        :: dstARR
+   type(ESMF_Array)        :: newSrcARR
+   type(ESMF_Array)        :: newDstARR
+   type(ESMF_Grid)         :: grid3D
+   real(4), dimension(:,:), pointer   :: sptr, dptr
+   real(4), dimension(:,:), pointer   :: sptr2d, dptr2d
+   real(4), dimension(:,:,:), pointer :: sptr3d, dptr3d
+   integer :: sCPD(3), dCPD(3), gccpd(3)
+   integer :: rank, k, deid, kmax, status, L, numVars
+   character(len=ESMF_MAXSTR) :: srcName, dstName, fname
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'BundleRegrid'
+
+! begin
+
+   call ESMF_VMGet(vm, localPet=deid, rc=status)
+   VERIFY_(status)
+
+   ! get number of fields in bundle
+   ! number in srcBUN should be the same as in dstBUN (we can change later)
+   call ESMF_FieldBundleGet      (srcBUN, FieldCount=NumVars,  RC=STATUS)
+   VERIFY_(STATUS)
+
+   call ESMF_FieldBundleGet (srcBUN,  1, srcFLD,            RC=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_FieldBundleGet (dstBUN,  1, dstFLD,            RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! get rank from any field
+   call ESMF_FieldGet(dstFLD, array=dstARR, rc=status)
+   VERIFY_(status)
+   call ESMF_ArrayGet(dstARR, RANK=rank, rc=status)
+   VERIFY_(status)
+
+   ! get sCPD from srcFLD, Sgrid2D does not have correct 3rd dim
+   call ESMF_FieldGet(srcFLD, grid=grid3D, rc=status)
+   VERIFY_(STATUS)
+
+   call MAPL_GridGet(grid3D, &
+         localCellCountPerDim=sCPD, &
+         RC=STATUS)
+   VERIFY_(STATUS)
+   ! get dCPD from Dgrid2D
+   call ESMF_FieldGet(dstFLD, grid=grid3D, rc=status)
+   VERIFY_(STATUS)  
+   call MAPL_GridGet(grid3D, &
+         localCellCountPerDim=dCPD,RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! for MAPL and GSI sCPD(3) = dCPD(3)
+   
+   ! assume 2D field
+   kmax=1
+   ! if rank is three then km = # levels in srcFLD
+   if (rank==3) kmax=sCPD(3)
+  
+
+#if 0
+   ! loop over fields in bundle
+ 
+   do L=1,NumVars   
+
+     call ESMF_FieldBundleGet     (srcBUN, L, srcFLD,           RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldGet           (srcFLD, NAME=srcName,         RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldBundleGet     (dstBUN, L, dstFLD,           RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_FieldGet           (dstFLD, NAME=dstName,         RC=STATUS)
+     VERIFY_(STATUS)
+
+     ! allocate f90 pointer to hold data
+     ! note halo width = 0
+     if(rank==3) then
+       call ESMF_FieldGet (srcFLD, 0, sptr3d, rc = status)
+       VERIFY_(status)
+       call ESMF_FieldGet(dstFLD, dptr3d, rc = status)
+       VERIFY_(status)
+     else
+       call ESMF_FieldGetDataPointer (srcFLD, sptr2d, rc = status)
+       VERIFY_(status)
+       call ESMF_FieldGetDataPointer (dstFLD, dptr2d, rc = status)
+       VERIFY_(status)
+     end if
+
+     ! these are 2d pointers used to create 2d fields
+     allocate(sptr(1:sCPD(1),1:sCPD(2)), STAT=STATUS)
+     VERIFY_(status)
+     allocate(dptr(1:dCPD(1),1:dCPD(2)), STAT=STATUS)
+     VERIFY_(status)
+     ! 2d ESMF arrays associated with pointers sptr and dptr
+     newSrcARR = ESMF_ArrayCreate(sptr, ESMF_DATA_REF, RC=STATUS)
+     VERIFY_(STATUS)
+     newDstARR = ESMF_ArrayCreate(dptr, ESMF_DATA_REF, RC=STATUS)
+     VERIFY_(STATUS)
+
+     ! local fields built with 2d sized arrays and 2D grids
+     srcFLD2D = ESMF_FieldCreate(Sgrid2D, newSrcARR,    &
+                   horzRelloc = ESMF_CELL_CENTER,         &
+                   datamap=dmap,                       &
+                   haloWidth=0, & 
+                   name   = fname, rc=status )
+     VERIFY_(STATUS)
+     dstFLD2D = ESMF_FieldCreate(Dgrid2D, newDstARR,    &
+                   horzRelloc = ESMF_CELL_CENTER,         &
+                   datamap=dmap,                       &
+                   haloWidth=0, &
+                   name   = fname, rc=status )
+     VERIFY_(STATUS)
+
+     ! loop over field's vertical levels
+
+     do k=1, kmax
+
+     ! modify field's pointer by reference
+     if (rank==3) then
+       sptr(:,:) = sptr3d(:,:,k)
+     else
+       sptr(:,:) = sptr2d(:,:)
+     end if
+
+     call ESMF_FieldRegrid(srcFLD2D, dstFLD2D, rh, rc=status)
+     VERIFY_(STATUS)
+
+     !  Update contents (array pointer) of dstFLD
+     call ESMF_FieldGetDataPointer (dstFLD2D, dptr, rc = status)
+     VERIFY_(status)
+
+     if (rank==3) then
+       dptr3d(:,:,k) = dptr(:,:)
+     else
+       dptr2d(:,:) = dptr(:,:)
+     end if
+
+     end do ! k
+   
+     deallocate(sptr, dptr, stat=status)
+     VERIFY_(STATUS)
+   
+   end do ! L
+
+#else
+   RETURN_(-1)
+#endif
+   end subroutine BundleRegrid1
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: BundleRegrid
+
+! !INTERFACE:
+
+   subroutine BundleRegrid (srcBUN, dstBUN, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inout)      :: srcBUN ! source bundle
+   type(ESMF_FieldBundle), intent(inout)      :: dstBUN ! destination bundle
+   integer, optional, intent(out)        :: rc     ! return code
+
+! !DESCRIPTION:
+!     Regrid a source bundle (srcBUN) into a destination bundle (dstBUN)
+!     using hinterp. A bundle is thought of as being comprised of n 2D
+!     slices (nslices) distributed among the n PEs (ns\_per\_pe). The 
+!     limits among each ns\_per\_pe region are given by n1 and n2 which
+!     are functions of mype (the local PE):
+!     \begin{verbatim}
+!                                                     slice_pe
+!           1 --- n1(pe=0)  -                     -->    0
+!           2 ---            |                    -->    0
+!              .             |_  ns_per_pe(pe=0)         .
+!              .             |                           0
+!              .             |                           0
+!             --- n2(pe=0)  -                            0
+!             --- n1(pe=1)                               1
+!              .                                         .
+!              .                                         .
+!              .                                         .
+!             --- n2(pe=1)                               1
+!             --- n1(pe=2)                               2
+!              .                                         .
+!              .                                         .
+!              .                                         .
+!          ns ---                                  slice_pe(ns)    
+!              .                                         .
+!              .                                         .
+!              .                                         .
+!     nslices --- n2(pe=n)                        -->   npe    
+!
+!     \end{verbatim}
+!     Each slice is gathered, regridded (hinterp), and scattered on
+!     a PE determined by a slice-to-PE map (slice\_pe) to "load balance"
+!     the work of the serial hinterp function.
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  24Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! local vars
+
+   type(ESMF_VM)    :: vm
+   type(ESMF_Grid)  :: srcGrid   ! grid associated with source bundle
+   type(ESMF_Grid)  :: dstGrid   ! grid associated with destination bundle
+   type(ESMF_DElayout)           :: layout
+   Logical          :: flip_poles
+   Logical          :: flip_lons
+   integer          :: numVars   ! number of fields in bundles
+   integer          :: nslices   ! number of 2D slices in bundles
+   integer          :: ns        ! counter for slices
+   integer          :: mype      ! local PE
+   integer          :: npe       ! number of PEs
+   integer          :: nfirst    ! integer value of n1(mype)
+   integer          :: nlast     ! integer value of n2(mype)
+   integer          :: bufindex  ! local index of global buffer
+   integer          :: ims_world ! x- global dimensions of src fields
+   integer          :: jms_world ! y- global dimensions of src fields
+   integer          :: imd_world ! x- global dimensions of dst fields
+   integer          :: jmd_world ! y- global dimensions of dst fields
+   integer          :: km_world  ! z- vertical dimension
+   integer          :: ims       ! x- local dimensions of src fields
+   integer          :: jms       ! y- local dimensions of src fields
+   integer          :: imd       ! x- local dimensions of dst fields
+   integer          :: jmd       ! y- local dimensions of dst fields
+   integer          :: kfirst    ! lower bound of buffer's 3rd dim
+   integer          :: status    ! return code status
+   integer, allocatable, dimension(:    ) :: slice_pe
+   integer, allocatable, dimension(:    ) :: ns_per_pe
+   integer, allocatable, dimension(:    ) :: n1, n2
+   real(4), allocatable, dimension(:,:,:) :: srcBUF  ! src buffer
+   real(4), allocatable, dimension(:,:,:) :: dstBUF  ! dst buffer
+   real(4),     pointer, dimension(:,:  ) :: llons, llats 
+   real(4), allocatable, dimension(:,:  ) :: glons, glats 
+   real(4), allocatable, dimension(:    ) :: srcLons, srcLats 
+   real(4), allocatable, dimension(:,:  ) :: srcWork 
+   real(4), allocatable, dimension(:,:  ) :: dstWork
+   character(len=ESMF_MAXSTR), parameter  :: IAm = 'BundleRegrid'
+
+! begin
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, petCount=npe, localPet=mype, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! get bundle grid information:
+! global and local counts perdimension, km_world, nslices, numVars
+
+   call Bundle_Prep_ (srcBUN, dstBUN)
+  
+! assign slices to PEs - create slice_pe array
+
+   allocate(slice_pe(nslices), stat = status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(ns_per_pe(npe), stat = status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(n1(npe), n2(npe), stat = status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call assign_slices_ (nslices, mype, npe, slice_pe, nfirst, nlast)
+
+! allocate buffers srcBUF, dstBUF
+
+   call alloc_ (ims_world, jms_world, &
+                imd_world, jmd_world, &
+                nfirst, nlast)
+
+! gather srcFLDs on all PEs into a srcBUF
+
+   if(verbose .and. mype==MAPL_Root) print *,' - Gather...'
+   call Do_Gathers_ (srcBUN, srcBUF)
+  
+! loop through slices and interpolate, use local addressing
+
+   if(verbose .and. mype==MAPL_Root) then 
+      print *,' - Regrid ',nslices,' slices '
+      print *,' SRC res ',ims_world,' x ', jms_world,&
+           ' DST res ',imd_world,' x ', jmd_world
+   end if
+
+   bufindex = 0
+   kfirst = lbound(srcBUF,3)
+   do ns = 1, nslices
+     bufindex = ns - n1(mype+1)
+     bufindex = kfirst + bufindex
+     if ( mype == slice_pe(ns) ) &
+     call Do_Regrid_ (ns, srcBuf(:,:,bufindex), dstBuf(:,:,bufindex))
+   end do
+
+! scatter dstBUF to dstFLDs on all PEs
+
+   if(verbose .and. mype==MAPL_Root) print *,' - Scatter...'
+   call Do_Scatters_ (dstBUN, dstBUF)
+
+   deallocate(slice_pe, ns_per_pe, n1, n2, stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call dealloc_
+   
+   RETURN_(ESMF_SUCCESS)
+
+   contains
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE:  Bundle_Prep_
+
+! !INTERFACE:
+
+   subroutine Bundle_Prep_ (srcBUN, dstBUN, only_vars)
+                      
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inout)      :: srcBUN !ALT: intent(in)
+   type(ESMF_FieldBundle), intent(inout)      :: dstBUN
+   character(len=*), optional, intent(in):: only_vars ! comma separated,
+                                                      ! no spaces  
+! !DESCRIPTION:
+!     Prepare for regridding
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  24Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_Array) :: srcArr, dstArr
+   type(ESMF_Field) :: srcFld, dstFld
+   integer :: rank
+   integer :: sCPD(3), dCPD(3)   ! src and dst counts per dimension (local)
+   integer :: gsCPD(3), gdCPD(3) ! src and dst counts per dimension (global)
+   integer :: srcLM              ! src vertical levels 
+   integer :: dstLM              ! dst                
+   integer :: dstNvars           ! numVars can be redefined if only_vars
+                                 ! is specified
+   integer :: L
+   character(len=ESMF_MAXSTR)            :: name
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Bundle_Prep_'
+
+
+! get number of fields in bundles
+
+   call ESMF_FieldBundleGet (srcBUN, FieldCount=NumVars, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   
+   nslices = 0
+   dstNvars = 0
+   do L = 1, NumVars
+
+     call ESMF_FieldBundleGet(srcBUN, L, srcFLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMF_FieldBundleGet(dstBUN, L, dstFLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+     if ( present(ONLY_VARS) ) then
+       if ( index(','//trim(ONLY_VARS)  //',', &
+       ','//trim(name)//',') < 1 ) cycle 
+     endif
+     dstNvars = dstNvars + 1
+
+     call ESMFL_FieldGetDims(srcFLD, lm=srcLM)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMFL_FieldGetDims(dstFLD, lm=dstLM)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! we can only do horizontal interpolation
+
+     if(srcLM /= dstLM) then
+       if(verbose .and. mype==MAPL_Root) then
+         print *, 'Vertical interpolation is not implemented'
+       end if
+       RETURN_(ESMF_FAILURE)
+     end if
+     km_world = srcLM
+     
+     call ESMF_FieldGet(srcFLD, Array=srcARR, rc=status)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMF_ArrayGet(srcARR, RANK=rank, rc=status)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+     if ( rank == 3 ) then
+       nslices = nslices + km_world
+     else
+       nslices = nslices + 1
+     end if
+
+   end do
+   if ( present(ONLY_VARS) ) NumVars = dstNvars
+
+! prepare buffers
+
+   call ESMF_FieldBundleGet(srcBUN, 1, srcFLD, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMFL_FieldGetDims(srcFLD, gCPD=gsCPD)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   ims_world = gsCPD(1); jms_world = gsCPD(2)
+   call ESMF_FieldBundleGet(dstBUN, 1, dstFLD, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMFL_FieldGetDims(dstFLD, gCPD=gdCPD)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   imd_world = gdCPD(1); jmd_world = gdCPD(2)
+
+! Get local dimensions
+
+   call ESMFL_FieldGetDims(srcFLD, lCPD=sCPD)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   ims = sCPD(1); jms = sCPD(2)
+   call ESMFL_FieldGetDims(dstFLD, lCPD=dCPD)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   imd = dCPD(1); jmd = dCPD(2)
+
+! get bundle grids
+
+   call ESMF_FieldBundleGet (srcBUN, 1, srcFLD, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMF_FieldGet(srcFLD, grid=srcGRID, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMF_FieldBundleGet (dstBUN, 1, dstFLD, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMF_FieldGet(dstFLD, grid=dstGRID, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! get lons,lats used by hhinterp
+   call ESMFL_GridCoordGet(   srcGrid, llats                     , &
+                              Name     = "Latitude"              , &
+                              Location = ESMF_STAGGERLOC_CENTER  , &
+                              Units    = ESMFL_UnitsRadians      , &
+                              RC       = STATUS                    )
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(gLats(ims_world,jms_world), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ArrayGather(llats, gLats, srcGrid,  RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(srcLats(jms_world), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   if(mype==MAPL_Root) then
+      srcLats = gLats(1,:)
+   end if
+   call ESMF_VMBroadcast(vm, srcLats, jms_world, MAPL_Root, rc=status)
+
+   call ESMFL_GridCoordGet(   srcGrid, llons                     , &
+                              Name     = "Longitude"             , &
+                              Location = ESMF_STAGGERLOC_CENTER  , &
+                              Units    = ESMFL_UnitsRadians      , &
+                              RC       = STATUS                    )
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(gLons(ims_world,jms_world), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ArrayGather(llons, gLons, srcGrid,  RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(srcLons(ims_world), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   if(mype==MAPL_Root) then
+      srcLons = gLons(:,1)
+   end if
+   call ESMF_VMBroadcast(vm, srcLons, ims_world, MAPL_Root, rc=status)
+
+   call ESMF_AttributeGet(dstGrid, 'VERBOSE', verbose, rc=status)
+   if (status /= ESMF_SUCCESS) verbose =.FALSE.
+
+   call ESMF_AttributeGet(dstGrid, 'FLIP_LONS', flip_lons, rc=status)
+   if (status /= ESMF_SUCCESS) flip_lons = .FALSE.
+   call ESMF_AttributeGet(dstGrid, 'FLIP_POLES', flip_poles, rc=status)
+   if (status /= ESMF_SUCCESS) flip_poles = .FALSE.
+   if(mype==MAPL_Root.and.verbose) then
+      if(flip_lons) print *, trim(Iam)//': We will flip lons'
+      if(flip_poles) print *, trim(Iam)//': We will flip poles'
+   end if
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine Bundle_Prep_
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: assign_slices_
+
+! !INTERFACE:
+
+   subroutine assign_slices_ (nslices, mype, npe, slice_pe, nfirst, nlast)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   integer, intent(in)    :: nslices       ! number of slices
+   integer, intent(in)    :: mype          ! local PE
+   integer, intent(in)    :: npe           ! number of PEs
+   integer, intent(inout) :: slice_pe(:)   ! slice-to-pe map
+   integer, intent(out)   :: nfirst     
+   integer, intent(out)   :: nlast   
+
+! !DESCRIPTION:
+!     Determine number of bundle slices per PE and "load balanced"
+!     map of slices-to-pes (slice\_pe)
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  24Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   integer                            :: ns_rem, i, ipe, peidx
+   integer, allocatable, dimension(:) :: displ
+
+! start
+
+   peidx = mype + 1
+
+! calculate number of slices per PE
+
+   ns_per_pe = nslices/npe
+   ns_rem  = mod(nslices,npe)
+  
+! redistribute remaining slices
+
+   allocate(displ(npe), stat = status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   do ipe = 1, npe
+     if(ipe-1 < ns_rem) ns_per_pe(ipe) = ns_per_pe(ipe) + 1
+     displ(ipe) = ns_per_pe(ipe) * ipe
+     if(ipe-1 >= ns_rem) displ(ipe) = displ(ipe) + ns_rem
+!?     call ESMF_VMBroadcast(vm, ns_per_pe, npe, ipe-1, rc=status)
+!?     call ESMF_VMBroadcast(vm, displ, npe, ipe-1, rc=status)
+   end do
+
+! limits for slice_pe map
+
+   n2 = displ
+   n1 = n2 - ns_per_pe + 1
+   nfirst = n1(peidx)
+   nlast  = n2(peidx)
+
+! determine slice_pe - this determines which PEs do the hinterp
+
+   slice_pe = -999
+   do ipe = 1, npe
+     slice_pe (n1(ipe):n2(ipe)) = ipe-1
+!?     call ESMF_VMBroadcast(vm, slice_pe, nslices, ipe-1, rc=status)
+   end do
+
+   deallocate(displ, stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   end subroutine assign_slices_
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: Do_Gathers_
+
+! !INTERFACE:
+
+   subroutine Do_Gathers_ (BUN, BUF)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inout)         :: BUN
+   real(4), intent(inout), dimension(:,:,:) :: BUF
+
+! !DESCRIPTION:
+!    gather FLDs in a BUNdle on all PEs into a BUFfer
+!    Note: local adressing is used
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  28Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_Field) :: FLD   ! ESMF field
+   integer          :: n     ! number of vars in a bundle counter
+   integer          :: L     ! vertical dim counter
+   integer          :: rank  ! field rank
+   integer          :: lmFLD ! field vertical dimension (1 or km_world)
+   integer          :: bufi, kf
+   integer          :: halowidth, hw
+   real(4), dimension(:,:  ), pointer    :: ptr2d
+   real(4), dimension(:,:,:), pointer    :: ptr3d
+   character(len=ESMF_MAXSTR)            :: name
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Do_Gathers_'
+
+! start
+
+   ns = 0
+   bufi = 0
+   kf = lbound(BUF,3)
+   do n = 1, NumVars
+
+     call ESMF_FieldBundleGet (BUN, n, FLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     ! get field name
+     call ESMF_FieldGet(FLD, name=name, rc=status)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMFL_FieldGetDims (FLD, lm=lmFLD, ar=rank)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     ! check if field has halo, initialize to no halo
+     hw = 0
+     call ESMF_AttributeGet(FLD, "HALOWIDTH", halowidth, &
+                            rc=status)
+     if (status == ESMF_SUCCESS) hw = halowidth
+     if (verbose .and. mype==MAPL_Root .and. n==1) print *, ' halowidth = ',hw
+
+     if (rank==2) then
+       call ESMF_FieldGet (FLD, localDE=0, farrayPtr=ptr2d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     else
+       call ESMF_FieldGet (FLD, localDE=0, farrayPtr=ptr3d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     end if    
+
+     do L = 1, lmFLD
+ 
+       ns = ns + 1
+
+       ! gather from distributed pointer to global buffer BUF
+       if (rank==2) then
+          if(hw>0) then
+             call ArrayGather(ptr2d       , srcWork, srcGRID, &
+                  depe = slice_pe(ns), hw=hw, RC=STATUS)
+          else
+             call ArrayGather(ptr2d       , srcWork, srcGRID, &
+                  depe = slice_pe(ns), RC=STATUS)
+          end if
+       else
+          if(hw>0) then
+             call ArrayGather(ptr3d(:,:,L), srcWork, srcGRID, &
+                  depe = slice_pe(ns), hw=hw, RC=STATUS)
+          else
+             call ArrayGather(ptr3d(:,:,L), srcWork, srcGRID, &
+                  depe = slice_pe(ns), RC=STATUS)
+          end if
+       end if
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+       call ESMF_VMBarrier(vm, rc=status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+       bufi = ns - n1(mype+1)
+       bufi = kf + bufi
+
+       if(mype==slice_pe(ns)) then
+         BUF(:,:,bufi) = srcWork
+       else                   
+         srcWork = 0.0
+       end if
+
+       if (L==1) then
+       if(verbose .and. mype==slice_pe(ns)) &
+         write(*,'(1x,2(a,i4),2(a,f12.4))') &
+         ' *** gathered buf index ',bufi,' on PE ',slice_pe(ns), &
+         ' SRC min = ',minval(BUF(:,:,bufi)), &
+             ' max = ',maxval(BUF(:,:,bufi))
+       end if
+     end do
+
+   end do
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine Do_Gathers_
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: Do_Regrid_
+
+! !INTERFACE:
+
+   subroutine Do_Regrid_ (n, inBuf, outBuf)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+
+   integer, intent(in)                    :: n      ! slice index
+   real(4), intent(inout), dimension(:,:) :: inBuf  ! source buffer
+   real(4), intent(inout), dimension(:,:) :: outBuf ! destination buffer
+
+! !DESCRIPTION:
+!     Call hinterp on local PE
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  28Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Do_Regrid_'
+
+ ! start
+
+   call hhinterp ( inBuf , ims_world, jms_world   , &
+                   outBuf, imd_world, jmd_world, 1, &
+                   MAPL_Undef, srcLons, srcLats)
+
+   if (flip_lons ) call FlipLons_ (outBuf)
+   if (flip_poles) call FlipPoles_(outBuf)
+
+   end subroutine Do_Regrid_
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: Do_Scatters_
+
+! !INTERFACE:
+
+   subroutine Do_Scatters_ (BUN, BUF)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inout)         :: BUN
+   real(4), intent(inout), dimension(:,:,:) :: BUF
+
+! !DESCRIPTION:
+!    scatter from BUffer onto FLDs in a BUNdle
+!    Note: local adressing is used
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  28Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_Field) :: FLD
+   integer          :: n     ! number of vars in a bundle counter
+   integer          :: L     ! vertical dim counter
+   integer          :: rank  ! field rank
+   integer          :: lmFLD ! field vertical dimension (1 or km_world)
+   integer          :: bufi, kf
+   integer          :: halowidth, hw
+   real(4), dimension(:,:  ), pointer    :: ptr2d
+   real(4), dimension(:,:,:), pointer    :: ptr3d
+   character(len=ESMF_MAXSTR)            :: name
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Do_Scatters_'
+
+! start
+
+   ns = 0
+   bufi = 0
+   kf = lbound(BUF,3)
+   do n = 1, NumVars
+
+     call ESMF_FieldBundleGet (BUN, n, FLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMF_FieldGet(FLD, name=name, rc=status)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMFL_FieldGetDims (FLD, lm=lmFLD, ar=rank)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     ! check if field has halo, initialize to no halo
+     hw = 0
+     call ESMF_AttributeGet(FLD, "HALOWIDTH", halowidth, &
+                                 rc=status)
+     if (status == ESMF_SUCCESS) hw = halowidth
+     if (verbose .and. mype==MAPL_Root .and. n==1) print *, ' halowidth = ',hw
+
+     if (rank==2) then
+       call ESMF_FieldGet (FLD, localDE=0, farrayPtr=ptr2d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     else
+       call ESMF_FieldGet (FLD, localDE=0, farrayPtr=ptr3d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     end if    
+
+     do L = 1, lmFLD
+
+       ns = ns + 1
+
+       bufi = ns - n1(mype+1)
+       bufi = kf + bufi
+
+       if (L==1) then
+       if(verbose .and. mype==slice_pe(ns)) &
+         write(*,'(1x,2(a,i4),2(a,f12.4))') &
+         ' *** scatter buf index ',bufi,' from PE ',mype, &
+         ' DST min = ',minval(BUF(:,:,bufi)), &
+             ' max = ',maxval(BUF(:,:,bufi))
+       end if
+
+       if(mype==slice_pe(ns)) then
+         dstWork = BUF(:,:,bufi)
+       else                   
+         dstWork = 0.0
+       end if
+
+       ! scatter from buffer BUF to distributed pointer
+       if (rank==2) then
+          if(hw>0) then
+             call ArrayScatter(ptr2d       , dstWork, dstGRID, &
+                  depe=slice_pe(ns), hw=hw, RC=STATUS)
+          else
+             call ArrayScatter(ptr2d       , dstWork, dstGRID, &
+                  depe=slice_pe(ns), RC=STATUS)
+          endif
+       else
+          if(hw>0) then
+             call ArrayScatter(ptr3d(:,:,L), dstWork, dstGRID, &
+                  depe=slice_pe(ns), hw=hw, RC=STATUS)
+          else
+             call ArrayScatter(ptr3d(:,:,L), dstWork, dstGRID, &
+                  depe=slice_pe(ns), RC=STATUS)
+          endif
+       end if
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+       ! CC: This barrier does not seem to be necessary
+       !call ESMF_VMBarrier(vm, rc=status)
+       !if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+     end do
+
+   end do
+
+   end subroutine  Do_Scatters_
+
+!-------------------------------------------------------------------------
+   subroutine alloc_ (ims,jms,imd,jmd,nfirst,nlast)
+!-------------------------------------------------------------------------
+
+   integer, intent(in) :: ims,jms,imd,jmd,nfirst,nlast
+!
+   integer :: status
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'alloc_'
+! 
+   allocate(srcBUF(1:ims,1:jms,nfirst:nlast), STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   srcBUF = 0.0
+   allocate(dstBUF(1:imd,1:jmd,nfirst:nlast), STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   dstBUF = 0.0
+   allocate(srcWork(1:ims,1:jms), STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(dstWork(1:imd,1:jmd), STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   end subroutine alloc_ 
+
+!-------------------------------------------------------------------------
+   subroutine dealloc_ 
+!-------------------------------------------------------------------------
+
+   integer :: status
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'dealloc_'
+!
+   deallocate(srcBUF, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   deallocate(dstBUF, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   deallocate(srcWork, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   deallocate(dstWork, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   ! these are allocated in Bundle_Prep_
+   deallocate(srcLons, srcLats, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   deallocate(gLons, gLats, STAT=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   end subroutine dealloc_ 
+
+!-------------------------------------------------------------------------
+   subroutine FlipLons_(q)
+!-------------------------------------------------------------------------
+     implicit none
+     real,dimension(:,:),intent(inout) :: q
+     integer :: j
+     do j=1,size(q,2)
+        call FlipLonsi_(q(:,j))
+     end do
+   end subroutine FlipLons_
+
+!-------------------------------------------------------------------------
+   subroutine FlipLonsi_(q)
+!-------------------------------------------------------------------------
+     implicit none
+     real,dimension(:),intent(inout) :: q
+     integer :: im
+     real,dimension(size(q,1)/2) :: d
+     im=size(q,1)
+     d(     1:im/2) = q(     1:im/2)
+     q(     1:im/2) = q(im/2+1:im  )
+     q(im/2+1:im  ) = d(     1:im/2)
+   end subroutine FlipLonsi_
+
+!-------------------------------------------------------------------------
+   subroutine FlipPoles_(rbufr)
+!-------------------------------------------------------------------------
+     implicit none
+     real(4),dimension(:,:),intent(inout) :: rbufr
+     real(4),allocatable, dimension(:,:) :: sfcin
+     integer :: im,jm
+     
+     im=size(rbufr,1)
+     jm=size(rbufr,2)
+     allocate(sfcin(im,jm))
+     sfcin = rbufr
+     rbufr(:,1:jm) = sfcin(:,jm:1:-1)
+     deallocate(sfcin)
+   end subroutine FlipPoles_
+
+   end subroutine BundleRegrid
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: StateRegrid
+
+! !INTERFACE:
+
+   subroutine StateRegrid (srcSTA, dstSTA, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_State), intent(inout)  :: srcSTA
+   type(ESMF_State), intent(inout)  :: dstSTA
+   integer, optional, intent(out)   :: rc     ! return code
+
+! !DESCRIPTION:
+!     Regrid a state
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  19Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_VM)              :: vm
+   type(ESMF_Field)           :: FLD
+   type(ESMF_Grid)            :: GRID
+   type(ESMF_FieldBundle)          :: srcBUN
+   type(ESMF_FieldBundle)          :: dstBUN
+   integer :: status, mype, npe, i, k, itemcount
+   character (len=ESMF_MAXSTR), pointer  :: itemnamelist(:)
+   type(ESMF_StateItem_Flag)  , pointer  :: itemtypelist(:)
+   character(len=ESMF_MAXSTR)            :: name 
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'StateRegrid'
+
+! start
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, petCount=npe, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! Get information from src state
+!-------------------------------
+! query the states for item number and types. If item type is other 
+! than a field then return(1)
+
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMF_StateGet(srcSTA, itemcount=itemcount, rc=status)
+
+   if(itemcount==0) then
+      call ESMFL_FailedRC(mype,Iam//': ESMF_state is empty')
+   end if
+
+   allocate(itemnamelist(itemcount), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(itemtypelist(itemcount), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   call ESMF_StateGet(srcSTA, itemnamelist=itemnamelist, &
+                      itemtypelist=itemtypelist, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   do i=1,itemcount
+      if(itemtypelist(i)/=ESMF_STATEITEM_FIELD) then
+        call ESMFL_FailedRC(mype,Iam//': State item is not a field.')
+      end if
+   end do
+
+! get grid from first field in state, and create bundle
+
+   if(verbose .and. mype==MAPL_Root) print *, ' Get grid from ',trim(itemnamelist(1))
+   call ESMF_StateGet(srcSTA, trim(itemnamelist(1)), FLD, &
+                      rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_StateGetField failed')
+   call ESMF_StateGet(srcSTA, name=name, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_StateGet failed')
+   name = name//'to bundle' 
+   call ESMF_FieldGet (FLD, grid=GRID, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_FieldGet failed')
+   ! create bundle with input grid
+   srcBUN = ESMF_FieldBundleCreate ( name=name, rc=status )
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' src ESMF_FieldBundleCreate failed' )
+   call ESMF_FieldBundleSet(srcBUN, grid, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' src ESMF_FieldBundleSet failed' )
+
+! populate source bundle   
+
+   call ESMFL_StateGetField(srcSTA, itemnamelist , srcBUN, RC=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' SRC ESMFL_StateGetField failed')
+
+! Get information from dst state
+!-------------------------------
+
+   call ESMF_StateGet(dstSTA, itemnamelist=itemnamelist, &
+                      itemtypelist=itemtypelist, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   do i=1,itemcount
+      if(itemtypelist(i)/=ESMF_STATEITEM_FIELD) then
+        call ESMFL_FailedRC(mype,Iam//': State item is not a field.')
+      end if
+   end do
+
+! get grid from first field in state, and create bundle
+
+   if(verbose .and. mype==MAPL_Root) print *, ' Get grid from ',trim(itemnamelist(1))
+   call ESMF_StateGet(dstSTA, trim(itemnamelist(1)), FLD, &
+                      rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_StateGetField failed')
+   call ESMF_StateGet(dstSTA, name=name, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_StateGet failed')
+   name = name//'to bundle'
+   call ESMF_FieldGet (FLD, grid=GRID, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_FieldGet failed')
+   ! create bundle with input grid
+   dstBUN = ESMF_FieldBundleCreate ( name=name, rc=status )
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' ESMF_FieldBundleCreate failed' )    
+   call ESMF_FieldBundleSet(dstBUN, grid, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' src ESMF_FieldBundleSet failed' )
+
+! populate destination bundle   
+
+   call ESMFL_StateGetField(dstSTA, itemnamelist, dstBUN, RC=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam//' DST ESMFL_StateGetField failed')
+
+! now call BundleRegrid
+
+   call BundleRegrid (srcBUN, dstBUN, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! clean up
+
+   deallocate(itemnamelist, stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   deallocate(itemtypelist, stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine StateRegrid
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: ESMFL_FieldGetDims
+
+! !INTERFACE:
+
+   subroutine ESMFL_FieldGetDims(FLD, gCPD, lCPD, lm, ar)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_Field), intent(inout)         :: FLD !ALT: intent(in)
+   integer, optional, intent(out)       :: gCPD(3)
+   integer, optional, intent(out)       :: lCPD(3)
+   integer, optional, intent(out)       :: lm
+   integer, optional, intent(out)       :: ar
+   
+! !DESCRIPTION:
+!     Return some grid information associated from an ESMF field
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  24Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_VM)    :: vm
+   type(ESMF_Grid)  :: GRID
+   type(ESMF_Array) :: ARR
+   integer          :: globalCPD(3)
+   integer          :: localCPD(3)
+   integer          :: status, thisrank, mype
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'ESMFL_FieldGetDims'
+
+! start
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   call ESMF_FieldGet(FLD, grid=GRID, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call MAPL_GridGet(GRID, &
+        globalCellCountPerDim=globalCPD, &
+        localCellCountPerDim=localCPD, &
+	rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   if (present(gCPD)) gCPD = globalCPD
+   if (present(lCPD)) lCPD = localCPD
+
+   call ESMF_FieldGet(FLD, Array=ARR, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   call ESMF_ArrayGet(ARR, RANK=thisrank, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   if (present(lm)) then
+     if ( thisrank == 3 ) then
+       lm = globalCPD(3)
+     else
+       lm = 1
+     end if
+   end if
+
+   if (present(ar)) ar = thisrank
+
+   end subroutine ESMFL_FieldGetDims
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: BundleDiff
+
+! !INTERFACE:
+
+   subroutine BundleDiff (srcBUN, dstBUN, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_FieldBundle), intent(inout) :: srcBUN
+   type(ESMF_FieldBundle), intent(inout) :: dstBUN
+   integer, optional, intent(out)   :: rc     ! return code
+
+! !DESCRIPTION:
+!     diff two bundles
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  24Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! local vars
+
+   type(ESMF_VM)           :: vm
+   type(ESMF_Field)        :: dstFLD
+   type(ESMF_Field)        :: srcFLD
+   type(ESMF_Array)        :: srcARR
+   type(ESMF_Array)        :: dstARR
+   type(ESMF_Grid)         :: grid3D
+   real(4), dimension(:,:  ), pointer   :: sptr2d, dptr2d
+   real(4), dimension(:,:,:), pointer   :: sptr3d, dptr3d
+   real(4), allocatable, dimension(:,:) :: srcBuf, dstBuf, diff
+   integer :: rank, i, j, k, mype, kmax, status, L, numVars
+   integer :: globalCPD(3)
+   character(len=ESMF_MAXSTR)            :: srcName
+   character(len=ESMF_MAXSTR)            :: dstName
+   character(len=ESMF_MAXSTR)            :: peinf
+   character(len=ESMF_MAXSTR), parameter :: fname = 'aleph'
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'BundleDiff'
+
+! begin
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   ! get number of fields in bundles
+   ! number in srcBUN should be the same as in dstBUN (we can change later)
+   call ESMF_FieldBundleGet      (srcBUN, FieldCount=NumVars,  RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   ! use only srcBUN; bundles are conformant
+   call ESMF_FieldBundleGet     (srcBUN, 1, srcFLD, RC=STATUS)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   ! get grid
+   call ESMF_FieldGet(srcFLD, grid=grid3D, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   ! get global counts per dim
+   call ESMFL_FieldGetDims(srcFLD, gCPD=globalCPD)
+   allocate(srcbuf(globalCPD(1),globalCPD(2)), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(dstbuf(globalCPD(1),globalCPD(2)), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(diff(globalCPD(1),globalCPD(2)), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   ! loop over fields in bundle
+ 
+   if(verbose .and. mype==MAPL_Root) print *,' Loop through bundles'
+
+   do L=1,NumVars   
+
+     call ESMF_FieldBundleGet     (srcBUN, L, srcFLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMF_FieldGet           (srcFLD, NAME=srcName, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     call ESMF_FieldBundleGet     (dstBUN, L, dstFLD, RC=STATUS)
+     if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     ! get rank from any field
+     call ESMFL_FieldGetDims(srcFLD, ar=rank)
+
+     ! allocate f90 pointer to hold data
+     ! note halo width = 0
+     if(rank==3) then
+       call ESMF_FieldGet (srcFLD, localDE=0, farrayPtr=sptr3d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+       call ESMF_FieldGet (dstFLD, localDE=0, farrayPtr=dptr3d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+     else
+       call ESMF_FieldGet (srcFLD, localDE=0, farrayPtr=sptr2d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+       call ESMF_FieldGet (dstFLD, localDE=0, farrayPtr=dptr2d, rc = status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+    end if
+
+    ! loop over field's vertical levels
+
+     call ESMFL_FieldGetDims(srcFLD, lm=kmax)
+
+     do k=1, kmax
+
+       if (rank==3) then
+         call ArrayGather(sptr3d(:,:,k), srcBuf, grid3D, RC=STATUS)
+         if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+         call ArrayGather(dptr3d(:,:,k), dstBuf, grid3D, RC=STATUS)
+         if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+       else
+         call ArrayGather(sptr2d, srcBuf, grid3D, RC=STATUS)
+         if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+         call ArrayGather(dptr2d, dstBuf, grid3D, RC=STATUS)
+         if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+       end if
+       call ESMF_VMBarrier(vm, rc=status)
+       if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+       if(verbose .and. mype==MAPL_Root) then
+         ! stats on level-by-level basis
+         call stats_ ( 6, globalCPD(1), globalCPD(2), k, &
+                      srcBuf, dstBuf                   , &
+                      trim(srcName), 'lev', MAPL_undef , &
+                      trim(srcName)//' diff statistics', 1 )
+       end if
+
+     end do ! k
+
+   end do ! L
+
+   deallocate(srcbuf, dstbuf, diff, stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   RETURN_(ESMF_SUCCESS)
+
+CONTAINS
+
+        subroutine stats_ (lu,mx,my,k,a1,a2,&
+                           atype,htype,amiss,header,inc)
+
+!       Print statistics of one 3-d variable. This is from the PSAS library.
+!       with some simplifications
+
+        implicit none
+
+        integer lu              ! Output unit
+        integer mx,my           ! Array sizes
+        integer k               ! level
+        real a1(mx,my)          ! The array1
+        real a2(mx,my)          ! The array2
+        character(*), intent(in) :: atype       ! Type of the variable
+        character(*), intent(in) :: htype       ! Typf of the levels
+        real amiss              ! missing value flag of a
+        character*(*) header    ! A header message
+        integer inc             ! order of the listing
+!
+        integer i,j
+        integer imx,imn,jmx,jmn
+        integer cnt
+        real a(mx,my)        ! diff
+        real amx,amn
+        real avg,dev,d,rms,sumsq,relerr
+        logical first
+
+!       ..A practical value for the magnitude of the fraction of a real
+!       number.
+
+        real rfrcval
+        parameter(rfrcval=1.e-5)
+
+        character*255 dash
+
+!       ..function
+
+        logical spv
+        real aspv
+        spv(aspv)=abs((aspv-amiss)/amiss).le.rfrcval
+
+!       compute diff
+
+        a = a1 - a2
+
+        ! only print header when k==1
+
+        if (k==1) then
+
+        do i = 1, 255
+           dash(i:i) = '-'
+        end do
+        i = len(trim(header))
+
+        write(lu,'(//a)') trim(header)
+        write(lu,'(a/)')  dash(1:i)
+        write(lu,'(a,1x,a,5x,a,6x,a,9x,a,9x,a,15x,a)') 'lvl',&
+            'count','mean','rmse','rele','maxi','mini'
+               
+        end if ! k==1
+
+! compute some statistics on diff
+
+          cnt=0
+          avg=0.
+          rms=0.
+          do j=1,my
+            do i=1,mx
+              if(.not.spv(a(i,j))) then
+                cnt=cnt+1
+                avg=avg+a(i,j)
+                sumsq = sumsq + a(i,j)*a(i,j)
+                relerr = relerr + (a1(i,j) - a2(i,j)) !/a1(i,j)
+              endif
+            end do
+          end do
+          avg=avg/max(1,cnt)
+          sumsq=sumsq/max(1,cnt)
+          rms = sqrt(sumsq)
+          relerr=relerr/max(1,cnt)
+
+          dev=0.
+          do j=1,my
+            do i=1,mx
+              if(.not.spv(a(i,j))) then
+                d=a(i,j)-avg
+                dev=dev+d*d
+              endif
+            end do
+          end do
+          dev=sqrt(dev/max(1,cnt-1))
+     
+          amx=a(1,1)
+          amn=a(1,1)
+          first=.true.
+          do j=1,my
+            do i=1,mx
+              if(.not.spv(a(i,j))) then
+                if(first) then
+                  imx=i
+                  imn=i
+                  jmx=j
+                  jmn=j
+                  amx=a(imx,jmx)
+                  amn=a(imn,jmn)
+                  first=.false.
+                else
+                  if(a(i,j).gt.amx) then
+                    amx=a(i,j)
+                    imx=i
+                    jmx=j
+                  endif
+                  if(a(i,j).lt.amn) then
+                    amn=a(i,j)
+                    imn=i
+                    jmn=j
+                  endif
+                endif
+              endif
+            end do
+          end do
+
+
+          write(lu,'(i3,1p,i7,1p,3e10.3e1,0p,'// &
+                '2(1p,e10.3e1,0p,a,i3,a,i3,a))') &
+                k,cnt,avg,rms,relerr, &
+                amx,'(',imx,',',jmx,')', &
+                amn,'(',imn,',',jmn,')'
+
+      end  subroutine stats_
+
+   end subroutine BundleDiff
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: StateDiff
+
+! !INTERFACE:
+
+   subroutine StateDiff (srcSTA, dstSTA, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+   
+   type(ESMF_State), intent(inout)  :: srcSTA
+   type(ESMF_State), intent(inout)  :: dstSTA
+   integer, optional, intent(out)   :: rc     ! return code
+
+! !DESCRIPTION:
+!     Regrid a state
+!
+!EOP
+
+! !REVISION HISTORY:
+!
+!  19Apr2006  Cruz  Initial code.
+!
+!-------------------------------------------------------------------------
+
+! locals
+
+   type(ESMF_VM)              :: vm
+   type(ESMF_Field)           :: FLD
+   type(ESMF_Grid)            :: GRID
+   type(ESMF_FieldBundle)          :: srcBUN
+   type(ESMF_FieldBundle)          :: dstBUN
+   integer :: status, mype, i, itemcount
+   character (len=ESMF_MAXSTR), pointer  :: itemnamelist(:)
+   type(ESMF_StateItem_Flag)  , pointer  :: itemtypelist(:)
+   character(len=ESMF_MAXSTR)            :: name 
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'StateDiff'
+
+! start
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+! Get information from state
+!---------------------------
+! query the states for item number and types. If item type is other 
+! than a field then return(1)
+
+   call ESMF_StateGet(srcSTA, itemcount=itemcount, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   if(itemcount==0) then
+      call ESMFL_FailedRC(mype,Iam//': ESMF_state is empty')
+   end if
+
+   allocate(itemnamelist(itemcount), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+   allocate(itemtypelist(itemcount), stat=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   call ESMF_StateGet(srcSTA, itemnamelist=itemnamelist, &
+                      itemtypelist=itemtypelist, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   do i=1,itemcount
+      if(itemtypelist(i)/=ESMF_STATEITEM_FIELD) then
+        call ESMFL_FailedRC(mype,Iam//': State item is not a field.')
+      end if
+   end do
+
+! populate source bundle with fields from source state
+! ----------------------------------------------------
+   call State2Bundle (srcSTA, srcBun)
+
+   call ESMF_StateGet(dstSTA, itemnamelist=itemnamelist, &
+                      itemtypelist=itemtypelist, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   do i=1,itemcount
+      if(itemtypelist(i)/=ESMF_STATEITEM_FIELD) then
+        call ESMFL_FailedRC(mype,Iam//': State item is not a field.')
+      end if
+   end do
+   call State2Bundle (dstSTA, dstBun)
+
+   ! now call BundleDiff
+   call BundleDiff (srcBUN, dstBUN, rc=status)
+   if (status /= ESMF_SUCCESS) call ESMFL_FailedRC(mype,Iam)
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine StateDiff
+
+!-------------------------------------------------------------------------
+!  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
+!-------------------------------------------------------------------------
+!BOP
+
+! !IROUTINE: ESMFL_GridDistBlockSet
+
+! !INTERFACE:
+
+   subroutine ESMFL_GridDistBlockSet (Egrid, ist, jst, il, jl, &
+                                      rlons, rlats, rc)
+
+!
+! !USES:
+!
+  implicit NONE
+
+! !ARGUMENTS:
+
+   type(ESMF_Grid), intent(inout)      :: Egrid
+   integer, intent(in), dimension(:):: ist, jst, il, jl
+   real(8), optional, dimension(:)     :: rlats 
+   real(8), optional, dimension(:)     :: rlons 
+   integer, optional, intent(out)      :: rc    ! return code
+
+#if 0
+! !DESCRIPTION:
+!   
+!EOP
+!  
+! !REVISION HISTORY:
+!
+!  16Jun2006  Cruz  Initial code.
+!  
+!-------------------------------------------------------------------------
+
+   integer, allocatable, dimension(:) :: iAI
+   integer :: ncnt,i,j,k,count,n,status,nDE,mype
+   integer, allocatable, dimension(:,:) :: myindices
+   type(ESMF_Logical) :: HasBlockSet
+   type(ESMF_DELayout):: layout
+   type(ESMF_VM):: vm
+   type(ESMF_AxisIndex), allocatable, dimension(:,:) :: AI
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'ESMFL_GridDistBlockSet'
+
+! start
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, petCount=nDE, localPet=mype, rc=status)
+   if (status /= ESMF_SUCCESS) &
+   call ESMFL_FailedRC(mype,Iam//': ESMF_VMGet failed')
+
+   allocate(myindices(il(mype+1)*jl(mype+1),2), stat=status)
+   if (status /= ESMF_SUCCESS) &
+   call ESMFL_FailedRC(mype,Iam//': allocate failed')
+
+   ncnt=0
+   do i=jst(mype+1),jst(mype+1)+jl(mype+1)-1
+     do j=ist(mype+1),ist(mype+1)+il(mype+1)-1
+       ncnt=ncnt+1
+       myindices(ncnt,1) = i
+       myindices(ncnt,2) = j
+     end do
+   end do
+   !print *,mype,' ncnt = ',ncnt,shape(myindices),il(mype+1)*jl(mype+1)
+
+   layout = ESMF_DELayoutCreate(vm, deCountList=(/1, 8/), rc=status)
+   if (status /= ESMF_SUCCESS) &
+   call ESMFL_FailedRC(mype,Iam//': ESMF_DELayoutCreate failed')
+
+   call ESMF_GridDistribute(Egrid,               &
+         deLayout=layout,                        &
+         mycount=ncnt,                           &
+         myindices=myindices,                    &
+         rc=status)
+   if (status /= ESMF_SUCCESS) &
+   call ESMFL_FailedRC(mype,Iam//': ESMF_GridDistribute failed')
+
+! Encode the AI information. Let's use the grid attributes to do that.
+! First, serialize the AI object: create an integer 1D array to hold the
+! AI information: 3D grids will be larger
+
+   count = nDE*6
+   allocate(iAI(count))
+   iAI = 0
+   k = 1
+   do n = 1, nDE
+     iAI(k) = ist(n); k=k+1
+     iAI(k) = jst(n); k=k+1
+     iAI(k) = il(k) ; k=k+1
+     iAI(k) = jl(k) ; k=k+1
+     iAI(k) = 0     ; k=k+1
+     iAI(k) = 0     ; k=k+1
+   end do
+
+! Attach attributes to the grid:
+
+   call ESMF_GridSetAttribute(Egrid, 'GlobalAxisIndex', count, iAI, rc=status)
+
+   HasBlockSet = ESMF_TRUE
+   call ESMF_GridSetAttribute(Egrid, 'HasBlockSet', HasBlockSet, rc)
+
+! if rlons and rlats were present attach them to grid
+
+   if(present(rlats)) &
+   call ESMF_GridSetAttribute(Egrid, 'GSI rlats', size(rlats), rlats, rc)
+   if(present(rlons)) &
+   call ESMF_GridSetAttribute(Egrid, 'GSI rlons', size(rlons), rlons, rc)
+!
+   deallocate(iAI, myindices)
+#endif
+
+   if (present(rc)) then
+      rc = 0
+   end if
+   end subroutine ESMFL_GridDistBlockSet
+
+! THE FOLLOWING ROUTINE MAY BE TEMPORARY
+
+!-------------------------------------------------------------------------
+   subroutine State2Bundle (STA, BUN, usrfldlist, rc)
+!-------------------------------------------------------------------------
+! extract fields from state and add to a bundle
+   type(ESMF_FieldBundle), intent(inout) :: BUN
+   type(ESMF_State) , intent(inout) :: STA
+   character(len=*),intent(in),optional :: usrfldlist
+   integer, intent(out), optional   :: rc
+
+! locals
+
+   integer          :: status
+   integer          :: mype
+   integer          :: i, itemcount
+   type(ESMF_VM)    :: VM
+   type(ESMF_Field) :: FLD
+   type(ESMF_Grid)  :: GRID
+   character (len=ESMF_MAXSTR)           :: fldname
+   character (len=ESMF_MAXSTR), pointer  :: namelist(:)
+   type(ESMF_StateItem_Flag)  , pointer  :: typelist(:)
+   character(len=ESMF_MAXSTR)            :: name 
+   character(len=ESMF_MAXSTR), parameter :: IAm='State2Bundle'
+   logical                               :: field_found_already
+
+! start
+
+   call ESMF_VMGetCurrent(VM)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   VERIFY_(STATUS)
+   call ESMF_StateGet(STA, itemcount=itemcount, rc=status)
+   VERIFY_(STATUS)
+   if(itemcount==0) then
+      if (verbose) print *,' state is empty'
+      RETURN_(ESMF_FAILURE)
+   end if
+   
+   allocate(namelist(itemcount), stat=status)
+   VERIFY_(STATUS)
+   allocate(typelist(itemcount), stat=status)
+   VERIFY_(STATUS)
+   
+   call ESMF_StateGet(STA, itemnamelist=namelist, &
+                      itemtypelist=typelist, rc=status)
+   VERIFY_(STATUS)
+
+   field_found_already = .false.
+   do i=1,itemcount
+      if(typelist(i)/=ESMF_STATEITEM_FIELD) cycle
+
+      call ESMF_StateGet(STA, trim(namelist(i)), FLD, &
+           rc=status)
+      VERIFY_(STATUS)
+      if(verbose .and. MAPL_AM_I_ROOT()) print *, ' Got ',trim(namelist(i)),' from field'
+      ! get grid from first field in state, and create bundle
+      if (.not. field_found_already) then
+         field_found_already = .true.
+
+         call ESMF_StateGet(STA, name=name, rc=status)
+         VERIFY_(STATUS)
+         name = name//'to bundle'
+         call ESMF_FieldGet (FLD, grid=GRID, rc=status)
+         VERIFY_(STATUS)
+         ! create bundle with input grid
+         BUN = ESMF_FieldBundleCreate ( name=name, rc=status )
+         VERIFY_(STATUS)
+	 call ESMF_FieldBundleSet(BUN, grid=grid, rc=status)
+         VERIFY_(STATUS)
+
+      end if
+
+     ! populate bundle   
+
+     if (present(usrfldlist) ) then
+         call ESMF_FieldGet(FLD, NAME=fldname, rc=status )
+         VERIFY_(STATUS)
+         if(.not. check_list_(fldname,usrfldlist)) cycle
+     endif
+     call MAPL_FieldBundleAdd (BUN, FLD, rc=status)
+     VERIFY_(STATUS)
+
+   end do
+
+   deallocate(typelist)
+   deallocate(namelist)
+
+   if (.not. field_found_already) then
+      RETURN_(ESMF_FAILURE)
+   end if
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine State2Bundle
+
+!-------------------------------------------------------------------
+   subroutine Bundle2State (BUN, STA, rc)
+!-------------------------------------------------------------------
+! extract fields from bundle and add to a state
+   type(ESMF_FieldBundle), intent(inout) :: BUN !ALT: intent(in)
+   type(ESMF_State) , intent(inout):: STA
+  integer, intent(out), optional   :: rc
+! locals
+   integer          :: L, status,NumVars
+   type(ESMF_Field) :: FLD
+   type(ESMF_Field) :: stateFIELD
+   character(len=ESMF_MAXSTR)              :: name
+   character(len=ESMF_MAXSTR), parameter   :: IAm='Bundle2State'
+
+   real, pointer :: src_ptr1d(:)
+   real, pointer :: dst_ptr1d(:)
+   real, pointer :: src_ptr2d(:,:)
+   real, pointer :: dst_ptr2d(:,:)
+   real, pointer :: src_ptr3d(:,:,:)
+   real, pointer :: dst_ptr3d(:,:,:)
+   real(kind=ESMF_KIND_R8), pointer :: src_pr81d(:)
+   real(kind=ESMF_KIND_R8), pointer :: dst_pr81d(:)
+   real(kind=ESMF_KIND_R8), pointer :: src_pr82d(:,:)
+   real(kind=ESMF_KIND_R8), pointer :: dst_pr82d(:,:)
+   real(kind=ESMF_KIND_R8), pointer :: src_pr83d(:,:,:)
+   real(kind=ESMF_KIND_R8), pointer :: dst_pr83d(:,:,:)
+   type(ESMF_TypeKind_Flag) :: src_tk, dst_tk
+   integer                  :: src_fieldRank, dst_fieldRank
+   logical                  :: NotInState
+   character(len=ESMF_MAXSTR) :: NameInBundle
+
+!
+   call ESMF_FieldBundleGet (BUN, name=name, FieldCount=NumVars, RC=STATUS)
+   if(verbose .and. MAPL_AM_I_ROOT()) print *,' Unwrapping ',trim(name)
+   do L=1,NumVars
+      call ESMF_FieldBundleGet (BUN, L, FLD, RC=STATUS)
+      VERIFY_(STATUS)
+
+      call ESMF_FieldGet(FLD, Name=NameInBundle, rc=STATUS)
+      VERIFY_(STATUS)
+      call ESMF_StateGet (STA, NameInBundle, StateFIELD,  RC=STATUS)
+      NotInState = (STATUS /= ESMF_SUCCESS)
+
+      if (NotInState) then
+         call MAPL_StateAdd (STA, FLD, rc=status)
+         VERIFY_(STATUS)
+      else
+         ! copy content to StateField
+         call ESMF_FieldGet(stateFIELD, &
+              dimCount=dst_fieldRank, &
+              typeKind=dst_tk, rc=status)
+         VERIFY_(STATUS)
+         call ESMF_FieldGet(FLD, dimCount=src_fieldRank, &
+              typeKind=src_tk, rc=status)
+         VERIFY_(STATUS)
+         ! make sure that type kind rank agrees between 
+         ! fld and stateField
+         ASSERT_(dst_fieldRank == src_fieldRank .and. dst_tk == src_tk)
+         ! for appropriate TKR:
+         if (dst_tk == ESMF_TypeKind_R4) then
+            select case (dst_fieldRank)
+            case (1)
+               call ESMF_FieldGet(fld, farrayPtr=src_ptr1d, rc=status)
+               VERIFY_(STATUS)
+               call ESMF_FieldGet(stateField, farrayPtr=dst_ptr1d, rc=status)
+               VERIFY_(STATUS)
+               dst_ptr1d = src_ptr1d
+            case (2)
+               call ESMF_FieldGet(fld, farrayPtr=src_ptr2d, rc=status)
+               VERIFY_(STATUS)
+               call ESMF_FieldGet(stateField, farrayPtr=dst_ptr2d, rc=status)
+               VERIFY_(STATUS)
+               dst_ptr2d = src_ptr2d
+            case (3)
+               call ESMF_FieldGet(fld, farrayPtr=src_ptr3d, rc=status)
+               VERIFY_(STATUS)
+               call ESMF_FieldGet(stateField, farrayPtr=dst_ptr3d, rc=status)
+               VERIFY_(STATUS)
+               dst_ptr3d = src_ptr3d
+            case default
+            end select
+         else if (dst_tk == ESMF_TypeKind_R8) then
+            select case (dst_fieldRank)
+            case (1)
+              call ESMF_FieldGet(fld, farrayPtr=src_pr81d, rc=status)
+              VERIFY_(STATUS)
+              call ESMF_FieldGet(stateField, farrayPtr=dst_pr81d, rc=status)
+              VERIFY_(STATUS)
+              dst_pr81d = src_pr81d
+           case (2)
+              call ESMF_FieldGet(fld, farrayPtr=src_pr82d, rc=status)
+              VERIFY_(STATUS)
+              call ESMF_FieldGet(stateField, farrayPtr=dst_pr82d, rc=status)
+              VERIFY_(STATUS)
+              dst_pr82d = src_pr82d
+           case (3)
+              call ESMF_FieldGet(fld, farrayPtr=src_pr83d, rc=status)
+              VERIFY_(STATUS)
+              call ESMF_FieldGet(stateField, farrayPtr=dst_pr83d, rc=status)
+              VERIFY_(STATUS)
+              dst_pr83d = src_pr83d
+            case default
+               ASSERT_(.false.)
+            end select
+         end if
+      end if
+
+   end do
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine Bundle2State
+
+!-------------------------------------------------------------------
+   subroutine Bundles2Bundle (BUN1, BUN2, mergedBUN, rc)
+!-------------------------------------------------------------------
+   type(ESMF_FieldBundle), intent(inout) :: BUN1
+   type(ESMF_FieldBundle), intent(inout) :: BUN2
+   type(ESMF_FieldBundle), intent(inout) :: mergedBUN
+   integer, intent(out), optional :: rc
+!
+   type(ESMF_VM)           :: vm
+   type(ESMF_Field)        :: FLD
+   integer :: status, mype, L, numVars1, numVars2
+   character(len=ESMF_MAXSTR)            :: name1, name2, name3
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Bundles2Bundle'
+   
+! begin
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   VERIFY_(STATUS)
+
+   ! get number of fields in bundles
+   call ESMF_FieldBundleGet (BUN1, name=name1, FieldCount=NumVars1, RC=STATUS)
+   VERIFY_(STATUS)
+   call ESMF_FieldBundleGet (BUN2, name=name2, FieldCount=NumVars2, RC=STATUS)
+   VERIFY_(STATUS)
+   ! mergedBUN is an empty bundle created by the parent routine
+   call ESMF_FieldBundleGet (mergedBUN, name=name3,  RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! loop over fields in bundle and add to mergedBUN
+
+   if(verbose .and. MAPL_AM_I_ROOT()) &
+   print *,' Add ',NumVars1,' fields from ',trim(name1), &
+   ' into ', trim(name3)
+   do L=1,NumVars1
+     call ESMF_FieldBundleGet (BUN1, L, FLD, RC=STATUS)
+     VERIFY_(STATUS)
+     call MAPL_FieldBundleAdd (mergedBUN, FLD, rc=status)
+     VERIFY_(STATUS)
+   end do ! L
+   if(verbose .and. MAPL_AM_I_ROOT()) &
+   print *,' Add ',NumVars2,' fields from ',trim(name2), &
+   ' into ', trim(name3)
+   do L=1,NumVars2
+     call ESMF_FieldBundleGet (BUN2, L, FLD, RC=STATUS)
+     VERIFY_(STATUS)
+     call MAPL_FieldBundleAdd (mergedBUN, FLD, rc=status)
+     VERIFY_(STATUS)
+   end do ! L
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine Bundles2Bundle
+
+!-------------------------------------------------------------------
+   subroutine Add2Bundle (BUN, mergedBUN, rc)
+!-------------------------------------------------------------------
+   type(ESMF_FieldBundle), intent(inout) :: BUN
+   type(ESMF_FieldBundle), intent(inout) :: mergedBUN
+   integer, intent(out), optional :: rc
+!
+   type(ESMF_VM)           :: vm
+   type(ESMF_Field)        :: FLD
+   integer :: status, mype, L, numVars1, numVars2
+   character(len=ESMF_MAXSTR)            :: name1, name2
+   character(len=ESMF_MAXSTR), parameter :: IAm = 'Add2Bundle'
+   
+! begin
+
+   call ESMF_VMGetCurrent(vm)
+   call ESMF_VMGet(vm, localPet=mype, rc=status)
+   VERIFY_(STATUS)
+
+   ! get number of fields in bundles
+   call ESMF_FieldBundleGet (BUN, name=name1, FieldCount=NumVars1, RC=STATUS)
+   VERIFY_(STATUS)
+
+   ! loop over fields in bundle and add to mergedBUN
+
+   do L=1,NumVars1
+     call ESMF_FieldBundleGet (BUN, L, FLD, RC=STATUS)
+     VERIFY_(STATUS)
+     call MAPL_FieldBundleAdd (mergedBUN, FLD, rc=status)
+     VERIFY_(STATUS)
+   end do ! L
+   call ESMF_FieldBundleGet (mergedBUN, name=name2, FieldCount=NumVars2, RC=STATUS)
+   VERIFY_(STATUS)
+   if(verbose .and. MAPL_AM_I_ROOT()) &
+   print *,' Added ',NumVars1,' fields from bundle ',trim(name1), &
+   ' into ', trim(name2), ' for a total number of fields of ', NumVars2
+
+   RETURN_(ESMF_SUCCESS)
+
+   end subroutine Add2Bundle
+
+! THE FOLLOWING ROUTINE IS TEMPORARY
+
+!-------------------------------------------------------------------------
+   subroutine ESMFL_FailedRC(mype, name)
+!-------------------------------------------------------------------------
+!
+! A local error-exiting routine for ESMFL
+!
+   integer, intent(in) :: mype
+   character(len=*), intent(in) :: name
+   write(*,*) ' *** ',trim(name),' failed ***'
+   call ESMF_Finalize()
+   end subroutine ESMFL_FailedRC
+
+!-------------------------------------------------------------------------
+  SUBROUTINE ESMFL_HALO_R4_2D(GRID, INPUT, RC)
+!-------------------------------------------------------------------------
+     TYPE(ESMF_Grid),         INTENT(IN)    :: GRID
+     REAL,                    INTENT(INOUT) :: INPUT(:,:)
+     integer, optional,       intent(OUT)   :: RC
+
+! Local variables
+
+     character(len=ESMF_MAXSTR) :: IAm='MAPL_HALO_R4_2D'
+     integer                    :: STATUS
+
+
+
+     INTEGER :: LAST, LEN1, LEN2
+
+     integer :: nn_north, nn_south, nn_east, nn_west
+     integer :: j_north, j_south, i_east, i_west
+     integer, save                            :: NX=-1
+     integer, save                            :: NY=-1
+     integer                                  :: NX0, NY0
+     type (ESMF_DELayout)                     :: layout
+     integer                                  :: COUNTS(2)
+     integer                                  :: myid
+     integer                                  :: ndes
+     integer                                  :: dimCount
+     integer, allocatable                     :: minindex(:,:)
+     integer, allocatable                     :: maxindex(:,:)
+     integer, pointer                         :: ims(:) => null()
+     integer, pointer                         :: jms(:) => null()
+     type (ESMF_VM)                           :: VM
+     type (ESMF_DistGrid)                     :: distGrid
+
+
+     call ESMF_GridGet    (GRID,   distGrid=distGrid, dimCount=dimCount, RC=STATUS)
+     VERIFY_(STATUS)
+     call ESMF_DistGridGet(distGRID, delayout=layout, rc=STATUS)
+     VERIFY_(STATUS)
+
+     call ESMF_DELayoutGet (layout, VM=vm, RC=STATUS)
+     VERIFY_(STATUS)
+
+     call ESMF_VmGet(VM, localPet=MYID, petCount=ndes, rc=status)
+     VERIFY_(STATUS)
+
+     if (NX < 0 .or. NY < 0) then
+!    Layout sizes
+!    ------------
+
+        allocate(minindex(dimCount,ndes), maxindex(dimCount,ndes), stat=status)
+        VERIFY_(STATUS)
+
+! Processors in each direction
+!-----------------------------
+
+        call ESMF_DistGridGet(distgrid, &
+             minIndexPDe=minindex, &
+             maxIndexPDe=maxindex, rc=status)
+        VERIFY_(STATUS)
+
+        call MAPL_GetImsJms(Imins=minindex(1,:),Imaxs=maxindex(1,:),&
+             Jmins=minindex(2,:),Jmaxs=maxindex(2,:),Ims=ims,Jms=jms,rc=status)
+        VERIFY_(STATUS)
+
+        NX = size(ims)
+        NY = size(jms)
+
+        deallocate(jms, ims)
+        deallocate(maxindex, minindex)
+     end if
+
+!    My processor coordinates
+!    -------------------------
+
+!ALT: we will use 0-based NX0, NY0 here, unlike in MAPL_Generic !
+
+     NX0 = mod(MYID,NX)
+     NY0 = MYID/NX
+
+     j_north = mod(NY0   +1,NY)
+     j_south = mod(NY0+NY-1,NY)
+     i_east  = MOD(NX0   +1,NX)
+     i_west  = MOD(NX0+NX-1,NX)
+
+!ALT help
+
+     nn_north = NX0 + NX*j_north
+     nn_south = NX0 + NX*j_south
+     nn_west  = i_west + NX*NY0
+     nn_east  = i_east + NX*NY0
+
+!  The default for FROM is to do all four sides.
+
+!  Fill NORTHERN ghost region
+
+     LAST = SIZE(INPUT,2)-1 
+     LEN1 = SIZE(INPUT,1)
+
+     call MAPL_CommsSendRecv(LAYOUT, &
+          INPUT(:,2        ),  LEN1,  NN_SOUTH,  &
+          INPUT(:,last+1   ),  LEN1,  NN_NORTH,  &
+          RC=STATUS)
+     VERIFY_(STATUS)
+     if(NY0==NY-1) then
+        INPUT(:,last+1   ) = INPUT(:,last )
+     end if
+
+!  Fill SOUTHERN ghost region
+
+     CALL MAPL_CommsSendRecv(layout,             &
+          INPUT(:,last     ),  LEN1,  NN_NORTH,  &
+          INPUT(:,1        ),  LEN1,  NN_SOUTH,  &
+          RC=STATUS)
+     VERIFY_(STATUS)
+     if(NY0==0) then
+        INPUT(:,1   ) = INPUT(:,2 )
+     endif
+
+     LAST = SIZE(INPUT,1)-1
+     LEN2 = SIZE(INPUT,2)
+
+!  Fill EASTERN ghost region
+
+     CALL MAPL_CommsSendRecv(layout,           &
+          INPUT(2     , : ),  LEN2,  NN_WEST,  &
+          INPUT(last+1, : ),  LEN2,  NN_EAST,  &
+          RC=STATUS)
+     VERIFY_(STATUS)
+
+!  Fill WESTERN ghost region
+
+     CALL MAPL_CommsSendRecv(layout,           &
+          INPUT(last  , : ),  LEN2,  NN_EAST,  &
+          INPUT(1     , : ),  LEN2,  NN_WEST,  &
+          RC=STATUS)
+     VERIFY_(STATUS)
+
+     RETURN_(ESMF_SUCCESS)
+
+   end SUBROUTINE ESMFL_HALO_R4_2D
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! !IROUTINE: BundleAddState_ - Addes contents of State to Bundle
+!
+! !INTERFACE:
+!
+    RECURSIVE subroutine BundleAddState_ ( BUNDLE, STATE, rc, &
+                                           GRID, VALIDATE )
+!
+! !ARGUMENTS:
+!
+    implicit NONE
+    type(ESMF_FieldBundle), intent(inout)         :: BUNDLE
+    type(ESMF_State),  intent(INout)            :: STATE
+    integer, optional                        :: rc
+    type(ESMF_Grid),  optional, intent(in)   :: GRID
+    logical, optional, intent(in)            :: VALIDATE
+!
+! !DESCRIPTION: Extracts fields from an ESMF State and adds them to a
+!               ESMF Bundle. In essesence, it serializes an ESMF state
+!  in a flat Bundle. The BUNDLE must have been created prior to calling 
+!  this routine.
+!
+!EOP
+
+    character(len=*), parameter          :: Iam="ESMFL_StateSerialize"
+    integer                              :: STATUS
+
+    type(ESMF_State)                     :: tSTATE
+    type(ESMF_FieldBundle)                    :: tBUNDLE
+    type(ESMF_Field)                     :: tFIELD
+    type(ESMF_Grid)                      :: tGRID
+
+    integer                              :: I, J
+    integer                              :: ItemCount, FieldCount
+    type (ESMF_StateItem_Flag), pointer  :: ItemTypes(:)
+    character(len=ESMF_MAXSTR ), pointer :: ItemNames(:), FieldNames(:)
+    logical                              :: needGrid = .true.
+    logical                              :: validate_ = .false.
+    integer, allocatable :: orderlist(:)
+    integer :: jj
+    character(len=ESMF_MAXSTR)           :: attrName
+    character(len=ESMF_MAXSTR), allocatable :: currList(:)
+    integer                                 :: natt
+
+!                           ---
+
+    
+    if ( present(validate) ) validate_ = validate
+
+!   Query state for number of items and allocate space for them
+!   -----------------------------------------------------------
+    call ESMF_StateGet(STATE,ItemCount=ItemCount,RC=STATUS)
+    VERIFY_(STATUS)
+    ASSERT_(ItemCount>0)
+    allocate ( ItemNames(ItemCount), stat=STATUS)
+    VERIFY_(STATUS)
+    allocate ( ItemTypes(ItemCount), stat=STATUS)
+    VERIFY_(STATUS)
+
+!   Next, retrieve the names and types of each item in the state
+!   ------------------------------------------------------------
+    call ESMF_StateGet ( STATE,      ItemNameList = ItemNames, &
+                                ItemtypeList = ItemTypes, &
+                                rc=STATUS)
+    VERIFY_(STATUS)
+
+!   Loop over each item on STATE
+!   ----------------------------
+    attrName = MAPL_StateItemOrderList
+    call ESMF_AttributeGet(state, NAME=attrName, itemcount=natt, RC=STATUS)
+    VERIFY_(STATUS)
+
+    ASSERT_(natt > 0)
+    allocate(orderlist(natt), stat=status)
+    VERIFY_(STATUS)
+    allocate(currList(natt), stat=status)
+    VERIFY_(STATUS)
+
+    ! get the current list
+    call ESMF_AttributeGet(state, NAME=attrName, VALUELIST=currList, rc=status)
+    VERIFY_(STATUS)
+
+    orderList = -1 ! not found
+    do i = 1, natt
+       ! search loop
+       do jj = 1, ITEMCOUNT
+          if (itemNames(jj) == currList(i)) then
+             orderList(i) = jj
+             exit
+          end if
+       end do
+    end do
+
+    deallocate(currList)
+
+    do JJ = 1, natt
+
+       I = ORDERLIST(JJ)
+!@@@    do I = 1, ItemCount
+
+!         Got a field
+!         -----------
+          if (ItemTypes(I) == ESMF_StateItem_Field) THEN
+
+             call ESMF_StateGet ( STATE, ItemNames(i), tFIELD, rc=status)
+             VERIFY_(STATUS)
+             call AddThisField_()
+
+!         Got a Bundle
+!         ------------
+          else if (ItemTypes(I) == ESMF_StateItem_FieldBundle) then
+
+             call ESMF_StateGet(STATE, ItemNames(i), tBUNDLE, rc=STATUS)
+             VERIFY_(STATUS)
+             call ESMF_FieldBundleGet ( tBUNDLE, FieldCount = FieldCount, rc=STATUS)
+             VERIFY_(STATUS)
+             ASSERT_(FieldCount>0)
+             do j = 1, FieldCount
+                call ESMF_FieldBundleGet ( tBUNDLE, j, tFIELD, rc=STATUS)
+                VERIFY_(STATUS)
+                call AddThisField_()
+             end do
+
+!         Got another state
+!         -----------------
+          else if (ItemTypes(I) == ESMF_StateItem_State) then
+
+             call ESMF_StateGet(STATE, ItemNames(i), tSTATE, rc=STATUS)
+             VERIFY_(STATUS)
+             call BundleAddState_ ( BUNDLE, tSTATE, rc=STATUS )
+             VERIFY_(STATUS)
+             if (needGrid) then
+                call ESMF_FieldBundleGet ( BUNDLE, GRID=tGRID, rc=STATUS )
+                VERIFY_(STATUS)
+                needGrid = .false.
+             end if
+
+!         What is this?
+!         ------------
+          else
+             cycle
+          end IF
+
+    end do
+
+    deallocate(orderlist)
+
+!   Make sure the Bundle is not empty
+!   ---------------------------------
+    call ESMF_FieldBundleGet ( BUNDLE, FieldCount = FieldCount, rc=STATUS)
+    VERIFY_(STATUS)
+    ASSERT_(FieldCount>0)
+
+!   Set the grid
+!   ------------
+    if ( present(GRID) ) then
+       call ESMF_FieldBundleSet ( BUNDLE, grid=GRID, rc=STATUS )
+       VERIFY_(STATUS)
+       needGrid = .false.
+    else
+       ASSERT_(.not. needGrid)              ! could not find a Grid
+    end if
+
+!   Make sure field names are unique
+!   --------------------------------
+    allocate ( FieldNames(FieldCount), stat=STATUS )
+    VERIFY_(STATUS) 
+    call ESMF_FieldBundleGet ( BUNDLE, FieldNameList=FieldNames, rc=STATUS )
+    VERIFY_(STATUS) 
+
+!   Make sure field names are unique
+!   --------------------------------
+    if ( validate_ ) then
+       do j = 1, FieldCount
+          do i = j+1, FieldCount
+             if ( trim(FieldNames(i)) == trim(FieldNames(j)) ) then
+                STATUS = -1              ! same name
+                VERIFY_(STATUS)
+             end if
+          end do
+       end do
+    end if
+
+!   All done
+!   --------
+    deallocate(ItemNames)
+    deallocate(ItemTypes)
+    deallocate(FieldNames)
+
+    RETURN_(ESMF_SUCCESS)
+
+CONTAINS
+
+    subroutine AddThisField_()
+
+      call MAPL_FieldBundleAdd ( BUNDLE, tField, rc=STATUS )
+      VERIFY_(STATUS)
+      if ( needGrid ) then
+         call ESMF_FieldGet ( tFIELD, grid=tGRID, rc=STATUS )
+         VERIFY_(STATUS)
+         needGrid = .false.
+      end if
+    end subroutine AddThisField_
+
+  end subroutine BundleAddState_
+
+  subroutine MAPL_AreaMean_2d_r8_bitrep ( qave, q, area, grid, bitreproducible, rc )
+
+    implicit none
+
+    ! Arguments
+    real*8,            intent(  OUT) :: qave 
+    real,              intent(IN   ) :: q(:,:)
+    real,              intent(IN   ) :: area(:,:)
+    type(ESMF_Grid),   intent(INout) :: grid
+    logical,           intent(IN   ) :: bitreproducible
+    integer, optional, intent(  OUT) :: rc
+
+    ! Log err vars
+    integer :: status
+    character(len=ESMF_MAXSTR), parameter :: Iam='MAPL_AreaMeanBR'
+
+    ! Local vars
+    real*8  :: qdum1
+    real*8, save  :: qdum2
+    integer :: im,jm
+    integer :: DIMS(3)
+
+    integer :: i,j
+    logical :: amIRoot
+
+    real, allocatable :: qglobal(:,:)
+    real, allocatable, save :: aglobal(:,:)
+
+    type(ESMF_VM) :: vm
+    logical, save :: firstime = .true.
+
+    if (.not. bitreproducible) then
+       call MAPL_AreaMean(qave, q, area, grid, rc=status )
+       RETURN_(STATUS)
+    end if
+
+    ! get VM (should get from the grid, but this is quicker)
+    call ESMF_VmGetCurrent(vm, rc=status)
+    VERIFY_(STATUS)
+
+    amIRoot = MAPL_AM_I_Root(vm)
+
+    if (amIRoot) then
+       call MAPL_GridGet(GRID, globalCellCountPerDim=DIMS, RC=STATUS)
+       im = DIMS(1) ! global grid dim
+       jm = DIMS(2) ! global grid dim
+    else
+       im = 0 ! dummy sizes
+       jm = 0 ! dummy sizes
+    end if
+    allocate(qglobal(im,jm), stat=status)
+    VERIFY_(STATUS)
+
+    if (firstime) then
+       firstime = .false.
+       allocate(aglobal(im,jm), stat=status)
+       VERIFY_(STATUS)
+       call ArrayGather(local_array=area, global_array=aglobal, grid=grid, rc=status)
+       VERIFY_(STATUS)
+       qdum2 = 0.0_8
+       if (amIRoot) then
+          do j=1,jm
+             do i=1,im
+                qdum2 = qdum2 + aglobal(i,j)
+             enddo
+          end do
+       end if
+    end if
+
+    call ArrayGather(local_array=q,    global_array=qglobal, grid=grid, rc=status)
+    VERIFY_(STATUS)
+
+    ! do calculation on root
+    if (amIRoot) then
+
+       qdum1 = 0.0_8
+       do j=1,jm
+          do i=1,im
+             qdum1 = qdum1 + qglobal(i,j)*aglobal(i,j)
+          enddo
+       enddo
+
+       ASSERT_(qdum2 /= 0.0_8)
+
+       qave = qdum1 / qdum2
+    end if
+    deallocate(qglobal)
+
+    call MAPL_CommsBcast(vm, DATA=qave, N=1, Root=MAPL_Root, RC=status)
+    VERIFY_(STATUS)
+
+    RETURN_(ESMF_SUCCESS)
+  end subroutine MAPL_AreaMean_2d_r8_bitrep
+
+  subroutine MAPL_AreaMean_2d_r8 ( qave, q, area, grid, rc )
+
+    implicit none
+
+    ! Arguments
+    real*8,            intent(  OUT) :: qave 
+    real,              intent(IN   ) :: q(:,:)
+    real,              intent(IN   ) :: area(:,:)
+    type(ESMF_Grid),   intent(INout) :: grid
+    integer, optional, intent(  OUT) :: rc
+
+    ! Log err vars
+    integer :: status
+    character(len=ESMF_MAXSTR), parameter :: Iam='MAPL_AreaMean'
+
+    ! Local vars
+    real*8  :: qdum1
+    real*8, save  :: qdum2
+    real*8  :: qdum1loc
+    real*8  :: qdum2loc
+    integer :: im,jm
+
+    integer :: i,j
+
+    type(ESMF_VM) :: vm
+    logical, save :: firstime = .true.
+
+
+    ! get VM (should get from the grid, but this is quicker)
+    call ESMF_VmGetCurrent(vm, rc=status)
+    VERIFY_(STATUS)
+
+    im = size(area,1) ! local grid dim
+    jm = size(area,2) ! local grid dim
+
+    if (firstime) then
+       firstime = .false.
+
+       ! compute local sum
+       qdum2loc = 0.0_8
+       do j=1,jm
+          do i=1,im
+             qdum2loc = qdum2loc + area(i,j)
+          enddo
+       end do
+
+       call MAPL_CommsAllReduceSum(vm, sendbuf=qdum2loc, recvbuf=qdum2, &
+            cnt=1, RC=status)
+       VERIFY_(STATUS)
+
+    end if
+
+    ! do calculation on every PE
+
+    qdum1loc = 0.0_8
+    do j=1,jm
+       do i=1,im
+          qdum1loc = qdum1loc + q(i,j)*area(i,j)
+       enddo
+    enddo
+
+    call MAPL_CommsAllReduceSum(vm, sendbuf=qdum1loc, recvbuf=qdum1, &
+         cnt=1, RC=status)
+    VERIFY_(STATUS)
+
+    ASSERT_(qdum2 /= 0.0_8)
+
+    qave = qdum1 / qdum2
+
+    RETURN_(ESMF_SUCCESS)
+  end subroutine MAPL_AreaMean_2d_r8
+
+  logical function check_list_ (this,list)
+  implicit none
+  character(len=*), intent(in) :: this
+  character(len=*), intent(in) :: list
+  integer i,ll,ls,le
+  check_list_=.false.
+  if (trim(list)=="NONE") then ! this is when does not specify variables
+      check_list_=.true.
+  endif
+  ll  = len_trim(list)
+  ls  = 1
+  do i=1,ll
+     le=i
+     if(list(i:i)==",") then
+        if (trim(this)==list(ls:le-1)) then
+           check_list_=.true.
+           exit
+        endif
+        ls=le+1
+     endif
+  enddo
+  if (trim(this)==list(ls:ll)) then
+      check_list_=.true.
+  endif
+  end function check_list_
+
+
+end module ESMFL_MOD

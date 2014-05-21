@@ -1,0 +1,38 @@
+#
+# Sample resource file exemplifying the specification of an interface to
+# boundary conditions, emissions and other external files. This resource
+# file is meant to be read by the MAPL_ExtData Grid Component.
+#
+
+
+PrimaryExports::
+# ---------|--------------|-----|-----|------|----------------------|--------|-------|---------------------------------   
+#  Export  |              |     | V   |      |_______ Refresh ______|____ Factors ___|________ External File __________
+#  Name    |    Units     | Dim | Loc | Clim |     Time Template    | Offset | Scale | Variable |      Template
+# ---------|--------------|-----|-----|------|----------------------|--------|-------|----------|----------------------   
+EMCO2_FF    'kg s-1 m-2'    xy     C     Y      %y4-%m2-15T12:00:00Z   0.0      1.0    emco2ff   ExtData/PIESA/sfc/bian.co2.x288_y181_t12.2001.nc
+EMCO2_NEP   'kg s-1 m-2'    xy     C     Y     %y4-%m2-%d2T12:00:00Z   0.0      1.0    emco2nep  ExtData/PIESA/sfc/bian.co2.x288_y181_t12.2001.nc
+EMCO2_OCN   'kg s-1 m-2'    xy     C     Y    %y4-%m2-%d2T%h2:00:00Z   0.0      1.0    emco2ocn  ExtData/PIESA/sfc/bian.co2.x288_y181_t12.2001.nc
+CONC_OH     'number cm-3'   xyz    C     Y   %y4-%m2-%d2T%h2:%n2:30Z   0.0      1.0    oh        ExtData/PIESA/L72/gmi_oh_ch4_h2o2_no3.x144_y91_z72_t12.2006.nc
+#
+#                                            --- constant fields ---
+#
+GINOUX_DU        '1'        xy     C     Y             -               0.0      1.0    du_src    ExtData/PIESA/sfc/gocart.dust_source.v5a_1x1inp.x360_y181.nc
+CONST_VAR        '1'        xy     C     Y            N/A              5.0      1.0    none      /dev/null
+::
+
+Masks::
+# ---------|------------------------------------------------------|
+#  Name    |                  Template File Name                  |
+# ---------|------------------------------------------------------|
+#          |                                                      |
+# ---------|------------------------------------------------------|
+
+DerivedExports::
+# ---------|---------|--------------------------------------------|
+#  Export  | Primary |_________________ Mask _____________________|
+#  Name    |  Name   |    Name    |           Expression          |    
+# ---------|---------|------------|-------------------------------|
+# ---------|---------|------------|-------------------------------|
+::
+

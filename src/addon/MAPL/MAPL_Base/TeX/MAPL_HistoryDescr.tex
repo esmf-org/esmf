@@ -1,0 +1,240 @@
+% +-======-+ 
+%  Copyright (c) 2003-2007 United States Government as represented by 
+%  the Admistrator of the National Aeronautics and Space Administration.  
+%  All Rights Reserved.
+%  
+%  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+%  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+%  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+%  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+%  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+%  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+%  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+%  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+%  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+%  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+%  
+%  Government Agency: National Aeronautics and Space Administration
+%  Government Agency Original Software Designation: GSC-15354-1
+%  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+%  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+%  Government Agency Point of Contact for Original Software:  
+%  			Dale Hithon, SRA Assistant, (301) 286-2691
+%  
+% +-======-+ 
+%
+% This is the !DESCRIPTION: entry for the MAPL_HistoryGridComp
+%
+
+{\tt MAPL\_HistoryGridCompMod} is an internal MAPL gridded component
+used to manange output streams from a MAPL hierarchy. It write Fields
+in the Export states of all MAPL components in a hierarchy to file
+collections during the course of a run. It also has the some limited
+capability to interpolate the fields horizontally and/or vertically
+beofore outputing them.
+
+It is usually one of the two gridded components in the ``cap'' or main
+program of a MAPL application, the other being the root of the MAPL
+hierarchy it is servicing. It is instanciated and all its registered
+methods are run automatically by {\tt MAPL\_Cap,} if that is used.  If
+writing a custom cap, {\tt MAPL\_HistoryGridCompMod}'s SetServices can
+be called anytime after ESMF is initialized.  Its Initialize method
+should be executed before entering the time loop, and its Run method
+at the bottom of each time loop, after advancing the Clock. Finalize
+simply cleans-up memory.
+
+The component has no true export state, since its products are
+diagnostic file collections. It does have both Import and Internal
+states, which can be treated as in any other MAPL component, but it
+generally makes no sense to checkpoint and restart these.
+
+The behavior of {\tt MAPL\_HistoryGridCompMod} is controlled through
+its configuration, which as in any MAPL gridded component, is open and
+available in the GC. It is placed there by the cap and usually
+contained in a HISTORY.rc file.
+
+{\tt MAPL\_HistoryGridCompMod} uses {\tt MAPL\_CFIO} for creating and
+writing its files; it thus obeys all {\tt MAPL\_CFIO} rules. In
+particular, an application can write either Grads style flat files
+together with the Grads .ctl file description files, or one of two
+self-describing format (netcdf or HDF), which ever is linked with the
+application.
+
+Each collection to be produced is described in the HISTORY.rc file and
+can have the following properties:
+\begin{itemize}
+\item Its fields may be "instantaneous" or "time-averaged", but all fields within
+      a collection use the same time discretization. 
+\item A beginning and an end time may be specified for each collection .
+\item Collections are a set of files with a common name template. 
+\item Files in a collection have a fixed number of time groups in them.
+\item Data in each time group are "time-stamped"; for time-averaged data,
+ the center of the averaging period is used.
+\item Files in a collection can have time-templated names. The template
+      values correspond to the times on the first group in the file.
+\end{itemize}
+
+The body of the HISTORY.rc file usually begins with two character
+string attributes under the config labels {\tt EXPID:} and {\tt
+  EXPDSC:} that are identifiers for the full set of collections. These
+are followed by a list of collection names under the config label {\tt
+  COLLECTIONS:}. Note the conventional use of colons to terminate
+labels in the HISTORY.rc.
+
+The remainder of the file contains the attributes for each collection.
+Attribute labels consist of the attribute name with the collection
+name prepended; the two are separated by a '.'.
+
+Attributes are listed below. A special attribute is {\tt {\em
+collection}.fields:} which is the label for the list of fields
+that will be in the collection.  Each item (line) in the field list
+consists of a comma separated list with the field's name (as it
+appears in the corresponding ESMF field in the EXPORT of the
+component), the name of the component that produces it, and the alias
+to use for it in the file. The alias may be omitted, in which case it
+defaults to the true name.
+
+Files in a collection are named using the collection name, the
+template attribute described below, and the {\tt EXDID:} attribute
+value. A filename extension may also be added to identify the type of
+file (e.g., .nc4).
+\begin{quote}
+    {\tt [expid.]collection[.template][.ext]}
+\end{quote}
+The extension is not added automatically, it is up to the user to add the appropriate one.
+If the format is CFIO or CFIOasync and the extension is absent or .nc a NETCDF4 classic file
+will be produced. Is the extentions is .nc4 a NETCDF4 file will be produced.
+If it is "flat", the data files have whatever extension you provide and
+the ``control file'' has the .ctl extension, but with no {\tt
+template}. The expid is always prepended, unless it is an empty
+string.
+
+The following are the valid collection attributes:
+\begin{quote}
+\begin{trivlist}
+\item[\tt template]      Character string defining the time stamping template that is appended 
+                         to {\tt collection} to create a particular file name. 
+                         The template uses GrADS convensions. 
+                         The default value depends on the {\tt duration} of the file.
+\item[\tt descr]         Character string describing the collection. Defaults to "expdsc".
+\item[\tt format]        Character string to select file format ("CFIO", "CFIOasync", "flat").  "CFIO" 
+                         uses MAPL\_CFIO and produces netcdf output. "CFIOasync" uses MAPL\_CFIO but
+                         delegates the actual I/O to the MAPL\_CFIOServer (see MAPL\_CFIOServer documenation for details).
+                         Default = "flat".
+\item[\tt frequency]     Integer (HHHHMMSS) for the frequency of time groups in the collection.
+                         Default = 060000.
+\item[\tt mode]          Character string equal to "instantaneous" or "time-averaged".
+                         Default = "instantaneous".
+\item[\tt acc\_interval] Integer (HHHHMMSS) for the acculation interval (<= frequency)
+                         for time-averaged diagnostics.Default = {\tt frequency}; ignored
+                         if {\tt mode} is "instantaneous".
+\item[\tt ref\_date]     Integer (YYYYMMDD) reference date for {\em frquency};
+                         also the beginning date for
+                         the collection. Default is the Start date on the Clock.
+\item[\tt ref\_time]     Integer (HHMMSS) Same a {\tt ref\_date}.
+\item[\tt end\_date]     Integer (YYYYMMDD) ending date to stop diagnostic output.
+                         Default: no end
+\item[\tt end\_time]     Integer (HHMMSS) ending time to stop diagnostic output.
+                         Default: no end.
+\item[\tt duration]      Integer (HHHHMMSS) for the duration of each file. 
+                         Default = 00000000 (everything in one file).
+\item[\tt resolution]    Optional resolution (IM JM) for the ouput stream.
+                         Transforms betwee two regulate LogRect grid in index space. 
+                         Default is the native resolution.
+\item[\tt xyoffset]      Optional Flag for output grid offset when interpolating. Must be
+                         between 0 and 3. (Cryptic Meaning: 0:DcPc, 1:DePc, 2:DcPe, 3:DePe).
+                         Ignored when {\tt resolution} results in no interpolation (native).
+                         Default: 0 (DatelinCenterPoleCenter). 
+\item[\tt levels]        Optional list of output levels (Default is all levels on Native Grid).
+                         If {\tt vvars} is not specified, these are layer indeces. Otherwise
+                         see {\tt vvars, vunits, vscale}.
+\item[\tt vvars]         Optional field to use as the vertical coordinate and functional form
+                         of vertical interpolation. A second argument specifies 
+                         the component the field comes from. 
+                         Example 1: the entry 'log(PLE)','DYN' uses PLE from the
+                         DYN component as the vertical coordinate and interpolates
+                         to {\tt levels} linearly in its log. Example 2: 'THETA','DYN'
+                         a way of producing isentropic output.
+                         Only {\tt log}($\cdot$), {\tt pow}($\cdot$,{\em real number})
+                         and straight linear interpolation are supported.
+\item[\tt vunit]         Character string to use for units attribute of the vertical 
+                         coordinate in file. 
+                         The default is the MAPL\_CFIO default. 
+                         This affects only the name in the file.
+                         It does not do the conversion. See {\tt vscale}
+\item[\tt vscale]        Optional Scaling to convert VVARS units to VUNIT units.
+                         Default: no conversion.
+\item[\tt regrid\_exch]  Name of the exchange grid that can be used for interpolation
+                         between two LogRect grids or from a tile grid to a LogRect grid.
+                         Default: no exchange grid interpolation.
+                         irregular grid.
+\item[\tt regrid\_name]  Name of the Log-Rect grid to interpolate to when going from a tile 
+                         to Field to a gridde output. {\tt regrid\_exch} must be set, otherwise
+                         it is ignored.
+\item[\tt conservative]  Set to a non-zero integer to turn on conservative regridding when going
+                         from a native cube-sphere grid to lat-lon output.
+                         Default: 0
+\item[\tt deflate]       Set deflate level (0-9) of NETCDF output when format is CFIO or CFIOasync.
+                         Default: 0
+\item[\tt subset]        Optional subset (lonMin lonMax latMin latMax) for the output when performing
+                         non-conservative cube-sphere to lat-lon regridding of the output.
+\item[\tt chunksize]     Optional user specified chunking of NETCDF output when format is CFIO or CFIOasync, 
+                         (Lon chunksize, Lat chunksize, Lev chunksize, Time chunksize)
+\end{trivlist}
+\end{quote}
+
+The following is a sample HISORY.rc take from the FV\_HeldSuarez test.
+\begin{verbatim}
+EXPID:  fvhs_example
+EXPDSC: fvhs_(ESMF07_EXAMPLE)_5x4_Deg
+
+COLLECTIONS:
+      'dynamics_vars_eta'
+      'dynamics_vars_p'
+      ::
+
+dynamics_vars_eta.template:   '%y4%m2%d2_%h2%n2z',
+dynamics_vars_eta.format:     'CFIO',
+dynamics_vars_eta.frequency:  240000,
+dynamics_vars_eta.duration:   240000,
+dynamics_vars_eta.fields:     'T_EQ'     , 'HSPHYSICS'           ,
+                              'U'        , 'FVDYNAMICS'          ,
+                              'V'        , 'FVDYNAMICS'          ,
+                              'T'        , 'FVDYNAMICS'          ,
+                              'PLE'      , 'FVDYNAMICS'          ,
+                      ::
+
+dynamics_vars_p.template:   '%y4%m2%d2_%h2%n2z',
+dynamics_vars_p.format:     'flat',
+dynamics_vars_p.frequency:  240000,
+dynamics_vars_p.duration:   240000,
+dynamics_vars_p.vscale:     100.0,
+dynamics_vars_p.vunit:      'hPa',
+dynamics_vars_p.vvars:      'log(PLE)' , 'FVDYNAMICS'          ,   
+dynamics_vars_p.levels:      1000 900 850 750 500 300 250 150 1,
+dynamics_vars_p.fields:     'T_EQ'     , 'HSPHYSICS'           ,
+                            'U'        , 'FVDYNAMICS'          ,
+                            'V'        , 'FVDYNAMICS'          ,
+                            'T'        , 'FVDYNAMICS'          ,
+                            'PLE'      , 'FVDYNAMICS'          ,
+                      ::
+\end{verbatim}
+
+\subsubsection*{BUGS:}
+
+ \begin{enumerate}
+ \item It may not be well behaved if more than one instance exists in an application.
+ \item Its use for servicing a non-MAPL gridded components is not documented.
+ \item GrADS output is currently done through specialized calls, rather than through the 
+       CFIO library.
+ \item Horizontal and vertical interpolation correctly 
+       rely on CFIO, and so are not yet available for GrADS files.
+ \item If resolution attribute is used to INCREASE resolution, code may break.   
+ \item Grid offsetting is very limited and does not allow for arbitrary rotations
+       in longitude 
+ \item Currently, this component only handles MAPL supported grids, which currently are 
+       the regular lat-lon and the cubed-sphere ESMF grids that tile the entire sphere.
+
+ \end{enumerate}
+
+  
