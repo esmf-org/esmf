@@ -21,6 +21,12 @@
 // The code in this file implements the C++ Array methods declared
 // in the companion file ESMCI_Array.h
 //
+// Macros that affect the code:
+//   * WORKAROUND_NONBLOCKPROGRESSBUG - when defined limits the outsanding 
+//     non-blocking sends to one at a time, or in other places uses blocking
+//     send calls instead. This work-around was introduced for the 
+//     discover/pgi-14.1.0/mvapich2-2.0b combination that started hanging some
+//     of the RegridWeightGen tests in the --check part.
 //-----------------------------------------------------------------------------
 // include associated header file
 #include "ESMCI_Array.h"
@@ -6682,8 +6688,6 @@ void serverResponse(T *t, int count, int i, char **requestStreamServer,
 
 template<typename T>
 void clientProcess(T *t, char *responseStream, int responseStreamSize);
-
-#define WORKAROUND_NONBLOCKPROGRESSBUG
 
 template<typename T>
 void accessLookup(
