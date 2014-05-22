@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: MAPL_VarSpecMod.F90,v 1.27.12.2 2013-03-12 15:18:31 atrayano Exp $
+!  $Id: MAPL_VarSpecMod.F90,v 1.27.12.4 2013-09-17 20:35:50 atrayano Exp $
 
 #include "MAPL_ErrLog.h"
 

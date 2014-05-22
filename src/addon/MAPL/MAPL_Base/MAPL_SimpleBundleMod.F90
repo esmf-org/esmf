@@ -255,7 +255,7 @@ CONTAINS
           isPresent = .false.
 
           do n = 1, NumVars
-             call ESMF_FieldBundleGet(BUNDLE, n, FIELD, __RC__)
+             call MAPL_FieldBundleGet(BUNDLE, n, FIELD, __RC__)
              call ESMF_FieldGet (FIELD, name=fieldName, __RC__)
 
              if (fieldName == var_list(i)) then

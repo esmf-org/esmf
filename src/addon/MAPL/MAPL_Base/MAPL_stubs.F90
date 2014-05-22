@@ -42,12 +42,17 @@ subroutine latlon2cube(npx, npy, nlon, nlat, data_ll, data_cs)
 
 end subroutine latlon2cube
 
-subroutine GetWeightsC2C(npx, npy, npxout, npyout, index, weight) 
+subroutine GetWeightsC2C(npx, npy, npxout, npyout, index, weight, &
+         ee1, ee2, ff1, ff2)
   implicit none
   integer,  intent(in   ) :: npx,  npy
   integer,  intent(in   ) :: npxout, npyout
-  integer,  intent(  out) :: index(:,:,:,:)
-  real(8),  intent(  out) :: weight(:,:,:,:)
+  integer,  intent(  out) :: index(:,:,:)
+  real(8),  intent(  out) :: weight(:,:,:)
+  real(8),  intent(  out) :: ee1(:,:,:)
+  real(8),  intent(  out) :: ee2(:,:,:)
+  real(8),  intent(  out) :: ff1(:,:,:)
+  real(8),  intent(  out) :: ff2(:,:,:)
 end subroutine GetWeightsC2C
 
 !!!!!!!!!!!!!!!%%%%%%%%%%%%%%%%%%%%%%%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -115,20 +120,32 @@ subroutine GetWeights_init (in_ntiles,in_ncnst,in_npx,in_npy,in_npz,&
   integer            :: comm
 end subroutine GetWeights_init
 subroutine GetWeights(npx, npy, nlat, nlon, &
-          index, weight, id1, id2, jdc, l2c,&
-          ee1, ee2, ff1, ff2, gg1, gg2)
-       integer,  intent(in   ) :: npx,  npy
-       integer,  intent(in   ) :: nlon, nlat
-       integer,  intent(inout) :: index(3,nlon,nlat)
-       real(R8), intent(inout) :: weight(4,nlon,nlat)
-       integer,  intent(inout) :: id1(npx,npy)
-       integer,  intent(inout) :: id2(npx,npy)
-       integer,  intent(inout) :: jdc(npx,npy)
-       real(R8), intent(inout) :: l2c(4,npx,npy)
-       real(R8), pointer       :: ee1(:,:,:) 
-       real(R8), pointer       :: ee2(:,:,:) 
-       real(R8), pointer       :: ff1(:,:,:) 
-       real(R8), pointer       :: ff2(:,:,:) 
-       real(R8), pointer, optional :: gg1(:,:,:) 
-       real(R8), pointer, optional :: gg2(:,:,:) 
+    index, weight, id1, id2, jdc, l2c,     &
+    ee1, ee2, ff1, ff2, gg1, gg2,          &
+     e1,  e2,  f1,  f2,  g1,  g2,          &
+    sublons, sublats, AmNodeRoot, WriteNetcdf) 
+  integer,  intent(in   ) :: npx,  npy
+  integer,  intent(in   ) :: nlon, nlat
+  integer,  intent(  out) :: index(3,nlon,nlat)
+  real(R8), intent(  out) :: weight(4,nlon,nlat)
+  integer,  intent(  out) :: id1(npx,npy)
+  integer,  intent(  out) :: id2(npx,npy)
+  integer,  intent(  out) :: jdc(npx,npy)
+  real(R8), intent(  out) :: l2c(4,npx,npy)
+  real(R8), intent(  out) :: ee1(npx,npy,3)
+  real(R8), intent(  out) :: ee2(npx,npy,3)
+  real(R8), intent(  out) :: ff1(npx,npy,3)
+  real(R8), intent(  out) :: ff2(npx,npy,3)
+  real(R8), intent(  out) :: gg1(npx,npy,3)
+  real(R8), intent(  out) :: gg2(npx,npy,3)
+  real(R8), pointer       ::  e1(:,:,:)
+  real(R8), pointer       ::  e2(:,:,:)
+  real(R8), pointer       ::  f1(:,:,:)
+  real(R8), pointer       ::  f2(:,:,:)
+  real(R8), pointer       ::  g1(:,:,:)
+  real(R8), pointer       ::  g2(:,:,:)
+  real(R8), optional      :: sublons(:)
+  real(R8), optional      :: sublats(:)
+  logical , optional      :: AmNodeRoot
+  logical , optional      :: WriteNetcdf
 end subroutine GetWeights

@@ -59,13 +59,13 @@ The following packages are *required* to work with ESMPy:
 * `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc>`_
 * `python <http://python.org/>`_
 * `numpy <http://www.numpy.org/>`_
-* ctypes (included with numpy)
 
 The following packages are *optional*:
 
 * mpi4py - python bindings to MPI, needed to run the parallel regridding tests
 * ESMF installation with NetCDF - required to create grids and meshes from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
+* nose - for nose testing
 
 ============
 Installation
@@ -125,25 +125,26 @@ To use this package in an external program, import it with:
 Validation
 ----------
 
-The setup.py file can be used to run all of the ESMPy tests, like this:
+The setup.py file can be used to run all of the ESMPy tests (in serial or 
+parallel), like this:
+
+    python setup.py test_all
+
+    python setup.py test_all_parallel
+
+or subsets of the tests individually, like this:
 
     python setup.py test
-
-or:
 
     python setup.py test_regrid
 
     python setup.py test_regrid_from_file
 
-    python setup.py test_all
-
     python setup.py test_parallel
-    
+
     python setup.py test_regrid_parallel
 
     python setup.py test_regrid_from_file_parallel
-
-    python setup.py test_all_parallel
 
 NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
 The "test_regrid_from_file_dryrun" command will simply download the test 
@@ -170,14 +171,16 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-- There is no FieldBundle class, only single Fields
-- There is no support for tripole or multi-tile Grids
+- There is no FieldBundle class, only single Fields.
+- There is no support for tripole or multi-tile Grids.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK 
   support.
+- Conservative regridding with a source Mesh created from file is not supported, because the Mesh cannot retrieve
+  coordinates from the elements.
 
 Testing related:
 
-- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI
+- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI.
 
 
 ===============================
