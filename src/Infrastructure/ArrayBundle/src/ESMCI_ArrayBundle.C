@@ -1337,18 +1337,24 @@ int ArrayBundle::sparseMatMul(
     
     // prepare termOrders vector
     vector<ESMC_TermOrder_Flag> termOrders;
+    int count=0;  // reset
+    if (srcArraybundle != NULL){
+      count = srcArraybundle->getCount();
+    }else if (dstArraybundle != NULL){
+      count = dstArraybundle->getCount();
+    }
     if (termorderflag_len == 0 || termorderflag == NULL){
       // set the default for all Array pairs
-      for (int i=0; i<srcArraybundle->getCount(); i++)
+      for (int i=0; i<count; i++)
         termOrders.push_back(ESMC_TERMORDER_FREE);
     }else{
       if (termorderflag_len == 1){
         // set the single provided order for all Array pairs
-        for (int i=0; i<srcArraybundle->getCount(); i++)
+        for (int i=0; i<count; i++)
           termOrders.push_back(*termorderflag);
-      }else if(termorderflag_len == srcArraybundle->getCount()){
+      }else if(termorderflag_len == count){
         // copy the provided entries over
-        for (int i=0; i<srcArraybundle->getCount(); i++)
+        for (int i=0; i<count; i++)
           termOrders.push_back(termorderflag[i]);
       }else{
         // inconsistency detected
@@ -1485,35 +1491,40 @@ int ArrayBundle::sparseMatMul(
       int rraCount = rraList.size();
       // set filterBitField  
       int filterBitField = 0x0; // init. to execute _all_ operations in XXE
-      if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
-        filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-        filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      if (count > 0){      
+        if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
+          filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter
 #ifdef SMMINFO
-      ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
-        ESMC_LOGMSG_INFO);
-#endif
-      }else if (termOrders[0] == ESMC_TERMORDER_SRCPET){
-        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
+        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
           ESMC_LOGMSG_INFO);
 #endif
-      }else if (termOrders[0] == ESMC_TERMORDER_FREE){
-        // not safe to use FREE for AB routehandle -> use TERMORDER_SRCPET
-        // settings here...
-//        filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-//        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-//        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+        }else if (termOrders[0] == ESMC_TERMORDER_SRCPET){
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE",
-          ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
+            ESMC_LOGMSG_INFO);
 #endif
+        }else if (termOrders[0] == ESMC_TERMORDER_FREE){
+          // not safe to use FREE for AB routehandle -> use TERMORDER_SRCPET
+          // settings here...
+//          filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+//          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+//          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE",
+            ESMC_LOGMSG_INFO);
+#endif
+        }
       }
       if (zeroflag!=ESMC_REGION_TOTAL)
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
