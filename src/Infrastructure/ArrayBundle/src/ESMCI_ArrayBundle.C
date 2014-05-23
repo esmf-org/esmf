@@ -1502,7 +1502,12 @@ int ArrayBundle::sparseMatMul(
           ESMC_LOGMSG_INFO);
 #endif
       }else if (termOrders[0] == ESMC_TERMORDER_FREE){
-        filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+        // not safe to use FREE for AB routehandle -> use TERMORDER_SRCPET
+        // settings here...
+//        filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+//        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+//        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
         filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
         filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
