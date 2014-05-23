@@ -43,10 +43,11 @@ module NUOPC_Connector
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
 
   type type_InternalStateStruct
-    type(ESMF_FieldBundle)  :: srcFields
-    type(ESMF_FieldBundle)  :: dstFields
-    type(ESMF_RouteHandle)  :: rh
-    type(ESMF_State)        :: state
+    type(ESMF_FieldBundle)              :: srcFields
+    type(ESMF_FieldBundle)              :: dstFields
+    type(ESMF_RouteHandle)              :: rh
+    type(ESMF_State)                    :: state
+    type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
   end type
 
   type type_InternalState
@@ -575,6 +576,9 @@ print *, "current bondLevel=", bondLevel
     call ESMF_UserCompSetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! clean starting condition for pointer member inside internal state
+    nullify(is%wrap%termOrders)
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
@@ -1559,7 +1563,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       ! if not specialized -> use default method to:
       ! precompute the regrid for all src to dst Fields
       call FieldBundleCplStore(is%wrap%srcFields, is%wrap%dstFields, &
-        cplList=cplList, rh=is%wrap%rh, name=name, rc=rc)
+        cplList=cplList, rh=is%wrap%rh, termOrders=is%wrap%termOrders, &
+        name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1643,7 +1648,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       ! if not specialized -> use default method to:
       ! execute the regrid operation
       call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
-        routehandle=is%wrap%rh, rc=rc)
+        routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1735,7 +1740,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
-    ! deallocate remaining internal state memebers
+    ! deallocate and destroy remaining internal state members
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1745,7 +1750,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     call ESMF_StateDestroy(is%wrap%state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+    if (associated(is%wrap%termOrders)) then
+      deallocate(is%wrap%termOrders, stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Deallocation of termOrders list.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -1912,13 +1924,15 @@ print *, "found match:"// &
     
   !-----------------------------------------------------------------------------
 
-  subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, name, rc)
-    type(ESMF_FieldBundle), intent(in)            :: srcFB
-    type(ESMF_FieldBundle), intent(inout)         :: dstFB
-    character(*),           pointer               :: cplList(:)
-    type(ESMF_RouteHandle), intent(inout)         :: rh
-    character(*),           intent(in)            :: name
-    integer,                intent(out), optional :: rc
+  subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
+    rc)
+    type(ESMF_FieldBundle),    intent(in)            :: srcFB
+    type(ESMF_FieldBundle),    intent(inout)         :: dstFB
+    character(*),              pointer               :: cplList(:)
+    type(ESMF_RouteHandle),    intent(inout)         :: rh
+    type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
+    character(*),              intent(in)            :: name
+    integer,                   intent(out), optional :: rc
     ! local variables
     integer                         :: i, j, k, count, stat, localDeCount
     type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
@@ -1964,6 +1978,20 @@ print *, "found match:"// &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
+    
+    ! consistency check the incoming "termOrders" argument
+    if (associated(termOrders)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'termOrders' argument must enter unassociated!", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    ! prepare "termOrders" list
+    allocate(termOrders(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of termOrders.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! access the fields in the add order
     allocate(srcFields(count), dstFields(count), stat=stat)
@@ -2296,6 +2324,34 @@ print *, "found match:"// &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         deallocate(weightsPerPet, deBlockList)
       endif
+      
+      ! determine "termOrders" list which will be used by Run() method
+      termOrders(i) = ESMF_TERMORDER_FREE ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"termorder=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="srcseq") then
+              termOrders(i) = ESMF_TERMORDER_SRCSEQ
+            else if (trim(chopSubString(2))=="srcpet") then
+              termOrders(i) = ESMF_TERMORDER_SRCPET
+            else if (trim(chopSubString(2))=="free") then
+              termOrders(i) = ESMF_TERMORDER_FREE
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to FREE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
       
       ! local garbage collection
       deallocate(factorIndexList, factorList)
