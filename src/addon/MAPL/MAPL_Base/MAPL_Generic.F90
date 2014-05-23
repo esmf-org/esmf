@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: MAPL_Generic.F90,v 1.99.4.6 2013-05-21 15:14:20 bmauer Exp $
+!  $Id: MAPL_Generic.F90,v 1.99.4.8.4.1 2013-12-18 21:30:06 bmauer Exp $
 
 #include "MAPL_ErrLog.h"
 #define GET_POINTER ESMFL_StateGetPointerToData
@@ -342,6 +342,7 @@ type MAPL_GenericGrid
    integer                                  :: Xcomm, Ycomm
    integer                                  :: readers_comm, IOscattercomm
    integer                                  :: writers_comm, IOgathercomm
+   integer                                  :: num_readers, num_writers
    integer, pointer                         :: i1(:), in(:), j1(:), jn(:)
 end type  MAPL_GenericGrid
 
@@ -393,6 +394,7 @@ type  MAPL_MetaComp
    integer                        , pointer :: phase_record(:)   => null()
    integer                        , pointer :: phase_coldstart(:)=> null()
    real                                     :: HEARTBEAT
+   type (MAPL_Communicators)                :: comm
 end type MAPL_MetaComp
 !EOC
 !EOP
@@ -1040,6 +1042,8 @@ recursive subroutine MAPL_GenericInitialize ( GC, IMPORT, EXPORT, CLOCK, RC )
   VERIFY_(STATUS)
 
   mygrid%comm = comm
+  mygrid%num_readers =  num_readers
+  mygrid%num_writers =  num_writers
 
 ! Y-dir communicators
   color =  MYGRID%NX0
@@ -3217,7 +3221,7 @@ end subroutine MAPL_DateStampGet
                                    EXCHANGEGRID,                              &
                                    CLOCK,                                     &
                                    NumInitPhases,                             &
-                                   GCS, CCS, GIM, GEX, CF, HEARTBEAT, RC )
+                                   GCS, CCS, GIM, GEX, CF, HEARTBEAT, maplComm, RC )
 
     !ARGUMENTS:
     type (MAPL_MetaComp),           intent(INOUT) :: STATE
@@ -3250,6 +3254,7 @@ end subroutine MAPL_DateStampGet
     real                 ,optional, intent(  OUT) :: HEARTBEAT
     integer,              optional, intent(  OUT) :: NumInitPhases
     type (ESMF_Config),   optional, intent(  OUT) :: CF
+    type (MAPL_Communicators), optional, intent(OUT) :: maplComm
 
 ! !DESCRIPTION:
 ! This is the way of querying the opaque {\em MAPL\_Generic}
@@ -3458,6 +3463,10 @@ end subroutine MAPL_DateStampGet
         NumInitPhases = SIZE(STATE%PHASE_INIT)
      endif
 
+     if(present(maplComm)) then
+       maplComm = state%comm
+     end if
+
     RETURN_(ESMF_SUCCESS)
   end subroutine MAPL_GenericStateGet
 
@@ -3470,7 +3479,7 @@ end subroutine MAPL_DateStampGet
   !INTERFACE:
   subroutine MAPL_GenericStateSet (STATE, ORBIT, LM, RUNALARM, CHILDINIT, &
                                    LOCSTREAM, EXCHANGEGRID, CLOCK, NAME,  &
-                                   CF, ConfigFile, RC)
+                                   CF, ConfigFile, maplComm, RC)
 
     !ARGUMENTS:
     type (MAPL_MetaComp),            intent(INOUT) :: STATE
@@ -3484,6 +3493,7 @@ end subroutine MAPL_DateStampGet
     type (ESMF_Config)   , optional, intent(IN   ) :: CF
     character(len=*)     , optional, intent(IN   ) :: NAME
     character(len=*)     , optional, intent(IN   ) :: ConfigFile
+    type(MAPL_Communicators), optional, intent(IN) :: maplComm
     integer,               optional, intent(  OUT) :: RC
     !EOPI
 
@@ -3533,6 +3543,10 @@ end subroutine MAPL_DateStampGet
         call ESMF_ConfigLoadFile(State%CF,ConfigFile,rc=STATUS)
         VERIFY_(STATUS)
      endif
+
+     if (present(maplComm)) then
+        State%comm = maplComm
+     end if
 
     RETURN_(ESMF_SUCCESS)
   end subroutine MAPL_GenericStateSet
@@ -3828,6 +3842,9 @@ end subroutine MAPL_DateStampGet
      VERIFY_(STATUS)
      CHILD_META%parentGC = parentGC
   end if
+
+! copy communicator to childs mapl_metacomp
+  CHILD_META%comm = META%comm
 
   call ESMF_GridCompSetServices ( META%GCS(I), SS, RC=status )
   VERIFY_(STATUS)
@@ -4378,6 +4395,11 @@ end function MAPL_AddChildFromGC
        filetype = 'binary'
     end if
 
+    if (mpl%grid%num_writers == 1 .and. filetype == 'pbinary') then
+       !ALT: this is a special case, we will treat the same as BINARY
+       filetype = 'binary'
+    end if
+
     if (filetype == 'binary' .or. filetype == 'BINARY') then
        UNIT = GETFILE(FILENAME, form="unformatted", rc=status)
        VERIFY_(STATUS)
@@ -4621,20 +4643,42 @@ end function MAPL_AddChildFromGC
     character(len=MPI_MAX_INFO_KEY )      :: key
     integer                               :: nkeys, flag, valuelen=MPI_MAX_INFO_VAL
     logical                               :: bootstrapable
+    logical                               :: ignoreEOF
 
 ! Implemented a suggestion by Arlindo to allow files beginning with "-" (dash)
 ! to be skipped if file does not exist and values defaulted
 
+! Implemented a suggestion by Larry to allow files beginning with "+" (plus)
+! to not fail if they do not contain enough variables or skipped alltogether
+! if file does not exist. In both case values are defaulted
+
     FNAME = adjustl(FILENAME)
     bootstrapable = .false.
+    ignoreEOF = .false.
+
     if (FNAME(1:1) == "-") then
        bootstrapable = .true.
        TMP = FNAME(2:)
        FNAME = TMP
+    end if
+    if (FNAME(1:1) == "+") then
+       bootstrapable = .true.
+       ignoreEOF = .true.
+       TMP = FNAME(2:)
+       FNAME = TMP
+    end if
+
+    if (bootstrapable) then
        inquire(FILE = FNAME, EXIST=FileExists)
        if (.not. FileExists) then
           call WRITE_PARALLEL("Bootstrapping " // trim(FNAME))
           RETURN_(ESMF_SUCCESS)
+       end if
+    end if
+
+    if (ignoreEOF) then
+       if (filetype == 'pbinary' .or. filetype == 'PBINARY') then
+          filetype = 'binary'
        end if
     end if
 
@@ -4645,6 +4689,11 @@ end function MAPL_AddChildFromGC
        filetype = 'binary'
     end if
     
+    if (mpl%grid%num_readers == 1 .and. filetype == 'pbinary') then
+       !ALT: this is a special case, we will treat the same as BINARY
+       filetype = 'binary'
+    end if
+
     if (filetype == 'binary' .or. filetype == 'BINARY') then
        UNIT = GETFILE(FNAME, form="unformatted", rc=status)
        VERIFY_(STATUS)
@@ -4796,7 +4845,7 @@ end function MAPL_AddChildFromGC
        VERIFY_(STATUS)
 
     elseif(UNIT/=0) then
-       call MAPL_VarRead(UNIT=UNIT, STATE=STATE, RC=STATUS)
+       call MAPL_VarRead(UNIT=UNIT, STATE=STATE, IgnoreEOF=ignoreEOF, RC=STATUS)
        VERIFY_(STATUS)
        call FREE_FILE(UNIT)
     else
@@ -7092,9 +7141,14 @@ recursive subroutine MAPL_WireComponent(GC, RC)
 
    character(len=ESMF_MAXSTR), parameter :: IAm="MAPL_ResourceC"
    integer                               :: STATUS
-   integer                               :: I
+   integer                               :: I,N,M
    character(len=ESMF_MAXSTR)            :: LBL(3)
    character(len=ESMF_MAXSTR)            :: TYPE 
+
+   character(len=ESMF_MAXSTR), pointer, save :: LABELS(:) => NULL()
+   character(len=ESMF_MAXSTR), pointer       :: DUMMYS(:)
+   integer                                   :: PRINTRC
+   logical                                   :: found
 
    TYPE = STATE%COMPNAME(index(STATE%COMPNAME,":")+1:)
    
@@ -7102,18 +7156,94 @@ recursive subroutine MAPL_WireComponent(GC, RC)
    LBL(2) = trim(TYPE)//'_'//trim(LABEL)
    LBL(3) = trim(LABEL)
 
+   call ESMF_ConfigFindLabel( STATE%CF, label='PRINTRC:', rc=status )
+   IF (STATUS == ESMF_SUCCESS) then
+   call ESMF_ConfigGetAttribute(STATE%CF, PRINTRC, label = 'PRINTRC:', default = 0, RC=STATUS )
+   else
+   PRINTRC = 0
+   endif
+
    DO I=1,SIZE(LBL)
       call ESMF_ConfigFindLabel( STATE%CF, label=trim(LBL(I)), rc=status )
       IF (STATUS == ESMF_SUCCESS) then
          call ESMF_ConfigGetAttribute(STATE%CF, VALUE, &
               label = trim(LBL(I)), &
               default = DEFAULT, RC=STATUS )
+
+                m = 1
+          if( .not.associated( LABELS ) ) then
+                   allocate  ( LABELS(m) )
+                               LABELS(m) = trim(LBL(I))
+                   if( present(default) ) then
+                       if( trim(value).ne.trim(default) .or. PRINTRC.eq.1 ) then
+                           if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m)),trim(value)
+                       endif
+                   else
+                           if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m)),trim(value)
+                   endif
+          else
+            found = .false.
+                m = size(LABELS)
+            do n=1,m
+               if( trim(LABELS(n)).eq.trim(LBL(I)) ) then
+                   found = .true.
+                   exit
+               endif
+            enddo
+            if( .not.found ) then
+                 allocate( DUMMYS(m) )
+                           DUMMYS = LABELS
+               deallocate( LABELS )
+                 allocate( LABELS(m+1) )
+                           LABELS(1:m) = DUMMYS
+                           LABELS(m+1) = trim(LBL(I))
+                   if( present(default) ) then
+                       if( trim(value).ne.trim(default) .or. PRINTRC.eq.1 ) then
+                           if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m+1)),trim(value)
+                       endif
+                   else
+                           if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m+1)),trim(value)
+                   endif
+               deallocate( DUMMYS )
+            endif
+          endif
+
          RETURN_(STATUS)
       END IF
    ENDDO
+ 1000 format(1x,'  Character Resource Parameter ',a,' ',a)
 
    if (present(DEFAULT)) then
-      VALUE = DEFAULT
+      VALUE = trim(DEFAULT)
+        if( PRINTRC.eq.1 ) then
+
+                m = 1
+          if( .not.associated( LABELS ) ) then
+                   allocate  ( LABELS(m) )
+                               LABELS(m) = trim(LABEL)
+                               if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m)),trim(value)
+          else
+            found = .false.
+                m = size(LABELS)
+            do n=1,m
+               if( trim(LABELS(n)).eq.trim(LABEL) ) then
+                   found = .true.
+                   exit
+               endif
+            enddo
+            if( .not.found ) then
+                 allocate( DUMMYS(m) )
+                           DUMMYS = LABELS
+               deallocate( LABELS )
+                 allocate( LABELS(m+1) )
+                           LABELS(1:m) = DUMMYS
+                           LABELS(m+1) = trim(LABEL)
+                           if(MAPL_AM_I_ROOT()) write(6,1000) trim(LABELS(m+1)),trim(value)
+               deallocate( DUMMYS )
+            endif
+          endif
+
+        endif
       RETURN_(ESMF_SUCCESS)
    end if
 

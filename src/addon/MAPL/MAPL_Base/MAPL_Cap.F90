@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: MAPL_Cap.F90,v 1.37.12.4 2013-05-23 20:08:05 atrayano Exp $
+!  $Id: MAPL_Cap.F90,v 1.37.12.4.14.6 2014-04-01 18:08:20 bmauer Exp $
 
 #include "MAPL_Generic.h"
 
@@ -48,6 +48,7 @@ module MAPL_CapMod
   use MAPL_HistoryGridCompMod, only : Hist_SetServices => SetServices
   use MAPL_HistoryGridCompMod, only : HISTORY_ExchangeListWrap
   use MAPL_ExtDataGridCompMod, only : ExtData_SetServices => SetServices
+  use MAPL_CFIOServerMod
 
   implicit none
   private
@@ -68,6 +69,8 @@ module MAPL_CapMod
      module procedure MAPL_ConfigSetString
      module procedure MAPL_ConfigSetIntI4
   end interface
+
+  include "mpif.h"
 
 contains
 
@@ -165,8 +168,18 @@ contains
    integer                               :: i, itemcount, comm
    type (ESMF_StateItem_Flag), pointer   :: ITEMTYPES(:)
    character(len=ESMF_MAXSTR ), pointer  :: ITEMNAMES(:)
-   type (ESMF_Field)                     :: field, fld
+   type (ESMF_Field)                     :: field
+   type (ESMF_FieldBundle)               :: bundle
    integer                               :: useShmem
+   integer                               :: esmfcommsize,MaxMem,nnodes
+   integer                               :: myRank, ioColor, esmfColor, key, esmfComm, ioComm,intercomm
+   type(MAPL_Communicators)              :: mapl_Comm
+   integer                               :: ioMyRank,IOnPes,IOcounter
+   logical                               :: lexist
+   namelist / ioserver / nnodes, CoresPerNode, maxMem
+   character(len=ESMF_MAXSTR )           :: DYCORE
+   integer                               :: snglcol
+
 
 ! Begin
 !------
@@ -174,497 +187,579 @@ contains
 !  Initialize ESMF
 !-----------------
 
+   call mpi_init(status)
+   VERIFY_(STATUS) 
+   call mpi_comm_size(MPI_COMM_WORLD,nPes,status)
+   VERIFY_(STATUS)
+   call mpi_comm_rank(MPI_COMM_WORLD,myRank,status)
+   VERIFY_(STATUS)
+   mapl_comm%myGlobalRank = myRank
+
+   if (myRank == 0) then
+      inquire(file="ioserver.nml",exist=lexist)
+      if (lexist) then
+         open(99,file="ioserver.nml",status='old')
+         read(unit=99,NML=ioserver)
+         close(99)
+         write(*,'(A,I5,A,I5,A,I6)')'Running ioserver on ',(nPes/CoresPerNode)-nnodes,' nodes with ',CoresPerNode,' CoresPerNode and maxMem ',MaxMem
+         write(*,'(A,I5,A)')'Runing model on ',nnodes,' nodes'
+         esmfcommsize = nnodes*CoresPerNode
+      else
+         esmfcommsize = nPes
+         coresPerNode = 0
+         maxMem = 0
+      end if
+   end if
+   call MPI_BCAST(esmfcommsize, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, status)
+   VERIFY_(STATUS)
+   call MPI_BCAST(corespernode, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, status)
+   VERIFY_(STATUS)
+   call MPI_BCAST(maxMem, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, status)
+   VERIFY_(STATUS)
+   mapl_comm%maxMem = maxMem
+   mapl_comm%corespernode = corespernode
+   ioColor = MPI_UNDEFINED
+   esmfColor = MPI_UNDEFINED
+   if (myRank < esmfcommsize) then
+      esmfColor = 0
+   else
+      ioColor = 0
+   end if
+   mapl_comm%ioCommSize = nPes-esmfcommsize
+ 
+   call mpi_comm_split(MPI_COMM_WORLD,esmfColor,myRank,esmfComm,status)
+   VERIFY_(STATUS)
+   call mpi_comm_split(MPI_COMM_WORLD,ioColor,myRank,ioComm,status)
+   VERIFY_(STATUS)
+
+   mapl_comm%esmfCommSize = esmfcommsize
+   mapl_comm%MaplCommSize = nPes
+
+   mapl_Comm%maplComm = MPI_COMM_WORLD
+   mapl_comm%esmfComm = esmfComm
+   mapl_comm%ioComm = ioComm
+   mapl_comm%ioCommRoot=esmfcommsize 
+ 
+   call MAPL_CFIOServerInitMpiTypes()
+  
+   ESMFCOMMIF: if (esmfComm /= MPI_COMM_NULL) then
 #if defined(ENABLE_ESMF_ERR_LOGGING)
-   call ESMF_Initialize (vm=vm, rc=status)
+      call ESMF_Initialize (vm=vm, mpiCommunicator=esmfComm, rc=status)
 #else
-   call ESMF_Initialize (vm=vm, logKindFlag=ESMF_LOGKIND_NONE, rc=status)
+      call ESMF_Initialize (vm=vm, logKindFlag=ESMF_LOGKIND_NONE, mpiCommunicator=esmfComm, rc=status)
 #endif
-   VERIFY_(STATUS)
-   call ESMF_VMGet      (VM, petcount=NPES, mpiCommunicator=comm, rc=status)
-   VERIFY_(STATUS)
-
-
-   call MAPL_GetNodeInfo (comm=comm, rc=status)
-   VERIFY_(STATUS)
-
-   AmIRoot_ = MAPL_Am_I_Root(vm)
-
-   if (present(AmIRoot)) then
-      AmIRoot = AmIRoot_
-   end if
-
-!  Open the CAP's configuration from CAP.rc
-!------------------------------------------
-
-   config = ESMF_ConfigCreate (                   rc=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_ConfigLoadFile   ( config, 'CAP.rc', rc=STATUS )
-   VERIFY_(STATUS)
-
-!  CAP's MAPL MetaComp
-!---------------------
-
-   if(present(Name)) then
-      call MAPL_Set (MAPLOBJ, name= Name, cf=CONFIG,    rc=STATUS )
       VERIFY_(STATUS)
-   else
-      call MAPL_Set (MAPLOBJ, name='CAP', cf=CONFIG,    rc=STATUS )
+      call ESMF_VMGet      (VM, petcount=NPES, mpiCommunicator=comm, rc=status)
       VERIFY_(STATUS)
-   end if
 
-! Check if user wants to use node shared memory (default is no)
-!--------------------------------------------------------------
-   call MAPL_GetResource( MAPLOBJ, useShmem,  label='USE_SHMEM:',  default = 0, rc=STATUS )
-   if (useShmem /= 0) then
-      call MAPL_InitializeShmem (rc=status)
+
+      call MAPL_GetNodeInfo (comm=comm, rc=status)
       VERIFY_(STATUS)
-   end if
 
-!  Create Clock. This is a private routine that sets the start and 
-!   end times and the time interval of the clock from the configuration.
-!   The start time is temporarily set to 1 interval before the time in the
-!   configuration. Once the Alarms are set in intialize, the clock will
-!   be advanced to guarantee it and its alarms are in the same state as they
-!   were after the last advance before the previous Finalize.
-!---------------------------------------------------------------------------
+      AmIRoot_ = MAPL_Am_I_Root(vm)
 
-   call MAPL_ClockInit ( MAPLOBJ, clock, NSTEPS,          rc=STATUS )
-   VERIFY_(STATUS)
-
-   clock_HIST = ESMF_ClockCreate ( clock, rc=STATUS )  ! Create copy for HISTORY
-   VERIFY_(STATUS)
-
-   CoresPerNode = MAPL_CoresPerNodeGet(comm,rc=status)
-   VERIFY_(STATUS)
-
-   ! We check resource for CoresPerNode (no longer needed to be in CAR.rc)
-   ! If it is set in the resource, we issue an warning if the
-   ! value does not agree with the detected CoresPerNode
-
-   call ESMF_ConfigGetAttribute(config, value=N, Label="CoresPerNode:", rc=status)
-   if(STATUS==ESMF_SUCCESS) then
-      if (CoresPerNode /= N) then
-         call WRITE_PARALLEL("WARNING: CoresPerNode set, but does NOT match detected value")
+      if (present(AmIRoot)) then
+         AmIRoot = AmIRoot_
       end if
-   end if
 
-   ASSERT_(CoresPerNode<=NPES)
+   !  Open the CAP's configuration from CAP.rc
+   !------------------------------------------
 
-   call ESMF_ConfigGetAttribute(config, value=HEARTBEAT_DT, Label="HEARTBEAT_DT:", rc=status)
-   VERIFY_(STATUS)
-   call ESMF_TimeIntervalSet( Frequency, S=HEARTBEAT_DT, rc=status )
-   VERIFY_(STATUS)
-
-
-   PERPETUAL = ESMF_AlarmCreate( clock=clock_HIST, name='PERPETUAL', ringinterval=Frequency, rc=status )
-   VERIFY_(STATUS)
-   call ESMF_AlarmRingerOff( PERPETUAL, rc=status )
-   VERIFY_(STATUS)
-
-! Set CLOCK for AGCM
-! ------------------
-
-   call MAPL_GetResource( MAPLOBJ, PERPETUAL_YEAR,  label='PERPETUAL_YEAR:',  default = -999, rc=STATUS )
-   VERIFY_(STATUS)
-   call MAPL_GetResource( MAPLOBJ, PERPETUAL_MONTH, label='PERPETUAL_MONTH:', default = -999, rc=STATUS )
-   VERIFY_(STATUS)
-   call MAPL_GetResource( MAPLOBJ, PERPETUAL_DAY,   label='PERPETUAL_DAY:',   default = -999, rc=STATUS )
-   VERIFY_(STATUS)
-
-   LPERP = ( ( PERPETUAL_DAY   /= -999 ) .or. &
-             ( PERPETUAL_MONTH /= -999 ) .or. &
-             ( PERPETUAL_YEAR  /= -999 ) )
-
-   if(         PERPETUAL_DAY   /= -999 ) then
-      ASSERT_( PERPETUAL_MONTH /= -999 )
-      ASSERT_( PERPETUAL_YEAR  /= -999 )
-   endif
-
-   if( LPERP ) then
-       if (AmIRoot_) then
-           if( PERPETUAL_YEAR  /= -999 ) print *, 'Using Perpetual  Year: ',PERPETUAL_YEAR
-           if( PERPETUAL_MONTH /= -999 ) print *, 'Using Perpetual Month: ',PERPETUAL_MONTH
-           if( PERPETUAL_DAY   /= -999 ) print *, 'Using Perpetual   Day: ',PERPETUAL_DAY
-       endif
-
-       call ESMF_ClockGet ( clock, name=clockname, rc=status )
-       clockname = trim( clockname ) // '_PERPETUAL'
-       call ESMF_Clockset ( clock, name=clockname, rc=status )
-
-       call ESMF_ClockGet ( clock_HIST, name=clockname, rc=status )
-       clockname = trim( clockname ) // '_PERPETUAL'
-       call ESMF_Clockset ( clock_HIST, name=clockname, rc=status )
-
-       call Perpetual_Clock ( clock, clock_HIST, PERPETUAL_YEAR, PERPETUAL_MONTH, PERPETUAL_DAY, STATUS )
-       VERIFY_(STATUS)
-   endif
-
-!  Get configurable info to create HIST 
-!  and the ROOT of the computational hierarchy
-!---------------------------------------------
-
-!BOR
-
-! !RESOURCE_ITEM: string :: Name of ROOT's config file
-   call MAPL_GetResource(MAPLOBJ, ROOT_CF,      "ROOT_CF:", default="ROOT.rc",       RC=STATUS ) 
-   VERIFY_(STATUS)
-
-! !RESOURCE_ITEM: string :: Name to assign to the ROOT component
-   call MAPL_GetResource(MAPLOBJ, ROOT_NAME,    "ROOT_NAME:", default="ROOT",           RC=STATUS ) 
-   VERIFY_(STATUS)
-
-! !RESOURCE_ITEM: string :: Name of HISTORY's config file 
-   call MAPL_GetResource(MAPLOBJ, HIST_CF,      "HIST_CF:", default="HIST.rc",        RC=STATUS ) 
-   VERIFY_(STATUS)
-
-! !RESOURCE_ITEM: string :: Name of ExtData's config file
-   call MAPL_GetResource(MAPLOBJ, EXTDATA_CF,   "EXTDATA_CF:", default='ExtData.rc',     RC=STATUS ) 
-   VERIFY_(STATUS)
-
-! !RESOURCE_ITEM: string :: Control Timers 
-   call MAPL_GetResource(MAPLOBJ, enableTimers, "MAPL_ENABLE_TIMERS:", default='NO',             RC=STATUS )
-   VERIFY_(STATUS)
-
-! !RESOURCE_ITEM: string :: Control Memory Diagnostic Utility 
-   call MAPL_GetResource(MAPLOBJ, enableMemUtils, "MAPL_ENABLE_MEMUTILS:", default='NO',             RC=STATUS )
-   VERIFY_(STATUS)
-!EOR
-   if (enableTimers /= 'YES' .and. enableTimers /= 'yes') then
-      call MAPL_ProfDisable( rc=STATUS )
+      config = ESMF_ConfigCreate (                   rc=STATUS )
       VERIFY_(STATUS)
-   end if
+      call ESMF_ConfigLoadFile   ( config, 'CAP.rc', rc=STATUS )
+      VERIFY_(STATUS)
 
-  if (enableMemUtils /= 'YES' .and. enableMemUtils /= 'yes') then
-     call MAPL_MemUtilsDisable( rc=STATUS )
-     VERIFY_(STATUS)
-  else
-     call MAPL_MemUtilsInit( rc=STATUS )
-     VERIFY_(STATUS)
-  end if
+   !  CAP's MAPL MetaComp
+   !---------------------
 
-   call MAPL_GetResource( MAPLOBJ, printSpec, label='PRINTSPEC:', default = 0, rc=STATUS )
-   VERIFY_(STATUS)
+      call MAPL_Set(MAPLOBJ, maplComm=mapl_Comm, rc=status)
+      VERIFY_(STATUS)
 
-! Handle RUN_DT in ROOT_CF
-!-------------------------
+      if(present(Name)) then
+         call MAPL_Set (MAPLOBJ, name= Name, cf=CONFIG,    rc=STATUS )
+         VERIFY_(STATUS)
+      else
+         call MAPL_Set (MAPLOBJ, name='CAP', cf=CONFIG,    rc=STATUS )
+         VERIFY_(STATUS)
+      end if
 
-   cf_root = ESMF_ConfigCreate(rc=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_ConfigLoadFile(cf_root, ROOT_CF, rc=STATUS )
-   VERIFY_(STATUS)
+   ! Check if user wants to use node shared memory (default is no)
+   !--------------------------------------------------------------
+      call MAPL_GetResource( MAPLOBJ, useShmem,  label='USE_SHMEM:',  default = 0, rc=STATUS )
+      if (useShmem /= 0) then
+         call MAPL_InitializeShmem (rc=status)
+         VERIFY_(STATUS)
+      end if
 
-   call ESMF_ConfigGetAttribute(cf_root, value=RUN_DT, Label="RUN_DT:", rc=status)
-   if (STATUS == ESMF_SUCCESS) then
-      if (heartbeat_dt /= run_dt) then
-         if (AmIRoot_) then
-            print *, "ERROR: inconsistent values of HEATBEAT_DT and RUN_DT"
+   !  Create Clock. This is a private routine that sets the start and 
+   !   end times and the time interval of the clock from the configuration.
+   !   The start time is temporarily set to 1 interval before the time in the
+   !   configuration. Once the Alarms are set in intialize, the clock will
+   !   be advanced to guarantee it and its alarms are in the same state as they
+   !   were after the last advance before the previous Finalize.
+   !---------------------------------------------------------------------------
+
+      call MAPL_ClockInit ( MAPLOBJ, clock, NSTEPS,          rc=STATUS )
+      VERIFY_(STATUS)
+
+      clock_HIST = ESMF_ClockCreate ( clock, rc=STATUS )  ! Create copy for HISTORY
+      VERIFY_(STATUS)
+
+      CoresPerNode = MAPL_CoresPerNodeGet(comm,rc=status)
+      VERIFY_(STATUS)
+
+      ! We check resource for CoresPerNode (no longer needed to be in CAR.rc)
+      ! If it is set in the resource, we issue an warning if the
+      ! value does not agree with the detected CoresPerNode
+
+      call ESMF_ConfigGetAttribute(config, value=N, Label="CoresPerNode:", rc=status)
+      if(STATUS==ESMF_SUCCESS) then
+         if (CoresPerNode /= N) then
+            call WRITE_PARALLEL("WARNING: CoresPerNode set, but does NOT match detected value")
          end if
-         call ESMF_VMBarrier(VM)
-         RETURN_(ESMF_FAILURE)
       end if
-   else
-      call MAPL_ConfigSetAttribute(cf_root, value=heartbeat_dt, Label="RUN_DT:", rc=status)
+
+      ASSERT_(CoresPerNode<=NPES)
+
+      call ESMF_ConfigGetAttribute(config, value=HEARTBEAT_DT, Label="HEARTBEAT_DT:", rc=status)
       VERIFY_(STATUS)
-   endif
-   
-! Add EXPID and EXPDSC from HISTORY.rc to AGCM.rc
-!------------------------------------------------
-   cf_hist = ESMF_ConfigCreate(rc=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_ConfigLoadFile(cf_hist, HIST_CF, rc=STATUS )
-   VERIFY_(STATUS)
-
-   call MAPL_ConfigSetAttribute(cf_hist, value=HIST_CF, Label="HIST_CF:", rc=status)
-   VERIFY_(STATUS)
-
-   call ESMF_ConfigGetAttribute(cf_hist, value=EXPID,  Label="EXPID:",  rc=status)
-   VERIFY_(STATUS)
-   call ESMF_ConfigGetAttribute(cf_hist, value=EXPDSC, Label="EXPDSC:", rc=status)
-   VERIFY_(STATUS)
-
-   call MAPL_ConfigSetAttribute(cf_root, value=EXPID,  Label="EXPID:",  rc=status)
-   VERIFY_(STATUS)
-   call MAPL_ConfigSetAttribute(cf_root, value=EXPDSC, Label="EXPDSC:", rc=status)
-   VERIFY_(STATUS)
-   
-! Add CoresPerNode from CAP.rc to HISTORY.rc and AGCM.rc
-!-------------------------------------------------------
-   call MAPL_ConfigSetAttribute(cf_root, value=CoresPerNode,  Label="CoresPerNode:",  rc=status)
-   VERIFY_(STATUS)
-   call MAPL_ConfigSetAttribute(cf_hist, value=CoresPerNode,  Label="CoresPerNode:",  rc=status)
-   VERIFY_(STATUS)
-
-
-! Register the children with MAPL
-!--------------------------------
-
-!  Create Root child
-!-------------------
-   call MAPL_Set(MAPLOBJ, CF=CF_ROOT, RC=STATUS)
-   VERIFY_(STATUS)
-
-   ROOT = MAPL_AddChild ( MAPLOBJ,     &
-        name       = ROOT_NAME,        &
-        SS         = ROOT_SetServices, &
-                             rc=STATUS )  
-   VERIFY_(STATUS)
-
-!  Create History child
-!----------------------
-
-   call MAPL_Set(MAPLOBJ, CF=CF_HIST, RC=STATUS)
-   VERIFY_(STATUS)
-
-   HIST = MAPL_AddChild ( MAPLOBJ,        &
-        name       = 'HIST',           &
-        SS         = HIST_SetServices, &
-                             rc=STATUS )  
-   VERIFY_(STATUS)
-
-
-!  Create ExtData child
-!----------------------
-   cf_ext = ESMF_ConfigCreate(rc=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_ConfigLoadFile(cf_ext, EXTDATA_CF, rc=STATUS )
-   VERIFY_(STATUS)
-
-   call ESMF_ConfigGetAttribute(cf_ext, value=RUN_DT, Label="RUN_DT:", rc=status)
-   if (STATUS == ESMF_SUCCESS) then
-      if (heartbeat_dt /= run_dt) then
-         if (AmIRoot_) then
-            print *, "ERROR: inconsistent values of HEATBEAT_DT and RUN_DT"
-         end if
-         call ESMF_VMBarrier(VM)
-         RETURN_(ESMF_FAILURE)
-      end if
-   else
-      call MAPL_ConfigSetAttribute(cf_ext, value=heartbeat_dt, Label="RUN_DT:", rc=status)
-      VERIFY_(STATUS)
-   endif
-
-   call MAPL_Set(MAPLOBJ, CF=CF_EXT, RC=STATUS)
-   VERIFY_(STATUS)
-
-   EXTDATA = MAPL_AddChild ( MAPLOBJ,        &
-        name       = 'EXTDATA',           &
-        SS         = ExtData_SetServices, &
-                             rc=STATUS )  
-   VERIFY_(STATUS)
-
-!  Query MAPL for the the children's for GCS, IMPORTS, EXPORTS
-!-------------------------------------------------------------
-
-   call MAPL_Get ( MAPLOBJ, GCS=GCS, GIM=IMPORTS, GEX=EXPORTS,      RC=STATUS )
-   VERIFY_(STATUS)
-
-! Run as usual unless PRINTSPEC> 0 as set in CAP.rc. If set then
-! model will not run completely and instead it will simply run MAPL_SetServices
-! and print out the IM/EX specs. This step uses MAPL_StatePrintSpecCSV found
-! in MAPL_Generic.F90.
-
-
-   if (printSpec>0) then
-
-      call MAPL_StatePrintSpecCSV(GCS(ROOT), printSpec, RC=status)
-      VERIFY_(STATUS)
-      call ESMF_VMBarrier       ( VM,                            RC=STATUS )
+      call ESMF_TimeIntervalSet( Frequency, S=HEARTBEAT_DT, rc=status )
       VERIFY_(STATUS)
 
-   else
 
-
-!  Initialize the Computational Hierarchy
-!----------------------------------------
-
-   call ESMF_GridCompInitialize ( GCS(ROOT), importState=IMPORTS(ROOT), &
-        exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
-   VERIFY_(STATUS)
-
-! All the EXPORTS of the Hierachy are made IMPORTS of History
-!------------------------------------------------------------
-
-   call ESMF_StateAdd ( IMPORTS(HIST), (/EXPORTS(ROOT)/), RC=STATUS )
-   VERIFY_(STATUS)
-
-   allocate(lswrap%ptr, stat=status)
-   VERIFY_(STATUS)
-   call ESMF_UserCompSetInternalState(GCS(HIST), 'MAPL_LocStreamList', &
-        lswrap, STATUS)
-   VERIFY_(STATUS)
-   call MAPL_GetAllExchangeGrids(GCS(ROOT), LSADDR, RC=STATUS)
-   VERIFY_(STATUS)
-   lswrap%ptr%LSADDR_PTR => LSADDR
-
-! Initialize the History
-!------------------------
-
-   call ESMF_GridCompInitialize (   GCS(HIST), importState=IMPORTS(HIST), &
-        exportState=EXPORTS(HIST), clock=CLOCK_HIST,  userRC=STATUS )
-   VERIFY_(STATUS)
- 
-! Prepare EXPORTS for ExtData
-! ---------------------------
-    call ESMF_StateGet(IMPORTS(ROOT), ITEMCOUNT=ITEMCOUNT, RC=STATUS)
-    VERIFY_(STATUS)
-    allocate(ITEMNAMES(ITEMCOUNT), STAT=STATUS)
-    VERIFY_(STATUS)
-    allocate(ITEMTYPES(ITEMCOUNT), STAT=STATUS)
-    VERIFY_(STATUS)
-
-    call ESMF_StateGet(IMPORTS(ROOT), ITEMNAMELIST=ITEMNAMES, &
-                       ITEMTYPELIST=ITEMTYPES, RC=STATUS)
-    VERIFY_(STATUS)
-
-    DO I=1, ITEMCOUNT
-       if(ItemTypes(I) == ESMF_StateItem_Field) then
-          call ESMF_StateGet(IMPORTS(ROOT), ItemNames(i), field, rc=status)
-          VERIFY_(STATUS)
-          
-          fld = MAPL_FieldCreate(FIELD, name=ItemNames(i), RC=STATUS )
-          VERIFY_(STATUS)
-          call MAPL_StateAdd(EXPORTS(EXTDATA), fld, rc=status)
-          VERIFY_(STATUS)
-       end if
-    END DO
-    deallocate(itemtypes)
-    deallocate(itemnames)
-
-
-! Initialize the ExtData
-!------------------------
-
-   call ESMF_GridCompInitialize (   GCS(EXTDATA), importState=IMPORTS(EXTDATA), &
-        exportState=EXPORTS(EXTDATA), & 
-        clock=CLOCK,  userRC=STATUS )
-   VERIFY_(STATUS)
- 
-! Time Loop starts by checking for Segment Ending Time
-!-----------------------------------------------------
-   TIME_LOOP: do n=1,nsteps
-
-      call MAPL_MemUtilsWrite(vm, 'MAPL_Cap:TimeLoop',           RC=STATUS )
+      PERPETUAL = ESMF_AlarmCreate( clock=clock_HIST, name='PERPETUAL', ringinterval=Frequency, rc=status )
+      VERIFY_(STATUS)
+      call ESMF_AlarmRingerOff( PERPETUAL, rc=status )
       VERIFY_(STATUS)
 
-      if( .not.LPERP ) then
-           DONE = ESMF_ClockIsStopTime( CLOCK_HIST, RC=STATUS )
-           VERIFY_(STATUS)
-           if ( DONE ) exit
+   ! Set CLOCK for AGCM
+   ! ------------------
+
+      call MAPL_GetResource( MAPLOBJ, PERPETUAL_YEAR,  label='PERPETUAL_YEAR:',  default = -999, rc=STATUS )
+      VERIFY_(STATUS)
+      call MAPL_GetResource( MAPLOBJ, PERPETUAL_MONTH, label='PERPETUAL_MONTH:', default = -999, rc=STATUS )
+      VERIFY_(STATUS)
+      call MAPL_GetResource( MAPLOBJ, PERPETUAL_DAY,   label='PERPETUAL_DAY:',   default = -999, rc=STATUS )
+      VERIFY_(STATUS)
+
+      LPERP = ( ( PERPETUAL_DAY   /= -999 ) .or. &
+                ( PERPETUAL_MONTH /= -999 ) .or. &
+                ( PERPETUAL_YEAR  /= -999 ) )
+
+      if(         PERPETUAL_DAY   /= -999 ) then
+         ASSERT_( PERPETUAL_MONTH /= -999 )
+         ASSERT_( PERPETUAL_YEAR  /= -999 )
       endif
 
-! Call Record for intermediate checkpoint (if desired)
-!  Note that we are not doing a Record for History.
-! ------------------------------------------------------
-
-      call ESMF_GridCompWriteRestart( GCS(ROOT), importState=IMPORTS(ROOT), &
-           exportState=EXPORTS(ROOT), clock=CLOCK_HIST, userRC=STATUS )
-      VERIFY_(STATUS)
-
-! Run the ExtData Component
-! --------------------------
-
-      call ESMF_GridCompRun     ( GCS(EXTDATA), importState=IMPORTS(EXTDATA), &
-                                  exportState=EXPORTS(EXTDATA), &
-                                  clock=CLOCK, userRC=STATUS )
-      VERIFY_(STATUS)
-
-! Run the Gridded Component
-! --------------------------
-
-      call ESMF_GridCompRun( GCS(ROOT), importState=IMPORTS(ROOT), &
-           exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
-      VERIFY_(STATUS)
-
-! Synchronize for Next TimeStep
-! -----------------------------
-
-      call ESMF_VMBarrier( VM, RC=STATUS )
-      VERIFY_(STATUS)
-
-! Advance the Clock before running History and Record
-! ---------------------------------------------------
-
-      call ESMF_ClockAdvance     ( CLOCK,                        RC=STATUS )
-      VERIFY_(STATUS)
-      call ESMF_ClockAdvance     ( CLOCK_HIST,                   RC=STATUS )
-      VERIFY_(STATUS)
-
-! Update Perpetual Clock
-! ----------------------
-
       if( LPERP ) then
+          if (AmIRoot_) then
+              if( PERPETUAL_YEAR  /= -999 ) print *, 'Using Perpetual  Year: ',PERPETUAL_YEAR
+              if( PERPETUAL_MONTH /= -999 ) print *, 'Using Perpetual Month: ',PERPETUAL_MONTH
+              if( PERPETUAL_DAY   /= -999 ) print *, 'Using Perpetual   Day: ',PERPETUAL_DAY
+          endif
+
+          call ESMF_ClockGet ( clock, name=clockname, rc=status )
+          clockname = trim( clockname ) // '_PERPETUAL'
+          call ESMF_Clockset ( clock, name=clockname, rc=status )
+
+          call ESMF_ClockGet ( clock_HIST, name=clockname, rc=status )
+          clockname = trim( clockname ) // '_PERPETUAL'
+          call ESMF_Clockset ( clock_HIST, name=clockname, rc=status )
+
           call Perpetual_Clock ( clock, clock_HIST, PERPETUAL_YEAR, PERPETUAL_MONTH, PERPETUAL_DAY, STATUS )
           VERIFY_(STATUS)
       endif
 
-      call ESMF_ClockGet ( clock, CurrTime=currTime, rc=status )
-      VERIFY_(STATUS)
-      call ESMF_TimeGet  ( CurrTime, YY = AGCM_YY, &
-                                     MM = AGCM_MM, &
-                                     DD = AGCM_DD, &
-                                     H  = AGCM_H , &
-                                     M  = AGCM_M , &
-                                     S  = AGCM_S, rc=status )
-      VERIFY_(STATUS)
-      if( AmIRoot_ ) write(6,1000) AGCM_YY,AGCM_MM,AGCM_DD,AGCM_H,AGCM_M,AGCM_S
- 1000 format(1x,'AGCM Date: ',i4.4,'/',i2.2,'/',i2.2,2x,'Time: ',i2.2,':',i2.2,':',i2.2)
+   !  Get configurable info to create HIST 
+   !  and the ROOT of the computational hierarchy
+   !---------------------------------------------
 
-! Call History Run for Output
-! ---------------------------
+   !BOR
 
-      call ESMF_GridCompRun( GCS(HIST), importState=IMPORTS(HIST), &
-           exportState=EXPORTS(HIST), clock=CLOCK_HIST, userRC=STATUS )
+   ! !RESOURCE_ITEM: string :: Name of ROOT's config file
+      call MAPL_GetResource(MAPLOBJ, ROOT_CF,      "ROOT_CF:", default="ROOT.rc",       RC=STATUS ) 
       VERIFY_(STATUS)
 
-   enddo TIME_LOOP ! end of time loop
+   ! !RESOURCE_ITEM: string :: Name to assign to the ROOT component
+      call MAPL_GetResource(MAPLOBJ, ROOT_NAME,    "ROOT_NAME:", default="ROOT",           RC=STATUS ) 
+      VERIFY_(STATUS)
 
-!  Finalize
-!  --------
+   ! !RESOURCE_ITEM: string :: Name of HISTORY's config file 
+      call MAPL_GetResource(MAPLOBJ, HIST_CF,      "HIST_CF:", default="HIST.rc",        RC=STATUS ) 
+      VERIFY_(STATUS)
 
-   call ESMF_GridCompFinalize( GCS(ROOT), importState=IMPORTS(ROOT),&
-        exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_GridCompFinalize( GCS(HIST), importState=IMPORTS(HIST),&
-        exportState=EXPORTS(HIST), clock=CLOCK_HIST,userRC=STATUS )
-   VERIFY_(STATUS)
-   call ESMF_GridCompFinalize( GCS(EXTDATA), importState=IMPORTS(EXTDATA),&
-         exportState=EXPORTS(EXTDATA), clock=CLOCK, userRC=STATUS )
-   VERIFY_(STATUS)
+   ! !RESOURCE_ITEM: string :: Name of ExtData's config file
+      call MAPL_GetResource(MAPLOBJ, EXTDATA_CF,   "EXTDATA_CF:", default='ExtData.rc',     RC=STATUS ) 
+      VERIFY_(STATUS)
 
-!  Finalize itselt
-! ----------------
+   ! !RESOURCE_ITEM: string :: Control Timers 
+      call MAPL_GetResource(MAPLOBJ, enableTimers, "MAPL_ENABLE_TIMERS:", default='NO',             RC=STATUS )
+      VERIFY_(STATUS)
 
-   call CAP_Finalize(CLOCK_HIST, "cap_restart", rc=STATUS)
-   VERIFY_(STATUS)
-
-   call ESMF_ConfigDestroy(cf_ext, RC=status)
-   VERIFY_(STATUS)
-   call ESMF_ConfigDestroy(cf_hist, RC=status)
-   VERIFY_(STATUS)
-   call ESMF_ConfigDestroy(cf_root, RC=status)
-   VERIFY_(STATUS)
-   call ESMF_ConfigDestroy(config, RC=status)
-   VERIFY_(STATUS)
-
-   end if ! PRINTSPEC
-
-   call MAPL_FinalizeShmem (rc=status)
-   VERIFY_(STATUS)
-
-! Write EGRESS file
-!------------------
-   call ESMF_VMBarrier(VM)
-   if(present(FinalFile)) then
-      if (AmIRoot_) then
-         close(99)
-         open (99,file=FinalFile,form='formatted')
-         close(99)
+   ! !RESOURCE_ITEM: string :: Control Memory Diagnostic Utility 
+      call MAPL_GetResource(MAPLOBJ, enableMemUtils, "MAPL_ENABLE_MEMUTILS:", default='NO',             RC=STATUS )
+      VERIFY_(STATUS)
+   !EOR
+      if (enableTimers /= 'YES' .and. enableTimers /= 'yes') then
+         call MAPL_ProfDisable( rc=STATUS )
+         VERIFY_(STATUS)
       end if
-   end if
 
+     if (enableMemUtils /= 'YES' .and. enableMemUtils /= 'yes') then
+        call MAPL_MemUtilsDisable( rc=STATUS )
+        VERIFY_(STATUS)
+     else
+        call MAPL_MemUtilsInit( rc=STATUS )
+        VERIFY_(STATUS)
+     end if
+
+      call MAPL_GetResource( MAPLOBJ, printSpec, label='PRINTSPEC:', default = 0, rc=STATUS )
+      VERIFY_(STATUS)
+
+   ! Handle RUN_DT in ROOT_CF
+   !-------------------------
+
+      cf_root = ESMF_ConfigCreate(rc=STATUS )
+      VERIFY_(STATUS)
+      call ESMF_ConfigLoadFile(cf_root, ROOT_CF, rc=STATUS )
+      VERIFY_(STATUS)
+
+      call ESMF_ConfigGetAttribute(cf_root, value=RUN_DT, Label="RUN_DT:", rc=status)
+      if (STATUS == ESMF_SUCCESS) then
+         if (heartbeat_dt /= run_dt) then
+            if (AmIRoot_) then
+               print *, "ERROR: inconsistent values of HEATBEAT_DT and RUN_DT"
+            end if
+            call ESMF_VMBarrier(VM)
+            RETURN_(ESMF_FAILURE)
+         end if
+      else
+         call MAPL_ConfigSetAttribute(cf_root, value=heartbeat_dt, Label="RUN_DT:", rc=status)
+         VERIFY_(STATUS)
+      endif
+      
+   ! Add EXPID and EXPDSC from HISTORY.rc to AGCM.rc
+   !------------------------------------------------
+      cf_hist = ESMF_ConfigCreate(rc=STATUS )
+      VERIFY_(STATUS)
+      call ESMF_ConfigLoadFile(cf_hist, HIST_CF, rc=STATUS )
+      VERIFY_(STATUS)
+
+      call MAPL_ConfigSetAttribute(cf_hist, value=HIST_CF, Label="HIST_CF:", rc=status)
+      VERIFY_(STATUS)
+
+      call ESMF_ConfigGetAttribute(cf_hist, value=EXPID,  Label="EXPID:",  rc=status)
+      VERIFY_(STATUS)
+      call ESMF_ConfigGetAttribute(cf_hist, value=EXPDSC, Label="EXPDSC:", rc=status)
+      VERIFY_(STATUS)
+
+      call MAPL_ConfigSetAttribute(cf_root, value=EXPID,  Label="EXPID:",  rc=status)
+      VERIFY_(STATUS)
+      call MAPL_ConfigSetAttribute(cf_root, value=EXPDSC, Label="EXPDSC:", rc=status)
+      VERIFY_(STATUS)
+      
+   ! Add CoresPerNode from CAP.rc to HISTORY.rc and AGCM.rc
+   !-------------------------------------------------------
+      call MAPL_ConfigSetAttribute(cf_root, value=CoresPerNode,  Label="CoresPerNode:",  rc=status)
+      VERIFY_(STATUS)
+      call MAPL_ConfigSetAttribute(cf_hist, value=CoresPerNode,  Label="CoresPerNode:",  rc=status)
+      VERIFY_(STATUS)
+
+   ! Add a SINGLE_COLUMN flag in HISTORY.rc based on DYCORE value(from AGCM.rc)
+   !---------------------------------------------------------------------------
+      call ESMF_ConfigGetAttribute(cf_root, value=DYCORE,  Label="DYCORE:",  rc=status)
+      VERIFY_(STATUS)
+      if (DYCORE == 'DATMO') then
+         snglcol = 1
+         call MAPL_ConfigSetAttribute(cf_hist, value=snglcol,  Label="SINGLE_COLUMN:",  rc=status)
+         VERIFY_(STATUS)
+      end if
+
+   ! Register the children with MAPL
+   !--------------------------------
+
+   !  Create Root child
+   !-------------------
+      call MAPL_Set(MAPLOBJ, CF=CF_ROOT, RC=STATUS)
+      VERIFY_(STATUS)
+
+      ROOT = MAPL_AddChild ( MAPLOBJ,     &
+           name       = ROOT_NAME,        &
+           SS         = ROOT_SetServices, &
+                                rc=STATUS )  
+      VERIFY_(STATUS)
+
+   !  Create History child
+   !----------------------
+
+      call MAPL_Set(MAPLOBJ, CF=CF_HIST, RC=STATUS)
+      VERIFY_(STATUS)
+
+      HIST = MAPL_AddChild ( MAPLOBJ,        &
+           name       = 'HIST',           &
+           SS         = HIST_SetServices, &
+                                rc=STATUS )  
+      VERIFY_(STATUS)
+
+
+   !  Create ExtData child
+   !----------------------
+      cf_ext = ESMF_ConfigCreate(rc=STATUS )
+      VERIFY_(STATUS)
+      call ESMF_ConfigLoadFile(cf_ext, EXTDATA_CF, rc=STATUS )
+      VERIFY_(STATUS)
+
+      call ESMF_ConfigGetAttribute(cf_ext, value=RUN_DT, Label="RUN_DT:", rc=status)
+      if (STATUS == ESMF_SUCCESS) then
+         if (heartbeat_dt /= run_dt) then
+            if (AmIRoot_) then
+               print *, "ERROR: inconsistent values of HEATBEAT_DT and RUN_DT"
+            end if
+            call ESMF_VMBarrier(VM)
+            RETURN_(ESMF_FAILURE)
+         end if
+      else
+         call MAPL_ConfigSetAttribute(cf_ext, value=heartbeat_dt, Label="RUN_DT:", rc=status)
+         VERIFY_(STATUS)
+      endif
+
+      call MAPL_Set(MAPLOBJ, CF=CF_EXT, RC=STATUS)
+      VERIFY_(STATUS)
+
+      EXTDATA = MAPL_AddChild ( MAPLOBJ,        &
+           name       = 'EXTDATA',           &
+           SS         = ExtData_SetServices, &
+                                rc=STATUS )  
+      VERIFY_(STATUS)
+
+   !  Query MAPL for the the children's for GCS, IMPORTS, EXPORTS
+   !-------------------------------------------------------------
+
+      call MAPL_Get ( MAPLOBJ, GCS=GCS, GIM=IMPORTS, GEX=EXPORTS,      RC=STATUS )
+      VERIFY_(STATUS)
+
+   ! Run as usual unless PRINTSPEC> 0 as set in CAP.rc. If set then
+   ! model will not run completely and instead it will simply run MAPL_SetServices
+   ! and print out the IM/EX specs. This step uses MAPL_StatePrintSpecCSV found
+   ! in MAPL_Generic.F90.
+
+
+      if (printSpec>0) then
+
+         call MAPL_StatePrintSpecCSV(GCS(ROOT), printSpec, RC=status)
+         VERIFY_(STATUS)
+         call ESMF_VMBarrier       ( VM,                            RC=STATUS )
+         VERIFY_(STATUS)
+
+      else
+
+
+   !  Initialize the Computational Hierarchy
+   !----------------------------------------
+
+      call ESMF_GridCompInitialize ( GCS(ROOT), importState=IMPORTS(ROOT), &
+           exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
+      VERIFY_(STATUS)
+
+   ! All the EXPORTS of the Hierachy are made IMPORTS of History
+   !------------------------------------------------------------
+
+      call ESMF_StateAdd ( IMPORTS(HIST), (/EXPORTS(ROOT)/), RC=STATUS )
+      VERIFY_(STATUS)
+
+      allocate(lswrap%ptr, stat=status)
+      VERIFY_(STATUS)
+      call ESMF_UserCompSetInternalState(GCS(HIST), 'MAPL_LocStreamList', &
+           lswrap, STATUS)
+      VERIFY_(STATUS)
+      call MAPL_GetAllExchangeGrids(GCS(ROOT), LSADDR, RC=STATUS)
+      VERIFY_(STATUS)
+      lswrap%ptr%LSADDR_PTR => LSADDR
+
+   ! Initialize the History
+   !------------------------
+
+      call ESMF_GridCompInitialize (   GCS(HIST), importState=IMPORTS(HIST), &
+           exportState=EXPORTS(HIST), clock=CLOCK_HIST,  userRC=STATUS )
+      VERIFY_(STATUS)
+    
+   ! Prepare EXPORTS for ExtData
+   ! ---------------------------
+       call ESMF_StateGet(IMPORTS(ROOT), ITEMCOUNT=ITEMCOUNT, RC=STATUS)
+       VERIFY_(STATUS)
+       allocate(ITEMNAMES(ITEMCOUNT), STAT=STATUS)
+       VERIFY_(STATUS)
+       allocate(ITEMTYPES(ITEMCOUNT), STAT=STATUS)
+       VERIFY_(STATUS)
+
+       call ESMF_StateGet(IMPORTS(ROOT), ITEMNAMELIST=ITEMNAMES, &
+                          ITEMTYPELIST=ITEMTYPES, RC=STATUS)
+       VERIFY_(STATUS)
+
+       DO I=1, ITEMCOUNT
+          if(ItemTypes(I) == ESMF_StateItem_Field) then
+             call ESMF_StateGet(IMPORTS(ROOT), ItemNames(i), field, rc=status)
+             VERIFY_(STATUS)
+             
+             call MAPL_StateAdd(EXPORTS(EXTDATA), field, rc=status)
+             VERIFY_(STATUS)
+          else if(ItemTypes(I) == ESMF_StateItem_FieldBundle) then
+             call ESMF_StateGet(IMPORTS(ROOT), ItemNames(i), bundle, rc=status)
+             VERIFY_(STATUS)
+             call MAPL_StateAdd(EXPORTS(EXTDATA), bundle, rc=status)
+             VERIFY_(STATUS)
+          end if
+       END DO
+       deallocate(itemtypes)
+       deallocate(itemnames)
+
+
+   ! Initialize the ExtData
+   !------------------------
+
+      call ESMF_GridCompInitialize (   GCS(EXTDATA), importState=IMPORTS(EXTDATA), &
+           exportState=EXPORTS(EXTDATA), & 
+           clock=CLOCK,  userRC=STATUS )
+      VERIFY_(STATUS)
+    
+   ! Time Loop starts by checking for Segment Ending Time
+   !-----------------------------------------------------
+      TIME_LOOP: do n=1,nsteps
+
+         call MAPL_MemUtilsWrite(vm, 'MAPL_Cap:TimeLoop',           RC=STATUS )
+         VERIFY_(STATUS)
+
+         if( .not.LPERP ) then
+              DONE = ESMF_ClockIsStopTime( CLOCK_HIST, RC=STATUS )
+              VERIFY_(STATUS)
+              if ( DONE ) exit
+         endif
+
+   ! Call Record for intermediate checkpoint (if desired)
+   !  Note that we are not doing a Record for History.
+   ! ------------------------------------------------------
+
+         call ESMF_GridCompWriteRestart( GCS(ROOT), importState=IMPORTS(ROOT), &
+              exportState=EXPORTS(ROOT), clock=CLOCK_HIST, userRC=STATUS )
+         VERIFY_(STATUS)
+
+   ! Run the ExtData Component
+   ! --------------------------
+
+         call ESMF_GridCompRun     ( GCS(EXTDATA), importState=IMPORTS(EXTDATA), &
+                                     exportState=EXPORTS(EXTDATA), &
+                                     clock=CLOCK, userRC=STATUS )
+         VERIFY_(STATUS)
+
+   ! Run the Gridded Component
+   ! --------------------------
+
+         call ESMF_GridCompRun( GCS(ROOT), importState=IMPORTS(ROOT), &
+              exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
+         VERIFY_(STATUS)
+
+   ! Synchronize for Next TimeStep
+   ! -----------------------------
+
+         call ESMF_VMBarrier( VM, RC=STATUS )
+         VERIFY_(STATUS)
+
+   ! Advance the Clock before running History and Record
+   ! ---------------------------------------------------
+
+         call ESMF_ClockAdvance     ( CLOCK,                        RC=STATUS )
+         VERIFY_(STATUS)
+         call ESMF_ClockAdvance     ( CLOCK_HIST,                   RC=STATUS )
+         VERIFY_(STATUS)
+
+   ! Update Perpetual Clock
+   ! ----------------------
+
+         if( LPERP ) then
+             call Perpetual_Clock ( clock, clock_HIST, PERPETUAL_YEAR, PERPETUAL_MONTH, PERPETUAL_DAY, STATUS )
+             VERIFY_(STATUS)
+         endif
+
+         call ESMF_ClockGet ( clock, CurrTime=currTime, rc=status )
+         VERIFY_(STATUS)
+         call ESMF_TimeGet  ( CurrTime, YY = AGCM_YY, &
+                                        MM = AGCM_MM, &
+                                        DD = AGCM_DD, &
+                                        H  = AGCM_H , &
+                                        M  = AGCM_M , &
+                                        S  = AGCM_S, rc=status )
+         VERIFY_(STATUS)
+         if( AmIRoot_ ) write(6,1000) AGCM_YY,AGCM_MM,AGCM_DD,AGCM_H,AGCM_M,AGCM_S
+    1000 format(1x,'AGCM Date: ',i4.4,'/',i2.2,'/',i2.2,2x,'Time: ',i2.2,':',i2.2,':',i2.2)
+
+   ! Call History Run for Output
+   ! ---------------------------
+
+         call ESMF_GridCompRun( GCS(HIST), importState=IMPORTS(HIST), &
+              exportState=EXPORTS(HIST), clock=CLOCK_HIST, userRC=STATUS )
+         VERIFY_(STATUS)
+
+      enddo TIME_LOOP ! end of time loop
+
+   !  Finalize
+   !  --------
+
+      call ESMF_GridCompFinalize( GCS(ROOT), importState=IMPORTS(ROOT),&
+           exportState=EXPORTS(ROOT), clock=CLOCK, userRC=STATUS )
+      VERIFY_(STATUS)
+      call ESMF_GridCompFinalize( GCS(HIST), importState=IMPORTS(HIST),&
+           exportState=EXPORTS(HIST), clock=CLOCK_HIST,userRC=STATUS )
+      VERIFY_(STATUS)
+      call ESMF_GridCompFinalize( GCS(EXTDATA), importState=IMPORTS(EXTDATA),&
+            exportState=EXPORTS(EXTDATA), clock=CLOCK, userRC=STATUS )
+      VERIFY_(STATUS)
+
+   !  Finalize itselt
+   ! ----------------
+
+      call CAP_Finalize(CLOCK_HIST, "cap_restart", rc=STATUS)
+      VERIFY_(STATUS)
+
+      call ESMF_ConfigDestroy(cf_ext, RC=status)
+      VERIFY_(STATUS)
+      call ESMF_ConfigDestroy(cf_hist, RC=status)
+      VERIFY_(STATUS)
+      call ESMF_ConfigDestroy(cf_root, RC=status)
+      VERIFY_(STATUS)
+      call ESMF_ConfigDestroy(config, RC=status)
+      VERIFY_(STATUS)
+
+      end if ! PRINTSPEC
+
+      call MAPL_FinalizeShmem (rc=status)
+      VERIFY_(STATUS)
+
+   ! Write EGRESS file
+   !------------------
+      call ESMF_VMBarrier(VM)
+      if(present(FinalFile)) then
+         if (AmIRoot_) then
+            close(99)
+            open (99,file=FinalFile,form='formatted')
+            close(99)
+         end if
+      end if
+
+   end if ESMFCOMMIF
+
+   IOCOMMIF: if (ioComm /= MPI_COMM_NULL) then
+      call MPI_comm_rank(mapl_comm%iocomm,mapl_comm%myIoRank,status)
+      VERIFY_(STATUS)
+      call MAPL_CFIOServerStart(mapl_Comm,rc=status)
+      VERIFY_(STATUS)
+   end if IOCOMMIF
+
+   call MPI_Barrier(MPI_COMM_WORLD,status)
+   VERIFY_(STATUS) 
 !  Finalize framework
 !  ------------------
-
+   
 #if 0
 !ALT due to a bug in MAPL (or in the garbage collection of ESMF_VMFinalize)
 !we have to bypass next line

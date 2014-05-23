@@ -425,15 +425,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           for a list of valid options. If not specified, defaults to 
 !           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
 !     \item [{[polemethod]}]
-!           Which type of artificial pole
-!           to construct on the source Grid for regridding. Please see 
+!           Specifies the type of pole
+!           to construct on the source Grid during regridding. Please see 
 !           Section~\ref{const:polemethod} for a list of
 !           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
-!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
-!           This parameter indicates how many points should be averaged
-!           over. Must be specified if {\tt polemethod} is 
-!           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG},
+!           then this parameter indicates the number of points over which to average.
+!           If {\tt polemethod} is not {ESMF\_POLEMETHOD\_NPNTAVG} and {\tt regridPoleNPnts} is specified, 
+!           then it will be ignored.  
+!           This subroutine will return an error if {\tt polemethod} is {ESMF\_POLEMETHOD\_NPNTAVG} and 
+!           {\tt regridPoleNPnts} is not specified. 
 !     \item [{[lineType]}]
 !           This argument controls the path of the line which connects two points on a sphere surface. This in
 !           turn controls the path along which distances are calculated and the shape of the edges that make

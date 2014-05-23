@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-! $Id: ESMFL_Mod.P90,v 1.26.10.5 2013-06-18 20:33:59 atrayano Exp $
+! $Id: ESMFL_Mod.P90,v 1.28 2014-01-31 16:11:09 atrayano Exp $
 #include "MAPL_ErrLog.h"
 
 #if 0
@@ -84,6 +84,7 @@ module ESMFL_MOD
   public ESMFL_Add2Bundle
   public ESMFL_HALO
   public ESMFL_BundleAddState
+  public MAPL_AreaMean
   !EOP
 
   ! regridding
@@ -155,6 +156,11 @@ module ESMFL_MOD
      module procedure AdjustPtrBounds1dr8
      module procedure AdjustPtrBounds3dr4
      module procedure AdjustPtrBounds3dr8
+  end interface
+
+  interface MAPL_AreaMean
+     module procedure MAPL_AreaMean_2d_r8_bitrep
+     module procedure MAPL_AreaMean_2d_r8
   end interface
 
   Logical            :: verbose
@@ -311,8 +317,11 @@ subroutine ESMFL_GridCoordGet(GRID, coord, name, Location, Units, rc)
   real(ESMF_KIND_R8), pointer :: r8d1(:)
   real(ESMF_KIND_R8), pointer :: r8d2(:,:)
   integer                   :: STATUS
+  integer                   :: i
   integer                   :: j
+!ALT  integer                   :: i1, in, j1, jn
   integer                   :: coordDimCount(ESMF_MAXDIM)
+  character(len=ESMF_MAXSTR):: gridname
   character(len=ESMF_MAXSTR):: IAm="ESMFL_GridCoordGet" 
 
 
@@ -328,6 +337,34 @@ subroutine ESMFL_GridCoordGet(GRID, coord, name, Location, Units, rc)
    STATUS=ESMF_FAILURE
    VERIFY_(STATUS)
   endif
+
+  call ESMF_GridGet(grid, name=gridname, rc=status)
+  VERIFY_(STATUS)
+
+  if (gridname(1:10) == 'tile_grid_') then
+
+     call MAPL_GridGet(GRID, localCellCountPerDim=counts, rc=status)
+     VERIFY_(STATUS)
+     allocate(coord(counts(1), counts(2)), STAT=status)
+     VERIFY_(STATUS)
+     coord = 0.0 ! initialize just in case
+
+!ALT     call ESMF_GRID_INTERIOR(GRID,I1,IN,J1,JN)
+
+     do I=1, counts(1)
+        do J=1, counts(2)
+           if (crdOrder == 1) then
+              coord(i,j) = i !ALT + I1 - 1
+           else 
+              coord(i,j) = j !ALT + J1 - 1
+           end if
+        end do
+     end do
+
+     coord = coord * (MAPL_PI_R8 / 180._8)
+
+     RETURN_(ESMF_SUCCESS)
+  end if
 
   if (tk == ESMF_TYPEKIND_R4) then
      if (coordDimCount(crdOrder)==2) then
@@ -3336,11 +3373,12 @@ CONTAINS
 ! THE FOLLOWING ROUTINE MAY BE TEMPORARY
 
 !-------------------------------------------------------------------------
-   subroutine State2Bundle (STA, BUN, rc)
+   subroutine State2Bundle (STA, BUN, usrfldlist, rc)
 !-------------------------------------------------------------------------
 ! extract fields from state and add to a bundle
    type(ESMF_FieldBundle), intent(inout) :: BUN
    type(ESMF_State) , intent(inout) :: STA
+   character(len=*),intent(in),optional :: usrfldlist
    integer, intent(out), optional   :: rc
 
 ! locals
@@ -3351,6 +3389,7 @@ CONTAINS
    type(ESMF_VM)    :: VM
    type(ESMF_Field) :: FLD
    type(ESMF_Grid)  :: GRID
+   character (len=ESMF_MAXSTR)           :: fldname
    character (len=ESMF_MAXSTR), pointer  :: namelist(:)
    type(ESMF_StateItem_Flag)  , pointer  :: typelist(:)
    character(len=ESMF_MAXSTR)            :: name 
@@ -3405,6 +3444,11 @@ CONTAINS
 
      ! populate bundle   
 
+     if (present(usrfldlist) ) then
+         call ESMF_FieldGet(FLD, NAME=fldname, rc=status )
+         VERIFY_(STATUS)
+         if(.not. check_list_(fldname,usrfldlist)) cycle
+     endif
      call MAPL_FieldBundleAdd (BUN, FLD, rc=status)
      VERIFY_(STATUS)
 
@@ -3989,6 +4033,198 @@ CONTAINS
     end subroutine AddThisField_
 
   end subroutine BundleAddState_
+
+  subroutine MAPL_AreaMean_2d_r8_bitrep ( qave, q, area, grid, bitreproducible, rc )
+
+    implicit none
+
+    ! Arguments
+    real*8,            intent(  OUT) :: qave 
+    real,              intent(IN   ) :: q(:,:)
+    real,              intent(IN   ) :: area(:,:)
+    type(ESMF_Grid),   intent(INout) :: grid
+    logical,           intent(IN   ) :: bitreproducible
+    integer, optional, intent(  OUT) :: rc
+
+    ! Log err vars
+    integer :: status
+    character(len=ESMF_MAXSTR), parameter :: Iam='MAPL_AreaMeanBR'
+
+    ! Local vars
+    real*8  :: qdum1
+    real*8, save  :: qdum2
+    integer :: im,jm
+    integer :: DIMS(3)
+
+    integer :: i,j
+    logical :: amIRoot
+
+    real, allocatable :: qglobal(:,:)
+    real, allocatable, save :: aglobal(:,:)
+
+    type(ESMF_VM) :: vm
+    logical, save :: firstime = .true.
+
+    if (.not. bitreproducible) then
+       call MAPL_AreaMean(qave, q, area, grid, rc=status )
+       RETURN_(STATUS)
+    end if
+
+    ! get VM (should get from the grid, but this is quicker)
+    call ESMF_VmGetCurrent(vm, rc=status)
+    VERIFY_(STATUS)
+
+    amIRoot = MAPL_AM_I_Root(vm)
+
+    if (amIRoot) then
+       call MAPL_GridGet(GRID, globalCellCountPerDim=DIMS, RC=STATUS)
+       im = DIMS(1) ! global grid dim
+       jm = DIMS(2) ! global grid dim
+    else
+       im = 0 ! dummy sizes
+       jm = 0 ! dummy sizes
+    end if
+    allocate(qglobal(im,jm), stat=status)
+    VERIFY_(STATUS)
+
+    if (firstime) then
+       firstime = .false.
+       allocate(aglobal(im,jm), stat=status)
+       VERIFY_(STATUS)
+       call ArrayGather(local_array=area, global_array=aglobal, grid=grid, rc=status)
+       VERIFY_(STATUS)
+       qdum2 = 0.0_8
+       if (amIRoot) then
+          do j=1,jm
+             do i=1,im
+                qdum2 = qdum2 + aglobal(i,j)
+             enddo
+          end do
+       end if
+    end if
+
+    call ArrayGather(local_array=q,    global_array=qglobal, grid=grid, rc=status)
+    VERIFY_(STATUS)
+
+    ! do calculation on root
+    if (amIRoot) then
+
+       qdum1 = 0.0_8
+       do j=1,jm
+          do i=1,im
+             qdum1 = qdum1 + qglobal(i,j)*aglobal(i,j)
+          enddo
+       enddo
+
+       ASSERT_(qdum2 /= 0.0_8)
+
+       qave = qdum1 / qdum2
+    end if
+    deallocate(qglobal)
+
+    call MAPL_CommsBcast(vm, DATA=qave, N=1, Root=MAPL_Root, RC=status)
+    VERIFY_(STATUS)
+
+    RETURN_(ESMF_SUCCESS)
+  end subroutine MAPL_AreaMean_2d_r8_bitrep
+
+  subroutine MAPL_AreaMean_2d_r8 ( qave, q, area, grid, rc )
+
+    implicit none
+
+    ! Arguments
+    real*8,            intent(  OUT) :: qave 
+    real,              intent(IN   ) :: q(:,:)
+    real,              intent(IN   ) :: area(:,:)
+    type(ESMF_Grid),   intent(INout) :: grid
+    integer, optional, intent(  OUT) :: rc
+
+    ! Log err vars
+    integer :: status
+    character(len=ESMF_MAXSTR), parameter :: Iam='MAPL_AreaMean'
+
+    ! Local vars
+    real*8  :: qdum1
+    real*8, save  :: qdum2
+    real*8  :: qdum1loc
+    real*8  :: qdum2loc
+    integer :: im,jm
+
+    integer :: i,j
+
+    type(ESMF_VM) :: vm
+    logical, save :: firstime = .true.
+
+
+    ! get VM (should get from the grid, but this is quicker)
+    call ESMF_VmGetCurrent(vm, rc=status)
+    VERIFY_(STATUS)
+
+    im = size(area,1) ! local grid dim
+    jm = size(area,2) ! local grid dim
+
+    if (firstime) then
+       firstime = .false.
+
+       ! compute local sum
+       qdum2loc = 0.0_8
+       do j=1,jm
+          do i=1,im
+             qdum2loc = qdum2loc + area(i,j)
+          enddo
+       end do
+
+       call MAPL_CommsAllReduceSum(vm, sendbuf=qdum2loc, recvbuf=qdum2, &
+            cnt=1, RC=status)
+       VERIFY_(STATUS)
+
+    end if
+
+    ! do calculation on every PE
+
+    qdum1loc = 0.0_8
+    do j=1,jm
+       do i=1,im
+          qdum1loc = qdum1loc + q(i,j)*area(i,j)
+       enddo
+    enddo
+
+    call MAPL_CommsAllReduceSum(vm, sendbuf=qdum1loc, recvbuf=qdum1, &
+         cnt=1, RC=status)
+    VERIFY_(STATUS)
+
+    ASSERT_(qdum2 /= 0.0_8)
+
+    qave = qdum1 / qdum2
+
+    RETURN_(ESMF_SUCCESS)
+  end subroutine MAPL_AreaMean_2d_r8
+
+  logical function check_list_ (this,list)
+  implicit none
+  character(len=*), intent(in) :: this
+  character(len=*), intent(in) :: list
+  integer i,ll,ls,le
+  check_list_=.false.
+  if (trim(list)=="NONE") then ! this is when does not specify variables
+      check_list_=.true.
+  endif
+  ll  = len_trim(list)
+  ls  = 1
+  do i=1,ll
+     le=i
+     if(list(i:i)==",") then
+        if (trim(this)==list(ls:le-1)) then
+           check_list_=.true.
+           exit
+        endif
+        ls=le+1
+     endif
+  enddo
+  if (trim(this)==list(ls:ll)) then
+      check_list_=.true.
+  endif
+  end function check_list_
 
 
 end module ESMFL_MOD

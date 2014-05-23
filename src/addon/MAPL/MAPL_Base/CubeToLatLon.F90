@@ -22,14 +22,14 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: CubeToLatLon.F90,v 1.2.12.5 2013-06-20 11:05:08 mathomp4 Exp $
+!  $Id: CubeToLatLon.F90,v 1.2.12.5.2.6.4.4 2014-02-23 01:43:02 atrayano Exp $
 
 #define SUCCESS 0
 #define VERIFY_(A) if((A)/=0) then; if(present(rc)) rc=A; PRINT *, Iam, __LINE__; return; endif
 #define ASSERT_(A) if(.not.(A)) then; if(present(rc)) rc=1; PRINT *, Iam, __LINE__; return; endif
 #define RETURN_(A) if(present(rc)) rc=A; return
 
-#define DEALOC_(A) if(associated(A)) then; call MAPL_DeAllocNodeArray(A,rc=STATUS); if(STATUS==MAPL_NoShm) deallocate(A, stat=STATUS); VERIFY_(STATUS); NULLIFY(A); endif
+#define DEALOC_(A) if(associated(A)) then;A=0;call MAPL_DeAllocNodeArray(A,rc=STATUS);if(STATUS==MAPL_NoShm) deallocate(A,stat=STATUS);VERIFY_(STATUS);NULLIFY(A);endif
 
 #define DEALOC2_(A) if(associated(A)) then; deallocate(A, stat=STATUS); VERIFY_(STATUS); NULLIFY(A); endif
 
@@ -74,6 +74,7 @@ Module CubeLatLonTransformMod
   public MAPL_RegridLSCreate
   public TileTransformTranspose
   public get_conservative_weights !JK patch for conservative interp
+  public RestaggerWindsCube
 
   include 'mpif.h'
 
@@ -108,8 +109,12 @@ Module CubeLatLonTransformMod
 
  type T_CubeCubeTransform
      private
-     real(R8),pointer    :: weight(:,:,:,:)
-     integer, pointer    :: index (:,:,:,:)
+     real(R8),pointer    :: weight(:,:,:) => NULL()
+     integer, pointer    :: index (:,:,:) => NULL()
+     real(R8), pointer   :: ee1(:,:,:) => NULL()
+     real(R8), pointer   :: ee2(:,:,:) => NULL()
+     real(R8), pointer   :: ff1(:,:,:) => NULL()
+     real(R8), pointer   :: ff2(:,:,:) => NULL()
      logical             :: Created=.false.
      character(len=120)  :: name
      integer             :: npx, npy, npxout, npyout
@@ -128,11 +133,13 @@ Module CubeLatLonTransformMod
   interface SphericalToCartesian
      module procedure SphericalToCartesianR4
      module procedure SphericalToCartesianR8
+     module procedure SphericalToCartesianR4C2C
   end interface
 
   interface CartesianToSpherical
      module procedure CartesianToSphericalR4
      module procedure CartesianToSphericalR8
+     module procedure CartesianToSphericalR4C2C
   end interface
 
   integer, parameter :: ntiles=6
@@ -148,32 +155,47 @@ Module CubeLatLonTransformMod
   interface
      subroutine GetWeights(npx, npy, nlat, nlon, &
           index, weight, id1, id2, jdc, l2c,     &
-          ee1, ee2, ff1, ff2, gg1, gg2, sublons, sublats) 
+          ee1, ee2, ff1, ff2, gg1, gg2,          &
+           e1,  e2,  f1,  f2,  g1,  g2,          &
+          sublons, sublats, AmNodeRoot, WriteNetcdf) 
        integer,  intent(in   ) :: npx,  npy
        integer,  intent(in   ) :: nlon, nlat
-       integer,  intent(inout) :: index(3,nlon,nlat)
-       real(R8), intent(inout) :: weight(4,nlon,nlat)
-       integer,  intent(inout) :: id1(npx,npy)
-       integer,  intent(inout) :: id2(npx,npy)
-       integer,  intent(inout) :: jdc(npx,npy)
-       real(R8), intent(inout) :: l2c(4,npx,npy)
-       real(R8), pointer       :: ee1(:,:,:) 
-       real(R8), pointer       :: ee2(:,:,:) 
-       real(R8), pointer       :: ff1(:,:,:) 
-       real(R8), pointer       :: ff2(:,:,:) 
-       real(R8), pointer, optional :: gg1(:,:,:) 
-       real(R8), pointer, optional :: gg2(:,:,:) 
+       integer,  intent(  out) :: index(3,nlon,nlat)
+       real(R8), intent(  out) :: weight(4,nlon,nlat)
+       integer,  intent(  out) :: id1(npx,npy)
+       integer,  intent(  out) :: id2(npx,npy)
+       integer,  intent(  out) :: jdc(npx,npy)
+       real(R8), intent(  out) :: l2c(4,npx,npy)
+       real(R8), intent(  out) :: ee1(npx,npy,3)
+       real(R8), intent(  out) :: ee2(npx,npy,3)
+       real(R8), intent(  out) :: ff1(npx,npy,3)
+       real(R8), intent(  out) :: ff2(npx,npy,3)
+       real(R8), intent(  out) :: gg1(npx,npy,3)
+       real(R8), intent(  out) :: gg2(npx,npy,3)
+       real(R8), pointer       ::  e1(:,:,:)
+       real(R8), pointer       ::  e2(:,:,:)
+       real(R8), pointer       ::  f1(:,:,:)
+       real(R8), pointer       ::  f2(:,:,:)
+       real(R8), pointer       ::  g1(:,:,:)
+       real(R8), pointer       ::  g2(:,:,:)
        real(R8), optional      :: sublons(:)
        real(R8), optional      :: sublats(:)
+       logical , optional      :: AmNodeRoot
+       logical , optional      :: WriteNetcdf
      end subroutine GetWeights
   end interface
 
   interface
-     subroutine GetWeightsC2C(npx, npy, npxout, npyout, index, weight) 
+     subroutine GetWeightsC2C(npx, npy, npxout, npyout, index, weight, &
+         ee1, ee2, ff1, ff2)
        integer,  intent(in   ) :: npx,  npy
        integer,  intent(in   ) :: npxout, npyout
-       integer,  intent(  out) :: index(:,:,:,:)
-       real(R8), intent(  out) :: weight(:,:,:,:)
+       integer,  intent(  out) :: index(:,:,:)
+       real(R8), intent(  out) :: weight(:,:,:)
+       real(R8), intent(  out) :: ee1(:,:,:)
+       real(R8), intent(  out) :: ee2(:,:,:)
+       real(R8), intent(  out) :: ff1(:,:,:)
+       real(R8), intent(  out) :: ff2(:,:,:)
      end subroutine GetWeightsC2C
   end interface
 
@@ -188,30 +210,32 @@ logical, save                 :: DO_CONSERVATIVE=.false.
 
 contains
 
-  subroutine CubeLatLonDestroy( Trans, rc)
-    type(T_CubeLatLonTransform), intent(inout) :: Trans
+  subroutine CubeLatLonDestroy( Tr, rc)
+    type(T_CubeLatLonTransform), intent(inout) :: Tr
     integer, optional,           intent(  out) :: rc
 
     integer :: status
 
-    DEALOC_(Trans%index)
-    DEALOC_(Trans%weight)
-    DEALOC_(Trans%l2c   )
-    DEALOC_(Trans%id1   )
-    DEALOC_(Trans%id2   )
-    DEALOC_(Trans%jdc   )
-    DEALOC_(Trans%elon  )
-    DEALOC_(Trans%elat  )
-    DEALOC2_(Trans%ee1   )
-    DEALOC2_(Trans%ee2   )
-    DEALOC2_(Trans%ff1   )
-    DEALOC2_(Trans%ff2   )
-    DEALOC2_(Trans%gg1   )
-    DEALOC2_(Trans%gg2   )
+    call MAPL_SyncSharedMemory(rc=STATUS)
+    VERIFY_(STATUS)
+    DEALOC_(Tr%index)
+    DEALOC_(Tr%weight)
+    DEALOC_(Tr%l2c)
+    DEALOC_(Tr%id1)
+    DEALOC_(Tr%id2)
+    DEALOC_(Tr%jdc)
+    DEALOC_(Tr%elon)
+    DEALOC_(Tr%elat)
+    DEALOC2_(Tr%ee1)
+    DEALOC2_(Tr%ee2)
+    DEALOC2_(Tr%ff1)
+    DEALOC2_(Tr%ff2)
+    DEALOC2_(Tr%gg1)
+    DEALOC2_(Tr%gg2)
 
-    Trans%Created = .false.
+    Tr%Created = .false.
 
-    if (Trans%lsCreated) then
+    if (Tr%lsCreated) then
 !ALT: if we created LocStream tile transforms we should destroy them
 !     unfortunately MAPL does not destroy LocationStreams yet 
     end if
@@ -219,27 +243,27 @@ contains
     RETURN_(SUCCESS)
   end subroutine CubeLatLonDestroy
 
-  logical function CubeLatLonIsCreated(Trans)
+  logical function CubeLatLonIsCreated(Tr)
 
-    type(T_CubeLatLonTransform), intent(in ) :: Trans
+    type(T_CubeLatLonTransform), intent(in ) :: Tr
 
-    CubeLatLonIsCreated = Trans%Created
+    CubeLatLonIsCreated = Tr%Created
 
   end function CubeLatLonIsCreated
 
-  subroutine CubeLatLonSubset(trans,doSubset)
+  subroutine CubeLatLonSubset(Tr,doSubset)
     logical,                     intent(in ) :: doSubset
-    type(T_CubeLatLonTransform)              :: Trans
-    trans%subset=dosubset
+    type(T_CubeLatLonTransform)              :: Tr
+    Tr%subset=dosubset
   end subroutine CubeLatLonSubset
 
-  function CubeLatLonCreate( npx, npy, nlon, nlat, lons, lats, doSubset, rc ) result(Trans)
+  function CubeLatLonCreate( npx, npy, nlon, nlat, lons, lats, doSubset, rc ) result(Tr)
 
     integer,                     intent(in ) :: npx,  npy
     integer,                     intent(in ) :: nlon, nlat
     real(R8),                    intent(in ) :: lons(:), lats(:)
     logical,                     intent(in ) :: doSubset
-    type(T_CubeLatLonTransform)              :: Trans
+    type(T_CubeLatLonTransform)              :: Tr
     integer, optional,           intent(out) :: rc
 
 ! Locals
@@ -250,83 +274,146 @@ contains
     real(R8), allocatable :: slon(:), slat(:)
     real(R8), allocatable :: clon(:), clat(:)
 
+! global vector rotations to be copied into local Tr versions
+    real(R8), pointer   :: ee1(:,:,:)
+    real(R8), pointer   :: ee2(:,:,:)
+    real(R8), pointer   :: ff1(:,:,:)
+    real(R8), pointer   :: ff2(:,:,:)
+    real(R8), pointer   :: gg1(:,:,:)
+    real(R8), pointer   :: gg2(:,:,:)
+
 ! Real*8 are needed to make fv calls.
 !-----------------------------------
 
 ! Begin
 !------
 
-    ASSERT_(.not.Trans%Created)
+    ASSERT_(.not.Tr%Created)
 
     npts = npx + 1
 
-    write(Trans%name,'(i5.5,"x",i5.5,"_c2l_",i5.5,"x",i5.5)') npx,npy,nlon,nlat
+    write(Tr%name,'(i5.5,"x",i5.5,"_c2l_",i5.5,"x",i5.5)') npx,npy,nlon,nlat
 !    write(*,'(i5.5,"x",i5.5,"_c2l_",i5.5,"x",i5.5)') npx,npy,nlon,nlat
 
-    Trans%npx  = npx
-    Trans%npy  = npy
-    Trans%nlon = nlon
-    Trans%nlat = nlat
+    Tr%npx  = npx
+    Tr%npy  = npy
+    Tr%nlon = nlon
+    Tr%nlat = nlat
 
   ! allocate storage for weights and indeces for C2L
   !-------------------------------------------------
 
-    DEALOC_(Trans%index)
-    DEALOC_(Trans%weight)
-    DEALOC_(Trans%l2c   )
-    DEALOC_(Trans%id1   )
-    DEALOC_(Trans%id2   )
-    DEALOC_(Trans%jdc   )
-    DEALOC_(Trans%elon  )
-    DEALOC_(Trans%elat  )
-    DEALOC2_(Trans%ee1   )
-    DEALOC2_(Trans%ee2   )
-    DEALOC2_(Trans%ff1   )
-    DEALOC2_(Trans%ff2   )
-    DEALOC2_(Trans%gg1   )
-    DEALOC2_(Trans%gg2   )
+    DEALOC_(Tr%index)
+    DEALOC_(Tr%weight)
+    DEALOC_(Tr%l2c)
+    DEALOC_(Tr%id1)
+    DEALOC_(Tr%id2)
+    DEALOC_(Tr%jdc)
+    DEALOC_(Tr%elon)
+    DEALOC_(Tr%elat)
+    !DEALOC_(ee1)
+    !DEALOC_(ee2)
+    !DEALOC_(ff1)
+    !DEALOC_(ff2)
+    !DEALOC_(gg1)
+    !DEALOC_(gg2)
+    DEALOC2_(Tr%ee1)
+    DEALOC2_(Tr%ee2)
+    DEALOC2_(Tr%ff1)
+    DEALOC2_(Tr%ff2)
+    DEALOC2_(Tr%gg1)
+    DEALOC2_(Tr%gg2)
 
-    call MAPL_AllocNodeArray(Trans%index,(/3,nlon,nlat/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%index(3,nlon,nlat),stat=status)
+    call MAPL_AllocNodeArray(Tr%index,(/3,nlon,nlat/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%index(3,nlon,nlat),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%weight,(/4,nlon,nlat/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%weight(4,nlon,nlat),stat=status)
+    call MAPL_AllocNodeArray(Tr%weight,(/4,nlon,nlat/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%weight(4,nlon,nlat),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%l2c,(/4,npx,npy/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%l2c(4,npx,npy),stat=status)
+    call MAPL_AllocNodeArray(Tr%l2c,(/4,npx,npy/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%l2c(4,npx,npy),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%id1,(/npx,npy/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%id1(npx,npy),stat=status)
+    call MAPL_AllocNodeArray(Tr%id1,(/npx,npy/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%id1(npx,npy),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%id2,(/npx,npy/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%id2(npx,npy),stat=status)
+    call MAPL_AllocNodeArray(Tr%id2,(/npx,npy/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%id2(npx,npy),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%jdc,(/npx,npy/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%jdc(npx,npy),stat=status)
+    call MAPL_AllocNodeArray(Tr%jdc,(/npx,npy/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%jdc(npx,npy),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%elon,(/size(lons),size(lats),3/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%elon(size(lons),size(lats),3),stat=status)
+    call MAPL_AllocNodeArray(Tr%elon,(/size(lons),size(lats),3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%elon(size(lons),size(lats),3),stat=status)
     VERIFY_(STATUS)
 
-    call MAPL_AllocNodeArray(Trans%elat,(/size(lons),size(lats),3/),rc=STATUS)
-    if(STATUS==MAPL_NoShm) allocate(Trans%elat(size(lons),size(lats),3),stat=status)
+    call MAPL_AllocNodeArray(Tr%elat,(/size(lons),size(lats),3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%elat(size(lons),size(lats),3),stat=status)
     VERIFY_(STATUS)
 
-    if (doSubSet) then
-       call GetWeights(npx, npy, nlat, nlon, Trans%index, Trans%weight, &
-            Trans%id1, Trans%id2, Trans%jdc, Trans%l2c,  &
-            Trans%ee1, Trans%ee2, Trans%ff1, Trans%ff2, Trans%gg1, Trans%gg2, lons, lats)
-    else
-       call GetWeights(npx, npy, nlat, nlon, Trans%index, Trans%weight, &
-            Trans%id1, Trans%id2, Trans%jdc, Trans%l2c,  &
-            Trans%ee1, Trans%ee2, Trans%ff1, Trans%ff2, Trans%gg1, Trans%gg2)
-    endif
+    call MAPL_AllocNodeArray(ee1,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(ee1(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(ee2,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(ee2(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(ff1,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(ff1(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(ff2,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(ff2(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(gg1,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(gg1(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(gg2,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(gg2(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+! Argument AmNodeRoot passed to GetWeights identifies if we're using SHMEM
+! and then only the NodeRoot gets weights, otherwise everyone does
+!-------------------------------------------------------------------------
+     if (doSubSet) then
+       call GetWeights(npx, npy, nlat, nlon, Tr%index, Tr%weight, &
+            Tr%id1, Tr%id2, Tr%jdc, Tr%l2c,  &
+               ee1,    ee2,    ff1,    ff2,    gg1,    gg2, &
+            Tr%ee1, Tr%ee2, Tr%ff1, Tr%ff2, Tr%gg1, Tr%gg2, lons, lats, &
+            AmNodeRoot = (MAPL_AmNodeRoot .or. (.not. MAPL_ShmInitialized))   &
+#ifdef WRITE_WEIGHTS_TO_FILE
+            , WriteNetcdf = MAPL_am_I_root() &
+#endif
+            )
+     else
+       call GetWeights(npx, npy, nlat, nlon, Tr%index, Tr%weight, &
+            Tr%id1, Tr%id2, Tr%jdc, Tr%l2c,  &
+               ee1,    ee2,    ff1,    ff2,    gg1,    gg2, &
+            Tr%ee1, Tr%ee2, Tr%ff1, Tr%ff2, Tr%gg1, Tr%gg2, &
+            AmNodeRoot = (MAPL_AmNodeRoot .or. (.not. MAPL_ShmInitialized))   &
+#ifdef WRITE_WEIGHTS_TO_FILE
+            , WriteNetcdf = MAPL_am_I_root() &
+#endif
+            )
+     endif
+
+! Deallocate large global vector rotation transforms
+    call MAPL_SyncSharedMemory(rc=STATUS)
+    VERIFY_(STATUS)
+    DEALOC_(ee1)
+    DEALOC_(ee2)
+    DEALOC_(ff1)
+    DEALOC_(ff2)
+    DEALOC_(gg1)
+    DEALOC_(gg2)
 
 !cartesian to latlon spherical on latlon grid
 
@@ -345,48 +432,53 @@ contains
 
        do j=1,size(lats)
           do I=1,size(lons)
-             Trans%elon(I,J,1) = -SLON(I)
-             Trans%elon(I,J,2) =  CLON(I)
-             Trans%elon(I,J,3) =  0.0
-             Trans%elat(I,J,1) = -SLAT(J)*CLON(I)
-             Trans%elat(I,J,2) = -SLAT(J)*SLON(I)
-             Trans%elat(I,J,3) =  CLAT(J)
+             Tr%elon(I,J,1) = -SLON(I)
+             Tr%elon(I,J,2) =  CLON(I)
+             Tr%elon(I,J,3) =  0.0
+             Tr%elat(I,J,1) = -SLAT(J)*CLON(I)
+             Tr%elat(I,J,2) = -SLAT(J)*SLON(I)
+             Tr%elat(I,J,3) =  CLAT(J)
           end do
        end do
 
        deallocate(slon,clon,slat,clat)
 
-    Trans%Created=.true.
+    Tr%Created=.true.
 
     RETURN_(SUCCESS)
   end function CubeLatLonCreate
 
-  subroutine CubeCubeDestroy( Trans, rc)
-    type(T_CubeCubeTransform), intent(inout) :: Trans
+  subroutine CubeCubeDestroy( Tr, rc)
+    type(T_CubeCubeTransform), intent(inout) :: Tr
     integer, optional,         intent(  out) :: rc
 
-    if(associated(Trans%weight)) deallocate(Trans%weight)
-    if(associated(Trans%index)) deallocate(Trans%index)
+    integer :: status
 
-    Trans%Created = .false.
+    DEALOC_(Tr%weight)
+    DEALOC_(Tr%index)
+    DEALOC_(Tr%ee1)
+    DEALOC_(Tr%ee2)
+    DEALOC_(Tr%ff1)
+    DEALOC_(Tr%ff2)
 
+    Tr%Created = .false.
 
     RETURN_(SUCCESS)
   end subroutine CubeCubeDestroy
 
-  logical function CubeCubeIsCreated(Trans)
+  logical function CubeCubeIsCreated(Tr)
 
-    type(T_CubeCubeTransform), intent(in ) :: Trans
+    type(T_CubeCubeTransform), intent(in ) :: Tr
 
-    CubeCubeIsCreated = Trans%Created
+    CubeCubeIsCreated = Tr%Created
 
   end function CubeCubeIsCreated
 
-  function CubeCubeCreate( npx, npy, npxout, npyout, rc ) result(Trans)
+  function CubeCubeCreate( npx, npy, npxout, npyout, rc ) result(Tr)
 
     integer,                     intent(in ) :: npx,  npy
     integer,                     intent(in ) :: npxout,  npyout
-    type(T_CubeCubeTransform)                :: Trans
+    type(T_CubeCubeTransform)                :: Tr
     integer, optional,           intent(out) :: rc
 
 ! Locals
@@ -402,41 +494,69 @@ contains
 ! Begin
 !------
 
-    ASSERT_(.not.Trans%Created)
+    ASSERT_(.not.Tr%Created)
 
 !ALT    npts = npx + 1
     npts = npxout ! + 1
 
-    write(Trans%name,'(i5.5,"x",i5.5,"_c2l_",i5.5,"x",i5.5)') npx,npy,npxout,npyout
+    write(Tr%name,'(i5.5,"x",i5.5,"_c2c_",i5.5,"x",i5.5)') npx,npy,npxout,npyout
 
-    Trans%npx  = npx
-    Trans%npy  = npy
-    Trans%npxout  = npxout
-    Trans%npyout  = npyout
+    Tr%npx  = npx
+    Tr%npy  = npy
+    Tr%npxout  = npxout
+    Tr%npyout  = npyout
 
   ! allocate storage for weights and indeces for C2C
   !-------------------------------------------------
 
-    if(associated(Trans%index )) deallocate(Trans%index )
-    if(associated(Trans%weight)) deallocate(Trans%weight)
+    DEALOC_(Tr%weight)
+    DEALOC_(Tr%index)
+    DEALOC_(Tr%ee1)
+    DEALOC_(Tr%ee2)
+    DEALOC_(Tr%ff1)
+    DEALOC_(Tr%ff2)
     
-    allocate(Trans%index(3,npts,npts,ntiles),Trans%weight(4,npts,npts,ntiles),stat=status)
+    ! ALT: index and weight are allocated at the output grid resolution
+    call MAPL_AllocNodeArray(Tr%weight,(/4,npxout,npyout/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%weight(4,npxout,npyout),stat=status)
     VERIFY_(STATUS)
 
+    call MAPL_AllocNodeArray(Tr%index,(/3,npxout,npyout/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%index(3,npxout,npyout),stat=status)
+    VERIFY_(STATUS)
 
-    call GetWeightsC2C(npx, npy, npxout, npyout, Trans%index, Trans%weight )
+    ! ALT: ff1 and ff2 are allocated at the input grid resolution
+    call MAPL_AllocNodeArray(Tr%ff1,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%ff1(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(Tr%ff2,(/npx,npy,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%ff2(npx,npy,3),stat=status)
+    VERIFY_(STATUS)
+
+    ! ALT: ee1 and ee2 are allocated at the output grid resolution
+    call MAPL_AllocNodeArray(Tr%ee1,(/npxout,npyout,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%ee1(npxout,npyout,3),stat=status)
+    VERIFY_(STATUS)
+
+    call MAPL_AllocNodeArray(Tr%ee2,(/npxout,npyout,3/),rc=STATUS)
+    if(STATUS==MAPL_NoShm) allocate(Tr%ee2(npxout,npyout,3),stat=status)
+    VERIFY_(STATUS)
+
+    call GetWeightsC2C(npx, npy, npxout, npyout, Tr%index, Tr%weight, &
+         Tr%ee1, Tr%ee2, Tr%ff1, Tr%ff2)
 
        
-    Trans%Created=.true.
+    Tr%Created=.true.
 
     RETURN_(SUCCESS)
   end function CubeCubeCreate
 
-  subroutine CubeToCube(Trans, data_cs_in, data_cs_out, rc)
+  subroutine CubeToCube(Tr, data_cs_in, data_cs_out, rc)
 
-    type(T_CubeCubeTransform),    intent(in )   :: Trans
-    real,                     intent(inout) :: data_cs_in(:,:)
-    real,                     intent(inout) :: data_cs_out(:,:)
+    type(T_CubeCubeTransform),    intent(in )   :: Tr
+    real,                         intent(inout) :: data_cs_in(:,:)
+    real,                         intent(inout) :: data_cs_out(:,:)
     integer, optional,            intent(out)   :: rc
 
 ! Locals
@@ -446,9 +566,9 @@ contains
     integer               :: nx,j1,j2,status,itile
     real(R8), allocatable :: var_cs_in(:,:,:), var_cs_out(:,:,:)
 
-    ASSERT_(Trans%Created)
+    ASSERT_(Tr%Created)
 
-    nx   = Trans%npx
+    nx   = Tr%npx
 
     !--------------------------------------------------------------------!
     ! perform interpolation                                              !
@@ -465,12 +585,12 @@ contains
        var_cs_in(1:nx,1:nx,itile)=data_cs_in(:,j1:j2)
     end do
 
-    nx   = Trans%npxout
+    nx   = Tr%npxout
     allocate ( var_cs_out(0:nx+1,0:nx+1,ntiles),stat=status)
     VERIFY_(STATUS)
     var_cs_out=0.0
 
-    call C2CInterp(var_cs_in, var_cs_out, Trans%index, Trans%weight)
+    call C2CInterp(var_cs_in, var_cs_out, Tr%index, Tr%weight)
 
     do itile=1,ntiles
        j1 = nx*(itile-1) + 1
@@ -491,16 +611,16 @@ contains
     ! using precalculated weights from get_weight                  !
     !------------------------------------------------------------------!
 
-    real(R8), dimension(0:,0:,:), intent(in out) :: var_in
+    real(R8), dimension(0:,0:,:), intent(inout) :: var_in
     real(R8), dimension(0:,0:,:), intent(inout) :: var_out
-    real(R8), dimension(:,:,:,:), intent(in   ) :: weight_c2c
-    integer,  dimension(:,:,:,:), intent(in   ) :: index_c2c
+    real(R8), dimension(:,:,:),   intent(in   ) :: weight_c2c
+    integer,  dimension(:,:,:),   intent(in   ) :: index_c2c
 
     !------------------------------------------------------------------!
     ! local variables                                                  !
     !------------------------------------------------------------------!
 
-    integer           :: i, j, l, ic, jc, lc, nx, ny
+    integer           :: i, j, l, jx, ic, jc, lc, nx, ny
 
     nx   = size(var_out,1)-2
     ny   = size(var_out,2)-2
@@ -509,16 +629,17 @@ contains
     call GhostCube(var_in)
 
     FACES: do l=1,ntiles
-       JLOOP: do j=1,ny
+       JLOOP: do jx=1,ny
+          j  = (l-1)*ny + jx
           ILOOP: do i=1,nx
-             ic=index_c2c(1,i,j,l)
-             jc=index_c2c(2,i,j,l)
-             lc=index_c2c(3,i,j,l)
+             ic=index_c2c(1,i,j)
+             jc=index_c2c(2,i,j)
+             lc=index_c2c(3,i,j)
 
-             var_out(i,j,l)=weight_c2c(1,i,j,l)*var_in(ic  ,jc  , lc)  &
-                           +weight_c2c(2,i,j,l)*var_in(ic  ,jc+1, lc)  &
-                           +weight_c2c(3,i,j,l)*var_in(ic+1,jc+1, lc)  &
-                           +weight_c2c(4,i,j,l)*var_in(ic+1,jc  , lc)
+             var_out(i,jx,l)=weight_c2c(1,i,j)*var_in(ic  ,jc  , lc)  &
+                            +weight_c2c(2,i,j)*var_in(ic  ,jc+1, lc)  &
+                            +weight_c2c(3,i,j)*var_in(ic+1,jc+1, lc)  &
+                            +weight_c2c(4,i,j)*var_in(ic+1,jc  , lc)
           enddo ILOOP
        enddo JLOOP
     enddo FACES
@@ -599,9 +720,9 @@ contains
   end subroutine get_conservative_weights
 
 
-  subroutine CubeToLatLonr8( Trans, data_cs, data_ll, transpose, misval, rc)
+  subroutine CubeToLatLonr8( Tr, data_cs, data_ll, transpose, misval, rc)
 
-    type(T_CubeLatLonTransform),  intent(in )   :: Trans
+    type(T_CubeLatLonTransform),  intent(in )   :: Tr
     real(R8),                     intent(inout) :: data_cs(:,:)
     real(R8),                     intent(inout) :: data_ll(:,:)
     logical, optional,            intent(in )   :: transpose
@@ -616,7 +737,7 @@ contains
     real(R8), allocatable :: var_cs(:,:,:)
     real(R8)              :: misval_
 
-    ASSERT_(Trans%Created)
+    ASSERT_(Tr%Created)
 
     if(present(misval)) then
        misval_ = misval
@@ -624,7 +745,7 @@ contains
        misval_ = 1.0
     end if
 
-    nx   = Trans%npx
+    nx   = Tr%npx
 
     !--------------------------------------------------------------------!
     ! perform interpolation                                              !
@@ -646,8 +767,8 @@ contains
        enddo
     end if
 
-    call C2LInterp(var_cs, data_ll, Trans%index, Trans%weight,&
-                   misval_,  Trans%subset, transpose)
+    call C2LInterp(var_cs, data_ll, Tr%index, Tr%weight,&
+                   misval_,  Tr%subset, transpose)
 
     if(transpose) then
        do itile=1,ntiles
@@ -663,9 +784,9 @@ contains
     RETURN_(SUCCESS)
   end subroutine CubeToLatLonr8
 
-  subroutine CubeToLatLonr4( Trans, data_cs, data_ll, transpose, misval, rc)
+  subroutine CubeToLatLonr4( Tr, data_cs, data_ll, transpose, misval, rc)
 
-    type(T_CubeLatLonTransform),  intent(in )   :: Trans
+    type(T_CubeLatLonTransform),  intent(in )   :: Tr
     real,                         intent(inout) :: data_cs(:,:)
     real,                         intent(inout) :: data_ll(:,:)
     logical, optional,            intent(in )   :: transpose
@@ -684,7 +805,7 @@ contains
     real(R8), allocatable :: data_cs8(:,:)
 
 
-    ASSERT_(Trans%Created)
+    ASSERT_(Tr%Created)
 
     if(present(misval)) then
        misval_ = misval
@@ -692,7 +813,7 @@ contains
        misval_ = 1.0
     end if
 
-    nx   = Trans%npx
+    nx   = Tr%npx
 
     !--------------------------------------------------------------------!
     ! perform interpolation                                              !
@@ -727,16 +848,16 @@ contains
 
     if(.not.transpose) then
       call CToL_interp  &
-         (data_ll8, data_cs8, NT_Tiles, Trans%nlat, Trans%nlon, Trans%npx, Trans%npy)
+         (data_ll8, data_cs8, NT_Tiles, Tr%nlat, Tr%nlon, Tr%npx, Tr%npy)
     else    
       call CToL_interp_b&
-         (data_ll8, data_cs8, NT_Tiles, Trans%nlat, Trans%nlon, Trans%npx, Trans%npy)
+         (data_ll8, data_cs8, NT_Tiles, Tr%nlat, Tr%nlon, Tr%npx, Tr%npy)
     endif
 
     else                       !JK for conservative interp---
 
-    call C2LInterp(var_cs, data_ll8, Trans%index, Trans%weight,&
-                   misval_,  trans%subset, transpose)
+    call C2LInterp(var_cs, data_ll8, Tr%index, Tr%weight,&
+                   misval_,  Tr%subset, transpose)
 
     endif                      !JK for conservative interp---
 
@@ -758,9 +879,9 @@ contains
     RETURN_(SUCCESS)
   end subroutine CubeToLatLonr4
 
-  subroutine LatLonToCuber8( Trans, data_ll, data_cs, transpose, misval, rc)
+  subroutine LatLonToCuber8( Tr, data_ll, data_cs, transpose, misval, rc)
 
-    type(T_CubeLatLonTransform),  intent(in )   :: Trans
+    type(T_CubeLatLonTransform),  intent(in )   :: Tr
     real(R8),                     intent(inout) :: data_ll(:,:)
     real(R8),                     intent(inout) :: data_cs(:,:)
     logical, optional,            intent(in )   :: transpose
@@ -774,7 +895,7 @@ contains
     real(R8), allocatable :: var_cs(:,:,:)
     real(R8)              :: misval_
 
-    ASSERT_(Trans%Created)
+    ASSERT_(Tr%Created)
 
     if(present(misval)) then
        misval_ = misval
@@ -782,7 +903,7 @@ contains
        misval_ = 1.0
     end if
 
-    nx   = Trans%npx
+    nx   = Tr%npx
 
     !--------------------------------------------------------------------!
     ! perform interpolation                                              !
@@ -802,8 +923,8 @@ contains
        enddo
     end if
 
-    call L2CInterp(data_ll, var_cs, Trans%id1,  Trans%id2,  Trans%jdc, &
-                   Trans%l2c, misval_, transpose)
+    call L2CInterp(data_ll, var_cs, Tr%id1,  Tr%id2,  Tr%jdc, &
+                   Tr%l2c, misval_, transpose)
 
     if(.not.transpose) then
        do itile=1,ntiles
@@ -819,9 +940,9 @@ contains
     RETURN_(SUCCESS)
   end subroutine LatLonToCuber8
 
-  subroutine LatLonToCuber4( Trans, data_ll, data_cs, transpose, misval, rc)
+  subroutine LatLonToCuber4( Tr, data_ll, data_cs, transpose, misval, rc)
 
-    type(T_CubeLatLonTransform),  intent(in )   :: Trans
+    type(T_CubeLatLonTransform),  intent(in )   :: Tr
     real,                         intent(inout) :: data_ll(:,:)
     real,                         intent(inout) :: data_cs(:,:)
     logical, optional,            intent(in )   :: transpose
@@ -840,7 +961,7 @@ contains
 !JK for conservative interp--------------
 
 
-    ASSERT_(Trans%Created)
+    ASSERT_(Tr%Created)
 
     if(present(misval)) then
        misval_ = misval
@@ -848,7 +969,7 @@ contains
        misval_ = 1.0
     end if
 
-    nx   = Trans%npx
+    nx   = Tr%npx
 
     allocate ( data_ll8(size(data_ll,1),size(data_ll,2)),stat=status)
     VERIFY_(STATUS)
@@ -886,16 +1007,16 @@ contains
 
     if(.not.transpose) then
       call LToC_interp &
-         (cs8_data, data_ll8, NT_Tiles, Trans%nlat, Trans%nlon, Trans%npx, Trans%npy)
+         (cs8_data, data_ll8, NT_Tiles, Tr%nlat, Tr%nlon, Tr%npx, Tr%npy)
     else
       call LToC_interp_b&
-         (cs8_data, data_ll8, NT_Tiles, Trans%nlat, Trans%nlon, Trans%npx, Trans%npy)
+         (cs8_data, data_ll8, NT_Tiles, Tr%nlat, Tr%nlon, Tr%npx, Tr%npy)
     endif
 
     else                     !JK for conservative interp---
 
-    call L2CInterp(data_ll8, data_cs8, Trans%id1,  Trans%id2,  Trans%jdc, &
-                   Trans%l2c, misval_, transpose)
+    call L2CInterp(data_ll8, data_cs8, Tr%id1,  Tr%id2,  Tr%jdc, &
+                   Tr%l2c, misval_, transpose)
 
     endif                    !JK for conservative interp---
 
@@ -1624,5 +1745,229 @@ SUBROUTINE CToL_INTERP_B(ll_datab, cs_datab, NT_tiles, nlat, nlon, nxg, nyg)
   END DO
   ll_datab = 0.0
 END SUBROUTINE CToL_INTERP_B
+
+subroutine ReStaggerWindsCube(U, V, D2A)
+  real,                      intent(INOUT) :: U(:,:,:)
+  real,                      intent(INOUT) :: V(:,:,:)
+  logical,                   intent(IN   ) :: D2A
+  
+  integer :: im, jm, lm
+  integer :: tile, l, j1, j2, status
+  integer, parameter :: ntiles=6
+  real, allocatable, dimension(:,:,:) :: UAP, VAP
+
+  IM = size(U,1)
+  JM = size(V,2)/6
+  LM = size(U,3)
+  
+  allocate (UAP(0:IM+1,0:JM+1,ntiles), stat=status)
+  allocate (VAP(0:IM+1,0:JM+1,ntiles), stat=status)
+
+
+  do L = 1, LM
+     do tile = 1,ntiles
+        j1 = (tile-1)*JM + 1
+        j2 = tile*JM 
+        UAP(1:IM,1:JM,tile) = U(1:IM,j1:j2,L)
+        VAP(1:IM,1:JM,tile) = V(1:IM,j1:j2,L)
+     enddo
+     call GhostCubeVector(UAP, VAP, D2A)
+
+     if(D2A) then
+        do tile = 1,ntiles
+           j1 = (tile-1)*IM + 1
+           j2 = tile*IM 
+           U(1:IM,j1:j2,L) = 0.5*(UAP(1:IM,1:JM,tile) + UAP(1:IM,2:JM+1,tile))
+           V(1:IM,j1:j2,L) = 0.5*(VAP(1:IM,1:JM,tile) + VAP(2:IM+1,1:JM,tile))
+        end do
+     else
+        do tile = 1,ntiles
+           j1 = (tile-1)*JM + 1
+           j2 = tile*JM 
+
+           U(1:IM,j1:j2,L) = 0.5*(UAP(1:IM,1:JM,tile) + UAP(1:IM,0:JM-1,tile))
+           V(1:IM,j1:j2,L) = 0.5*(VAP(1:IM,1:JM,tile) + VAP(0:IM-1,1:JM,tile))
+        end do
+     end if
+  end do
+
+  deallocate(VAP)
+  deallocate(UAP)
+
+  return
+end subroutine ReStaggerWindsCube
+
+  subroutine SphericalToCartesianR4C2C(Tr, U, V, Uxyz)
+    type(T_CubeCubeTransform), intent(IN ) :: Tr
+    real,                      intent(IN ) :: U(:,:,:), V(:,:,:)
+    real,                      intent(OUT) :: Uxyz(:,:,:)
+    
+    integer           :: K, LM
+    real(R8), pointer :: e1(:,:,:), e2(:,:,:) 
+
+    e1=>Tr%ff1
+    e2=>Tr%ff2
+
+    LM = size(U,3)
+    
+    do k=1,LM
+       Uxyz(:,:,k     ) = U(:,:,k)*e1(:,:,1) + V(:,:,k)*e2(:,:,1)
+       Uxyz(:,:,k+  LM) = U(:,:,k)*e1(:,:,2) + V(:,:,k)*e2(:,:,2)
+       Uxyz(:,:,k+2*LM) = U(:,:,k)*e1(:,:,3) + V(:,:,k)*e2(:,:,3)
+    end do
+
+    return
+  end subroutine SphericalToCartesianR4C2C
+
+  subroutine CartesianToSphericalR4C2C(Tr, Uxyz, U, V)
+    type(T_CubeCubeTransform),   intent(IN ) :: Tr
+    real,                        intent(OUT) :: U(:,:,:), V(:,:,:)
+    real,                        intent(IN ) :: Uxyz(:,:,:)
+
+    logical           :: Rotate_
+    integer           :: K, LM
+    real(R8), pointer :: e1(:,:,:), e2(:,:,:) 
+
+    e1=>Tr%ee1
+    e2=>Tr%ee2
+
+    LM = size(U,3)
+    
+    do k=1,LM
+       U(:,:,k) = Uxyz(:,:,k     )*e1(:,:,1) + &
+                  Uxyz(:,:,k+  LM)*e1(:,:,2) + &
+                  Uxyz(:,:,k+2*LM)*e1(:,:,3)
+
+       V(:,:,k) = Uxyz(:,:,k     )*e2(:,:,1) + &
+                  Uxyz(:,:,k+  LM)*e2(:,:,2) + &
+                  Uxyz(:,:,k+2*LM)*e2(:,:,3)
+    end do
+
+    return
+  end subroutine CartesianToSphericalR4C2C
+
+  subroutine GhostCubeVector(u,v,d2a)
+    real,    intent(INOUT) :: u(0:,0:,:)
+    real,    intent(INOUT) :: v(0:,0:,:)
+    logical, intent(IN   ) :: d2a ! .true. when input is on D-grid
+
+    integer :: nx, ny
+
+! Note that the mapping between the "flipped" edges differs for
+! points on the A and D grid. 
+! For "center" vars, 1 <=> n; for "edge" vars, 1 <=> n+1
+
+    nx = size(u,1)-2
+    ny = nx
+
+    ! FACE 1
+    u(1:nx,0,   1) =  u(1:nx,ny,   6)
+    u(1:nx,ny+1,1) = -v(1,ny:1:-1, 3)
+    u(nx+1,1:ny,1) =  u(1,1:ny,    2)
+
+    v(1:nx,0,   1) =  v(1:nx,ny,   6)
+    v(0,1:ny,   1) = -u(nx:1:-1,ny,5)
+    v(nx+1,1:ny,1) =  v(1,1:ny,    2)
+
+    ! FACE 2
+    u(1:nx,0,   2) = -v(nx,ny:1:-1,6)
+    u(1:nx,ny+1,2) =  u(1:nx,1,    3)
+    u(0,1:ny,   2) =  u(nx,1:ny,   1)
+
+    v(1:nx,ny+1,2) =  v(1:nx,1,    3)
+    v(0,1:ny,   2) =  v(nx,1:ny,   1)
+    v(nx+1,1:ny,2) = -u(nx:1:-1,1, 4)
+
+    ! FACE 3
+    u(1:nx,0,   3) =  u(1:nx,ny,   2)
+    u(1:nx,ny+1,3) = -v(1,ny:1:-1, 5)
+    u(nx+1,1:ny,3) =  u(1,1:ny,    4)
+
+    v(1:nx,0,   3) =  v(1:nx,ny,   2)
+    v(0,1:ny,   3) = -u(nx:1:-1,ny,1)
+    v(nx+1,1:ny,3) =  v(1,1:ny,    4)
+
+    ! FACE 4
+    u(1:nx,0,   4) = -v(nx,ny:1:-1,2)
+    u(1:nx,ny+1,4) =  u(1:nx,1,    5)
+    u(0,1:ny,   4) =  u(nx,1:ny,   3)
+
+    v(1:nx,ny+1,4) =  v(1:nx,1,    5)
+    v(0,1:ny,   4) =  v(nx,1:ny,   3)
+    v(nx+1,1:ny,4) = -u(nx:1:-1,1, 6)
+
+    ! FACE 5
+    u(1:nx,0,   5) =  u(1:nx,ny,   4)
+    u(1:nx,ny+1,5) = -v(1,ny:1:-1, 1)
+    u(nx+1,1:ny,5) =  u(1,1:ny,    6)
+
+    v(1:nx,0,   5) =  v(1:nx,ny,   4)
+    v(0,1:ny,   5) = -u(nx:1:-1,ny,3)
+    v(nx+1,1:ny,5) =  v(1,1:ny,    6)
+
+    ! FACE 6
+    u(1:nx,0,   6) = -v(nx,ny:1:-1,4)
+    u(1:nx,ny+1,6) =  u(1:nx,1,    1)
+    u(0,1:ny,   6) =  u(nx,1:ny,   5)
+
+    v(1:nx,ny+1,6) =  v(1:nx,1,    1)
+    v(0,1:ny,   6) =  v(nx,1:ny,   5)
+    v(nx+1,1:ny,6) = -u(nx:1:-1,1, 2)
+
+! Deal with "flipped" edges
+    if (D2A) then
+       u(0,2:ny,   1) =  v(nx:2:-1,ny,5)
+       v(2:nx,ny+1,1) =  u(1,ny:2:-1, 3)
+       u(nx+1,2:ny,2) =  v(nx:2:-1,1, 4)
+       v(2:nx,0,   2) =  u(nx,ny:2:-1,6)
+       u(0,2:ny,   3) =  v(nx:2:-1,ny,1)
+       v(2:nx,ny+1,3) =  u(1,ny:2:-1, 5)
+       u(nx+1,2:ny,4) =  v(nx:2:-1,1, 6)
+       v(2:nx,0,   4) =  u(nx,ny:2:-1,2)
+       u(0,2:ny,   5) =  v(nx:2:-1,ny,3)
+       v(2:nx,ny+1,5) =  u(1,ny:2:-1, 1)
+       u(nx+1,2:ny,6) =  v(nx:2:-1,1, 2)
+       v(2:nx,0,   6) =  u(nx,ny:2:-1,4)
+       ! fill these edges (on first cell/row) around corner
+       u(0,   1,   1) =  v(1,ny,6)
+       v(1,   ny+1,1) = -u(1,ny,5)
+       u(nx+1,   1,2) = -u(nx,1,6)
+       v(1,   0,   2) =  u(nx,1,1)
+       u(0,   1,   3) =  v(1,ny,2)
+       v(1,   ny+1,3) = -v(1,ny,1)
+       u(nx+1,1,   4) = -v(nx,1,2)
+       v(1,   0,   4) =  u(nx,1,3)
+       u(0,   1,   5) =  v(1,ny,4)
+       v(1,   ny+1,5) = -v(1,ny,3)
+       u(nx+1,1,   6) = -u(nx,1,4)
+       v(1,   0,   6) =  u(nx,1,5)
+    else
+       u(0,1:ny,   1) =  v(nx:1:-1,ny,5)
+       v(1:nx,ny+1,1) =  u(1,ny:1:-1, 3)
+       u(nx+1,1:ny,2) =  v(nx:1:-1,1, 4)
+       v(1:nx,0,   2) =  u(nx,ny:1:-1,6)
+       u(0,1:ny,   3) =  v(nx:1:-1,ny,1)
+       v(1:nx,ny+1,3) =  u(1,ny:1:-1, 5)
+       u(nx+1,1:ny,4) =  v(nx:1:-1,1, 6)
+       v(1:nx,0,   4) =  u(nx,ny:1:-1,2)
+       u(0,1:ny,   5) =  v(nx:1:-1,ny,3)
+       v(1:nx,ny+1,5) =  u(1,ny:1:-1, 1)
+       u(nx+1,1:ny,6) =  v(nx:1:-1,1, 2)
+       v(1:nx,0,   6) =  u(nx,ny:1:-1,4)
+    end if
+
+!  Zero corners
+
+    u(0,   ny+1,:) = 0.0
+    u(0,      0,:) = 0.0
+    u(nx+1,   0,:) = 0.0
+    u(nx+1,ny+1,:) = 0.0
+
+    v(0,   ny+1,:) = 0.0
+    v(0,      0,:) = 0.0
+    v(nx+1,   0,:) = 0.0
+    v(nx+1,ny+1,:) = 0.0
+
+  end subroutine GhostCubeVector
 
 end Module CubeLatLonTransformMod

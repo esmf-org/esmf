@@ -97,13 +97,14 @@ defaults to the true name.
 Files in a collection are named using the collection name, the
 template attribute described below, and the {\tt EXDID:} attribute
 value. A filename extension may also be added to identify the type of
-file (e.g., .hdf).
+file (e.g., .nc4).
 \begin{quote}
     {\tt [expid.]collection[.template][.ext]}
 \end{quote}
-The appended extension depends on the {\tt mode} attribute below. if
-{\tt mode} is "HDF", the extension is always .hdf, even when using a
-netcdf library. If it is "GrADS", the data files have no extension and
+The extension is not added automatically, it is up to the user to add the appropriate one.
+If the format is CFIO or CFIOasync and the extension is absent or .nc a NETCDF4 classic file
+will be produced. Is the extentions is .nc4 a NETCDF4 file will be produced.
+If it is "flat", the data files have whatever extension you provide and
 the ``control file'' has the .ctl extension, but with no {\tt
 template}. The expid is always prepended, unless it is an empty
 string.
@@ -116,9 +117,10 @@ The following are the valid collection attributes:
                          The template uses GrADS convensions. 
                          The default value depends on the {\tt duration} of the file.
 \item[\tt descr]         Character string describing the collection. Defaults to "expdsc".
-\item[\tt format]        Character string to select file format ("GrADS" or "HDF").  "HDF" 
-                         implies whatever IO library is linked, netcdf or HDF.
-                         Default = "GrADS".
+\item[\tt format]        Character string to select file format ("CFIO", "CFIOasync", "flat").  "CFIO" 
+                         uses MAPL\_CFIO and produces netcdf output. "CFIOasync" uses MAPL\_CFIO but
+                         delegates the actual I/O to the MAPL\_CFIOServer (see MAPL\_CFIOServer documenation for details).
+                         Default = "flat".
 \item[\tt frequency]     Integer (HHHHMMSS) for the frequency of time groups in the collection.
                          Default = 060000.
 \item[\tt mode]          Character string equal to "instantaneous" or "time-averaged".
@@ -169,6 +171,15 @@ The following are the valid collection attributes:
 \item[\tt regrid\_name]  Name of the Log-Rect grid to interpolate to when going from a tile 
                          to Field to a gridde output. {\tt regrid\_exch} must be set, otherwise
                          it is ignored.
+\item[\tt conservative]  Set to a non-zero integer to turn on conservative regridding when going
+                         from a native cube-sphere grid to lat-lon output.
+                         Default: 0
+\item[\tt deflate]       Set deflate level (0-9) of NETCDF output when format is CFIO or CFIOasync.
+                         Default: 0
+\item[\tt subset]        Optional subset (lonMin lonMax latMin latMax) for the output when performing
+                         non-conservative cube-sphere to lat-lon regridding of the output.
+\item[\tt chunksize]     Optional user specified chunking of NETCDF output when format is CFIO or CFIOasync, 
+                         (Lon chunksize, Lat chunksize, Lev chunksize, Time chunksize)
 \end{trivlist}
 \end{quote}
 
@@ -183,7 +194,7 @@ COLLECTIONS:
       ::
 
 dynamics_vars_eta.template:   '%y4%m2%d2_%h2%n2z',
-dynamics_vars_eta.format:     'HDF',
+dynamics_vars_eta.format:     'CFIO',
 dynamics_vars_eta.frequency:  240000,
 dynamics_vars_eta.duration:   240000,
 dynamics_vars_eta.fields:     'T_EQ'     , 'HSPHYSICS'           ,
@@ -194,7 +205,7 @@ dynamics_vars_eta.fields:     'T_EQ'     , 'HSPHYSICS'           ,
                       ::
 
 dynamics_vars_p.template:   '%y4%m2%d2_%h2%n2z',
-dynamics_vars_p.format:     'Grads',
+dynamics_vars_p.format:     'flat',
 dynamics_vars_p.frequency:  240000,
 dynamics_vars_p.duration:   240000,
 dynamics_vars_p.vscale:     100.0,
@@ -215,15 +226,14 @@ dynamics_vars_p.fields:     'T_EQ'     , 'HSPHYSICS'           ,
  \item It may not be well behaved if more than one instance exists in an application.
  \item Its use for servicing a non-MAPL gridded components is not documented.
  \item GrADS output is currently done through specialized calls, rather than through the 
-       CFIO library. This will change soon.
+       CFIO library.
  \item Horizontal and vertical interpolation correctly 
        rely on CFIO, and so are not yet available for GrADS files.
- \item Even when writing with the netcdf library, files extensions are .hdf.
  \item If resolution attribute is used to INCREASE resolution, code may break.   
  \item Grid offsetting is very limited and does not allow for arbitrary rotations
        in longitude 
  \item Currently, this component only handles MAPL supported grids, which currently are 
-       LogRect ESMF grids that tile the entire sphere.
+       the regular lat-lon and the cubed-sphere ESMF grids that tile the entire sphere.
 
  \end{enumerate}
 

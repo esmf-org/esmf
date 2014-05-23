@@ -106,10 +106,10 @@ module MAPL_LoadBalanceMod
 
 contains
 
-  subroutine MAPL_BalanceWork(A, Idim, Direction, StratHandle, rc)
+  subroutine MAPL_BalanceWork(A, Idim, Direction, Handle, rc)
     real,              intent(INOUT) :: A(:)
     integer,           intent(IN   ) :: Idim, Direction
-    integer, optional, intent(IN   ) :: StratHandle
+    integer, optional, intent(IN   ) :: Handle
     integer, optional, intent(  OUT) :: rc
 
     integer :: PASS, LENGTH, PROCESSOR, CURSOR, ISTRAT
@@ -131,8 +131,8 @@ contains
 
     Jdim = size(A)/Idim
 
-    if(present(StratHandle)) then
-       ISTRAT = StratHandle
+    if(present(Handle)) then
+       ISTRAT = Handle
     else
        ISTRAT = 0
     endif
@@ -214,14 +214,14 @@ contains
                                 Handle, BalLen, BufLen, rc)
 
     integer,           intent(IN)  :: OrgLen
-    integer, optional, intent(IN)  :: Comm
+    integer,           intent(IN)  :: Comm
     integer, optional, intent(IN)  :: MaxPasses
     real,    optional, intent(IN)  :: BalCond
     integer, optional, intent(OUT) :: Handle, BalLen, BufLen
     integer, optional, intent(OUT) :: rc
 
     real    :: BalCond_
-    integer :: MaxPasses_, Comm_
+    integer :: MaxPasses_
     integer :: KPASS, STATUS, Balance, MyNewWork, MyBufSize
     integer :: NPES, MyPE, J, JSPARD, LEN
     real    :: MEAN
@@ -235,16 +235,12 @@ contains
 !!!  for the other methods. The number of passes may be optionally controlled
 !!!  with an upper limit (MaxPasses) or a limiting criterion (BalCond).
 !!!  The amount of work resulting for the local rank can be returned (BalLen).
-!!!  If Comm is not specified, MPI_COMM_WORLD is assumed.
+!!!
+!!! NOTE: As there may be more than one communicator, Comm is required. This
+!!!  will most likely be the communicator from the ESMF VM.
 
 !!! Defaults of optional Inputs
 !!!----------------------------
-
-    if(present(Comm)) then
-       Comm_ = Comm
-    else
-       Comm_ = MPI_COMM_WORLD
-    end if
 
     if(present(BalCond)) then
        BalCond_ = BalCond
@@ -261,9 +257,9 @@ contains
 !!! Get Communicator parameters
 !!!----------------------------
 
-    call MPI_COMM_RANK(Comm_, MyPE, STATUS)
+    call MPI_COMM_RANK(Comm, MyPE, STATUS)
     ASSERT_(STATUS==MPI_SUCCESS)
-    call MPI_COMM_SIZE(Comm_, NPES, STATUS)
+    call MPI_COMM_SIZE(Comm, NPES, STATUS)
     ASSERT_(STATUS==MPI_SUCCESS)
 
 !!! Allocate temporary space
@@ -276,7 +272,7 @@ contains
 !!!------------------------------------------------------------
 
     call MPI_AllGather(OrgLen,1,MPI_INTEGER,&
-                       Work  ,1,MPI_INTEGER,Comm_,status)
+                       Work  ,1,MPI_INTEGER,Comm,status)
     ASSERT_(STATUS==MPI_SUCCESS)
 
     forall (J=1:NPES) Rank(J) = J-1
@@ -313,7 +309,7 @@ contains
     THE_STRATEGIES(Balance)%BUFFER_LENGTH     = MyBufSize
     THE_STRATEGIES(Balance)%UNBALANCED_LENGTH = OrgLen
     THE_STRATEGIES(Balance)%PASSES            = KPASS
-    THE_STRATEGIES(Balance)%COMM              = Comm_
+    THE_STRATEGIES(Balance)%COMM              = Comm
     THE_STRATEGIES(Balance)%NOP               = NOP(:,:KPASS)
 
     deallocate(NOP)
@@ -403,18 +399,27 @@ contains
     integer, optional, intent(IN ) :: Handle
     integer, optional, intent(OUT) :: rc
 
-    ASSERT_(Handle>=0 .and. Handle<=MAX_NUM_STRATEGIES)
+    integer :: Handle_
 
-    if(associated(THE_STRATEGIES(Handle)%NOP)) &
-         deallocate(THE_STRATEGIES(Handle)%NOP)
+    if (present(Handle)) then 
+       ASSERT_(Handle>=0 .and. Handle<=MAX_NUM_STRATEGIES)
+       Handle_ = Handle
+    else
+       ! If we do not pass in a Handle, assume we wish to destroy
+       ! the default Strategy which has a Handle of 0
+       Handle_ = 0
+    end if
 
-    nullify(THE_STRATEGIES(Handle)%NOP)
+    if(associated(THE_STRATEGIES(Handle_)%NOP)) &
+         deallocate(THE_STRATEGIES(Handle_)%NOP)
 
-    THE_STRATEGIES(Handle)%UNBALANCED_LENGTH =-1
-    THE_STRATEGIES(Handle)%BALANCED_LENGTH   =-1
-    THE_STRATEGIES(Handle)%BUFFER_LENGTH     =-1
-    THE_STRATEGIES(Handle)%PASSES            =-1
-    THE_STRATEGIES(Handle)%COMM              =-1
+    nullify(THE_STRATEGIES(Handle_)%NOP)
+
+    THE_STRATEGIES(Handle_)%UNBALANCED_LENGTH =-1
+    THE_STRATEGIES(Handle_)%BALANCED_LENGTH   =-1
+    THE_STRATEGIES(Handle_)%BUFFER_LENGTH     =-1
+    THE_STRATEGIES(Handle_)%PASSES            =-1
+    THE_STRATEGIES(Handle_)%COMM              =-1
 
     RETURN_(LDB_SUCCESS)
   end subroutine MAPL_BalanceDestroy
