@@ -328,6 +328,15 @@ class Grid(object):
         if staggerloc != None:
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
 
+        # Add items if they are specified, this is done after the
+        # mask and area are initialized
+        if add_user_area:
+            self.add_item(GridItem.AREA, staggerloc=StaggerLoc.CENTER, 
+                          from_file=from_file)
+        if add_mask:
+            self.add_item(GridItem.MASK, staggerloc=StaggerLoc.CENTER, 
+                          from_file=from_file)
+
         # regist with atexit
         import atexit; atexit.register(self.__del__)
         self.__finalized = False
@@ -445,7 +454,7 @@ class Grid(object):
         if len(staggerlocs) == 1 and coord_dim is not None:
             return self.coords[staggerlocs[0]][coord_dim]
 
-    def add_item(self, item, staggerloc=None):
+    def add_item(self, item, staggerloc=None, from_file=False):
         """
         Allocate space for a Grid item (mask or areas)
         at a specified stagger location. \n
@@ -489,8 +498,9 @@ class Grid(object):
             if self.item_done[stagger][item] == 1:
                 warnings.warn("This item has already been added.")
 
-            # request that ESMF allocate space for this item
-            ESMP_GridAddItem(self, item, staggerloc=stagger)
+            # request that ESMF allocate space for the coordinates
+            if not from_file:
+                ESMP_GridAddItem(self, item, staggerloc=stagger)
 
             # and now for Python..
             self.allocate_items(item, stagger)
