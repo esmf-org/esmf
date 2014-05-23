@@ -1959,7 +1959,11 @@ print *, "found match:"// &
     integer                         :: localPet, petCount
     
     ! consistency check counts
-    count = size(cplList)
+    if (associated(cplList)) then
+      count = size(cplList)
+    else
+      count = 0
+    endif
     call ESMF_FieldBundleGet(srcFB, fieldCount=i, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
