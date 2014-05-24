@@ -3,7 +3,7 @@
 # Input data for ESMPy regrid from file tests
 
 # total number of test cases
-24
+27
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
 #wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-06 : 10E-16
@@ -150,11 +150,11 @@ T42_grid.nc : T42_grid.nc : nearestdtos : -i : 10E-04 : 10E-16
 
 # GridSpec
 GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : bilinear : -p none -i --src_type GRIDSPEC --src_missingvalue so: 10E-05 : 10E-16
-#GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC -i --src_missingvalue so: 10E-04 : 10E-13
+GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC -i --src_missingvalue so: 10E-04 : 10E-13
 so_Omon_GISS-E2.nc : SCRIP_1x1.nc : bilinear : --src_type GRIDSPEC : 10E-08 : 10E-16
-#so_Omon_GISS-E2.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC : 10E-08 : 10E-14
+so_Omon_GISS-E2.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC : 10E-08 : 10E-14
 GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : bilinear : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-02 : 10E-16
-#GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-04 : 10E-13
+GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-04 : 10E-13
 
 # UGRID
 #FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-03 : 10E-15
