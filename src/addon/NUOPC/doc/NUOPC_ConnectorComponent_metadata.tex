@@ -18,6 +18,6 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
      {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
      {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
      {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
-     {\tt CplList} & List of StandardNames of the connected Fields.& {\em standard names as per field dictionary}\\ \hline
+     {\tt CplList} & List of StandardNames of the connected Fields. Each StandardName entry may be followed by a colon separated list of connection options. The details are discussed in section \ref{connection_options} & {\em Standard names} as per field dictionary, followed by {\em connection options} defined in section \ref{connection_options}.\\ \hline
      \hline
 \end{tabular}
