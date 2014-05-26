@@ -1491,10 +1491,12 @@ int ArrayBundle::sparseMatMul(
       int rraCount = rraList.size();
       // set filterBitField  
       int filterBitField = 0x0; // init. to execute _all_ operations in XXE
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-      if (count > 0){      
+      if (count == 0){
+        // use SRCSEQ as default setting
+        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      }else{
         if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
           filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
