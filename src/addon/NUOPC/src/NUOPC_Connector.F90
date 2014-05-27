@@ -43,10 +43,11 @@ module NUOPC_Connector
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
 
   type type_InternalStateStruct
-    type(ESMF_FieldBundle)  :: srcFields
-    type(ESMF_FieldBundle)  :: dstFields
-    type(ESMF_RouteHandle)  :: rh
-    type(ESMF_State)        :: state
+    type(ESMF_FieldBundle)              :: srcFields
+    type(ESMF_FieldBundle)              :: dstFields
+    type(ESMF_RouteHandle)              :: rh
+    type(ESMF_State)                    :: state
+    type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
   end type
 
   type type_InternalState
@@ -531,7 +532,8 @@ print *, "current bondLevel=", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -574,6 +576,9 @@ print *, "current bondLevel=", bondLevel
     call ESMF_UserCompSetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! clean starting condition for pointer member inside internal state
+    nullify(is%wrap%termOrders)
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
@@ -616,16 +621,25 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! prepare chopStringList
+    nullify(chopStringList)
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
-      
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -815,7 +829,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -911,16 +926,25 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! prepare chopStringList
+    nullify(chopStringList)
+    
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1075,7 +1099,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1170,16 +1195,25 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! prepare chopStringList
+    nullify(chopStringList)
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1324,7 +1358,8 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR), pointer :: cplList(:)
+    character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
+    character(ESMF_MAXSTR)          :: cplName
     integer                         :: cplListSize, i
     integer                         :: bondLevel, bondLevelMax
     character(ESMF_MAXSTR), pointer :: importNamespaceList(:)
@@ -1413,17 +1448,26 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! prepare chopStringList
+    nullify(chopStringList)
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
+      call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      cplName = chopStringList(1) ! first part is the standard name of cpl field
+      deallocate(chopStringList)
       
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplList(i)).and. &
-            (exportStandardNameList(eMatch) == cplList(i))) then
+          if ((importStandardNameList(iMatch) == cplName).and. &
+            (exportStandardNameList(eMatch) == cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1518,9 +1562,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (.not.existflag) then
       ! if not specialized -> use default method to:
       ! precompute the regrid for all src to dst Fields
-      call ESMF_FieldBundleRegridStore(is%wrap%srcFields, is%wrap%dstFields, &
-        unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-        routehandle=is%wrap%rh, rc=rc)
+      call FieldBundleCplStore(is%wrap%srcFields, is%wrap%dstFields, &
+        cplList=cplList, rh=is%wrap%rh, termOrders=is%wrap%termOrders, &
+        name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1604,7 +1648,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       ! if not specialized -> use default method to:
       ! execute the regrid operation
       call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
-        routehandle=is%wrap%rh, rc=rc)
+        routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1696,7 +1740,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
-    ! deallocate remaining internal state memebers
+    ! deallocate and destroy remaining internal state members
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1706,7 +1750,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     call ESMF_StateDestroy(is%wrap%state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+    if (associated(is%wrap%termOrders)) then
+      deallocate(is%wrap%termOrders, stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Deallocation of termOrders list.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -1819,6 +1870,508 @@ print *, "found match:"// &
     
   end subroutine
     
+  !-----------------------------------------------------------------------------
+
+  subroutine chopString(string, chopChar, chopStringList, rc)
+    character(len=*)                              :: string
+    character                                     :: chopChar
+    character(ESMF_MAXSTR), pointer               :: chopStringList(:)
+    integer,                intent(out), optional :: rc
+    ! local variables
+    integer               :: i, j, count
+    integer, allocatable  :: chopPos(:)
+    
+    ! check the incoming pointer
+    if (associated(chopStringList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="chopStringList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! determine how many times chopChar is found in string
+    count=0 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) count=count+1
+    enddo
+    
+    ! record positions where chopChar is found in string
+    allocate(chopPos(count))
+    j=1 ! reset
+    do i=1, len(trim(string))
+      if (string(i:i)==chopChar) then
+        chopPos(j)=i
+        j=j+1
+      endif
+    enddo
+    
+    ! chop up the string
+    allocate(chopStringList(count+1))
+    j=1 ! reset
+    do i=1, count
+      chopStringList(i) = string(j:chopPos(i)-1)
+      j=chopPos(i)+1
+    enddo
+    chopStringList(count+1) = trim(string(j:len(string)))
+    deallocate(chopPos)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+
+  subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, termOrders, name, &
+    rc)
+    type(ESMF_FieldBundle),    intent(in)            :: srcFB
+    type(ESMF_FieldBundle),    intent(inout)         :: dstFB
+    character(*),              pointer               :: cplList(:)
+    type(ESMF_RouteHandle),    intent(inout)         :: rh
+    type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
+    character(*),              intent(in)            :: name
+    integer,                   intent(out), optional :: rc
+    ! local variables
+    integer                         :: i, j, k, count, stat, localDeCount
+    type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
+    integer                         :: rraShift, vectorLengthShift
+    type(ESMF_RouteHandle)          :: rhh
+    integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
+    real(ESMF_KIND_R8), pointer     :: factorList(:)
+    character(ESMF_MAXSTR), pointer :: chopStringList(:)
+    character(ESMF_MAXSTR), pointer :: chopSubString(:), chopSubSubString(:)
+    character(len=160)              :: msgString
+    character(len=480)              :: tempString
+    type(ESMF_RegridMethod_Flag)    :: regridmethod
+    type(ESMF_UnmappedAction_Flag)  :: unmappedaction
+    type(ESMF_PoleMethod_Flag)      :: polemethod
+    integer                         :: regridPoleNPnts
+    integer(ESMF_KIND_I4), pointer  :: srcMaskValues(:)
+    integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
+    integer                         :: srcTermProcessing, pipelineDepth
+    logical                         :: dumpWeightsFlag
+    integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
+    type(ESMF_VM)                   :: vm
+    type(ESMF_DistGrid)             :: dg
+    type(ESMF_Array)                :: array
+    integer                         :: localPet, petCount
+    
+    ! consistency check counts
+    if (associated(cplList)) then
+      count = size(cplList)
+    else
+      count = 0
+    endif
+    call ESMF_FieldBundleGet(srcFB, fieldCount=i, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (i /= count) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Counts must match!", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    call ESMF_FieldBundleGet(dstFB, fieldCount=i, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (i /= count) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Counts must match!", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! consistency check the incoming "termOrders" argument
+    if (associated(termOrders)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'termOrders' argument must enter unassociated!", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    ! prepare "termOrders" list
+    allocate(termOrders(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of termOrders.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! access the fields in the add order
+    allocate(srcFields(count), dstFields(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of srcFields and dstFields.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_FieldBundleGet(srcFB, fieldList=srcFields, &
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(dstFB, fieldList=dstFields, &
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! prepare Routehandle
+    rh = ESMF_RouteHandleCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_RouteHandlePrepXXE(rh, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! prepare auxiliary variables
+    rraShift = 0              ! reset
+    vectorLengthShift = 0     ! reset
+    nullify(chopStringList)   ! reset
+    nullify(chopSubString)    ! reset
+    nullify(chopSubSubString) ! reset
+    nullify(factorIndexList)  ! reset
+    nullify(factorList)       ! reset
+    nullify(srcMaskValues)    ! reset
+    nullify(dstMaskValues)    ! reset
+    
+    ! loop over all fields
+    do i=1, count
+    
+      ! use a temporary string and convert the cplList(i) to lower characters
+      tempString = trim(cplList(i))
+      call ESMF_StringLowerCase(tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+      ! chop the cplList entry
+      call chopString(tempString, chopChar=":", chopStringList=chopStringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+      ! determine "srcMaskValues"
+      allocate(srcMaskValues(0))  ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"srcmaskvalues=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            call chopString(chopSubString(2), chopChar=",", &
+              chopStringList=chopSubSubString, rc=rc)
+            if (size(chopSubSubString)>0) then
+              deallocate(srcMaskValues)
+              allocate(srcMaskValues(size(chopSubSubString)))
+              do k=1, size(chopSubSubString)
+                read(chopSubSubString(k), "(i10)") srcMaskValues(k)
+              enddo
+            endif
+            deallocate(chopSubSubString)
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "dstMaskValues"
+      allocate(dstMaskValues(0))  ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"dstmaskvalues=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            call chopString(chopSubString(2), chopChar=",", &
+              chopStringList=chopSubSubString, rc=rc)
+            if (size(chopSubSubString)>0) then
+              deallocate(dstMaskValues)
+              allocate(dstMaskValues(size(chopSubSubString)))
+              do k=1, size(chopSubSubString)
+                read(chopSubSubString(k), "(i10)") dstMaskValues(k)
+              enddo
+            endif
+            deallocate(chopSubSubString)
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "regridmethod"
+      regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"regridmethod=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="bilinear") then
+              regridmethod = ESMF_REGRIDMETHOD_BILINEAR
+            else if (trim(chopSubString(2))=="patch") then
+              regridmethod = ESMF_REGRIDMETHOD_PATCH
+            else if (trim(chopSubString(2))=="nearest_stod") then
+              regridmethod = ESMF_REGRIDMETHOD_NEAREST_STOD
+            else if (trim(chopSubString(2))=="nearest_dtos") then
+              regridmethod = ESMF_REGRIDMETHOD_NEAREST_DTOS
+            else if (trim(chopSubString(2))=="conserve") then
+              regridmethod = ESMF_REGRIDMETHOD_CONSERVE
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to BILINEAR for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "polemethod" and "regridPoleNPnts"
+      polemethod = ESMF_POLEMETHOD_NONE ! default
+      regridPoleNPnts = 1 ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"polemethod=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="none") then
+              polemethod = ESMF_POLEMETHOD_NONE
+            else if (trim(chopSubString(2))=="allavg") then
+              polemethod = ESMF_POLEMETHOD_ALLAVG
+            else if (trim(chopSubString(2))=="npntavg") then
+              polemethod = ESMF_POLEMETHOD_NPNTAVG
+              if (size(chopSubString)>=3) then
+                read(chopSubString(3), "(i10)") regridPoleNPnts
+              endif
+            else if (trim(chopSubString(2))=="teeth") then
+              polemethod = ESMF_POLEMETHOD_TEETH
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to NONE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "unmappedaction"
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"unmappedaction=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="error") then
+              unmappedaction = ESMF_UNMAPPEDACTION_ERROR
+            else if (trim(chopSubString(2))=="ignore") then
+              unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to IGNORE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "srcTermProcessing"
+      srcTermProcessing = -1  ! default -> force auto-tuning
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"srctermprocessing=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            read(chopSubString(2), "(i10)") srcTermProcessing
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "pipelineDepth"
+      pipelineDepth = -1  ! default -> force auto-tuning
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"pipelinedepth=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            read(chopSubString(2), "(i10)") pipelineDepth
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! determine "dumpWeightsFlag"
+      dumpWeightsFlag = .false. ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"dumpweights=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="on") then
+              dumpWeightsFlag = .true.
+            else if (trim(chopSubString(2))=="off") then
+              dumpWeightsFlag = .false.
+            else if (trim(chopSubString(2))=="yes") then
+              dumpWeightsFlag = .true.
+            else if (trim(chopSubString(2))=="no") then
+              dumpWeightsFlag = .false.
+            else if (trim(chopSubString(2))=="true") then
+              dumpWeightsFlag = .true.
+            else if (trim(chopSubString(2))=="false") then
+              dumpWeightsFlag = .false.
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to OFF for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! the actual regrid store call
+      call ESMF_FieldRegridStore(srcField=srcFields(i), dstField=dstFields(i), &
+        srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+        regridmethod=regridmethod, &
+        polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+        unmappedaction=unmappedaction, &
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+        routehandle=rhh, &
+        factorIndexList=factorIndexList, factorList=factorList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+      ! append rhh to rh and clear rhh
+      call ESMF_RouteHandleAppendClear(rh, appendRoutehandle=rhh, &
+        rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+      ! adjust rraShift and vectorLengthShift
+      call ESMF_FieldGet(srcFields(i), localDeCount=localDeCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      rraShift = rraShift + localDeCount
+      call ESMF_FieldGet(dstFields(i), localDeCount=localDeCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      rraShift = rraShift + localDeCount
+      vectorLengthShift = vectorLengthShift + 1
+      
+      ! weight dumping
+      if (dumpWeightsFlag) then
+        call ESMF_VMGetCurrent(vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(weightsPerPet(petCount))
+        call ESMF_VMAllGather(vm, (/size(factorList)/), weightsPerPet, &
+          count=1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        allocate(deBlockList(1,2,petCount))
+        do j=1, petCount
+          if (j==1) then
+            deBlockList(1,1,j) = 1
+            deBlockList(1,2,j) = weightsPerPet(1)
+          else
+            deBlockList(1,1,j) = deBlockList(1,2,j-1) + 1
+            deBlockList(1,2,j) = deBlockList(1,1,j) + weightsPerPet(j) - 1
+          endif
+        enddo
+        dg = ESMF_DistGridCreate(minIndex=(/1/), &
+          maxIndex=(/deBlockList(1,2,petCount)/), &
+          deBlockList=deBlockList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        array = ESMF_ArrayCreate(dg, factorList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_ArrayWrite(array, &
+          "weights_"//trim(name)//"_"//trim(chopStringList(1))//".nc", &
+          status=ESMF_FILESTATUS_REPLACE, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_ArrayDestroy(array, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_DistGridDestroy(dg, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        deallocate(weightsPerPet, deBlockList)
+      endif
+      
+      ! determine "termOrders" list which will be used by Run() method
+      termOrders(i) = ESMF_TERMORDER_FREE ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"termorder=")==1) then
+          call chopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="srcseq") then
+              termOrders(i) = ESMF_TERMORDER_SRCSEQ
+            else if (trim(chopSubString(2))=="srcpet") then
+              termOrders(i) = ESMF_TERMORDER_SRCPET
+            else if (trim(chopSubString(2))=="free") then
+              termOrders(i) = ESMF_TERMORDER_FREE
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a vailid choice. Defaulting to FREE for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+      
+      ! local garbage collection
+      deallocate(factorIndexList, factorList)
+      deallocate(chopStringList)
+      deallocate(srcMaskValues, dstMaskValues)
+      
+    enddo
+    
+    ! garbage collection
+    deallocate(srcFields, dstFields)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+
   !-----------------------------------------------------------------------------
 
 end module

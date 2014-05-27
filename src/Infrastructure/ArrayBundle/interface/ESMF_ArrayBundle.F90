@@ -2396,20 +2396,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, zeroregion, checkflag, rc)
+    routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in),    optional :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout), optional :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_ArrayBundle),    intent(in),    optional :: srcArrayBundle
+    type(ESMF_ArrayBundle),    intent(inout), optional :: dstArrayBundle
+    type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Region_Flag), intent(in),    optional :: zeroregion
-    logical,                intent(in),    optional :: checkflag
-    integer,                intent(out),   optional :: rc
+    type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
+    type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag(:)
+    logical,                   intent(in),    optional :: checkflag
+    integer,                   intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt termorderflag}.
+!              The new argument gives the user control over the order in which
+!              the src terms are summed up.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2443,6 +2450,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     zero out those elements in the destination Arrays that will be updated
 !     by the sparse matrix multiplication. See section \ref{const:region}
 !     for a complete list of valid settings.
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during 
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the term order for each Array SMM operation is
+!     indicated separately. If only one term order element is specified, it is
+!     used for {\em all} Array pairs.
+!     The default is {\tt (/ESMF\_TERMORDER\_FREE/)}, allowing maximum 
+!     flexibility in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pairs will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -2455,12 +2476,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Region_Flag)   :: opt_zeroregion ! helper variable
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
-    type(ESMF_ArrayBundle)  :: opt_srcArrayBundle ! helper variable
-    type(ESMF_ArrayBundle)  :: opt_dstArrayBundle ! helper variable
-
+    integer                   :: localrc      ! local return code
+    type(ESMF_ArrayBundle)    :: opt_srcArrayBundle ! helper variable
+    type(ESMF_ArrayBundle)    :: opt_dstArrayBundle ! helper variable
+    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
+    type(ESMF_Logical)        :: opt_checkflag      ! helper variable
+    integer                   :: len                ! helper variable
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2489,12 +2511,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(zeroregion)) opt_zeroregion = zeroregion
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
-        
-    ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-      routehandle, opt_zeroregion, opt_checkflag, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(termorderflag)) then
+      len = size(termorderflag)
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
+        routehandle, opt_zeroregion, termorderflag, len, opt_checkflag, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      len = 0
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
+        routehandle, opt_zeroregion, len, len, opt_checkflag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3142,14 +3175,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     [file\_name]002, [file\_name]003,...
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!      A logical flag, the default is .false., i.e., existing field data may
+!      A logical flag, the default is .false., i.e., existing Array data may
 !      {\em not} be overwritten. If .true., the overwrite behavior depends
 !      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each field's data.
+!      be overwritten with each Arrays's data.
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
-!      data corresponding to each field's name will be
+!      data corresponding to each Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF

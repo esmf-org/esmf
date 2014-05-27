@@ -2972,7 +2972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, &
-         routehandle, keywordEnforcer, zeroregion, checkflag, rc)
+         routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
@@ -2980,12 +2980,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
+        type(ESMF_TermOrder_Flag), intent(in), optional  :: termorderflag(:)
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt termorderflag}.
+!              The new argument gives the user control over the order in which
+!              the src terms are summed up.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3037,6 +3044,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during 
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the term order for each Field Regrid operation is
+!     indicated separately. If only one term order element is specified, it is
+!     used for {\em all} Field pairs.
+!     The default is {\tt (/ESMF\_TERMORDER\_FREE/)}, allowing maximum 
+!     flexibility in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input FieldBundle pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -3062,7 +3083,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         call ESMF_FieldBundleSMM(srcFieldBundle=srcFieldBundle, &
           dstFieldBundle=dstFieldBundle, routehandle=routehandle, &
-          zeroregion=zeroregion, checkflag=checkflag, rc=localrc)
+          zeroregion=zeroregion, termorderflag=termorderflag, &
+          checkflag=checkflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -3965,7 +3987,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, zeroregion, checkflag, rc)
+        routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
@@ -3973,12 +3995,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
+        type(ESMF_TermOrder_Flag), intent(in), optional  :: termorderflag(:)
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt termorderflag}.
+!              The new argument gives the user control over the order in which
+!              the src terms are summed up.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4030,6 +4059,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination FieldBundle that will be updated by the sparse matrix
 !     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during 
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the term order for each Field SMM operation is
+!     indicated separately. If only one term order element is specified, it is
+!     used for {\em all} Field pairs.
+!     The default is {\tt (/ESMF\_TERMORDER\_FREE/)}, allowing maximum 
+!     flexibility in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input FieldBundle pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -4073,7 +4116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(srcFieldBundle)) then
           srcab = ESMF_FieldBundleToAB(srcFieldBundle, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           src_bundle = .false.
         endif
@@ -4082,26 +4125,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(dstFieldBundle)) then
           dstab = ESMF_FieldBundleToAB(dstFieldBundle, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
-            dst_bundle = .false.
+          dst_bundle = .false.
         endif
 
         ! perform FieldBundle SMM
         if(src_bundle .and. dst_bundle) &
-            call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
-                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
+          call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
+            zeroregion=l_zeroregion, termorderflag=termorderflag, &
+            checkflag=l_checkflag, rc=localrc)
         if(src_bundle .and. .not. dst_bundle) &
-            call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, routehandle=routehandle, &
-                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
+          call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, &
+            routehandle=routehandle, &
+            zeroregion=l_zeroregion, termorderflag=termorderflag, &
+            checkflag=l_checkflag, rc=localrc)
         if(.not. src_bundle .and. dst_bundle) &
-            call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, routehandle=routehandle, &
-                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
+          call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, &
+            routehandle=routehandle, &
+            zeroregion=l_zeroregion, termorderflag=termorderflag, &
+            checkflag=l_checkflag, rc=localrc)
         if(.not. src_bundle .and. .not. dst_bundle) &
-            call ESMF_ArrayBundleSMM(routehandle=routehandle, &
-                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
+          call ESMF_ArrayBundleSMM(routehandle=routehandle, &
+            zeroregion=l_zeroregion, termorderflag=termorderflag, &
+            checkflag=l_checkflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
         if (present(srcFieldBundle)) then

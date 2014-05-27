@@ -148,6 +148,13 @@
 \input{../addon/NUOPC/doc/NUOPC_Namespaces}
 #endif
 
+\subsubsection{Connection Options}
+#ifdef STANDALONE
+\input{NUOPC_ConnectionOptions}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ConnectionOptions}
+#endif
+
 \subsubsection{Data-Dependencies during Initialize}
 #ifdef STANDALONE
 \input{NUOPC_DataDepInit}

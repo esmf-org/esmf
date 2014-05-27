@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-! $Id: MAPL_Base.F90,v 1.43.2.3 2013-03-13 19:40:35 atrayano Exp $
+! $Id: MAPL_Base.F90,v 1.43.2.6.2.1.2.2 2013-12-19 17:06:56 bmauer Exp $
 
 #include "MAPL_ErrLog.h"
 
@@ -75,7 +75,11 @@ public MAPL_StateAdd
 public MAPL_FieldBundleAdd
 public MAPL_FieldBundleGet
 public MAPL_FieldDestroy
+public MAPL_FieldBundleDestroy
 public MAPL_GetHorzIJIndex
+public MAPL_GenGridName
+public MAPL_GeosNameNew
+public MAPL_Communicators
 
 ! !PUBLIC PARAMETERS
 !
@@ -104,6 +108,12 @@ integer, public, parameter :: MAPL_DimsTileTile    = 5
 
 integer, public, parameter :: MAPL_ScalarField     = 1
 integer, public, parameter :: MAPL_VectorField     = 2
+
+
+integer, public, parameter :: MAPL_CplAverage      = 0
+integer, public, parameter :: MAPL_CplMin          = 1
+integer, public, parameter :: MAPL_CplMax          = 2
+integer, public, parameter :: MAPL_MinMaxUnknown   = MAPL_CplAverage
 
 integer, public, parameter :: MAPL_AttrGrid        = 1
 integer, public, parameter :: MAPL_AttrTile        = 2
@@ -140,6 +150,20 @@ integer, public, parameter :: MAPL_HorzTransOrderSample   = 99
 
 character(len=ESMF_MAXSTR), public, parameter :: MAPL_StateItemOrderList = 'MAPL_StateItemOrderList'
 character(len=ESMF_MAXSTR), public, parameter :: MAPL_BundleItemOrderList = 'MAPL_BundleItemOrderList'
+
+type MAPL_Communicators
+   integer :: maplComm
+   integer :: esmfComm
+   integer :: ioComm
+   integer :: maplCommSize
+   integer :: esmfCommSize
+   integer :: ioCommSize
+   integer :: ioCommRoot
+   integer :: myGlobalRank
+   integer :: myIoRank
+   integer :: CoresPerNode
+   integer :: maxMem ! maximum memory per node in megabytes
+end type MAPL_Communicators
 
 #ifdef __PROTEX__
 
@@ -2242,7 +2266,7 @@ and so on.
 
       if (pglobal) then
 
-         globalCellCountPerDim = 0
+         globalCellCountPerDim = 1
 
          call ESMF_GridGet(grid, tile=1, staggerLoc=ESMF_STAGGERLOC_CENTER, &
               minIndex=mincounts, &
@@ -2259,7 +2283,7 @@ and so on.
       end if
 
       if (plocal) then
-         localCellCountPerDim = 0
+         localCellCountPerDim = 1
 
          call ESMF_GridGet(GRID, localDE=0, &
               staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -2629,6 +2653,32 @@ and so on.
      RETURN_(ESMF_SUCCESS)
 
   end subroutine MAPL_FieldDestroy
+         
+  subroutine MAPL_FieldBundleDestroy(Bundle,RC)
+    type(ESMF_FieldBundle),    intent(INOUT) :: Bundle
+    integer, optional,         intent(OUT  ) :: RC
+
+    integer                               :: I
+    integer                               :: FieldCount
+    type(ESMF_Field)                      :: Field
+
+    character(len=ESMF_MAXSTR), parameter :: IAm="MAPL_FieldBundleDestroy"
+    integer                               :: STATUS
+
+ 
+    call ESMF_FieldBundleGet(BUNDLE, FieldCount=FIELDCOUNT, RC=STATUS)
+    VERIFY_(STATUS)
+
+    do I = 1, FIELDCOUNT
+       call ESMF_FieldBundleGet(BUNDLE, I, FIELD, RC=STATUS)
+       VERIFY_(STATUS)
+       call MAPL_FieldDestroy(FIELD, RC=status)
+       VERIFY_(STATUS)
+    end do
+
+    RETURN_(ESMF_SUCCESS)
+
+  end subroutine MAPL_FieldBundleDestroy
          
   subroutine MAPL_StateAddField(State, Field, RC)
     type(ESMF_State),  intent(inout) :: State
@@ -3274,6 +3324,125 @@ and so on.
       end subroutine check_face_pnt
          
   end subroutine MAPL_GetHorzIJIndex
+
+  subroutine MAPL_GenGridName(im, jm, lon, lat, xyoffset, gridname, geos_style)
+    integer :: im, jm
+    character (len=*) :: gridname
+    character(len=2)  :: dateline, pole
+    real, optional    :: lon(:), lat(:)
+    integer, optional :: xyoffset
+    logical,  optional :: geos_style
+
+    integer           :: I
+    real, parameter   :: eps=1.0e-4
+    character(len=16) :: imstr, jmstr
+
+    logical :: old_style
+    if (present(geos_style)) then
+       old_style = geos_style
+    else
+       old_style = .false.
+    end if
+
+    if (jm /= 6*im) then
+       ! Lat-Lon
+       dateline='UU' ! Undefined
+       pole='UU'     ! Undefined
+       if (present(LON) .and. present(LAT)) then
+          if(abs(LAT(1) + 90.0) < eps) then
+             pole='PC'
+          else if (abs(LAT(1) + 90.0 - 0.5*(LAT(2)-LAT(1))) < eps) then
+             pole='PE'
+          end if
+          do I=0,1
+             if(abs(LON(1) + 180.0*I) < eps) then
+                dateline='DC'
+                exit
+             else if (abs(LON(1) + 180.0*I - 0.5*(LON(2)-LON(1))) < eps) then
+                dateline='DE'
+                exit
+             end if
+          end do
+
+       else if (present(xyoffset)) then
+! xyoffset Optional Flag for Grid Staggering (0:DcPc, 1:DePc, 2:DcPe, 3:DePe)
+          select case (xyoffset)
+          case (0)
+             dateline='DC'
+             pole='PC'
+          case (1)
+             dateline='DE'
+             pole='PC'
+          case (2)
+             dateline='DC'
+             pole='PE'
+          case (4)
+             dateline='DE'
+             pole='PE'             
+          end select
+       endif
+       
+       if (old_style) then
+          write(imstr,*) im
+          write(jmstr,*) jm
+          gridname =  pole // trim(adjustl(imstr))//'x'//&
+                      trim(adjustl(jmstr))//'-'//dateline
+       else
+          write(gridname,'(a,i4.4,a,a,i4.4)') dateline,im,'x',pole,jm
+       end if
+    else
+       ! cubed-sphere
+       dateline='CF'
+       pole='6C'
+       if (old_style) then
+          pole='PE'
+          write(imstr,*) im
+          write(jmstr,*) jm
+          gridname =  pole // trim(adjustl(imstr))//'x'//&
+                      trim(adjustl(jmstr))//'-CF'
+       else
+          write(gridname,'(a,i4.4,a,a)') dateline,im,'x',pole
+       end if
+    end if
+
+  end subroutine MAPL_GenGridName
+
+  subroutine MAPL_GeosNameNew(name)
+    character(len=*) :: name
+
+    integer :: im, jm
+    integer :: nn
+    character(len=128) :: gridname
+    character(len=2) :: dateline, pole
+    character(len=8) :: imsz
+    character(len=8) :: jmsz
+
+    ! Parse name for grid info 
+    !-------------------------
+
+    Gridname = AdjustL(name)
+    nn   = len_trim(Gridname)
+    imsz = Gridname(3:index(Gridname,'x')-1)
+    jmsz = Gridname(index(Gridname,'x')+1:nn-3)
+    pole = Gridname(1:2)
+    dateline = Gridname(nn-1:nn)
+
+    read(IMSZ,*) IM
+    read(JMSZ,*) JM
+
+    if (jm /= 6*im) then
+       ! Lat-Lon
+       write(name,'(a,i4.4,a,a,i4.4)') dateline,im,'x',pole,jm
+    else
+       ! Cubed-sphere
+       pole='6C'       
+       if (dateline=='CF') then
+          write(name,'(a,i4.4,a,a)') dateline,im,'x',pole
+       else
+          name='UNKNOWN_ERROR'
+       end if
+    end if
+  end subroutine MAPL_GeosNameNew
 
 end module MAPL_BaseMod
 

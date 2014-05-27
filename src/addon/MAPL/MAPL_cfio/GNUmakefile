@@ -50,7 +50,7 @@ THIS := $(shell basename `pwd`)
 #                  Standard ESMA Targets
 #                  ---------------------
 
-esma_help :
+esma_help help:
 	@echo "Standard ESMA targets:"
 	@echo "% make esma_install    (builds and install under ESMADIR)"
 	@echo "% make esma_clean      (removes deliverables: *.[aox], etc)"
@@ -63,7 +63,6 @@ esma_help :
 	@echo "         ARCH = $(ARCH)"
 	@echo "         SITE = $(SITE) "
 	@echo "         THIS = $(THIS) "
-
 
 #                  --------------------------------
 #                   Recurse Make in Sub-directories
@@ -79,7 +78,7 @@ endif
 SUBDIRS = r4 r8 $(EOS_DIRS)
 
 TARGETS = esma_install esma_clean esma_doc \
-          help install doc test benchmark ut clean
+          install doc test benchmark ut clean
 
 $(TARGETS): 
 	@ t=$@; argv="$(SUBDIRS)" ;\
@@ -87,9 +86,19 @@ $(TARGETS):
 	    ( $(MKDIR) $$d            		;\
 	      $(MAKE) -C $$d -f ../GNUmakefile_r4r8 -e $$t NTHIS=$(THIS) RN=$$d ) \
 	  done
+	$(MAKE) local_$@
 
 local_esma_install local_install: $(LIB)
 	@echo No local install in here
+
+local_esma_clean local_clean:
+	-$(RM) *~ *.[aox] *.[Mm][Oo][Dd]
+
+esma_distclean distclean:
+	-$(RM) -r *~ *.[aoxd] *.[Mm][Oo][Dd] $(SUBDIRS)
+
+local_esma_doc local_doc:
+	@echo no documentation here
 
 #                  --------------------
 #                  User Defined Targets
@@ -114,9 +123,6 @@ eos_r8_install:
 	$(MKDIR) eos_r8
 	echo Making install for eos_r8 in $(PWD)
 	$(MAKE) -C eos_r8 -f ../GNUmakefile_r4r8 -e install NTHIS=$(THIS) RN=eos_r8
-
-esma_distclean distclean:
-	-$(RM) -r *~ *.[aoxd] *.[Mm][Oo][Dd] r4 r8 eos_r4 eos_r8
 
   -include $(ESMADIR)/Config/ESMA_post.mk  # ESMA additional targets, macros
 

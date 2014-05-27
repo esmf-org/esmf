@@ -765,7 +765,7 @@ int ArrayBundle::halo(
   
   // implemented via sparseMatMul
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
-    ESMC_REGION_SELECT, checkflag, true);
+    ESMC_REGION_SELECT, NULL, 0, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1038,7 +1038,7 @@ int ArrayBundle::redist(
   
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    ESMC_REGION_SELECT, checkflag);
+    ESMC_REGION_SELECT, NULL, 0, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1294,12 +1294,19 @@ int ArrayBundle::sparseMatMul(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // inout - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_Region_Flag zeroflag,             // in    - ESMC_REGION_TOTAL:
+  ESMC_Region_Flag zeroflag,            // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
                                         //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
+  ESMC_TermOrder_Flag *termorderflag,   // in    - ESMC_TERMORDER_FREE
+                                        //         -> free partial sum order
+                                        //       - ESMC_TERMORDER_SRCPET
+                                        //         -> PET then seq index order
+                                        //       - ESMC_TERMORDER_SRCSEQ
+                                        //         -> strict src seq index order
+  int termorderflag_len,                //       - elements in termorderflag
   bool checkflag,                       // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
   bool haloFlag                         // in    - support halo conditions
@@ -1326,7 +1333,39 @@ int ArrayBundle::sparseMatMul(
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
     srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
-    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);    
+    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
+    
+    // prepare termOrders vector
+    vector<ESMC_TermOrder_Flag> termOrders;
+    int count=0;  // reset
+    if (srcArraybundle != NULL){
+      count = srcArraybundle->getCount();
+    }else if (dstArraybundle != NULL){
+      count = dstArraybundle->getCount();
+    }
+    if (termorderflag_len == 0 || termorderflag == NULL){
+      // set the default for all Array pairs
+      for (int i=0; i<count; i++)
+        termOrders.push_back(ESMC_TERMORDER_FREE);
+    }else{
+      if (termorderflag_len == 1){
+        // set the single provided order for all Array pairs
+        for (int i=0; i<count; i++)
+          termOrders.push_back(*termorderflag);
+      }else if(termorderflag_len == count){
+        // copy the provided entries over
+        for (int i=0; i<count; i++)
+          termOrders.push_back(termorderflag[i]);
+      }else{
+        // inconsistency detected
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- incorrect number of elements provided in the termorderflag.", 
+          ESMC_CONTEXT, &rc);
+        return rc;  // bail out
+      }
+    }
+
+    // process according to the different routehandle types        
     if (rhType == ESMC_ARRAYXXE){
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
@@ -1340,7 +1379,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArrayVector[i];
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1349,7 +1388,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1358,7 +1397,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1452,13 +1491,43 @@ int ArrayBundle::sparseMatMul(
       int rraCount = rraList.size();
       // set filterBitField  
       int filterBitField = 0x0; // init. to execute _all_ operations in XXE
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      if (count == 0){
+        // use SRCSEQ as default setting
+        filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+        filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+        filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      }else{
+        if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
+          filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter
 #ifdef SMMINFO
-      ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
-        ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
+          ESMC_LOGMSG_INFO);
 #endif
+        }else if (termOrders[0] == ESMC_TERMORDER_SRCPET){
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
+            ESMC_LOGMSG_INFO);
+#endif
+        }else if (termOrders[0] == ESMC_TERMORDER_FREE){
+          // not safe to use FREE for AB routehandle -> use TERMORDER_SRCPET
+          // settings here...
+//          filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+//          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+//          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+          filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+          filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+          filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE",
+            ESMC_LOGMSG_INFO);
+#endif
+        }
+      }
       if (zeroflag!=ESMC_REGION_TOTAL)
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
       if (zeroflag!=ESMC_REGION_SELECT)

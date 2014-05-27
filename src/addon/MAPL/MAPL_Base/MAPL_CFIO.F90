@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: MAPL_CFIO.F90,v 1.131.12.4.2.2.4.2 2013-06-14 17:26:40 bmauer Exp $
+!  $Id: MAPL_CFIO.F90,v 1.131.12.4.2.2.4.8.4.3.4.4.4.3.2.4 2014-03-11 18:02:23 bmauer Exp $
 
 #include "MAPL_Generic.h"
 
@@ -52,6 +52,7 @@ module MAPL_CFIOMod
   use MAPL_HorzTransformMod
   use ESMFL_Mod
   use MAPL_ShmemMod
+  use MAPL_CFIOServerMod
 
   implicit none
   private
@@ -68,11 +69,15 @@ module MAPL_CFIOMod
   public MAPL_CFIOWrite
   public MAPL_CFIOWriteBundlePost
   public MAPL_CFIOWriteBundleWait
+  public MAPL_CFIOWriteBundleWrite
   public MAPL_CFIORead
   public MAPL_CFIODestroy
   public MAPL_GetCurrentFile
   public MAPL_CFIOIsCreated
   public MAPL_CFIOGetFilename
+  public MAPL_CFIOGetTimeString
+  public MAPL_CFIOStartAsyncColl
+  public MAPL_CFIOBcastIONode
 
   ! ESMF-style names
   ! ----------------
@@ -91,6 +96,14 @@ module MAPL_CFIOMod
 
 !                     MAPL Consistent Naming Convention
 !                     ---------------------------------
+
+  interface MAPL_CFIOStartAsyncColl
+     module procedure MAPL_CFIOStartAsyncColl
+  end interface
+
+  interface MAPL_CFIOBcastIONode
+     module procedure MAPL_CFIOBcastIONode
+  end interface
 
   interface MAPL_CFIOCreate
      module procedure MAPL_CFIOCreateFromBundle
@@ -139,6 +152,10 @@ module MAPL_CFIOMod
      real, pointer              :: Ptr(:,:,:)
   end type Ptr3Arr
 
+  type Ptr2Arr
+     real, pointer              :: Ptr(:,:)
+  end type Ptr2Arr
+
   !BOP
   !BOC
   type MAPL_CFIO
@@ -167,6 +184,10 @@ module MAPL_CFIOMod
      integer, pointer           :: SUBSET(:) => null()
      integer, pointer           :: VarDims(:)=>null()
      integer, pointer           :: VarType(:)=>null()
+     integer, pointer           :: needVar(:)=>null()
+     integer, pointer           :: pairList(:)=>null()
+     character(len=ESMF_MAXSTR), &
+                        pointer :: vectorList(:,:)=>null()
      logical                    :: Vinterp
      real                       :: pow=0.0
      character(len=ESMF_MAXSTR) :: Vvar
@@ -178,6 +199,9 @@ module MAPL_CFIOMod
      type(MAPL_CommRequest), &
                         pointer :: reqs(:)=>null()
      type(MAPL_HorzTransform)   :: Trans
+     logical                    :: async
+     integer                    :: AsyncWorkRank
+     integer                    :: globalComm
   end type MAPL_CFIO
   !EOC
   !EOP
@@ -198,11 +222,12 @@ contains
 ! !INTERFACE:
 !
   subroutine MAPL_CFIOCreateFromBundle ( MCFIO, NAME, CLOCK, BUNDLE, OFFSET,      &
-                                         RESOLUTION, SUBSET, FREQUENCY, LEVELS, DESCR,    &
+                                         RESOLUTION, SUBSET, CHUNKSIZE, FREQUENCY, LEVELS, DESCR,    &
                                          XYOFFSET, VCOORD, VUNIT, VSCALE,         &
                                          SOURCE, INSTITUTION, COMMENT, CONTACT,   &
                                          FORMAT, EXPID, DEFLATE, GC,  ORDER, &
-                                         NumCores, nbits, TM, RC )
+                                         NumCores, nbits, TM, Conservative,  &
+                                         Async, VectorList, RC )
 ! !ARGUMENTS:
 !
     type(MAPL_CFIO),             intent(OUT) :: MCFIO
@@ -213,6 +238,7 @@ contains
                      optional,   intent(INout):: OFFSET
     integer,         optional,   pointer     :: RESOLUTION(:)
     real,            optional,   pointer     :: SUBSET(:)
+    integer,         optional,   pointer     :: CHUNKSIZE(:)
     integer,         optional,   intent(IN)  :: FREQUENCY
     real,            optional,   pointer     :: LEVELS(:)
     character(LEN=*),optional,   intent(IN)  :: DESCR
@@ -227,11 +253,15 @@ contains
     character(len=*),optional,   intent(IN)  :: contact     
     character(len=*),optional,   intent(IN)  :: format
     character(len=*),optional,   intent(IN)  :: EXPID
+    integer,         optional,   intent(IN)  :: Conservative
     type(ESMF_GridComp),optional,intent(IN)  :: GC
     integer,         optional,   intent(IN)  :: Order
     integer,         optional,   intent(IN)  :: Nbits
     integer,         optional,   intent(IN)  :: NumCores
     integer,         optional,   intent(IN)  :: TM
+    logical,         optional,   intent(IN)  :: Async
+    character(len=*),  pointer,&
+                     optional,   intent(IN)  :: vectorList(:,:)
     integer,         optional,   intent(OUT) :: RC
 
 #ifdef ___PROTEX___
@@ -348,6 +378,9 @@ contains
 
     character(len=ESMF_MAXSTR)  :: ClockName
     character(len=ESMF_MAXSTR)  :: Gridname
+    character(len=ESMF_MAXSTR)  :: GridnameIn
+    character(len=ESMF_MAXSTR)  :: GridnameOut
+    character(len=ESMF_MAXSTR)  :: tileFile
     character(len=2)            :: date
     character(len=2)            :: pole
     integer                     :: nn
@@ -356,7 +389,9 @@ contains
     real, pointer               :: ptr3d(:,:,:)
     integer, allocatable        :: vsize(:)
     logical, allocatable        :: HasUngrid(:)
-
+    logical                     :: regridConservative
+    logical                     :: found
+    integer                     :: vectorListSize
 ! Begin
 !------
 
@@ -447,17 +482,27 @@ contains
 !ALT       MCFIO%GC   = ESMF_GridCompCreate("NULL")
     endif
 
-    if(present(NumCores)) then
-       mcfio%Numcores = NumCores
-    else
-       mcfio%Numcores = 1
-    end if
-
     if(present(VUNIT)) then
        vunits = trim(vunit)
     else
        vunits = ""
     endif
+
+    if (present(Async)) then
+       mcfio%async = async
+    else
+       mcfio%async = .false.
+    end if
+
+    if (present(vectorList)) then
+       if (associated(vectorList)) then
+          mcfio%vectorList => vectorList
+       else
+          mcfio%vectorList => null()
+       end if
+    else
+       mcfio%vectorList => null()
+    end if
 
 ! Get CommBndl, the communicator that is spanned by fields in the bundle
 !-----------------------------------------------------------------------
@@ -488,6 +533,20 @@ contains
 
     mCFIO%comm = comm
     mCFIO%Grid = ESMFGRID
+
+    if(present(NumCores)) then
+       mcfio%Numcores = NumCores
+    else
+       mcfio%Numcores = MAPL_CoresPerNodeGet(comm,rc=status)
+       VERIFY_(STATUS)
+    end if
+
+    regridConservative = .false.
+    if (present(Conservative)) then
+       if (Conservative /= 0) then
+          regridConservative = .true.
+       end if
+    end if
 
 ! Vertical interpolation info
 !----------------------------
@@ -528,6 +587,8 @@ contains
     VERIFY_(STATUS)
     allocate(MCFIO%VarType(NumVars), stat=STATUS)
     VERIFY_(STATUS)
+    allocate(MCFIO%needVar(NumVars), stat=STATUS)
+    VERIFY_(STATUS)
 
     VARIABLES_1: DO I = 1, NumVars
 
@@ -565,6 +626,46 @@ contains
 
     end do VARIABLES_1
 
+
+!ALT: next segment is here only for initial testing
+! we need a better logic how to prepare needVar list
+! possibilities are: add staggering, vector pair to spec
+! special key words in collection, etc.
+    mCFIO%needVar = 0
+    vectorListSize = 0
+    if (associated(mCFIO%vectorList)) then
+       vectorListSize = size(mCFIO%vectorList,2)
+    end if
+    VARLOOP: DO I = 1, NumVars
+       DO k = 1, vectorListSize
+          if (mCFIO%varName(I) == mCFIO%vectorList(1,k)) then
+             ! this is first component of a vector (i.e. U)
+             ! find the index of the V component
+             found = .false.
+             DO J = 1, NumVars
+                if (trim(mCFIO%varName(J)) == mCFIO%vectorList(2,k)) then
+                   found = .true.
+                   exit
+                end if
+             end DO
+             ASSERT_(found)
+             mCFIO%needVar(I) = J ! I am first component of the vector
+          else if(mCFIO%varName(I) == mCFIO%vectorList(2,k)) then
+             ! find the index of the U component
+             ! store it as negative number by convension suggested by Max
+             found = .false.
+             DO J = 1, NumVars
+                if (trim(mCFIO%varName(J)) == mCFIO%vectorList(1,k)) then
+                   found = .true.
+                   exit
+                end if
+             end DO
+             ASSERT_(found)
+             mCFIO%needVar(I) = -J ! I am second component of the vector
+          end if
+       end DO
+    end DO VARLOOP
+
 ! Sizes of global grid in the bundle. Sizes in the SDF may be different.
 !----------------------------------------------------------------------
 
@@ -594,6 +695,9 @@ contains
 !      Check on proper levels
 !      -----------------------
        if(HAVE_center .and.  HAVE_edge) then
+          DO I = 1, NumVars
+             IF (LOCATION(I)==MAPL_VLocationEdge) print*, mCFIO%VarName(I)
+          ENDDO
           print *, 'ERROR: Mixed Vlocation in CFIO not allowed unless LEVELS is specified'
           ASSERT_(.false.)
        endif
@@ -632,7 +736,10 @@ contains
     VERIFY_(STATUS)
     allocate( MCFIO%Krank(LT),stat=STATUS)
     VERIFY_(STATUS)
+    allocate(MCFIO%pairList(LT), stat=STATUS)
+    VERIFY_(STATUS)
 
+    MCFIO%pairList = 0
 
 ! Horizontal dimensions of output fields
 !---------------------------------------
@@ -831,10 +938,23 @@ contains
 ! Create the transform at all pes, whether they need it or not.
 !--------------------------------------------------------------
 
-       call MAPL_HorzTransformCreate (mCFIO%Trans, IM, JM, IMO, JMO, &
-                    GridTypeIn=GridTypeAttribute,                    &
-                    XYOFFSET=MCFIO%XYOFFSET, order=mCFIO%order, subset=MCFIO%subset, rc=STATUS)
-       VERIFY_(STATUS)
+       if (regridConservative) then
+          call MAPL_GenGridName(imo, jmo, xyoffset=mcfio%xyoffset, gridname=gridnameOut, geos_style=.false.)
+          gridnameIn = gridname
+          call MAPL_GeosNameNew(gridnameIn)
+
+          tileFile=trim(adjustl(gridnameOut)) // '_' // &
+                   trim(adjustl(gridnameIn))  // '.bin'
+
+          call MAPL_HorzTransformCreate (mCFIO%Trans, tileFile, gridIn=gridname, RootOnly=.false., vm=vm, rc=status)
+          VERIFY_(STATUS)
+
+      else
+          call MAPL_HorzTransformCreate (mCFIO%Trans, IM, JM, IMO, JMO, &
+               GridTypeIn=GridTypeAttribute,                    &
+               XYOFFSET=MCFIO%XYOFFSET, order=mCFIO%order, subset=MCFIO%subset, rc=STATUS)
+          VERIFY_(STATUS)
+       end if
 
     else
 
@@ -890,6 +1010,13 @@ contains
        DEALLOCATE(LATS)
 
     endif TRANSFORM
+
+    if (JMO == 6*IMO) then
+       if (isGridRectalinear) then
+          lons1d = [1:size(lons1d)]
+          lats1d = [1:size(lats1d)]
+       end if
+    end if
 
 ! Create the CFIO grid and populate it
 !-------------------------------------
@@ -1003,6 +1130,7 @@ contains
 
     K = 0
 
+    mCFIO%vartype = MAPL_ScalarField
     VARIABLES_2: do L=1,NumVars
 
        if(mCFIO%VarDims(L)<1) cycle
@@ -1035,6 +1163,14 @@ contains
             vUnits       = UNITS,                  &
                                          RC=STATUS )
        VERIFY_(STATUS)
+
+       if (present(CHUNKSIZE)) then
+          if (associated(CHUNKSIZE)) then
+             call ESMF_CFIOVarInfoSet(VARS(K), &
+                  ChunkSize = ChunkSize,       &
+                         rc = status           )
+          end if
+       end if
 
     end do VARIABLES_2
 
@@ -1284,11 +1420,12 @@ contains
 ! !INTERFACE:
 !
   subroutine MAPL_CFIOCreateFromState ( MCFIO, NAME, CLOCK, STATE, OFFSET,  &
-                                        RESOLUTION, SUBSET, LEVELS, DESCR, BUNDLE, &
+                                        RESOLUTION, SUBSET, CHUNKSIZE, FREQUENCY, &
+                                        LEVELS, DESCR, BUNDLE, &
                                         XYOFFSET, VCOORD, VUNIT, VSCALE,   &
                                         SOURCE, INSTITUTION, COMMENT, CONTACT, &
                                         FORMAT, EXPID, DEFLATE, GC,  ORDER, &
-                                          NumCores, nbits,           RC )
+                                        NumCores, nbits, TM, Conservative,  RC )
 
 !
 ! !ARGUMENTS:
@@ -1302,6 +1439,8 @@ contains
                      optional,   intent(INOUT):: OFFSET
     integer,         optional,   pointer     :: RESOLUTION(:)
     real,            optional,   pointer     :: SUBSET(:)
+    integer,         optional,   pointer     :: CHUNKSIZE(:)
+    integer,         optional,   intent(IN)  :: FREQUENCY
     real,            optional,   pointer     :: LEVELS(:)
     character(LEN=*),optional,   intent(IN)  :: DESCR
     real,            optional,   intent(IN)  :: VSCALE
@@ -1319,6 +1458,8 @@ contains
     integer,         optional,   intent(IN)  :: Order
     integer,         optional,   intent(IN)  :: Nbits
     integer,         optional,   intent(IN)  :: NumCores
+    integer,         optional,   intent(IN)  :: TM
+    integer,         optional,   intent(IN)  :: CONSERVATIVE
     integer, optional,           intent(OUT) :: RC
 !
 #ifdef ___PROTEX___
@@ -1385,6 +1526,8 @@ contains
                                      OFFSET = OFFSET,                    & 
                                      RESOLUTION=RESOLUTION,              &
                                      SUBSET=SUBSET,                      &
+                                     CHUNKSIZE=CHUNKSIZE,                &
+                                     FREQUENCY=FREQUENCY,                &
                                      LEVELS=LEVELS,                      &
                                      DESCR=DESCR,                        &
                                      XYOFFSET= XYOFFSET,                 &
@@ -1402,6 +1545,8 @@ contains
                                      ORDER   = ORDER,                    &
                                      NumCores= NUMCORES,                 &
                                      nbits   = NBITS,                    &
+                                     TM      = TM,                       &
+                                     CONSERVATIVE=CONSERVATIVE,          &
                                                                RC=STATUS )
     VERIFY_(STATUS)
 
@@ -1471,6 +1616,9 @@ contains
     type(ESMF_FIELD)           :: FIELD
     integer                    :: L, K, k0, II, LL, LM
     integer                    :: NN, Nnodes
+    integer                    :: nv, np
+    integer                    :: sgn
+    integer,      allocatable  :: varStart(:)
     real,             pointer  :: Ptr2(:,:), Ptr3(:,:,:)
     real, target, allocatable  :: Ple3d(:,:,:)
     real,         allocatable  :: Pl3d(:,:,:)
@@ -1560,6 +1708,66 @@ contains
        II             = mod((L-1)/Nnodes,MCFIO%Numcores)
        LL             = mod((L-1)*MCFIO%Numcores + II,MCFIO%PartSize)
        MCFIO%Krank(L) = MCFIO%ROOT + mod(LL,MCFIO%PartSize)
+    enddo
+
+    allocate(varStart(size(MCFIO%VarDims)), stat=status)
+    VERIFY_(status)
+
+    nn = 0
+
+    STARTVAR: do L=1, size(MCFIO%VarDims)
+       if(mCFIO%VarDims(L)==2) then ! Rank == 2
+          LM = 1
+       elseif(MCFIO%VarDims(L)==3) then ! Rank == 3
+          LM = MCFIO%LM
+       else
+          LM = 0
+       endif
+       if (L /= 0) then
+          varStart(L) = nn + 1
+          nn = nn + LM
+       end if
+    end do STARTVAR
+
+    nn = 0
+
+    VECTPAIR: do L=1, size(MCFIO%VarDims)
+       if(mCFIO%VarDims(L)==2) then ! Rank == 2
+          LM = 1
+       elseif(MCFIO%VarDims(L)==3) then ! Rank == 3
+          LM = MCFIO%LM
+       else
+          LM = 0
+       endif
+
+       nv = mCFIO%needVar(L)
+       if (nv > 0) then
+          sgn=1
+       else
+          sgn = -1
+       end if
+
+       do K=1,LM
+          nn = nn + 1
+          if (nv /= 0) then
+             MCFIO%pairList(nn) = sgn*(varStart(abs(nv)) - 1 + k)
+          else
+             MCFIO%pairList(nn) = 0
+          end if
+       enddo
+    end do VECTPAIR
+
+    deallocate(varStart)
+
+
+! Modify KRANK to make sure that for any pair,
+! all of its components are handled by the SAME processor
+    do L=1,size(MCFIO%Krank)
+       np = MCFIO%pairList(L)
+       if (np > 0) then
+          ! I am "U"; overwrite location of "V"
+          mCFIO%Krank(abs(np)) = mCFIO%Krank(L)
+       end if
     enddo
 
 ! Cycle through all variables posting receives.
@@ -1671,7 +1879,278 @@ contains
     character(len=*), parameter:: Iam="MAPL_CFIOWriteBundleWait"
     integer                    :: status
 
-    integer                    :: L, K, NN, Lout
+    integer                    :: L, K, NN
+    integer                    :: YY,MM,DD,H,M,S
+    integer                    :: noffset
+    logical                    :: AmRoot, MyGlobal
+    real,          pointer     :: Gptr3Out(:,:,:)
+    real,          pointer     :: Gptr2Out(:,:  )
+    real,          pointer     :: PtrGlob (:,:  )
+    integer                    :: counts(5)
+    integer                    :: IM0,JM0,I,IP
+    logical                    :: FixPole, SubSet
+    integer                    :: levsize
+    integer                    :: lm, n, nv
+    logical                    :: transAlreadyDone
+    type(Ptr2Arr), allocatable :: globPtrArr(:)
+    type(Ptr2Arr)              :: PtrTypeIn(2)
+    type(Ptr2Arr)              :: PtrTypeOut(2)
+
+! Space for global arrays is allocated everywhere, even if not used.
+!------------------------------------------------------------------
+
+    ASSERT_(MCFIO%CREATED)
+
+! Allocate global 2d and 3d arrays at the writing resolution
+!  Note that everybody allocated these.
+!-----------------------------------------------------------
+
+    call MAPL_GridGet( MCFIO%GRID, globalCellCountPerDim=COUNTS, RC=STATUS)
+    VERIFY_(STATUS)
+
+    IM0 = COUNTS(1)
+    JM0 = COUNTS(2)
+
+    !if(any(mCFIO%myPE==mCFIO%Krank)) then
+       !allocate(Gptr3Out(Mcfio%IM, Mcfio%JM,1), stat=STATUS)
+       !VERIFY_(STATUS)
+
+       !Gptr2Out => Gptr3Out(:,:,1)
+       !Gptr2Out(:,:) = 0.0
+    !end if
+
+    nn   = 0
+
+    AmRoot     = mCFIO%myPE==mCFIO%Root
+
+    allocate(globPtrArr(size(mCFIO%reqs)), stat=status)
+    VERIFY_(STATUS)
+    COLCTVWAIT: do nn=1,size(mCFIO%reqs)
+       ! Wait on request for slice nn
+       !-----------------------------
+       call MAPL_CollectiveWait(MCFIO%reqs(nn), DstArray=PtrGlob,  rc=status)
+       VERIFY_(STATUS)
+       globPtrArr(nn)%ptr => PtrGlob ! this is valid only if myGlobal is .true.
+    end do COLCTVWAIT
+
+    nn   = 0
+    SubSet = .not. all(MCFIO%subset == -1)
+    VARIABLES: do L=1,size(MCFIO%VarDims)
+          
+       FixPole = (MCFIO%VarType(L) == MAPL_VectorField) .and. &
+                 (JM0              == 6*IM0)            .and. &
+                 (Mcfio%JM         /= 6*mcfio%IM)       .and. &
+                 (SubSet           == .false.                 ) 
+ 
+       RANK: if (MCFIO%VarDims(L)==2) then
+          LM = 1
+       else  if (MCFIO%VarDims(L)==3) then
+          LM = MCFIO%lm
+       else
+          LM = 0
+       end if RANK
+
+       LEVELS: do k=1,LM
+          nn       = nn + 1
+          MyGlobal = mCFIO%Krank(nn) == MCFIO%MYPE
+          PtrGlob => globPtrArr(nn)%ptr
+
+! Horizontal Interpolation and Shaving on PEs with global data
+! ------------------------------------------------------------
+
+          if( MyGlobal ) then
+             nv = mCFIO%pairList(nn)
+             VECTORTEST: if (nv == 0) then
+                ! scalar
+                allocate( MCFIO%reqs(nn)%Trans_Array(Mcfio%IM, Mcfio%JM, 1), stat=STATUS )
+                VERIFY_(STATUS)
+                Gptr2Out => MCFIO%reqs(nn)%Trans_Array(:,:,1)
+                PtrTypeIn (1)%ptr => globPtrArr(nn)%ptr
+                PtrTypeOut(1)%ptr => Gptr2Out
+                call TransShaveAndSend(PtrTypeIn(1:1),PtrTypeOut(1:1),MCFIO%reqs(nn)%s_rqst,doTrans=.true.,IdxOut=1)
+             else if (nv > 0) then 
+                ! I am U part of vector
+                if (associated(MCFIO%reqs(nn)%Trans_Array)) then
+                   ASSERT_(associated(MCFIO%reqs(nv)%Trans_Array))
+                   TransAlreadyDone = .true.
+                else
+                   TransAlreadyDone = .false.
+                   allocate( MCFIO%reqs(nn)%Trans_Array(Mcfio%IM, Mcfio%JM, 1), stat=STATUS )
+                   VERIFY_(STATUS)
+                   allocate( MCFIO%reqs(nv)%Trans_Array(Mcfio%IM, Mcfio%JM, 1), stat=STATUS )
+                   VERIFY_(STATUS)
+                endif
+                PtrTypeIn (1)%ptr => globPtrArr(nn)%ptr
+                PtrTypeIn (2)%ptr => globPtrArr(nv)%ptr
+                PtrTypeOut(1)%ptr => MCFIO%reqs(nn)%Trans_Array(:,:,1)
+                PtrTypeOut(2)%ptr => MCFIO%reqs(nv)%Trans_Array(:,:,1)
+                call TransShaveAndSend(PtrTypeIn(1:2),PtrTypeOut(1:2),MCFIO%reqs(nn)%s_rqst,doTrans=.not.TransAlreadyDone,IdxOut=1)
+             else 
+                ! I am V part of vector
+                nv = abs(nv)
+                if (associated(MCFIO%reqs(nn)%Trans_Array)) then
+                   ASSERT_(associated(MCFIO%reqs(nv)%Trans_Array))
+                   TransAlreadyDone = .true.
+                else
+                   TransAlreadyDone = .false.
+                   allocate( MCFIO%reqs(nn)%Trans_Array(Mcfio%IM, Mcfio%JM, 1), stat=STATUS )
+                   VERIFY_(STATUS)
+                   allocate( MCFIO%reqs(nv)%Trans_Array(Mcfio%IM, Mcfio%JM, 1), stat=STATUS )
+                   VERIFY_(STATUS)
+                endif
+                PtrTypeIn (1)%ptr => globPtrArr(nv)%ptr
+                PtrTypeIn (2)%ptr => globPtrArr(nn)%ptr
+                PtrTypeOut(1)%ptr => MCFIO%reqs(nv)%Trans_Array(:,:,1)
+                PtrTypeOut(2)%ptr => MCFIO%reqs(nn)%Trans_Array(:,:,1)
+                call TransShaveAndSend(PtrTypeIn(1:2),PtrTypeOut(1:2),MCFIO%reqs(nn)%s_rqst,doTrans=.not.TransAlreadyDone,IdxOut=2)
+             end if VECTORTEST
+          endif
+       end do LEVELS
+
+    end do VARIABLES
+
+!    do nn=1,size(mCFIO%reqs)
+!       MyGlobal = MCFIO%Krank(nn) == MCFIO%MYPE
+!       if (myGlobal) then
+!          deallocate(globPtrArr(nn)%ptr)
+!          NULLIFY(globPtrArr(nn)%ptr)
+!       end if
+!    end do
+    deallocate(globPtrArr)
+
+   !if(AmRoot) then
+   !   write(6,'(1X,"TransShaveAndSend: ",i6," Slices (",i3," Nodes, ",i2," CoresPerNode) to File:  ",a)') &
+   !         size(MCFIO%reqs),mCFIO%partsize/mCFIO%numcores,mCFIO%numcores,trim(mCFIO%fName)
+   !endif
+
+    !if (any(mCFIO%myPE==mCFIO%Krank)) then
+       !deallocate(Gptr3Out, stat=STATUS)
+       !VERIFY_(STATUS)
+    !end if
+
+    RETURN_(ESMF_SUCCESS)
+
+  contains
+    
+    subroutine TransShaveAndSend(PtrIn,PtrOut,request,doTrans,idxOut)
+      use, intrinsic :: ISO_C_BINDING
+      type(Ptr2Arr) :: PtrIn(:)
+      type(Ptr2Arr) :: PtrOut(:)
+      integer       :: request
+      logical       :: doTrans
+      integer       :: idxOut
+
+      real, pointer :: Gin (:,:)
+      real, pointer :: Gout(:,:)
+      real, dimension(:,:,:), pointer :: uin, uout, vin, vout
+      integer :: im, jm
+
+      if (size(PtrIn) == 1) then
+         ASSERT_(idxOut ==1)
+         Gin => PtrIn(1)%ptr
+         Gout => PtrOut(1)%ptr
+
+         if (MAPL_HorzTransformIsCreated(mCFIO%Trans)) then
+            call MAPL_HorzTransformRun(mCFIO%Trans, Gin, Gout, MAPL_undef, rc=STATUS)
+            VERIFY_(STATUS)
+
+            ! if going from CS to LAT-LON pole winds are wrong, approximate fix below
+            if (FixPole) then
+               do i=1,mcfio%im
+                  ip = i+(mcfio%im/2)
+                  if (ip > mcfio%im) ip = ip - mcfio%im
+                  if ( (gout(i,mcfio%jm-1) == MAPL_UNDEF) .or. (gout(ip,mcfio%jm-1) == MAPL_UNDEF)) then
+                     gout(i,mcfio%jm) = MAPL_UNDEF
+                  else
+                     gout(i,mcfio%jm)=(gout(i,mcfio%jm-1)-gout(ip,mcfio%jm-1))/2.0
+                  end if
+                  if ( (gout(i,2) == MAPL_UNDEF) .or. (gout(ip,2) == MAPL_UNDEF)) then
+                     gout(i,1) = MAPL_UNDEF
+                  else
+                     gout(i,1)=(gout(i,2)-gout(ip,2))/2.0
+                  endif
+               enddo
+            endif
+
+         else
+            Gout = Gin
+         endif
+         deallocate(Gin)
+         nullify   (Gin)
+      else
+         ASSERT_(size(PtrIn) == 2) 
+         ASSERT_(size(PtrOut) == 2) 
+         Gout => PtrOut(idxOut)%ptr
+         if (doTrans) then
+            if (MAPL_HorzTransformIsCreated(mCFIO%Trans)) then
+               im = size(PtrIn(1)%ptr,1)
+               jm = size(PtrIn(1)%ptr,2)
+               call C_F_POINTER (C_LOC(PtrIn(1)%ptr(1,1)), uin,[im,jm,1])
+               call C_F_POINTER (C_LOC(PtrIn(2)%ptr(1,1)), vin,[im,jm,1])
+!@#               allocate(uin(im,jm,1), vin(im,jm,1))
+!@#               uin(:,:,1) = PtrIn(1)%ptr
+!@#               vin(:,:,1) = PtrIn(2)%ptr
+               im = size(PtrOut(1)%ptr,1)
+               jm = size(PtrOut(1)%ptr,2)
+               call C_F_POINTER (C_LOC(PtrOut(1)%ptr(1,1)), uout,[im,jm,1])
+               call C_F_POINTER (C_LOC(PtrOut(2)%ptr(1,1)), vout,[im,jm,1])
+!@#               allocate(uout(im,jm,1), vout(im,jm,1))
+               call MAPL_HorzTransformRun(mCFIO%Trans, &
+                    uin, vin, uout, vout, &
+                    MAPL_undef, rc=STATUS)
+               VERIFY_(STATUS)
+!@#               PtrOut(1)%ptr = uout(:,:,1)
+!@#               PtrOut(2)%ptr = vout(:,:,1)
+!@#               deallocate(uin, vin)
+!@#               deallocate(uout, vout)
+            else
+               do i = 1,size(PtrIn)
+                  PtrOut(i)%ptr = PtrIn(i)%ptr
+               end do
+            end if
+            deallocate(PtrIn(1)%ptr)
+            nullify(PtrIn(1)%ptr)
+            deallocate(PtrIn(2)%ptr)
+            nullify(PtrIn(2)%ptr)
+         end if
+      end if
+
+      if(mCFIO%NBITS < 24) then
+         call ESMF_CFIODownBit ( Gout, Gout, mCFIO%NBITS, undef=MAPL_undef, rc=STATUS )
+         VERIFY_(STATUS)
+      end if
+
+      if (mcfio%async) then
+         levsize = mcfio%im*mcfio%jm
+         call MPI_ISend(Gout,levsize,MPI_REAL,mcfio%asyncWorkRank, &
+              MAPL_TAG_SHIPDATA,mCFIO%globalComm,request,status)
+         VERIFY_(STATUS)
+      else
+         call MPI_ISend(Gout, size(Gout), MPI_REAL, mCFIO%Root, &
+                 trans_tag, mCFIO%comm, request,         STATUS)
+            VERIFY_(STATUS)
+
+      end if
+
+
+      return
+    end subroutine TransShaveAndSend
+
+  end subroutine MAPL_CFIOWriteBundleWait
+
+  subroutine MAPL_CFIOWriteBundleWrite( MCFIO, CLOCK, RC )
+
+    type(MAPL_CFIO  ),                 intent(INOUT) :: MCFIO
+    type(ESMF_CLOCK),                  intent(INOUT) :: CLOCK
+    integer,                optional,  intent(  OUT) :: RC
+
+! Locals
+!-------
+
+    character(len=*), parameter:: Iam="MAPL_CFIOWriteBundleWrite"
+    integer                    :: status
+
+    integer                    :: L, K, NN
     integer                    :: YY,MM,DD,H,M,S
     integer                    :: noffset
     logical                    :: AmRoot, MyGlobal, LPERP
@@ -1685,7 +2164,7 @@ contains
     integer                    :: counts(5)
     integer                    :: IM0,JM0,I,IP
     logical                    :: FixPole, SubSet
-
+    integer                    :: nymd,nhms
 
 ! Space for global arrays is allocated everywhere, even if not used.
 !------------------------------------------------------------------
@@ -1695,192 +2174,176 @@ contains
 ! Set the time at which we will be writing from the clock
 !--------------------------------------------------------
 
-    call ESMF_ClockGet       (CLOCK, name=ClockName, CurrTime =TIME, RC=STATUS)
-    VERIFY_(STATUS)
+    ASYNCIF: if (.not.mcfio%async) then
 
-        call ESMF_TimeIntervalGet( MCFIO%OFFSET, S=noffset, rc=status )
-        VERIFY_(STATUS)
-        if( noffset /= 0 ) then
-            LPERP = ( index( trim(clockname),'_PERPETUAL' ).ne.0 )
-        if( LPERP ) then
-            call ESMF_ClockGetAlarm ( clock, alarmName='PERPETUAL', alarm=PERPETUAL, rc=status )
-            VERIFY_(STATUS)
-            if( ESMF_AlarmIsRinging(PERPETUAL) ) then
-                call ESMF_TimeGet ( Time, YY = YY, &
-                                          MM = MM, &
-                                          DD = DD, &
-                                          H  = H , &
-                                          M  = M , &
-                                          S  = S, rc=status )
-                                          MM = MM + 1
-                call ESMF_TimeSet ( Time, YY = YY, &
-                                          MM = MM, &
-                                          DD = DD, &
-                                          H  = H , &
-                                          M  = M , &
-                                          S  = S, rc=status )
-            endif
-        endif
-        endif
+       call ESMF_ClockGet       (CLOCK, name=ClockName, CurrTime =TIME, RC=STATUS)
+       VERIFY_(STATUS)
 
-    TIME = TIME - MCFIO%OFFSET
+           call ESMF_TimeIntervalGet( MCFIO%OFFSET, S=noffset, rc=status )
+           VERIFY_(STATUS)
+           if( noffset /= 0 ) then
+               LPERP = ( index( trim(clockname),'_PERPETUAL' ).ne.0 )
+           if( LPERP ) then
+               call ESMF_ClockGetAlarm ( clock, alarmName='PERPETUAL', alarm=PERPETUAL, rc=status )
+               VERIFY_(STATUS)
+               if( ESMF_AlarmIsRinging(PERPETUAL) ) then
+                   call ESMF_TimeGet ( Time, YY = YY, &
+                                             MM = MM, &
+                                             DD = DD, &
+                                             H  = H , &
+                                             M  = M , &
+                                             S  = S, rc=status )
+                                             MM = MM + 1
+                   call ESMF_TimeSet ( Time, YY = YY, &
+                                             MM = MM, &
+                                             DD = DD, &
+                                             H  = H , &
+                                             M  = M , &
+                                             S  = S, rc=status )
+               endif
+           endif
+           endif
 
-    call ESMF_TimeGet        (TIME,     timeString=DATE,     RC=STATUS)
-    VERIFY_(STATUS)
+       TIME = TIME - MCFIO%OFFSET
 
-! Allocate global 2d and 3d arrays at the writing resolution
-!  Note that everybody allocated these.
-!-----------------------------------------------------------
+       call ESMF_TimeGet        (TIME,     timeString=DATE,     RC=STATUS)
+       VERIFY_(STATUS)
 
-    call MAPL_GridGet( MCFIO%GRID, globalCellCountPerDim=COUNTS, RC=STATUS)
-    VERIFY_(STATUS)
+   ! Allocate global 2d and 3d arrays at the writing resolution
+   !  Note that everybody allocated these.
+   !-----------------------------------------------------------
 
-    IM0 = COUNTS(1)
-    JM0 = COUNTS(2)
+       call MAPL_GridGet( MCFIO%GRID, globalCellCountPerDim=COUNTS, RC=STATUS)
+       VERIFY_(STATUS)
 
-    allocate(Gptr3Out(Mcfio%IM, Mcfio%JM,1), stat=STATUS)
-    VERIFY_(STATUS)
+       IM0 = COUNTS(1)
+       JM0 = COUNTS(2)
 
-    Gptr2Out => Gptr3Out(:,:,1)
-    Gptr2Out(:,:) = 0.0
-
-    Lout = Mcfio%IM*Mcfio%JM
-
-    nn   = 0
-
-    AmRoot = mCFIO%myPE==mCFIO%Root
-
-    SubSet = .not. all(MCFIO%subset == -1)
-    VARIABLES: do L=1,size(MCFIO%VarDims)
-          
-       FixPole = .false.
-       IF ((MCFIO%VarType(L) == MAPL_VectorField) .and. (JM0 == 6*IM0) .and. (Mcfio%JM /= 6*mcfio%IM) .and. (SubSet == .false.) ) FixPole = .true.
- 
-       RANK: if (MCFIO%VarDims(L)==2) then
-          nn       = nn + 1
-          MyGlobal = mCFIO%Krank(nn) == MCFIO%MYPE
-
-! Wait on request for slice nn
-!-----------------------------
-
-          call MAPL_CollectiveWait(MCFIO%reqs(nn), DstArray=PtrGlob, rc=status)
+       if(any(mCFIO%myPE==mCFIO%Krank)) then
+          allocate(Gptr3Out(Mcfio%IM, Mcfio%JM,1), stat=STATUS)
           VERIFY_(STATUS)
 
-! Horizontal Interpolation and Shaving on PEs with global data
-! ------------------------------------------------------------
+          Gptr2Out => Gptr3Out(:,:,1)
+          Gptr2Out(:,:) = 0.0
+       end if
 
-          if( MyGlobal ) &
-               call TransShaveAndSend(PtrGlob,Gptr2Out)
+       AmRoot     = mCFIO%myPE==mCFIO%Root
 
-          IAMVARROOT: if(AmRoot) then
-             if( .not.MyGlobal ) then
+       SubSet = .not. all(MCFIO%subset == -1)
+   !
+   ! Finally Do The Writes
+   !______________________
+
+       nn   = 0
+       VARIABLESW: do L=1,size(MCFIO%VarDims)
+
+          RANKW: if (MCFIO%VarDims(L)==2) then
+             nn       = nn + 1
+             MyGlobal = mCFIO%Krank(nn) == MCFIO%MYPE
+
+   ! Horizontal Interpolation and Shaving on PEs with global data
+   ! ------------------------------------------------------------
+
+             IAMVARROOT: if(AmRoot) then
+                Gptr2Out => Gptr3Out(:,:,1)
                 call MPI_Recv(Gptr2Out,size(Gptr2Out),MPI_REAL, mCFIO%Krank(nn), &
                               trans_tag,  mCFIO%comm, MPI_STATUS_IGNORE, STATUS)
                 VERIFY_(STATUS)
-             end if
 
-             call ESMF_CFIOVarWrite(MCFIO%CFIO, trim(MCFIO%VARNAME(L)), &
-                                    Gptr2Out, timeString=DATE,  RC=STATUS)
-             VERIFY_(STATUS)
-          end if IAMVARROOT
+                call StrToInt(date,nymd,nhms)
+                call ESMF_CFIOVarWrite(MCFIO%CFIO, trim(MCFIO%VARNAME(L)), &
+                                       Gptr2Out, timeString=DATE,  RC=STATUS)
+                VERIFY_(STATUS)
 
-       elseif (MCFIO%VarDims(L)==3) then
+             end if IAMVARROOT
 
-! Everyone waits, processes their layer, and sends it to root.
-!   Root write it out.
-!-------------------------------------------------------------
+          elseif (MCFIO%VarDims(L)==3) then
 
-          LEVELS: do k=1,MCFIO%lm
-             nn       = nn + 1
-             MyGlobal = MCFIO%Krank(nn) == MCFIO%MYPE
+   ! Everyone waits, processes their layer, and sends it to root.
+   !   Root write it out.
+   !-------------------------------------------------------------
 
-             call MAPL_CollectiveWait(MCFIO%reqs(nn), DstArray=PtrGlob,  rc=status)
-             VERIFY_(STATUS)
+             LEVELSW: do k=1,MCFIO%lm
+                nn       = nn + 1
+                MyGlobal = MCFIO%Krank(nn) == MCFIO%MYPE
 
-
-             if( MyGlobal ) &
-                  call TransShaveAndSend(PtrGlob,Gptr2Out)
-
-             IAMLEVROOT: if(AmRoot) then
-                if( .not.MyGlobal ) then
+                IAMLEVROOT: if(AmRoot) then
+                   Gptr2Out => Gptr3Out(:,:,1)
                    call MPI_Recv(Gptr2Out, size(Gptr2Out), MPI_REAL, mCFIO%Krank(nn), &
                                  trans_tag,  mCFIO%comm, MPI_STATUS_IGNORE,   STATUS)
                    VERIFY_(STATUS)
-                end if
 
-                call ESMF_CFIOVarWrite(MCFIO%CFIO, trim(MCFIO%VARNAME(L)), &
-                                       Gptr3Out, kbeg=K, kount=1,          &
-                                       timeString=DATE,           RC=STATUS)
-                VERIFY_(STATUS)
-             end if IAMLEVROOT
-          end do LEVELS
-       endif RANK
+                   call StrToInt(date,nymd,nhms)
+                   call ESMF_CFIOVarWrite(MCFIO%CFIO, trim(MCFIO%VARNAME(L)), &
+                                          Gptr3Out, kbeg=K, kount=1,          &
+                                          timeString=DATE,           RC=STATUS)
+                   VERIFY_(STATUS)
 
-    end do VARIABLES
+                end if IAMLEVROOT
+             end do LEVELSW
+          endif RANKW
 
-!   if(AmRoot) then
-!      write(6,'(1X,"Wrote: ",i6," Slices (",i3," Nodes, ",i2," CoresPerNode) to File:  ",a)') &
-!            size(MCFIO%reqs),mCFIO%partsize/mCFIO%numcores,mCFIO%numcores,trim(mCFIO%fName)
-!   endif
+       end do VARIABLESW
+
+    end if ASYNCIF
+
+   !if(AmRoot) then
+   !   write(6,'(1X,"Wrote: ",i6," Slices (",i3," Nodes, ",i2," CoresPerNode) to File:  ",a)') &
+   !         size(MCFIO%reqs),mCFIO%partsize/mCFIO%numcores,mCFIO%numcores,trim(mCFIO%fName)
+   !endif
 
 ! Clean-up
 !---------
+    nn   = 0
+    VARIABLESC: do L=1,size(MCFIO%VarDims)
 
-    deallocate(Gptr3Out, stat=STATUS)
-    VERIFY_(STATUS)
+       RANKC: if (MCFIO%VarDims(L)==2) then
+          nn       = nn + 1
+          MyGlobal = mCFIO%Krank(nn) == MCFIO%MYPE
+
+             if( MyGlobal ) then
+                call MPI_Wait(MCFIO%reqs(nn)%s_rqst, MPI_STATUS_IGNORE, STATUS)
+                VERIFY_(STATUS)
+                deallocate( MCFIO%reqs(nn)%Trans_Array, stat=STATUS)
+                VERIFY_(STATUS)
+                nullify( MCFIO%reqs(nn)%Trans_Array )
+             endif
+
+       elseif (MCFIO%VarDims(L)==3) then
+
+          LEVELSC: do k=1,MCFIO%lm
+             nn       = nn + 1
+             MyGlobal = MCFIO%Krank(nn) == MCFIO%MYPE
+
+             if( MyGlobal ) then
+                call MPI_Wait(MCFIO%reqs(nn)%s_rqst, MPI_STATUS_IGNORE, STATUS)
+                VERIFY_(STATUS)
+                deallocate( MCFIO%reqs(nn)%Trans_Array, stat=STATUS)
+                VERIFY_(STATUS)
+                nullify( MCFIO%reqs(nn)%Trans_Array )
+             endif
+
+          end do LEVELSC
+       endif RANKC
+
+    end do VARIABLESC
+
+  ! if(AmRoot) then
+  !    write(6,'(1X,"Cleaned: ",i6," Slices (",i3," Nodes, ",i2," CoresPerNode) to File:  ",a)') &
+  !          size(MCFIO%reqs),mCFIO%partsize/mCFIO%numcores,mCFIO%numcores,trim(mCFIO%fName)
+  ! endif
+    if (.not.mCFIO%async) then
+
+       if (any(mCFIO%myPE==mCFIO%Krank)) then
+          deallocate(Gptr3Out, stat=STATUS)
+          VERIFY_(STATUS)
+       end if
+
+    end if
 
     RETURN_(ESMF_SUCCESS)
 
-  contains
-    
-    subroutine TransShaveAndSend(Gin,Gout)
-      real, pointer :: Gin (:,:)
-      real, pointer :: Gout(:,:)
-
-      if (MAPL_HorzTransformIsCreated(mCFIO%Trans)) then
-         call MAPL_HorzTransformRun(mCFIO%Trans, Gin, Gout, MAPL_undef, rc=STATUS)
-         VERIFY_(STATUS)
-
-         ! if going from CS to LAT-LON pole winds are wrong, approximate fix below
-         if (FixPole) then
-            do i=1,mcfio%im
-               ip = i+(mcfio%im/2)
-               if (ip > mcfio%im) ip = ip - mcfio%im
-               if ( (gout(i,mcfio%jm-1) == MAPL_UNDEF) .or. (gout(ip,mcfio%jm-1) == MAPL_UNDEF)) then
-                  gout(i,mcfio%jm) = MAPL_UNDEF
-               else
-                  gout(i,mcfio%jm)=(gout(i,mcfio%jm-1)-gout(ip,mcfio%jm-1))/2.0
-               end if
-               if ( (gout(i,2) == MAPL_UNDEF) .or. (gout(ip,2) == MAPL_UNDEF)) then
-                  gout(i,1) = MAPL_UNDEF
-               else
-                  gout(i,1)=(gout(i,2)-gout(ip,2))/2.0
-               endif
-            enddo
-         endif
-
-      else
-         Gout = Gin
-      endif
-
-      if(mCFIO%NBITS < 24) then
-         call ESMF_CFIODownBit ( Gout, Gout, mCFIO%NBITS, undef=MAPL_undef, rc=STATUS )
-         VERIFY_(STATUS)
-      end if
-
-      if(.not.AmRoot) then
-         call MPI_Send(Gout, size(Gout), MPI_REAL, mCFIO%Root, &
-              trans_tag, mCFIO%comm,                  STATUS)
-         VERIFY_(STATUS)
-      endif
-
-      deallocate(Gin)
-      nullify   (Gin)
-
-      return
-    end subroutine TransShaveAndSend
-
-  end subroutine MAPL_CFIOWriteBundleWait
+  end subroutine MAPL_CFIOWriteBundleWrite
 
 !===========================================================================
 
@@ -1965,6 +2428,9 @@ contains
     VERIFY_(STATUS)
 
     call MAPL_CFIOWriteBundleWait( MCFIO, CLOCK,  RC=status)
+    VERIFY_(STATUS)
+
+    call MAPL_CFIOWriteBundleWrite( MCFIO, CLOCK, RC=status)
     VERIFY_(STATUS)
 
     RETURN_(ESMF_SUCCESS)
@@ -2075,7 +2541,8 @@ contains
 !
   subroutine MAPL_CFIOReadBundle ( FILETMPL, TIME, BUNDLE, NOREAD, RC, &
                                    VERBOSE, FORCE_REGRID, ONLY_VARS,   &
-                                   TIME_IS_CYCLIC, TIME_INTERP, EXPID )
+                                   TIME_IS_CYCLIC, TIME_INTERP, conservative, &
+                                   voting, ignoreCase, EXPID )
 !
 ! !ARGUMENTS:
 !
@@ -2088,8 +2555,11 @@ contains
     logical, optional,           intent(IN)    :: FORCE_REGRID 
     logical, optional,           intent(IN)    :: TIME_IS_CYCLIC
     logical, optional,           intent(IN)    :: TIME_INTERP
+    logical, optional,           intent(IN)    :: conservative
+    logical, optional,           intent(IN)    :: voting
     character(len=*), optional,  intent(IN)    :: ONLY_VARS 
     character(len=*), optional,  intent(IN)    :: EXPID
+    logical, optional,           intent(IN)    :: ignoreCase
 !
 #ifdef ___PROTEX___
     !DESCRIPTION: 
@@ -2217,11 +2687,32 @@ contains
     integer                 :: gridRank
     integer                 :: comm
     logical                 :: found
+    character(len=ESMF_MAXSTR) :: gridnamef, gridname, tileFile
+    logical :: geosGridNames = .false.
+    logical :: useableconservative
+    logical :: Voting_, doingMasking
+    integer :: order
+    logical :: ignoreCase_
 
 !                              ---
     
     if ( present(VERBOSE) )     VERB = VERBOSE
     if ( present(TIME_INTERP) ) timeInterp = TIME_INTERP
+    if (present(conservative) ) then
+       useableconservative = conservative
+    else
+       useableconservative = .false.
+    end if
+    if ( present(Voting) ) then
+         Voting_ = Voting
+    else
+         Voting_ = .false.
+    endif
+    if ( present(ignoreCase) ) then
+         ignoreCase_ = ignoreCase
+    else
+         ignoreCase_ = .false.
+    end if
 
 ! Create a CFIO object named after the bundle
 !--------------------------------------------
@@ -2239,7 +2730,8 @@ contains
     call ESMF_CFIOstrTemplate ( filename, filetmpl, 'GRADS', &
                                 xid=EXPID, nymd=nymd, nhms=nhms, stat=status )
     VERIFY_(STATUS)
-    call WRITE_PARALLEL("CFIO: Reading " // trim(filename))
+    !call WRITE_PARALLEL("CFIO: Reading " // trim(filename))
+    if (mapl_am_i_root()) write(*,*)"CFIO: Reading ",trim(filename)," at ",nymd," ",nhms
 
 ! Set its filename and open it for reading
 !-----------------------------------------
@@ -2287,6 +2779,8 @@ contains
        VERIFY_(STATUS)
        call MAPL_GridGet(ESMFGRID, globalCellCountPerDim=COUNTS, &
             localCellCountPerDim=DIMS, RC=STATUS)
+       VERIFY_(STATUS)
+       call ESMF_GridGet(ESMFGRID, name=gridname, rc=rc)
        VERIFY_(STATUS)
 
        ! Assert compatibility of file and bundle
@@ -2358,7 +2852,7 @@ contains
                allocate(PTR3(DIMS(1),DIMS(2),LM),stat=STATUS)
                VERIFY_(STATUS)
             else if (lm == (counts(3)+1)) then
-               allocate(PTR3(DIMS(1),DIMS(2),0:LM),stat=STATUS)
+               allocate(PTR3(DIMS(1),DIMS(2),0:LM-1),stat=STATUS)
                VERIFY_(STATUS)
             end if
             PTR3  = 0.0
@@ -2400,6 +2894,8 @@ contains
           VERIFY_(STATUS)
           call MAPL_GridGet(ESMFGRID, globalCellCountPerDim=COUNTS, RC=STATUS)
           VERIFY_(STATUS)
+          call ESMF_GridGet(ESMFGRID, name=gridname, rc=rc)
+          VERIFY_(STATUS)
           ! Assert compatibility of file and bundle
           !----------------------------------------
           ASSERT_( LM==0 .or. counts(3) == 0 .or. LM==counts(3) .or. lm == (counts(3)+1) )
@@ -2413,6 +2909,10 @@ contains
           do K=1,size(VARS)
              call ESMF_CFIOVarInfoGet(VARS(K),vname=CFIOVARNAME,          RC=STATUS)
              VERIFY_(STATUS)
+             if (ignoreCase_) then
+                call ESMF_StringUpperCase(BUNDLEVARNAME,status)
+                call ESMF_StringUpperCase(CFIOVARNAME,status)
+             end if
              if(trim(BUNDLEVARNAME)==trim(CFIOVARNAME)) then
                found = .true.
                exit
@@ -2422,8 +2922,6 @@ contains
        end do
 
     end if
-
-    deallocate(VARS)
 
     if(present(NOREAD)) then
        if(NOREAD) goto 10
@@ -2491,12 +2989,25 @@ contains
 !         change_resolution = change_resolution .OR. FORCE_REGRID
 !    endif
 
-    if (amOnFirstNode) then
-       if ( change_resolution ) then
+    if ( change_resolution .and. (.not.useableConservative)) then
+       if (amOnFirstNode) then
           call MAPL_HorzTransformCreate (Trans, im, jm, im0, jm0, rc=STATUS)
           VERIFY_(STATUS)
        end if
-    endif
+    end if
+
+    if (change_resolution .and. useableConservative) then
+       call MAPL_GenGridName(im, jm, LONSfile, LATSfile, gridname=gridnamef, geos_style=geosGridNames)
+       if (.not. geosGridNames) call MAPL_GeosNameNew(gridname)
+       tileFile=trim(adjustl(gridnamef)) // '_' // &
+             trim(adjustl(gridname))  // '.bin'
+       call MAPL_HorzTransformCreate (Trans, tileFile, gridnamef, gridname, RootOnly=.true., vm=vm, rc=rc)
+
+       call MAPL_HorzTransformGet(Trans, order=order)
+       if (Voting_) then
+          call MAPL_HorzTransformSet(Trans, order=MAPL_HorzTransOrderSample, rc=rc)
+       endif
+    end if
 
 ! Pick out index into file grid for lats and lons of scm grid - 
 !  Assume that scm grid counts lon from -180 to 180 and lat from -90 to 90
@@ -2522,6 +3033,9 @@ contains
        VERIFY_(STATUS)
        call ESMF_FieldGet       (FIELD, NAME=BundleVarName, array=ARRAY, RC=STATUS)
        VERIFY_(STATUS)
+       
+       if (ignoreCase_) call getVarNameIgnoreCase(BundleVarName,vars,RC=status)
+
        call ESMF_FieldGet(FIELD,   Grid=ESMFGRID, RC=STATUS)
        VERIFY_(STATUS)
        call ESMF_ArrayGet       (array, rank=arrayRank,                  RC=STATUS)
@@ -2637,6 +3151,9 @@ contains
 
     if (amOnFirstNode) then
        if ( change_resolution ) then
+          if (Voting_) then
+             call MAPL_HorzTransformSet(Trans, order=order, rc=rc)
+          end if
           call MAPL_HorzTransformDestroy(Trans,rc=STATUS)
           VERIFY_(STATUS)
        end if
@@ -2652,6 +3169,7 @@ contains
 
     deallocate(LONSfile,LATSfile)
     deallocate(LONSbundle,LATSbundle)
+    deallocate(VARS)
 
     call ESMF_CFIODestroy(CFIO, rc=status)
     VERIFY_(STATUS)
@@ -2676,6 +3194,32 @@ CONTAINS
     return
     end subroutine shift180Lon2D_
 
+    subroutine getVarNameIgnoreCase(vname,vars,rc)
+    character(len=*), intent(inout)  :: vname
+    type(ESMF_CFIOVarInfo), pointer, intent(in) :: vars(:)
+    integer, optional, intent(out)  :: rc
+
+    integer :: status
+    character(len=ESMF_MAXSTR) :: Iam
+    integer j
+    character(len=ESMF_MAXSTR) :: cfiovarname,tname,tcfioname
+    Iam = "getVarNameIgnoreCase"
+
+    tname = vname
+    call ESMF_StringUpperCase(tname)
+    do j=1,size(vars)
+        call ESMF_CFIOVarInfoGet(vars(j),vname=cfiovarname,RC=STATUS)
+        VERIFY_(STATUS)
+        tcfioname = cfiovarname
+        call ESMF_StringUpperCase(tcfioname,status)
+        if (trim(tname) == trim(tcfioname)) then
+           vname = cfiovarname
+           exit
+        end if
+    enddo
+    RETURN_(ESMF_SUCCESS)
+    end subroutine getVarNameIgnoreCase
+
   end subroutine MAPL_CFIOReadBundle
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2686,8 +3230,9 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine MAPL_CFIOReadState ( FILETMPL, TIME, STATE, NOREAD, RC, &
-                                  VERBOSE, FORCE_REGRID, ONLY_VARS,   &
-                                  TIME_IS_CYCLIC, TIME_INTERP )
+                                  VERBOSE, FORCE_REGRID, ONLY_VARS,  &
+                                  TIME_IS_CYCLIC, TIME_INTERP,       &
+                                  conservative, voting, ignoreCase )
 !
 ! !ARGUMENTS:
 !
@@ -2700,6 +3245,9 @@ CONTAINS
     logical, optional,           intent(IN)    :: FORCE_REGRID ! obsolete
     logical, optional,           intent(IN)    :: TIME_IS_CYCLIC
     logical, optional,           intent(IN)    :: TIME_INTERP
+    logical, optional,           intent(IN)    :: conservative
+    logical, optional,           intent(IN)    :: voting
+    logical, optional,           intent(IN)    :: ignoreCase
     character(len=*), optional,  intent(IN   ) :: ONLY_VARS ! comma separated,
                                                             ! no spaces
 !
@@ -2801,6 +3349,9 @@ CONTAINS
                               ONLY_VARS = ONLY_VARS,           &
                               TIME_IS_CYCLIC = TIME_IS_CYCLIC, &
                               TIME_INTERP = TIME_INTERP,       &
+                              conservative = conservative,     &
+                              voting = voting,                 &
+                              ignoreCase = ignoreCase,         &
                               RC = STATUS )
 
     VERIFY_(STATUS)
@@ -2824,7 +3375,8 @@ CONTAINS
 !
   subroutine MAPL_CFIOReadField     ( VARN, FILETMPL, TIME,       FIELD, RC, &
                                       VERBOSE, FORCE_REGRID, TIME_IS_CYCLIC, &
-                                      TIME_INTERP )
+                                      TIME_INTERP,                           &
+                                      conservative , voting, ignoreCase)
 !
 ! !ARGUMENTS:
 !
@@ -2837,6 +3389,9 @@ CONTAINS
     logical, optional,           intent(IN)    :: FORCE_REGRID
     logical, optional,           intent(IN)    :: TIME_IS_CYCLIC
     logical, optional,           intent(IN)    :: TIME_INTERP
+    logical, optional,           intent(IN)    :: conservative
+    logical, optional,           intent(IN)    :: voting
+    logical, optional,           intent(IN)    :: ignoreCase
 !
 #ifdef ___PROTEX___
 
@@ -2933,7 +3488,10 @@ CONTAINS
                               FORCE_REGRID=FORCE_REGRID,                 &
                               ONLY_VARS = trim(varn),                    &
                               TIME_IS_CYCLIC=TIME_IS_CYCLIC,             &
-                              TIME_INTERP=TIME_INTERP, RC=STATUS         )
+                              TIME_INTERP=TIME_INTERP,                   &
+                              conservative=conservative,                 &
+                              voting = voting, ignoreCase = ignoreCase,  &
+                              RC=STATUS)
     VERIFY_(STATUS)    
 
 
@@ -2955,8 +3513,8 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine MAPL_CFIOReadArray3D ( VARN, FILETMPL, TIME, GRID, farrayPtr, RC, &
-                                    VERBOSE, FORCE_REGRID, TIME_IS_CYCLIC,  &
-                                    TIME_INTERP )
+                                    VERBOSE, FORCE_REGRID, TIME_IS_CYCLIC,     &
+                                    TIME_INTERP, conservative, voting, ignoreCase )
 !
 ! !ARGUMENTS:
 !
@@ -2970,6 +3528,9 @@ CONTAINS
     logical, optional,           intent(IN)    :: FORCE_REGRID
     logical, optional,           intent(IN)    :: TIME_IS_CYCLIC
     logical, optional,           intent(IN)    :: TIME_INTERP
+    logical, optional,           intent(IN)    :: conservative
+    logical, optional,           intent(IN)    :: voting
+    logical, optional,           intent(IN)    :: ignoreCase
 !
 #ifdef ___PROTEX___
 
@@ -3075,7 +3636,10 @@ CONTAINS
     call MAPL_CFIOReadField ( VARN, FILETMPL, TIME,       FIELD,          &
                               VERBOSE=VERBOSE, FORCE_REGRID=FORCE_REGRID, &
                               TIME_IS_CYCLIC=TIME_IS_CYCLIC,              &
-                              TIME_INTERP=TIME_INTERP, RC=STATUS         )
+                              TIME_INTERP=TIME_INTERP,                    &
+                              conservative=conservative,                  &
+                              voting=voting, ignoreCase = ignoreCase,     &
+                              RC=STATUS)
     VERIFY_(STATUS)
 
 !   Destroy the ESMF array (data will be preserved since we own it)
@@ -3095,8 +3659,8 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine MAPL_CFIOReadArray2D ( VARN, FILETMPL, TIME, GRID, farrayPtr, RC, &
-                                    VERBOSE, FORCE_REGRID, TIME_IS_CYCLIC,  &
-                                    TIME_INTERP )
+                                    VERBOSE, FORCE_REGRID, TIME_IS_CYCLIC,     &
+                                    TIME_INTERP , conservative, voting, ignoreCase)
 !
 ! !ARGUMENTS:
 !
@@ -3110,6 +3674,9 @@ CONTAINS
     logical, optional,           intent(IN)  :: FORCE_REGRID
     logical, optional,           intent(IN)  :: TIME_IS_CYCLIC
     logical, optional,           intent(IN)  :: TIME_INTERP
+    logical, optional,           intent(IN)    :: conservative
+    logical, optional,           intent(IN)    :: voting
+    logical, optional,           intent(IN)    :: ignoreCase
 !
 #ifdef ___PROTEX___
 
@@ -3235,7 +3802,10 @@ CONTAINS
     call MAPL_CFIOReadField ( VARN, FILETMPL, TIME,       FIELD,          &
                               VERBOSE=VERBOSE, FORCE_REGRID=FORCE_REGRID, &
                               TIME_INTERP=TIME_INTERP,                    &
-                              TIME_IS_CYCLIC=TIME_IS_CYCLIC, RC=STATUS    )
+                              TIME_IS_CYCLIC=TIME_IS_CYCLIC,              &
+                              conservative=conservative,                  &
+                              voting = voting, ignoreCase = ignoreCase,   &
+                              RC=STATUS)
     VERIFY_(STATUS)
 
 !   Destroy the ESMF array (data will be preserved since we own it)
@@ -3278,6 +3848,8 @@ CONTAINS
   if(associated(MCFIO%vardims   )) deallocate(MCFIO%vardims   )
   if(associated(MCFIO%Levs      )) deallocate(MCFIO%Levs      )
   if(associated(MCFIO%vartype   )) deallocate(MCFIO%vartype   )
+  if(associated(MCFIO%needvar   )) deallocate(MCFIO%needvar   )
+  if(associated(MCFIO%pairList  )) deallocate(MCFIO%pairList  )
 
   nullify(MCFIO%Krank     )   
   nullify(MCFIO%reqs      )
@@ -3307,11 +3879,12 @@ CONTAINS
 
 ! !INTERFACE:
 !
-  subroutine MAPL_CFIOClose( MCFIO, RC )
+  subroutine MAPL_CFIOClose( MCFIO, filename, RC )
 !
 ! !ARGUMENTS:
 !
   type(MAPL_CFIO),             intent(INOUT) :: MCFIO
+  character(len=*), optional,  intent(IN   ) :: filename
   integer, optional,           intent(  OUT) :: RC
 
 ! !DESCRIPTION: 
@@ -3326,6 +3899,11 @@ CONTAINS
   if (MCFIO%myPE == MCFIO%Root) then
      call ESMF_CFIOFileClose(MCFIO%CFIO,rc=status)
      VERIFY_(STATUS)
+     if (present(filename)) then
+        close(99)
+        open (99,file=trim(filename)//".done",form='formatted')
+        close(99)
+     end if
   end if
 
   RETURN_(ESMF_SUCCESS)
@@ -3333,7 +3911,7 @@ CONTAINS
 
 
 
-  subroutine MAPL_CFIOSet( MCFIO, Root, Psize, fName, Krank, RC )
+  subroutine MAPL_CFIOSet( MCFIO, Root, Psize, fName, Krank, IOWorker, globalComm, RC )
 !
 ! !ARGUMENTS:
 !
@@ -3341,6 +3919,8 @@ CONTAINS
   integer, optional,           intent(IN   ) :: Root, Psize
   character*(*), optional,     intent(IN   ) :: fName
   integer, optional,           intent(IN   ) :: Krank(:)
+  integer, optional,           intent(IN   ) :: IOWorker
+  integer, optional,           intent(IN   ) :: globalComm
   integer, optional,           intent(  OUT) :: RC
 
 ! !DESCRIPTION: 
@@ -3367,6 +3947,14 @@ CONTAINS
   if(present(Krank)) then
     mCFIO%Krank = Krank
   endif
+
+  if(present(IOWorker)) then
+    mCFIO%AsyncWorkRank = IOWorker
+  end if
+
+  if(present(globalComm)) then
+    mCFIO%globalComm = globalComm
+  end if
 
   RETURN_(ESMF_SUCCESS)
   end subroutine MAPL_CFIOSet
@@ -3585,5 +4173,201 @@ CONTAINS
     type(MAPL_CFIO),             intent(IN) :: MCFIO
     MAPL_CFIOGetFilename = MCFIO%fNAME
   end function MAPL_CFIOGetFilename
+
+  subroutine MAPL_CFIOGetTimeString(mcfio,Clock,Date,rc)
+  
+    type(MAPL_CFIO  ),          intent(inout) :: MCFIO
+    type(ESMF_Clock),           intent(in   ) :: Clock 
+    character(len=ESMF_MAXSTR), intent(inout) :: Date
+    integer, optional,          intent(out  ) :: rc
+
+    integer :: status
+    character(len=ESMF_MAXSTR) :: Iam
+
+    type(ESMF_Time) :: time
+    integer :: YY,MM,DD,H,M,S
+    integer :: noffset
+    logical :: LPERP
+    type(ESMF_Alarm)           :: PERPETUAL
+    character(len=ESMF_MAXSTR) :: ClockName
+
+    Iam = "MAPL_CFIOGetTimeString"
+
+    call ESMF_ClockGet       (CLOCK, name=ClockName, CurrTime =TIME, RC=STATUS)
+    VERIFY_(STATUS)
+
+     call ESMF_TimeIntervalGet( MCFIO%OFFSET, S=noffset, rc=status )
+     VERIFY_(STATUS)
+     if( noffset /= 0 ) then
+         LPERP = ( index( trim(clockname),'_PERPETUAL' ).ne.0 )
+        if( LPERP ) then
+            call ESMF_ClockGetAlarm ( clock, alarmName='PERPETUAL', alarm=PERPETUAL, rc=status )
+            VERIFY_(STATUS)
+            if( ESMF_AlarmIsRinging(PERPETUAL) ) then
+                call ESMF_TimeGet ( Time, YY = YY, &
+                                          MM = MM, &
+                                          DD = DD, &
+                                          H  = H , &
+                                          M  = M , &
+                                          S  = S, rc=status )
+                                          MM = MM + 1
+                call ESMF_TimeSet ( Time, YY = YY, &
+                                          MM = MM, &
+                                          DD = DD, &
+                                          H  = H , &
+                                          M  = M , &
+                                          S  = S, rc=status )
+            endif
+        endif
+     endif
+
+    TIME = TIME - MCFIO%OFFSET
+
+    call ESMF_TimeGet        (TIME,     timeString=DATE,     RC=STATUS)
+    VERIFY_(STATUS)
+
+    RETURN_(ESMF_SUCCESS)
+
+    end subroutine MAPL_CFIOGetTimeString
+    
+    subroutine MAPL_CFIOstartAsyncColl(mcfio,clock,mapl_comm,filename,markdone,rc)
+
+    type(MAPL_CFIO  ),          intent(inout) :: MCFIO
+    type(ESMF_Clock) ,          intent(inout) :: clock
+    type(MAPL_Communicators),   intent(inout) :: mapl_comm
+    character(len=ESMF_MAXSTR), intent(in   ) :: filename
+    integer,                    intent(in   ) :: markdone
+    integer, optional       ,   intent(out  ) :: rc
+
+    integer :: status
+    character(len=ESMF_MAXSTR) :: Iam
+
+    integer :: slices
+    character(len=ESMF_MAXSTR) :: TimeString
+    integer :: im,jm,ionode,l,nn,k,csize
+    integer, allocatable :: levindex(:)
+    character(len=esmf_maxstr), allocatable ::  levname(:)
+
+    Iam = "MAPL_CFIOstartAsyncColl"
+    im = mcfio%im
+    jm = mcfio%jm
+
+    ! count the number of slices
+    slices = 0
+    do L=1,size(MCFIO%VarDims)
+       if (MCFIO%VarDims(L)==2) then
+          slices=slices+1
+       else if (MCFIO%VarDims(L) ==3) then
+          do k=1,MCFIO%lm
+             slices=slices+1
+          enddo
+       endif
+    enddo
+ 
+    call MAPL_CFIOServerGetFreeNode(mapl_comm,IOnode,im,jm,slices,rc=status)
+    VERIFY_(STATUS)
+    call MAPL_CFIOSet(mcfio,IOWorker=IOnode,rc=status)
+    VERIFY_(STATUS)
+    call MAPL_CFIOGetTimeString(mcfio,clock,timeString,rc=status)
+    VERIFY_(STATUS)
+    call MAPL_CFIOAsyncSendCollInfo(filename,IM,JM,timeString,slices &
+           ,IOnode,markdone,mapl_comm,rc)
+    VERIFY_(STATUS)
+
+    allocate(levindex(slices),stat=status)
+    VERIFY_(STATUS)
+    allocate(levname(slices),stat=status)
+    VERIFY_(STATUS)
+    nn = 0
+
+    VARIABLES: do L=1,size(MCFIO%VarDims)
+
+       RANK: if (MCFIO%VarDims(L)==2) then
+
+          nn=nn+1
+          levindex(nn)=0
+          levname(nn)=mcfio%VarName(L)
+
+       elseif (MCFIO%VarDims(L)==3) then
+
+
+          LEVELS: do k=1,MCFIO%lm
+
+             nn=nn+1
+             levindex(nn)=k
+             levname(nn)=mcfio%VarName(L)
+          enddo LEVELS
+       end if Rank
+    enddo VARIABLES
+
+    call MPI_Send(mcfio%krank, slices, MPI_INTEGER, IONODE, MAPL_TAG_SHIPINFO, &
+     mapl_comm%maplcomm,status)
+    VERIFY_(STATUS)
+    call MPI_Send(levindex, slices, MPI_INTEGER , IONODE, MAPL_TAG_SHIPINFO, &
+     mapl_comm%maplcomm,status)
+    VERIFY_(STATUS)
+    csize=slices*ESMF_MAXSTR
+    call MPI_Send(levname,csize,MPI_CHARACTER, IONODE, MAPL_TAG_SHIPINFO, &
+     mapl_comm%maplcomm,status)
+    VERIFY_(STATUS)
+
+    deallocate(levindex)
+    deallocate(levname)
+
+    RETURN_(ESMF_SUCCESS)
+
+    end subroutine
+
+
+    subroutine MAPL_CFIOBcastIONode(mcfio,root,comm,rc)
+    type(MAPL_CFIO  ),          intent(inout) :: MCFIO
+    integer,                    intent(in   ) :: root
+    integer,                    intent(in   ) :: comm
+    integer, optional,          intent(out  ) :: rc
+
+    integer :: status
+    character(len=ESMF_MAXSTR) :: Iam
+    Iam = "MAPL_CFIOBcastIONode"
+
+    call mpi_bcast(mcfio%AsyncWorkRank,1,MPI_INTEGER,root,comm,status)
+    VERIFY_(STATUS)
+
+    RETURN_(ESMF_SUCCESS)
+    end subroutine
+
+  subroutine MAPL_CFIOAsyncSendCollInfo(filename,IM,JM,timeString,nlevs,workRank,markdone,mapl_comm,rc)
+  character(len=ESMF_MAXSTR), intent(in) :: filename
+  integer,                    intent(in) :: IM
+  integer,                    intent(in) :: JM
+  character(len=ESMF_MAXSTR), intent(in) :: timeString
+  integer,                    intent(in) :: nlevs
+  integer,                    intent(in) :: workRank
+  integer,                    intent(in) :: markdone
+  type(MAPL_Communicators),   intent(in) :: mapl_comm
+  integer, optional,          intent(out) :: rc
+
+  integer :: status
+  character(len=ESMF_MAXSTR) :: Iam
+  type(MAPL_CFIOServerIOinfo) :: ServerInfo
+  integer :: nymd,nhms
+
+  Iam = "MAPL_CFIOAsyncSendCollInfo"
+
+  ServerInfo%filename = filename
+  ServerInfo%lons = IM
+  ServerInfo%lats = JM
+  ServerInfo%nlevs = nlevs
+  call StrToInt(timeString,nymd,nhms)
+  ServerInfo%date = nymd
+  ServerInfo%time = nhms
+  ServerInfo%markdone = markdone
+
+  call MPI_Send(ServerInfo, 1, mpi_io_server_info_type, workRank, MAPL_TAG_SHIPINFO, &
+     mapl_comm%maplcomm,status)
+  VERIFY_(STATUS)
+
+  RETURN_(ESMF_SUCCESS)
+
+  end subroutine
 
 end module MAPL_CFIOMod
