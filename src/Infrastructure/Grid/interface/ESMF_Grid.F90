@@ -5711,8 +5711,8 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileformat, regDecomp, keywordEnforcer, &
-       decompflag, isSphere, addCornerStagger, addUserArea, addMask, &
-       indexflag, varname, coordNames, rc)
+       decompflag, isSphere, addCornerStagger, addUserArea, indexflag, &
+       addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -5727,8 +5727,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
-    logical,                intent(in),  optional  :: addMask
     type(ESMF_Index_Flag), intent(in), optional :: indexflag
+    logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
     integer,                intent(out), optional  :: rc
@@ -5749,7 +5749,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-! \item[fileFormat]
+! \item[fileformat]
 !     The Grid file format, please see Section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
 ! \item[regDecomp] 
@@ -5770,12 +5770,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the Grid. The coordinates for the corner stagger is required for conservative
 !      regridding. If not specified, defaults to false. 
 ! \item[{[addUserArea]}]
-!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
-! \item[{[addMask]}]
-!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it.  The feature
+!      is only supported when the grid file is in the SCRIP format.
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
 !      to {\tt ESMF\_INDEX\_GLOBAL}
+! \item[{[addMask]}]
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'. This flag
+!      is only needed for the GRIDSPEC file format.
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
