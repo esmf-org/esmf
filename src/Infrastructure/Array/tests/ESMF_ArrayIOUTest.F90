@@ -187,6 +187,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LogSet (trace = .true.)
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -238,6 +239,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -283,6 +285,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
+  call ESMF_LogSet (trace = .true.)
   write(name, *) "Read ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_wouthalo2, file='file3D_wouthalo.nc', rc=rc)
@@ -292,6 +295,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -332,6 +336,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
+  call ESMF_LogSet (trace = .true.)
   write(name, *) "Read ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
@@ -355,6 +360,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -652,6 +658,7 @@ program ESMF_ArrayIOUTest
 10 continue
 
   !-----------------------------------------------------------------------------
+  call ESMF_LogSet (trace = .true.)
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
 
