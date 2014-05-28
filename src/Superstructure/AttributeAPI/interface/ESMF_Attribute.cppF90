@@ -1982,7 +1982,8 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object
 !     \item [count]
-!           The Attribute count for <object>
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
 !     \item [{[attcountflag]}]
 !           The flag to specify which attribute count to return, the
 !           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented

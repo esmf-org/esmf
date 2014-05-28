@@ -38,5 +38,3 @@ CF Extended -- Field package -- is a nest with one child package:
 \begin{enumerate}
    \item CF General
 \end{enumerate}
-
-An explanation of the Attribute packages specifiers is in order at this point.  The purpose specifier is really just meant as an additional means, beyond the use of "convention", to specify Attribute packages.  One could imagine that the CF convention would want to be able to have Attribute packages divided up in some fashion, which ESMF could then keep track of with the purpose specifier.  It was added with the intention of allowing Attributes, and packages, maximum flexibility.  Take the Field's ESMF standard Attribute package for example.  This package is made up of three nested Attribute packages.  The lowest one is made up of three Attributes with convention=CF and purpose=General.  The next level contains one Attribute with convention=CF but purpose=Extended.  On top of this is the convention=ESMF package, also with purpose=General.
