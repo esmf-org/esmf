@@ -80,6 +80,8 @@ program ESMF_ArrayIOUTest
     goto 10
   endif
 
+  call ESMF_LogSet (flush = .true.)
+
 !-------------------------------------------------------------------------------
 !
 ! Tests: 3D case (Integer)
@@ -130,9 +132,13 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !-------------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
 ! !  Get Fortran pointer to Array data
 ! !  Data is type ESMF_KIND_I4
+  write(name, *) "Accessing Fortran pointers for Arrays Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   localDeCount = 1
+  rc = ESMF_SUCCESS
   ESMF_BLOCK(aget_i4)
     call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
     if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
@@ -151,6 +157,7 @@ program ESMF_ArrayIOUTest
     if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
         line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
 
+    Farray3D_wouthalo = 1
     do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
     do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
     do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
@@ -173,6 +180,7 @@ program ESMF_ArrayIOUTest
     enddo
     enddo
   ESMF_ENDBLOCK(aget_i4)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
