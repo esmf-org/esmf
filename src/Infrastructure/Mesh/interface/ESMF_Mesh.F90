@@ -1619,7 +1619,7 @@ end function ESMF_MeshCreateFromMeshes
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
+    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
 		 nodalDistgrid, elementDistgrid, rc)
 !
@@ -1628,7 +1628,7 @@ end function ESMF_MeshCreateFromMeshes
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
-    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
@@ -1648,7 +1648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[filetypeflag] 
+!   \item[fileTypeFlag] 
 !         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 

@@ -5521,10 +5521,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-! \item[fileFormat]
+! \item[fileformat]
 !     The Grid file format, please see Section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
-! \item[distGrid] 
+! \item[distgrid] 
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
@@ -5533,9 +5533,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the Grid. The coordinates for the corner stagger is required for conservative
 !      regridding. If not specified, defaults to false. 
 ! \item[{[addUserArea]}]
-!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
+!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it. The feature
+!      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
+!      .false.
 ! \item[{[addMask]}]
-!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'. 
+!      This flag is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
@@ -5734,7 +5737,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-! \item[fileFormat]
+! \item[fileformat]
 !     The Grid file format, please see Section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
 ! \item[regDecomp] 
@@ -5753,9 +5756,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      the Grid. The coordinates for the corner stagger is required for conservative
 !      regridding. If not specified, defaults to false. 
 ! \item[{[addUserArea]}]
-!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
+!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it.  The feature
+!      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
+!      .false.
 ! \item[{[addMask]}]
-!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'. This flag
+!      is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of

@@ -160,9 +160,11 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
 //      regridding. If not specified, defaults to 0. 
 // \item[{[addUserArea]}]
 //      Set to 1 to read in the cell area from the Grid file; otherwise, ESMF will 
-//      calculate it.
+//      calculate it.  This feature is only supported when the grid file is in the SCRIP
+//      format.
 // \item[{[addMask]}]
-//      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'
+//      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'.
+//      This flag is only needed when the grid file is in the GRIDSPEC format.
 // \item[{[varname]}]
 //      If addMask is non-zero, provide a variable name stored in the grid file and
 //      the mask will be generated using the missing value of the data value of
