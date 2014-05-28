@@ -1619,7 +1619,7 @@ end function ESMF_MeshCreateFromMeshes
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
+    function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
 		 nodalDistgrid, elementDistgrid, rc)
 !
@@ -1628,7 +1628,7 @@ end function ESMF_MeshCreateFromMeshes
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
-    type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea

@@ -5485,7 +5485,7 @@ end subroutine pack_and_send_int2D
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFrmNCFileDG(filename, fileFormat, distGrid, keywordEnforcer, &
+     function ESMF_GridCreateFrmNCFileDG(filename, fileformat, distgrid, keywordEnforcer, &
        isSphere, addCornerStagger, addUserArea, addMask, &
        indexflag, varname, coordNames, rc)
 
@@ -5495,8 +5495,8 @@ end subroutine pack_and_send_int2D
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag), intent(in)	   :: fileFormat
-    type(ESMF_DistGrid),    intent(in)		   :: distGrid
+    type(ESMF_FileFormat_Flag), intent(in)	   :: fileformat
+    type(ESMF_DistGrid),    intent(in)		   :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
@@ -5710,7 +5710,7 @@ end function ESMF_GridCreateFrmNCFileDG
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
+     function ESMF_GridCreateFrmNCFile(filename, fileformat, regDecomp, keywordEnforcer, &
        decompflag, isSphere, addCornerStagger, addUserArea, addMask, &
        indexflag, varname, coordNames, rc)
 
@@ -5720,7 +5720,7 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag) 			   :: fileFormat
+    type(ESMF_FileFormat_Flag) 			   :: fileformat
     integer,                intent(in)             :: regDecomp(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
