@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ESMPy'
-copyright = u'2011-2013, University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center.  Licensed under the University of Illinois-NCSA License'
+copyright = u'2011-2014, University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center.  Licensed under the University of Illinois-NCSA License'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -70,9 +70,10 @@ release = ESMF.__release__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['CoordSys.rst', 'FileFormat', 'GridItem', 'LogKind', 
-                    'MeshElemType', 'MeshLoc', 'Region', 'RegridMethod',
-                    'StaggerLoc', 'TypeKind', 'UnmappedAction']
+exclude_patterns = ['CoordSys.rst', 'DecompFlag', 'FileFormat', 'GridItem', 
+                    'LogKind', 'MeshElemType', 'MeshLoc', 'PoleMethod',
+                    'Region', 'RegridMethod', 'StaggerLoc', 'TypeKind', 
+                    'UnmappedAction']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
