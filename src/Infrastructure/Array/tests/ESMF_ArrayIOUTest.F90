@@ -279,6 +279,7 @@ program ESMF_ArrayIOUTest
   do de=0,localDeCount-1
     call ESMF_ArrayGet(array_wouthalo2, localDe=de, farrayPtr=Farray3D_wouthalo2, rc=rc) 
   enddo
+  Farray3D_wouthalo2 = 0    ! Initialize it for some fortran compilers
   call ESMF_ArrayGet(array_wouthalo2, exclusiveLBound=exclusiveLBound, &
                      exclusiveUBound=exclusiveUBound, rc=rc)
 
@@ -486,7 +487,6 @@ program ESMF_ArrayIOUTest
 ! !  Data is type ESMF_KIND_R8
   localDeCount = 1
   call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray2D_withhalo, rc=rc)
-  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray2D_wouthalo, rc=rc)
 
   localDeCount = 1
   allocate(exclusiveLBound(2,localDeCount))         ! dimCount=2
@@ -519,8 +519,8 @@ program ESMF_ArrayIOUTest
 !-------------------------------------------------------------------------------
 ! !  Get Fortran pointer to Array data
 ! !  Data is type ESMF_KIND_R8
-  call ESMF_ArrayGet(array_wouthalo, localDe=0, &
-          farrayPtr=Farray2D_wouthalo, rc=rc)
+  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray2D_wouthalo, rc=rc)
+  Farray2D_wouthalo = 0.0
 
   call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
                      exclusiveUBound=exclusiveUBound, rc=rc)
@@ -541,7 +541,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare read in and the existing file
-  write(name, *) "Compare read in data to the existing data - 2D without halo"
+  write(name, *) "Compare read in data to the existing data - 2D with/without halo"
   write(failMsg, *) "Comparison failed"
   r8Max(1) = 0.0
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
@@ -554,7 +554,7 @@ program ESMF_ArrayIOUTest
   write(*,*)"Maximum Error (With/Without Halo case) = ", r8Max(1)
   call ESMF_Test((r8Max(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not fail as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected, max error =", r8Max(1)
   call ESMF_Test((r8Max(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
