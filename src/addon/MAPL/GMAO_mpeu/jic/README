@@ -1,0 +1,51 @@
+=== +-======-+ 
+===  Copyright (c) 2003-2007 United States Government as represented by 
+===  the Admistrator of the National Aeronautics and Space Administration.  
+===  All Rights Reserved.
+===  
+===  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+===  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+===  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+===  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+===  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+===  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+===  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+===  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+===  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+===  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+===  
+===  Government Agency: National Aeronautics and Space Administration
+===  Government Agency Original Software Designation: GSC-15354-1
+===  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+===  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+===  Government Agency Point of Contact for Original Software:  
+===  			Dale Hithon, SRA Assistant, (301) 286-2691
+===  
+=== +-======-+ 
+25Apr02	- Jing Guo
+
+A header file "mpif.h" is required to compile module mpeu.  Therefore,
+if a MPI library is not installed on the current system, and one does
+not really want to run a program under a message passing parallel
+environment, a fake "mpif.h" file in this directory can be used to get
+the compilation done.
+
+Special care is needed for compilation.  For example, if a Fortran 90
+source code is
+
+  module m_mymod
+    include "mpif.h"
+  end module m_mymod
+
+Its compilation command lines should look like this.
+
+	f90 -I. -I/usr/local/mpich/include -I./jic
+
+Note "/usr/local/mpich/include" is where the system "mpif.h" is expected
+to be.  If this directory does not exist, or "mpif.h" does not exist in
+this directory, the compiler will look for "mpif.h" in the next
+directory "./jic".
+
+This removed the earlier less implicit solution of the use of a special
+target "mpif.h: $(LOCAL_mpif_H)" through "make all LOCAL_mpif_H=mpif.h".
+

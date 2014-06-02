@@ -1,0 +1,189 @@
+! +-======-+ 
+!  Copyright (c) 2003-2007 United States Government as represented by 
+!  the Admistrator of the National Aeronautics and Space Administration.  
+!  All Rights Reserved.
+!  
+!  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+!  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+!  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+!  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+!  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+!  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+!  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+!  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+!  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+!  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+!  
+!  Government Agency: National Aeronautics and Space Administration
+!  Government Agency Original Software Designation: GSC-15354-1
+!  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+!  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+!  Government Agency Point of Contact for Original Software:  
+!  			Dale Hithon, SRA Assistant, (301) 286-2691
+!  
+! +-======-+ 
+m_mpout - a standard output manager for a multi-process environment.
+
+Usecases:
+
+  Case 1: Unmanaged output
+
+	use m_mpout,only : mpout
+	write(mpout,'(a)') 'main: Hello, world!'
+
+  If unit mpout is not turned on on the given PE, the output is sent to
+  STDOUT, as defined in m_stdio.
+
+  If unit mpout is turned on on the given PE, the output is sent to
+  either STDOUT or a file if unit mpout has been connected to a file
+  through mpout_open().
+
+  Unmanaged output requires minimum code changes to sent output STDOUT
+  on all PEs, except where mpout has been turned on and connected to a
+  file through mpout_open().
+
+  Case 2: Output managed implicitly through a m_mpout interface
+
+	use m_mpout,only : mpout_log
+	call mpout_log('main','Hello, world!')
+
+  Output is sent only if the given PE has unit mpout turned on, either
+  to STDOUT, or a file if mpout has been connected to a file through
+  mpout_open().
+
+  Case 3: Output managed explicitly by users
+
+	use m_mpout,only : mpout,mpout_ison
+	if(mpout_ison()) write(mpout,'(a)') 'main: Hello, world!'
+
+  Output is sent in a way similar to Case 2.
+
+  Managed output requires minimum code changes to turn off undesired
+  output streams on some PEs, with the options to sent the output to
+  either STDOUT or files on selected PEs.
+
+Status "mpout is on":
+
+  Module mpout is turned on in two ways.  First, on the root PE, if any
+  m_mpout procedure except mpout_close() has been called before mpout
+  is invoked in a write() statement.  Second, on any given PE, if a
+  mpout_open() is called with an argument set to turn mpout on.
+
+Examples:
+
+  1: write 'main: Hello, world!' to STDOUT on PE 0 only.
+
+	program main
+	use m_mpout,only : mpout_log
+		... initialize MPI ...
+	call mpout_log('main','Hello, world!')
+		... finalize MPI ...
+	end program main
+
+  2: write 'main: Hello, world!' to files "out.000" on PE 0 only.
+
+	program main
+	use m_mpout,only : mpout_open
+	use m_mpout,only : mpout_log
+	use m_mpout,only : mpout_close
+		... initialize MPI ...
+	call mpout_open(pfix='out')
+	call mpout_log('main','Hello, world!')
+	call mpout_close()
+		... finalize MPI ...
+	end program main
+
+Implementation issues:
+
+[1] The mechanism of PE masking in m_mpout always set PE 0 to output,
+  unless "call mpout_open(mask=-1,..)" on PE 0.
+
+[2] There are two output status.  The first setting is _output_.  If
+    this setting is true, the second setting is _where_.  _where_ could
+    be either _stdout_, or a file.
+
+[3] At the beginning of a program using m_mpout, the status of m_mpout
+    module is always .not. _initialized_.  Any module procedure will
+    verify this status variable first, and by default making sure the
+    module is _initialized_ before proceed.
+
+    Once the module is initialized, unit mpout is defined to a default
+    status[4].
+
+[4] A default status occurs if mpout_open() is not called by an
+    application, or mpout_open() is called without specifying any
+    argument, or a mpout_close() has been called.
+
+[1] Basic status:
+
+    . uninitialized
+    . default configuration
+    . user specified configuration
+
+[1.1] Uninitialized
+
+    Uninitialized occurs when an application tries to invoke mpout
+    directly before any module procedure of m_mpout has been called.
+
+    An uninitialized status has the value of mpout==stdout, which
+    allows a program using mpout the same way as with stdout.
+
+    Therefore, if an application uses mpout for its output logical
+    unit,
+
+    Ex. 1.1.1:
+
+    program main
+      use m_mpout,only : mpout
+      write(mpout,*) 'Hello!'	! mpout is _uninitialized_
+    end program main
+
+    A line of "Hello!" will be sent to stdout by _allL processors.
+
+[1.2] Default
+
+    A default status occurs if mpout_open() is not called by an
+    application, or mpout_open() is called without specifying any
+    argument, or a mpout_close() has been called, but any routine
+    of m_mpout is used to generate output.
+
+    It is considered an error to use write(mpout,*) unconditionally
+    if m_mpout has a default status (although it is not so if m_mpout
+    has an uninitialized status!).  To make the routine to be more
+    tolorent to different programming practices, all messages will be
+    sen
+
+    Ex. 1.2.1:
+
+    program main
+      use m_mpout,only : mpout
+	! The message will be sent to STDOUT.
+      write(mpout,*) 'Hello!'
+    end program main
+
+    Ex. 1.2.2:
+
+    program main
+      use m_mpout,only : mpout_ison,mpout
+	! If mpout_open() is not called, mpout_ison() is .true. only
+	! on PE 0.  The message will be sent to STDOUT.
+      if(mpout_ison()) write(mpout,*) 'Hello!'
+    end program main
+
+    Ex. 1.2.3:
+
+    program main
+      use m_mpout,only : mpout_log
+	! A meesage is sent to STDOUT only on PE 0.
+      call mpout_log('main','Hello!')
+    end program main
+
+    Ex. 1.2.4:
+
+    program main
+      use m_mpout,only : mpout_open,mpout_close,mpout
+      call mpout_open()
+	! A message is sent to a file "mpout.000" on PE 0
+      if(mpout_ison()) write(mpout,*) 'on PE 0!'
+      call mpout_close()
+    end program main
