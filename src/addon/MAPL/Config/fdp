@@ -250,12 +250,22 @@ sub write_output {
                                      or  $dep =~ /^esmf\.mod/
                                      or  $dep =~ /^netcdf\.mod/
                                      or  $dep =~ /^netcdf\.inc/
-                                     or  $dep ~~ @stdcinc       # Is the dep a standard C library?
+                                     #or  $dep ~~ @stdcinc       # Is the dep a standard C library?
+                                     or  smart_match($dep, \@stdcinc)       # Is the dep a standard C library?
                                      or  $dep =~ /^sys\//       # Is the dep in the sys/ folder?
                                      or  $dep =~ /^mpif.*h$/ ); # Is the dep an included mpif-/_ file?
     }
     print OUTFL "\n";
     close OUTFL;
+}
+
+# smart match ~~ not supported in all  versions of Perl...
+sub smart_match {
+    my ($dep, $array) = @_;
+    foreach (@{$array}){
+        return 1 if($dep =~ $_);
+    }
+    return 0;
 }
 
 #=======================================================================
