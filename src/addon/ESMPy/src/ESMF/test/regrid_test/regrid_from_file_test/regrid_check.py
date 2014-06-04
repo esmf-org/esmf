@@ -263,7 +263,8 @@ def parse_options(options):
                                                'src_meshname=', 'dst_meshname=',
                                                'ignore_unmapped', 
                                                'src_regional', 'dst_regional',
-                                               'src_missingvalue=','dst_missingvalue='])
+                                               'src_missingvalue=','dst_missingvalue=',
+					       '64bit_offset','netcdf4'])
         src_type_str = "SCRIP"
         dst_type_str = "SCRIP"
         src_meshname = "Undefined"
