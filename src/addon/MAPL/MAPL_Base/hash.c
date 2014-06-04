@@ -53,6 +53,9 @@ typedef struct {
 hash_t *hash_heap=(hash_t *)NULL;
 int hash_heap_size = HEAPCHUNK;
 
+int hash1(int key);
+int hash2(int i, int j);
+
 void init_hash(hash_t *h, int nbuckets) {
   int l;
   bucket_t *bucket;

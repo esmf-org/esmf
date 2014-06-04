@@ -730,4 +730,8 @@ ifeq ($(ARCH),Darwin)
 
 endif  #    Darwin
 
-$(info Compiler is set to $(FC), make sure this is the MPI wrapper of the actual compiler)
+include $(ESMFMKFILE)
+FC := $(ESMF_F90COMPILER)
+CC := $(ESMF_CXXCOMPILER)
+CXX := $(ESMF_CXXCOMPILER)
+$(info Compiler is set to $(FC) and $(CC), make sure this is the MPI wrapper of the actual compiler)

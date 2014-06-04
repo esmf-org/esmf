@@ -92,8 +92,7 @@ Kept the difference for reference.
 
 /*  Implementations: */
 
-void get_zeits_(zts)
-  double *zts;
+void get_zeits_(double *zts)
 {
 
   struct tms tm;
@@ -109,8 +108,7 @@ void get_zeits_(zts)
 
 }
 
-void get_ztick_(tic)
-  double *tic;
+void get_ztick_(double *tic)
 {
   tic[0]=1./CLK_TCK;
 }

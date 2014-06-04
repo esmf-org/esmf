@@ -24,6 +24,7 @@
  +-======-+   */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h> 
 #include "ShaveMantissa.h"   /* protype */
 
@@ -66,24 +67,24 @@ float32 SetOffset(float32 minv, float32 maxv)
 //
 // !INTERFACE:
 */
-int ShaveMantissa32 ( a, ain, len, xbits, has_undef, undef, chunksize )
+int ShaveMantissa32 ( float32 a[], float32 ain[], int32 len, int xbits, int has_undef, float32 undef, int32 chunksize )
 
 /*
 // !INPUT PARAMETERS:
 */
 
-int32   len;        /* size of a[] */
-int     xbits;      /* number of bits to excludes from mantissa */
-int     has_undef;  /* whether field has missing (undef) values */ 
-int32   chunksize;  /* find mid range over chunksize chunks     */ 
-float32 undef;      /* missing (undefined) value */
-float32 ain[];      /* input array */
+// int32   len;        /* size of a[] */
+// int     xbits;      /* number of bits to excludes from mantissa */
+// int     has_undef;  /* whether field has missing (undef) values */ 
+// int32   chunksize;  /* find mid range over chunksize chunks     */ 
+// float32 undef;      /* missing (undefined) value */
+// float32 ain[];      /* input array */
 
 /*
 // !OUTPUT PARAMETERS:
 */
 
-float32 a[];    // output "shaved" array; can share storage with ain[]
+// float32 a[];    // output "shaved" array; can share storage with ain[]
 
 /*
 // !DESCRIPTION:  
