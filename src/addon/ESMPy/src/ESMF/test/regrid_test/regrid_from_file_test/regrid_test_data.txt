@@ -3,12 +3,10 @@
 # Input data for ESMPy regrid from file tests
 
 # total number of test cases
-63
+67
 #98
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
-#wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-06 : 10E-16
-
 ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-03 : 10E-13
 wr50a_090614.nc : T42_grid.nc : patch : --src_regional -i : 10E-04 : 10E-16
 wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i : 10E-06 : 10E-16
@@ -60,13 +58,13 @@ ar9v4_100920.nc : T42_grid.nc : patch    : --src_regional -i : 10E-07 : 10E-16
 ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-03 : 10E-14
 
 # regional to regional with destination masking
-#wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-05 : 10E-16
-#wr50a_090614.nc : ar9v4_100920.nc : patch    : -r -i --netcdf4 : 10E-06 : 10E-16
+wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-05 : 10E-16
+wr50a_090614.nc : ar9v4_100920.nc : patch    : -r -i --netcdf4 : 10E-06 : 10E-16
 wr50a_090614.nc : ar9v4_100920.nc : conserve : -r -i : 10E-03 : 10E-14
 
 # regional to regional with source masking
-#ar9v4_100920.nc : wr50a_090614.nc : bilinear : -r -i --64bit_offset : 10E-07 : 10E-16
-#ar9v4_100920.nc : wr50a_090614.nc : patch    : -r -i --netcdf4 : 10E-07 : 10E-16
+ar9v4_100920.nc : wr50a_090614.nc : bilinear : -r -i --64bit_offset : 10E-07 : 10E-16
+ar9v4_100920.nc : wr50a_090614.nc : patch    : -r -i --netcdf4 : 10E-07 : 10E-16
 ar9v4_100920.nc : wr50a_090614.nc : conserve : -i -r : 10E-04 : 10E-13
 
 # cubed sphere to global with pole all
