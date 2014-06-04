@@ -365,7 +365,8 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttributeGetAttPack(DTDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DTDT, convESMF, purpGen, &
+	attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
