@@ -180,9 +180,9 @@ MODS_OBJ        = m_chars.o		\
 		  assert.H
 
 
-USER_FINCS  = $(I). $(I)$(INC_MPI)
-USER_CINCS  = $(I). $(I)$(INC_MPI)
-USER_FFLAGS = $(BIG_ENDIAN) $(M). 
+USER_FINCS  += $(I). $(I)$(INC_MPI)
+USER_CINCS  += $(I). $(I)$(INC_MPI)
+USER_FFLAGS += $(BIG_ENDIAN) $(M). 
 
 MOD_DIRS = . $(INC_MPI)
 FREAL = $(FREAL4)

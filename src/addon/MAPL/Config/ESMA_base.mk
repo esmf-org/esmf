@@ -195,18 +195,13 @@ LIB_GCTP   = $(BASELIB)/libGctp.a
 LIB_HDFEOS = $(BASELIB)/libhdfeos.a
 LIB_EOS    = $(LIB_HDFEOS) $(LIB_GCTP)
 
-ifdef ESMFMKFILE
-  ifneq ($(ESMFMKFILE),)
-    include $(ESMFMKFILE)
-    FFLAGS += $(ESMF_F90COMPILEPATHS)
-    CFLAGS += $(ESMF_CXXCOMPILEPATHS)
-    LIBS   += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90ESMFLINKLIBS)
-  else
-    $(error ESMFMKFILE environment variable is invalid)
-  endif
-else
+ifndef ESMFMKFILE
   $(error ESMFMKFILE environment variable is not SET)
 endif
+include $(ESMFMKFILE)
+USER_FFLAGS += $(ESMF_F90COMPILEOPTS)
+USER_CFLAGS += $(ESMF_CXXCOMPILEOPTS)
+LIBS   += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90ESMFLINKLIBS)
 
 ifndef ESMF_DIR
   $(error ESMF_DIR environment variable is not SET)
@@ -217,7 +212,7 @@ endif
 #MOD_ESMF = $(DIR_ESMF)/$(ARCH)/include/esmf
 #LIB_ESMF = $(DIR_ESMF)/$(ARCH)/lib/libesmf.a
 INC_ESMF = $(ESMF_F90COMPILEPATHS) -I$(ESMF_DIR)/src/include
-MOD_ESMF = $(ESMF_F90COMPILEPATHS)
+MOD_ESMF = $(ESMF_F90COMPILEPATHS) 
 LIB_ESMF = $(ESMF_LIBSDIR)/libesmf.a
 
 INC_MPI = /usr/include
@@ -251,8 +246,8 @@ CC        = gcc
 CXX       = g++
 CPP       = cpp
 
-CFLAGS    = $(CDEFS) $(CINCS) $(COPT) $(USER_CFLAGS)
-CXXFLAGS  = $(CDEFS) $(CINCS) $(COPT) $(USER_CFLAGS)
+CFLAGS    = $(CDEFS) $(CINCS) $(COPT) $(USER_CFLAGS) $(ESMF_CXXCOMPILEOPTS)
+CXXFLAGS  = $(CDEFS) $(CINCS) $(COPT) $(USER_CFLAGS) $(ESMF_CXXCOMPILEOPTS)
 
 
 #                     -------------------------
@@ -303,10 +298,10 @@ FMODS     = $(foreach dir,$(INC_ESMF), $(dir)) $(USER_FMODS)
 XFLAGS    = 
 
 FC        = f90
-fFLAGS    = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS)
-f90FLAGS  = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS)
-FFLAGS    = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS)
-F90FLAGS  = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS)
+fFLAGS    = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS) $(ESMF_F90COMPILEOPTS)
+f90FLAGS  = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS) $(ESMF_F90COMPILEOPTS)
+FFLAGS    = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS) $(ESMF_F90COMPILEOPTS)
+F90FLAGS  = $(FDEFS) $(FINCS) $(FMODS) $(FOPT) $(FREAL) $(FINT) $(XFLAGS) $(USER_FFLAGS) $(ESMF_F90COMPILEOPTS)
 
 FPP = /lib/cpp 
 FPPFLAGS = -P $(DC)sys$(ARCH) $(FDEFS) $(FINCS) $(foreach dir,$(INC_MPI), $(I)$(dir))

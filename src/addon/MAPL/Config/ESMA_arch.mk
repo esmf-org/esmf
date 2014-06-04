@@ -80,8 +80,6 @@
   ifndef BASEDIR
      $(warning BASEDIR is undefined --- this will cause an error in the next release!)
   endif
-ESMA_FC=$(ESMF_COMPILER)
-$(info Compiler is set to $(ESMA_FC), make sure this is the MPI wrapper of the actual compiler)
 
 #                             ---------------------
 #                             User defined defaults
@@ -732,3 +730,4 @@ ifeq ($(ARCH),Darwin)
 
 endif  #    Darwin
 
+$(info Compiler is set to $(FC), make sure this is the MPI wrapper of the actual compiler)

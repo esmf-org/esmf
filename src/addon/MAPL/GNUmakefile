@@ -28,6 +28,9 @@
 
 # Make sure ESMADIR is defined
 # ----------------------------
+ifndef ESMF_DIR
+  $(error ESMF_DIR must be defined)
+endif
 BASEDIR  = $(ESMF_DIR)/src/addon/MAPL/
 ESMADIR  = $(ESMF_DIR)/src/addon/MAPL/ESMA
 
@@ -43,6 +46,7 @@ ESMADIR  = $(ESMF_DIR)/src/addon/MAPL/ESMA
 
 # Compilation rules, flags, etc
 # -----------------------------
+#  include $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
   include $(ESMADIR)/Config/ESMA_base.mk  # Generic stuff
   include $(ESMADIR)/Config/ESMA_arch.mk  # System dependencies
 
