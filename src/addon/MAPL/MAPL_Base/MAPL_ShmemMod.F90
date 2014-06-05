@@ -87,6 +87,7 @@
 
        function shmat(shmid, shmaddr, shmflg) bind(c, name="shmat")
          use, intrinsic :: ISO_C_BINDING
+         implicit none
          type (c_ptr)           :: shmat
          integer (c_int), value :: shmid
          type (c_ptr),    value :: shmaddr
@@ -95,13 +96,15 @@
 
        function shmdt(shmaddr) bind(c, name="shmdt")
          use, intrinsic :: ISO_C_BINDING
+         implicit none
          integer (c_int)     :: shmdt
          type (c_ptr), value :: shmaddr
        end function shmdt
 
        function shmctl(shmid, cmd, buf) bind(c, name="shmctl")
          use, intrinsic :: ISO_C_BINDING
-         integer (c_int)        :: shctl
+         implicit none
+         integer (c_int)        :: shmctl
          integer (c_int), value :: shmid
          integer (c_int), value :: cmd
          type (c_ptr),    value :: buf
@@ -109,6 +112,7 @@
 
        subroutine perror(s) bind(c,name="perror")
          use, intrinsic :: ISO_C_BINDING
+         implicit none
          character(c_char), intent(in) :: s(*)
        end subroutine perror
 
@@ -250,7 +254,7 @@
     end subroutine MAPL_FinalizeShmem
 
     subroutine MAPL_DeAllocNodeArray_1DL4(Ptr,rc)
-      logical,           intent(IN ) :: Ptr(:)
+      logical,  pointer              :: Ptr(:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -260,7 +264,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -269,7 +273,7 @@
     end subroutine MAPL_DeAllocNodeArray_1DL4
 
     subroutine MAPL_DeAllocNodeArray_1DI4(Ptr,rc)
-      integer,           intent(IN ) :: Ptr(:)
+      integer,  pointer              :: Ptr(:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -279,7 +283,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -288,7 +292,7 @@
     end subroutine MAPL_DeAllocNodeArray_1DI4
 
     subroutine MAPL_DeAllocNodeArray_2DI4(Ptr,rc)
-      integer,           intent(IN ) :: Ptr(:,:)
+      integer,  pointer              :: Ptr(:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -298,7 +302,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -307,7 +311,7 @@
     end subroutine MAPL_DeAllocNodeArray_2DI4
 
     subroutine MAPL_DeAllocNodeArray_3DI4(Ptr,rc)
-      integer,           intent(IN ) :: Ptr(:,:,:)
+      integer,  pointer              :: Ptr(:,:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -317,7 +321,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -327,7 +331,7 @@
 
 
     subroutine MAPL_DeAllocNodeArray_1DR4(Ptr,rc)
-      real*4,            intent(IN ) :: Ptr(:)
+      real*4,  pointer               :: Ptr(:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -337,7 +341,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -346,7 +350,7 @@
     end subroutine MAPL_DeAllocNodeArray_1DR4
 
     subroutine MAPL_DeAllocNodeArray_2DR4(Ptr,rc)
-      real*4,            intent(IN ) :: Ptr(:,:)
+      real*4,  pointer               :: Ptr(:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -356,7 +360,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -365,7 +369,7 @@
     end subroutine MAPL_DeAllocNodeArray_2DR4
 
     subroutine MAPL_DeAllocNodeArray_3DR4(Ptr,rc)
-      real*4,            intent(IN ) :: Ptr(:,:,:)
+      real*4,  pointer               :: Ptr(:,:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -375,7 +379,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -385,7 +389,7 @@
 
 
     subroutine MAPL_DeAllocNodeArray_1DR8(Ptr,rc)
-      real*8,            intent(IN ) :: Ptr(:)
+      real*8,  pointer               :: Ptr(:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -395,7 +399,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -404,7 +408,7 @@
     end subroutine MAPL_DeAllocNodeArray_1DR8
 
     subroutine MAPL_DeAllocNodeArray_2DR8(Ptr,rc)
-      real*8,            intent(IN ) :: Ptr(:,:)
+      real*8,  pointer               :: Ptr(:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -414,7 +418,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -423,7 +427,7 @@
     end subroutine MAPL_DeAllocNodeArray_2DR8
 
     subroutine MAPL_DeAllocNodeArray_3DR8(Ptr,rc)
-      real*8,            intent(IN ) :: Ptr(:,:,:)
+      real*8,  pointer               :: Ptr(:,:,:)
       integer, optional, intent(OUT) :: rc
 
       type(c_ptr) :: Caddr
@@ -433,7 +437,7 @@
          RETURN_(MAPL_NoShm)
       endif
 
-      Caddr = C_Loc(Ptr)
+      Caddr = C_Loc(Ptr(1,1,1))
 
       call ReleaseSharedMemory(Caddr,rc=STATUS)
       VERIFY_(STATUS)
@@ -910,7 +914,7 @@
       else                 ! wait for create on root & get segment
          call MPI_Barrier(MAPL_NodeComm, STATUS)
          ASSERT_(STATUS==MPI_SUCCESS)
-         Segs(pos)%shmid = shmget(key, numBytes, o'666')
+         Segs(pos)%shmid = shmget(key, numBytes, int(o'666', c_int))
          ASSERT_(Segs(pos)%shmid /= -1)
       end if
 

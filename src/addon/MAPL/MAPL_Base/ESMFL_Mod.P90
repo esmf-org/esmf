@@ -450,7 +450,7 @@ subroutine ESMFL_GridCoordGet(GRID, coord, name, Location, Units, rc)
          call ESMF_AttributeGet  (FIELD, NAME="Needed",VALUE=NEEDED, RC=STATUS)
          if(STATUS /= ESMF_SUCCESS) NEEDED = .false.
 
-         if(NEEDED==.false.) then
+         if(.not. NEEDED) then
             call ESMF_FieldGet(FIELD, Array=ARRAY, RC=STATUS)
             VERIFY_(STATUS)
             call ESMF_ArrayGet     (ARRAY, rank=RANK,   RC=STATUS)

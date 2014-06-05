@@ -79,6 +79,8 @@ module MAPL_CommsMod
      real, pointer :: A(:,:)
   end type ArrPtr
 
+  public ArrPtr
+
   type MAPL_CommRequest
      integer, pointer :: i1(:),in(:),j1(:),jn(:),im(:),jm(:)
      integer          :: im_world, jm_world, im0, jm0
