@@ -362,7 +362,7 @@ int IO::write(
 //     int error return code
 //
 // !ARGUMENTS:
-  char const * const file,        // (in)    - name of file being read
+  char const * const file,        // (in)    - name of file being written
   ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
   bool overwrite,                 // (in)    - overwrite fields if true
   ESMC_FileStatus_Flag status,    // (in)    - file status flag
