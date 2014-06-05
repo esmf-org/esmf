@@ -1708,6 +1708,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
         elementDistgrid=srcElementDistgrid, &
         rc=localrc)
+    elseif (present(srcNodalDistgrid)) then
+      srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        nodalDistgrid=srcElementDistgrid, &
+        rc=localrc)
     else                     
       srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
         convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
@@ -1734,6 +1739,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
         convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
         elementDistgrid=dstElementDistgrid, &
+        rc=localrc)
+    elseif (present(dstNodalDistgrid)) then
+      dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+        nodalDistgrid=dstnodalDistgrid, &
         rc=localrc)
     else
       dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
@@ -1934,8 +1944,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_FieldDestroy(srcFracField)
        call ESMF_FieldDestroy(dstFracField)
     endif
-    call ESMF_MeshDestroy(srcMesh)
-    call ESMF_MeshDestroy(dstMesh) 
+    ! ESMF_MeshDestory() will destroy the distgrid passed in as input argument
+    ! Work Around: use ESMF_MeshFreeMemory() instead
+    ! call ESMF_MeshDestroy(srcMesh)
+    ! call ESMF_MeshDestroy(dstMesh) 
+    call ESMF_MeshFreeMemory(srcMesh)
+    call ESMF_MeshFreeMemory(dstMesh)
     if (present(weightFile)) then
        deallocate(factorList, factorIndexList)
     endif     
