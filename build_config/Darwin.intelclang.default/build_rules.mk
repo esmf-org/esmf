@@ -183,7 +183,7 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
-ESMF_CXXLINKLIBS += -lifcore -limf -ldl -lirc -stdlib=libstdc++
+ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -stdlib=libstdc++
 
 ############################################################
 # Blank out shared library options
