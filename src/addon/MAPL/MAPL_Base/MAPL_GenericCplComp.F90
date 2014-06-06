@@ -110,7 +110,7 @@ contains
 
 ! !ARGUMENTS:
 
-    type (ESMF_CplComp  )            :: CC  
+    type (ESMF_CplComp  )                          :: CC  
     integer,                         intent(  OUT) :: RC
     
 !EOPI

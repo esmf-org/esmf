@@ -128,6 +128,7 @@ ifeq ($(ARCH),Linux)
 #                    -----------------------
 
   ifeq ($(ESMF_COMPILER), gfortran)
+    FDEFS += -DGFORTRAN
     FOPT += -fno-range-check -fcoarray=single
   endif
 
