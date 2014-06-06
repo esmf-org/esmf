@@ -1711,7 +1711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (present(srcNodalDistgrid)) then
       srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
         convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-        nodalDistgrid=srcElementDistgrid, &
+        nodalDistgrid=srcNodalDistgrid, &
         rc=localrc)
     else                     
       srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
@@ -1743,7 +1743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (present(dstNodalDistgrid)) then
       dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
         convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-        nodalDistgrid=dstnodalDistgrid, &
+        nodalDistgrid=dstNodalDistgrid, &
         rc=localrc)
     else
       dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
