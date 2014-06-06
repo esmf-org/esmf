@@ -127,6 +127,10 @@ ifeq ($(ARCH),Linux)
 #                    Linux Compiler Specific
 #                    -----------------------
 
+  ifeq ($(ESMF_COMPILER), gfortran)
+    FOPT += -fno-range-check
+  endif
+
 # Absoft compiler
 # ---------------
   ifeq ($(FC), f90) 
