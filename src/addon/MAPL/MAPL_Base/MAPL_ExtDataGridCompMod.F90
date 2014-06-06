@@ -572,7 +572,7 @@ CONTAINS
                 if ( ios /= 0 ) primary%item(totalPrimaryEntries)%const = 0.0
              end if
 
-             if ( primary%item(totalPrimaryEntries)%isConst ==.false. )  then
+             if ( .not. primary%item(totalPrimaryEntries)%isConst )  then
                 call CreateTimeInterval(primary%item(totalPrimaryEntries),clock,__RC__)
                 if (primary%item(totalPrimaryEntries)%cyclic) then
                    call GetClimYear(primary%item(totalPrimaryEntries),__RC__)

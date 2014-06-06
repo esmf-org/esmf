@@ -6871,7 +6871,7 @@ recursive subroutine MAPL_WireComponent(GC, RC)
           RETURN_(STATUS)
        END IF
     ENDDO
- 1000 format(1x,'  Integer*4 Resource Parameter ',a,'  ',g)
+ 1000 format(1x,'  Integer*4 Resource Parameter ',a,'  ',g10.4)
 
     if (present(DEFAULT)) then
         VALUE = DEFAULT
@@ -7041,7 +7041,7 @@ recursive subroutine MAPL_WireComponent(GC, RC)
           RETURN_(STATUS)
        END IF
     ENDDO
- 1000 format(1x,'     Real*4 Resource Parameter ',a,'  ',g)
+ 1000 format(1x,'     Real*4 Resource Parameter ',a,'  ',g10.4)
     
     if (present(DEFAULT)) then
         VALUE = DEFAULT

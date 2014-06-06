@@ -128,7 +128,7 @@ ifeq ($(ARCH),Linux)
 #                    -----------------------
 
   ifeq ($(ESMF_COMPILER), gfortran)
-    FOPT += -fno-range-check
+    FOPT += -fno-range-check -fcoarray=single
   endif
 
 # Absoft compiler

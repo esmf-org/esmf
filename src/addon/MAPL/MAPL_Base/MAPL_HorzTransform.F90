@@ -25,6 +25,7 @@
 
 #define VERIFY_(A)   if(  A/=0) then; if(present(rc)) rc=A; PRINT *, Iam, __LINE__; return; endif
 #define ASSERT_(A)   if(.not.A) then; if(present(rc)) rc=1; PRINT *, Iam, __LINE__; return; endif
+#define NEGASSERT_(A)   if(A) then; if(present(rc)) rc=1; PRINT *, Iam, __LINE__; return; endif
 #define RETURN_(A)   if(present(rc)) rc=A; return
 #define SUCCESS      0
 #define DEALOC_(A)   if(associated(A)) deallocate(A)
@@ -1128,7 +1129,7 @@ contains
        if (Trans%ConsrvTrans%runDistributed) then
           call RunTileTransform(TRANS%CubeTrans, QIN, QOUT, TRANS%TRANSPOSE, RC)
        else
-          ASSERT_(.not. Trans%transpose) 
+          NEGASSERT_(.not. Trans%transpose) 
 
           if (Trans%order == MAPL_HorzTransOrderSample) then
              call MAPL_RegridConservativeRun(Trans%consrvTrans, QIN, QOUT, SAMPLE=.true., rc=STATUS )
@@ -1205,7 +1206,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              nlon = Trans%N_in (1)
              nlat = Trans%N_in (2)
@@ -1219,7 +1220,7 @@ contains
           end if
        end if
     else
-       ASSERT_(.not.Trans%transpose)
+       NEGASSERT_(.not.Trans%transpose)
 
        do j=1,Trans%N_out(2)
           j0 = lbound(Trans%DimMapping(2)%WeightList(j)%f,1)
@@ -1391,7 +1392,7 @@ contains
        return
     end if
 
-    ASSERT_(.not.Trans%transpose)
+    NEGASSERT_(.not.Trans%transpose)
 
     doCube2Latlon = Trans%gridtypeIN =='Cubed-Sphere'
     doLatlon2Cube = Trans%gridtypeOUT=='Cubed-Sphere'
@@ -1688,7 +1689,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              npx  = Trans%N_in (1)
              npy  = Trans%N_in (2)
@@ -1716,7 +1717,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              nlon = Trans%N_in (1)
              nlat = Trans%N_in (2)
@@ -1730,7 +1731,7 @@ contains
           end if
        end if
     else
-       ASSERT_(.not.Trans%transpose)
+       NEGASSERT_(.not.Trans%transpose)
 
        if(present(undef)) then
           undef_ = undef
@@ -1837,7 +1838,7 @@ contains
        return
     end if
 
-    ASSERT_(.not.Trans%transpose)
+    NEGASSERT_(.not.Trans%transpose)
 
     doCube2Latlon = Trans%gridtypeIN =='Cubed-Sphere'
     doLatlon2Cube = Trans%gridtypeOUT=='Cubed-Sphere'
@@ -2164,9 +2165,9 @@ contains
     GT => ConsrvTrans%GlobalTrans
 
 ! do not allow to create again
-!    ASSERT_(.not. ConsrvTrans%created)
+!    NEGASSERT_(.not. ConsrvTrans%created)
 
-    ASSERT_(.not. ConsrvTrans%runDistributed)
+    NEGASSERT_(.not. ConsrvTrans%runDistributed)
 
     if (present(RootOnly)) then
        RootOnly_ = RootOnly
@@ -2498,7 +2499,7 @@ contains
     integer :: status
 
 
-    ASSERT_(.not. ConsrvTrans%runDistributed)
+    NEGASSERT_(.not. ConsrvTrans%runDistributed)
 
     if (ConsrvTrans%created) then
 

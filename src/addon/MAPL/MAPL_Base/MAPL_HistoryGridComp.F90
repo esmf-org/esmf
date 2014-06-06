@@ -2425,7 +2425,12 @@ ENDDO PARSER
                 ASSERT_(.false.)
          end select
 
-         print *, '      Fields: ',((trim(list(n)%fields(3,m)),' '),m=1,list(n)%nfield)
+         !print *, '      Fields: ',((trim(list(n)%fields(3,m)),' '),m=1,list(n)%nfield)
+         do m=1,list(n)%nfield
+            if( trim(list(n)%fields(3,m)).ne.BLANK ) then
+               print *, '      Fields: ',trim(list(n)%fields(3,m)),' '
+            endif
+         enddo
          do m=1,list(n)%nfield
             if( trim(list(n)%fields(4,m)).ne.BLANK ) then
                 print *, '   MINMAX Variable: ',trim(list(n)%fields(3,m)),'  Function: ',trim(list(n)%fields(4,m))
@@ -4127,7 +4132,7 @@ ENDDO PARSER
   VERIFY_(STATUS)
   k=0
   do m=1,nfield
-     if (rewrite(m)==.False.) then
+     if (.not. rewrite(m)) then
         k=k+1
         VarNames(k)=fields(3,m)
      endif
@@ -4290,7 +4295,7 @@ ENDDO PARSER
  VERIFY_(STATUS)
 
  do m=1,nfield
-     if (Rewrite(m)==.TRUE.) then
+     if (Rewrite(m)) then
          largest_rank =0
          ifound_vloc=.false.
          call CheckSyntax(tmpfields(m),TotAliasNames,VarNeeded,rc=status)

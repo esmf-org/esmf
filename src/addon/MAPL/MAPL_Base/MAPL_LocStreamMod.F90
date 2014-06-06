@@ -228,13 +228,22 @@ contains
 
     character(len=ESMF_MAXSTR) :: IAm='MAPL_LocStreamGet'
     integer                    :: STATUS
+    integer                    :: n_ele, i
+    integer, pointer           :: tmp_iptr(:) => null()
+    real,    pointer           :: tmp_rptr(:) => null()
+    character(len=ESMF_MAXSTR), pointer       :: tmp_strptr(:) => null()
 
     if (present(NT_LOCAL)) then
        NT_LOCAL = locstream%Ptr%NT_LOCAL
     end if
 
     if (present(tiletype)) then
-       tiletype => locstream%Ptr%Local_GeoLocation(:)%t
+!       tiletype => locstream%Ptr%Local_GeoLocation(:)%t
+       allocate(tmp_iptr(lbound(locstream%Ptr%Local_GeoLocation,1):ubound(locstream%Ptr%Local_GeoLocation,1)))
+       do i = lbound(locstream%Ptr%Local_GeoLocation,1), ubound(locstream%Ptr%Local_GeoLocation,1)
+         tmp_iptr(i) = locstream%Ptr%Local_GeoLocation(i)%t
+       enddo
+       tiletype => tmp_iptr
     end if
 
     if (present(tilekind)) then
@@ -244,27 +253,52 @@ contains
     end if
 
     if (present(tilelons)) then
-       tilelons => locstream%Ptr%Local_GeoLocation(:)%x
+!       tilelons => locstream%Ptr%Local_GeoLocation(:)%x
+       allocate(tmp_rptr(lbound(locstream%Ptr%Local_GeoLocation,1):ubound(locstream%Ptr%Local_GeoLocation,1)))
+       do i = lbound(locstream%Ptr%Local_GeoLocation,1), ubound(locstream%Ptr%Local_GeoLocation,1)
+         tmp_rptr(i) = locstream%Ptr%Local_GeoLocation(i)%x
+       enddo
+       tilelons => tmp_rptr
     end if
 
     if (present(tilelats)) then
-       tilelats => locstream%Ptr%Local_GeoLocation(:)%y
+!       tilelats => locstream%Ptr%Local_GeoLocation(:)%y
+       allocate(tmp_rptr(lbound(locstream%Ptr%Local_GeoLocation,1):ubound(locstream%Ptr%Local_GeoLocation,1)))
+       do i = lbound(locstream%Ptr%Local_GeoLocation,1), ubound(locstream%Ptr%Local_GeoLocation,1)
+         tmp_rptr(i) = locstream%Ptr%Local_GeoLocation(i)%y
+       enddo
+       tilelats => tmp_rptr
     end if
 
     if (present(tilearea)) then
        if (locstream%Ptr%IsTileAreaValid) then
-          tilearea => locstream%Ptr%Local_GeoLocation(:)%a
+!          tilearea => locstream%Ptr%Local_GeoLocation(:)%a
+          allocate(tmp_rptr(lbound(locstream%Ptr%Local_GeoLocation,1):ubound(locstream%Ptr%Local_GeoLocation,1)))
+          do i = lbound(locstream%Ptr%Local_GeoLocation,1), ubound(locstream%Ptr%Local_GeoLocation,1)
+            tmp_rptr(i) = locstream%Ptr%Local_GeoLocation(i)%a
+          enddo
+          tilearea => tmp_rptr
        else
           tilearea => null()
        end if
     end if
 
     if (present(gridim)) then
-       gridim => locstream%Ptr%tiling(:)%im
+!       gridim => locstream%Ptr%tiling(:)%im
+       allocate(tmp_iptr(lbound(locstream%Ptr%tiling,1):ubound(locstream%Ptr%tiling,1)))
+       do i = lbound(locstream%Ptr%tiling,1), ubound(locstream%Ptr%tiling,1)
+         tmp_iptr(i) = locstream%Ptr%tiling(i)%im
+       enddo
+       gridim => tmp_iptr
     end if
 
     if (present(gridjm)) then
-       gridjm => locstream%Ptr%tiling(:)%jm
+!       gridjm => locstream%Ptr%tiling(:)%jm
+       allocate(tmp_iptr(lbound(locstream%Ptr%tiling,1):ubound(locstream%Ptr%tiling,1)))
+       do i = lbound(locstream%Ptr%tiling,1), ubound(locstream%Ptr%tiling,1)
+         tmp_iptr(i) = locstream%Ptr%tiling(i)%jm
+       enddo
+       gridjm => tmp_iptr
     end if
 
     if (present(local_id)) then
@@ -272,7 +306,12 @@ contains
     end if
 
     if (present(gridnames)) then
-       gridnames => locstream%Ptr%tiling(:)%name
+!       gridnames => locstream%Ptr%tiling(:)%name
+       allocate(tmp_strptr(lbound(locstream%Ptr%tiling,1):ubound(locstream%Ptr%tiling,1)))
+       do i = lbound(locstream%Ptr%tiling,1), ubound(locstream%Ptr%tiling,1)
+         tmp_strptr(i) = locstream%Ptr%tiling(i)%name
+       enddo
+       gridnames => tmp_strptr
     end if
 
     if (present(attachedgrid)) then

@@ -1013,8 +1013,14 @@ contains
 
     if (JMO == 6*IMO) then
        if (isGridRectalinear) then
-          lons1d = [1:size(lons1d)]
-          lats1d = [1:size(lats1d)]
+!          lons1d = [1:size(lons1d)]
+!          lats1d = [1:size(lats1d)]
+          do i = 1, size(lons1d)
+            lons1d(i) = i
+          enddo
+          do j = 1, size(lats1d)
+            lats1d(j) = j
+          enddo
        end if
     end if
 
@@ -1940,7 +1946,7 @@ contains
        FixPole = (MCFIO%VarType(L) == MAPL_VectorField) .and. &
                  (JM0              == 6*IM0)            .and. &
                  (Mcfio%JM         /= 6*mcfio%IM)       .and. &
-                 (SubSet           == .false.                 ) 
+                 (.not. SubSet                                 ) 
  
        RANK: if (MCFIO%VarDims(L)==2) then
           LM = 1
