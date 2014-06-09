@@ -150,10 +150,10 @@ DEPS := $(addsuffix .d, $(basename $(SRCS) $(SRC_STUBS)))
 
 OBJ_STUBS := $(addsuffix .o, $(basename $(SRC_STUBS)))
 
-INC_DIRS = . $(INC_ESMF) $(INC_MPI) /usr/include $(INC_SDF)
+INC_DIRS = . $(INC_MPI) /usr/include $(INC_SDF)
 MOD_DIRS = $(INC_DIRS) $(INC_CFIO) $(INC_MPEU)
 
-USER_FINCS = $(foreach dir,$(INC_DIRS),$(I)$(dir))
+USER_FINCS = $(foreach dir,$(INC_DIRS),$(I)$(dir)) $(foreach dir,$(INC_ESMF),$(dir))
 USER_FMODS = $(foreach dir,$(MOD_DIRS),$(M)$(dir)) 
 USER_FDEFS = $(D)MAPL $(D)DO_COMMAS $(D)TWO_SIDED_COMM
 
