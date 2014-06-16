@@ -60,6 +60,7 @@ program ESMF_MeshUTest
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
   real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer(ESMF_KIND_I4) :: localNumOwnedElems(1), globalNumOwnedElems(1)
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   type(ESMF_ArraySpec) :: arrayspec
@@ -97,6 +98,7 @@ program ESMF_MeshUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a small 2x2 2D QUAD Mesh in 3 steps on 1 proc"
@@ -1359,7 +1361,7 @@ endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test Mesh Create Redist with just node distgrid "
+  write(name, *) "Test Mesh Create Redist with just node distgrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables
@@ -1367,24 +1369,115 @@ endif
   rc=ESMF_SUCCESS
 
   ! Create Test mesh
-  call createTestMesh1(mesh, rc=localrc)
+  call createTestMesh3x3(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Setup lists
   if (petCount .eq. 1) then  
-     allocate(nodeIds(9))
-     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     allocate(nodeIds(16))
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/) 
 
   else if (petCount .eq. 4) then  
      if (localPet .eq. 0) then
 
-        allocate(nodeIds(5))
-        nodeIds=(/5,6,8,9,7/)
+        allocate(nodeIds(13))
+        nodeIds=(/4,5,6,7,8,9,10,11,12,13,14,15,16/) 
 
      else if (localPet .eq. 1) then
 
         allocate(nodeIds(1))
-        nodeIds=(/4/)        
+        nodeIds=(/1/)        
+        
+     else if (localPet .eq. 2) then
+        
+        allocate(nodeIds(1))
+        nodeIds=(/2/)
+        
+     else if (localPet .eq. 3) then
+        allocate(nodeIds(1))
+        nodeIds=(/3/)
+     endif
+  endif
+
+
+  ! Create node Distgrid
+  nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  ! Create redisted mesh
+  mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
+                        rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Make sure nodes in nodeIds are the same as local nodes in mesh2
+   sizeOfList=size(nodeIds)
+   call c_esmc_meshchecknodelist(mesh2%this, sizeOfList, nodeIds, &
+                                 localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Deallocate
+  deallocate(nodeIds)
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, numOwnedElements=localNumOwnedElems(1), &
+                   rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Sum across procs
+  call ESMF_VMAllReduce(vm,localNumOwnedElems, globalNumOwnedElems, 1, &
+                       ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure the global number of elements is still the same
+  if (globalNumOwnedElems(1) .ne. 10) correct=.false.
+
+  !write(*,*) localPet, " number of local elems=",localnumOwnedElems(1)
+  !write(*,*) localPet, " number of global elems=",globalnumOwnedElems(1)
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Distgrids
+  call ESMF_DistgridDestroy(nodedistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist with just node distgrid and >4 sided elements"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMeshPH(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Setup lists
+  if (petCount .eq. 1) then  
+     allocate(nodeIds(12))
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/) 
+
+  else if (petCount .eq. 4) then  
+     if (localPet .eq. 0) then
+
+        allocate(nodeIds(7))
+        nodeIds=(/5,6,8,9,7,10,12/)
+
+     else if (localPet .eq. 1) then
+
+        allocate(nodeIds(2))
+        nodeIds=(/4,11/)        
         
      else if (localPet .eq. 2) then
         
@@ -1402,6 +1495,7 @@ endif
   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
  
+
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
                         rc=localrc)
@@ -1437,7 +1531,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

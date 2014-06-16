@@ -71,6 +71,9 @@ namespace ESMCI {
 
   void set_elem_owners_wo_list(Mesh *output_mesh);
 
+
+  void set_split_orig_id_map(Mesh *src_mesh, Mesh *output_mesh);
+
   struct MRN_Search {
   public:
     MRN_Search() : gid(0), proc(0), elem(NULL) {}
@@ -86,6 +89,10 @@ namespace ESMCI {
   };
 
 
+  void add_other_split_elems(Mesh *mesh, int gid, int proc, 
+                             std::multimap<UInt,MeshObj *> orig_id_to_split_elem,
+                             std::set<MRN_Search> *to_snd);
+
   void redist_elems_from_set(Mesh *src_mesh, std::set<MRN_Search> to_snd,
                              Mesh *output_mesh,  CommReg *_elemComm);
 
@@ -95,8 +102,6 @@ namespace ESMCI {
                   Mesh **_output_mesh) {
 
     Trace __trace("MeshRedistNode()");
-
-    //    printf("In MeshRedistNode!!!!! \n");
 
 
     // Create a distributed directory to figure out where 
@@ -121,49 +126,96 @@ namespace ESMCI {
       ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
     }
 
-    
-    // Get a list of the Mesh nodes with gids 
+    // Make a node id to proc map    
+    // Build map of node id to proc destination
+    std::map<int,int> src_node_id_to_proc;
+    {// beg. of block to get rid of memory for search vectors (e.g. src_gids)
+
+      // Get a list of the Mesh nodes with gids 
+      MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+      std::vector<UInt> src_gids;
+      src_gids.reserve(src_mesh->num_nodes());
+      std::vector<MeshObj *> src_nodes;
+      src_nodes.reserve(src_mesh->num_nodes());
+      for (; ni != ne; ++ni) {
+        MeshObj &node=*ni;
+        
+        // DO ALL NODES, BECAUSE NEEDED LATER FOR UNUSED ELEM MOVEMENT
+        // If not local, then go on to next node
+        // if (!GetAttr(node).is_locally_owned()) continue;
+        
+        // Add info to lists
+        src_gids.push_back(node.get_id());
+        src_nodes.push_back(&node);
+      }
+      
+      // Allocate arrays for search
+      UInt num_src_gids=src_gids.size();
+      std::vector<UInt> src_gids_proc(num_src_gids, 0);
+      std::vector<UInt> src_gids_lids(num_src_gids, 0);
+      
+      // Get where each nodes is to go
+      if (num_src_gids) {
+        ndir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
+      } else {
+        ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
+      }
+      
+      for (int i=0; i< num_src_gids; i++) {
+        // Get node
+        MeshObj *node=src_nodes[i];
+        int proc=src_gids_proc[i];
+        
+        src_node_id_to_proc[node->get_id()]=proc;
+      }
+    } // end. of block to get rid of memory for search vectors (e.g. src_gids)
+
+
+    // Invert split to orig id map
+    std::multimap<UInt, MeshObj *> orig_id_to_split_elem;
+    if (src_mesh->is_split) {
+      MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem=*ei;
+
+        // get gid
+        int gid=elem.get_id();
+
+        // If this is a split element
+        std::map<UInt,double>::iterator sitf = src_mesh->split_id_to_frac.find(gid);
+        if (sitf != src_mesh->split_id_to_frac.end()) {
+          // Translate split id to original
+          int orig_id;
+          std::map<UInt,UInt>::iterator soi = src_mesh->split_to_orig_id.find(gid);
+          if (soi == src_mesh->split_to_orig_id.end()) {
+            orig_id=gid;
+          } else {
+            orig_id=soi->second;
+          }
+
+          // Add to multimap
+          orig_id_to_split_elem.insert(std::pair<UInt,MeshObj *>(orig_id,&elem));
+        }
+      }
+    }
+
+
+    // Find out what element to send to which proc to satisfy node requirement
+    std::set<MRN_Search> to_snd;
     MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-    std::vector<UInt> src_gids;
-    src_gids.reserve(src_mesh->num_nodes());
-    std::vector<MeshObj *> src_nodes;
-    src_nodes.reserve(src_mesh->num_nodes());
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-
+      
       // If not local, then go on to next node
       if (!GetAttr(node).is_locally_owned()) continue;
       
-      // Add info to lists
-      src_gids.push_back(node.get_id());
-      src_nodes.push_back(&node);
-    }
-    
-    // Allocate arrays for search
-    UInt num_src_gids=src_gids.size();
-    std::vector<UInt> src_gids_proc(num_src_gids, 0);
-    std::vector<UInt> src_gids_lids(num_src_gids, 0);
-    
-    // Get where each nodes is to go
-    if (num_src_gids) {
-      ndir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
-    } else {
-      ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
-    }
+      // Get proc that node is going to
+      std::map<int,int>::iterator sni = src_node_id_to_proc.find(node.get_id());
+      if (sni == src_node_id_to_proc.end()) {
+        Throw() << "Node id not found in map!";
+      }
+      int proc=sni->second;
 
-
-    //    for (int i=0; i< num_src_gids; i++) {
-    //  printf("%d# gid=%d going to proc=%d\n",Par::Rank(),src_gids[i],src_gids_proc[i]);
-    //    }
-
- /* XMRKX */
-    std::set<MRN_Search> to_snd;
-
-    // Find out what element to send to which proc to satisfy node requirement
-    for (int i=0; i< num_src_gids; i++) {
-      // Get node
-      MeshObj &node=*(src_nodes[i]);
-      int proc=src_gids_proc[i];
 
       // Loop through all elements attached to the node
       MRN_Search to_use; 
@@ -192,11 +244,75 @@ namespace ESMCI {
       // If not found add to set
       if (!found) {
         to_snd.insert(to_use);
+
+        // If split mesh then add others
+        if (src_mesh->is_split) {
+          add_other_split_elems(src_mesh, 
+                                to_use.gid, to_use.proc, 
+                                orig_id_to_split_elem,
+                                &to_snd);
+        }
       }
     }
 
+    // Go through source mesh and put elements that haven't been used yet someplace
+    MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem=*ei;
+
+      // See if this elem is in to_snd list
+      //// make lowest element with this gid
+      MRN_Search lowest(elem.get_id(), 0, &elem);
+
+      //// find element either equiv. to lowest or above
+      std::set<MRN_Search>::iterator lsi=to_snd.lower_bound(lowest);
+
+      //// If lower bound has same gid then elem in to_snd, otherwise not.
+      bool elem_in_to_snd=false;
+      if (lsi !=to_snd.end()) {
+        MRN_Search mnr=*lsi;
+
+        if (mnr.gid == elem.get_id()) {
+          elem_in_to_snd=true;
+        }
+      }
+
+
+      // If elem not being sent anyplace yet, then send it 
+      if (!elem_in_to_snd) {
+ 
+        // Get a node in the element
+        MeshObj *node;
+        MeshObjRelationList::const_iterator nr = MeshObjConn::find_relation(elem, MeshObj::NODE);
+        if (nr != elem.Relations.end() && nr->obj->get_type() == MeshObj::NODE){
+          node=nr->obj;
+        } else {
+          Throw() << "This element has no associated node!";
+        }
+
+        // Get where that node is going
+        std::map<int,int>::iterator sni = src_node_id_to_proc.find(node->get_id());
+        if (sni == src_node_id_to_proc.end()) {
+          Throw() << "Node id not found in map!";
+        }
+        int proc=sni->second;
+
+        // Send this element to where one of it's nodes is going
+        MRN_Search curr(elem.get_id(), proc, &elem);
+        to_snd.insert(curr);
+
+        // If split mesh then add others
+        if (src_mesh->is_split) {
+          add_other_split_elems(src_mesh, 
+                                curr.gid, curr.proc, 
+                                orig_id_to_split_elem,
+                                &to_snd);
+        }
+      }
+    }
 
 #if 0
+      {
     // print out what is going where for debugging
     std::set<MRN_Search>::iterator si=to_snd.begin(), se=to_snd.end();
     for (; si != se; ++si) {
@@ -205,6 +321,7 @@ namespace ESMCI {
       printf("%d# elem=%d going to proc=%d\n",Par::Rank(),mnr.gid,mnr.proc);
       
     }
+      }
 #endif
 
     // Create Output Mesh
@@ -220,7 +337,16 @@ namespace ESMCI {
     redist_elems_from_set(src_mesh, to_snd,
                           output_mesh,  &elemComm);
 
-       
+
+    // Set the split information in output_mesh
+    // NOTE: that this is done outside the MeshRedist function
+    //       in other MeshRedist cases, but it was more efficient
+    //       to do it here because it's needed to assign elem owners. 
+    output_mesh->is_split=src_mesh->is_split;
+    if (output_mesh->is_split) {
+      set_split_orig_id_map(src_mesh, output_mesh);
+    }
+
     // Assign element owners
     set_elem_owners_wo_list(output_mesh);
 
@@ -232,7 +358,6 @@ namespace ESMCI {
 
     // Set node data indexes
     set_node_data_indices(output_mesh, num_node_gids, node_gids);
-
 
     // Assume Contexts
     output_mesh->AssumeContexts(*src_mesh);
@@ -246,7 +371,6 @@ namespace ESMCI {
     // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
     send_mesh_fields(src_mesh, output_mesh, elemComm);
 
-
 #if 0
   {
      // Get a list of the Mesh nodes with gids 
@@ -254,37 +378,47 @@ namespace ESMCI {
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
      
-      printf("#%d N node id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
+      printf("#%d ON node id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
     }
 
   }
 
 #endif
+
 
 #if 0
 
 
   {
      // Get a list of the Mesh elems with gids 
-    MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
+    MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
      
-      printf("#%d E elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
+      printf("#%d SE elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
     }
 
   }
 #endif
 
 
+#if 0
+  {
+     // Get a list of the Mesh elems with gids 
+    MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem=*ei;
+     
+      printf("#%d OE elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
+    }
 
-
-
+  }
+#endif
 
     // Output 
     *_output_mesh=output_mesh;
 
-  }
+    }
 
 
 
@@ -1332,6 +1466,278 @@ namespace ESMCI {
  /* XMRKX */
 
   // Assign elem owners in output_mesh
+  // WARNING: needs is_split set in output_mesh, and if is_split==true then needs
+  //          split_to_orig_id map to be correct in output_mesh.  
+  void set_elem_owners_wo_list(Mesh *output_mesh) {
+    Trace __trace("set_elem_owners_wo_list()");
+
+    // Count number of split and non-split elements
+    int num_non_split=0;
+    int num_split=0;
+    if (output_mesh->is_split) {
+      MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem=*ei;
+        
+        // If this is an elem created as the result of a split, then skip
+        std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
+        if (soi == output_mesh->split_to_orig_id.end()) {
+          num_non_split++;
+        } else {
+          num_split++;
+        }
+      }
+    } else {
+      num_non_split=output_mesh->num_elems();
+    }
+
+
+    // Get a list of the Mesh nodes with gids 
+    std::vector<UInt> gids;
+    gids.resize(num_non_split,0);
+    std::vector<UInt> lids; // Actually the number of associated elements
+    lids.resize(num_non_split,0);
+    std::vector<UInt> owner; // The owner proc
+    owner.resize(num_non_split,0);
+    std::vector<MeshObj *> elems;
+    elems.resize(num_non_split);
+
+    int i=0;
+    MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem=*ei;
+
+      // If this is an elem created as the result of a split, then skip
+      if (output_mesh->is_split) {
+        std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
+        if (soi != output_mesh->split_to_orig_id.end()) {
+          continue;
+        }
+      }
+   
+      // Set GID
+      gids[i]=elem.get_id();
+
+      // Set elem
+      elems[i]=&elem;
+
+      // Count the number of local nodes associated with elem
+      int num_loc_nodes=0;
+      MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
+      while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
+	MeshObj &node = *(nl->obj);
+        if (GetAttr(node).is_locally_owned()) num_loc_nodes++;
+	++nl;
+      }
+
+
+      // Set the number of associated local nodes as the lids
+      lids[i]=num_loc_nodes;
+
+      // Next thing in list
+      i++;
+    }
+     
+    // Create a distributed directory with the above information
+    DDir<> dir;
+    
+    if (gids.size ()) {
+      dir.Create(gids.size(), &gids[0], &lids[0]);
+    } else {
+      dir.Create(0, (UInt*) NULL, 0);
+    }
+
+
+    // Lookup elem gids
+    std::vector<DDir<>::dentry> lookups;
+    if (gids.size())
+      dir.RemoteGID(gids.size(), &gids[0], lookups);
+    else
+      dir.RemoteGID(0, (UInt *) NULL, lookups);
+
+
+     // Loop through the results. 
+     int curr_pos=0;
+     UInt curr_gid=0;
+     UInt curr_lid_best=0;
+     UInt curr_proc_best=0;
+     bool first_time=true;
+     std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
+     for (; ri != re; ++ri) {
+       DDir<>::dentry &dent = *ri;
+
+       // Get info for this entry gid 
+       UInt gid=dent.gid;
+       UInt lid=dent.origin_lid;
+       UInt proc=dent.origin_proc;
+
+       // first time
+       if (first_time) {
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           printf("Error: first time gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
+
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+
+         // Set intial values
+         curr_gid=gids[curr_pos];
+         curr_lid_best=lid;
+         curr_proc_best=proc;
+
+         first_time=false;
+       }
+
+
+       // See if we're still looking at the same gid, if not move to  next
+       if (curr_gid != gid) {
+         // Set owner of gid before moving on
+         owner[curr_pos]=curr_proc_best;
+
+         // Move to next gid
+         curr_pos++;
+
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           printf("Error: gid[curr_pos]=%d gid=%d\n",gids[curr_pos],gid);
+
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+
+         // Get info
+         curr_gid=gids[curr_pos];
+         curr_lid_best=lid;
+         curr_proc_best=proc;
+       } else {
+         // Still the same gid so see if the proc is better
+         if (lid > curr_lid_best) {
+           curr_lid_best=lid;
+           curr_proc_best=proc;
+         } else if (lid == curr_lid_best) {
+           // Same lid, so chose the lowest proc
+           if (proc < curr_proc_best) {
+             curr_lid_best=lid;
+             curr_proc_best=proc;
+           }
+         }
+       }
+
+       // Print out
+       //  printf("%d# gid=%d lid=%d orig_proc=%d \n",Par::Rank(),gid,lid,proc);
+
+     } // ri
+
+
+     // Set owner of last gid before moving on
+     // (could use gids.size() in if here also, but 
+     //  owner.size seemed clearer...)
+     if (owner.size()) {
+       owner[curr_pos]=curr_proc_best;
+     }
+
+     // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
+
+
+    // Loop setting owner and OWNER_ID
+     for (int i=0; i<gids.size(); i++) {    
+      MeshObj &elem=*(elems[i]);
+      
+      // Set owner
+      elem.set_owner(owner[i]);
+      
+      // Setup for changing attribute
+      const Context &ctxt = GetMeshObjContext(elem);
+      Context newctxt(ctxt);
+      
+      // Set OWNED_ID appropriately
+      if (owner[i]==Par::Rank()) {
+        newctxt.set(Attr::OWNED_ID);
+      } else {
+        newctxt.clear(Attr::OWNED_ID);
+      }
+      
+      // If attribute has changed change in node
+      if (newctxt != ctxt) {
+        Attr attr(GetAttr(elem), newctxt);
+        output_mesh->update_obj(&elem, attr);
+      }
+    } 
+
+
+     // Do split elems
+     if (output_mesh->is_split) {
+       // Create list of split elems
+       std::vector<MeshObj *> split_elems;
+       split_elems.resize(num_split);       
+       
+       // Fill list of split elems
+       int pos=0;
+       ei = output_mesh->elem_begin();
+       for (; ei != ee; ++ei) {
+         MeshObj &elem=*ei;
+         
+         // If this is an elem created as the result of a split, then skip
+         std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
+         if (soi == output_mesh->split_to_orig_id.end()) {
+           continue;
+         }
+   
+         // Set elem
+         split_elems[pos]=&elem;
+         
+         // Next in list
+         pos++;
+       }
+
+       // Loop setting owner and OWNER_ID
+       for (int i=0; i<split_elems.size(); i++) {    
+         MeshObj &elem=*(split_elems[i]);
+         
+         // Get orig id
+         std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
+         if (soi == output_mesh->split_to_orig_id.end()) {
+           Throw() << " split element not found in split_to_orig_id map";
+         }
+         int orig_id=soi->second;
+         
+         // Get original element
+         Mesh::MeshObjIDMap::iterator mi=output_mesh->map_find(MeshObj::ELEMENT, orig_id);
+         if (mi == output_mesh->map_end(MeshObj::ELEMENT)) {
+           Throw() << " elem id not found in element map";
+         }
+         MeshObj &orig_elem=*mi;
+         
+         // Split element owner is original elements owner
+         int owner=orig_elem.get_owner();
+         
+         // Set owner
+         elem.set_owner(owner);
+       
+         // Setup for changing attribute
+         const Context &ctxt = GetMeshObjContext(elem);
+         Context newctxt(ctxt);
+         
+         // Set OWNED_ID appropriately
+         if (owner==Par::Rank()) {
+           newctxt.set(Attr::OWNED_ID);
+         } else {
+           newctxt.clear(Attr::OWNED_ID);
+         }
+         
+         // If attribute has changed change in node
+         if (newctxt != ctxt) {
+           Attr attr(GetAttr(elem), newctxt);
+           output_mesh->update_obj(&elem, attr);
+         }
+       } 
+     }
+  }
+
+
+#if 0
+  // BEFORE ADDING SPLIT ELEMS
+
+  // Assign elem owners in output_mesh
   void set_elem_owners_wo_list(Mesh *output_mesh) {
     Trace __trace("set_elem_owners_wo_list()");
 
@@ -1497,6 +1903,140 @@ namespace ESMCI {
         output_mesh->update_obj(&elem, attr);
       }
     } 
+  }
+#endif
+
+  // For a split mesh add the other parts of a split element
+ void add_other_split_elems(Mesh *mesh, int gid, int proc, 
+                        std::multimap<UInt,MeshObj *> orig_id_to_split_elem,
+                        std::set<MRN_Search> *to_snd) {
+    // If this is a split element
+    std::map<UInt,double>::iterator sitf =  mesh->split_id_to_frac.find(gid);
+    if (sitf != mesh->split_id_to_frac.end()) {
+      // Translate split id to original
+      int orig_id;
+      std::map<UInt,UInt>::iterator soi = mesh->split_to_orig_id.find(gid);
+      if (soi == mesh->split_to_orig_id.end()) {
+        orig_id=gid;
+      } else {
+        orig_id=soi->second;
+      }
+     
+      // Loop through and add other elements from original
+      std::pair <std::multimap<UInt,MeshObj *>::iterator, std::multimap<UInt,MeshObj *>::iterator> ret;
+      ret=orig_id_to_split_elem.equal_range(orig_id);
+      for (std::multimap<UInt,MeshObj *>::iterator it=ret.first; it!=ret.second; ++it) {
+        // Split elem
+        MeshObj *split_elem=it->second;   
+        
+        // Only add if not the one that's been added before
+        if (split_elem->get_id() != gid) {
+
+          // Add to send list
+          MRN_Search curr(split_elem->get_id(), proc, split_elem);
+          to_snd->insert(curr);
+        }
+      }
+    }        
+  }
+
+  // Set the split_orig_id_map in a redisted mesh from the src mesh
+  void set_split_orig_id_map(Mesh *src_mesh, Mesh *output_mesh) {
+
+  // Get number of elements
+  int num_gids=src_mesh->num_elems();
+
+  // Get list of split and orig element gids
+  UInt *gids_split=NULL;
+  UInt *gids_orig=NULL;
+  if (num_gids>0) {
+
+    // Allocate space
+    gids_split= new UInt[num_gids];
+    gids_orig= new UInt[num_gids];
+    
+    // Loop through list putting into arrays
+    int pos=0;
+    Mesh::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+ 
+      // Only do local
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Get element id
+      UInt split_eid=elem.get_id();
+
+      // See if this is a split id
+      std::map<UInt,UInt>::iterator soi=src_mesh->split_to_orig_id.find(split_eid);
+
+      // If this is a split set it to the original, otherwise just set it to the elem id
+      UInt orig_eid;
+      if (soi==src_mesh->split_to_orig_id.end()) {
+        orig_eid=split_eid;
+      } else {
+        orig_eid=soi->second;
+      }
+
+      // Put into arrays
+      gids_orig[pos]=orig_eid;
+      gids_split[pos]=split_eid;
+
+      // Next
+      pos++;
+    }
+  }
+
+  // Put into a DDir
+  DDir<> id_map_dir;
+  id_map_dir.Create(num_gids,gids_orig,gids_split);
+
+  // Clean up 
+  if (num_gids>0) {
+    if (gids_split!= NULL) delete [] gids_split;
+    if (gids_orig != NULL) delete [] gids_orig;
+  }
+
+
+  // STOPPED HERE 
+  // LOOK UP OUTPUT_MESH ELEMS HERE PUT INTO elem_gids_u
+  int num_elem_gids=output_mesh->num_elems();
+
+  // Copy input array to UInt
+  UInt *elem_gids_u=NULL;
+  if (num_elem_gids>0) {
+    elem_gids_u= new UInt[num_elem_gids];
+  }
+
+  // Loop through and collect output_mesh element ids
+  int om_pos=0;
+  Mesh::iterator om_ei = output_mesh->elem_begin(), om_ee = output_mesh->elem_end();
+  for (; om_ei != om_ee; ++om_ei) {
+    MeshObj &elem = *om_ei;  
+
+    elem_gids_u[om_pos]=elem.get_id();
+    om_pos++;
+  }
+
+
+  // Do a look up of the input ids
+  std::vector<DDir<>::dentry> lookups;
+  id_map_dir.RemoteGID(num_elem_gids, elem_gids_u, lookups);
+
+  // Don't need anymore so clean up 
+  if (num_elem_gids>0) {
+    if (elem_gids_u != NULL) delete [] elem_gids_u;
+  }
+
+  // Loop through lookups and generate new list
+    for (int i=0; i<lookups.size(); i++) {
+      
+      // If split put into map
+      if (lookups[i].gid != lookups[i].origin_lid) {
+        output_mesh->split_to_orig_id[lookups[i].origin_lid]=lookups[i].gid;
+      }
+    }
+    
   }
   
 } // namespace
