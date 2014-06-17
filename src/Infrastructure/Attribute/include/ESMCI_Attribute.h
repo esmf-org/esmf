@@ -119,8 +119,9 @@ class Attribute
     static const char   CF_CONV[];
     static const char	ESG_CONV[];
     static const char	ESMF_CONV[];
-    static const char	CIM_1_5_CONV[];
+    static const char CIM_1_5_CONV[];
     static const char CIM_1_5_1_CONV[];
+    static const char CIM_1_7_1_CONV[];
 
 
     static const char	GENERAL_PURP[];
@@ -337,11 +338,10 @@ class Attribute
 
     int AttributeWriteXML(const std::string &convention, const std::string &purpose, 
       const std::string &object, const std::string &varobj, const std::string &basename) const;
-
+    int AttributeWriteXMLheader(IO_XML *io_xml, const std::string &convention,
+      const std::string &purpose, const std::string &object, 
+      const std::string &varobj) const;
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const std::string &convention,
-      const std::string &purpose,
-      const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
-    int AttributeWriteXMLtraverseGrids(IO_XML *io_xml, const std::string &convention,
       const std::string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(IO_XML *io_xml) const;
@@ -354,18 +354,23 @@ class Attribute
     int AttributeWriteWaterMLbuffieldT(IO_XML *io_xml, int &index,
        const int &columns) const;
 
-    int AttributeWriteCIM(IO_XML *io_xml) const;
-    int AttributeWriteCIMmodelComp(IO_XML *io_xml, int indent) const;
-    int AttributeWriteCIMsimRun(IO_XML *io_xml) const;
-    int AttributeWriteCIMplatform(IO_XML *io_xml) const;
-    int AttributeWriteCIMCP(IO_XML *io_xml, const std::string &purpose, int indent) const;
-    int AttributeWriteCIMCPfield(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIM(IO_XML *io_xml, const std::string &convention) const;
+    int AttributeWriteCIMmodelComp(IO_XML *io_xml, const std::string &convention, int indent, 
+                                   const bool gridPresent, const std::string gridGUID) const;
+    int AttributeWriteCIMsimRun(IO_XML *io_xml, const std::string &convention) const;
+    int AttributeWriteCIMplatform(IO_XML *io_xml, const std::string &convention) const;
+    int AttributeWriteCIMCP(IO_XML *io_xml, const std::string &convention, 
+                            const std::string &purpose, int indent) const;
+    int AttributeWriteCIMCPfield(IO_XML *io_xml, const std::string &convention, int indent) const;
     int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcitation(IO_XML *io_xml, int indent) const;
     //int AttributeWriteCIMcomposition(IO_XML *io_xml) const;
-    int AttributeWriteCIMinput(IO_XML *io_xml) const;
+    int AttributeWriteCIMinput(IO_XML *io_xml, const std::string &convention) const;
     int AttributeWriteCIMbuffer(IO_XML *io_xml) const; 
 
+    int AttributeWriteCIMgrids(IO_XML *io_xml, const std::string convention, const std::string gridGUID, const int indent, const bool gridSolo) const;
+    int AttributeWriteCIMgridref(IO_XML *io_xml, int indent, const std::string gridGUID) const;
+    bool AttributeWriteCIMgridPresent(const std::string convention) const;
     int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
