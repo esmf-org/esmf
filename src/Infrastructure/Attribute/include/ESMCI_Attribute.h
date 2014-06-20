@@ -374,7 +374,7 @@ class Attribute
     int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
-    const char *  getTime() const; 
+    const std::string getTime() const; 
     std::string month2Num(std::string month) const;
 };
 } // namespace

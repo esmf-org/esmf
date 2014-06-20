@@ -1293,7 +1293,7 @@ namespace ESMCI {
         "1.0.0", local_indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("documentCreationDate", 
-        getTime(), local_indent, 0);
+        getTime().c_str(), local_indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   
       localrc = io_xml->writeEndElement("gridSpec", --local_indent);
@@ -1761,7 +1761,7 @@ namespace ESMCI {
 // !IROUTINE:  getTime - retrieve time in CF1.6 format
 //
 // !INTERFACE:
-      const char *  Attribute::getTime(
+      const string Attribute::getTime(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1802,7 +1802,7 @@ namespace ESMCI {
   newstr.insert(11, timestr.substr(11,8));
   newstr.resize(19);
 
-  return newstr.c_str();
+  return newstr;
 
 } // end getTime
 //-----------------------------------------------------------------------------
