@@ -220,7 +220,7 @@ int ESMC_GridAddItem(
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
-//  Add coordinates to the Grid.
+//  Add an item (e.g. a mask) to the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -249,10 +249,10 @@ void * ESMC_GridGetItem(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to the item data. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to item data (e.g. mask data) in the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -313,10 +313,10 @@ void * ESMC_GridGetCoord(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to coordinate data in the Grid. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to coordinate data in the Grid.
 //
 //  The arguments are:
 //  \begin{description}

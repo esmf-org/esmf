@@ -86,7 +86,16 @@ enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_CENTER,
                       ESMC_STAGGERLOC_EDGE1,
                       ESMC_STAGGERLOC_EDGE2,
-                      ESMC_STAGGERLOC_CORNER};
+                      ESMC_STAGGERLOC_CORNER,
+                      ESMC_STAGGERLOC_CENTER_VCENTER=0,
+                      ESMC_STAGGERLOC_EDGE1_VCENTER,
+                      ESMC_STAGGERLOC_EDGE2_VCENTER,
+                      ESMC_STAGGERLOC_CORNER_VCENTER,
+                      ESMC_STAGGERLOC_CENTER_VFACE,
+                      ESMC_STAGGERLOC_EDGE1_VFACE,
+                      ESMC_STAGGERLOC_EDGE2_VFACE,
+                      ESMC_STAGGERLOC_CORNER_VFACE};
+
 
 enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
                     ESMC_TYPEKIND_I2,
