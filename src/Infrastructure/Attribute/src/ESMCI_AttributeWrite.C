@@ -1788,6 +1788,7 @@ namespace ESMCI {
   char *timecstr = ctime (&rawtime);
   string timestr (timecstr);
 
+  newstr.resize(19);
   newstr.insert(0, timestr.substr(20,4));
   newstr.insert(4, "-");
   newstr.insert(5, month2Num(timestr.substr(4,3)).c_str());
@@ -1800,7 +1801,6 @@ namespace ESMCI {
   newstr.insert(8, day);
   newstr.insert(10, "T");
   newstr.insert(11, timestr.substr(11,8));
-  newstr.resize(19);
 
   return newstr;
 
