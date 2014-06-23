@@ -26,9 +26,11 @@
 
 # Make sure ESMADIR is defined
 # ----------------------------
-ifndef ESMADIR
-       ESMADIR := $(shell pwd)/../../../
+ifndef ESMF_DIR
+  $(error ESMF_DIR must be defined)
 endif
+BASEDIR  = $(ESMF_DIR)/src/addon/MAPL/
+ESMADIR  = $(ESMF_DIR)/src/addon/MAPL/ESMA
 
 THIS := $(shell basename `pwd`)
 LIB  = lib$(THIS).a
@@ -51,10 +53,10 @@ SRCS = $(wildcard *.F90)
 OBJS = $(SRCS:.F90=.o) 
 BIN = $(SRCS:.F90=.x) 
 
-INC_DIRS = . $(INC_MAPL_BASE) $(INC_ESMF)
+INC_DIRS = . $(INC_MAPL_BASE)
 MOD_DIRS = . $(INC_DIRS) $(INC_CFIO) $(INC_MPEU) 
 
-USER_FINCS  = $(foreach dir,$(INC_DIRS),$(I)$(dir))
+USER_FINCS  = $(foreach dir,$(INC_DIRS),$(I)$(dir)) $(INC_ESMF)
 USER_FMODS  = $(foreach dir,$(MOD_DIRS),$(M)$(dir))
          
 LIB_COMP = -L$(LIB_MAPL) -lMAPL_Base -lMAPL_Base_stubs -lMAPL_cfio_r4 -lGMAO_mpeu

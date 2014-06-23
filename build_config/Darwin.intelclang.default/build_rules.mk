@@ -186,6 +186,6 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) 
 ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -stdlib=libstdc++
 
 ############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+# Shared library options
+ESMF_SL_LIBOPTS  += -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)

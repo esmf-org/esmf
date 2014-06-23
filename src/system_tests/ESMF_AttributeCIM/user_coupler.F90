@@ -121,7 +121,7 @@ module user_coupler
     !
     ! Top-level model component attributes, set on coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpComp = 'ModelComp'
     purpProp = 'CompProp'
 
@@ -138,7 +138,7 @@ module user_coupler
     ! Add CIM Attribute package to top-level coupler component, 
     !  containing a variable number of Responsible Party and 
     !  Citation sub-packages
-    !   convention = 'CIM 1.5'
+    !   convention = 'CIM 1.7.1'
     !   purpose    = 'ModelComp'
     !   nestConvention(1) = 'ISO 19115'
     !   nestPurpose(1)    = 'RespParty'

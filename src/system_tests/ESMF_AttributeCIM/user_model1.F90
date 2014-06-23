@@ -114,7 +114,7 @@ module user_model1
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpComp = 'ModelComp'
     ! Specify the Gridded Components to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
@@ -243,7 +243,7 @@ module user_model1
     !
     !  CIM child component scientific property attributes
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpSci = 'SciProp'
     sciPropAtt(1) = 'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses'
     sciPropAtt(2) = 'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment'
@@ -281,7 +281,7 @@ module user_model1
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpField = 'Inputs'
 
 
@@ -476,7 +476,7 @@ module user_model1
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpComp = 'ModelComp'
 
     ! Initialize return code
