@@ -59,7 +59,7 @@ __author__ = "University Corporation for Atmospheric Research, \
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
-__release__ = "630rp1_01b_dev"
+__release__ = "ESMF_6_3_0rp1"
 
 #### IMPORT LIBRARIES #########################################################
 
