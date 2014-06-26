@@ -1785,8 +1785,12 @@ namespace ESMCI {
 
   time_t rawtime;
   time(&rawtime);
-  char *timecstr = ctime (&rawtime);
-  string timestr (timecstr);
+
+  string timestr(ctime (&rawtime));
+
+  char day[3];
+  strftime(day, 3, "%d",localtime(&rawtime));
+  string sday(day);
 
   newstr.resize(19);
   newstr.insert(0, timestr.substr(20,4));
@@ -1794,11 +1798,7 @@ namespace ESMCI {
   newstr.insert(5, month2Num(timestr.substr(4,3)).c_str());
   newstr.insert(7, "-");
   //newstr.insert(8, timestr.substr(8,2));
-  char day[2];
-  struct tm * timeinfo;
-  timeinfo = localtime (&rawtime);
-  strftime(day, 2, "%d",timeinfo);
-  newstr.insert(8, day);
+  newstr.insert(8, sday.substr(0,2));
   newstr.insert(10, "T");
   newstr.insert(11, timestr.substr(11,8));
 
