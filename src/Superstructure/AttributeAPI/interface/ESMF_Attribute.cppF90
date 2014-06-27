@@ -11022,7 +11022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 !EOPI @\
  @\
-      integer :: localrc @\
+      integer :: localrc, petCount, localPet @\
       character(len=*), parameter :: object=#mthisobj @\
       character(len=*), parameter :: ftarobj=#mthistar @\
       type(ESMF_AttWriteFlag) :: writeflag @\
@@ -11036,38 +11036,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (present(attwriteflag)) then @\
-        writeflag = attwriteflag @\
-      else @\
-        writeflag = ESMF_ATTWRITE_TAB @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
-        if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-          call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-            purpose, object, ftarobj, localrc) @\
-        else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-          call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-            purpose, object, ftarobj, localrc) @\
-        endif @\
-      endif @\
+      call ESMF_VMGetCurrent(vm, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
-      call ESMF_VMGetCurrent(vm, rc=rc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      if (localPet == 0) then @\
+        if (present(convention).or.present(purpose)) then @\
+          if (present(convention).and..not.present(purpose).or. & @\
+              present(purpose).and..not.present(convention)) then @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+              msg="both convention and purpose must be present or not", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+            return @\
+          endif @\
+          attpack = ESMF_TRUE @\
+        endif @\
+ @\ 
+        if (present(attwriteflag)) then @\
+          writeflag = attwriteflag @\
+        else @\
+          writeflag = ESMF_ATTWRITE_TAB @\
+        endif @\
+ @\ 
+        if (attpack == ESMF_TRUE) then @\
+          if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+            call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
+              purpose, object, ftarobj, localrc) @\
+          else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+            call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
+              purpose, object, ftarobj, localrc) @\
+          endif @\
+        endif @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+      endif @\
+ @\
       call ESMF_VMBarrier(vm, rc=rc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
