@@ -444,8 +444,30 @@ int main(void){
   strcpy(name, "GridCreateFromFile_SCRIP");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
-  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", ESMC_FILEFORMAT_SCRIP,
-					   NULL, NULL, NULL, NULL, "", NULL, &rc);
+  int regDecomp[2] = {petCount,1};
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc",
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, NULL, NULL, NULL, NULL, 
+					   NULL, "", NULL, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_GridDestroy(&grid_from_file);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp and decompflag
+  strcpy(name, "GridCreateFromFile_SCRIP_decompflag");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  int decompflag[2] = {ESMC_DECOMP_BALANCED, ESMC_DECOMP_BALANCED};
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_GridDestroy(&grid_from_file);
