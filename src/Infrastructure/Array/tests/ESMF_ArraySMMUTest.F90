@@ -137,9 +137,10 @@ module ESMF_ArraySMMUTest_comp_mod
     integer               :: i, j, petCount, localPet, localDeCount
     integer, allocatable  :: localDeToDeMap(:)
     integer, pointer      :: farrayPtr(:)
-    integer               :: seed(4,6), value
+    integer               :: seed(4,6), value, result(4,6), validation(4,6)
     integer               :: factorList(18), factorIndexList(2,18)
-    type(ESMF_RouteHandle):: rh
+    type(ESMF_RouteHandle):: rh, trh
+    character(len=160)    :: msg
     
     rc = ESMF_SUCCESS
 
@@ -192,6 +193,36 @@ module ESMF_ArraySMMUTest_comp_mod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+      
+    !---------------------------------------------------------------------------
+    ! set up array for transpose validation
+
+    if (localPet==0) then
+      validation(1,1) = -120
+      validation(2,1) = -459
+      validation(3,1) = -528
+      validation(4,1) = 2496
+      validation(1,2) = -24
+      validation(2,2) = 1728
+      validation(3,2) = 3072
+      validation(4,2) = 1920
+      validation(1,3) = -1344
+      validation(2,3) = 1122
+      validation(3,3) = 384
+      validation(4,3) = -1683
+      validation(1,4) = 2295
+      validation(2,4) = 36
+      validation(3,4) = 132
+      validation(4,4) = -330
+      validation(1,5) = 0
+      validation(2,5) = 0
+      validation(3,5) = 0
+      validation(4,5) = 0
+      validation(1,6) = 0
+      validation(2,6) = 0
+      validation(3,6) = 0
+      validation(4,6) = 0
+    endif
 
     !---------------------------------------------------------------------------
     ! set up dstArray
@@ -298,19 +329,31 @@ module ESMF_ArraySMMUTest_comp_mod
     if (localPet == 0) then
       call ESMF_ArraySMMStore(srcArray, dstArray, factorList=factorList, &
         factorIndexList=factorIndexList, routehandle=rh, &
-        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+        transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     else
       call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, &
-        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+        transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     endif
+
+    !---------------------------------------------------------------------------
+    ! Re-set the data in srcArray, because it will have been modified due to
+    ! the transposeRoutehandle option in ESMF_ArraySMMStore()
+
+    call ESMF_ArrayScatter(srcArray, seed, rootPet=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     !---------------------------------------------------------------------------
     ! ASMM
@@ -331,7 +374,7 @@ module ESMF_ArraySMMUTest_comp_mod
       return  ! bail out
 
     !---------------------------------------------------------------------------
-    ! Verification
+    ! Verification dstArray
     
     call ESMF_ArrayGet(dstArray, localDeCount=localDeCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -426,6 +469,60 @@ module ESMF_ArraySMMUTest_comp_mod
     
     deallocate(localDeToDeMap)
     
+    !---------------------------------------------------------------------------
+    ! ASMM transpose
+    
+    call ESMF_ArraySMM(dstArray, srcArray, routehandle=trh, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    !---------------------------------------------------------------------------
+    ! ASMMRelease transpose
+
+    call ESMF_ArraySMMRelease(routehandle=trh, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    !---------------------------------------------------------------------------
+    ! Verification transpose
+    
+    call ESMF_ArrayGather(srcArray, result, rootPet=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    if (localPet==0) then
+      do j=1, 6
+        do i=1, 4
+          if (result(i,j)==validation(i,j)) then
+            write(msg,*) "Correct transpose results verified in result(",i,",",j,")."
+            call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          else
+            write(msg,*) "Incorrect transpose results detected in result(",i,",",j,")"//&
+              ": ", result(i,j), "/=", validation(i,j)
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_WRONG, &
+              msg = msg, &
+              line=__LINE__, &
+              file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+        enddo
+      enddo
+    endif
+
+    !---------------------------------------------------------------------------
+    ! Clean-up
+
     call ESMF_ArrayDestroy(srcArray, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
