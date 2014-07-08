@@ -51,14 +51,18 @@ program ESMF_ContainerUTest
 
   ! type definitions
   type TestTypeStruct
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     character(len=120)            :: string
     integer                       :: index
     type(ESMF_Field)              :: field
   end type
 
   type TestType
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     type(TestTypeStruct), pointer :: wrap
   end type
 
