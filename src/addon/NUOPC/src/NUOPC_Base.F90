@@ -1509,12 +1509,13 @@ endif
 ! !IROUTINE: NUOPC_GridCreateSimpleSph - Create a simple Spherical Grid
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleSph(x_min, y_min, x_max, y_max, &
-    i_count, j_count, area_adj, tag, scheme, rc)
+    i_count, j_count, half_polar_cell, area_adj, tag, scheme, rc)
 ! !RETURN VALUE:
     type(ESMF_Grid):: NUOPC_GridCreateSimpleSph
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
     integer,            intent(in)            :: i_count, j_count
+    logical,            intent(in),  optional :: half_polar_cell
     real(ESMF_KIND_R4), intent(in),  optional :: area_adj
     character(len=*),   intent(in),  optional :: tag
     integer,            intent(in) , optional :: scheme
@@ -1525,7 +1526,7 @@ endif
   !-----------------------------------------------------------------------------
     ! local variables
     integer                                   :: nx, ny
-    real(ESMF_KIND_R8)                        :: dx, dy, sx, sy
+    real(ESMF_KIND_R8)                        :: dx, dy, sx, sy, halfdy
     integer                                   :: i, j
     real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
     real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:)
@@ -1534,8 +1535,11 @@ endif
     integer                                   :: l_scheme
     type(ESMF_Mesh)                           :: mesh
     type(ESMF_Field)                          :: field
+    logical                                   :: l_half_polar_cell
     
     if (present(rc)) rc = ESMF_SUCCESS
+    l_half_polar_cell = .false.
+    if(present(half_polar_cell)) l_half_polar_cell = half_polar_cell
 
     ! convert to input variables to the internal variables
     sx = x_min
@@ -1543,7 +1547,12 @@ endif
     nx = i_count
     ny = j_count
     dx = (x_max - x_min) / nx
-    dy = (y_max - y_min) / ny
+    if(l_half_polar_cell) then
+      dy = (y_max - y_min) / (ny - 1)
+      halfdy = dy/2.
+    else
+      dy = (y_max - y_min) / ny
+    endif
     
     ! scheme
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
@@ -1606,12 +1615,21 @@ endif
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    do i = lbound(coordX,1), ubound(coordX,1)
-      do j = lbound(coordX, 2), ubound(coordX, 2)
-        coordX(i,j) = startx + dx/2. + (i-1)*dx
-        coordY(i,j) = starty + dy/2. + (j-1)*dy
+    if(l_half_polar_cell) then
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + dx/2. + (i-1)*dx
+          coordY(i,j) = starty + halfdy/2. + (j-1)*dy
+        enddo
       enddo
-    enddo
+    else
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + dx/2. + (i-1)*dx
+          coordY(i,j) = starty + dy/2. + (j-1)*dy
+        enddo
+      enddo
+    endif
     !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
     ! X corner
     call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
@@ -1629,12 +1647,25 @@ endif
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    do i = lbound(coordX,1), ubound(coordX,1)
-      do j = lbound(coordX, 2), ubound(coordX, 2)
-        coordX(i,j) = startx + (i-1)*dx
-        coordY(i,j) = starty + (j-1)*dy
+    if(l_half_polar_cell) then
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + (i-1)*dx
+          if(j == 1) then
+            coordY(i,j) = starty
+          else 
+            coordY(i,j) = starty + halfdy + (j-2)*dy
+          endif
+        enddo
       enddo
-    enddo
+    else
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + (i-1)*dx
+          coordY(i,j) = starty + (j-1)*dy
+        enddo
+      enddo
+    endif
 
     if(present(area_adj)) then
       ! retrieve area
