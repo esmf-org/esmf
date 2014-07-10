@@ -592,9 +592,27 @@
     ! Test getting the current directory
     write (name, *) "Testing getting the current directory"
     write (failMsg, *) "did not return ESMF_SUCCESS"
+    pathname = ' '
     call ESMF_UtilIOGetCWD (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     print *, 'current directory name =>', trim (pathname), '<'
+
+    !EX_UTest
+    ! Test for valid characters
+    write (name, *) "Testing directory name for valid characters"
+    write (failMsg, *) "did not contain valid characters"
+    rc = ESMF_SUCCESS
+    if (pathname /= ' ') then
+      do, i=1, len (pathname)
+        if (iachar (pathname(i:i)) < 32 .or. iachar (pathname(i:i)) > 126) then
+          rc = ESMF_FAILURE
+          exit
+        end if
+      end do
+    else
+      rc = ESMF_FAILURE
+    end if
+    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
     ! Test getting the current directory
