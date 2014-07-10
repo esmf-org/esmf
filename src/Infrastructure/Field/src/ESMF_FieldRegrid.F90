@@ -377,6 +377,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               This allows the user to use their preferred line path for the calculation
 !               of distances and the shape of cells during regrid weight calculation on 
 !               a sphere.
+! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to 
+!               control the type of normalization done during conservative weight generation. 
+!               The new normalization type allowed by the argument ({\tt ESMF\_NORMTYPE\_FRACAREA}) automatically
+!               incorporates the destination fraction into the weights. If not specifed, this argument
+!               defaults to the normalization type ({\tt ESMF\_NORMTYPE\_DSTAREA}) used in previous releases
+!               before the addition of this argument. 
 ! \end{description}
 ! \end{itemize}
 !
