@@ -83,11 +83,11 @@
       integer, parameter :: ESMF_VERSION_MAJOR        = 6
       integer, parameter :: ESMF_VERSION_MINOR        = 3
       integer, parameter :: ESMF_VERSION_REVISION     = 0
-      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 1
+      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 2
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "6.3.0rp1"
+      character(*), parameter :: ESMF_VERSION_STRING  = "6.3.0rp2 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
