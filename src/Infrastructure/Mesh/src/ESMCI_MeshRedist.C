@@ -33,6 +33,7 @@
 #include <limits>
 #include <vector>
 
+#include <cstdio>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
