@@ -1,0 +1,4 @@
+Build instructions:
+1. Build and Install ESMF
+2. Set up the following environment variables: ESMFMKFILE, ESMF_DIR, and ESMF_COMPILER so they point to the proper variable. Typically ESMFMKFILE points to esmf.mk file set up in step 1, more information about this variable can be found here: http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node7.html. ESMF_DIR is the root directory of the ESMF source tree. ESMF_COMPILER is the compiler suite used to compile ESMF.
+3. In MAPL directory, make install && make esma_doc
