@@ -75,6 +75,7 @@ program ESMF_LAPACKUTest
   !NEX_UTest
   name = "DGELSY workspace size inquiry test"
   info = 0
+  pivs = 0
   call DGELSY (n, n, nrhs, a, n, b, n, pivs, cond, rank, work1, -1, info)
   worklen = work1(1)
   print *, '  suggested workspace length =', worklen
@@ -87,6 +88,7 @@ program ESMF_LAPACKUTest
   name = "DGELSY computation test"
   allocate (work(worklen))
   cond = 1.234e-5
+  pivs = 0
   call DGELSY (n, n, nrhs, a, n, b, n, pivs, cond, rank, work, worklen, info)
 
   write (failMsg, *) trim (name) // ': info =', info
