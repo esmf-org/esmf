@@ -152,7 +152,6 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int *arrayData = (int *) ESMC_ArrayGetPtr(array, 0,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  memset (arrayData, 0, 5*10*sizeof (int));
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
