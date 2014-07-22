@@ -250,7 +250,7 @@ call printStringList("exportNamespaceList", exportNamespaceList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
 
 #if 0
 print *, "current bondLevel=", bondLevel
@@ -402,7 +402,7 @@ call printStringList("exportNamespaceList", exportNamespaceList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
 
 #if 0
 print *, "current bondLevel=", bondLevel
@@ -646,7 +646,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -951,7 +951,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -1220,7 +1220,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -1474,7 +1474,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
