@@ -6,14 +6,14 @@
 ALL: build_here
 
 ifdef ESMF_NETCDF
-CPPFLAGS += -D_NETCDF
+ESMF_CPPFLAGS += -D_NETCDF
 endif
 
 ifdef ESMF_PNETCDF
-CPPFLAGS += -D_PNETCDF
+ESMF_CPPFLAGS += -D_PNETCDF
 endif
 
-CPPFLAGS += -DNO_MPIMOD
+ESMF_CPPFLAGS += -DNO_MPIMOD
 
 SOURCEC	  = topology.c \
 	piocpp.C
