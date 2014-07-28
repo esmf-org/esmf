@@ -2893,6 +2893,7 @@ endif
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field),       pointer       :: stdFieldList(:)
     character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     type(ESMF_Time)         :: time
@@ -2917,9 +2918,10 @@ endif
   
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
+    nullify(stdFieldList)
   
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, rc=rc)
+      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -2927,11 +2929,7 @@ endif
     
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
-        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        field=stdFieldList(i)
         if (present(selective)) then
           if (selective) then
             call ESMF_AttributeGet(field, &
@@ -2968,6 +2966,7 @@ endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    if (associated(stdFieldList)) deallocate(stdFieldList)
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2990,6 +2989,7 @@ endif
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field),       pointer       :: stdFieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
@@ -3000,9 +3000,10 @@ endif
     
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
+    nullify(stdFieldList)
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, rc=rc)
+      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -3022,14 +3023,7 @@ endif
 
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
-
-        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-          
+        field=stdFieldList(i)
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="General", &
@@ -3074,6 +3068,7 @@ endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    if (associated(stdFieldList)) deallocate(stdFieldList)
     
   end subroutine
   !-----------------------------------------------------------------------------

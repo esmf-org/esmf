@@ -52,9 +52,9 @@ typedef struct{
 //
 // !INTERFACE:
 int ESMC_ArraySpecGet(
-  ESMC_ArraySpec arrayspec,         // inout
-  int *rank,                        // in
-  enum ESMC_TypeKind_Flag *typekind      // in
+  ESMC_ArraySpec arrayspec,         // in
+  int *rank,                        // out
+  enum ESMC_TypeKind_Flag *typekind // out
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

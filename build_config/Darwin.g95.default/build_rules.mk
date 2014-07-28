@@ -224,6 +224,7 @@ ESMF_F90LINKLIBS += -lstdc++
 ESMF_CXXLINKLIBS += $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
 
 ############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+# Shared library options
+ESMF_SL_LIBOPTS  += -dynamiclib $(ESMF_CXXLINKOPTS)
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
