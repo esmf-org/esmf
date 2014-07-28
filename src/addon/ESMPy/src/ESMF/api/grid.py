@@ -270,7 +270,7 @@ class Grid(object):
             self.rank = self.max_index.size
 
         # grid type
-        if coord_typekind == None:
+        if coord_typekind is None:
             self.type = TypeKind.R8
         else:
             self.type = coord_typekind
@@ -345,7 +345,7 @@ class Grid(object):
                            for b in range(2**self.rank)]
 
         # Add coordinates if a staggerloc is specified
-        if staggerloc != None:
+        if staggerloc is not None:
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
 
         # Add items if they are specified, this is done after the
@@ -448,7 +448,7 @@ class Grid(object):
    
         # handle the default case
         staggerlocs = 0
-        if staggerloc == None:
+        if staggerloc is None:
             staggerlocs = [StaggerLoc.CENTER]
         elif type(staggerloc) is list:
             staggerlocs = staggerloc
@@ -505,7 +505,7 @@ class Grid(object):
 
         # handle the default case
         staggerlocs = 0
-        if staggerloc == None:
+        if staggerloc is None:
             staggerlocs = [StaggerLoc.CENTER]
         elif type(staggerloc) is list:
             staggerlocs = staggerloc
@@ -563,7 +563,7 @@ class Grid(object):
 
         # handle the default case
         #TODO: return full coordinates, and by dimension as optional
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc
@@ -604,7 +604,7 @@ class Grid(object):
         """
 
         # handle the default case
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc
@@ -661,7 +661,7 @@ class Grid(object):
         """
 
         # handle the default case
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc
