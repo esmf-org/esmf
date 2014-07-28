@@ -2770,7 +2770,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! XMRKX
 
 
 #if 1
@@ -3157,7 +3156,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation. 
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be 
 !      created for the Grid.
@@ -3210,6 +3210,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
+
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
 
@@ -3767,7 +3778,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -5765,7 +5777,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
 ! \item[{[addCornerStagger]}]
@@ -5948,7 +5961,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
 ! \item[{[addCornerStagger]}]
@@ -6446,7 +6460,8 @@ end function ESMF_GridCreateFrmScrip
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing value defined for varname
 ! \item[{[varname]}]
@@ -7335,7 +7350,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -8109,7 +8125,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -8844,7 +8861,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -10338,7 +10356,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -10553,6 +10572,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
+
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
 
@@ -12229,7 +12259,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -20482,7 +20513,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -20680,6 +20712,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
+
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
     if ((dimCount .lt. 3) .and. present(connflagDim3)) then
@@ -23692,7 +23735,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{minIndex}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -23738,13 +23782,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(decompFlag)) then
+        ! Make sure size is correct
         if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
                     msg="- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
-    endif
+
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
+     endif
 
 
     ! Set default for regDecomp 
