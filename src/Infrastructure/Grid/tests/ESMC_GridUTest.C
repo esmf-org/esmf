@@ -440,7 +440,8 @@ int main(void){
 #endif
   //----------------------------------------------------------------------------
   //NEX_UTest
-  // Create grid object from SCRIP file
+  // Create grid object from SCRIP file with both regDecomp and decompflag
+  // set to NULL.
   strcpy(name, "GridCreateFromFile_SCRIP");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
@@ -451,68 +452,415 @@ int main(void){
 					   NULL, "", NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  rc = ESMC_GridDestroy(&grid_from_file);
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
 #else
   // No NetCDF, so just PASS this test.
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
   //NEX_UTest
-  // Create grid object from SCRIP file with regDecomp and decompflag
-  strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED");
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {BALANCED, BALANCED}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED_BALANCED");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
-  int decompflag_balanced[2] = {ESMC_DECOMP_BALANCED, ESMC_DECOMP_BALANCED};
+  int decompflag[2] = {ESMC_DECOMP_BALANCED, ESMC_DECOMP_BALANCED};
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag_balanced, 
+					   regDecomp, decompflag,
 					   NULL, NULL, NULL, NULL, "", NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  rc = ESMC_GridDestroy(&grid_from_file);
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
 #else
   // No NetCDF, so just PASS this test.
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
   //NEX_UTest
-  // Create grid object from SCRIP file with regDecomp and decompflag
-  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTFIRST");
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {BALANCED, RESTFIRST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED_RESTFIRST");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
-  int decompflag_restfirst[2] = {ESMC_DECOMP_RESTFIRST, ESMC_DECOMP_RESTFIRST};
+  decompflag[1] = ESMC_DECOMP_RESTFIRST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag_restfirst, 
+					   regDecomp, decompflag, 
 					   NULL, NULL, NULL, NULL, "", NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  rc = ESMC_GridDestroy(&grid_from_file);
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
 #else
   // No NetCDF, so just PASS this test.
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
   //NEX_UTest
-  // Create grid object from SCRIP file with regDecomp and decompflag
-  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTLAST");
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {BALANCED, RESTLAST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED_RESTLAST");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
-  int decompflag_restlast[2] = {ESMC_DECOMP_RESTLAST, ESMC_DECOMP_RESTLAST};
+  decompflag[1] = ESMC_DECOMP_RESTLAST;
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, decompflag_restlast, 
+					   regDecomp, decompflag, 
 					   NULL, NULL, NULL, NULL, "", NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  rc = ESMC_GridDestroy(&grid_from_file);
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
 #else
   // No NetCDF, so just PASS this test.
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {BALANCED, CYCLIC}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED_CYCLIC");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_CYCLIC;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTFIRST, BALANCED}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTFIRST_BALANCED");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[0] = ESMC_DECOMP_RESTFIRST;
+  decompflag[1] = ESMC_DECOMP_BALANCED;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTFIRST, RESTFIRST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTFIRST_RESTFIRST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTFIRST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTFIRST, RESTLAST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTFIRST_RESTLAST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTLAST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTFIRST, CYCLIC}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTFIRST_CYCLIC");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_CYCLIC;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTLAST, BALANCED}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTLAST_BALANCED");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[0] = ESMC_DECOMP_RESTLAST;
+  decompflag[1] = ESMC_DECOMP_BALANCED;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTLAST, RESTFIRST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTLAST_RESTFIRST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTFIRST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTLAST, RESTLAST}
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTLAST_RESTLAST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTLAST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag, 
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {RESTLAST, CYCLIC}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_RESTLAST_CYCLIC");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_CYCLIC;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {CYCLIC, BALANCED}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_CYCLIC_BALANCED");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[0] = ESMC_DECOMP_CYCLIC;
+  decompflag[1] = ESMC_DECOMP_BALANCED;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {CYCLIC, RESTFIRST}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_CYCLIC_RESTFIRST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTFIRST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {CYCLIC, RESTLAST}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_CYCLIC_RESTLAST");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_RESTLAST;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file with regDecomp specified and
+  // decompflag = {CYCLIC, CYCLIC}.  Since CYCLIC is currently not 
+  // support, this test passes if ESMC_GridCreateFromFile fails with
+  // rc=ESMF_RC_ARG_OUTOFRANGE.
+  strcpy(name, "GridCreateFromFile_SCRIP_decomp_CYCLIC_CYCLIC");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  decompflag[1] = ESMC_DECOMP_CYCLIC;
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
+					   ESMC_FILEFORMAT_SCRIP,
+					   regDecomp, decompflag,
+					   NULL, NULL, NULL, NULL, "", NULL, 
+					   &rc);
+  ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
