@@ -83,6 +83,17 @@ def grid_create_test():
     # return True from unit test
     return True
 
+def grid_defaultstagger_test():
+
+    max_index = np.array([12,20])
+
+    grid = Grid(max_index)
+
+    coords = grid.get_coords(0)
+
+    # return True from unit test
+    return True
+
 def grid_create_3D_test():
 
     max_index = np.array([12,20,37])
@@ -1329,6 +1340,7 @@ def main():
     (2,'VMGetGlobal, VMPrint, and VMGet') : vm_test,
     (3,'Mesh create and destroy') : mesh_test,
     (4,'Grid create and destroy') : grid_create_test,
+    (4.05,'Grid default stagger') : grid_defaultstagger_test,
     (4.1,'Grid 3D create and destroy') : grid_create_3D_test,
     (4.2,'Grid coordinates') : grid_coords_test,
     (4.3,'Grid 3D coordinates') : grid_coords_3D_test,
