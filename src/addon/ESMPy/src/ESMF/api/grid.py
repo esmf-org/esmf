@@ -26,8 +26,8 @@ class Grid(object):
                  staggerloc=None,
                  filename=None,
                  filetype=None,
-		 regDecomp=None,
-		 decompflag=None,
+		         regDecomp=None,
+		         decompflag=None,
                  is_sphere=None,
                  add_corner_stagger=None,
                  add_user_area=None,
@@ -66,15 +66,15 @@ class Grid(object):
                         FileFormat.SCRIP \n
                         FileFormat.GRIDSPEC \n
             Optional arguments for creating a Grid from file: \n
-	        regDecomp: A 2 element integer list specifying how the grid
-		           is decomposed.  Each entry is the number of decounts
-			   for that dimension.  The total decounts cannot
-			   exceed the total number of PETs.  In other words,
-			   at most one DE is allowed per processor. \n
-                decompflag: List of decomposition flags indicating how each 
-		            dimension of the tile is to be divided between the 
-			    DEs. The default setting is BALANCED in all 
-			    dimensions. \n
+                regDecomp: A 2 element integer list specifying how the grid
+                           is decomposed.  Each entry is the number of decounts
+                           for that dimension.  The total decounts cannot
+                           exceed the total number of PETs.  In other words,
+                           at most one DE is allowed per processor. \n
+                decompflag: List of decomposition flags indicating how each
+                            dimension of the tile is to be divided between the
+                            DEs. The default setting is BALANCED in all
+                            dimensions. \n
                 is_sphere: Set to True for a spherical grid, or False for
                            regional. Defaults to True. \n
                 add_corner_stagger: Set to True to use the information in the
@@ -142,9 +142,9 @@ class Grid(object):
                 warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
             if filetype is not None:
                 warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
-	    if regDecomp is not None:
+            if regDecomp is not None:
                 warnings.warn("regDecomp is only used for grids created from file, this argument will be ignored.")
-	    if decompflag is not None:
+            if decompflag is not None:
                 warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
@@ -217,18 +217,18 @@ class Grid(object):
         self.struct = None
 
         if from_file:
-	    # create default regDecomp if it is not passed as an argument
-	    if regDecomp is None:
-		regDecomp = [pet_count(), 1]
-            #print 'Creating grid from ', filename
-            self.struct = ESMP_GridCreateFromFile(filename, filetype,
-						  regDecomp, 
-						  decompflag=decompflag,
-                                                  isSphere=is_sphere,
-                                                  addCornerStagger=add_corner_stagger,
-                                                  addUserArea=add_user_area,
-                                                  addMask=add_mask, varname=varname,
-                                                  coordNames=coord_names)
+            # create default regDecomp if it is not passed as an argument
+            if regDecomp is None:
+                regDecomp = [pet_count(), 1]
+                #print 'Creating grid from ', filename
+                self.struct = ESMP_GridCreateFromFile(filename, filetype,
+                                                      regDecomp,
+                                                      decompflag=decompflag,
+                                                      isSphere=is_sphere,
+                                                      addCornerStagger=add_corner_stagger,
+                                                      addUserArea=add_user_area,
+                                                      addMask=add_mask, varname=varname,
+                                                      coordNames=coord_names)
             # grid rank and dims
             if filetype == FileFormat.SCRIP:
                 self.rank = ESMP_ScripInqRank(filename)
@@ -236,7 +236,7 @@ class Grid(object):
                 self.ndims = self.rank
             else: # must be GRIDSPEC
                 self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)
-            # stagger is not required for from-file grids, but we need to 
+            # stagger is not required for from-file grids, but we need to
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
 
@@ -268,6 +268,10 @@ class Grid(object):
 
             # grid rank
             self.rank = self.max_index.size
+
+            # staggerloc center is the default, set if not already set
+            if staggerloc is None:
+                staggerloc = [StaggerLoc.CENTER]
 
         # grid type
         if coord_typekind is None:
