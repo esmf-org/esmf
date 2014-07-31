@@ -250,7 +250,7 @@ call printStringList("exportNamespaceList", exportNamespaceList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
 
 #if 0
 print *, "current bondLevel=", bondLevel
@@ -402,7 +402,7 @@ call printStringList("exportNamespaceList", exportNamespaceList)
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
 
 #if 0
 print *, "current bondLevel=", bondLevel
@@ -646,7 +646,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -951,7 +951,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -1220,7 +1220,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -1474,7 +1474,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
               getBondLevel(importNamespaceList(iMatch), &
               exportNamespaceList(eMatch))
               
-            if (bondLevel == -1) exit  ! break out and look for next match
+            if (bondLevel == -1) cycle  ! break out and look for next match
             
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -1944,6 +1944,7 @@ print *, "found match:"// &
     character(ESMF_MAXSTR), pointer :: chopSubString(:), chopSubSubString(:)
     character(len=160)              :: msgString
     character(len=480)              :: tempString
+    logical                         :: redistflag
     type(ESMF_RegridMethod_Flag)    :: regridmethod
     type(ESMF_UnmappedAction_Flag)  :: unmappedaction
     type(ESMF_PoleMethod_Flag)      :: polemethod
@@ -2096,16 +2097,19 @@ print *, "found match:"// &
         endif
       enddo
       
-      ! determine "regridmethod"
+      ! determine "redistflag" and "regridmethod"
+      redistflag = .false. ! default to regridding
       regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
       do j=2, size(chopStringList)
-        if (index(chopStringList(j),"regridmethod=")==1) then
+        if (index(chopStringList(j),"remapmethod=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
             chopStringList=chopSubString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (size(chopSubString)>=2) then
-            if (trim(chopSubString(2))=="bilinear") then
+            if (trim(chopSubString(2))=="redist") then
+              redistflag = .true.
+            else if (trim(chopSubString(2))=="bilinear") then
               regridmethod = ESMF_REGRIDMETHOD_BILINEAR
             else if (trim(chopSubString(2))=="patch") then
               regridmethod = ESMF_REGRIDMETHOD_PATCH
@@ -2253,19 +2257,31 @@ print *, "found match:"// &
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
-      ! the actual regrid store call
-      call ESMF_FieldRegridStore(srcField=srcFields(i), dstField=dstFields(i), &
-        srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-        regridmethod=regridmethod, &
-        polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-        unmappedaction=unmappedaction, &
-        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-        routehandle=rhh, &
-        factorIndexList=factorIndexList, factorList=factorList, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      if (redistflag) then
+        ! redist store call
+        call ESMF_FieldRedistStore(srcField=srcFields(i), &
+          dstField=dstFields(i), &
+!not yet implemented:          pipelineDepth=pipelineDepth, &
+          routehandle=rhh, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else      
+        ! regrid store call
+        call ESMF_FieldRegridStore(srcField=srcFields(i), &
+          dstField=dstFields(i), &
+          srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+          regridmethod=regridmethod, &
+          polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+          unmappedaction=unmappedaction, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          routehandle=rhh, &
+          factorIndexList=factorIndexList, factorList=factorList, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
       
       ! append rhh to rh and clear rhh
       call ESMF_RouteHandleAppendClear(rh, appendRoutehandle=rhh, &
@@ -2285,7 +2301,7 @@ print *, "found match:"// &
       vectorLengthShift = vectorLengthShift + 1
       
       ! weight dumping
-      if (dumpWeightsFlag) then
+      if (dumpWeightsFlag .and. .not.redistflag) then
         call ESMF_VMGetCurrent(vm, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

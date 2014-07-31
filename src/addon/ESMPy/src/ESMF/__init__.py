@@ -48,6 +48,21 @@ methods can be broken down to a simple sparse matrix multiplication operation
 between interpolation weights and data values.
 '''
 
+#### IMPORT LIBRARIES #########################################################
+
+from api.esmpymanager import *
+from api.grid import *
+from api.mesh import *
+from api.field import *
+from api.regrid import *
+from api.constants import _ESMF_VERSION
+
+# for testing
+from util.decorators import expected_failure
+[node, element] = [0, 1]
+
+#### SET UP SOME INFO #########################################################
+
 __name__ = "ESMF"
 __description__ = "ESMF Python interface"
 __author__ = "University Corporation for Atmospheric Research, \
@@ -59,17 +74,6 @@ __author__ = "University Corporation for Atmospheric Research, \
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
-__release__ = "630rp1_01b_dev"
+__release__ = api.constants._ESMF_VERSION
 
-#### IMPORT LIBRARIES #########################################################
-
-from api.esmpymanager import *
-from api.grid import *
-from api.mesh import *
-from api.field import *
-from api.regrid import *
-
-# for testing
-from util.decorators import expected_failure
-[node, element] = [0, 1]
 

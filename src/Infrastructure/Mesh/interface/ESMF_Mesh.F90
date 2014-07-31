@@ -1358,12 +1358,12 @@ num_elems, &
     if(present(parametricDim)) l_pdim = parametricDim
     if(present(spatialDim))    l_sdim = spatialDim
 
-   ! Set Default coordSys
-   if (present(coordSys)) then
-      coordSysLocal=coordSys
-   else 
-      coordSysLocal=ESMF_COORDSYS_CART
-   endif
+    ! Set Default coordSys
+    if (present(coordSys)) then
+       coordSysLocal=coordSys
+    else 
+       coordSysLocal=ESMF_COORDSYS_CART
+    endif
 
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
                            coordSysLocal, rc=localrc)

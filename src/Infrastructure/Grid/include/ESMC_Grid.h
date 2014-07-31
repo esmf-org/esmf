@@ -135,6 +135,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
+				  int *regDecomp, int *decompflag,
 				  int *isSphere, int *addCornerStagger,
 				  int *addUserArea, int *addMask, const char *varname,
 				  const char **coordNames, int *rc);
@@ -152,6 +153,17 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 // \item[fileTypeFlag]
 //     The Grid file format, please see Section~\ref{const:cfileformat}
 //         for a list of valid options. 
+// \item[regDecomp] 
+//      A 2 element array specifying how the grid is decomposed.
+//      Each entry is the number of decounts for that dimension.
+//      The total decounts cannot exceed the total number of PETs.  In other
+//      word, at most one DE is allowed per processor.
+// \item[{[decompflag]}]
+//      List of decomposition flags indicating how each dimension of the
+//      tile is to be divided between the DEs. The default setting
+//      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
+//      Section~\ref{const:decompflag} for a full description of the 
+//      possible options. 
 // \item[{[isSphere]}]
 //      Set to 1 for a spherical grid, or 0 for regional. Defaults to 1.
 // \item[{[addCornerStagger]}]
@@ -220,7 +232,7 @@ int ESMC_GridAddItem(
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
-//  Add coordinates to the Grid.
+//  Add an item (e.g. a mask) to the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -249,10 +261,10 @@ void * ESMC_GridGetItem(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to the item data. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to item data (e.g. mask data) in the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -313,10 +325,10 @@ void * ESMC_GridGetCoord(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to coordinate data in the Grid. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to coordinate data in the Grid.
 //
 //  The arguments are:
 //  \begin{description}

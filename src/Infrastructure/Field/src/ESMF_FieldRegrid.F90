@@ -377,6 +377,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               This allows the user to use their preferred line path for the calculation
 !               of distances and the shape of cells during regrid weight calculation on 
 !               a sphere.
+! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to 
+!               control the type of normalization done during conservative weight generation. 
 ! \end{description}
 ! \end{itemize}
 !

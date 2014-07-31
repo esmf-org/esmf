@@ -518,6 +518,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkGridComp
         module procedure ESMF_CplCompAttLinkSciComp
         module procedure ESMF_CplCompAttLinkState
+        module procedure ESMF_CplCompAttLinkGrid
         module procedure ESMF_FieldBundleAttLinkField
         module procedure ESMF_FieldBundleAttLinkGrid
         module procedure ESMF_FieldAttLinkGrid
@@ -525,10 +526,12 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttLinkGridComp
         module procedure ESMF_GridCompAttLinkSciComp
         module procedure ESMF_GridCompAttLinkState
+        module procedure ESMF_GridCompAttLinkGrid
         module procedure ESMF_SciCompAttLinkCplComp
         module procedure ESMF_SciCompAttLinkGridComp
         module procedure ESMF_SciCompAttLinkSciComp
         module procedure ESMF_SciCompAttLinkState
+        module procedure ESMF_SciCompAttLinkGrid
         module procedure ESMF_StateAttLinkArrayBundle
         module procedure ESMF_StateAttLinkArray
         module procedure ESMF_StateAttLinkFieldBundle
@@ -556,6 +559,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttLinkRmGridComp
         module procedure ESMF_CplCompAttLinkRmSciComp
         module procedure ESMF_CplCompAttLinkRmState
+        module procedure ESMF_CplCompAttLinkRmGrid
         module procedure ESMF_FieldBundleAttLinkRmField
         module procedure ESMF_FieldBundleAttLinkRmGrid
         module procedure ESMF_FieldAttLinkRmGrid
@@ -563,10 +567,12 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttLinkRmGridComp
         module procedure ESMF_GridCompAttLinkRmSciComp
         module procedure ESMF_GridCompAttLinkRmState
+        module procedure ESMF_GridCompAttLinkRmGrid
         module procedure ESMF_SciCompAttLinkRmCplComp
         module procedure ESMF_SciCompAttLinkRmGridComp
         module procedure ESMF_SciCompAttLinkRmSciComp
         module procedure ESMF_SciCompAttLinkRmState
+        module procedure ESMF_SciCompAttLinkRmGrid
         module procedure ESMF_StateAttLinkRmArrayBundle
         module procedure ESMF_StateAttLinkRmArray
         module procedure ESMF_StateAttLinkRmFieldBundle
@@ -3730,8 +3736,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 (convention.eq."CF".and.purpose.eq."General").or. & @\
                 (convention.eq."CF".and.purpose.eq."Extended").or. & @\
                 (convention.eq."CIM 1.5.1".and.purpose.eq."grids").or. & @\
+                (convention.eq."CIM 1.7.1".and.purpose.eq."grids").or. & @\
                 (convention.eq."CIM 1.5".and.purpose.eq."ModelComp").or. & @\
-                (convention.eq."CIM 1.5".and.purpose.eq."Inputs"))) then @\
+                (convention.eq."CIM 1.5.1".and.purpose.eq."ModelComp").or. & @\
+                (convention.eq."CIM 1.7.1".and.purpose.eq."ModelComp").or. & @\
+                (convention.eq."CIM 1.5".and.purpose.eq."Inputs").or. & @\
+                (convention.eq."CIM 1.5.1".and.purpose.eq."Inputs").or. & @\
+                (convention.eq."CIM 1.7.1".and.purpose.eq."Inputs"))) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
           msg="See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
@@ -3842,8 +3853,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 (specList(1).eq."CF"       .and.specList(2).eq."General").or. & @\
                 (specList(1).eq."CF"       .and.specList(2).eq."Extended").or. & @\
                 (specList(1).eq."CIM 1.5.1".and.specList(2).eq."grids").or. & @\
+                (specList(1).eq."CIM 1.7.1".and.specList(2).eq."grids").or. & @\
                 (specList(1).eq."CIM 1.5"  .and.specList(2).eq."ModelComp").or. & @\
-                (specList(1).eq."CIM 1.5"  .and.specList(2).eq."Inputs"))) then @\
+                (specList(1).eq."CIM 1.5.1"  .and.specList(2).eq."ModelComp").or. & @\
+                (specList(1).eq."CIM 1.7.1"  .and.specList(2).eq."ModelComp").or. & @\
+                (specList(1).eq."CIM 1.5"  .and.specList(2).eq."Inputs").or. & @\
+                (specList(1).eq."CIM 1.5.1"  .and.specList(2).eq."Inputs").or. & @\
+                (specList(1).eq."CIM 1.7.1"  .and.specList(2).eq."Inputs"))) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
           msg="See ESMF Reference Manual for ESMF standard Attribute packages", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
@@ -11006,7 +11022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 !EOPI @\
  @\
-      integer :: localrc @\
+      integer :: localrc, petCount, localPet @\
       character(len=*), parameter :: object=#mthisobj @\
       character(len=*), parameter :: ftarobj=#mthistar @\
       type(ESMF_AttWriteFlag) :: writeflag @\
@@ -11020,38 +11036,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (present(attwriteflag)) then @\
-        writeflag = attwriteflag @\
-      else @\
-        writeflag = ESMF_ATTWRITE_TAB @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
-        if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
-          call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
-            purpose, object, ftarobj, localrc) @\
-        else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
-          call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
-            purpose, object, ftarobj, localrc) @\
-        endif @\
-      endif @\
+      call ESMF_VMGetCurrent(vm, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
-      call ESMF_VMGetCurrent(vm, rc=rc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      if (localPet == 0) then @\
+        if (present(convention).or.present(purpose)) then @\
+          if (present(convention).and..not.present(purpose).or. & @\
+              present(purpose).and..not.present(convention)) then @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+              msg="both convention and purpose must be present or not", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+            return @\
+          endif @\
+          attpack = ESMF_TRUE @\
+        endif @\
+ @\ 
+        if (present(attwriteflag)) then @\
+          writeflag = attwriteflag @\
+        else @\
+          writeflag = ESMF_ATTWRITE_TAB @\
+        endif @\
+ @\ 
+        if (attpack == ESMF_TRUE) then @\
+          if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+            call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
+              purpose, object, ftarobj, localrc) @\
+          else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+            call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
+              purpose, object, ftarobj, localrc) @\
+          endif @\
+        endif @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+      endif @\
+ @\
       call ESMF_VMBarrier(vm, rc=rc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -11094,6 +11116,8 @@ AttLinkCompMacro(ESMF_CplComp, ESMF_SciComp, SciComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
+AttLinkCompMacro(ESMF_CplComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
@@ -11102,6 +11126,8 @@ AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_SciComp, SciComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 
 AttReadMacro(ESMF_CplComp, comp, comp%compp%base)
 
@@ -11150,6 +11176,8 @@ AttLinkCompMacro(ESMF_GridComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
+AttLinkCompMacro(ESMF_GridComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
@@ -11158,6 +11186,8 @@ AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 
 AttReadMacro(ESMF_GridComp, comp, comp%compp%base)
 
@@ -11204,6 +11234,8 @@ AttLinkCompMacro(ESMF_SciComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
+AttLinkCompMacro(ESMF_SciComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
@@ -11212,6 +11244,8 @@ AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_Grid, Grid, comp, grid,  & @\
+                comp%compp%base, grid)
 
 AttReadMacro(ESMF_SciComp, comp, comp%compp%base)
 

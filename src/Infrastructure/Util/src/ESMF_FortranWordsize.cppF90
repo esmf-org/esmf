@@ -260,6 +260,9 @@ end subroutine
       implicit none @\
  @\
       type wrapper @\
+^ifndef ESMF_NO_SEQUENCE @\
+        sequence @\
+^endif @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
       end type @\
  @\

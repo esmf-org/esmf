@@ -27,7 +27,7 @@ OptionName and the value strings are case insensitive. There are single and mult
      \hline\hline
      {\tt srcMaskValues} & List of integer values that defines the mask values. & multi & List of integers.\\ \hline
      {\tt dstMaskValues} & List of integer values that defines the mask values. & multi & List of integers.\\ \hline
-     {\tt regridmethod} & Interpolation method used to compute the regridding weights.& single & {\tt bilinear}(default), {\tt patch}, {\tt nearest\_stod}, {\tt nearest\_dtos}, {\tt conserve}\\ \hline
+     {\tt remapmethod} & Redistribution or interpolation to compute the regridding weights.& single & {\tt redist}, {\tt bilinear}(default), {\tt patch}, {\tt nearest\_stod}, {\tt nearest\_dtos}, {\tt conserve}\\ \hline
      {\tt polemethod} & Extrapolation method around the pole(s).& single & {\tt none}(default), {\tt allavg}, {\tt npntavg}={\em "integer indicating number of points"}\\ \hline
      {\tt unmappedaction} & The action to take when unmapped destination elements are encountered.& single & {\tt ignore}(default), {\tt error}\\ \hline
      {\tt srcTermProcessing} & Number of terms in each partial sum of the interpolation to process on the source side. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to 1. & single & integer\\ \hline

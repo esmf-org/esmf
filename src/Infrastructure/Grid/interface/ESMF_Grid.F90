@@ -3211,6 +3211,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return 
         endif
 
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
 
@@ -10580,6 +10590,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return 
         endif
 
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
 
@@ -20710,6 +20730,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return 
         endif
 
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
     endif
 
     if ((dimCount .lt. 3) .and. present(connflagDim3)) then
@@ -23777,6 +23807,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return 
         endif
 
+        ! CYCLIC decomposition isn't allowed when creating a Grid
+        do i=1,size(decompFlag)
+           if (decompFlag(i) == ESMF_DECOMP_CYCLIC) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_OUTOFRANGE, & 
+                    msg="- decompFlag isn't allowed to be" // &
+                        " ESMF_DECOMP_CYCLIC when creating a Grid.", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        enddo
      endif
 
 

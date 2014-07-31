@@ -69,8 +69,9 @@ int Attribute::count = 0;
 const char Attribute::CF_CONV[]      = "CF";
 const char Attribute::ESG_CONV[]     = "ESG";
 const char Attribute::ESMF_CONV[]    = "ESMF";
-const char Attribute::CIM_1_5_CONV[] = "CIM 1.5";
+const char Attribute::CIM_1_5_CONV[]  = "CIM 1.5";
 const char Attribute::CIM_1_5_1_CONV[]  = "CIM 1.5.1";
+const char Attribute::CIM_1_7_1_CONV[]  = "CIM 1.7.1";
 
 const char Attribute::GENERAL_PURP[]    = "General";
 const char Attribute::EXTENDED_PURP[]   = "Extended";
@@ -315,17 +316,19 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
-    if (convention.compare(CIM_1_5_1_CONV)==0 && purpose.compare(GRIDS_PURP)==0) {
+    if ((convention.compare(CIM_1_5_1_CONV)==0 || 
+         convention.compare(CIM_1_7_1_CONV)==0) && 
+         purpose.compare(GRIDS_PURP)==0) {
 
       // create an Attribute package for grids which uses internal Grid info
-      localrc = AttPackCreateCustom(CIM_1_5_1_CONV, GRIDS_PURP, object);
+      localrc = AttPackCreateCustom(convention, GRIDS_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
 
       // add Attributes to the grids Attribute package
       // and set the Attributes in this Attpack to have links to internal info
       string attPackInstanceName;
-      attpack = AttPackGet(CIM_1_5_1_CONV, GRIDS_PURP, object, attPackInstanceName);
+      attpack = AttPackGet(convention, GRIDS_PURP, object, attPackInstanceName);
   
       string name, value;
       vector<string> vv;
@@ -406,8 +409,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
           convention.compare(ESG_CONV)==0 ||
           convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
          (convention.compare(CF_CONV)==0 && purpose.compare(EXTENDED_PURP)==0) ||
-         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0))
-    {
+         ((convention.compare(CIM_1_5_CONV)==0 ||
+          convention.compare(CIM_1_5_1_CONV)==0 ||
+          convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackCreateCustom(CF_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -420,7 +424,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     if (((convention.compare(ESG_CONV)==0 ||
           convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
          (convention.compare(CF_CONV)==0    && purpose.compare(EXTENDED_PURP)==0) ||
-         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+         ((convention.compare(CIM_1_5_CONV)==0 ||
+          convention.compare(CIM_1_5_1_CONV)==0 ||
+          convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(CF_CONV, EXTENDED_PURP, object, CF_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -430,7 +436,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     }
     if (((convention.compare(ESG_CONV)==0 ||
           convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
-         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+         ((convention.compare(CIM_1_5_CONV)==0 ||
+          convention.compare(CIM_1_5_1_CONV)==0 ||
+          convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(ESG_CONV, GENERAL_PURP, object, CF_CONV, EXTENDED_PURP);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -439,35 +447,38 @@ const char Attribute::GRIDS_PURP[]   = "grids";
             ESMC_CONTEXT, &localrc)) return localrc;
     }
     if ((convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) ||
-        (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+         ((convention.compare(CIM_1_5_CONV)==0 ||
+          convention.compare(CIM_1_5_1_CONV)==0 ||
+          convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, ESG_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
     // CIM inherits (ESMF, General)
-    if (convention.compare(CIM_1_5_CONV)==0 &&
-        purpose.compare(INPUTS_PURP)==0) {
-      localrc = AttPackNest(CIM_1_5_CONV, INPUTS_PURP, object,
+    if ((convention.compare(CIM_1_5_CONV)==0 ||
+          convention.compare(CIM_1_5_1_CONV)==0 ||
+          convention.compare(CIM_1_7_1_CONV)==0) && purpose.compare(INPUTS_PURP)==0) {
+      localrc = AttPackNest(convention, INPUTS_PURP, object,
                             ESMF_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
-      localrc = AttPackAddAttribute("CouplingPurpose", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("CouplingPurpose", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("CouplingSource", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("CouplingSource", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("CouplingTarget", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("CouplingTarget", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("Description", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("Description", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("Frequency", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("Frequency", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("SpatialRegriddingMethod", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SpatialRegriddingMethod", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("SpatialRegriddingDimension", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SpatialRegriddingDimension", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("Technique", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("Technique", convention,
                             INPUTS_PURP, object);
-      localrc = AttPackAddAttribute("TimeTransformationType", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("TimeTransformationType", convention,
                             INPUTS_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -507,16 +518,18 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
     }
-    if (convention.compare(CIM_1_5_CONV)==0 &&
+    if ((convention.compare(CIM_1_5_CONV)==0 ||
+         convention.compare(CIM_1_5_1_CONV)==0 ||
+         convention.compare(CIM_1_7_1_CONV)==0) &&
         purpose.compare(MODEL_COMP_PURP)==0) {
 
       // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackCreateCustom(CIM_1_5_CONV,
+      //localrc = AttPackCreateCustom(convention,
       //                              "Scientific Property Description", object);
       //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      ESMC_CONTEXT, &localrc)) return localrc;
 
-      localrc = AttPackCreateCustom(CIM_1_5_CONV,
+      localrc = AttPackCreateCustom(convention,
                                     PLATFORM_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -536,16 +549,16 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       nestconv.reserve(nestcount);
       nestpurp.reserve(nestcount);
       // TODO: uncomment and expand when we have better definition from CIM
-      //nestconv.push_back(CIM_1_5_CONV);
+      //nestconv.push_back(convention);
       //nestpurp.push_back("Scientific Property Description");
-      nestconv.push_back(CIM_1_5_CONV);
+      nestconv.push_back(convention);
       nestpurp.push_back(PLATFORM_PURP);
       nestconv.push_back("ISO 19115");
       nestpurp.push_back(CITATION_PURP);
       nestconv.push_back("ISO 19115");
       nestpurp.push_back(RESP_PARTY_PURP);
 
-      localrc = AttPackNest(CIM_1_5_CONV,
+      localrc = AttPackNest(convention,
                             MODEL_COMP_PURP, object,
                             nestcount, nestconv, nestpurp);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -556,21 +569,21 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       //  1 <modelComponent> in separate CIM document node, also
       //    1 within each <childComponent>
       //
-      localrc = AttPackAddAttribute("Description", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("Description", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("LongName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("LongName", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("MetadataVersion", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MetadataVersion", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("ModelType", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("ModelType", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("ReleaseDate", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("ReleaseDate", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("ShortName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("ShortName", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("URL", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("URL", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("Version", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("Version", convention,
                             MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -579,24 +592,24 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       // Simulation Run attributes
       //  1 <simulationRun> in separate CIM document node
       //
-      localrc = AttPackAddAttribute("SimulationDuration", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationDuration", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationEndDate", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationEndDate", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationEnsembleID", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationEnsembleID", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationLongName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationLongName", convention,
                             MODEL_COMP_PURP, object);
       localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
-                                                          CIM_1_5_CONV,
+                                                          convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationProjectName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationProjectName", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationRationale", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationRationale", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationShortName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationShortName", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("SimulationStartDate", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("SimulationStartDate", convention,
                             MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -605,9 +618,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       // Document Relationship attributes
       //  1 <documentGenealogy> at end of <modelComponent>
       //
-      localrc = AttPackAddAttribute("PreviousVersion", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("PreviousVersion", convention,
                             MODEL_COMP_PURP, object);
-      localrc = AttPackAddAttribute("PreviousVersionDescription", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("PreviousVersionDescription", convention,
                             MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -618,11 +631,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       //    <modelComponent>
       //
       // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackAddAttribute("ScientificPropertyLongName", CIM_1_5_CONV,
+      //localrc = AttPackAddAttribute("ScientificPropertyLongName", convention,
       //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyShortName", CIM_1_5_CONV,
+      //localrc = AttPackAddAttribute("ScientificPropertyShortName", convention,
       //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyValue", CIM_1_5_CONV,
+      //localrc = AttPackAddAttribute("ScientificPropertyValue", convention,
       //                      "Scientific Property Description", object);
       //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      ESMC_CONTEXT, &localrc)) return localrc;
@@ -632,27 +645,27 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       //  1 <platform> in separate CIM document node
       //    also 1 within <deployment> within <simulationRun> CIM document node
       //
-      localrc = AttPackAddAttribute("CompilerName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("CompilerName", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("CompilerVersion", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("CompilerVersion", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineCoresPerProcessor", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineCoresPerProcessor", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineDescription", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineDescription", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineInterconnectType", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineInterconnectType", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineMaximumProcessors", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineMaximumProcessors", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineName", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineName", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineOperatingSystem", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineOperatingSystem", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineProcessorType", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineProcessorType", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineSystem", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineSystem", convention,
                             PLATFORM_PURP, object);
-      localrc = AttPackAddAttribute("MachineVendor", CIM_1_5_CONV,
+      localrc = AttPackAddAttribute("MachineVendor", convention,
                             PLATFORM_PURP, object);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &localrc)) return localrc;
@@ -752,7 +765,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   unsigned int i,j;
   Attribute *stdParent, *stdChild;
 
-  if (convention.compare(CIM_1_5_CONV)!=0 ||
+  if (!(convention.compare(CIM_1_5_CONV)==0 ||
+      convention.compare(CIM_1_5_1_CONV)==0 ||
+      convention.compare(CIM_1_7_1_CONV)==0) ||
       purpose.compare(MODEL_COMP_PURP)!=0) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "non-standard attpack type", ESMC_CONTEXT, &localrc);
@@ -823,7 +838,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // create child standard attpacks, attach to parent attpack
 
   // create one Platform child attpack
-  stdChild = new Attribute(CIM_1_5_CONV, PLATFORM_PURP, object);
+  stdChild = new Attribute(convention, PLATFORM_PURP, object);
   if(!stdChild) {
     // TODO:  more detailed error message including conv,purp,object 
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED,

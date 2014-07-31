@@ -3921,30 +3921,22 @@ extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_
       MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
     } else {
 
-      Throw() << "Split meshes not supported in MeshRedistNodes right now! \n";
-
-#if 0 
-     // If split mesh expand ids
-      int num_elem_gids_ws;
-      int *elem_gids_ws=NULL;
-      std::map<UInt,UInt> split_to_orig_id;
-      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
-      
-      // Call into redist with expanded ids
-      MeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+      // Redist nodes
+      // NOTE: internally sets: is_split and split_to_orig_id map
+      //       split_id_to_frac is set below
+      MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
 
       // dereference output mesh
       Mesh *output_mesh=*output_meshpp;
 
       // if split mesh add info
-      output_mesh->is_split=src_mesh->is_split;
+      // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
       output_mesh->max_non_split_id=src_mesh->max_non_split_id;
-      output_mesh->split_to_orig_id=split_to_orig_id;
+      // output_mesh->split_to_orig_id=split_to_orig_id; // SET INSIDE MeshRedistNode()
 
       // calculate split_id_to_frac map from other info
       calc_split_id_to_frac(output_mesh); 
 
-#endif
 #if 0
       // DEBUG OUTPUT
     // Loop and get split-orig id pairs
@@ -3981,12 +3973,7 @@ extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_
     }
     }
 
-    /* XMRKX */
-
-      // Free split gids
-      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
 #endif
-
     }
 
 

@@ -78,7 +78,7 @@ program ESMF_RHandleBitForBitEx
 ! binary diff tools.
 !
 ! While bfb reproducibility is desirable (and often required) for regression
-! testing, it does, at the same, limit the available performance optimization
+! testing, it does limit the available performance optimization
 ! opportunities. Especially in highly parallelized code, best performance is 
 ! often achieved by allowing operations to occur in a flexible order. Under
 ! some conditions, however, a change in the order of numerical operations
