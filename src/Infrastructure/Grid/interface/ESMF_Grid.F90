@@ -6791,7 +6791,6 @@ end function ESMF_GridCreateFrmScrip
            call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, latCoord2D, fptrlat, dims)       
 
            deallocate(loncoord2D, latcoord2D, dims)
-	   deallocate(minind)
 	else
            localroot = (PetNo/regDecomp(1))*regDecomp(1)
            call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
@@ -6970,7 +6969,7 @@ end function ESMF_GridCreateFrmScrip
           mask2D(:,:) = 1
           call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
 			        varBuffer, missing_value = missing_value, &
-                                start=lbnd, count=total, rc=localrc)
+                                start=minind(:,PetNo+1), count=total, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	  do i=1,size(varBuffer,2)
@@ -6984,6 +6983,7 @@ end function ESMF_GridCreateFrmScrip
 	  deallocate(varBuffer)
           deallocate(mask2D)
 	  deallocate(dims)
+          deallocate(minind)
        else
           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
 	      exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
