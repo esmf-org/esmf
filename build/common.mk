@@ -643,6 +643,7 @@ endif
 # the ESMF_xxxDEFAULT values are only used if ESMF_xxx is not defined in
 # user's environment.
 #-------------------------------------------------------------------------------
+ESMF_PIODEFAULT             = internal
 ESMF_PTHREADSDEFAULT        = ON
 ESMF_OPENMPDEFAULT          = ON
 ESMF_OPENACCDEFAULT         = OFF
