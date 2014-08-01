@@ -1,3 +1,5 @@
+#include "ESMF_Conf.inc"
+
 #if defined (ESMF_NETCDF)
 #if !defined (_NETCDF)
 #define _NETCDF
