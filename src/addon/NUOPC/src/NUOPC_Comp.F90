@@ -24,6 +24,7 @@ module NUOPC_Comp
   ! public module interfaces
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSpecialize
@@ -340,14 +341,16 @@ module NUOPC_Comp
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: comp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
-    character(len=*),       intent(in)            :: phaseLabel
+    character(len=*),       intent(in),  optional :: phaseLabel
     integer,                intent(out)           :: phaseIndex
     integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Search all PhaseMap entries in a GridComp (i.e. Model, Mediator, or Driver)
 ! to see if {\tt phaseLabel} is found. Return the associated ESMF
-! {\tt phaseIndex}, or {\tt -1} if not found.
+! {\tt phaseIndex}, or {\tt -1} if not found. If {\tt phaseLabel} is not
+! specified, set {\tt phaseIndex} to the first entry in the PhaseMap, or 
+! {\tt -1} if there are no entries.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -355,6 +358,7 @@ module NUOPC_Comp
     integer                   :: itemCount, stat, ind, max
     character(ESMF_MAXSTR)    :: name
     character(len=40)         :: attributeName
+    logical                   :: phaseFlag
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
@@ -376,6 +380,7 @@ module NUOPC_Comp
     endif
     
     phaseIndex = -1             ! initialize to invalid
+    phaseFlag  = .false.        ! initialize
     
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
@@ -395,12 +400,20 @@ module NUOPC_Comp
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      do i=1, itemCount
-        if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-      enddo
-      if (i <= itemCount) then
-        ! phaseLabel was found
-        tempString = trim(phases(i))
+      if (present(phaseLabel)) then
+        do i=1, itemCount
+          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
+        enddo
+        if (i <= itemCount) then
+          ! phaseLabel was found
+          phaseFlag = .true.
+          tempString = trim(phases(i))
+        endif
+      else
+        phaseFlag = .true.
+        tempString = trim(phases(1))  ! by default select the first map entry
+      endif
+      if (phaseFlag) then
         ind = index(tempString, "=")
         max = len(tempString)
         read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
@@ -422,14 +435,16 @@ module NUOPC_Comp
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: comp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
-    character(len=*),       intent(in)            :: phaseLabel
+    character(len=*),       intent(in),  optional :: phaseLabel
     integer,                intent(out)           :: phaseIndex
     integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Search all PhaseMap entries in a CplComp (i.e. Connector)
 ! to see if {\tt phaseLabel} is found. Return the associated ESMF
-! {\tt phaseIndex}, or {\tt -1} if not found.
+! {\tt phaseIndex}, or {\tt -1} if not found. If {\tt phaseLabel} is not
+! specified, set {\tt phaseIndex} to the first entry in the PhaseMap, or 
+! {\tt -1} if there are no entries.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -437,6 +452,7 @@ module NUOPC_Comp
     integer                   :: itemCount, stat, ind, max
     character(ESMF_MAXSTR)    :: name
     character(len=40)         :: attributeName
+    logical                   :: phaseFlag
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
@@ -458,6 +474,7 @@ module NUOPC_Comp
     endif
     
     phaseIndex = -1             ! initialize to invalid
+    phaseFlag  = .false.        ! initialize
     
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
@@ -477,12 +494,20 @@ module NUOPC_Comp
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      do i=1, itemCount
-        if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-      enddo
-      if (i <= itemCount) then
-        ! phaseLabel was found
-        tempString = trim(phases(i))
+      if (present(phaseLabel)) then
+        do i=1, itemCount
+          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
+        enddo
+        if (i <= itemCount) then
+          ! phaseLabel was found
+          phaseFlag = .true.
+          tempString = trim(phases(i))
+        endif
+      else
+        phaseFlag = .true.
+        tempString = trim(phases(1))  ! by default select the first map entry
+      endif
+      if (phaseFlag) then
         ind = index(tempString, "=")
         max = len(tempString)
         read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
