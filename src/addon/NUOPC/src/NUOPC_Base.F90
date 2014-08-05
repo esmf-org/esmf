@@ -2771,7 +2771,8 @@ endif
     type(ESMF_Field), intent(in)            :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Realizes a previously advertised Field in {\tt state}.
+!   Realizes a previously advertised Field in {\tt state} by replacing the
+!   advertised Field with {\tt field}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2781,12 +2782,22 @@ endif
     character(ESMF_MAXSTR)  :: Units
     character(ESMF_MAXSTR)  :: LongName
     character(ESMF_MAXSTR)  :: ShortName
-    character(ESMF_MAXSTR)  :: ProducerConnection
-    character(ESMF_MAXSTR)  :: ConsumerConnection
-    character(ESMF_MAXSTR)  :: TransferOfferGeomObject
-    character(ESMF_MAXSTR)  :: TransferActionGeomObject
+    integer                 :: i
+    integer, parameter      :: attrCount=6
+    character(ESMF_MAXSTR)  :: attrList(attrCount)
+    character(ESMF_MAXSTR)  :: tempString
     
     if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Set up a customized list of Attributes to be copied
+    attrList(1) = "Connected"
+    attrList(2) = "ProducerConnection"
+    attrList(3) = "ConsumerConnection"
+    attrList(4) = "Updated"
+    attrList(5) = "TransferOfferGeomObject"
+    attrList(6) = "TransferActionGeomObject"
+    
+    ! Obtain the advertised Field
     
     call ESMF_FieldGet(field, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2795,6 +2806,8 @@ endif
     call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! Obtain basic attributes from the adevertised Field
       
     call NUOPC_FieldAttributeGet(advertisedField, name="StandardName", &
       value=StandardName, rc=rc)
@@ -2815,58 +2828,31 @@ endif
       value=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, name="ProducerConnection", &
-      value=ProducerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, name="ConsumerConnection", &
-      value=ConsumerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, &
-      name="TransferOfferGeomObject", value=TransferOfferGeomObject, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, &
-      name="TransferActionGeomObject", value=TransferActionGeomObject, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
+    
+    ! Add the Field attributes to the realizing Field and set basic values
+    
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
       Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
-    ! set ProducerConnection
-    call NUOPC_FieldAttributeSet(field, &
-      name="ProducerConnection", value=ProducerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    ! Loop over the list of Attributes and transfer between Fields
+    
+    do i=1, attrCount
       
-    ! set ConsumerConnection
-    call NUOPC_FieldAttributeSet(field, &
-      name="ConsumerConnection", value=ConsumerConnection, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_FieldAttributeGet(advertisedField, name=trim(attrList(i)), &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set TransferOfferGeomObject
-    call NUOPC_FieldAttributeSet(field, &
-      name="TransferOfferGeomObject", value=TransferOfferGeomObject, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_FieldAttributeSet(field, name=trim(attrList(i)), &
+        value=trim(tempString), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set TransferActionGeomObject
-    call NUOPC_FieldAttributeSet(field, &
-      name="TransferActionGeomObject", value=TransferActionGeomObject, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    enddo
+    
+    ! Finally replace the advertised Field with the realizing Field
       
     call ESMF_StateReplace(state, (/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
