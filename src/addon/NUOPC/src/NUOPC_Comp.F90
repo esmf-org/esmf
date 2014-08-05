@@ -39,6 +39,11 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompFilterPhaseMap
   end interface
   !---------------------------------------------
+  interface NUOPC_CompSearchPhaseMap
+    module procedure NUOPC_GridCompSearchPhaseMap
+    module procedure NUOPC_CplCompSearchPhaseMap
+  end interface
+  !---------------------------------------------
   interface NUOPC_CompSetEntryPoint
     module procedure NUOPC_GridCompSetEntryPoint
     module procedure NUOPC_CplCompSetEntryPoint
@@ -147,7 +152,7 @@ module NUOPC_Comp
 ! that do {\em not} match any entry in the {\tt acceptStringList}.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     integer                   :: i, ii, iii
     integer                   :: itemCount, stat
     integer                   :: acceptStringCount
@@ -177,7 +182,7 @@ module NUOPC_Comp
     acceptStringCount = size(acceptStringList)
     
     ! query the already existing phaseMap enties
-    call ESMF_AttributeGet(comp, name=attributeName, &
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -188,7 +193,7 @@ module NUOPC_Comp
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name=attributeName, valueList=phases, &
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -215,7 +220,7 @@ module NUOPC_Comp
     endif
     
     ! set the filtered phase map as the Attribute
-    call ESMF_AttributeSet(comp, name=attributeName, &
+    call ESMF_AttributeSet(comp, name=trim(attributeName), &
       valueList=newPhases(1:iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -245,7 +250,7 @@ module NUOPC_Comp
 ! that do {\em not} match any entry in the {\tt acceptStringList}.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     integer                   :: i, ii, iii
     integer                   :: itemCount, stat
     integer                   :: acceptStringCount
@@ -275,7 +280,7 @@ module NUOPC_Comp
     acceptStringCount = size(acceptStringList)
     
     ! query the already existing phaseMap enties
-    call ESMF_AttributeGet(comp, name=attributeName, &
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -286,7 +291,7 @@ module NUOPC_Comp
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name=attributeName, valueList=phases, &
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -313,7 +318,7 @@ module NUOPC_Comp
     endif
     
     ! set the filtered phase map as the Attribute
-    call ESMF_AttributeSet(comp, name=attributeName, &
+    call ESMF_AttributeSet(comp, name=trim(attributeName), &
       valueList=newPhases(1:iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -321,6 +326,170 @@ module NUOPC_Comp
     
     ! clean-up
     deallocate(phases, newPhases)
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSearchPhaseMap - Search the Phase Map of a GridComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSearchPhaseMap()
+  subroutine NUOPC_GridCompSearchPhaseMap(comp, methodflag, phaseLabel, &
+    phaseIndex, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                           :: comp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    character(len=*),       intent(in)            :: phaseLabel
+    integer,                intent(out)           :: phaseIndex
+    integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Search all PhaseMap entries in a GridComp (i.e. Model, Mediator, or Driver)
+! to see if {\tt phaseLabel} is found. Return the associated ESMF phase index,
+! or {\tt -1} if not found.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: i
+    integer                   :: itemCount, stat, ind, max
+    character(ESMF_MAXSTR)    :: name
+    character(len=40)         :: attributeName
+    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength)           :: tempString
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      attributeName = "InitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+      attributeName = "RunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+      attributeName = "FinalizePhaseMap"
+    endif
+    
+    phaseIndex = -1             ! initialize to invalid
+    
+    ! access phaseMap info
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+      itemCount=itemCount, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! search the phaseMap
+    if (itemCount > 0) then
+      allocate(phases(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of temporary data structure.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      do i=1, itemCount
+        if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
+      enddo
+      if (i <= itemCount) then
+        ! phaseLabel was found
+        tempString = trim(phases(i))
+        ind = index(tempString, "=")
+        max = len(tempString)
+        read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
+      endif
+      ! clean-up
+      deallocate(phases)
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSearchPhaseMap - Search the Phase Map of a CplComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSearchPhaseMap()
+  subroutine NUOPC_CplCompSearchPhaseMap(comp, methodflag, phaseLabel, &
+    phaseIndex, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: comp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    character(len=*),       intent(in)            :: phaseLabel
+    integer,                intent(out)           :: phaseIndex
+    integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Search all PhaseMap entries in a CplComp (i.e. Connector)
+! to see if {\tt phaseLabel} is found. Return the associated ESMF phase index,
+! or {\tt -1} if not found.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: i
+    integer                   :: itemCount, stat, ind, max
+    character(ESMF_MAXSTR)    :: name
+    character(len=40)         :: attributeName
+    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength)           :: tempString
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+      attributeName = "InitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+      attributeName = "RunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+      attributeName = "FinalizePhaseMap"
+    endif
+    
+    phaseIndex = -1             ! initialize to invalid
+    
+    ! access phaseMap info
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+      itemCount=itemCount, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! search the phaseMap
+    if (itemCount > 0) then
+      allocate(phases(itemCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of temporary data structure.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      do i=1, itemCount
+        if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
+      enddo
+      if (i <= itemCount) then
+        ! phaseLabel was found
+        tempString = trim(phases(i))
+        ind = index(tempString, "=")
+        max = len(tempString)
+        read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
+      endif
+      ! clean-up
+      deallocate(phases)
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
