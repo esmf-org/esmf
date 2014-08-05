@@ -1463,7 +1463,7 @@ module NUOPC_Driver
             call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
               msg="Initialize data-dependency resolution loop "// &
               "has entered a dead-lock situation.", &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return  ! bail out of data-dependency resolution loop, prevent lock
           endif
           
@@ -2131,7 +2131,7 @@ module NUOPC_Driver
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2214,7 +2214,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2235,7 +2235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2322,7 +2322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2335,7 +2335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2425,7 +2425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2438,7 +2438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2466,7 +2466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -3093,7 +3093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if ((compIndex<1) .or. (compIndex>is%wrap%modelCount)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="compIndex is out of bounds.", &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
     
