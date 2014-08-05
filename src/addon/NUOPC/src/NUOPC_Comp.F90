@@ -111,7 +111,7 @@ module NUOPC_Comp
     end interface
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Derive an CplComp (i.e. Connector) from a generic component.
+!   Derive a CplComp (i.e. Connector) from a generic component.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -353,7 +353,8 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Set entry point for a GridComp (i.e. Model, Mediator, or Driver).
+! Set an entry point for a GridComp (i.e. Model, Mediator, or Driver). Publish
+! the new entry point in the correct {\tt PhaseMap} component attribute.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -486,7 +487,8 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Set entry point for a CplComp (i.e. Model, Mediator, or Driver).
+! Set an entry point for a CplComp (i.e. Connector). Publish
+! the new entry point in the correct {\tt PhaseMap} component attribute.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -786,7 +788,7 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Specialize a derived CplComp (i.e. Model, Mediator, or Driver).
+! Specialize a derived CplComp (i.e. Connector).
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
