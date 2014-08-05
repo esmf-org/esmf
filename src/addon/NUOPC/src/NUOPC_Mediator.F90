@@ -131,7 +131,7 @@ module NUOPC_Mediator
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR):: name
     logical               :: allConnected
     integer               :: i
@@ -198,7 +198,7 @@ module NUOPC_Mediator
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag
@@ -244,7 +244,7 @@ module NUOPC_Mediator
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag

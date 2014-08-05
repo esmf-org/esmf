@@ -137,7 +137,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     character(ESMF_MAXSTR):: name
     logical               :: clockIsPresent
@@ -218,7 +218,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag
@@ -264,7 +264,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag

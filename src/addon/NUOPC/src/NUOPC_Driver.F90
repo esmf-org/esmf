@@ -210,7 +210,7 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -2236,7 +2236,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
@@ -2500,7 +2500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
