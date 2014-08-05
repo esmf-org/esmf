@@ -6898,7 +6898,7 @@ end function ESMF_GridCreateFrmScrip
 		   corner2D(total(1),total(2))=cornerlat3D(3, datadims(1), datadims(2))
               endif
               call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlat, dims1)       
-	      deallocate(dims1)
+	      deallocate(dims1, minind)
 	   else
               call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
 	          exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
@@ -6955,6 +6955,13 @@ end function ESMF_GridCreateFrmScrip
 
        ! Check if we want to extract mask from a data variable
        if (mod(PetNo, regDecomp(1)) == 0) then
+	   call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           allocate(minind(2,PetCnt))
+      	   call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
            allocate(dims(regdecomp(1)-1))
            do i=1, regDecomp(1)-1
               call ESMF_VMRecv(vm, recv, 1, PetNo+i)
