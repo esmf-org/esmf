@@ -85,16 +85,19 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                                   :: localrc
+    character(ESMF_MAXSTR)    :: name
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call genericSetServicesRoutine(comp, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! call into the generic SetServices routine
+    call genericSetServicesRoutine(comp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -121,16 +124,19 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                                   :: localrc
+    character(ESMF_MAXSTR)    :: name
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call genericSetServicesRoutine(comp, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! call into the generic SetServices routine
+    call genericSetServicesRoutine(comp, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -552,21 +558,25 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                  :: i, ii, iii
-    integer                  :: phase, itemCount, phaseLabelCount, stat
-    character(len=8)         :: phaseString
-    character(len=40)        :: attributeName
+    integer                   :: i, ii, iii
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: phase, itemCount, phaseLabelCount, stat
+    character(len=8)          :: phaseString
+    character(len=40)         :: attributeName
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! determine next available phase index    
     call ESMF_GridCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     phase = phase + 1
 
@@ -574,9 +584,7 @@ module NUOPC_Comp
     call ESMF_GridCompSetEntryPoint(comp, methodflag, userRoutine=userRoutine, &
       phase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
 !print *, "NUOPC_GridCompSetEntryPoint: phaseLabelList:", &
 !phaseLabelList, "     phase:", phase
@@ -599,23 +607,17 @@ module NUOPC_Comp
       itemCount=itemCount, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     ! add the new entries to the phaseMap
@@ -643,9 +645,7 @@ module NUOPC_Comp
       valueList=phases(1:itemCount+iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
     deallocate(phases)
@@ -686,21 +686,25 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                  :: i, ii, iii
-    integer                  :: phase, itemCount, phaseLabelCount, stat
-    character(len=8)         :: phaseString
-    character(len=40)        :: attributeName
+    integer                   :: i, ii, iii
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: phase, itemCount, phaseLabelCount, stat
+    character(len=8)          :: phaseString
+    character(len=40)         :: attributeName
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine next available phase index    
     call ESMF_CplCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     phase = phase + 1
 
@@ -708,9 +712,7 @@ module NUOPC_Comp
     call ESMF_CplCompSetEntryPoint(comp, methodflag, userRoutine=userRoutine, &
       phase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
 !print *, "NUOPC_CplCompSetEntryPoint: phaseLabelList:", &
 !phaseLabelList, "     phase:", phase
@@ -733,23 +735,17 @@ module NUOPC_Comp
       itemCount=itemCount, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     ! add the new entries to the phaseMap
@@ -777,9 +773,7 @@ module NUOPC_Comp
       valueList=phases(1:itemCount+iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
     deallocate(phases)
@@ -820,21 +814,25 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                  :: i, ii, iii
-    integer                  :: phase, itemCount, phaseLabelCount, stat
-    character(len=8)         :: phaseString
-    character(len=40)        :: attributeName
+    integer                   :: i, ii, iii
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: phase, itemCount, phaseLabelCount, stat
+    character(len=8)          :: phaseString
+    character(len=40)         :: attributeName
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! determine next available phase index    
     call ESMF_GridCompGetEPPhaseCount(comp, methodflag, &
       phaseCount=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     phase = phase + 1
 
@@ -842,9 +840,7 @@ module NUOPC_Comp
     call ESMF_GridCompSetEntryPoint(comp, methodflag, userRoutine=userRoutine, &
       phase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
 !print *, "NUOPC_GridCompSetEntryPoint: phaseLabelList:", &
 !phaseLabelList, "     phase:", phase
@@ -867,23 +863,17 @@ module NUOPC_Comp
       itemCount=itemCount, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
         convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     ! add the new entries to the phaseMap
@@ -911,9 +901,7 @@ module NUOPC_Comp
       valueList=phases(1:itemCount+iii), &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
     deallocate(phases)
@@ -927,12 +915,12 @@ module NUOPC_Comp
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSpecialize()
-  subroutine NUOPC_GridCompSpecialize(comp, specLabel, specIndex, &
+  subroutine NUOPC_GridCompSpecialize(comp, specLabel, specPhaseLabel, &
     specRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                     :: comp
     character(len=*), intent(in)            :: specLabel
-    integer,          intent(in),  optional :: specIndex
+    character(len=*), intent(in),  optional :: specPhaseLabel
     interface
       subroutine specRoutine(gridcomp, rc)
         use ESMF
@@ -944,17 +932,47 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Specialize a derived GridComp (i.e. Model, Mediator, or Driver).
+! Specialize a derived GridComp (i.e. Model, Mediator, or Driver). If
+! {\tt specPhaseLabel} is specified, the specialization only applies to
+! the associated phase. Otherwise the specialization applies to all phases.
 !EOP
   !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: phaseIndex
+
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_MethodAdd(comp, label=specLabel, index=specIndex, &
-      userRoutine=specRoutine, rc=rc)
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    if (present(specPhaseLabel)) then
+      ! Figure out the phase index
+      call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+        phaseLabel=specPhaseLabel, phaseIndex=phaseIndex, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (phaseIndex < 0) then
+        ! specPhaseLabel was not found
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="specPhaseLabel could not be identified.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      ! add the method under the specific phase index
+      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+        userRoutine=specRoutine, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    else
+      ! add the method under under no specific phase index
+      call ESMF_MethodAdd(comp, label=specLabel, &
+        userRoutine=specRoutine, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -965,12 +983,12 @@ module NUOPC_Comp
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSpecialize()
-  subroutine NUOPC_CplCompSpecialize(comp, specLabel, specIndex, &
+  subroutine NUOPC_CplCompSpecialize(comp, specLabel, specPhaseLabel, &
     specRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: comp
     character(len=*), intent(in)            :: specLabel
-    integer,          intent(in),  optional :: specIndex
+    character(len=*), intent(in),  optional :: specPhaseLabel
     interface
       subroutine specRoutine(cplcomp, rc)
         use ESMF
@@ -982,17 +1000,47 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Specialize a derived CplComp (i.e. Connector).
+! Specialize a derived CplComp (i.e. Connector). If
+! {\tt specPhaseLabel} is specified, the specialization only applies to
+! the associated phase. Otherwise the specialization applies to all phases.
 !EOP
   !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: phaseIndex
+
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_MethodAdd(comp, label=specLabel, index=specIndex, &
-      userRoutine=specRoutine, rc=rc)
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    if (present(specPhaseLabel)) then
+      ! Figure out the phase index
+      call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+        phaseLabel=specPhaseLabel, phaseIndex=phaseIndex, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (phaseIndex < 0) then
+        ! specPhaseLabel was not found
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="specPhaseLabel could not be identified.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      ! add the method under the specific phase index
+      call ESMF_MethodAdd(comp, label=specLabel, index=phaseIndex, &
+        userRoutine=specRoutine, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    else
+      ! add the method under under no specific phase index
+      call ESMF_MethodAdd(comp, label=specLabel, &
+        userRoutine=specRoutine, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
