@@ -438,18 +438,18 @@ class Grid(object):
             staggerlocs = [staggerloc]
 
         for stagger in staggerlocs:
-            if self.coords_done[stagger] == 1:
+            if self.coords_done[stagger][0] == 1:
                 warnings.warn("This coordinate has already been added.")
+            else:
+                # request that ESMF allocate space for the coordinates
+                if not from_file:
+                    ESMP_GridAddCoord(self, staggerloc=stagger)
 
-            # request that ESMF allocate space for the coordinates
-            if not from_file:
-                ESMP_GridAddCoord(self, staggerloc=stagger)
+                # and now for Python
+                self.allocate_coords(stagger)
 
-            # and now for Python
-            self.allocate_coords(stagger)
-
-            # set the staggerlocs to be done
-            self.staggerloc[stagger] = True
+                # set the staggerlocs to be done
+                self.staggerloc[stagger] = True
 
         if len(staggerlocs) == 1 and coord_dim is not None:
             return self.coords[staggerlocs[0]][coord_dim]
@@ -497,13 +497,13 @@ class Grid(object):
         for stagger in staggerlocs:
             if self.item_done[stagger][item] == 1:
                 warnings.warn("This item has already been added.")
+            else:
+                # request that ESMF allocate space for the coordinates
+                if not from_file:
+                    ESMP_GridAddItem(self, item, staggerloc=stagger)
 
-            # request that ESMF allocate space for the coordinates
-            if not from_file:
-                ESMP_GridAddItem(self, item, staggerloc=stagger)
-
-            # and now for Python..
-            self.allocate_items(item, stagger)
+                # and now for Python..
+                self.allocate_items(item, stagger)
 
         if len(staggerlocs) is 1:
             if item == GridItem.MASK:
