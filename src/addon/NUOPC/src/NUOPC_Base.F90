@@ -126,7 +126,7 @@ module NUOPC_Base
 !   to the currentTime of {\tt checkClock}.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     type(ESMF_Time)           :: checkCurrTime, currTime, stopTime, startTime
     type(ESMF_TimeInterval)   :: checkTimeStep, timeStep
     type(ESMF_Direction_Flag) :: direction
@@ -1319,7 +1319,7 @@ endif
 !   account the direction of the Clock.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS

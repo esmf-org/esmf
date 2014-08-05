@@ -76,6 +76,10 @@ endif
 endif
 
 ############################################################
+# Disable PIO until F2003 C Interop is verified to work
+ESMF_PIO               =
+
+############################################################
 # currently does not support OpenMP
 #
 ESMF_OPENMP := OFF

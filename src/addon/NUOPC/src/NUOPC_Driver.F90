@@ -210,7 +210,7 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -2174,11 +2174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(type_InternalState)        :: is
     integer                         :: iComp, i
     type(ESMF_GridComp)             :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2223,43 +2219,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error
@@ -2411,11 +2378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: src, dst, i
     type(ESMF_GridComp)             :: srcComp, dstComp
     type(ESMF_CplComp)              :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2487,43 +2450,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error

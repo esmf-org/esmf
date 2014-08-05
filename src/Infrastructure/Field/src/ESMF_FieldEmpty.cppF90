@@ -550,7 +550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_FieldEmptyComplete(field, arrayspec, &
       indexflag=indexflag, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=rc)
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

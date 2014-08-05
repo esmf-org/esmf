@@ -5989,7 +5989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid)  :: grid
     type(ESMF_Array) :: array
     type(ESMF_VM) :: vm
-    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1), msgbuf(4)
+    integer :: numDim, buf(1), msgbuf(4)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Decomp_Flag):: decompflagLocal(2)
     integer :: localrc
@@ -5998,7 +5998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: localAddUserArea
     logical :: localIsSphere
     integer :: grid_corners
-    integer :: maxIndex(2)
+    integer, pointer :: minind(:,:)
     integer :: cornerDims(2)
     integer :: lbnd(2), ubnd(2), total(2)
     real(ESMF_KIND_R8), pointer :: fptrLat(:,:), fptrLon(:,:), fptrCLon(:,:), fptrCLat(:,:)
@@ -6193,6 +6193,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For instance, if there are 8 PETs and regDecomp = /4,2/, then PET 0 and PET 4 will be
         ! the reader, and each one will read in half of the input data.
 
+        allocate(minind(2,PetCnt))
+	call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+  	call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
 	    exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6200,7 +6207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
         total(1)=dims(1)
         totalpoints = total(1)*total(2) 
-        startindex = (lbnd(2)-1)*total(1)+lbnd(1)
+        startindex = (minind(2,PetNo+1)-1)*total(1)+minind(1,PetNo+1)
      
         ! Get the coordinate information from the SCRIP file, if in radians, convert to degrees
         if (localAddCornerStagger) then ! Get centers and corners
@@ -6243,7 +6250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                  ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        deallocate(dims)
+        deallocate(dims, minind)
       
         ! pack the coordinate data and send it to the PETs in the same row (PET0 fills its
         ! own array and send data to PET1 to PET3, PET4 will send to 5 to 7, etc...)
@@ -6513,6 +6520,7 @@ end function ESMF_GridCreateFrmScrip
     real(ESMF_KIND_R8) :: missing_value
     integer :: i,j,k,localroot
     integer :: maxIndex2D(2)    
+    integer, pointer :: minind(:,:) 
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -6721,6 +6729,13 @@ end function ESMF_GridCreateFrmScrip
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (mod(PetNo, regDecomp(1)) == 0) then
+           call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+           allocate(minind(2,PetCnt))
+      	   call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
            call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
 	      exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6733,12 +6748,12 @@ end function ESMF_GridCreateFrmScrip
                 call ESMF_GridspecGetVar2D(grid_filename, coordids, &
 				    loncoord=loncoord2D, latcoord=latcoord2D, &
                                     cornerlon=cornerlon3D, cornerlat=cornerlat3D, &
-				    start=lbnd, count=total, &
+				    start=minind(:,PetNo+1), count=total, &
 				    rc=localrc)
            else
                 call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
 				    loncoord=loncoord2D, latcoord=latcoord2D, &
-				    start=lbnd, count=total, &
+				    start=minind(:,PetNo+1), count=total, &
                                     rc=localrc)
    	   endif
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6883,7 +6898,7 @@ end function ESMF_GridCreateFrmScrip
 		   corner2D(total(1),total(2))=cornerlat3D(3, datadims(1), datadims(2))
               endif
               call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlat, dims1)       
-	      deallocate(dims1)
+	      deallocate(dims1, minind)
 	   else
               call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
 	          exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
@@ -6923,6 +6938,7 @@ end function ESMF_GridCreateFrmScrip
         endif  ! end if (AddCornerStagger)
      endif  ! end if ndims = 2
 
+
     ! Only add mask if localAddMask = .TRUE.
     ! This code is common whether it is ndims=1 or ndims=2
     if (localAddMask) then
@@ -6939,6 +6955,13 @@ end function ESMF_GridCreateFrmScrip
 
        ! Check if we want to extract mask from a data variable
        if (mod(PetNo, regDecomp(1)) == 0) then
+	   call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           allocate(minind(2,PetCnt))
+      	   call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
            allocate(dims(regdecomp(1)-1))
            do i=1, regDecomp(1)-1
               call ESMF_VMRecv(vm, recv, 1, PetNo+i)
@@ -6953,7 +6976,7 @@ end function ESMF_GridCreateFrmScrip
           mask2D(:,:) = 1
           call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
 			        varBuffer, missing_value = missing_value, &
-                                start=lbnd, count=total, rc=localrc)
+                                start=minind(:,PetNo+1), count=total, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	  do i=1,size(varBuffer,2)
@@ -6967,6 +6990,7 @@ end function ESMF_GridCreateFrmScrip
 	  deallocate(varBuffer)
           deallocate(mask2D)
 	  deallocate(dims)
+          deallocate(minind)
        else
           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
 	      exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)

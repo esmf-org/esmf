@@ -149,7 +149,7 @@ module NUOPC_Connector
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR)                    :: name
 
     rc = ESMF_SUCCESS

@@ -144,7 +144,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR)  :: name
 
     rc = ESMF_SUCCESS
@@ -170,7 +170,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
-    ! local variables    
+    ! local variables
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
