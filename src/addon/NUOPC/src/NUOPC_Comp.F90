@@ -346,8 +346,8 @@ module NUOPC_Comp
 !
 ! !DESCRIPTION:
 ! Search all PhaseMap entries in a GridComp (i.e. Model, Mediator, or Driver)
-! to see if {\tt phaseLabel} is found. Return the associated ESMF phase index,
-! or {\tt -1} if not found.
+! to see if {\tt phaseLabel} is found. Return the associated ESMF
+! {\tt phaseIndex}, or {\tt -1} if not found.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -428,8 +428,8 @@ module NUOPC_Comp
 !
 ! !DESCRIPTION:
 ! Search all PhaseMap entries in a CplComp (i.e. Connector)
-! to see if {\tt phaseLabel} is found. Return the associated ESMF phase index,
-! or {\tt -1} if not found.
+! to see if {\tt phaseLabel} is found. Return the associated ESMF
+! {\tt phaseIndex}, or {\tt -1} if not found.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
