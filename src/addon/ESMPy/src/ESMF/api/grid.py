@@ -220,7 +220,7 @@ class Grid(object):
             # create default regDecomp if it is not passed as an argument
             if regDecomp is None:
                 regDecomp = [pet_count(), 1]
-                #print 'Creating grid from ', filename
+            # create the grid from file
             self.struct = ESMP_GridCreateFromFile(filename, filetype,
                                                   regDecomp,
                                                   decompflag=decompflag,
