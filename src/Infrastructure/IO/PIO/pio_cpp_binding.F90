@@ -1343,7 +1343,7 @@ function pio_cpp_file_is_open(file) result(is_open) bind(c)
 #if !defined (ESMF_PGI_C_BOOL_BUG)
   is_open = logical(o, c_bool)
 #else
-  is_open = merge (1, 0, is_open)
+  is_open = merge (1, 0, o)
 #endif
 
   !  return to the cpp caller
