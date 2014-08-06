@@ -26,8 +26,8 @@ class Grid(object):
                  staggerloc=None,
                  filename=None,
                  filetype=None,
-		         regDecomp=None,
-		         decompflag=None,
+                 regDecomp=None,
+                 decompflag=None,
                  is_sphere=None,
                  add_corner_stagger=None,
                  add_user_area=None,
@@ -221,14 +221,14 @@ class Grid(object):
             if regDecomp is None:
                 regDecomp = [pet_count(), 1]
                 #print 'Creating grid from ', filename
-                self.struct = ESMP_GridCreateFromFile(filename, filetype,
-                                                      regDecomp,
-                                                      decompflag=decompflag,
-                                                      isSphere=is_sphere,
-                                                      addCornerStagger=add_corner_stagger,
-                                                      addUserArea=add_user_area,
-                                                      addMask=add_mask, varname=varname,
-                                                      coordNames=coord_names)
+            self.struct = ESMP_GridCreateFromFile(filename, filetype,
+                                                  regDecomp,
+                                                  decompflag=decompflag,
+                                                  isSphere=is_sphere,
+                                                  addCornerStagger=add_corner_stagger,
+                                                  addUserArea=add_user_area,
+                                                  addMask=add_mask, varname=varname,
+                                                  coordNames=coord_names)
             # grid rank and dims
             if filetype == FileFormat.SCRIP:
                 self.rank = ESMP_ScripInqRank(filename)
