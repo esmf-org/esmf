@@ -8,6 +8,7 @@
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
 
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include <iterator>
