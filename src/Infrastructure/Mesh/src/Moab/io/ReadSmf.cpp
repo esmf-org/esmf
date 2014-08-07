@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <cstdio>
 #include <iostream>
 
 #include "ReadSmf.hpp"

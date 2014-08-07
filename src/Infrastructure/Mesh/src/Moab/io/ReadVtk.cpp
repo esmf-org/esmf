@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cstdio>
 
 #include "ReadVtk.hpp"
 #include "moab/Range.hpp"
