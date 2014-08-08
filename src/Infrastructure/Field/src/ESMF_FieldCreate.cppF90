@@ -1745,7 +1745,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag 
 !      different from the one stored in the {\tt ESMF\_Grid} object.The default
-!      value is {\tt ESMF\_INDEXFLAG\_DELOCAL}
+!      value is {\tt ESMF\_INDEX\_DELOCAL}
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
