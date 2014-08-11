@@ -832,7 +832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_ArrayRedistStore()
 ! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, &
 !   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
-!   unmatchedIndicesOkay, pipelineDepth, rc)
+!   ignoreUnmatchedIndices, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_Array),       intent(in)             :: srcArray
@@ -841,7 +841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>),intent(in)            :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,               intent(in),    optional :: srcToDstTransposeMap(:)
-!   logical,               intent(in),    optional :: unmatchedIndicesOkay
+!   logical,               intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,               intent(inout), optional :: pipelineDepth
 !   integer,               intent(out),   optional :: rc
 !
@@ -853,7 +853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt pipelineDepth}.
 !              The new argument provide access to the tuning parameter
 !              affecting the sparse matrix execution.
-! \item[7.0.0] Added argument {\tt unmatchedIndicesOkay} to support situations 
+! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
 ! \end{description}
@@ -940,11 +940,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     specified {\tt dstArray} dimension. Mixing of distributed and
 !     undistributed dimensions is supported.
 !
-!   \item [{[unmatchedIndicesOkay]}]
+!   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
 !     between the {\tt srcArray} and {\tt dstArray} side. The default setting
 !     is {\tt .false.}, indicating that it is an error when such a situation is 
-!     encountered. Setting {\tt unmatchedIndicesOkay} to {\tt .true.} ignores
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
 !     unmatched indices.
 !
 !   \item [{[pipelineDepth]}]
@@ -988,7 +988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI4(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, unmatchedIndicesOkay, &
+    factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
     pipelineDepth, rc)
 !
 ! !ARGUMENTS:
@@ -998,7 +998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4),      intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
     integer,                    intent(out),   optional :: rc
 !
@@ -1006,7 +1006,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_unmatchedOkay        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1023,12 +1023,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_unmatchedOkay, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_ignoreUnmatched, &
       pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1059,7 +1059,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI8(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, unmatchedIndicesOkay, &
+    factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
     pipelineDepth, rc)
 !
 ! !ARGUMENTS:
@@ -1069,7 +1069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8),      intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
     integer,                    intent(out),   optional :: rc
 !
@@ -1077,7 +1077,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_unmatchedOkay        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1094,12 +1094,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, opt_unmatchedOkay, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, opt_ignoreUnmatched, &
       pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1130,7 +1130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR4(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, unmatchedIndicesOkay, &
+    factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
     pipelineDepth, rc)
 !
 ! !ARGUMENTS:
@@ -1140,7 +1140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4),         intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
     integer,                    intent(out),   optional :: rc
 !
@@ -1148,7 +1148,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_unmatchedOkay        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1165,12 +1165,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, opt_unmatchedOkay, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, opt_ignoreUnmatched, &
       pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1201,7 +1201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR8(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, unmatchedIndicesOkay, &
+    factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
     pipelineDepth, rc)
 !
 ! !ARGUMENTS:
@@ -1211,7 +1211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8),         intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
     integer,                    intent(out),   optional :: rc
 !
@@ -1219,7 +1219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_unmatchedOkay        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1236,12 +1236,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, opt_unmatchedOkay, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, opt_ignoreUnmatched, &
       pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1272,7 +1272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
-    keywordEnforcer, srcToDstTransposeMap, unmatchedIndicesOkay, &
+    keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
     pipelineDepth, rc)
 !
 ! !ARGUMENTS:
@@ -1281,7 +1281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),    optional :: srcToDstTransposeMap(:)
-    logical,                intent(in),    optional :: unmatchedIndicesOkay
+    logical,                intent(in),    optional :: ignoreUnmatchedIndices
     integer,                intent(inout), optional :: pipelineDepth
     integer,                intent(out),   optional :: rc
 !
@@ -1293,7 +1293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt pipelineDepth}.
 !              The new argument provide access to the tuning parameter
 !              affecting the sparse matrix execution.
-! \item[7.0.0] Added argument {\tt unmatchedIndicesOkay} to support situations 
+! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
 ! \end{description}
@@ -1373,11 +1373,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     specified {\tt dstArray} dimension. Mixing of distributed and
 !     undistributed dimensions is supported.
 !
-!   \item [{[unmatchedIndicesOkay]}]
+!   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
 !     between the {\tt srcArray} and {\tt dstArray} side. The default setting
 !     is {\tt .false.}, indicating that it is an error when such a situation is 
-!     encountered. Setting {\tt unmatchedIndicesOkay} to {\tt .true.} ignores
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
 !     unmatched indices.
 !
 !   \item [{[pipelineDepth]}]
@@ -1412,7 +1412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_unmatchedOkay        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1429,12 +1429,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, opt_unmatchedOkay, pipelineDepth, localrc)
+      srcToDstTransposeMapArg, opt_ignoreUnmatched, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

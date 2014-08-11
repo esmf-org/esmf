@@ -571,12 +571,12 @@ program ESMF_ArrayRedistUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Reverse ArrayRedistStore with holes Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  ! This direction requires unmatchedIndicesOkay=.true. because the
+  ! This direction requires ignoreUnmatchedIndices=.true. because the
   ! sparse matrix is costructed from the srcArray, but now the dstArray
   ! has holes, and that means the sparse matrix has entries with indices
   ! that are not found on the dstArray side.
   call ESMF_ArrayRedistStore(srcArray=dstArray, dstArray=srcArray, &
-    unmatchedIndicesOkay=.true., routehandle=routehandle, rc=rc)
+    ignoreUnmatchedIndices=.true., routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------

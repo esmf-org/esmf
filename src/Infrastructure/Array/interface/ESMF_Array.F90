@@ -775,7 +775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_ArraySMMStore()
 ! subroutine ESMF_ArraySMMStore<type><kind>(srcArray, dstArray, &
 !   routehandle, factorList, factorIndexList, keywordEnforcer, &
-!   unmatchedIndicesOkay, srcTermProcessing, pipelineDepth, &
+!   ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, &
 !   transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -785,7 +785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>), target, intent(in)       :: factorList(:)
 !   integer,                   intent(in)              :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   logical,                   intent(in),    optional :: unmatchedIndicesOkay
+!   logical,                   intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                   intent(inout), optional :: srcTermProcessing
 !   integer,                   intent(inout), optional :: pipelineDepth
 !   type(ESMF_RouteHandle),    intent(inout)           :: transposeRoutehandle
@@ -802,7 +802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              affecting the sparse matrix execution.
 ! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
 !              the transposed matrix operation to be returned.\newline
-!              Added argument {\tt unmatchedIndicesOkay} to support sparse 
+!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
 ! \end{description}
@@ -907,12 +907,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Array {\em sequence indices} and {\em tensor sequence indices}.
 !
-!   \item [{[unmatchedIndicesOkay]}]
+!   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when sequence indices 
 !     in the sparse matrix are encountered that do not have a match on the 
 !     {\tt srcArray} or {\tt dstArray} side. The default setting is 
 !     {\tt .false.}, indicating that it is an error when such a situation is 
-!     encountered. Setting {\tt unmatchedIndicesOkay} to {\tt .true.} ignores
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
 !     entries with unmatched indices.
 !
 !   \item [{[srcTermProcessing]}]
@@ -992,7 +992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, unmatchedIndicesOkay, srcTermProcessing, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1002,7 +1002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)              :: factorList(:)
     integer,                       intent(in)              :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                       intent(in),    optional :: unmatchedIndicesOkay
+    logical,                       intent(in),    optional :: ignoreUnmatchedIndices
     integer,                       intent(inout), optional :: srcTermProcessing
     integer,                       intent(inout), optional :: pipelineDepth
     type(ESMF_RouteHandle),        intent(inout), optional :: transposeRoutehandle
@@ -1016,7 +1016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_unmatchedOkay  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1035,13 +1035,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
-      opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1081,7 +1081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
-        opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
@@ -1111,7 +1111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, unmatchedIndicesOkay, srcTermProcessing, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1121,7 +1121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), target, intent(in)              :: factorList(:)
     integer,                       intent(in)              :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                       intent(in),    optional :: unmatchedIndicesOkay
+    logical,                       intent(in),    optional :: ignoreUnmatchedIndices
     integer,                       intent(inout), optional :: srcTermProcessing
     integer,                       intent(inout), optional :: pipelineDepth
     type(ESMF_RouteHandle),        intent(inout), optional :: transposeRoutehandle
@@ -1135,7 +1135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_unmatchedOkay  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1154,13 +1154,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
-      opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1200,7 +1200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
-        opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
@@ -1230,7 +1230,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, unmatchedIndicesOkay, srcTermProcessing, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1240,7 +1240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: srcTermProcessing
     integer,                    intent(inout), optional :: pipelineDepth
     type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
@@ -1254,7 +1254,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_unmatchedOkay  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1273,13 +1273,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
-      opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1319,7 +1319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
-        opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
@@ -1349,7 +1349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, unmatchedIndicesOkay, srcTermProcessing, &
+    factorIndexList, keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, &
     pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1359,7 +1359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                    intent(in),    optional :: unmatchedIndicesOkay
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: srcTermProcessing
     integer,                    intent(inout), optional :: pipelineDepth
     type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
@@ -1373,7 +1373,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt)         :: factorIndexListArg ! helper variable
     integer                         :: tupleSize, i       ! helper variable
     integer, allocatable            :: transposeFIL(:,:)  ! helper variable
-    type(ESMF_Logical)              :: opt_unmatchedOkay  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1392,13 +1392,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
-      opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1438,7 +1438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStore(dstArray, srcArray, transposeRoutehandle, &
         ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
-        opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Garbage collection
@@ -1468,7 +1468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
-    keywordEnforcer, unmatchedIndicesOkay, srcTermProcessing, pipelineDepth, &
+    keywordEnforcer, ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, &
     transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1476,7 +1476,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),    optional :: unmatchedIndicesOkay
+    logical,                intent(in),    optional :: ignoreUnmatchedIndices
     integer,                intent(inout), optional :: srcTermProcessing
     integer,                intent(inout), optional :: pipelineDepth
     type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
@@ -1493,7 +1493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              affecting the sparse matrix execution.
 ! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
 !              the transposed matrix operation to be returned.\newline
-!              Added argument {\tt unmatchedIndicesOkay} to support sparse 
+!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
 ! \end{description}
@@ -1560,12 +1560,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !
-!   \item [{[unmatchedIndicesOkay]}]
+!   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when sequence indices 
 !     in the sparse matrix are encountered that do not have a match on the 
 !     {\tt srcArray} or {\tt dstArray} side. The default setting is 
 !     {\tt .false.}, indicating that it is an error when such a situation is 
-!     encountered. Setting {\tt unmatchedIndicesOkay} to {\tt .true.} ignores
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
 !     entries with unmatched indices.
 !
 !   \item [{[srcTermProcessing]}]
@@ -1635,7 +1635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                         :: localrc            ! local return code
-    type(ESMF_Logical)              :: opt_unmatchedOkay  ! helper variable
+    type(ESMF_Logical)              :: opt_ignoreUnmatched  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1646,12 +1646,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Set default flags
-    opt_unmatchedOkay = ESMF_FALSE
-    if (present(unmatchedIndicesOkay)) opt_unmatchedOkay = unmatchedIndicesOkay
+    opt_ignoreUnmatched = ESMF_FALSE
+    if (present(ignoreUnmatchedIndices)) opt_ignoreUnmatched = ignoreUnmatchedIndices
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
-      opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+      opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1664,7 +1664,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(transposeRoutehandle)) then
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStoreNF(dstArray, srcArray, transposeRoutehandle, &
-        opt_unmatchedOkay, srcTermProcessing, pipelineDepth, localrc)
+        ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Mark transposeRoutehandle object as being created

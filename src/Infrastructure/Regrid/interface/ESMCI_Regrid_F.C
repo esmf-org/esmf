@@ -80,7 +80,7 @@ void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt **factorIndexList, ESMC_Logical *unmatchedOkay,
+    ESMCI::InterfaceInt **factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
@@ -405,9 +405,9 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     if (*has_rh != 0) {
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
-      ESMC_Logical unmatchedOkay = ESMF_FALSE;
+      ESMC_Logical ignoreUnmatched = ESMF_FALSE;
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-            &num_entries, &iiptr, &unmatchedOkay, srcTermProcessing, 
+            &num_entries, &iiptr, &ignoreUnmatched, srcTermProcessing, 
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception

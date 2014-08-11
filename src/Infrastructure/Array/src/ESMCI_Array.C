@@ -4456,7 +4456,7 @@ int Array::redistStore(
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
   void *factor,                         // in    - redist factor
-  bool unmatchedOkay,                   // in    - support unmatched indices
+  bool ignoreUnmatched,                 // in    - support unmatched indices
   int *pipelineDepthArg                 // in (optional)
   ){
 //
@@ -4923,7 +4923,7 @@ for (int i=0; i<factorListCount; i++)
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
-    false, unmatchedOkay, &srcTermProcessing, pipelineDepthArg);
+    false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -7704,7 +7704,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     const bool tensorMixFlag, DD::Interval const *seqIndexInterval,
     const int tensorElementCountEff, vector<bool> const &factorPetFlag,
     const ESMC_TypeKind_Flag typekindFactors, const bool haloFlag,
-    const bool unmatchedOkay, Array const *array, const int localDeCount, 
+    const bool ignoreUnmatched, Array const *array, const int localDeCount, 
     const int *localDeElementCount, int const *localDeToDeMap,
     int const *localIntervalPerPetCount,
     int const *localElementsPerIntervalCount
@@ -7765,7 +7765,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
         break;
       }while (iMin != iMax);
-      if (!unmatchedOkay && !foundFlag){
+      if (!ignoreUnmatched && !foundFlag){
         // seqIndex lies outside Array bounds
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains seqIndex outside Array bounds",
@@ -7922,7 +7922,7 @@ int Array::sparseMatMulStore(
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
   bool haloFlag,                            // in    - support halo conditions
-  bool unmatchedOkay,                       // in    - support unmatched indices
+  bool ignoreUnmatched,                     // in    - support unmatched indices
   int *srcTermProcessingArg,                // inout - src term proc (optional)
                                 // if (NULL) -> auto-tune, no pass back
                                 // if (!NULL && -1) -> auto-tune, pass back
@@ -8650,7 +8650,7 @@ int Array::sparseMatMulStore(
     false,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     srcSeqIndexInterval, srcTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, unmatchedOkay, srcArray, srcLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, srcArray, srcLocalDeCount,
     srcLocalDeElementCount, srcLocalDeToDeMap, srcLocalIntervalPerPetCount,
     srcLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -8676,7 +8676,7 @@ int Array::sparseMatMulStore(
     true,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     dstSeqIndexInterval, dstTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, unmatchedOkay, dstArray, dstLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, dstArray, dstLocalDeCount,
     dstLocalDeElementCount, dstLocalDeToDeMap, dstLocalIntervalPerPetCount,
     dstLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -9003,7 +9003,7 @@ int Array::sparseMatMulStore(
   }
 #endif
   
-  if (unmatchedOkay){
+  if (ignoreUnmatched){
     // If there are unmatched src or dst elements in the sparse matrix, they
     // will have lead to FactorElement entries with a partnerDe.size()==0 here.
     // Leaving them like that will lead to issues down the code, so that if

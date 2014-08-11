@@ -342,7 +342,7 @@ module ESMF_ArraySMMUTest_comp_mod
       call ESMF_ArraySMMStore(srcArray, dstArray, factorList=factorList, &
         factorIndexList=factorIndexList, routehandle=rh, &
 #ifdef TEST_UNMATCHED
-        unmatchedIndicesOkay=.true., &
+        ignoreUnmatchedIndices=.true., &
 #endif
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
@@ -353,7 +353,7 @@ module ESMF_ArraySMMUTest_comp_mod
     else
       call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, &
 #ifdef TEST_UNMATCHED
-        unmatchedIndicesOkay=.true., &
+        ignoreUnmatchedIndices=.true., &
 #endif
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
