@@ -138,7 +138,7 @@ module ESMF_ArraySMMUTest_comp_mod
     integer, allocatable  :: localDeToDeMap(:)
     integer, pointer      :: farrayPtr(:)
     integer               :: seed(4,6), value, result(4,6), validation(4,6)
-    integer               :: factorList(18), factorIndexList(2,18)
+    integer               :: factorList(19), factorIndexList(2,19)
     type(ESMF_RouteHandle):: rh, trh
     character(len=160)    :: msg
     
@@ -321,6 +321,18 @@ module ESMF_ArraySMMUTest_comp_mod
       factorIndexList(1,18) = 6
       factorIndexList(2,18) = 4
       factorList(18)        = 9
+
+#define TEST_UNMATCHED
+#ifdef TEST_UNMATCHED
+      factorIndexList(1,19) = 15  ! outside
+      factorIndexList(2,19) = 40   ! inside
+      factorList(19)        = 100 ! will never be used
+#else
+      factorIndexList(1,19) = 1   ! inside
+      factorIndexList(2,19) = 1   ! inside
+      factorList(19)        = 0   ! does not change anything
+#endif
+
     endif
     
     !---------------------------------------------------------------------------
@@ -329,6 +341,9 @@ module ESMF_ArraySMMUTest_comp_mod
     if (localPet == 0) then
       call ESMF_ArraySMMStore(srcArray, dstArray, factorList=factorList, &
         factorIndexList=factorIndexList, routehandle=rh, &
+#ifdef TEST_UNMATCHED
+        unmatchedIndicesOkay=.true., &
+#endif
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -337,6 +352,9 @@ module ESMF_ArraySMMUTest_comp_mod
       return  ! bail out
     else
       call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, &
+#ifdef TEST_UNMATCHED
+        unmatchedIndicesOkay=.true., &
+#endif
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         transposeRoutehandle=trh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

@@ -779,30 +779,39 @@ extern "C" {
   void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
-    void *factor, int *pipelineDepth, int *rc){
+    void *factor, ESMC_Logical *unmatchedOkay, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // unmatchedOkay flag
+    bool unmatchedOkayOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(unmatchedOkay) != ESMC_NULL_POINTER)
+      if (*unmatchedOkay == ESMF_TRUE) unmatchedOkayOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, *typekind,
-      factor, pipelineDepth),
+      factor, unmatchedOkayOpt, pipelineDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt **srcToDstTransposeMap, int *pipelineDepth, int *rc){
+    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_Logical *unmatchedOkay,
+    int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // unmatchedOkay flag
+    bool unmatchedOkayOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(unmatchedOkay) != ESMC_NULL_POINTER)
+      if (*unmatchedOkay == ESMF_TRUE) unmatchedOkayOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, ESMF_NOKIND,
-      NULL, pipelineDepth),
+      NULL, unmatchedOkayOpt, pipelineDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -847,6 +856,7 @@ extern "C" {
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, 
+    ESMC_Logical *unmatchedOkay,
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstore()"
@@ -882,6 +892,10 @@ extern "C" {
         return;
       }
     }
+    // unmatchedOkay flag
+    bool unmatchedOkayOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(unmatchedOkay) != ESMC_NULL_POINTER)
+      if (*unmatchedOkay == ESMF_TRUE) unmatchedOkayOpt = true;
     // prepare SparseMatrix vector
     vector<ESMCI::SparseMatrix> sparseMatrix;
     int srcN = (*factorIndexList)->extent[0]/2;
@@ -890,7 +904,7 @@ extern "C" {
       *factorListCount, srcN, dstN, (*factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, sparseMatrix, false,
+      *srcArray, *dstArray, routehandle, sparseMatrix, false, unmatchedOkayOpt,
       ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
       ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -917,16 +931,21 @@ extern "C" {
 
   void FTN_X(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
+    ESMC_Logical *unmatchedOkay,
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // unmatchedOkay flag
+    bool unmatchedOkayOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(unmatchedOkay) != ESMC_NULL_POINTER)
+      if (*unmatchedOkay == ESMF_TRUE) unmatchedOkayOpt = true;
     // prepare empty SparseMatrix vector
     vector<ESMCI::SparseMatrix> sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, sparseMatrix, false,
+      *srcArray, *dstArray, routehandle, sparseMatrix, false, unmatchedOkayOpt,
       ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
       ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
