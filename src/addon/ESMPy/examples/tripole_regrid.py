@@ -1,15 +1,12 @@
 # This example demonstrates how to regrid between a grid and a mesh.
 # The grid and mesh files are required, they can be retrieved from the ESMF data repository:
 #   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
-#   wget http://www.earthsystemmodeling.org/download/data/tripole.nc
+#   wget http://www.earthsystemmodeling.org/download/data/GRIDSPEC_ACCESS1.nc
 
 import ESMF
 
-ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
-
 grid1 = "ll2.5deg_grid.nc"
-grid2 = "tripole.nc"
+grid2 = "GRIDSPEC_ACCESS1.nc"
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
@@ -22,13 +19,11 @@ srcfield = ESMF.Field(grid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 srcfield[...] = 25
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP,
+tripole = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.GRIDSPEC,
                  add_corner_stagger=True)
-#mesh = ESMF.Mesh(filename=grid2,
-#                 filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the elements of the destination mesh
-dstfield = ESMF.Field(mesh, 'dstmesh', meshloc=ESMF.MeshLoc.ELEMENT)
+dstfield = ESMF.Field(tripole, 'dstfield', meshloc=ESMF.StaggerLoc.CENTER)
 
 # create an object to regrid data from the source to the destination field
 regrid = ESMF.Regrid(srcfield, dstfield, \
