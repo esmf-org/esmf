@@ -99,6 +99,8 @@ program ESMF_IO_PIOUTest
 ! the ESMF API.
 !------------------------------------------------------------------------
 
+  addr_diff = -1
+  desc_len  = -1
 !------------------------------------------------------------------------
   !NEX_UTest
   ! Ensure at least enough C++ space to hold Fortran derived type
@@ -112,7 +114,7 @@ program ESMF_IO_PIOUTest
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_IOSYSTEM_DESC"
+  write(failMsg, *) "PIO_SIZE_IOSYSTEM_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(iosystem_desc_t) vs PIO_SIZE_IOSYSTEM_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -130,7 +132,7 @@ program ESMF_IO_PIOUTest
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_FILE_DESC"
+  write(failMsg, *) "PIO_SIZE_FILE_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(file_desc_t) vs PIO_SIZE_FILE_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -148,7 +150,7 @@ program ESMF_IO_PIOUTest
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_IO_DESC"
+  write(failMsg, *) "PIO_SIZE_IO_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(io_desc_t) vs PIO_SIZE_IO_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -166,7 +168,7 @@ program ESMF_IO_PIOUTest
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_VAR_DESC"
+  write(failMsg, *) "PIO_SIZE_VAR_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(var_desc_t) vs PIO_SIZE_VAR_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
