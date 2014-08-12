@@ -1664,7 +1664,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(transposeRoutehandle)) then
       ! Call into the C++ interface, which will sort out optional arguments
       call c_ESMC_ArraySMMStoreNF(dstArray, srcArray, transposeRoutehandle, &
-        ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, localrc)
+        opt_ignoreUnmatched, srcTermProcessing, pipelineDepth, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Mark transposeRoutehandle object as being created

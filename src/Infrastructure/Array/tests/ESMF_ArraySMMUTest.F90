@@ -324,8 +324,8 @@ module ESMF_ArraySMMUTest_comp_mod
 
 #define TEST_UNMATCHED
 #ifdef TEST_UNMATCHED
-      factorIndexList(1,19) = 15  ! outside
-      factorIndexList(2,19) = 40   ! inside
+      factorIndexList(1,19) = 15  ! valid src sequence index
+      factorIndexList(2,19) = 40  ! invalid dst sequence index
       factorList(19)        = 100 ! will never be used
 #else
       factorIndexList(1,19) = 1   ! inside
