@@ -4290,7 +4290,7 @@ int Array::haloStore(
     // precompute sparse matrix multiplication
     int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
-      &srcTermProcessing, pipelineDepthArg);
+      false, &srcTermProcessing, pipelineDepthArg);
     
 #ifdef HALOSTOREMEMLOG_on
     VM::logMemInfo(std::string("HaloStore4"));
@@ -4456,6 +4456,7 @@ int Array::redistStore(
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
   void *factor,                         // in    - redist factor
+  bool ignoreUnmatched,                 // in    - support unmatched indices
   int *pipelineDepthArg                 // in (optional)
   ){
 //
@@ -4922,7 +4923,7 @@ for (int i=0; i<factorListCount; i++)
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
-    false, &srcTermProcessing, pipelineDepthArg);
+    false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -7703,8 +7704,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     const bool tensorMixFlag, DD::Interval const *seqIndexInterval,
     const int tensorElementCountEff, vector<bool> const &factorPetFlag,
     const ESMC_TypeKind_Flag typekindFactors, const bool haloFlag,
-    Array const *array, const int localDeCount, const int *localDeElementCount,
-    int const *localDeToDeMap, int const *localIntervalPerPetCount,
+    const bool ignoreUnmatched, Array const *array, const int localDeCount, 
+    const int *localDeElementCount, int const *localDeToDeMap,
+    int const *localIntervalPerPetCount,
     int const *localElementsPerIntervalCount
     ){
     
@@ -7763,7 +7765,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
         break;
       }while (iMin != iMax);
-      if (!foundFlag){
+      if (!ignoreUnmatched && !foundFlag){
         // seqIndex lies outside Array bounds
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains seqIndex outside Array bounds",
@@ -7920,6 +7922,7 @@ int Array::sparseMatMulStore(
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
   bool haloFlag,                            // in    - support halo conditions
+  bool ignoreUnmatched,                     // in    - support unmatched indices
   int *srcTermProcessingArg,                // inout - src term proc (optional)
                                 // if (NULL) -> auto-tune, no pass back
                                 // if (!NULL && -1) -> auto-tune, pass back
@@ -8647,7 +8650,7 @@ int Array::sparseMatMulStore(
     false,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     srcSeqIndexInterval, srcTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, srcArray, srcLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, srcArray, srcLocalDeCount,
     srcLocalDeElementCount, srcLocalDeToDeMap, srcLocalIntervalPerPetCount,
     srcLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -8673,7 +8676,7 @@ int Array::sparseMatMulStore(
     true,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     dstSeqIndexInterval, dstTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, dstArray, dstLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, dstArray, dstLocalDeCount,
     dstLocalDeElementCount, dstLocalDeToDeMap, dstLocalIntervalPerPetCount,
     dstLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -9000,6 +9003,50 @@ int Array::sparseMatMulStore(
   }
 #endif
   
+  if (ignoreUnmatched){
+    // If there are unmatched src or dst elements in the sparse matrix, they
+    // will have lead to FactorElement entries with a partnerDe.size()==0 here.
+    // Leaving them like that will lead to issues down the code, so that if
+    // unmatched entries are to be supported, these FactorElements must be 
+    // removed here.
+    //
+    //TODO: This could have been done on the SeqIndexFactorLookup level further
+    //TODO: up ... probably a more efficient way.
+    //
+    // Doing this for the src side
+    for (int j=0; j<srcLocalDeCount; j++){
+      for (int k=0; k<srcLinSeqVect[j].size(); k++){
+        for (vector<DD::FactorElement>::iterator
+          fe=srcLinSeqVect[j][k].factorList.begin();
+          fe!=srcLinSeqVect[j][k].factorList.end();){
+          if (fe->partnerDe.size() == 0){
+            // eliminate this factorList entry
+            fe = srcLinSeqVect[j][k].factorList.erase(fe);
+            --srcLinSeqVect[j][k].factorCount;
+          }else{
+            ++fe;
+          }
+        }
+      }
+    }
+    // Doing this for the dst side
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (int k=0; k<dstLinSeqVect[j].size(); k++){
+        for (vector<DD::FactorElement>::iterator
+          fe=dstLinSeqVect[j][k].factorList.begin();
+          fe!=dstLinSeqVect[j][k].factorList.end();){
+          if (fe->partnerDe.size() == 0){
+            // eliminate this factorList entry
+            fe = dstLinSeqVect[j][k].factorList.erase(fe);
+            --dstLinSeqVect[j][k].factorCount;
+          }else{
+            ++fe;
+          }
+        }
+      }
+    }
+  }
+
   if (haloFlag){
     // Phase IV below expects each FactorElement inside of srcLinSeqVect and
     // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
