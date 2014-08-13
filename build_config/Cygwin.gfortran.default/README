@@ -21,6 +21,23 @@ should be set as appropriate:
  export ESMF_CXX=g++-4
 
 
+NetCDF installation
+===================
+
+When installing NetCDF via the Cygwin Setup package tool, the following
+packages must be selected:
+
+  - libnetcdf-devel
+  - libnetcdf-fortran-devel (also selects libnetcdf-fortran_5)
+  - netcdf (also selects libnetcdf7)
+  - netcdf-fortran
+
+The following environment variables should then be set:
+
+  export ESMF_NETCDF=split
+  export ESMF_NETCDF_INCLUDE=/usr/include
+ 
+
 Accessing the ESMF shared library
 =================================
 
