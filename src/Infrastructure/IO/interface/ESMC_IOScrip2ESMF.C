@@ -39,12 +39,12 @@
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "handle_error"
-bool handle_error(int status) {
+bool handle_error(int status, int lineno) {
 #ifdef ESMF_NETCDF
   char errmsg[128];
   int rc;
   if (status != NC_NOERR) {
-    sprintf(errmsg, "NetCDF error: %s", nc_strerror(status));
+    sprintf(errmsg, "line %d: NetCDF error: %s", lineno, nc_strerror(status));
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, errmsg, ESMC_CONTEXT,
       &rc);
     return true;
@@ -222,7 +222,7 @@ extern "C" {
           rc);
 	return; //bail out
       }
-      if (handle_error(status)) return; //bail out
+      if (handle_error(status,__LINE__)) return; //bail out
     } else if (*netcdf4fileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (status == NC_ENOTNC) {
@@ -232,10 +232,10 @@ extern "C" {
           rc);
 	return; //bail out
       }
-      if (handle_error(status)) return; //bail out
+      if (handle_error(status,__LINE__)) return; //bail out
     } else {
       status = nc_create(c_infile, *mode, &id);
-      if (handle_error(status)) return; //bail out
+      if (handle_error(status,__LINE__)) return; //bail out
     }
     *rc = 0;
     *ncid = id;
@@ -268,13 +268,13 @@ int ESMC_ScripInqRank(char *infile)
 
   // Open input SCRIP file
   status = nc_open(infile, NC_NOWRITE, &ncid1);  
-  if (handle_error(status)) return -1; // bail out;
+  if (handle_error(status,__LINE__)) return -1; // bail out;
 
   // Inquire grid rank
   status = nc_inq_dimid(ncid1, "grid_rank", &grdimid);
-  if (handle_error(status)) return -2; // bail out;
+  if (handle_error(status,__LINE__)) return -2; // bail out;
   status = nc_inq_dimlen(ncid1, grdimid, &grdim);
-  if (handle_error(status)) return -3; // bail out;
+  if (handle_error(status,__LINE__)) return -3; // bail out;
 
   // Close input SCRIP file
   nc_close(ncid1);
@@ -311,13 +311,13 @@ int ESMC_ScripInqDims(char *infile, int *dims)
 
   // Open input SCRIP file
   status = nc_open(infile, NC_NOWRITE, &ncid1);  
-  if (handle_error(status)) return -1; // bail out;
+  if (handle_error(status,__LINE__)) return -1; // bail out;
 
   // Inquire grid dimensions
   status = nc_inq_varid(ncid1, "grid_dims", &gd_id);
-  if (handle_error(status)) return -2; // bail out;
+  if (handle_error(status,__LINE__)) return -2; // bail out;
   status = nc_get_var_int(ncid1, gd_id, dims);
-  if (handle_error(status)) return -3; // bail out;
+  if (handle_error(status,__LINE__)) return -3; // bail out;
 
 
   // Close input SCRIP file
@@ -399,23 +399,23 @@ void FTN_X(c_convertscrip)(
   
   // Open intput SCRIP file
   status = nc_open(c_infile, NC_NOWRITE, &ncid1);  
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   // inquire dimension ids
   status = nc_inq_dimid(ncid1, "grid_size", &gsdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_dimid(ncid1, "grid_corners", &gcdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_dimid(ncid1, "grid_rank", &grdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   // Get dimension values
   status = nc_inq_dimlen(ncid1, gsdimid, &gsdim);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_dimlen(ncid1, gcdimid, &gcdim);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_dimlen(ncid1, grdimid, &grdim);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
 #if 0
   if (grdim > 1) {
@@ -442,9 +442,9 @@ void FTN_X(c_convertscrip)(
     return;
   }
   status = nc_inq_varid(ncid1, "grid_corner_lat", &colatid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_varid(ncid1, "grid_corner_lon", &colonid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_inq_varid(ncid1, "grid_imask", &maskid);
   if (status != NC_NOERR) nomask = 1;
 
@@ -452,15 +452,15 @@ void FTN_X(c_convertscrip)(
   cornerlats = (double*)malloc(sizeof(double)*gcdim*gsdim);
   cornerlons = (double*)malloc(sizeof(double)*gcdim*gsdim);
   status = nc_get_var_double(ncid1, colatid, cornerlats);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_get_var_double(ncid1, colonid, cornerlons);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   // get units of grid_cornor_lon
   status = nc_inq_attlen(ncid1, colonid, "units", &len);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_get_att_text(ncid1, colonid, "units", units);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   units[len] = '\0';
 
   // convert radian to degree
@@ -554,102 +554,102 @@ void FTN_X(c_convertscrip)(
     if (status == NC_ENOTNC) {
       status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
     } 
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
 #else
     status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
 #endif
 
     // define the dimensions
     status = nc_def_dim(ncid2, "nodeCount", totalnodes, &vertdimid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_def_dim(ncid2, "elementCount", gsdim, &celldimid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_def_dim(ncid2, "maxNodePElement", gcdim, & vpcdimid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     
     // define the variables
     dims[0]=vertdimid;
     dims[1]=vdimid;
     status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     strbuf = "degrees";
     status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     dims[0]=celldimid;
     dims[1]=vpcdimid;
     status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     strbuf = "Node indices that define the element connectivity";
     status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf)+1, strbuf);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     fillvalue = -1;
     status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     strbuf = "Number of nodes per element";
     status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     if (!nocenter) {
       dims[0]=celldimid;
       dims[1]=vdimid;
       status = nc_def_var(ncid2, "centerCoords", NC_DOUBLE, 2, dims, &ccoordid);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       strbuf = "degrees";
       status = nc_put_att_text(ncid2, ccoordid, "units", strlen(strbuf)+1, strbuf);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
     } 
     if (!noarea) {
       status = nc_def_var(ncid2, "elementArea", NC_DOUBLE, 1, dims, &caid);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       // copy the units and long_name attributes if they exist in the input file
       int attid;
       status = nc_inq_attid(ncid1, areaid, "units", &attid);
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
-        if (handle_error(status)) return; // bail out;
+        if (handle_error(status,__LINE__)) return; // bail out;
       }    
       status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
-        if (handle_error(status)) return; // bail out;
+        if (handle_error(status,__LINE__)) return; // bail out;
       }
     }
     if (!nomask) {
       status = nc_def_var(ncid2, "elementMask", NC_INT, 1, dims, &cmid);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
-      // if (handle_error(status)) return; // bail out;
+      // if (handle_error(status,__LINE__)) return; // bail out;
     }
  
     // Global Attribute
     strbuf = "unstructured";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     strbuf = "0.9";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     time(&tloc);
     strbuf2 = ctime(&tloc);
     strbuf2[strlen(strbuf2)-1] = '\0';
     status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     
     status=nc_enddef(ncid2);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
 
     nc_put_var_double(ncid2, vertexid, nodelatlon); 
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     nc_put_var_int(ncid2, cellid, cells);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
 
     nc_put_var_uchar(ncid2, edgeid, edges);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
 
 
     free(edges);
@@ -660,22 +660,22 @@ void FTN_X(c_convertscrip)(
     if (!nocenter) {
       inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
       status = nc_get_var_double(ncid1, ctlatid, inbuf);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
 	inbuf1[i*2+1]=inbuf[i];
       }
       status = nc_get_var_double(ncid1, ctlonid, inbuf);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
 	inbuf1[i*2]=inbuf[i];
       }
       // get units of grid_center_lon
       status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       status = nc_get_att_text(ncid1, ctlonid, "units", units);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       units[len] = '\0';
       // convert radian to degree
       for (i=0; i<len; i++) {
@@ -698,22 +698,22 @@ void FTN_X(c_convertscrip)(
       counts[0]=gsdim;
       counts[1]=2;
       status = nc_put_vara_double(ncid2, ccoordid, starts, counts, inbuf1);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       free(inbuf1);
     }  
     if (!noarea) {
       status = nc_get_var_double(ncid1, areaid, inbuf);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       status = nc_put_var_double(ncid2, caid, inbuf);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
     }
     free(inbuf);
     if (!nomask) {
       inbuf2=(int*)malloc(sizeof(int)*gsdim);
       status = nc_get_var_int(ncid1, maskid, inbuf2);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       status = nc_put_var_int(ncid2, cmid, inbuf2);
-      if (handle_error(status)) return; // bail out;
+      if (handle_error(status,__LINE__)) return; // bail out;
       free(inbuf2);
     }
     nc_close(ncid1);
@@ -742,22 +742,22 @@ void FTN_X(c_convertscrip)(
   inbuf = (double*)malloc(sizeof(double)*gsdim);
   inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
   status = nc_get_var_double(ncid1, ctlatid, inbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   // copy inbuf to inbuf1
   for (i=0; i<gsdim; i++) {
     inbuf1[i*2+1]=inbuf[i];
   }
   status = nc_get_var_double(ncid1, ctlonid, inbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   // copy inbuf to inbuf1
   for (i=0; i<gsdim; i++) {
     inbuf1[i*2]=inbuf[i];
   }
   // get units of grid_center_lon
   status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_get_att_text(ncid1, ctlonid, "units", units);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   units[len]='\0';
   // convert radian to degree
   for (i=0; i<len; i++) {
@@ -850,88 +850,88 @@ void FTN_X(c_convertscrip)(
   if (status == NC_ENOTNC) {
     status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
   }
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 #else
   status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 #endif
 
   // define the dimensions
   status = nc_def_dim(ncid2, "nodeCount", gsdim, &vertdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_def_dim(ncid2, "elementCount", goodnodes, &celldimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_def_dim(ncid2, "maxNodePElement", maxconnection, & vpcdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   // define the variables
   dims[0]=vertdimid;
   dims[1]=vdimid;
   status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   strbuf = "degrees";
   status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   dims[0]=celldimid;
   dims[1]=vpcdimid;
   status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   strbuf = "Node indices that define the element connectivity";
   status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf), strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   fillvalue = -1;
   status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf), strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   // defind node mask
   dims[0]=vertdimid;
   if (!nomask) {
     status = nc_def_var(ncid2, "nodeMask", NC_INT, 1, dims, &cmid);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
-    // if (handle_error(status)) return; // bail out;
+    // if (handle_error(status,__LINE__)) return; // bail out;
   }
  
   // Global Attribute
   strbuf = "unstructured";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   strbuf = "0.9";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   strbuf="Dual mesh generated using the cell center coordinates";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), strbuf);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   time(&tloc);
   strbuf2 = ctime(&tloc);
   strbuf2[strlen(strbuf2)-1] = '\0';
   status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   nc_enddef(ncid2);
   if (!nomask) {
     inbuf2=(int*)malloc(sizeof(int)*gsdim);
     status = nc_get_var_int(ncid1, maskid, inbuf2);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_put_var_int(ncid2, cmid, inbuf2);
-    if (handle_error(status)) return; // bail out;
+    if (handle_error(status,__LINE__)) return; // bail out;
     free(inbuf2);
   }
   nc_put_var_double(ncid2, vertexid, inbuf1); 
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   nc_put_var_int(ncid2, cellid, dualcells);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
   nc_put_var_uchar(ncid2, edgeid, totalneighbors);
-  if (handle_error(status)) return; // bail out;
+  if (handle_error(status,__LINE__)) return; // bail out;
 
   free(totalneighbors);
   free(cells);
