@@ -161,7 +161,6 @@ def grid_create_periodic(bounds, domask=False):
         gridYCenter[:, j] = (y+yp1)/2.0
 
     [x,y] = [0, 1]
-    mask = 0
     if domask:
         # set up the grid mask
         mask = grid.add_item(ESMF.GridItem.MASK)

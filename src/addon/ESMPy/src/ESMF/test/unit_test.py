@@ -1292,7 +1292,9 @@ def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
     '''
     PRECONDITIONS: Two Fields have been created and a regridding 
                    operation is desired from 'srcfield' to 'dstfield'.  
-                   The 'srcfracfield' and 'dstfractfield' are Fields 
+                   The 'src_mask_values' and 'dst_mask_values' arguments
+                   specify the integer values to be considered masked.
+                   The 'src_frac_field' and 'dst_frac_field' are Fields
                    created to hold the fractions of the source and 
                    destination fields which contribute to conservative 
                    regridding.\n
@@ -1305,6 +1307,8 @@ def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
     # call the regridding functions
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
                                 regrid_method=ESMF.RegridMethod.CONSERVE, \
+                                src_mask_values=np.array([0]), \
+                                dst_mask_values=np.array([0]), \
                                 unmapped_action=ESMF.UnmappedAction.ERROR, \
                                 src_frac_field=srcfracfield, \
                                 dst_frac_field=dstfracfield)
