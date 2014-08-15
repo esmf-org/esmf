@@ -2024,17 +2024,19 @@ print *, "found match:"// &
     ! prepare auxiliary variables
     rraShift = 0              ! reset
     vectorLengthShift = 0     ! reset
-    nullify(chopStringList)   ! reset
-    nullify(chopSubString)    ! reset
-    nullify(chopSubSubString) ! reset
-    nullify(factorIndexList)  ! reset
-    nullify(factorList)       ! reset
-    nullify(srcMaskValues)    ! reset
-    nullify(dstMaskValues)    ! reset
     
     ! loop over all fields
     do i=1, count
     
+      ! prepare pointer variables
+      nullify(chopStringList)   ! reset
+      nullify(chopSubString)    ! reset
+      nullify(chopSubSubString) ! reset
+      nullify(factorIndexList)  ! reset
+      nullify(factorList)       ! reset
+      nullify(srcMaskValues)    ! reset
+      nullify(dstMaskValues)    ! reset
+
       ! use a temporary string and convert the cplList(i) to lower characters
       tempString = trim(cplList(i))
       call ESMF_StringLowerCase(tempString, rc=rc)
@@ -2374,9 +2376,11 @@ print *, "found match:"// &
       enddo
       
       ! local garbage collection
-      deallocate(factorIndexList, factorList)
-      deallocate(chopStringList)
-      deallocate(srcMaskValues, dstMaskValues)
+      if (associated(factorIndexList)) deallocate(factorIndexList)
+      if (associated(factorList)) deallocate(factorList)
+      if (associated(chopStringList)) deallocate(chopStringList)
+      if (associated(srcMaskValues)) deallocate(srcMaskValues)
+      if (associated(dstMaskValues)) deallocate(dstMaskValues)
       
     enddo
     
