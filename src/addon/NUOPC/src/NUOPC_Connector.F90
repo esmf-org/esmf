@@ -1283,13 +1283,13 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         endif
 
         if (verbose) then
-          call ESMF_LogWrite(trim(name)//": transferring the full Grid", &
+          call ESMF_LogWrite(trim(name)//": transferring the full Grid/Mesh", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
 
-        ! transfer the underlying DistGrid from provider to acceptor
+        ! transfer the underlying Grid/Mesh from provider to acceptor
         call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
