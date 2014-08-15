@@ -269,10 +269,6 @@ class Grid(object):
             # grid rank
             self.rank = self.max_index.size
 
-            # staggerloc center is the default, set if not already set
-            if staggerloc is None:
-                staggerloc = [StaggerLoc.CENTER]
-
         # grid type
         if coord_typekind is None:
             self.type = TypeKind.R8
