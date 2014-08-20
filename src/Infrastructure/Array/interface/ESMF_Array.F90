@@ -788,7 +788,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   logical,                   intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                   intent(inout), optional :: srcTermProcessing
 !   integer,                   intent(inout), optional :: pipelineDepth
-!   type(ESMF_RouteHandle),    intent(inout)           :: transposeRoutehandle
+!   type(ESMF_RouteHandle),    intent(inout), optional :: transposeRoutehandle
 !   integer,                   intent(out),   optional :: rc
 !
 ! !STATUS:
