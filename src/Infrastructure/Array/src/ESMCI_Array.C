@@ -10713,9 +10713,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing,
-            srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
-            dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
@@ -10784,9 +10785,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing, srcLocalDeCount,
-            elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
-            dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
