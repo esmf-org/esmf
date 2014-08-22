@@ -97,7 +97,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -108,7 +108,6 @@ int main(void){
 
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -283,7 +282,7 @@ int main(void){
   maxIndex_d = (int *)malloc(dimcount*sizeof(int));
   maxIndex_d[0] = int(ub_x);
   maxIndex_d[1] = int(ub_y);
-  i_maxIndex_d = ESMC_InterfaceIntCreate(maxIndex_d, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex_d, maxIndex_d, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -292,7 +291,6 @@ int main(void){
 
   // free memory
   free(maxIndex_d);
-  ESMC_InterfaceIntDestroy(&i_maxIndex_d);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -526,9 +524,10 @@ int main(void){
   //EX_UTest
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  strcpy(name, "Create an InterfaceInt for maskValues in ESMC_FieldRegridStore()");
+  strcpy(name, "Set an InterfaceInt for maskValues in ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_InterfaceInt i_maskValues = ESMC_InterfaceIntCreate(maskValues, 1, &rc);
+  ESMC_InterfaceInt i_maskValues;
+  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------

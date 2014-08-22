@@ -138,7 +138,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gridToFieldMap = (int *)malloc(sizeof(int));
   gridToFieldMap[0] = 1;
-  i_gridToFieldMap = ESMC_InterfaceIntCreate(gridToFieldMap, 1, &rc);
+  rc = ESMC_InterfaceIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -149,7 +149,7 @@ int main(void){
   ungriddedLBound = (int *)malloc(2*sizeof(int));
   ungriddedLBound[0] = 1;
   ungriddedLBound[1] = 1;
-  i_ungriddedLBound = ESMC_InterfaceIntCreate(ungriddedLBound, 2, &rc);
+  rc = ESMC_InterfaceIntSet(&i_ungriddedLBound, ungriddedLBound, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ int main(void){
   ungriddedUBound = (int *)malloc(2*sizeof(int));
   ungriddedUBound[0] = 2;
   ungriddedUBound[1] = 3;
-  i_ungriddedUBound = ESMC_InterfaceIntCreate(ungriddedUBound, 2, &rc);
+  rc = ESMC_InterfaceIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
@@ -278,7 +278,7 @@ int main(void){
   maxIndex = (int *)malloc(2*sizeof(int));
   maxIndex[0] = 4;
   maxIndex[1] = 4;
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, 2, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, 2);
   rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
   grid=ESMC_GridCreateNoPeriDim(i_maxIndex, 0, 0, &rc);
   field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, "must have a name", &rc);
@@ -302,13 +302,9 @@ int main(void){
   free(elemConn);
 
   free(gridToFieldMap);
-  ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
   free(ungriddedLBound);
-  ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
   free(ungriddedUBound);
-  ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

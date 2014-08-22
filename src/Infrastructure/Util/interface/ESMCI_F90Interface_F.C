@@ -23,35 +23,35 @@ extern "C" {
   // ESMC_InterfaceInt interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN_X(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintsetinvalid)(ESMCI::InterfaceInt *array,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interfaceintsetinvalid()"
+    array->set();
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate1d()"
-    *array = new ESMCI::InterfaceInt(farray, 1, len);
+    array->set(farray, 1, len);
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate2d()"
-    *array = new ESMCI::InterfaceInt(farray, 2, len);
+    array->set(farray, 2, len);
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt *array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate3d()"
-    *array = new ESMCI::InterfaceInt(farray, 3, len);
-    *rc = ESMF_SUCCESS;
-  }
-
-  void FTN_X(c_esmc_interfaceintdestroy)(ESMCI::InterfaceInt **array,
-    int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_interfaceintdestroy()"
-    delete *array;
+    array->set(farray, 3, len);
     *rc = ESMF_SUCCESS;
   }
 

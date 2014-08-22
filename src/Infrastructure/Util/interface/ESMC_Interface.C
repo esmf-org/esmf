@@ -40,12 +40,11 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc){
+int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+  int *arrayArg, int lenArg){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_InterfaceInt interfaceInt;
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   /*
   // this is a test to see if the data is passed in correctly
@@ -55,30 +54,11 @@ ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc){
   printf("], length = %d\n", lenArg);
   */
   
-  interfaceInt.ptr = (void *)(new ESMCI::InterfaceInt(arrayArg, lenArg));
+  ((ESMCI::InterfaceInt *)(interfaceIntArg))->set(arrayArg, lenArg);
 
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return interfaceInt;
-}
-
-int ESMC_InterfaceIntDestroy(ESMC_InterfaceInt *interfaceIntArg){
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  // typecast into ESMCI type
-  ESMCI::InterfaceInt *iip = (ESMCI::InterfaceInt *)(interfaceIntArg->ptr);
-
-  // call into ESMCI method
-  delete iip;
-  
-  // invalidate pointer
-  interfaceIntArg->ptr = NULL;
-    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
-}  
+}
 
 }; // extern "C"

@@ -469,7 +469,7 @@ Array *Array::create(
     else
       distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (distgridToArrayMap != NULL){
+  if (present(distgridToArrayMap)){
     if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -538,7 +538,7 @@ Array *Array::create(
   // tensorCount
   int undistLBoundArrayAllocFlag = 0;  // reset
   int *undistLBoundArray = NULL; // reset
-  if (undistLBoundArg != NULL){
+  if (present(undistLBoundArg)){
     if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -565,7 +565,7 @@ Array *Array::create(
   }
   int undistUBoundArrayAllocFlag = 0;  // reset
   int *undistUBoundArray = NULL; // reset
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -659,7 +659,7 @@ Array *Array::create(
   // deal with computationalEdge widths
   int *computationalEdgeLWidth = new int[redDimCount];
   int *computationalEdgeUWidth = new int[redDimCount];
-  if (computationalEdgeLWidthArg != NULL){
+  if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -677,7 +677,7 @@ Array *Array::create(
     for (int i=0; i<redDimCount; i++)
       computationalEdgeLWidth[i] = 0;
   }
-  if (computationalEdgeUWidthArg != NULL){
+  if (present(computationalEdgeUWidthArg)){
     if (computationalEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -698,7 +698,7 @@ Array *Array::create(
   // deal with computational widths
   int *computationalLBound = new int[redDimCount*localDeCount];
   int *computationalUBound = new int[redDimCount*localDeCount];
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -718,7 +718,7 @@ Array *Array::create(
     memcpy(computationalLBound, exclusiveLBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -769,7 +769,7 @@ Array *Array::create(
   int totalUBoundFlag = 0;  // reset
   int *totalLBound = new int[redDimCount*localDeCount];
   int *totalUBound = new int[redDimCount*localDeCount];
-  if (totalLWidthArg != NULL){
+  if (present(totalLWidthArg)){
     totalLBoundFlag = 1;  // set
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -797,7 +797,7 @@ Array *Array::create(
     for (int i=0; i<localDeCount*redDimCount; i++)
       totalLBound[i] = computationalLBound[i];
   }
-  if (totalUWidthArg != NULL){
+  if (present(totalUWidthArg)){
     totalUBoundFlag = 1;  // set
     if (totalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1174,7 +1174,7 @@ Array *Array::create(
     else
       distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (distgridToArrayMap != NULL){
+  if (present(distgridToArrayMap)){
     if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1241,20 +1241,20 @@ Array *Array::create(
   }
   // check for undistLBound and undistUBound arguments and that they match
   // tensorCount
-  if (tensorCount > 0 && undistLBoundArg == NULL){
+  if (tensorCount > 0 && !present(undistLBoundArg)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistLBound argument required to create Array with tensor dims",
       ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
-  if (tensorCount > 0 && undistUBoundArg == NULL){
+  if (tensorCount > 0 && !present(undistUBoundArg)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistUBound argument required to create Array with tensor dims",
       ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
   int *undistLBoundArray = NULL; // reset
-  if (undistLBoundArg != NULL){
+  if (present(undistLBoundArg)){
     if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1268,7 +1268,7 @@ Array *Array::create(
     undistLBoundArray = undistLBoundArg->array;
   }
   int *undistUBoundArray = NULL; // reset
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1298,13 +1298,13 @@ Array *Array::create(
     indexflag = *indexflagArg;
   // check that presence of distLBoundArg is consistent with indexflag
   if(indexflag == ESMF_INDEX_USER){
-    if (distLBoundArg == NULL){
+    if (!present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- distLBoundArg required in ESMF_INDEX_USER mode", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }else{
-    if (distLBoundArg != NULL){
+    if (present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- distLBoundArg must only be specified in ESMF_INDEX_USER mode",
         ESMC_CONTEXT, rc);
@@ -1358,7 +1358,7 @@ Array *Array::create(
   // deal with computationalEdge widths
   int *computationalEdgeLWidth = new int[redDimCount];
   int *computationalEdgeUWidth = new int[redDimCount];
-  if (computationalEdgeLWidthArg != NULL){
+  if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1376,7 +1376,7 @@ Array *Array::create(
     for (int i=0; i<redDimCount; i++)
       computationalEdgeLWidth[i] = 0;
   }
-  if (computationalEdgeUWidthArg != NULL){
+  if (present(computationalEdgeUWidthArg)){
     if (computationalEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1397,7 +1397,7 @@ Array *Array::create(
   // deal with computational widths
   int *computationalLBound = new int[redDimCount*localDeCount];
   int *computationalUBound = new int[redDimCount*localDeCount];
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1417,7 +1417,7 @@ Array *Array::create(
     memcpy(computationalLBound, exclusiveLBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1466,7 +1466,7 @@ Array *Array::create(
   // deal with total widths
   int *totalLBound = new int[redDimCount*localDeCount];
   int *totalUBound = new int[redDimCount*localDeCount];
-  if (totalLWidthArg != NULL){
+  if (present(totalLWidthArg)){
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1493,7 +1493,7 @@ Array *Array::create(
     for (int i=0; i<localDeCount*redDimCount; i++)
       totalLBound[i] = computationalLBound[i];
   }
-  if (totalUWidthArg != NULL){
+  if (present(totalUWidthArg)){
     if (totalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1556,7 +1556,7 @@ Array *Array::create(
   }
   
   // optionally shift to supplied lower bounds
-  if (distLBoundArg != NULL){
+  if (present(distLBoundArg)){
     if (distLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distLBoundArg array must be of rank 1", ESMC_CONTEXT, rc);
@@ -2279,7 +2279,7 @@ int Array::setComputationalLWidth(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalLWidthArg input and process
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 2", ESMC_CONTEXT, &rc);
@@ -2355,7 +2355,7 @@ int Array::setComputationalUWidth(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalUWidthArg input and process
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 2", ESMC_CONTEXT, &rc);
@@ -2439,7 +2439,7 @@ int Array::setRimSeqIndex(
   }
 
   // check rimSeqIndexArg input and process
-  if (rimSeqIndexArg != NULL){
+  if (present(rimSeqIndexArg)){
     if (rimSeqIndexArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- rimSeqIndexArg array must be of rank 1", ESMC_CONTEXT, &rc);
@@ -4049,7 +4049,7 @@ int Array::haloStore(
     int redDimCount = array->rank - array->tensorCount;
     vector<vector<int> > haloInsideLBound(localDeCount);
     vector<vector<int> > haloOutsideLBound(localDeCount);
-    if (haloLDepth == NULL){
+    if (!present(haloLDepth)){
       // haloLDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
@@ -4116,7 +4116,7 @@ int Array::haloStore(
     // prepare haloOutsideUBound and haloInsideUBound arrays
     vector<vector<int> > haloInsideUBound(localDeCount);
     vector<vector<int> > haloOutsideUBound(localDeCount);
-    if (haloUDepth == NULL){
+    if (!present(haloUDepth)){
       // haloUDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
@@ -4610,7 +4610,7 @@ int Array::redistStore(
   int dstN;
   int *factorIndexList;
   
-  if (srcToDstTransposeMap == NULL){
+  if (!present(srcToDstTransposeMap)){
     // srcToDstTransposeMap not specified -> default mode
     
     // src and dst Arrays must have identical number of exclusive elements

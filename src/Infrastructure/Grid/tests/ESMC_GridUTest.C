@@ -74,7 +74,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 20;
   maxIndex[1] = 20;
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -85,7 +85,6 @@ int main(void){
 
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -134,7 +133,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 12;
   maxIndex[1] = 20;
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -147,7 +146,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -220,7 +218,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 12;
   maxIndex[1] = 20;
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -228,7 +226,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

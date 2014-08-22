@@ -164,7 +164,7 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 } // meshcreate
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
-                                           double *nodeCoord, int *nodeOwner, InterfaceInt **nodeMaskII,
+                                           double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
 {
@@ -230,15 +230,15 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
     IOField<NodalField> *node_mask;
 
     bool has_node_mask=false;
-    if (*nodeMaskII != NULL) { // if masks exist
+    if (present(nodeMaskII)) { // if masks exist
     // Error checking
-    if ((*nodeMaskII)->dimCount !=1) {
+    if ((nodeMaskII)->dimCount !=1) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
     }
 
-    if ((*nodeMaskII)->extent[0] != *num_nodes) {
+    if ((nodeMaskII)->extent[0] != *num_nodes) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                        "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -257,7 +257,7 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
 #if 0
     // Loop and add coords and mask
     if (has_node_mask) {
-      int *maskArray=(*nodeMaskII)->array;
+      int *maskArray=(nodeMaskII)->array;
       int nm=0;
       for (UInt nc = 0; ni != ne; ++ni) {
         
@@ -324,7 +324,7 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
 
     // Loop and add mask
     if (has_node_mask) {
-      int *maskArray=(*nodeMaskII)->array;    
+      int *maskArray=(nodeMaskII)->array;    
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
       int nm=0;
@@ -547,7 +547,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
 
 extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt **_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -578,7 +578,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
     int num_elemConn=*_num_elemConn;
 
-    InterfaceInt *elemMaskII=*_elemMaskII;
+    InterfaceInt *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
 
@@ -764,7 +764,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
     // If they exist, error check mask 
-    if (elemMaskII != NULL) { // if masks exist
+    if (present(elemMaskII)) { // if masks exist
       // Error checking
       if (elemMaskII->dimCount !=1) {
         int localrc;
@@ -829,7 +829,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
-      if (elemMaskII != NULL) { 
+      if (present(elemMaskII)) { 
 
         // Get mask value array
         elemMaskIIArray=elemMaskII->array;
@@ -952,7 +952,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
       elemId=elemId_wsplit;
       if (areaPresent==1) elemArea=elemArea_wsplit;
 
-      if (elemMaskII != NULL) { 
+      if (present(elemMaskII)) { 
         elemMaskII=elemMaskII_wsplit;
       }
     }   
@@ -1001,7 +1001,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
   // Handle element masking
   bool has_elem_mask=false;
-  if (elemMaskII != NULL) { // if masks exist
+  if (present(elemMaskII)) { // if masks exist
     // ERROR CHECKED ABOVE
 
     // Context for new fields
@@ -1191,7 +1191,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
     //// Setup for split mask
-    if (elemMaskII != NULL) { 
+    if (present(elemMaskII)) { 
       if (elemMaskIIArray_wsplit != NULL) delete [] elemMaskIIArray_wsplit;
       if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
     }
@@ -3109,7 +3109,7 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
 }
 
 
-extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
   try {
 
@@ -3130,7 +3130,7 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     
 
     // If no mask values then leave
-    if (maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3139,7 +3139,7 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // If no mask values then leave
-    if (*maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3148,8 +3148,8 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // Get mask values
-    int numMaskValues=(*maskValuesArg)->extent[0];
-    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
 
 
     // Set Mask values
@@ -3305,7 +3305,7 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
 }
 
 ////////////
-extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
   try {
 
@@ -3326,7 +3326,7 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     
 
     // If no mask values then leave
-    if (maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3335,7 +3335,7 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // If no mask values then leave
-    if (*maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3344,8 +3344,8 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // Get mask values
-    int numMaskValues=(*maskValuesArg)->extent[0];
-    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
 
 
     // Set Mask values
