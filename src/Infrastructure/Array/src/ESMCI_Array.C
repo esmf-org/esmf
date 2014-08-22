@@ -10743,8 +10743,12 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-          localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish
-            |XXE::filterBitNbWaitFinishSingleSum,
+          localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10811,8 +10815,12 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-          localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish
-            |XXE::filterBitNbWaitFinishSingleSum,
+          localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
