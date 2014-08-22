@@ -381,7 +381,7 @@ program ESMF_FieldIOUTest
   write(*,*)"Maximum Error (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
@@ -458,7 +458,7 @@ program ESMF_FieldIOUTest
   write(*,*)"Maximum Error with Halos (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
@@ -513,7 +513,7 @@ program ESMF_FieldIOUTest
   write(*,*)"Maximum Error without Halos (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
@@ -686,7 +686,12 @@ program ESMF_FieldIOUTest
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_r == localPet))
   write(failMsg, *) "Failed comparison check"
   write(name, *) "Compare read-in data with expected"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as was expected"
+  call ESMF_Test((rc==ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 
