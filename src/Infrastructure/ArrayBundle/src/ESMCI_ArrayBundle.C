@@ -1317,17 +1317,15 @@ int ArrayBundle::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMINFO____disable
+#define SMMINFO_off
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   try{
-    // in the most trivial implementation call Array::sparseMatMul() for each
-    // Array pair
-    
+    // determine rhType
     RouteHandleType rhType = (*routehandle)->getType();
-    
+        
     Array *srcArray = NULL;
     Array *dstArray = NULL;
     vector<Array *> srcArrayVector;
@@ -1492,16 +1490,20 @@ int ArrayBundle::sparseMatMul(
       // set filterBitField  
       int filterBitField = 0x0; // init. to execute _all_ operations in XXE
       if (count == 0){
-        // use SRCSEQ as default setting
+        // use SRCPET as default setting
         filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
         filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
         filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO_on
+        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET (default)",
+          ESMC_LOGMSG_INFO);
+#endif
       }else{
         if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
           filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-#ifdef SMMINFO
+#ifdef SMMINFO_on
         ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
           ESMC_LOGMSG_INFO);
 #endif
@@ -1509,7 +1511,7 @@ int ArrayBundle::sparseMatMul(
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
+#ifdef SMMINFO_on
           ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
             ESMC_LOGMSG_INFO);
 #endif
@@ -1522,8 +1524,8 @@ int ArrayBundle::sparseMatMul(
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO
-          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE",
+#ifdef SMMINFO_on
+          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE -> TERMORDER_SRCPET",
             ESMC_LOGMSG_INFO);
 #endif
         }

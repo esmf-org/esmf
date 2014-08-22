@@ -10589,10 +10589,9 @@ int sparseMatMulStoreEncodeXXEStream(
     vector<ArrayHelper::SendnbElement>::iterator pSendWait=sendnbVector.begin();
     
     
-#define SMM_NONBLOCKINGSTYLE___disable
-#define SMM_NONBLOCKINGSTYLE
+#define SMM_NONBLOCKINGSTYLE_on
     
-#ifdef SMM_NONBLOCKINGSTYLE
+#ifdef SMM_NONBLOCKINGSTYLE_on
     // prepare pipeline
 #ifdef OLDSTYLEPIPELINEPREPARE
     for (int i=0; i<pipelineDepth; i++){
@@ -10681,7 +10680,7 @@ int sparseMatMulStoreEncodeXXEStream(
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
     
-#ifdef SMM_NONBLOCKINGSTYLE
+#ifdef SMM_NONBLOCKINGSTYLE_on
     // fill pipeline
     bool recvnbOK = true; // initialize
     bool sendnbOK = true; // initialize
@@ -10714,9 +10713,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing,
-            srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
-            dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
@@ -10747,15 +10747,21 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[160];
-          sprintf(tempString, "done WaitOnIndex: %d",
+          sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
-          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
+          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish
+            |XXE::filterBitNbWaitFinishSingleSum,
             tempString, xxe->count, xxe->count);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10783,9 +10789,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing, srcLocalDeCount,
-            elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
-            dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
@@ -10812,15 +10819,21 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[160];
-          sprintf(tempString, "done WaitOnIndex: %d",
+          sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
-          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
+          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish
+            |XXE::filterBitNbWaitFinishSingleSum,
             tempString, xxe->count, xxe->count);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10837,7 +10850,7 @@ int sparseMatMulStoreEncodeXXEStream(
     //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
     
     // append a single productSum operation that considers _all_ of the 
-    // incoming elements and orders them accroding the strict canonical 
+    // incoming elements and orders them according the strict canonical 
     // TERMORDER_SRCSEQ order
     localrc = ArrayHelper::RecvnbElement::appendSingleProductSum(xxe,
       0x0|XXE::filterBitNbWaitFinishSingleSum, srcTermProcessing,
@@ -10854,7 +10867,7 @@ int sparseMatMulStoreEncodeXXEStream(
     // TODO: the BLOCKING option should really be added with a special 
     // TODO: pedication bit set so it can be executed for blocking user calls,
     // TODO: of course only if it has been determined as being faster by the
-    // TODO: tuning phase over the non-blocking couter part implementation.
+    // TODO: tuning phase over the non-blocking counter part implementation.
     
     while ((pRecv != recvnbVector.end()) || (pSend != sendnbVector.end())){
       int recvStage = -1; // invalidate

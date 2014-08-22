@@ -95,16 +95,6 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1a"/), &
-      userRoutine=InitializeP1a, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1b"/), &
-      userRoutine=InitializeP1b, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2", &
       "IPDv04p2"/), &
       userRoutine=InitializeP2, rc=rc)
@@ -124,6 +114,16 @@ module NUOPC_Connector
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p5", "IPDv04p5"/), &
       userRoutine=InitializeP5, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv04p1a"/), &
+      userRoutine=InitializeP1a, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv04p1b"/), &
+      userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

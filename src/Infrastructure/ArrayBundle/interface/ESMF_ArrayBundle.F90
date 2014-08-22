@@ -2066,7 +2066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleRedistStore()"
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreNF()"
 !BOP
 ! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution without local factor argument
 !

@@ -197,14 +197,17 @@ module user_model2
         if (abs(farrayPtr1(i,j) - (10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
+          call ESMF_LogWrite("array1 check failure", ESMF_LOGMSG_INFO)
           rc=ESMF_FAILURE
           return ! bail out
         endif
         if (abs(farrayPtr2(i,j) - farrayPtr1(i,j) - 123.456d0) > 1.d-8) then
+          call ESMF_LogWrite("array2 check failure", ESMF_LOGMSG_INFO)
           rc=ESMF_FAILURE
           return ! bail out
         endif
         if (abs(farrayPtr3(i,j) - farrayPtr1(i,j) + 123.456d0) > 1.d-8) then
+          call ESMF_LogWrite("array3 check failure", ESMF_LOGMSG_INFO)
           rc=ESMF_FAILURE
           return ! bail out
         endif
