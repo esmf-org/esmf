@@ -84,6 +84,10 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  // okay to free minIndexValues and maxIndexValues variables now
+  free(minIndexValues);
+  free(maxIndexValues);
+  
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_Array object");
