@@ -625,7 +625,12 @@ program ESMF_FieldIOUTest
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_gw from field"
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -676,14 +681,23 @@ program ESMF_FieldIOUTest
       exclusiveLBound=exclusiveLBound, &
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Get Farray_gw from field"
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  write(name, *) "Get Farray_gr from field"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Compare read-in data with expected
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_r == localPet))
+#else
+  rc = ESMF_FAILURE
+#endif
   write(failMsg, *) "Failed comparison check"
   write(name, *) "Compare read-in data with expected"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
