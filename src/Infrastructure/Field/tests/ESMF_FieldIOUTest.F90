@@ -611,7 +611,7 @@ program ESMF_FieldIOUTest
   ! Create Field
   field_gw=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
            indexflag=ESMF_INDEX_GLOBAL,  &
-           name="temperature_g",  rc=rc)
+           name="temperature_gw",  rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create a gloablly indexed field from grid and fortran dummy array"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -625,18 +625,13 @@ program ESMF_FieldIOUTest
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_gw from field"
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Fill array and write
-  Farray_w = localPet
+  Farray_w = localPet ! Fill
   call ESMF_FieldWrite(field_gw, file="field_globalindex.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -653,7 +648,7 @@ program ESMF_FieldIOUTest
   ! Create Field
   field_gr=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
            indexflag=ESMF_INDEX_GLOBAL,  &
-           name="temperature_g",  rc=rc)
+           name="temperature_gr",  rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a gloablly indexed field from grid and fortran dummy array"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -682,12 +677,7 @@ program ESMF_FieldIOUTest
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_gr from field"
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
