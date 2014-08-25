@@ -67,9 +67,9 @@ esma_help help:
 esma_install install:
 	@echo "Nothing to be installed here"
 
-# #                  --------------------
-# #                     Documentation
-# #                  --------------------
+#                  --------------------
+#                     Documentation
+#                  --------------------
 
 MAPLUG = MAPL_UsersGuide
 
@@ -79,35 +79,22 @@ esma_doc doc: $(MAPLUG).tex
 	  $(MKINDX) $(MAPLUG).idx
 	  $(PDFLATEX) $(MAPLUG).tex
 	  $(PDFLATEX) $(MAPLUG).tex
-	  #$(CP) $(MAPLUG).pdf $(ESMADIR)/src/Doc/
+	  $(CP) $(MAPLUG).pdf $(ESMADOC)
 
 # Sources
-EX_DIR := ../../../Applications/Examples
-
 MAN_SRC :=  MAPL_Intro.tex
 
 API_SRC := ../MAPL_Cap.F90 ../MAPL_Generic.F90 ../MAPL_CFIO.F90 \
 	   ../MAPL_LocStreamMod.F90 ../MAPL_Base.F90 \
 	   ../ESMFL_Mod.P90 ../MAPL_HistoryGridComp.F90 \
-	   ../MAPL_GenericCplComp.F90 #../MAPL_ExtDataGridCompMod.F90
+	   ../MAPL_GenericCplComp.F90 ../MAPL_ExtDataGridCompMod.F90
 
-EX_GC_SRC := ../../../Applications/Examples/Example_GridComp/Example_GridCompMod.F90
-
-
-# The tutorial is not going to be part of MAPL_Manual, as of now
-$(MAPLUG).tex: $(MAN_SRC) MAPL_Preamble.tex MAPL_API__.tex #EX_GC__.tex
+$(MAPLUG).tex: $(MAN_SRC) MAPL_Preamble.tex MAPL_API__.tex
 	  $(CAT) MAPL_Preamble.tex $(MAN_SRC) > $(MAPLUG).tex
 	  @echo "\end{document}" >> $(MAPLUG).tex
 
 MAPL_API__.tex: $(API_SRC)
 	  $(PROTEX) $(PROTEX_FLAGS) $(API_SRC) > MAPL_API__.tex
-
-EX_GC__.tex: $(EX_GC_SRC)
-	  $(PROTEX) $(PROTEX_FLAGS) $(EX_GC_SRC) >> EX_GC__.tex
-	  # we want everything shifted to the right
-	  $(SED) -i 's/\\subsubsection/\\paragraph/g' EX_GC__.tex
-	  $(SED) -i 's/\\subsection/\\subsubsection/g' EX_GC__.tex
-	  $(SED) -i 's/\\section/\\subsection/g' EX_GC__.tex
 
 esma_clean clean:
 	  $(RM) -f *~ *.aux *.log *.out *.toc *__.tex $(MAPLUG).*

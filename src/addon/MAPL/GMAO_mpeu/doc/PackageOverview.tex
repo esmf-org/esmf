@@ -1,0 +1,61 @@
+% +-======-+ 
+%  Copyright (c) 2003-2007 United States Government as represented by 
+%  the Admistrator of the National Aeronautics and Space Administration.  
+%  All Rights Reserved.
+%  
+%  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+%  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+%  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+%  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+%  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+%  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+%  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+%  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+%  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+%  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+%  
+%  Government Agency: National Aeronautics and Space Administration
+%  Government Agency Original Software Designation: GSC-15354-1
+%  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+%  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+%  Government Agency Point of Contact for Original Software:  
+%  			Dale Hithon, SRA Assistant, (301) 286-2691
+%  
+% +-======-+ 
+\section{Package Overview }
+%
+\pagenumbering{arabic}
+% 
+\setcounter{secnumdepth}{5}
+\setlength{\parskip}{0.5em}
+%
+The Message Passing Envionment Utility ({\tt mpeu}) is a library that
+was designed and developed at the Data Assimilation Office (DAO) to
+support its data assimilation system.
+It sits on top of vendors utilities such as MPI, BLAS, shared-memory
+primitives, etc. 
+%
+{\tt mpeu} is written is Fortran 90 and is portable to many platforms.
+It provides the following services:
+%
+\begin{itemize}
+\item Management of resources
+\item Manipulation of strings
+\item F90 module-style access to MPI
+\item Portable/flexible definition of types
+\item Support for multiprocessor stdout/stderr
+\item Error handling/shutdown
+\item Timing/load balance monitoring tools
+\item Sorting tools
+\end{itemize}
+%
+
+The {\tt mpeu} library can be easily included in any application (using
+MPI) and can be ported into any platform with little (or no) modification.
+
+This report is a user's documentation that describes the above {\tt mpeu}
+services.
+Each of the services is contained a module. 
+In the next sections, we present the functions of each module and provides 
+enough examples to show how the library can be efficiently employed in a 
+given application.

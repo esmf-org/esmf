@@ -327,6 +327,7 @@ extern "C" {
       default:
         *rc = ESMF_FAILURE;
     }
+    return;
   }
 #else
   int winrt = GetCurrentDirectory (pathname_l, pathname)

@@ -383,8 +383,9 @@ module ESMF_GridUtilMod
     	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, localIsLatLonDeg, &
-                           theMesh, maskValuesArg, lregridConserve%regridconserve, localrc)
+    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, &
+      localIsLatLonDeg, theMesh, maskValuesArg, &
+      lregridConserve%regridconserve, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 

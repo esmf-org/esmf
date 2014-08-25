@@ -75,7 +75,10 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
 
-void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, const char *filename, int *fileTypeFlag, 
+void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, 
+				      const char *filename, int *fileTypeFlag, 
+				      int *regDecomp, 
+				      int *decompflag, int *dfpresent,
 				      int *isSphere, int *ispresent,
 				      int *addCornerStagger, int *acspresent,
 				      int *addUserArea, int *auapresent,
@@ -199,7 +202,7 @@ int setDefaultsLUA(int dimCount,
     cs_present = 0;
     ctk_present = 0;
 
-    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)&maxIndex;
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -267,7 +270,7 @@ int setDefaultsLUA(int dimCount,
 
     int pksize = 2;
 
-    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)&maxIndex;
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -316,6 +319,8 @@ int setDefaultsLUA(int dimCount,
 // !ARGUMENTS:
     const char *filename,
     int fileTypeFlag,
+    int *regDecomp,
+    int *decompflag,
     int *isSphere,
     int *addCornerStagger,
     int *addUserArea,
@@ -342,6 +347,13 @@ int setDefaultsLUA(int dimCount,
     // handle the optional arguments
     int ispresent=0, acspresent=0, auapresent=0;
     int ampresent=0, vnpresent=0, cnpresent=0;
+    int dfpresent=0;
+    int *df_loc = NULL;
+
+    if (decompflag != NULL) {
+      df_loc = decompflag;
+      dfpresent = 1;
+    }
     int is_loc = 1;
     if (isSphere != NULL) {
       is_loc = *isSphere;
@@ -387,6 +399,7 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
+				     regDecomp, df_loc, &dfpresent,
 				     &is_loc, &ispresent, 
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
 				     &am_loc, &ampresent, varname, &vnpresent, 
@@ -2917,72 +2930,72 @@ int Grid::set(
   }
 
   // if passed in, set gridEdgeLWidth
-  if (gridEdgeLWidthArg != ESMC_NULL_POINTER) { 
+  if (present(gridEdgeLWidthArg)) { 
     // if present get rid of the old data
-    if (proto->gridEdgeLWidth !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->gridEdgeLWidth);
+    if (present(proto->gridEdgeLWidth)) _freeInterfaceInt(&proto->gridEdgeLWidth);
 
     // record the new data
     proto->gridEdgeLWidth=_copyInterfaceInt(gridEdgeLWidthArg);
   }
 
   // if passed in, set gridEdgeUWidth
-  if (gridEdgeUWidthArg != ESMC_NULL_POINTER) { 
+  if (present(gridEdgeUWidthArg)) { 
     // if present get rid of the old data
-    if (proto->gridEdgeUWidth !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->gridEdgeUWidth);
+    if (present(proto->gridEdgeUWidth)) _freeInterfaceInt(&proto->gridEdgeUWidth);
 
     // record the new data
     proto->gridEdgeUWidth=_copyInterfaceInt(gridEdgeUWidthArg);
   }
 
   // if passed in, set gridAlign
-  if (gridAlignArg != ESMC_NULL_POINTER) { 
+  if (present(gridAlignArg)) { 
     // if present get rid of the old data
-    if (proto->gridAlign !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->gridAlign);
+    if (present(proto->gridAlign)) _freeInterfaceInt(&proto->gridAlign);
 
     // record the new data
     proto->gridAlign=_copyInterfaceInt(gridAlignArg);
   }
 
   // if passed in, set distgridToGridMap
-  if (distgridToGridMapArg != ESMC_NULL_POINTER) { 
+  if (present(distgridToGridMapArg)) { 
     // if present get rid of the old data
-    if (proto->distgridToGridMap !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->distgridToGridMap);
+    if (present(proto->distgridToGridMap)) _freeInterfaceInt(&proto->distgridToGridMap);
 
     // record the new data
     proto->distgridToGridMap=_copyInterfaceInt(distgridToGridMapArg);
   }
 
   // if passed in, set distDim
-  if (distDimArg != ESMC_NULL_POINTER) { 
+  if (present(distDimArg)) { 
     // if present get rid of the old data
-    if (proto->distDim !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->distDim);
+    if (present(proto->distDim)) _freeInterfaceInt(&proto->distDim);
 
     // record the new data
     proto->distDim=_copyInterfaceInt(distDimArg);
   }
 
   // if passed in, set minIndex
-  if (minIndexArg != ESMC_NULL_POINTER) {
+  if (present(minIndexArg)) {
     // if present get rid of the old data
-    if (proto->minIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&proto->minIndex);
+    if (present(proto->minIndex)) _freeInterfaceInt(&proto->minIndex);
 
     // record the new data
     proto->minIndex = _copyInterfaceInt(minIndexArg);
   }
 
   // if passed in, set maxIndex
-  if (maxIndexArg != ESMC_NULL_POINTER) {
+  if (present(maxIndexArg)) {
     // if present get rid of the old data
-    if (proto->maxIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&proto->maxIndex);
+    if (present(proto->maxIndex)) _freeInterfaceInt(&proto->maxIndex);
 
     // record the new data
     proto->maxIndex = _copyInterfaceInt(maxIndexArg);
   }
 
   // if passed in, set localArbIndex
-  if (localArbIndexArg != ESMC_NULL_POINTER) {
+  if (present(localArbIndexArg)) {
     // if present get rid of the old data
-    if (proto->localArbIndex != ESMC_NULL_POINTER) _freeInterfaceInt(&proto->localArbIndex);
+    if (present(proto->localArbIndex)) _freeInterfaceInt(&proto->localArbIndex);
 
     // record the new data
     proto->localArbIndex = _copyInterfaceInt(localArbIndexArg);
@@ -2994,27 +3007,27 @@ int Grid::set(
   }
 
   // if passed in, set coordDimCount
-  if (coordDimCountArg != ESMC_NULL_POINTER) { 
+  if (present(coordDimCountArg)) { 
     // if present get rid of the old data
-    if (proto->coordDimCount !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->coordDimCount);
+    if (present(proto->coordDimCount)) _freeInterfaceInt(&proto->coordDimCount);
 
     // record the new data
     proto->coordDimCount=_copyInterfaceInt(coordDimCountArg);
   }
 
   // if passed in, set coordDimMap
-  if (coordDimMapArg != ESMC_NULL_POINTER) { 
+  if (present(coordDimMapArg)) { 
     // if present get rid of the old data
-    if (proto->coordDimMap !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->coordDimMap);
+    if (present(proto->coordDimMap)) _freeInterfaceInt(&proto->coordDimMap);
 
     // record the new data
     proto->coordDimMap=_copyInterfaceInt(coordDimMapArg);
   }
 
   // if passed in, set gridMemLBoundArg
-  if (gridMemLBoundArg != ESMC_NULL_POINTER) { 
+  if (present(gridMemLBoundArg)) { 
     // if present get rid of the old data
-    if (proto->gridMemLBound !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->gridMemLBound);
+    if (present(proto->gridMemLBound)) _freeInterfaceInt(&proto->gridMemLBound);
 
     // record the new data
     proto->gridMemLBound=_copyInterfaceInt(gridMemLBoundArg);
@@ -4562,7 +4575,7 @@ int Grid::setItemArrayInternal(
   rc = ESMC_RC_NOT_IMPL;
   
   // Error check LWidth
-  if (staggerEdgeLWidthArg != NULL) {
+  if (present(staggerEdgeLWidthArg)) {
     //// Ensure staggerEdgeLWidth is of the correct dimCount 
     if (staggerEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -4586,7 +4599,7 @@ int Grid::setItemArrayInternal(
   }
 
   // Error check UWidth
-  if (staggerEdgeUWidthArg != NULL) {
+  if (present(staggerEdgeUWidthArg)) {
     //// Ensure staggerEdgeUWidth is of the correct dimCount 
     if (staggerEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -4610,7 +4623,7 @@ int Grid::setItemArrayInternal(
   }
 
   // Error check Align
-  if (staggerAlignArg != NULL) {
+  if (present(staggerAlignArg)) {
     //// Ensure staggerAlign has the correct dimCount
     if (staggerAlignArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -4634,7 +4647,7 @@ int Grid::setItemArrayInternal(
   }
 
   // Error check Align
-  if (staggerMemLBoundArg != NULL) {
+  if (present(staggerMemLBoundArg)) {
     //// Ensure staggerMemLBoundArg has the correct dimCount
     if (staggerMemLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -4667,7 +4680,7 @@ int Grid::setItemArrayInternal(
 
    
   // Set staggerMemLBound 
-  if (staggerMemLBoundArg != NULL) {
+  if (present(staggerMemLBoundArg)) {
     for (int i=0; i<dimCount; i++) {
       staggerMemLBound[i]=staggerMemLBoundArg->array[i];
     }
@@ -5857,7 +5870,7 @@ int construct(
   // (undistDimCount=0), if it has been then error check and copy it
   undistDimCount=0; // default to 0
   undistUBound = NULL; // default to NULL
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -5878,8 +5891,8 @@ int construct(
   // If undistLBound isn't present and undistUBound is then set a default, 
   // otherwise error check and copy undistLBoundArg. 
   undistLBound = NULL; // reset
-  if (undistLBoundArg != NULL){
-    if (undistUBoundArg==NULL){
+  if (present(undistLBoundArg)){
+    if (!present(undistUBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- can't have undistUBound without undistLBound", ESMC_CONTEXT, &rc);
       return rc;
@@ -5898,7 +5911,7 @@ int construct(
     undistLBound=new int[undistDimCount];
     for (int i=0; i<undistDimCount; i++)
          undistLBound[i]=undistLBoundArg->array[i];
-  } else if (undistUBoundArg != NULL) {
+  } else if (present(undistUBoundArg)) {
     // default undistLBound to (1,1,1,...)
     undistLBound=new int[undistDimCount];
     for (int i=0; i<undistDimCount; i++)
@@ -5917,7 +5930,7 @@ int construct(
   }
 
   // Error check gridEdgeLWidthArg
-  if (gridEdgeLWidthArg != NULL) {
+  if (present(gridEdgeLWidthArg)) {
     if (gridEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- gridEdgeLWidth array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -5939,7 +5952,7 @@ int construct(
   } 
 
   // Error check gridEdgeUWidthArg
-  if (gridEdgeUWidthArg != NULL) {
+  if (present(gridEdgeUWidthArg)) {
     if (gridEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- gridEdgeUWidth array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -5961,7 +5974,7 @@ int construct(
   }
 
   // Error check gridAlignArg
-  if (gridAlignArg != NULL) {
+  if (present(gridAlignArg)) {
     if (gridAlignArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- gridAlign array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -5996,7 +6009,7 @@ int construct(
 
   // Error check gridMemLBound and fill in value
   gridMemLBound=new int[dimCount];
-  if (gridMemLBoundArg != NULL) {
+  if (present(gridMemLBoundArg)) {
     if (indexflag != ESMF_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
         "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER",
@@ -6033,7 +6046,7 @@ int construct(
   // If the distgridToGridMapArg parameter has been passed in then error check 
   // and copy it, otherwise set a default.
   distgridToGridMap = new int[distDimCount];
-  if (distgridToGridMapArg == NULL) {
+  if (!present(distgridToGridMapArg)) {
     for (int i=0; i<distDimCount; i++)
       distgridToGridMap[i] = i; // set distgridToGridMap to default (0,1,2..)
   } else {
@@ -6060,7 +6073,7 @@ int construct(
   // If the coordDimCountArg parameter has been passed in then error check and 
   // copy it, otherwise set a default.
   coordDimCount=new int[dimCount];
-  if (coordDimCountArg == NULL) {
+  if (!present(coordDimCountArg)) {
     for (int i=0; i<dimCount; i++)
       coordDimCount[i] = dimCount; // set coordDimCount to default all curvilinear
   } else {
@@ -6102,14 +6115,14 @@ int construct(
     }
   }
 
-  if (coordDimMapArg == NULL) {
+  if (!present(coordDimMapArg)) {
     for(int i=0; i<dimCount; i++) {
       for (int j=0; j<coordDimCount[i]; j++) {
         coordDimMap[i][j]=j;  // initialize to a default
       }
     }
   } else {
-    if (coordDimCountArg == NULL){
+    if (!present(coordDimCountArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- if coordDimMap is specified then a corresponding coordDimCount must also be specified",
         ESMC_CONTEXT, &rc);
@@ -6214,7 +6227,7 @@ int construct(
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         
   // Dellocate temporay arrays
-  if (undistUBoundArg != NULL)  delete [] undistLBound;
+  if (present(undistUBoundArg))  delete [] undistLBound;
 
   if (name) delete [] name;
 
@@ -6378,7 +6391,7 @@ int construct(
   // undistributed dimensions 
   // (undistDimCount=0), if it has been then error check and copy it
     undistUBound = NULL; // default to NULL
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of dimCount 1", ESMC_CONTEXT, &rc);
@@ -6399,8 +6412,8 @@ int construct(
   // If undistLBound isn't present and undistUBound is then set a default, 
   // otherwise error check and copy undistLBoundArg. 
   undistLBound = NULL; // reset
-  if (undistLBoundArg != NULL){
-    if (undistUBoundArg==NULL){
+  if (present(undistLBoundArg)){
+    if (!present(undistUBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- can't have undistUBound without undistLBound", ESMC_CONTEXT, &rc);
       return rc;
@@ -6436,7 +6449,7 @@ int construct(
 
   // Error check gridMemLBound and fill in value
   gridMemLBound=new int[dimCount];
-  if (gridMemLBoundArg != NULL) {
+  if (present(gridMemLBoundArg)) {
     if (indexflag != ESMF_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
         "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER",
@@ -6497,7 +6510,7 @@ int construct(
    } 
 
   coordDimCount=new int[dimCount];
-  if (coordDimCountArg == NULL) {
+  if (!present(coordDimCountArg)) {
     // default should be 1 for both arbitrary dimension or undistributed dimension
     for (int i=0; i<dimCount; i++) coordDimCount[i]=1;
   } else { 
@@ -6520,7 +6533,7 @@ int construct(
   // Create coordDimMap
   coordDimMap=_allocate2D<int>(dimCount,dimCount);
   // initialize array to 0
-  if (coordDimMapArg == NULL) {
+  if (!present(coordDimMapArg)) {
     // ESMC_GRID_ARBDIM (-2) if arbitrary dim, otherwise, i
     for (int i=0; i<dimCount; i++) coordDimMap[i][0]=i;
     for (int i=0; i<distDimCount; i++) {
@@ -6550,7 +6563,7 @@ int construct(
   minIndex = new int[dimCount];
   maxIndex = new int[dimCount];
 
-  if (minIndexArg == NULL) {
+  if (!present(minIndexArg)) {
     for (int i=0; i<dimCount; i++) {
       minIndex[i]=1;
     }
@@ -6633,7 +6646,7 @@ int construct(
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
   // Dellocate temporay arrays
-  if (undistUBoundArg != NULL)  delete [] undistLBound;
+  if (present(undistUBoundArg))  delete [] undistLBound;
 
   if (name) delete [] name;
    
@@ -6764,7 +6777,7 @@ int setDefaultsLUA(
   rc = ESMC_RC_NOT_IMPL;
   
   // At least make sure the input arrays are the right size
-  if (lWidthIn != ESMC_NULL_POINTER) {
+  if (present(lWidthIn)) {
     if (lWidthIn->extent[0] < dimCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
                         "- LWidth size too small ", ESMC_CONTEXT, &rc);
@@ -6772,7 +6785,7 @@ int setDefaultsLUA(
     }
   }
 
-  if (uWidthIn != ESMC_NULL_POINTER) {
+  if (present(uWidthIn)) {
     if (uWidthIn->extent[0] < dimCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
                         "- UWidth size too small ", ESMC_CONTEXT, &rc);
@@ -6780,7 +6793,7 @@ int setDefaultsLUA(
     }
   }
 
-  if (alignIn != ESMC_NULL_POINTER) {
+  if (present(alignIn)) {
     if (alignIn->extent[0] < dimCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- align size too small ", ESMC_CONTEXT, &rc);
@@ -6789,9 +6802,9 @@ int setDefaultsLUA(
   }
 
   // set outputs based on presence of inputs
-  if (lWidthIn == ESMC_NULL_POINTER) { // lWidthIn NOT present
-    if (uWidthIn == ESMC_NULL_POINTER) { // uWidthIn NOT present
-      if (alignIn == ESMC_NULL_POINTER) { // alignIn NOT present
+  if (!present(lWidthIn)) { // lWidthIn NOT present
+    if (!present(uWidthIn)) { // uWidthIn NOT present
+      if (!present(alignIn)) { // alignIn NOT present
         // present:       ,       ,
         memcpy(lWidthOut,lWidthDefault,dimCount*sizeof(int));        
         memcpy(uWidthOut,uWidthDefault,dimCount*sizeof(int));        
@@ -6815,7 +6828,7 @@ int setDefaultsLUA(
         
       }
     } else { // uWidthIn present
-      if (alignIn == ESMC_NULL_POINTER) { // alignIn NOT present
+      if (!present(alignIn)) { // alignIn NOT present
         // present:       , UWidth,
         for (int i=0; i<dimCount; i++)
           lWidthOut[i]=0;
@@ -6831,8 +6844,8 @@ int setDefaultsLUA(
       }
     }
   } else { // lWidthIn present
-    if (uWidthIn == ESMC_NULL_POINTER) { // uWidthIn NOT present
-      if (alignIn == ESMC_NULL_POINTER) { // alignIn NOT present
+    if (!present(uWidthIn)) { // uWidthIn NOT present
+      if (!present(alignIn)) { // alignIn NOT present
         // present: lWidth,       ,
         memcpy(lWidthOut,lWidthIn->array,dimCount*sizeof(int));        
         for (int i=0; i<dimCount; i++)
@@ -6849,7 +6862,7 @@ int setDefaultsLUA(
      
       }      
     } else { // uWidthIn present
-      if (alignIn == ESMC_NULL_POINTER) { // alignIn NOT present
+      if (!present(alignIn)) { // alignIn NOT present
         // present: lWidth, UWidth, 
         memcpy(lWidthOut,lWidthIn->array,dimCount*sizeof(int));        
         memcpy(uWidthOut,uWidthIn->array,dimCount*sizeof(int));        

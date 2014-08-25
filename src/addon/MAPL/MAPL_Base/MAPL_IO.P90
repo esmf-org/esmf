@@ -22,7 +22,7 @@
 !  			Dale Hithon, SRA Assistant, (301) 286-2691
 !  
 ! +-======-+ 
-!  $Id: MAPL_IO.P90,v 1.55.2.8 2013-05-22 16:18:29 ltakacs Exp $
+!  $Id: MAPL_IO.P90,v 1.55.2.13 2014-01-30 19:20:07 atrayano Exp $
 
 #include "MAPL_ErrLog.h"
 
@@ -40,6 +40,7 @@ module MAPL_IOMod
   use MAPL_CommsMod
   use MAPL_SortMod
   use, intrinsic :: ISO_C_BINDING
+  use, intrinsic :: iso_fortran_env
 
   implicit none
   private
@@ -258,7 +259,7 @@ module MAPL_IOMod
     logical :: found
 
     found = .false.
-    do i = 2, last_unit
+    do i = 3, last_unit
        if(name==Mname(i)) then
           found = .true.
           exit
@@ -266,7 +267,7 @@ module MAPL_IOMod
     end do
 
     if (.not. found) then
-       do i = 2,last_unit
+       do i = 3,last_unit
           if(.not.MTAKEN(i)) then
              found = .true.
              exit
@@ -618,11 +619,12 @@ module MAPL_IOMod
 ! Read routines
 !---------------------------
 
-  subroutine MAPL_StateVarRead(UNIT, STATE, NAME, arrdes, RC)
+  subroutine MAPL_StateVarRead(UNIT, STATE, NAME, arrdes, ignoreEOF, RC)
     integer                     , intent(IN   ) :: UNIT
     type (ESMF_State)           , intent(INOUT) :: STATE
     character(len=*),   optional, intent(IN   ) :: NAME
     type(ArrDescr),     optional, intent(INOUT) :: ARRDES
+    logical,            optional, intent(IN   ) :: ignoreEOF
     integer,            optional, intent(  OUT) :: RC
 
 ! Local vars
@@ -755,7 +757,7 @@ module MAPL_IOMod
                 endif
              endif
       
-             call MAPL_FieldRead(unit, field, arrdes=arrdes, HomePE=Mask, rc=status)
+             call MAPL_FieldRead(unit, field, arrdes=arrdes, HomePE=Mask, ignoreEOF=ignoreEOF, rc=status)
              VERIFY_(STATUS)
 
 !ALT          else
@@ -812,12 +814,13 @@ module MAPL_IOMod
   end subroutine MAPL_BundleRead
 
 
-  subroutine MAPL_FieldRead(UNIT,FIELD, ARRDES, HomePE, varid, RC)
+  subroutine MAPL_FieldRead(UNIT,FIELD, ARRDES, HomePE, varid, ignoreEOF, RC)
     integer                     , intent(IN   ) :: UNIT
     type (ESMF_Field)           , intent(INOUT) :: field
     type(ArrDescr),     optional, intent(INOUT) :: ARRDES
     integer, target,   optional , intent(IN   ) :: HomePE(:)
     integer,           optional , intent(IN   ) :: varid
+    logical,           optional , intent(IN   ) :: ignoreEOF
     integer,           optional , intent(  OUT) :: RC
 
 ! Local vars
@@ -843,11 +846,19 @@ module MAPL_IOMod
     integer, pointer                   :: mask(:)
     character(len=ESMF_MAXSTR)         :: IAm='MAPL_FieldRead'
     type (ESMF_DistGrid)               :: distGrid
+    integer                            :: stat
+    logical                            :: ignoreEOF_
 
     if (unit < 0 .or. present(arrdes)) then
        FORMATTED = "NO"
     else
        inquire(unit=UNIT, formatted=FORMATTED)
+    end if
+
+    if (present(ignoreEOF)) then
+       ignoreEOF_ = ignoreEOF
+    else
+       ignoreEOF_ = .false.
     end if
 
     call ESMF_FieldGet(field, grid=grid, rc=status)
@@ -856,6 +867,25 @@ module MAPL_IOMod
     VERIFY_(STATUS)
     call ESMF_DistGridGet(distGrid, delayout=layout, rc=STATUS)
     VERIFY_(STATUS)
+
+    if (ignoreEOF_) then
+       ! test for end-of-file by 
+       ! making a blank read followed by backspace
+
+       if (MAPL_am_i_root(layout)) then
+          read (UNIT, IOSTAT=status)
+       end if
+       call MAPL_CommsBcast(layout, status, n=1, ROOT=MAPL_Root, rc=stat)
+       VERIFY_(STAT)
+
+       if (status == IOSTAT_END) then
+          RETURN_(ESMF_SUCCESS)
+       end if
+       VERIFY_(STATUS)
+
+       call MAPL_Backspace(UNIT, layout, rc=status)
+       VERIFY_(STATUS)
+    end if
 
     call ESMF_AttributeGet(field, name='DIMS', value=DIMS, rc=status)
     VERIFY_(STATUS)
@@ -884,6 +914,7 @@ module MAPL_IOMod
                    VERIFY_(STATUS)
                 else
                    call MAPL_VarRead(unit, grid, var_1d, arrdes=arrdes, mask=mask, rc=status)
+                   VERIFY_(STATUS)
                 endif
              else if (DIMS == MAPL_DimsVertOnly) then
                 if(present(varid)) then
@@ -1081,7 +1112,7 @@ module MAPL_IOMod
 
 !---------------------------
 
-  subroutine MAPL_VarRead_R4_1d(UNIT, GRID, A, MASK, arrdes,  RC)
+  subroutine MAPL_VarRead_R4_1d(UNIT, GRID, A, MASK, arrdes, RC)
 
     integer                     , intent(IN   ) :: UNIT
     type (ESMF_Grid)            , intent(INout) :: GRID
@@ -1119,7 +1150,6 @@ module MAPL_IOMod
 
     integer :: numread, mpistatus(MPI_STATUS_SIZE)
     integer :: cnt
-
 
     if(present(arrdes)) then
        ASSERT_(present(mask))
@@ -2291,8 +2321,6 @@ module MAPL_IOMod
                 if (STATUS == ESMF_SUCCESS) then
                    skipWriting = (RST == 0)
                 end if
-             else
-                skipWriting = .true.
              end if
              if (skipWriting) cycle
 
@@ -2309,8 +2337,6 @@ module MAPL_IOMod
                 if (STATUS == ESMF_SUCCESS) then
                    skipWriting = (RST == 0)
                 end if
-             else
-                skipWriting = .true.
              end if
              if (skipWriting) cycle
 

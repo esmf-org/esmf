@@ -165,7 +165,7 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 } // meshcreate
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
-                                           double *nodeCoord, int *nodeOwner, InterfaceInt **nodeMaskII,
+                                           double *nodeCoord, int *nodeOwner, InterfaceInt *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
 {
@@ -231,15 +231,15 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
     IOField<NodalField> *node_mask;
 
     bool has_node_mask=false;
-    if (*nodeMaskII != NULL) { // if masks exist
+    if (present(nodeMaskII)) { // if masks exist
     // Error checking
-    if ((*nodeMaskII)->dimCount !=1) {
+    if ((nodeMaskII)->dimCount !=1) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
     }
 
-    if ((*nodeMaskII)->extent[0] != *num_nodes) {
+    if ((nodeMaskII)->extent[0] != *num_nodes) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                        "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -258,7 +258,7 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
 #if 0
     // Loop and add coords and mask
     if (has_node_mask) {
-      int *maskArray=(*nodeMaskII)->array;
+      int *maskArray=(nodeMaskII)->array;
       int nm=0;
       for (UInt nc = 0; ni != ne; ++ni) {
         
@@ -325,7 +325,7 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
 
     // Loop and add mask
     if (has_node_mask) {
-      int *maskArray=(*nodeMaskII)->array;    
+      int *maskArray=(nodeMaskII)->array;    
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
       int nm=0;
@@ -548,7 +548,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
 
 extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
-                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt **_elemMaskII ,
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
                                               int *_coordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
@@ -579,7 +579,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
     int num_elemConn=*_num_elemConn;
 
-    InterfaceInt *elemMaskII=*_elemMaskII;
+    InterfaceInt *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
 
@@ -765,7 +765,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
     // If they exist, error check mask 
-    if (elemMaskII != NULL) { // if masks exist
+    if (present(elemMaskII)) { // if masks exist
       // Error checking
       if (elemMaskII->dimCount !=1) {
         int localrc;
@@ -830,7 +830,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
-      if (elemMaskII != NULL) { 
+      if (present(elemMaskII)) { 
 
         // Get mask value array
         elemMaskIIArray=elemMaskII->array;
@@ -953,7 +953,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
       elemId=elemId_wsplit;
       if (areaPresent==1) elemArea=elemArea_wsplit;
 
-      if (elemMaskII != NULL) { 
+      if (present(elemMaskII)) { 
         elemMaskII=elemMaskII_wsplit;
       }
     }   
@@ -1002,7 +1002,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
   // Handle element masking
   bool has_elem_mask=false;
-  if (elemMaskII != NULL) { // if masks exist
+  if (present(elemMaskII)) { // if masks exist
     // ERROR CHECKED ABOVE
 
     // Context for new fields
@@ -1192,7 +1192,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
 
     //// Setup for split mask
-    if (elemMaskII != NULL) { 
+    if (present(elemMaskII)) { 
       if (elemMaskIIArray_wsplit != NULL) delete [] elemMaskIIArray_wsplit;
       if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
     }
@@ -3110,7 +3110,7 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
 }
 
 
-extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
   try {
 
@@ -3131,7 +3131,7 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     
 
     // If no mask values then leave
-    if (maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3140,7 +3140,7 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // If no mask values then leave
-    if (*maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3149,8 +3149,8 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // Get mask values
-    int numMaskValues=(*maskValuesArg)->extent[0];
-    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
 
 
     // Set Mask values
@@ -3306,7 +3306,7 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
 }
 
 ////////////
-extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt *maskValuesArg,  int *rc) {
 
   try {
 
@@ -3327,7 +3327,7 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     
 
     // If no mask values then leave
-    if (maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3336,7 +3336,7 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // If no mask values then leave
-    if (*maskValuesArg == NULL) {
+    if (!present(maskValuesArg)) {
       // Set return code 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
       
@@ -3345,8 +3345,8 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
     }
 
     // Get mask values
-    int numMaskValues=(*maskValuesArg)->extent[0];
-    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
 
 
     // Set Mask values
@@ -3922,30 +3922,22 @@ extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_
       MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
     } else {
 
-      Throw() << "Split meshes not supported in MeshRedistNodes right now! \n";
-
-#if 0 
-     // If split mesh expand ids
-      int num_elem_gids_ws;
-      int *elem_gids_ws=NULL;
-      std::map<UInt,UInt> split_to_orig_id;
-      expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
-      
-      // Call into redist with expanded ids
-      MeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
+      // Redist nodes
+      // NOTE: internally sets: is_split and split_to_orig_id map
+      //       split_id_to_frac is set below
+      MeshRedistNode(src_mesh, *num_node_gids, node_gids, output_meshpp);
 
       // dereference output mesh
       Mesh *output_mesh=*output_meshpp;
 
       // if split mesh add info
-      output_mesh->is_split=src_mesh->is_split;
+      // output_mesh->is_split=src_mesh->is_split; // SET INSIDE MeshRedistNode()
       output_mesh->max_non_split_id=src_mesh->max_non_split_id;
-      output_mesh->split_to_orig_id=split_to_orig_id;
+      // output_mesh->split_to_orig_id=split_to_orig_id; // SET INSIDE MeshRedistNode()
 
       // calculate split_id_to_frac map from other info
       calc_split_id_to_frac(output_mesh); 
 
-#endif
 #if 0
       // DEBUG OUTPUT
     // Loop and get split-orig id pairs
@@ -3982,12 +3974,7 @@ extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_
     }
     }
 
-    /* XMRKX */
-
-      // Free split gids
-      if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
 #endif
-
     }
 
 

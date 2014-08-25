@@ -198,7 +198,7 @@ c --------------------------------------------------------
       end
 
       subroutine interp_hh ( q_cmp,im,jm,lm,dlam,dphi, 
-     .                       q_geo,irun,lon_geo,lat_geo, undef, lon_min )
+     .                       q_geo,irun,lon_geo,lat_geo, undef, lon_min)
 C***********************************************************************
 C
 C  PURPOSE:
@@ -306,12 +306,18 @@ c Allocate Memory for Weights and Index Locations
 c -----------------------------------------------
       allocate ( wl_ip0jp0(irun) , wl_im1jp0(irun) )
       allocate ( wl_ip0jm1(irun) , wl_im1jm1(irun) )
-      allocate ( wc_ip1jp1(irun) , wc_ip0jp1(irun) , wc_im1jp1(irun) , wc_im2jp1(irun) )
-      allocate ( wc_ip1jp0(irun) , wc_ip0jp0(irun) , wc_im1jp0(irun) , wc_im2jp0(irun) )
-      allocate ( wc_ip1jm1(irun) , wc_ip0jm1(irun) , wc_im1jm1(irun) , wc_im2jm1(irun) )
-      allocate ( wc_ip1jm2(irun) , wc_ip0jm2(irun) , wc_im1jm2(irun) , wc_im2jm2(irun) )
-      allocate (       ip1(irun) ,       ip0(irun) ,       im1(irun) ,       im2(irun) )
-      allocate (       jp1(irun) ,       jp0(irun) ,       jm1(irun) ,       jm2(irun) )
+      allocate ( wc_ip1jp1(irun) , wc_ip0jp1(irun) , 
+     .  wc_im1jp1(irun) , wc_im2jp1(irun) )
+      allocate ( wc_ip1jp0(irun) , wc_ip0jp0(irun) ,
+     .  wc_im1jp0(irun) , wc_im2jp0(irun) )
+      allocate ( wc_ip1jm1(irun) , wc_ip0jm1(irun) ,
+     .  wc_im1jm1(irun) , wc_im2jm1(irun) )
+      allocate ( wc_ip1jm2(irun) , wc_ip0jm2(irun) ,
+     .  wc_im1jm2(irun) , wc_im2jm2(irun) )
+      allocate (       ip1(irun) ,       ip0(irun) ,
+     .        im1(irun) ,       im2(irun) )
+      allocate (       jp1(irun) ,       jp0(irun) ,
+     .        jm1(irun) ,       jm2(irun) )
 
 c Compute Input Computational-Grid Latitude and Longitude Locations
 c -----------------------------------------------------------------

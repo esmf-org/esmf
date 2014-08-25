@@ -49,6 +49,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
                          meshname=meshname,
                          convert_to_dual=convert_to_dual)
         is_mesh = True
+        add_mask = False
     else:
         print "Creating ESMF.Grid object"
         add_mask = len(missingvalue) > 0
@@ -56,7 +57,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
                                  add_corner_stagger=add_corner_stagger,
                                  is_sphere=isSphere, add_mask=add_mask, 
                                  varname=missingvalue)
-    return grid_or_mesh, is_mesh
+    return grid_or_mesh, is_mesh, add_mask
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
     if is_mesh:
@@ -77,19 +78,26 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
     lats = np.radians(lats)
     return lons,lats
         
-def create_field(grid, name, regrid_method=None):
+def create_field(grid, name, regrid_method=None, domask=False):
     '''
     PRECONDITIONS: A Mesh or Grid has been created, and 'name' is a string that
                    will be used to initialize the name of a new Field.
     POSTCONDITIONS: A Field has been created.
     '''
+    mask_values = None
+    if domask:
+        mask_values = [0]
+
     if isinstance(grid,ESMF.Mesh):
         if regrid_method == ESMF.RegridMethod.CONSERVE:
-            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT)
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT, 
+                                mask_values=mask_values)
         else:
-            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE)
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE, 
+                                mask_values=mask_values)
     else:
-        field = ESMF.Field(grid, name)
+        field = ESMF.Field(grid, name, mask_values=mask_values)
+
     return field
 
 def build_analyticfield_const(field):
@@ -107,7 +115,8 @@ def build_analyticfield(field, lons, lats):
     field.data[...] = 2.0 + np.cos(lats[...])**2 * np.cos(2.0*lons[...])
     return field
 
-def run_regridding(srcfield, dstfield, regrid_method, unmapped_action, srcfracfield, 
+def run_regridding(srcfield, dstfield, src_mask, dst_mask, 
+                   regrid_method, unmapped_action, srcfracfield, 
                    dstfracfield, pole_method=None, regrid_pole_npoints=None):
     '''
     PRECONDITIONS: Two Fields have been created and a regridding operation
@@ -115,8 +124,16 @@ def run_regridding(srcfield, dstfield, regrid_method, unmapped_action, srcfracfi
     POSTCONDITIONS: A regridding operation has set the data on 'dstfield'.
     '''
     # call the regridding functions
-    dstfield.data[...] = UNINITVAL
+    src_mask_vals = None
+    dst_mask_vals = None
+    if src_mask:
+        src_mask_vals = np.array([0])
+    if dst_mask:
+        dst_mask_vals = np.array([0])
+
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                src_mask_values=src_mask_vals,
+                                dst_mask_values=dst_mask_vals,
                                 regrid_method=regrid_method,
                                 unmapped_action=unmapped_action,
                                 src_frac_field=srcfracfield,
@@ -129,7 +146,7 @@ def run_regridding(srcfield, dstfield, regrid_method, unmapped_action, srcfracfi
 
 def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False, 
                    dstfracfield=None, mass1=None, mass2=None, 
-                   regrid_method=ESMF.RegridMethod.CONSERVE):
+                   regrid_method=ESMF.RegridMethod.CONSERVE, uninitval=422397696.):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'srcfield' and 'dstfield'.
@@ -159,10 +176,8 @@ def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False,
 
     for i in range(field2_flat.size):     
         if ((not field2mask_flat[i]) and 
-            (field1_flat[i] != UNINITVAL) and 
-            (abs(field2_flat[i]) > EPSILON) and
-            (regrid_method != ESMF.RegridMethod.CONSERVE or
-            dstfracfield_flat[i] >= 0.999)):
+            (field1_flat[i] != uninitval) and 
+            (dstfracfield_flat[i] >= 0.999)):
             if (field2_flat.data[i] != 0.0):
                 err = abs(field1_flat[i]/dstfracfield_flat[i] - \
                             field2_flat[i])/abs(field2_flat[i])
@@ -248,7 +263,8 @@ def parse_options(options):
                                                'src_meshname=', 'dst_meshname=',
                                                'ignore_unmapped', 
                                                'src_regional', 'dst_regional',
-                                               'src_missingvalue=','dst_missingvalue='])
+                                               'src_missingvalue=','dst_missingvalue=',
+					       '64bit_offset','netcdf4'])
         src_type_str = "SCRIP"
         dst_type_str = "SCRIP"
         src_meshname = "Undefined"
@@ -318,66 +334,63 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, itrp_err, csrv_er
             pole_method = ESMF.PoleMethod.NPNTAVG
             pole_method_npntavg = int(pole_method_str)
 
-    srcgrid, src_is_mesh = create_grid_or_mesh_from_file(src_fname, src_type, 
-                                                         meshname=src_meshname,
-                                                         convert_to_dual=convert_to_dual, 
-                                                         isSphere=src_is_sphere,
-                                                         add_corner_stagger=add_corner_stagger,
-                                                         missingvalue=src_missingvalue)
-    dstgrid, dst_is_mesh = create_grid_or_mesh_from_file(dst_fname, dst_type, 
-                                                         meshname=dst_meshname,
-                                                         convert_to_dual=convert_to_dual, 
-                                                         isSphere=dst_is_sphere,
-                                                         add_corner_stagger=add_corner_stagger,
-                                                         missingvalue=dst_missingvalue)
+    src_mask = False
+    srcgrid, src_is_mesh, src_mask = create_grid_or_mesh_from_file(src_fname, src_type,
+                                                    meshname=src_meshname,
+                                                    convert_to_dual=convert_to_dual, 
+                                                    isSphere=src_is_sphere,
+                                                    add_corner_stagger=add_corner_stagger,
+                                                    missingvalue=src_missingvalue)
+    dst_mask = False
+    dstgrid, dst_is_mesh, dst_mask = create_grid_or_mesh_from_file(dst_fname, dst_type, 
+                                                    meshname=dst_meshname,
+                                                    convert_to_dual=convert_to_dual, 
+                                                    isSphere=dst_is_sphere,
+                                                    add_corner_stagger=add_corner_stagger,
+                                                    missingvalue=dst_missingvalue)
 
     # Get node coordinates in radians
     src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
     dst_lons, dst_lats = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh)
-
-    # get the destination mask
-    if dst_is_mesh:
-        dst_mask = np.copy(dst_lons)
-        dst_mask[...] = 1
-    else:
-        #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
-        dstgrid.link_item_buffer(ESMF.GridItem.MASK, ESMF.StaggerLoc.CENTER)
-        dst_mask = dstgrid.get_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
     
     # create Field objects on the Grids
-    srcfield = create_field(srcgrid, 'srcfield', regrid_method)
-    dstfield = create_field(dstgrid, 'dstfield', regrid_method)
-    dstfield2 = create_field(dstgrid, 'dstfield_exact', regrid_method)
+    srcfield = create_field(srcgrid, 'srcfield', 
+                            regrid_method=regrid_method, domask=src_mask)
+    dstfield = create_field(dstgrid, 'dstfield', 
+                            regrid_method=regrid_method, domask=dst_mask)
+    dstfield2 = create_field(dstgrid, 'dstfield_exact', 
+                            regrid_method=regrid_method, domask=dst_mask)
 
     #create the frac fields
-    srcfracfield = create_field(srcgrid, 'src_frac_field', regrid_method)
-    dstfracfield = create_field(dstgrid, 'dst_frac_field', regrid_method)
+    srcfracfield = create_field(srcgrid, 'src_frac_field', 
+                            regrid_method=regrid_method)
+    dstfracfield = create_field(dstgrid, 'dst_frac_field', 
+                            regrid_method=regrid_method)
 
     # initialize the Fields to an analytic function
     srcfield = build_analyticfield(srcfield, src_lons, src_lats)
     dstfield2 = build_analyticfield(dstfield2, dst_lons, dst_lats)
 
     # run the ESMF regridding
-    dstfield = run_regridding(srcfield, dstfield, 
+    dstfield.data[...] = UNINITVAL
+    dstfield = run_regridding(srcfield, dstfield, src_mask, dst_mask,
                               regrid_method, unmapped_action, 
                               srcfracfield, dstfracfield,
                               pole_method=pole_method, 
                               regrid_pole_npoints=pole_method_npntavg)
 
-    # compare results and output PASS or FAIL
-    #correct = compare_fields(dstfield, dstfield2, regrid_method, dstfracfield, dst_mask,
-    #                         max_err, parallel)
-
     srcmass = None
     dstmass = None
     if regrid_method == ESMF.RegridMethod.CONSERVE:
         # create the area fields
-        srcareafield = create_field(srcgrid, 'srcareafield', regrid_method)
-        dstareafield = create_field(dstgrid, 'dstareafield', regrid_method)
+        srcareafield = create_field(srcgrid, 'srcareafield', 
+                        regrid_method=regrid_method)
+        dstareafield = create_field(dstgrid, 'dstareafield', 
+                        regrid_method=regrid_method)
 
         srcmass = compute_mass(srcfield, srcareafield, 
                             dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass(dstfield, dstareafield)
+        dstmass = compute_mass(dstfield, dstareafield, uninitval=UNINITVAL)
     else:
         srcfracfield = None
         dstfracfield = None
@@ -385,53 +398,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, itrp_err, csrv_er
     correct = compare_fields(dstfield, dstfield2, itrp_err, csrv_err, 
                               parallel=parallel, dstfracfield=dstfracfield,
                               mass1=srcmass, mass2=dstmass, 
-                              regrid_method=regrid_method)
+                              regrid_method=regrid_method, uninitval=UNINITVAL)
 
     return correct
-
-if __name__ == '__main__':
-    #src_fname = "FVCOM_grid2d.nc"
-    #dst_fname = "selfe_grid2d.nc"
-    #regrid_method = "bilinear"
-    #options = "-t UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh -i"
-    #max_err = 0.06
-    #src_fname = "FVCOM_grid2d.nc"
-    #dst_fname = "selfe_grid2d.nc"
-    #regrid_method = "conserve"
-    #options = "-i --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
-    #max_err = 0.06
-    #src_fname = "T42_grid.nc"
-    #dst_fname = "ll2.5deg_grid.nc"
-    #regrid_method = "bilinear"
-    #regrid_method = "conserve"
-    #options = "-p none -i"
-    #options = "-p 4"
-    #max_err = 10E-03
-    #src_fname = "T42_grid.nc"
-    #dst_fname = "ar9v4_100920.nc"
-    #regrid_method = "patch"
-    #options = "--dst_regional"
-    #max_err = 10E-04
-    #src_fname = "ne60np4_pentagons_100408.nc"
-    #dst_fname = "ne30np4-t2.nc"
-    #regrid_method = "bilinear"
-    #options = "-i"
-    #max_err = 10E-04
-    #src_fname = "wr50a_090614.nc"
-    #dst_fname = "ar9v4_100920.nc"
-    #regrid_method = "bilinear"
-    #options = "-r -i"
-    #max_err = 10E-06
-    #src_fname = "T42_grid.nc"
-    #dst_fname = "wr50a_090614.nc"
-    #regrid_method = "bilinear"
-    #options = "--dst_regional"
-    #max_err = 10E-04
-    src_fname = "mpas_uniform_10242.nc"
-    dst_fname = "mpas_uniform_10242_dual.nc"
-    regrid_method = "bilinear"
-    options = " --src_type ESMF --dst_type ESMF"
-    max_err = 10E-04
-    
-    sys.exit(regrid_check(src_fname, dst_fname, regrid_method, options, max_err))
 

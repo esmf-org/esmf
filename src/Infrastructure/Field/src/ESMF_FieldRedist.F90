@@ -255,7 +255,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
 ! subroutine ESMF_FieldRedistStore<type><kind>(srcField, dstField, & 
-!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
+!        ignoreUnmatchedIndices, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(in)            :: srcField  
@@ -263,13 +264,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factor 
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in), optional  :: srcToDstTransposeMap(:) 
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:) 
+!   logical,                  intent(in),  optional :: ignoreUnmatchedIndices
 !   integer,                  intent(out), optional :: rc 
 ! 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support sparse 
+!              matrices that contain elements with indices that do not have a
+!              match within the source or destination Array.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
@@ -357,6 +365,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   entry maps the corresponding {\tt srcField} dimension against the specified
 !   {\tt dstField} dimension. Mixing of distributed and undistributed
 !   dimensions is supported.
+! \item [{[ignoreUnmatchedIndices]}]
+!   A logical flag that affects the behavior for when not all elements match
+!   between the {\tt srcField} and {\tt dstField} side. The default setting
+!   is {\tt .false.}, indicating that it is an error when such a situation is 
+!   encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+!   unmatched indices.
 ! \item [{[rc]}]  
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -372,7 +386,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreI4(srcField, dstField, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
+        ignoreUnmatchedIndices, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -381,6 +396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),  intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
+        logical,                intent(in), optional  :: ignoreUnmatchedIndices
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -413,7 +429,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
-            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, &
+            ignoreUnmatchedIndices=ignoreUnmatchedIndices, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -430,7 +447,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreI8(srcField, dstField, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, ignoreUnmatchedIndices, &
+        srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -439,6 +457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I8),  intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
+        logical,                intent(in), optional  :: ignoreUnmatchedIndices
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -471,7 +490,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
-            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, &
+            ignoreUnmatchedIndices=ignoreUnmatchedIndices, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -488,7 +508,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreR4(srcField, dstField, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
+        ignoreUnmatchedIndices, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -497,6 +518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R4),     intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
+        logical,                intent(in), optional  :: ignoreUnmatchedIndices
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -529,7 +551,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
-            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, &
+            ignoreUnmatchedIndices=ignoreUnmatchedIndices, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -546,7 +569,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreR8(srcField, dstField, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
+        ignoreUnmatchedIndices, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -555,6 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),     intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
+        logical,                intent(in), optional  :: ignoreUnmatchedIndices
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -587,31 +612,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
-            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, &
+            ignoreUnmatchedIndices=ignoreUnmatchedIndices, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreR8
+!------------------------------------------------------------------------------ 
 
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "ESMF_FieldRedistStoreNF" 
 !---------------------------------------------------------------------------- 
 !BOP 
 ! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution without a local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
-! subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
-!        routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_Field),       intent(in)            :: srcField  
-!   type(ESMF_Field),       intent(inout)         :: dstField  
-!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
-!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(in),  optional :: srcToDstTransposeMap(:) 
-!   integer,                intent(out), optional :: rc 
-! 
+    subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
+        routehandle, keywordEnforcer, srcToDstTransposeMap, &
+        ignoreUnmatchedIndices, rc) 
+!
+! !ARGUMENTS:
+        type(ESMF_Field),       intent(in)            :: srcField  
+        type(ESMF_Field),       intent(inout)         :: dstField  
+        type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
+        logical,                intent(in), optional  :: ignoreUnmatchedIndices
+        integer,                intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -696,32 +726,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   entry maps the corresponding {\tt srcField} dimension against the specified
 !   {\tt dstField} dimension. Mixing of distributed and undistributed
 !   dimensions is supported.
+! \item [{[ignoreUnmatchedIndices]}]
+!   A logical flag that affects the behavior for when not all elements match
+!   between the {\tt srcField} and {\tt dstField} side. The default setting
+!   is {\tt .false.}, indicating that it is an error when such a situation is 
+!   encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+!   unmatched indices.
 ! \item [{[rc]}]  
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
 !EOP 
 !---------------------------------------------------------------------------- 
-
-#undef  ESMF_METHOD 
-#define ESMF_METHOD "ESMF_FieldRedistStoreNF" 
-!BOPI
-! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldRedistStore()
-    subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
-        routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
-
-        ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
-        integer,                intent(out), optional :: rc 
-
-!EOPI
         ! local variables as temporary input/output arguments 
 
         ! internal local variables 
@@ -751,7 +767,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, & 
-            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, &
+            ignoreUnmatchedIndices=ignoreUnmatchedIndices, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 

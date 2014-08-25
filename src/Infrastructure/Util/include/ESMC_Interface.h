@@ -41,13 +41,12 @@ extern "C" {
 
 // Class declaration type
 typedef struct{
-  void *ptr;
+  char shallowMem[80];
 }ESMC_InterfaceInt;
 
 // Class API
-void TestArrayPassing(int *array, int len);
-ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc);
-int ESMC_InterfaceIntDestroy(ESMC_InterfaceInt *interfaceIntArg);
+int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
+  int *arrayArg, int lenArg);
 
 #ifdef __cplusplus
 } // extern "C"

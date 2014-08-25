@@ -96,7 +96,7 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2"/), &
+      phaseLabelList=(/"IPDv00p2", "IPDv01p3", "IPDv02p3", "IPDv03p3"/), &
       userRoutine=routine_Nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -137,7 +137,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     character(ESMF_MAXSTR):: name
     logical               :: clockIsPresent
@@ -218,7 +218,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag
@@ -264,7 +264,7 @@ module NUOPC_Model
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     integer               :: localrc
     type(ESMF_Clock)      :: internalClock
     logical               :: existflag

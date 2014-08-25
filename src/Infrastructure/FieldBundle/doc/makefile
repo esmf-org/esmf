@@ -37,8 +37,8 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
-CLEANDIRS   = FieldBundle_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) FieldBundle_refdoc.tex $(PDFFILES)
+CLEANDIRS   = FieldBundle_refdoc FieldBundle_crefdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) FieldBundle_refdoc.tex FieldBundle_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

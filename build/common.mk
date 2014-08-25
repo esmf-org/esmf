@@ -627,13 +627,13 @@ ESMC_DOCDIR	= $(ESMF_DOCDIR)
 #-------------------------------------------------------------------------------
 # Add preprocessing flags according to environment variables
 ifeq ($(ESMF_ARRAY_LITE),TRUE)
-CPPFLAGS += -DESMF_NO_GREATER_THAN_4D
+ESMF_CPPFLAGS += -DESMF_NO_GREATER_THAN_4D
 endif           
 ifeq ($(ESMF_NO_INTEGER_1_BYTE),TRUE)
-CPPFLAGS += -DESMF_NO_INTEGER_1_BYTE
+ESMF_CPPFLAGS += -DESMF_NO_INTEGER_1_BYTE
 endif           
 ifeq ($(ESMF_NO_INTEGER_2_BYTE),TRUE)
-CPPFLAGS += -DESMF_NO_INTEGER_2_BYTE
+ESMF_CPPFLAGS += -DESMF_NO_INTEGER_2_BYTE
 endif           
 #-------------------------------------------------------------------------------
 
@@ -643,6 +643,7 @@ endif
 # the ESMF_xxxDEFAULT values are only used if ESMF_xxx is not defined in
 # user's environment.
 #-------------------------------------------------------------------------------
+ESMF_PIODEFAULT             = internal
 ESMF_PTHREADSDEFAULT        = ON
 ESMF_OPENMPDEFAULT          = ON
 ESMF_OPENACCDEFAULT         = OFF
@@ -754,7 +755,7 @@ ESMF_F90COMPILEFREECPP    +=
 ESMF_F90COMPILEFREENOCPP  +=
 ESMF_F90COMPILEFIXCPP     +=
 ESMF_F90COMPILEFIXNOCPP   +=
-ESMF_F90COMPILECPPFLAGS   += $(FPPFLAGS)
+ESMF_F90COMPILECPPFLAGS   += $(ESMF_FPPFLAGS)
 
 # - CXXCOMPILER
 ifneq ($(origin ESMF_CXXCOMPILER), environment)
@@ -799,7 +800,7 @@ ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_SITEDIR)
 endif
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_CONFDIR) $(ESMF_INTERNALINCDIRS)
 ESMF_CXXCOMPILEPATHS      += -I$(ESMF_INCDIR)  $(ESMF_CXXCOMPILEPATHSTHIRD)
-ESMF_CXXCOMPILECPPFLAGS   += $(CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
+ESMF_CXXCOMPILECPPFLAGS   += $(ESMF_CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
 
 # - F90LINKER
 ifneq ($(origin ESMF_F90LINKER), environment)
@@ -1080,10 +1081,12 @@ endif
 endif
 
 ifdef ESMF_LAPACK
-CPPFLAGS                += -DESMF_LAPACK=1
+ESMF_CPPFLAGS             += -DESMF_LAPACK=1
 ifdef ESMF_LAPACK_LIBS
-ESMF_CXXLINKLIBS        := $(ESMF_LAPACK_LIBS) $(ESMF_CXXLINKLIBS)
-ESMF_F90LINKLIBS        := $(ESMF_LAPACK_LIBS) $(ESMF_F90LINKLIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_LAPACK_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_LAPACK_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_LAPACK_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_LAPACK_LIBS))))
 endif
 ifdef ESMF_LAPACK_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_LAPACK_LIBPATH)
@@ -1103,14 +1106,16 @@ endif
 endif
 
 ifneq ($(ESMF_MOAB),OFF)
-CPPFLAGS                += -DESMF_MOAB=1
+ESMF_CPPFLAGS             += -DESMF_MOAB=1
 ifdef ESMF_MOAB_INCLUDE
-ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_MOAB_INCLUDE)
-ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_MOAB_INCLUDE)
+ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_MOAB_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_MOAB_INCLUDE)
 endif
 ifdef ESMF_MOAB_LIBS
-ESMF_CXXLINKLIBS        := $(ESMF_MOAB_LIBS) $(ESMF_CXXLINKLIBS)
-ESMF_F90LINKLIBS        := $(ESMF_MOAB_LIBS) $(ESMF_F90LINKLIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_MOAB_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_MOAB_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_MOAB_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_MOAB_LIBS))))
 endif
 ifdef ESMF_MOAB_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_MOAB_LIBPATH)
@@ -1136,14 +1141,16 @@ endif
 endif
 
 ifdef ESMF_NETCDF
-CPPFLAGS                += -DESMF_NETCDF=1
+ESMF_CPPFLAGS             += -DESMF_NETCDF=1
 ifdef ESMF_NETCDF_INCLUDE
-ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NETCDF_INCLUDE)
-ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NETCDF_INCLUDE)
+ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_NETCDF_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_NETCDF_INCLUDE)
 endif
 ifdef ESMF_NETCDF_LIBS
-ESMF_CXXLINKLIBS        += $(ESMF_NETCDF_LIBS)
-ESMF_F90LINKLIBS        += $(ESMF_NETCDF_LIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_NETCDF_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NETCDF_LIBS))))
 endif
 ifdef ESMF_NETCDF_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NETCDF_LIBPATH)
@@ -1163,14 +1170,16 @@ endif
 endif
 
 ifdef ESMF_PNETCDF
-CPPFLAGS                += -DESMF_PNETCDF=1
+ESMF_CPPFLAGS             += -DESMF_PNETCDF=1
 ifdef ESMF_PNETCDF_INCLUDE
-ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PNETCDF_INCLUDE)
-ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PNETCDF_INCLUDE)
+ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_PNETCDF_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_PNETCDF_INCLUDE)
 endif
 ifdef ESMF_PNETCDF_LIBS
-ESMF_CXXLINKLIBS        += $(ESMF_PNETCDF_LIBS)
-ESMF_F90LINKLIBS        += $(ESMF_PNETCDF_LIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_PNETCDF_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PNETCDF_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_PNETCDF_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PNETCDF_LIBS))))
 endif
 ifdef ESMF_PNETCDF_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PNETCDF_LIBPATH)
@@ -1190,14 +1199,16 @@ endif
 endif
 
 ifdef ESMF_XERCES
-CPPFLAGS                += -DESMF_XERCES=1
+ESMF_CPPFLAGS                += -DESMF_XERCES=1
 ifdef ESMF_XERCES_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_XERCES_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_XERCES_INCLUDE)
 endif
 ifdef ESMF_XERCES_LIBS
-ESMF_CXXLINKLIBS        += $(ESMF_XERCES_LIBS)
-ESMF_F90LINKLIBS        += $(ESMF_XERCES_LIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_XERCES_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_XERCES_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_XERCES_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_XERCES_LIBS))))
 endif
 ifdef ESMF_XERCES_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_XERCES_LIBPATH)
@@ -1237,14 +1248,16 @@ endif
 endif
 
 ifdef ESMF_PIO
-CPPFLAGS                += -DESMF_PIO=1
+ESMF_CPPFLAGS                += -DESMF_PIO=1
 ifdef ESMF_PIO_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
 endif
 ifdef ESMF_PIO_LIBS
-ESMF_CXXLINKLIBS        := $(ESMF_PIO_LIBS) $(ESMF_CXXLINKLIBS)
-ESMF_F90LINKLIBS        := $(ESMF_PIO_LIBS) $(ESMF_F90LINKLIBS)
+ESMF_CXXLINKLIBS          += $(ESMF_PIO_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_PIO_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
 endif
 ifdef ESMF_PIO_LIBPATH
 ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
@@ -1257,7 +1270,7 @@ endif
 ifneq ($(ESMF_COMM),mpiuni)
 ifneq ($(ESMF_COMM),mvapich)
 export ESMF_MPIIO = supported
-CPPFLAGS += -DESMF_MPIIO
+ESMF_CPPFLAGS += -DESMF_MPIIO
 endif
 endif
 
@@ -1275,7 +1288,7 @@ endif
 # dependency of the ESMF library on Pthreads.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_PTHREADS),OFF)
-CPPFLAGS       += -DESMF_NO_PTHREADS
+ESMF_CPPFLAGS       += -DESMF_NO_PTHREADS
 endif
 # even when compiling with ESMF_PTHREADS=ON we need to find common header
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
@@ -1285,7 +1298,7 @@ ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
 # dependency of the ESMF library on OpenMP.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_OPENMP),OFF)
-CPPFLAGS       += -DESMF_NO_OPENMP
+ESMF_CPPFLAGS       += -DESMF_NO_OPENMP
 endif
 
 ifeq ($(ESMF_OPENMP),ON)
@@ -1301,7 +1314,7 @@ endif
 # dependency of the ESMF library on OpenACC.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_OPENACC),OFF)
-CPPFLAGS       += -DESMF_NO_OPENACC
+ESMF_CPPFLAGS       += -DESMF_NO_OPENACC
 endif
 
 ifeq ($(ESMF_OPENACC),ON)
@@ -1316,7 +1329,7 @@ endif
 # number of tests that a test program will do.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
-CPPFLAGS       += -DESMF_TESTEXHAUSTIVE 
+ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE 
 endif
 
 #-------------------------------------------------------------------------------
@@ -1324,27 +1337,26 @@ endif
 # dependency on ESMF-threading.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTWITHTHREADS),ON)
-CPPFLAGS       += -DESMF_TESTWITHTHREADS
+ESMF_CPPFLAGS       += -DESMF_TESTWITHTHREADS
 endif
 
 #-------------------------------------------------------------------------------
 # Add ESMF_ABISTRING to preprocessor flags
 #-------------------------------------------------------------------------------
 
-CPPFLAGS        +=-DS$(ESMF_ABISTRING)=1
+ESMF_CPPFLAGS        +=-DS$(ESMF_ABISTRING)=1
 
 #-------------------------------------------------------------------------------
 # Add ESMF_OS to preprocessor flags
 #-------------------------------------------------------------------------------
 
-CPPFLAGS        +=-DESMF_OS_$(ESMF_OS)=1
+ESMF_CPPFLAGS        +=-DESMF_OS_$(ESMF_OS)=1
 
 #-------------------------------------------------------------------------------
 # construct precompiler flags to be used on Fortran sources
 #-------------------------------------------------------------------------------
 
-FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(CPPFLAGS))
-
+ESMF_FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(ESMF_CPPFLAGS))
 
 #-------------------------------------------------------------------------------
 # common variables

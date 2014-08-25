@@ -163,7 +163,7 @@ DELayout *DELayout::create(
   // check deGrouping input
   int deGroupingFlag = 0; // reset
   int deGroupingCount = 0;
-  if (deGrouping != ESMC_NULL_POINTER && deGrouping->extent[0] > 0){
+  if (present(deGrouping) && deGrouping->extent[0] > 0){
     deGroupingCount = deGrouping->extent[0];
     deGroupingFlag = 1;   // set
     if (deGroupingCount != deCount){
@@ -178,7 +178,7 @@ DELayout *DELayout::create(
   int petListFlag = 0;        // reset
   int petListCount = 0;
   int *petList;
-  if (petListArg != ESMC_NULL_POINTER && petListArg->extent[0] > 0){
+  if (present(petListArg ) && petListArg->extent[0] > 0){
     petListCount=petListArg->extent[0];
     petListFlag = 1;        // set
     petList = petListArg->array;

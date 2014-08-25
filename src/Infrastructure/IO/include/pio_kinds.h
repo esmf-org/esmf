@@ -21,7 +21,7 @@ extern "C" const pio_iosystem_desc_t PIO_IOSYSTEM_DESC_NULL;
 
 // sizeof( file_desc_t)
 typedef void *pio_file_desc_t;
-#define PIO_SIZE_FILE_DESC       64
+#define PIO_SIZE_FILE_DESC       128
 
 // sizeof( io_desc_t)
 typedef void *pio_io_desc_t;

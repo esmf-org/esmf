@@ -34,6 +34,9 @@ _ESMF_NETCDF = False
 _ESMF_COMM = None
 _ESMF_COMM_MPIUNI = -1
 
+# ESMF_COMM
+_ESMF_VERSION = None
+
 #### NAMED CONSTANTS ##########################################################
 
 # CoordSys

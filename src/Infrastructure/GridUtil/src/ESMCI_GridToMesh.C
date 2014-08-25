@@ -87,7 +87,9 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg, int *regridConserve) {
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
+  const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg,
+  int *regridConserve) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToMesh()" 
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
@@ -148,7 +150,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  int numMaskValues=0;
  int *ptrMaskValues;
  if (hasMask) {
-   if (maskValuesArg != NULL) {
+   if (present(maskValuesArg)) {
      // Error check mask values
      if (maskValuesArg->dimCount != 1) {
        Throw() << " Mask values must be of rank 1.";

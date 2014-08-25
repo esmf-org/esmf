@@ -1,0 +1,347 @@
+#!/usr/bin/env perl
+# +-======-+ 
+#  Copyright (c) 2003-2007 United States Government as represented by 
+#  the Admistrator of the National Aeronautics and Space Administration.  
+#  All Rights Reserved.
+#  
+#  THIS OPEN  SOURCE  AGREEMENT  ("AGREEMENT") DEFINES  THE  RIGHTS  OF USE,
+#  REPRODUCTION,  DISTRIBUTION,  MODIFICATION AND REDISTRIBUTION OF CERTAIN 
+#  COMPUTER SOFTWARE ORIGINALLY RELEASED BY THE UNITED STATES GOVERNMENT AS 
+#  REPRESENTED BY THE GOVERNMENT AGENCY LISTED BELOW ("GOVERNMENT AGENCY").  
+#  THE UNITED STATES GOVERNMENT, AS REPRESENTED BY GOVERNMENT AGENCY, IS AN 
+#  INTENDED  THIRD-PARTY  BENEFICIARY  OF  ALL  SUBSEQUENT DISTRIBUTIONS OR 
+#  REDISTRIBUTIONS  OF THE  SUBJECT  SOFTWARE.  ANYONE WHO USES, REPRODUCES, 
+#  DISTRIBUTES, MODIFIES  OR REDISTRIBUTES THE SUBJECT SOFTWARE, AS DEFINED 
+#  HEREIN, OR ANY PART THEREOF,  IS,  BY THAT ACTION, ACCEPTING IN FULL THE 
+#  RESPONSIBILITIES AND OBLIGATIONS CONTAINED IN THIS AGREEMENT.
+#  
+#  Government Agency: National Aeronautics and Space Administration
+#  Government Agency Original Software Designation: GSC-15354-1
+#  Government Agency Original Software Title:  GEOS-5 GCM Modeling Software
+#  User Registration Requested.  Please Visit http://opensource.gsfc.nasa.gov
+#  Government Agency Point of Contact for Original Software:  
+#  			Dale Hithon, SRA Assistant, (301) 286-2691
+#  
+# +-======-+ 
+#
+# Simple script for automatic dependency generation of (primarily) FORTRAN
+# and C programs. See usage() for more info.
+#
+# Notes
+# 1. Some files contain more than one module. When this occurs, the basename
+#    of the .mod files will not necessarily match the basename of the source
+#    file in which they are found.
+# 2. Because of #1, module dependencies must be made to the .mod file rather
+#    than to the source or object file (since there may not be a source or
+#    object file to match the module name).
+# 3. Because of #2, a line is added showing the dependency of the .mod file
+#    to object file associated with the source file.
+#
+# REVISION HISTORY:
+# 25Feb2005  da Silva  First crack.
+# 17Mar2006  da Silva  Now it should work with more than 1 module per file
+# 28Nov2006  da Silva  Fixed Include regular expression.
+# 03Mar2007  da Silva  Fixed major bug with .mod dependencies; also revised
+#                      the include refular expression rule and added elsif's
+#                      for efficiency
+# 17Jul2008  Stassi    Divided code into subs; use strict standards
+# 17May2011  Stassi    Simplified .mod.o dependency
+# 24Feb2012  Stassi    Added addkey() to handle file with variable named "use"
+# 03Feb2014  Thompson  Remove standard C libraries from dependency checks.
+#                      If the compiler can't find them, we are in trouble.
+#........................................................................
+use strict;
+use warnings;
+
+# global variables
+#-----------------
+my ($verbose, $outfile, $default);
+my ($script, $srcfn, $infile);
+my (%deps, $mstring);
+my ($base, $suffix);
+my ($ncase, $mcase);
+my (@stdcinc);
+
+# main program
+#-------------
+{
+    init();
+    read_input();
+    write_output();
+}
+
+#=======================================================================
+# name - init
+# purpose - read input flags and parameters; determine file names;
+#           set global variables
+#=======================================================================
+sub init {
+    use File::Basename;
+    use Getopt::Long;
+    my ($writefile, $mncase, $ifilenm, $help);
+    my ($name, $mod, $path);
+
+    $script = basename($0);
+    $writefile = 0;
+    $outfile = "";
+
+    # command line options
+    #---------------------
+    GetOptions("v"    => \$verbose,
+               "c"    => \$writefile,
+               "p=s"  => \$mncase,
+               "o=s"  => \$outfile,
+               "i=s"  => \$ifilenm,
+               "h"    => \$help,
+               "help" => \$help);
+    usage() if $help;
+
+    # determine name and mod case
+    #----------------------------
+    # IMPORTANT: never change the line below as installation relies on it
+    #            for creating appropiate defaults for each compiler.
+  default: $default = "fdp.mod";  
+    #----------------------------
+    $ncase = "lower";
+    $mcase = "lower";
+
+    $mncase = $default unless $mncase;
+    ($name, $mod) = split /[.]/, $mncase;
+    $ncase = "upper" if ($name eq uc $name);
+    $mcase = "upper" if ($mod  eq uc $mod);
+
+    # input file and input filename
+    #------------------------------
+    $infile = shift @ARGV;
+    die "$script: must supply input filename as input parameter."
+        unless ($infile);
+    
+    # (NOTE: $ifilenm may differ from $infile)
+    #-----------------------------------------
+    $ifilenm = $infile unless $ifilenm;
+    ($base,$path,$suffix) = fileparse($ifilenm,'\..*');
+    $srcfn = "$base$suffix";
+
+    # output dependency file
+    #-----------------------
+    if ($writefile) { $outfile = "$base.d" unless $outfile };
+
+    # initialize global variables
+    #----------------------------
+    %deps = ();
+    $mstring = "";   # string of space-delimited mod names
+
+    # stdcinc is an array of Standard C include files
+    # as retrieved on 2014-Feb-03 from:
+    # http://en.cppreference.com/w/c/header
+    # -----------------------------------------------
+    @stdcinc = ("assert.h",      "complex.h",  "ctype.h",
+                "errno.h",       "fenv.h",     "float.h",
+                "inttypes.h",    "iso646.h",   "limits.h",
+                "locale.h",      "math.h",     "setjmp.h",
+                "signal.h",      "stdalign.h", "stdarg.h",
+                "stdatomic.h",   "stdbool.h",  "stddef.h",
+                "stdint.h",      "stdio.h",    "stdlib.h",
+                "stdnoreturn.h", "string.h",   "tgmath.h",
+                "threads.h",     "time.h",     "uchar.h", 
+                "wchar.h",       "wctype.h");
+}
+
+#=======================================================================
+# name - read_input
+# purpose - read the input file and extract list of dependencies
+#
+# key variables -
+#  %deps : hash storing dependency names as keys
+#  $mstring : string containing list of dependency names
+#=======================================================================
+sub read_input {
+    my ($keyword, $name, @dummy);
+
+    open INFILE, "< $infile"
+        or die "$script: >>> Error <<< while opening input file: $infile: $!";
+    
+    while (<INFILE>) {
+        chomp;
+        s/^\s*//;        # remove leading blanks
+        s/\#\s*/\#/;     # remove blanks between "#" and "include"
+        ($keyword, $name, @dummy) = split /\s+/;
+
+        if (/^\#include\s/ and $name) {
+            $name =~ s/\"//g;
+            $name =~ s/\'//g;
+            $name =~ s/<//g;
+            $name =~ s/>//g;
+            #--print $name;
+            addkey(\%deps, $name);
+
+        } elsif (/^[Ii][Nn][Cc][Ll][Uu][Dd][Ee]\s/ and $name) {
+            $name =~ s/\"//g;
+            $name =~ s/\'//g;
+            #--print $name;
+            addkey(\%deps, $name);
+
+        } elsif (/^[Uu][Ss][Ee]\s/ and $name) {
+            $name =~ s/;//g;
+            $name =~ s/,.*//gi;
+            $name = fix_mod("$name");
+            #--print $name;
+            addkey(\%deps, $name);
+
+        } elsif (/^[Mm][Oo][Dd][Uu][Ll][Ee]\s/ and $name) {
+            if (uc $name ne "PROCEDURE") {
+                if ($mstring) {
+                    #--------------------------------------
+                    # if not the first module found in file
+                    #--------------------------------------
+                    print STDERR "fdp: extra module found in $srcfn: $name\n";
+                    $mstring = $mstring . " ";
+                }
+                $mstring = $mstring . fix_mod("$name");
+            }
+        }
+    }
+    close INFILE;
+}        
+
+#=======================================================================
+# name - addkey
+# purpose - add key to hash if key's value begins with \w character.
+#=======================================================================
+sub addkey {
+    my ($hashAddr, $key, $first);
+    ($hashAddr, $key) = @_;
+    
+    if ($key) {
+        $first = substr($key, 0, 1);
+        $$hashAddr{$key} = 1 unless $first =~ /\W/;
+    }
+}
+
+#=======================================================================
+# name - write_output
+# purpose - write the dependency file to disk or standard output
+#
+# note:
+# => The semi-colon at the end of the $mstring line explicitly tells the
+#    system to do nothing, i.e. there are no instructions for building the
+#    target from the dependencies; this over-rides any implicit instructions
+#    that may exist.
+#=======================================================================
+sub write_output {
+    my $dep;
+
+    # open output file
+    #-----------------
+    if ( $outfile ) {
+        open(OUTFL, "> $outfile");
+        print STDERR "Building dependency file $outfile\n" if $verbose;
+    } else {
+        open(OUTFL, ">& STDOUT");
+    }
+
+    # write to output file
+    #---------------------
+    print OUTFL "$base.d : $srcfn\n";
+    if ($mstring) { print OUTFL "$mstring : $base.o;\n" }
+    print OUTFL "$base.o : $srcfn";
+    foreach $dep ( keys %deps ) {
+        print OUTFL " $dep" unless ( $mstring =~ /\b$dep\b/ 
+                                     or  $dep =~ /^esmf\.mod/
+                                     or  $dep =~ /^netcdf\.mod/
+                                     or  $dep =~ /^netcdf\.inc/
+                                     #or  $dep ~~ @stdcinc       # Is the dep a standard C library?
+                                     or  smart_match($dep, \@stdcinc)       # Is the dep a standard C library?
+                                     or  $dep =~ /^sys\//       # Is the dep in the sys/ folder?
+                                     or  $dep =~ /^mpif.*h$/ ); # Is the dep an included mpif-/_ file?
+    }
+    print OUTFL "\n";
+    close OUTFL;
+}
+
+# smart match ~~ not supported in all  versions of Perl...
+sub smart_match {
+    my ($dep, $array) = @_;
+    foreach (@{$array}){
+        return 1 if($dep =~ $_);
+    }
+    return 0;
+}
+
+#=======================================================================
+# name - fix_mod
+# purpose - create modfile name with correct case for both root and
+#           .mod extension
+#=======================================================================
+sub fix_mod {
+    my ($name, $mod);
+    $name = shift @_;
+
+    if ($ncase eq "lower") { $name = lc $name; }
+    else                   { $name = uc $name; }
+
+    if ($mcase eq "lower") { $mod = "mod"; }
+    else                   { $mod = "MOD"; }
+
+    $name = "$name.$mod";
+    return $name;
+}
+
+#=======================================================================
+# name - usage
+# purpose - print usage message
+#=======================================================================
+sub usage {
+
+   print <<"EOF";
+
+NAME
+     $script - a simple depency generator for C or FORTRAN
+          
+SYNOPSIS
+
+     $script OPTIONS file_name
+          
+DESCRIPTION
+
+     Finds #include, include, and use kind of dependencies and prints them to
+     stdout. Use this script for automatic dependence generation within
+     the ESMA building mechanism. 
+
+OPTIONS
+     -c             Creates dependency file with extension .d instead of
+                    writing to stdout.
+
+     -i filename    Use filename for input file when creating rules;
+                    This is useful when the filename is different than
+                    the file_name input parameter, e.g. when the function
+                    goes through /bin/cpp
+
+     -o filename    Specifies name of output depency file name, default
+                    is same as source file with .d extension.
+
+     -p case.case   Because f90 does not specify the case of the
+                    compiled module files, the user may need to specify
+                    it with the -p option. For example, the simple f90
+                    module
+                        module fdp
+                        end module fdp
+                    may compile to fdp.mod, FDP.mod, fdp.MOD or FDP.MOD. 
+                    You specify
+                       -p fdp.mod   for the compilers producing fdp.mod
+                       -p FDP.mod   for the compilers producing FDP.mod
+                        etc.
+                    The default is fdp.mod
+
+     -v             verbose mode
+
+BUGS
+     It does not yet handle nested include files.
+
+AUTHOR
+     Arlindo da Silva, NASA/GSFC.
+
+EOF
+
+exit(1)
+}

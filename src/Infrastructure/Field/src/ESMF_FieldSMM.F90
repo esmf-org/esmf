@@ -290,7 +290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_FieldSMMStore() 
 ! subroutine ESMF_FieldSMMStore<type><kind>(srcField, dstField, & 
 !        routehandle, factorList, factorIndexList, keywordEnforcer, &
-!        srcTermProcessing, pipelineDepth, rc) 
+!        ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(in)              :: srcField  
@@ -299,6 +299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>), intent(in)              :: factorList(:) 
 !   integer,                  intent(in),             :: factorIndexList(:,:) 
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   logical,                  intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                  intent(inout), optional :: srcTermProcessing
 !   integer,                  intent(inout), optional :: pipeLineDepth
 !   integer,                  intent(out),   optional :: rc 
@@ -313,6 +314,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. 
+! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support sparse 
+!              matrices that contain elements with indices that do not have a
+!              match within the source or destination Array.
 ! \end{description}
 ! \end{itemize}
 !
@@ -371,17 +375,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! For examples and associated documentations using this method see Section  
 ! \ref{sec:field:usage:smm_1dptr}. 
 ! 
-! The arguments are: 
-! \begin{description} 
-! \item [srcField]  
-!       {\tt ESMF\_Field} with source data. 
-! \item [dstField] 
+! The arguments are:
+!
+! \begin{description}
+!
+! \item [srcField]
+!       {\tt ESMF\_Field} with source data.
+!
+! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
 !     destroyed by this call.
-! \item [routehandle] 
-!       Handle to the precomputed Route. 
+!
+! \item [routehandle]
+!       Handle to the precomputed Route.
+!
 ! \item [factorList]
 !       List of non-zero coefficients.
+!
 ! \item [factorIndexList]
 !     Pairs of sequence indices for the factors stored in {\tt factorList}.
 !
@@ -413,6 +423,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Field {\em sequence indices} and {\em tensor sequence indices}.
+!
+!   \item [{[ignoreUnmatchedIndices]}]
+!     A logical flag that affects the behavior for when sequence indices 
+!     in the sparse matrix are encountered that do not have a match on the 
+!     {\tt srcField} or {\tt dstField} side. The default setting is 
+!     {\tt .false.}, indicating that it is an error when such a situation is 
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+!     entries with unmatched indices.
+!
 !   \item [{[srcTermProcessing]}]
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
@@ -468,8 +487,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional
 !     {\tt pipelineDepth} argument is omitted.
+!
 ! \item [{[rc]}]  
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 ! \end{description} 
 ! 
 !EOP 
@@ -484,7 +505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI4(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -493,6 +514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),   optional:: ignoreUnmatchedIndices
         integer,                intent(inout),optional:: srcTermProcessing
         integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
@@ -529,6 +551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, &
           factorIndexList=factorIndexList, &
+          ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
           rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
@@ -548,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI8(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -557,6 +580,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),   optional:: ignoreUnmatchedIndices
         integer,                intent(inout),optional:: srcTermProcessing
         integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
@@ -593,6 +617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
           factorIndexList=factorIndexList, &
+          ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
           rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
@@ -612,7 +637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR4(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -621,6 +646,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),   optional:: ignoreUnmatchedIndices
         integer,                intent(inout),optional:: srcTermProcessing
         integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
@@ -657,6 +683,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
           factorIndexList=factorIndexList, &
+          ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
           rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
@@ -676,7 +703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR8(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -685,6 +712,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),   optional:: ignoreUnmatchedIndices
         integer,                intent(inout),optional:: srcTermProcessing
         integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
@@ -721,6 +749,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
           factorIndexList=factorIndexList, &
+          ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
           rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
@@ -739,14 +768,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
-    subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
-        routehandle, keywordEnforcer, srcTermProcessing, pipelineDepth, rc) 
+    subroutine ESMF_FieldSMMStoreNF(srcField, dstField, &
+        routehandle, keywordEnforcer, ignoreUnmatchedIndices, &
+        srcTermProcessing, pipelineDepth, rc) 
 !
 ! !ARGUMENTS:
         type(ESMF_Field),       intent(in)             :: srcField  
         type(ESMF_Field),       intent(inout)          :: dstField  
         type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),   optional :: ignoreUnmatchedIndices
         integer,                intent(inout),optional :: srcTermProcessing
         integer,                intent(inout),optional :: pipeLineDepth
         integer,                intent(out),  optional :: rc 
@@ -754,11 +785,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[6.1.0] Added arguments {\tt srcTermProcessing}, {\tt pipelineDepth}
 !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. 
+! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support sparse 
+!              matrices that contain elements with indices that do not have a
+!              match within the source or destination Array.
 ! \end{description}
 ! \end{itemize}
 !
@@ -817,15 +852,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! For examples and associated documentations using this method see Section  
 ! \ref{sec:field:usage:smm_1dptr}. 
 ! 
-! The arguments are: 
-! \begin{description} 
-! \item [srcField]  
-!       {\tt ESMF\_Field} with source data. 
-! \item [dstField] 
+! The arguments are:
+!
+! \begin{description}
+!
+! \item [srcField]
+!       {\tt ESMF\_Field} with source data.
+!
+! \item [dstField]
 !       {\tt ESMF\_Field} with destination data. The data in this Field may be
 !     destroyed by this call.
-! \item [routehandle] 
-!       Handle to the precomputed Route. 
+!
+! \item [routehandle]
+!       Handle to the precomputed Route.
+!
+!   \item [{[ignoreUnmatchedIndices]}]
+!     A logical flag that affects the behavior for when sequence indices 
+!     in the sparse matrix are encountered that do not have a match on the 
+!     {\tt srcField} or {\tt dstField} side. The default setting is 
+!     {\tt .false.}, indicating that it is an error when such a situation is 
+!     encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+!     entries with unmatched indices.
+!
 !   \item [{[srcTermProcessing]}]
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
@@ -881,8 +929,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional
 !     {\tt pipelineDepth} argument is omitted.
-! \item [{[rc]}]  
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!
+! \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 ! \end{description} 
 ! 
 !EOP 
@@ -917,6 +967,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, &
+          ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
           rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 

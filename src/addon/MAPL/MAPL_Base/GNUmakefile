@@ -102,10 +102,10 @@ local_esma_install local_install: $(LIB) $(LIB_STUBS)
 
 
 local_esma_clean local_clean:
-	-$(RM) *~ *.[aoxd] *.[Mm][Oo][Dd] 
+	-$(RM) *~ *.[aox] *.[Mm][Oo][Dd] *___.f90
 
 local_esma_distclean local_distclean:
-	-$(RM) *~ *.[aoxd] *.[Mm][Oo][Dd] 
+	-$(RM) *~ *.[aoxd] *.[Mm][Oo][Dd] *___.f90
 
 local_esma_doc local_doc:
 	@echo "Target $@ not implemented in `pwd`"
@@ -135,7 +135,7 @@ SRCS :=  ESMFL_Mod.P90            MAPL_HeapMod.F90       MAPL_VarSpecMod.F90\
          memuse.c                 MAPL_MemUtils.F90      MAPL_Hash.F90 \
          CubeToLatLon.F90         MAPL_MaxMinMod.F90     MAPL_SimpleBundleMod.F90 \
          MAPL_OrbGridCompMod.F90  MAPL_NominalOrbitsMod.F90 MAPL_ExtDataGridCompMod.F90 \
-         MAPL_NewArthParser.F90   MAPL_ShmemMod.F90      MAPL_LoadBalance.F90
+         MAPL_NewArthParser.F90   MAPL_ShmemMod.F90      MAPL_LoadBalance.F90 MAPL_CFIOServer.F90
 
 SRC_STUBS :=  MAPL_stubs.F90
 
@@ -150,10 +150,10 @@ DEPS := $(addsuffix .d, $(basename $(SRCS) $(SRC_STUBS)))
 
 OBJ_STUBS := $(addsuffix .o, $(basename $(SRC_STUBS)))
 
-INC_DIRS = . $(INC_ESMF) $(INC_MPI) /usr/include $(INC_SDF)
+INC_DIRS = . $(INC_MPI) /usr/include $(INC_SDF)
 MOD_DIRS = $(INC_DIRS) $(INC_CFIO) $(INC_MPEU)
 
-USER_FINCS = $(foreach dir,$(INC_DIRS),$(I)$(dir))
+USER_FINCS = $(foreach dir,$(INC_DIRS),$(I)$(dir)) $(foreach dir,$(INC_ESMF),$(dir))
 USER_FMODS = $(foreach dir,$(MOD_DIRS),$(M)$(dir)) 
 USER_FDEFS = $(D)MAPL $(D)DO_COMMAS $(D)TWO_SIDED_COMM
 

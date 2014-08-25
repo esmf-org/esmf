@@ -102,7 +102,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   //----------------------------------------------------------------------------
   //EX_UTest_Multi_Proc_Only
@@ -115,7 +115,6 @@ int main(void){
 
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

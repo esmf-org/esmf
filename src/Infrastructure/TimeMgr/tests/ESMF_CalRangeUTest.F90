@@ -676,7 +676,8 @@
       integer(ESMF_KIND_I8), intent(in) :: Dl
       type(ESMF_Calendar), intent(inout) :: cal
       integer, intent(out), optional :: rc
-      character(ESMF_MAXSTR) :: calName
+
+      !character(ESMF_MAXSTR) :: calName
         
 ! !DESCRIPTION:
 !     Checks given values against those set/get with ESMF
@@ -711,7 +712,7 @@
         if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                   rDl.eq.Dl)) then
           broken = .true.
-          call ESMF_CalendarGet(cal, name=calName)
+          !call ESMF_CalendarGet(cal, name=calName)
           !print *, trim(calName), " Set/Get breaks,"
           !print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
           !print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
@@ -728,7 +729,7 @@
 
         if (.not.(rDl.eq.Dl)) then
           broken = .true.
-          call ESMF_CalendarGet(cal, name=calName)
+          !call ESMF_CalendarGet(cal, name=calName)
           !print *, trim(calName), " Set/Julian Day Get breaks,"
           !print *,                " should be = ", Dl
           !print *,                " returned  = ", rDl
@@ -764,16 +765,19 @@
         ! see what we get back via input calendar
         call ESMF_TimeSet(time, calendar=cal)
         call ESMF_TimeGet(time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
-
-        if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
-                  rDl.eq.Dl)) then
+        if (rc /= ESMF_SUCCESS) then
           broken = .true.
+        else
+          if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
+                  rDl.eq.Dl)) then
+            broken = .true.
           !print *, "Julian Day Set/"
-          call ESMF_CalendarGet(cal, name=calName)
+          !call ESMF_CalendarGet(cal, name=calName)
           !print *, trim(calName), " Get breaks,"
           !print *, " should be = ", YYl, "/", MM, "/", DD, " ", Dl
           !print *, " returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
           !print *
+          end if
         end if
 
       end if

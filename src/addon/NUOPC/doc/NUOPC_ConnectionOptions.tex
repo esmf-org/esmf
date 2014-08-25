@@ -1,0 +1,39 @@
+% $Id$
+%
+
+\label{connection_options}
+
+Once the field pairing discussed in the previous sections is completed, each Connector component holds an attribute by the name of {\tt CplList}. The {\tt CplList} is a list type attribute with as many entries as there are fields for which the Connector component is responsible for connecting. The first part of each of these entries is always the {\tt StandardName} of the associated field. See section \ref{field_dictionary} for a discussion of the NUOPC field dictionary and standard names.
+
+After the {\tt StandardName} part, each {\tt CplList} entry may optionally contain a string of {\em connection options}. Each Driver component has the chance as part of the internal {\tt IPDv04p2} phase (see \ref{IPD}) to modify the {\tt CplList} attribute of all the Connectors that it drives.
+
+The individual connection options are colon separated, leading to the following format for each {\tt CplList} entry:
+
+\begin{verbatim}
+StandardName[:option1[:option2[: ...]]
+\end{verbatim}
+
+The format of the options is:
+
+\begin{verbatim}
+OptionName=value1[=spec1][,value2[=spec2][, ...]]
+\end{verbatim}
+
+OptionName and the value strings are case insensitive. There are single and multi-valued options as indicated in the table below. For single valued options only {\tt value1} is relevant. If the same option is listed multiple times, only the first occurrence will be used. If an option has a default value, it is indicated in the table. If a value requires additional specification via {\tt =spec} then the specifications are listed in the table.
+
+\begin{tabular}{|p{4cm}|p{5cm}|p{1cm}|p{35mm}|}
+     \hline\hline
+     {\bf OptionName} & {\bf Definition} & {\bf Type} & {\bf Values}\\
+     \hline\hline
+     {\tt srcMaskValues} & List of integer values that defines the mask values. & multi & List of integers.\\ \hline
+     {\tt dstMaskValues} & List of integer values that defines the mask values. & multi & List of integers.\\ \hline
+     {\tt remapmethod} & Redistribution or interpolation to compute the regridding weights.& single & {\tt redist}, {\tt bilinear}(default), {\tt patch}, {\tt nearest\_stod}, {\tt nearest\_dtos}, {\tt conserve}\\ \hline
+     {\tt polemethod} & Extrapolation method around the pole(s).& single & {\tt none}(default), {\tt allavg}, {\tt npntavg}={\em "integer indicating number of points"}\\ \hline
+     {\tt unmappedaction} & The action to take when unmapped destination elements are encountered.& single & {\tt ignore}(default), {\tt error}\\ \hline
+     {\tt srcTermProcessing} & Number of terms in each partial sum of the interpolation to process on the source side. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to 1. & single & integer\\ \hline
+     {\tt termOrder} & Order of the terms in each partial sum of the interpolation. This setting impacts the bit-for-bit reproducibility of the parallel interpolation results between runs. The strictest bit-for-bit setting is achieved by setting the value to {\tt srcseq}. & single & {\tt free}(default), {\tt srcseq}, {\tt srcpet}\\ \hline
+     {\tt pipelineDepth} & Maximum number of outstanding non-blocking communication calls during the parallel interpolation. Only relevant for cases where the automatic tuning procedure fails to find a setting that works well on a given hardware. & single & integer\\ \hline
+     {\tt dumpWeightsFlag} & Enable or disable dumping of the interpolation weights into a file. & single & {\tt true}, {\tt false}(default)\\ \hline
+     \hline
+\end{tabular}
+

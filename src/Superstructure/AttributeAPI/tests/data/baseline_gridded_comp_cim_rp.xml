@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with ESMF Version 5.3.0, http://www.earthsystemmodeling.org -->
-<CIMDocumentSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns="http://www.purl.org/org/esmetadata/cim/1.7/schemas" xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.7/schemas/cim.xsd">
+<CIMDocumentSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns="http://www.purl.org/org/esmetadata/cim/1.5/schemas" xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.5/schemas/cim.xsd">
   <modelComponent>
     <responsibleParty>
       <gmd:individualName>
@@ -12,17 +11,17 @@
         <!-- from ESMF: CIM/ResponsibleParty, abbreviation (initials) of 'Name'. -->
         <!--    to ESG: Not ingested yet. -->
     </responsibleParty>
-    <documentID>5d18fbf2-29a4-b0c4-0d79-3da5f0adcd3b</documentID>
+    <documentID>031fc38a-b1b8-d6f6-f729-74319007dc8c</documentID>
     <documentVersion>1.0</documentVersion>
     <documentAuthor>
       <gmd:individualName>
-        <gco:CharacterString>ESMF Version 5.3.0</gco:CharacterString>
+        <gco:CharacterString>ESMF Version 7.0.0 beta snapshot</gco:CharacterString>
       </gmd:individualName>
       <gmd:role>
         <gmd:CI_RoleCode codeList="" codeListValue="documentAuthor"></gmd:CI_RoleCode>
       </gmd:role>
     </documentAuthor>
-    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
   </modelComponent>
   <simulationRun>
     <supports>
@@ -38,17 +37,17 @@
     <model>
       <reference></reference>
     </model>
-    <documentID>761f5c78-5dc5-ae0b-7c87-1624f2f4fc9e</documentID>
+    <documentID>2b3f656a-0898-5c75-c643-38f98be69aa0</documentID>
     <documentVersion>1.0</documentVersion>
-    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
   </simulationRun>
   <platform>
     <unit>
       <machine>
       </machine>
     </unit>
-    <documentID>61eb9d58-476a-1529-076b-2a52db5a06de</documentID>
+    <documentID>47d7ade3-bff9-8119-c9f3-7ff4cb5e2854</documentID>
     <documentVersion>1.0</documentVersion>
-    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+    <documentCreationDate>2014-06-17T10:00:24</documentCreationDate>
   </platform>
 </CIMDocumentSet>

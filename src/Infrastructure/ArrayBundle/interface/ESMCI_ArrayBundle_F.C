@@ -335,7 +335,7 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
-    ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
+    ESMCI::InterfaceInt *haloLDepth, ESMCI::InterfaceInt *haloUDepth,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlehalostore()"
@@ -343,8 +343,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::haloStore(
-      *arraybundle, routehandle, *halostartregionflag, *haloLDepth,
-      *haloUDepth),
+      *arraybundle, routehandle, *halostartregionflag, haloLDepth,
+      haloUDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -445,7 +445,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
+    ESMCI::InterfaceInt *srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststore()"
@@ -453,7 +453,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
-      *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap,
+      *srcArraybundle, *dstArraybundle, routehandle, srcToDstTransposeMap,
       *typekind, factor),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -461,14 +461,14 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
+    ESMCI::InterfaceInt *srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
-      *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap),
+      *srcArraybundle, *dstArraybundle, routehandle, srcToDstTransposeMap),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -588,7 +588,7 @@ extern "C" {
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt **factorIndexList, int *rc){
+    ESMCI::InterfaceInt *factorIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
@@ -599,24 +599,24 @@ extern "C" {
     // check argument consistency
     if (*factorListCount > 0){
       // must provide valid factorList and factorIndexList args
-      if (*factorIndexList == NULL){
+      if (!present(factorIndexList)){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
           "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*factorIndexList)->dimCount != 2){
+      if ((factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*factorIndexList)->extent[0] != 2 && 
-        (*factorIndexList)->extent[0] != 4){
+      if ((factorIndexList)->extent[0] != 2 && 
+        (factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of factorIndexList array must be of size 2 or 4",
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((*factorIndexList)->extent[1] != *factorListCount){
+      if ((factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of factorIndexList does not match factorListCount",
           ESMC_CONTEXT, rc);
@@ -625,10 +625,10 @@ extern "C" {
     }
     // prepare SparseMatrix vector
     vector<ESMCI::SparseMatrix> sparseMatrix;
-    int srcN = (*factorIndexList)->extent[0]/2;
-    int dstN = (*factorIndexList)->extent[0]/2;
+    int srcN = (factorIndexList)->extent[0]/2;
+    int dstN = (factorIndexList)->extent[0]/2;
     sparseMatrix.push_back(ESMCI::SparseMatrix(*typekindFactors, factorList,
-      *factorListCount, srcN, dstN, (*factorIndexList)->array));
+      *factorListCount, srcN, dstN, (factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix ),
@@ -671,7 +671,8 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMC_Region_Flag *zeroflag, ESMC_Logical *checkflag, int *rc){
+    ESMC_Region_Flag *zeroflag, ESMC_TermOrder_Flag *termorderflag,
+    int *termorderflag_len, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
@@ -682,7 +683,8 @@ extern "C" {
       if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMul(
-      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, checkflagOpt),
+      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, 
+      termorderflag, *termorderflag_len, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

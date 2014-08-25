@@ -68,3 +68,17 @@ the State derived types.
 #if (ESMF_PGIVERSION_MAJOR < 8)
 #define ESMF_SEQUENCE_BUG 1
 #endif
+
+#if 0
+PGI thru 10.0 do not support the F2003 C Interop 'c_bool' logical kind.
+PGI fixed this in 10.1.
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if defined(ESMF_PIO) && (ESMF_PGIVERSION_MAJOR < 8)
+#error ESMF_PIO must be disabled with PGI versions < 8.0.
+#endif
+#if (ESMF_PGIVERSION_MAJOR < 10) || ((ESMF_PGIVERSION_MAJOR == 10) && (ESMF_PGIVERSION_MINOR == 0))
+#define ESMF_PGI_C_BOOL_BUG
+#endif
+#endif
+

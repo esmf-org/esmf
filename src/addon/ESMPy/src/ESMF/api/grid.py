@@ -26,6 +26,8 @@ class Grid(object):
                  staggerloc=None,
                  filename=None,
                  filetype=None,
+                 regDecomp=None,
+                 decompflag=None,
                  is_sphere=None,
                  add_corner_stagger=None,
                  add_user_area=None,
@@ -64,6 +66,15 @@ class Grid(object):
                         FileFormat.SCRIP \n
                         FileFormat.GRIDSPEC \n
             Optional arguments for creating a Grid from file: \n
+                regDecomp: A 2 element integer list specifying how the grid
+                           is decomposed.  Each entry is the number of decounts
+                           for that dimension.  The total decounts cannot
+                           exceed the total number of PETs.  In other words,
+                           at most one DE is allowed per processor. \n
+                decompflag: List of decomposition flags indicating how each
+                            dimension of the tile is to be divided between the
+                            DEs. The default setting is BALANCED in all
+                            dimensions. \n
                 is_sphere: Set to True for a spherical grid, or False for
                            regional. Defaults to True. \n
                 add_corner_stagger: Set to True to use the information in the
@@ -131,6 +142,10 @@ class Grid(object):
                 warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
             if filetype is not None:
                 warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
+            if regDecomp is not None:
+                warnings.warn("regDecomp is only used for grids created from file, this argument will be ignored.")
+            if decompflag is not None:
+                warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
@@ -202,8 +217,13 @@ class Grid(object):
         self.struct = None
 
         if from_file:
-            #print 'Creating grid from ', filename
+            # create default regDecomp if it is not passed as an argument
+            if regDecomp is None:
+                regDecomp = [pet_count(), 1]
+            # create the grid from file
             self.struct = ESMP_GridCreateFromFile(filename, filetype,
+                                                  regDecomp,
+                                                  decompflag=decompflag,
                                                   isSphere=is_sphere,
                                                   addCornerStagger=add_corner_stagger,
                                                   addUserArea=add_user_area,
@@ -216,7 +236,7 @@ class Grid(object):
                 self.ndims = self.rank
             else: # must be GRIDSPEC
                 self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)
-            # stagger is not required for from-file grids, but we need to 
+            # stagger is not required for from-file grids, but we need to
             # correctly allocate the space
             staggerloc = [StaggerLoc.CENTER]
 
@@ -250,7 +270,7 @@ class Grid(object):
             self.rank = self.max_index.size
 
         # grid type
-        if coord_typekind == None:
+        if coord_typekind is None:
             self.type = TypeKind.R8
         else:
             self.type = coord_typekind
@@ -325,8 +345,17 @@ class Grid(object):
                            for b in range(2**self.rank)]
 
         # Add coordinates if a staggerloc is specified
-        if staggerloc != None:
+        if staggerloc is not None:
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
+
+        # Add items if they are specified, this is done after the
+        # mask and area are initialized
+        if add_user_area:
+            self.add_item(GridItem.AREA, staggerloc=StaggerLoc.CENTER, 
+                          from_file=from_file)
+        if add_mask:
+            self.add_item(GridItem.MASK, staggerloc=StaggerLoc.CENTER, 
+                          from_file=from_file)
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
@@ -419,7 +448,7 @@ class Grid(object):
    
         # handle the default case
         staggerlocs = 0
-        if staggerloc == None:
+        if staggerloc is None:
             staggerlocs = [StaggerLoc.CENTER]
         elif type(staggerloc) is list:
             staggerlocs = staggerloc
@@ -429,23 +458,23 @@ class Grid(object):
             staggerlocs = [staggerloc]
 
         for stagger in staggerlocs:
-            if self.coords_done[stagger] == 1:
+            if self.coords_done[stagger][0] == 1:
                 warnings.warn("This coordinate has already been added.")
+            else:
+                # request that ESMF allocate space for the coordinates
+                if not from_file:
+                    ESMP_GridAddCoord(self, staggerloc=stagger)
 
-            # request that ESMF allocate space for the coordinates
-            if not from_file:
-                ESMP_GridAddCoord(self, staggerloc=stagger)
+                # and now for Python
+                self.allocate_coords(stagger)
 
-            # and now for Python
-            self.allocate_coords(stagger)
-
-            # set the staggerlocs to be done
-            self.staggerloc[stagger] = True
+                # set the staggerlocs to be done
+                self.staggerloc[stagger] = True
 
         if len(staggerlocs) == 1 and coord_dim is not None:
             return self.coords[staggerlocs[0]][coord_dim]
 
-    def add_item(self, item, staggerloc=None):
+    def add_item(self, item, staggerloc=None, from_file=False):
         """
         Allocate space for a Grid item (mask or areas)
         at a specified stagger location. \n
@@ -476,7 +505,7 @@ class Grid(object):
 
         # handle the default case
         staggerlocs = 0
-        if staggerloc == None:
+        if staggerloc is None:
             staggerlocs = [StaggerLoc.CENTER]
         elif type(staggerloc) is list:
             staggerlocs = staggerloc
@@ -488,12 +517,13 @@ class Grid(object):
         for stagger in staggerlocs:
             if self.item_done[stagger][item] == 1:
                 warnings.warn("This item has already been added.")
+            else:
+                # request that ESMF allocate space for the coordinates
+                if not from_file:
+                    ESMP_GridAddItem(self, item, staggerloc=stagger)
 
-            # request that ESMF allocate space for this item
-            ESMP_GridAddItem(self, item, staggerloc=stagger)
-
-            # and now for Python..
-            self.allocate_items(item, stagger)
+                # and now for Python..
+                self.allocate_items(item, stagger)
 
         if len(staggerlocs) is 1:
             if item == GridItem.MASK:
@@ -533,7 +563,7 @@ class Grid(object):
 
         # handle the default case
         #TODO: return full coordinates, and by dimension as optional
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc
@@ -574,7 +604,7 @@ class Grid(object):
         """
 
         # handle the default case
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc
@@ -631,7 +661,7 @@ class Grid(object):
         """
 
         # handle the default case
-        if staggerloc == None:
+        if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
         elif type(staggerloc) is list:
             raise GridSingleStaggerloc

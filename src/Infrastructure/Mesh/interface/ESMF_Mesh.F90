@@ -1358,12 +1358,12 @@ num_elems, &
     if(present(parametricDim)) l_pdim = parametricDim
     if(present(spatialDim))    l_sdim = spatialDim
 
-   ! Set Default coordSys
-   if (present(coordSys)) then
-      coordSysLocal=coordSys
-   else 
-      coordSysLocal=ESMF_COORDSYS_CART
-   endif
+    ! Set Default coordSys
+    if (present(coordSys)) then
+       coordSysLocal=coordSys
+    else 
+       coordSysLocal=ESMF_COORDSYS_CART
+    endif
 
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
                            coordSysLocal, rc=localrc)
@@ -1648,7 +1648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[filetypeflag] 
+!   \item[fileTypeFlag] 
 !         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 

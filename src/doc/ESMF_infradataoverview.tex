@@ -174,7 +174,7 @@ methods, such the sparse matrix multiplication, is given in section
  execution of the user's code. In addition to generating the weights, integrated regridding can also produce a {\bf RouteHandle} (described in Section~\ref{sec:RHandle}) which allows the user to perform the parallel sparse 
  matrix multiplication using ESMF methods. In other words, ESMF integrated regridding allows a user to perform the whole process of interpolation within their code. 
 
- To see what types of grids and other options are supported in the two types of regridding and their testing status, please see the \htmladdnormallink{ESMF Regridding Status}{http://earthsystemmodeling.org/esmf_releases/public/ESMF_6_3_0r/esmf_6_3_0r_regridding_status.html} webpage for this version of ESMF.
+ To see what types of grids and other options are supported in the two types of regridding and their testing status, please see the \htmladdnormallink{ESMF Regridding Status}{http://earthsystemmodeling.org/esmf_releases/public/ESMF_6_3_0rp1/esmf_6_3_0rp1_regridding_status.html} webpage for this version of ESMF.
  Figure~\ref{Regrid Interfaces} shows a comparison of different regrid interfaces and where they can be found in the documentation. 
 
  The rest of this section further describes various options available in ESMF regridding. It starts with a description of the five interpolation methods available in regridding.
@@ -230,6 +230,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 {\bf Restrictions:}
  \begin{itemize}
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported 
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
@@ -269,6 +270,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 {\bf Restrictions:}
  \begin{itemize}
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
@@ -464,8 +466,9 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
 
 {\bf Restrictions:}
  \begin{itemize}
- \item Concave cells are currently not supported
  \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
+ \item Concave cells with 4 sides are currently not supported (note that concave cells with more than 4 sides are supported)
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 

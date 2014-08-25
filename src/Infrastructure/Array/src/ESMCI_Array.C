@@ -469,7 +469,7 @@ Array *Array::create(
     else
       distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (distgridToArrayMap != NULL){
+  if (present(distgridToArrayMap)){
     if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -538,7 +538,7 @@ Array *Array::create(
   // tensorCount
   int undistLBoundArrayAllocFlag = 0;  // reset
   int *undistLBoundArray = NULL; // reset
-  if (undistLBoundArg != NULL){
+  if (present(undistLBoundArg)){
     if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -565,7 +565,7 @@ Array *Array::create(
   }
   int undistUBoundArrayAllocFlag = 0;  // reset
   int *undistUBoundArray = NULL; // reset
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -659,7 +659,7 @@ Array *Array::create(
   // deal with computationalEdge widths
   int *computationalEdgeLWidth = new int[redDimCount];
   int *computationalEdgeUWidth = new int[redDimCount];
-  if (computationalEdgeLWidthArg != NULL){
+  if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -677,7 +677,7 @@ Array *Array::create(
     for (int i=0; i<redDimCount; i++)
       computationalEdgeLWidth[i] = 0;
   }
-  if (computationalEdgeUWidthArg != NULL){
+  if (present(computationalEdgeUWidthArg)){
     if (computationalEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -698,7 +698,7 @@ Array *Array::create(
   // deal with computational widths
   int *computationalLBound = new int[redDimCount*localDeCount];
   int *computationalUBound = new int[redDimCount*localDeCount];
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -718,7 +718,7 @@ Array *Array::create(
     memcpy(computationalLBound, exclusiveLBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -769,7 +769,7 @@ Array *Array::create(
   int totalUBoundFlag = 0;  // reset
   int *totalLBound = new int[redDimCount*localDeCount];
   int *totalUBound = new int[redDimCount*localDeCount];
-  if (totalLWidthArg != NULL){
+  if (present(totalLWidthArg)){
     totalLBoundFlag = 1;  // set
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -797,7 +797,7 @@ Array *Array::create(
     for (int i=0; i<localDeCount*redDimCount; i++)
       totalLBound[i] = computationalLBound[i];
   }
-  if (totalUWidthArg != NULL){
+  if (present(totalUWidthArg)){
     totalUBoundFlag = 1;  // set
     if (totalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1174,7 +1174,7 @@ Array *Array::create(
     else
       distgridToArrayMapArray[i] = 0;   // default (replicator dims beyond rank)
   }
-  if (distgridToArrayMap != NULL){
+  if (present(distgridToArrayMap)){
     if (distgridToArrayMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1241,20 +1241,20 @@ Array *Array::create(
   }
   // check for undistLBound and undistUBound arguments and that they match
   // tensorCount
-  if (tensorCount > 0 && undistLBoundArg == NULL){
+  if (tensorCount > 0 && !present(undistLBoundArg)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistLBound argument required to create Array with tensor dims",
       ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
-  if (tensorCount > 0 && undistUBoundArg == NULL){
+  if (tensorCount > 0 && !present(undistUBoundArg)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistUBound argument required to create Array with tensor dims",
       ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
   int *undistLBoundArray = NULL; // reset
-  if (undistLBoundArg != NULL){
+  if (present(undistLBoundArg)){
     if (undistLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1268,7 +1268,7 @@ Array *Array::create(
     undistLBoundArray = undistLBoundArg->array;
   }
   int *undistUBoundArray = NULL; // reset
-  if (undistUBoundArg != NULL){
+  if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1298,13 +1298,13 @@ Array *Array::create(
     indexflag = *indexflagArg;
   // check that presence of distLBoundArg is consistent with indexflag
   if(indexflag == ESMF_INDEX_USER){
-    if (distLBoundArg == NULL){
+    if (!present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- distLBoundArg required in ESMF_INDEX_USER mode", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }else{
-    if (distLBoundArg != NULL){
+    if (present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- distLBoundArg must only be specified in ESMF_INDEX_USER mode",
         ESMC_CONTEXT, rc);
@@ -1358,7 +1358,7 @@ Array *Array::create(
   // deal with computationalEdge widths
   int *computationalEdgeLWidth = new int[redDimCount];
   int *computationalEdgeUWidth = new int[redDimCount];
-  if (computationalEdgeLWidthArg != NULL){
+  if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1376,7 +1376,7 @@ Array *Array::create(
     for (int i=0; i<redDimCount; i++)
       computationalEdgeLWidth[i] = 0;
   }
-  if (computationalEdgeUWidthArg != NULL){
+  if (present(computationalEdgeUWidthArg)){
     if (computationalEdgeUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1397,7 +1397,7 @@ Array *Array::create(
   // deal with computational widths
   int *computationalLBound = new int[redDimCount*localDeCount];
   int *computationalUBound = new int[redDimCount*localDeCount];
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1417,7 +1417,7 @@ Array *Array::create(
     memcpy(computationalLBound, exclusiveLBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1466,7 +1466,7 @@ Array *Array::create(
   // deal with total widths
   int *totalLBound = new int[redDimCount*localDeCount];
   int *totalUBound = new int[redDimCount*localDeCount];
-  if (totalLWidthArg != NULL){
+  if (present(totalLWidthArg)){
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalLWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1493,7 +1493,7 @@ Array *Array::create(
     for (int i=0; i<localDeCount*redDimCount; i++)
       totalLBound[i] = computationalLBound[i];
   }
-  if (totalUWidthArg != NULL){
+  if (present(totalUWidthArg)){
     if (totalUWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalUWidth array must be of rank 1", ESMC_CONTEXT, rc);
@@ -1556,7 +1556,7 @@ Array *Array::create(
   }
   
   // optionally shift to supplied lower bounds
-  if (distLBoundArg != NULL){
+  if (present(distLBoundArg)){
     if (distLBoundArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distLBoundArg array must be of rank 1", ESMC_CONTEXT, rc);
@@ -2279,7 +2279,7 @@ int Array::setComputationalLWidth(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalLWidthArg input and process
-  if (computationalLWidthArg != NULL){
+  if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 2", ESMC_CONTEXT, &rc);
@@ -2355,7 +2355,7 @@ int Array::setComputationalUWidth(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check computationalUWidthArg input and process
-  if (computationalUWidthArg != NULL){
+  if (present(computationalUWidthArg)){
     if (computationalUWidthArg->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 2", ESMC_CONTEXT, &rc);
@@ -2439,7 +2439,7 @@ int Array::setRimSeqIndex(
   }
 
   // check rimSeqIndexArg input and process
-  if (rimSeqIndexArg != NULL){
+  if (present(rimSeqIndexArg)){
     if (rimSeqIndexArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- rimSeqIndexArg array must be of rank 1", ESMC_CONTEXT, &rc);
@@ -4049,7 +4049,7 @@ int Array::haloStore(
     int redDimCount = array->rank - array->tensorCount;
     vector<vector<int> > haloInsideLBound(localDeCount);
     vector<vector<int> > haloOutsideLBound(localDeCount);
-    if (haloLDepth == NULL){
+    if (!present(haloLDepth)){
       // haloLDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
@@ -4116,7 +4116,7 @@ int Array::haloStore(
     // prepare haloOutsideUBound and haloInsideUBound arrays
     vector<vector<int> > haloInsideUBound(localDeCount);
     vector<vector<int> > haloOutsideUBound(localDeCount);
-    if (haloUDepth == NULL){
+    if (!present(haloUDepth)){
       // haloUDepth was not provided
       for (int i=0; i<localDeCount; i++){
         int kOff = i * (array->rank - array->tensorCount);
@@ -4290,7 +4290,7 @@ int Array::haloStore(
     // precompute sparse matrix multiplication
     int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
-      &srcTermProcessing, pipelineDepthArg);
+      false, &srcTermProcessing, pipelineDepthArg);
     
 #ifdef HALOSTOREMEMLOG_on
     VM::logMemInfo(std::string("HaloStore4"));
@@ -4456,6 +4456,7 @@ int Array::redistStore(
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
   void *factor,                         // in    - redist factor
+  bool ignoreUnmatched,                 // in    - support unmatched indices
   int *pipelineDepthArg                 // in (optional)
   ){
 //
@@ -4552,29 +4553,33 @@ int Array::redistStore(
   
   // set factorLocal
   void *factorLocal;
+  ESMC_R4 factorLocalTR4; // type specific factor, persisting during store call
+  ESMC_R8 factorLocalTR8; // type specific factor, persisting during store call
+  ESMC_I4 factorLocalTI4; // type specific factor, persisting during store call
+  ESMC_I8 factorLocalTI8; // type specific factor, persisting during store call
   if (typekindFactor == ESMC_TYPEKIND_R4){
-    ESMC_R4 *factorLocalT = new ESMC_R4;
+    ESMC_R4 *factorLocalT = &factorLocalTR4;
     if (factor)
       *factorLocalT = *(ESMC_R4 *)factor;
     else
       *factorLocalT = 1.;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_R8){
-    ESMC_R8 *factorLocalT = new ESMC_R8;
+    ESMC_R8 *factorLocalT = &factorLocalTR8;
     if (factor)
       *factorLocalT = *(ESMC_R8 *)factor;
     else
       *factorLocalT = 1.;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_I4){
-    ESMC_I4 *factorLocalT = new ESMC_I4;
+    ESMC_I4 *factorLocalT = &factorLocalTI4;
     if (factor)
       *factorLocalT = *(ESMC_I4 *)factor;
     else
       *factorLocalT = 1;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_I8){
-    ESMC_I8 *factorLocalT = new ESMC_I8;
+    ESMC_I8 *factorLocalT = &factorLocalTI8;
     if (factor)
       *factorLocalT = *(ESMC_I8 *)factor;
     else
@@ -4609,7 +4614,7 @@ int Array::redistStore(
   int dstN;
   int *factorIndexList;
   
-  if (srcToDstTransposeMap == NULL){
+  if (!present(srcToDstTransposeMap)){
     // srcToDstTransposeMap not specified -> default mode
     
     // src and dst Arrays must have identical number of exclusive elements
@@ -4893,25 +4898,21 @@ for (int i=0; i<factorListCount; i++)
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_R4 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_R4 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = new ESMC_R8[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_R8 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_R8 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = new ESMC_I4[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_I4 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_I4 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = new ESMC_I8[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_I8 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_I4 *)factorLocal;
   }
   
   // prepare SparseMatrix vector
@@ -4922,7 +4923,7 @@ for (int i=0; i<factorListCount; i++)
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
-    false, &srcTermProcessing, pipelineDepthArg);
+    false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -7703,8 +7704,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     const bool tensorMixFlag, DD::Interval const *seqIndexInterval,
     const int tensorElementCountEff, vector<bool> const &factorPetFlag,
     const ESMC_TypeKind_Flag typekindFactors, const bool haloFlag,
-    Array const *array, const int localDeCount, const int *localDeElementCount,
-    int const *localDeToDeMap, int const *localIntervalPerPetCount,
+    const bool ignoreUnmatched, Array const *array, const int localDeCount, 
+    const int *localDeElementCount, int const *localDeToDeMap,
+    int const *localIntervalPerPetCount,
     int const *localElementsPerIntervalCount
     ){
     
@@ -7763,7 +7765,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
         break;
       }while (iMin != iMax);
-      if (!foundFlag){
+      if (!ignoreUnmatched && !foundFlag){
         // seqIndex lies outside Array bounds
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains seqIndex outside Array bounds",
@@ -7920,6 +7922,7 @@ int Array::sparseMatMulStore(
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
   bool haloFlag,                            // in    - support halo conditions
+  bool ignoreUnmatched,                     // in    - support unmatched indices
   int *srcTermProcessingArg,                // inout - src term proc (optional)
                                 // if (NULL) -> auto-tune, no pass back
                                 // if (!NULL && -1) -> auto-tune, pass back
@@ -8647,7 +8650,7 @@ int Array::sparseMatMulStore(
     false,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     srcSeqIndexInterval, srcTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, srcArray, srcLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, srcArray, srcLocalDeCount,
     srcLocalDeElementCount, srcLocalDeToDeMap, srcLocalIntervalPerPetCount,
     srcLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -8673,7 +8676,7 @@ int Array::sparseMatMulStore(
     true,  // dstSetupFlag
     sparseMatrix, tensorMixFlag,
     dstSeqIndexInterval, dstTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, dstArray, dstLocalDeCount,
+    typekindFactors, haloFlag, ignoreUnmatched, dstArray, dstLocalDeCount,
     dstLocalDeElementCount, dstLocalDeToDeMap, dstLocalIntervalPerPetCount,
     dstLocalElementsPerIntervalCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -9000,6 +9003,50 @@ int Array::sparseMatMulStore(
   }
 #endif
   
+  if (ignoreUnmatched){
+    // If there are unmatched src or dst elements in the sparse matrix, they
+    // will have lead to FactorElement entries with a partnerDe.size()==0 here.
+    // Leaving them like that will lead to issues down the code, so that if
+    // unmatched entries are to be supported, these FactorElements must be 
+    // removed here.
+    //
+    //TODO: This could have been done on the SeqIndexFactorLookup level further
+    //TODO: up ... probably a more efficient way.
+    //
+    // Doing this for the src side
+    for (int j=0; j<srcLocalDeCount; j++){
+      for (int k=0; k<srcLinSeqVect[j].size(); k++){
+        for (vector<DD::FactorElement>::iterator
+          fe=srcLinSeqVect[j][k].factorList.begin();
+          fe!=srcLinSeqVect[j][k].factorList.end();){
+          if (fe->partnerDe.size() == 0){
+            // eliminate this factorList entry
+            fe = srcLinSeqVect[j][k].factorList.erase(fe);
+            --srcLinSeqVect[j][k].factorCount;
+          }else{
+            ++fe;
+          }
+        }
+      }
+    }
+    // Doing this for the dst side
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (int k=0; k<dstLinSeqVect[j].size(); k++){
+        for (vector<DD::FactorElement>::iterator
+          fe=dstLinSeqVect[j][k].factorList.begin();
+          fe!=dstLinSeqVect[j][k].factorList.end();){
+          if (fe->partnerDe.size() == 0){
+            // eliminate this factorList entry
+            fe = dstLinSeqVect[j][k].factorList.erase(fe);
+            --dstLinSeqVect[j][k].factorCount;
+          }else{
+            ++fe;
+          }
+        }
+      }
+    }
+  }
+
   if (haloFlag){
     // Phase IV below expects each FactorElement inside of srcLinSeqVect and
     // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
@@ -10542,10 +10589,9 @@ int sparseMatMulStoreEncodeXXEStream(
     vector<ArrayHelper::SendnbElement>::iterator pSendWait=sendnbVector.begin();
     
     
-#define SMM_NONBLOCKINGSTYLE___disable
-#define SMM_NONBLOCKINGSTYLE
+#define SMM_NONBLOCKINGSTYLE_on
     
-#ifdef SMM_NONBLOCKINGSTYLE
+#ifdef SMM_NONBLOCKINGSTYLE_on
     // prepare pipeline
 #ifdef OLDSTYLEPIPELINEPREPARE
     for (int i=0; i<pipelineDepth; i++){
@@ -10634,7 +10680,7 @@ int sparseMatMulStoreEncodeXXEStream(
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
     
-#ifdef SMM_NONBLOCKINGSTYLE
+#ifdef SMM_NONBLOCKINGSTYLE_on
     // fill pipeline
     bool recvnbOK = true; // initialize
     bool sendnbOK = true; // initialize
@@ -10667,9 +10713,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing,
-            srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
-            dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
@@ -10700,15 +10747,21 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[160];
-          sprintf(tempString, "done WaitOnIndex: %d",
+          sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
-          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
+          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish
+            |XXE::filterBitNbWaitFinishSingleSum,
             tempString, xxe->count, xxe->count);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10736,9 +10789,10 @@ int sparseMatMulStoreEncodeXXEStream(
           int k = pRecvWait-recvnbVector.begin();
           // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
-            0x0, srcTermProcessing, srcLocalDeCount,
-            elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
-            dataSizeFactors, rraList, rraCount, k);
+            0x0,  // appendTestWaitProductSum() sets correct filter bits:
+                  // XXE::filterBitNbTestFinish XXE::filterBitNbWaitFinish
+            srcTermProcessing, srcLocalDeCount, elementTK, valueTK, factorTK,
+            dataSizeDst, dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           // append simple wait if summing to be done in a single sum at the end
@@ -10765,15 +10819,21 @@ int sparseMatMulStoreEncodeXXEStream(
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum,
+            pSendWait->sendnbIndex);
+          if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           localrc = xxe->appendCancelIndex(0x0|XXE::filterBitCancel,
             pSendWait->sendnbIndex);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMMPROFILE
           char *tempString = new char[160];
-          sprintf(tempString, "done WaitOnIndex: %d",
+          sprintf(tempString, "done send WaitOnIndex: %d",
             pSendWait->sendnbIndex);
-          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish,
+          localrc = xxe->appendWtimer(0x0|XXE::filterBitNbWaitFinish
+            |XXE::filterBitNbWaitFinishSingleSum,
             tempString, xxe->count, xxe->count);
           if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -10790,7 +10850,7 @@ int sparseMatMulStoreEncodeXXEStream(
     //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
     
     // append a single productSum operation that considers _all_ of the 
-    // incoming elements and orders them accroding the strict canonical 
+    // incoming elements and orders them according the strict canonical 
     // TERMORDER_SRCSEQ order
     localrc = ArrayHelper::RecvnbElement::appendSingleProductSum(xxe,
       0x0|XXE::filterBitNbWaitFinishSingleSum, srcTermProcessing,
@@ -10807,7 +10867,7 @@ int sparseMatMulStoreEncodeXXEStream(
     // TODO: the BLOCKING option should really be added with a special 
     // TODO: pedication bit set so it can be executed for blocking user calls,
     // TODO: of course only if it has been determined as being faster by the
-    // TODO: tuning phase over the non-blocking couter part implementation.
+    // TODO: tuning phase over the non-blocking counter part implementation.
     
     while ((pRecv != recvnbVector.end()) || (pSend != sendnbVector.end())){
       int recvStage = -1; // invalidate

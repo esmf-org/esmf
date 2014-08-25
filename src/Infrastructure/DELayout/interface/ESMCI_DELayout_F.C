@@ -79,8 +79,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
-    ESMCI::InterfaceInt **deGrouping, ESMC_Pin_Flag *pinFlag, 
-    ESMCI::InterfaceInt **petList, ESMCI::VM **vm, int *rc){
+    ESMCI::InterfaceInt *deGrouping, ESMC_Pin_Flag *pinFlag, 
+    ESMCI::InterfaceInt *petList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatedefault()"
     // Initialize return code; assume routine not implemented
@@ -106,9 +106,9 @@ extern "C" {
       // on PETs with actual members call into C++
       *ptr = ESMCI::DELayout::create(
         ESMC_NOT_PRESENT_FILTER(deCount), 
-        *deGrouping,
+        deGrouping,
         ESMC_NOT_PRESENT_FILTER(pinFlag),
-        *petList, opt_vm, &localrc);
+        petList, opt_vm, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     }
@@ -148,10 +148,10 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
-    int *deCount, ESMCI::InterfaceInt **petMap, ESMCI::InterfaceInt **vasMap,
+    int *deCount, ESMCI::InterfaceInt *petMap, ESMCI::InterfaceInt *vasMap,
     ESMC_Logical *oneToOneFlag, ESMC_Pin_Flag *pinFlag,
-    int *localDeCount, ESMCI::InterfaceInt **localDeToDeMap,
-    int *vasLocalDeCount, ESMCI::InterfaceInt **vasLocalDeToDeMap, int *rc){
+    int *localDeCount, ESMCI::InterfaceInt *localDeToDeMap,
+    int *vasLocalDeCount, ESMCI::InterfaceInt *vasLocalDeToDeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented
@@ -161,14 +161,14 @@ extern "C" {
       *vm = (*ptr)->getVM();
     if (ESMC_NOT_PRESENT_FILTER(deCount) != ESMC_NULL_POINTER)
       *deCount = (*ptr)->getDeCount();
-    if (*petMap != NULL){
+    if (present(petMap)){
       // petMap was provided -> do some error checking
-      if ((*petMap)->dimCount != 1){
+      if ((petMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- petMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
-      if ((*petMap)->extent[0] < (*ptr)->getDeCount()){
+      if ((petMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of petMap array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
@@ -176,16 +176,16 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<(*ptr)->getDeCount(); i++)
-        ((*petMap)->array)[i] = (*ptr)->getPet(i);
+        ((petMap)->array)[i] = (*ptr)->getPet(i);
     }
-    if (*vasMap != NULL){
+    if (present(vasMap)){
       // vasMap was provided -> do some error checking
-      if ((*vasMap)->dimCount != 1){
+      if ((vasMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- vasMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
-      if ((*vasMap)->extent[0] < (*ptr)->getDeCount()){
+      if ((vasMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of vasMap array must be of size 'deCount'", ESMC_CONTEXT,
           rc);
@@ -193,7 +193,7 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<(*ptr)->getDeCount(); i++)
-        ((*vasMap)->array)[i] = (*ptr)->getVas(i);
+        ((vasMap)->array)[i] = (*ptr)->getVas(i);
     }
     if (ESMC_NOT_PRESENT_FILTER(oneToOneFlag) != ESMC_NULL_POINTER)
       *oneToOneFlag = (*ptr)->getOneToOneFlag();
@@ -201,40 +201,40 @@ extern "C" {
       *pinFlag = (*ptr)->getPinFlag();
     if (ESMC_NOT_PRESENT_FILTER(localDeCount) != ESMC_NULL_POINTER)
       *localDeCount = (*ptr)->getLocalDeCount();
-    if (*localDeToDeMap != NULL){
+    if (present(localDeToDeMap)){
       // localDeToDeMap was provided -> do some error checking
-      if ((*localDeToDeMap)->dimCount != 1){
+      if ((localDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
-      if ((*localDeToDeMap)->extent[0] < (*ptr)->getLocalDeCount()){
+      if ((localDeToDeMap)->extent[0] < (*ptr)->getLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of localDeToDeMap array must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
         return; // bail out
       }
       // fill in values
-      memcpy((*localDeToDeMap)->array, (*ptr)->getLocalDeToDeMap(),
+      memcpy((localDeToDeMap)->array, (*ptr)->getLocalDeToDeMap(),
         sizeof(int)*(*ptr)->getLocalDeCount());
     }
     if (ESMC_NOT_PRESENT_FILTER(vasLocalDeCount) != ESMC_NULL_POINTER)
       *vasLocalDeCount = (*ptr)->getVasLocalDeCount();
-    if (*vasLocalDeToDeMap != NULL){
+    if (present(vasLocalDeToDeMap)){
       // vasLocalDeToDeMap was provided -> do some error checking
-      if ((*vasLocalDeToDeMap)->dimCount != 1){
+      if ((vasLocalDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- vasLocalDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
         return; // bail out
       }
-      if ((*vasLocalDeToDeMap)->extent[0] < (*ptr)->getVasLocalDeCount()){
+      if ((vasLocalDeToDeMap)->extent[0] < (*ptr)->getVasLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of vasLocalDeToDeMap array must be of size "
           "'vasLocalDeCount'", ESMC_CONTEXT, rc);
         return; // bail out
       }
       // fill in values
-      memcpy((*vasLocalDeToDeMap)->array, (*ptr)->getVasLocalDeToDeMap(),
+      memcpy((vasLocalDeToDeMap)->array, (*ptr)->getVasLocalDeToDeMap(),
         sizeof(int)*(*ptr)->getVasLocalDeCount());
     }
     // return successfully

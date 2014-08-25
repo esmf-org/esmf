@@ -759,6 +759,7 @@
       cfio%timeInc = hour*10000 + minute*100 + seconds
 
       allocate(attNames(ngatts))
+      attNames = " "
       call CFIO_GetAttNames ( cfio%fid, ngatts, attNames, rtcode )
       if (err("CFIO_GetAttNames failed",rtcode,rtcode) .lt. 0) then  
          if ( present(rc) ) rc = rtcode

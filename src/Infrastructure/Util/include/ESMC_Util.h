@@ -86,7 +86,16 @@ enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_CENTER,
                       ESMC_STAGGERLOC_EDGE1,
                       ESMC_STAGGERLOC_EDGE2,
-                      ESMC_STAGGERLOC_CORNER};
+                      ESMC_STAGGERLOC_CORNER,
+                      ESMC_STAGGERLOC_CENTER_VCENTER=0,
+                      ESMC_STAGGERLOC_EDGE1_VCENTER,
+                      ESMC_STAGGERLOC_EDGE2_VCENTER,
+                      ESMC_STAGGERLOC_CORNER_VCENTER,
+                      ESMC_STAGGERLOC_CENTER_VFACE,
+                      ESMC_STAGGERLOC_EDGE1_VFACE,
+                      ESMC_STAGGERLOC_EDGE2_VFACE,
+                      ESMC_STAGGERLOC_CORNER_VFACE};
+
 
 enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
                     ESMC_TYPEKIND_I2,
@@ -108,7 +117,8 @@ enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
 			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
 			   ESMC_FILEFORMAT_GRIDSPEC};
 
-enum ESMC_Decomp_Flag {ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
+		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
 		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 // ESMF platform-dependent data types

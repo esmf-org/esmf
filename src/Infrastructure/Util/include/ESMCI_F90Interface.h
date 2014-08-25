@@ -67,7 +67,13 @@ namespace ESMCI {
       InterfaceInt(std::vector<int> &arrayArg); // constructor
       InterfaceInt(int *arrayArg, int dimArg, const int *lenArg); // constructor
       ~InterfaceInt(void);                      // destructor
+      void set();
+      void set(int *arrayArg, int lenArg);
+      void set(std::vector<int> &arrayArg);
+      void set(int *arrayArg, int dimArg, const int *lenArg);
   };
+  
+  bool present(InterfaceInt *ptr);  // simplify checking whether object present
 
 } // namespace ESMCI
 

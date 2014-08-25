@@ -116,7 +116,7 @@ module user_model3
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpComp = 'ModelComp'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -240,7 +240,7 @@ module user_model3
     !
     !  CIM child component scientific property attributes
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpSci = 'SciProp'
     sciPropAtt(1) = 'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables'
     sciPropAtt(2) = 'AtmosphereAtmosDynamicalCoreTopBoundaryCondition'
@@ -272,7 +272,7 @@ module user_model3
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpField = 'Inputs'
 
     ! Ozone Field
@@ -443,7 +443,7 @@ module user_model3
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM 1.7.1'
     purpComp = 'ModelComp'
 
     ! Initialize return code

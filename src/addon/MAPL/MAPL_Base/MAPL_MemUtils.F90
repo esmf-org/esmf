@@ -65,6 +65,7 @@ module MAPL_MemUtilsMod
   public MAPL_MemUtilsDisable
   public MAPL_MemUtilsWrite
   public MAPL_MemUtilsIsDisabled
+  public MAPL_MemUtilsFree
 
 #ifdef _CRAY
   public :: hplen
@@ -475,6 +476,59 @@ integer :: status
 
    RETURN_(ESMF_SUCCESS)
 end subroutine mem_dump
+
+subroutine MAPL_MemUtilsFree ( totmemfree, RC )
+
+real, intent(out) :: totmemfree
+integer, optional, intent(OUT  ) :: RC
+
+! This routine returns the amount of free memory on Linux systems.
+! It does this by querying a system file (file_name below).
+
+character(len=32) :: meminfo   = '/proc/meminfo'
+character(len=32) :: string
+real    :: memfree, buffers, cached
+integer :: mem_unit
+real    :: multiplier
+
+character(len=ESMF_MAXSTR), parameter :: IAm="MAPL_MemUtilsFree"
+integer :: status
+
+  totmemfree = 0.0
+  memfree = 0.0
+  buffers = 0.0
+  cached = 0.0
+  multiplier = 1.0
+
+  call get_unit(mem_unit)
+  open(UNIT=mem_unit,FILE=meminfo,FORM='formatted',IOSTAT=STATUS)
+  VERIFY_(STATUS)
+  do; read (mem_unit,'(a)', end=20) string
+    if ( INDEX ( string, 'MemFree:' ) == 1 ) then  ! Free memory
+      read (string(9:LEN_TRIM(string)-2),*) memfree
+      if (TRIM(string(LEN_TRIM(string)-1:)) == "kB" ) &
+        multiplier = 1.0/1024. ! Convert from kB to MB
+      memfree = memfree * multiplier
+    endif
+    if ( INDEX ( string, 'Buffers:' ) == 1 ) then  ! Buffers
+      read (string(9:LEN_TRIM(string)-2),*) buffers
+      if (TRIM(string(LEN_TRIM(string)-1:)) == "kB" ) &
+        multiplier = 1.0/1024. ! Convert from kB to MB
+      buffers = buffers * multiplier
+    endif
+    if ( INDEX ( string, 'Cached:' ) == 1 ) then  ! Cached
+      read (string(8:LEN_TRIM(string)-2),*) cached
+      if (TRIM(string(LEN_TRIM(string)-1:)) == "kB" ) &
+        multiplier = 1.0/1024. ! Convert from kB to MB
+      cached = cached * multiplier
+    endif
+  enddo
+20 close(mem_unit)
+
+  totmemfree = memfree + cached + buffers
+
+   RETURN_(ESMF_SUCCESS)
+end subroutine MAPL_MemUtilsFree
 
 subroutine get_unit ( iunit )
   implicit none

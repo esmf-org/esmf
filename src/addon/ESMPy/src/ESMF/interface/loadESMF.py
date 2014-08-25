@@ -41,6 +41,7 @@ try:
     esmfos = None
     esmfabi = None
     esmfcomm = None
+    esmfversion = None
     netcdf = [False, False, False, False]
     
     for line in MKFILE:
@@ -60,6 +61,9 @@ try:
             netcdf[3] = True
         elif 'ESMF_COMM:' in line:
             esmfcomm = line.split(":")[1]
+        elif 'ESMF_VERSION_STRING=' in line:
+            esmfversion = line.split("=")[1]
+            esmfversion = esmfversion.rstrip('\n')
         
             
     MKFILE.close()
@@ -95,6 +99,9 @@ try:
     # set _ESMF_COMM
     if "mpiuni" in esmfcomm:
         constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
+
+    # set _ESMF_VERSION_STRING 
+    constants._ESMF_VERSION = esmfversion
 
 except:
     raise ValueError('There is no ESMF shared library object available \

@@ -161,7 +161,6 @@ def grid_create_periodic(bounds, domask=False):
         gridYCenter[:, j] = (y+yp1)/2.0
 
     [x,y] = [0, 1]
-    mask = 0
     if domask:
         # set up the grid mask
         mask = grid.add_item(ESMF.GridItem.MASK)
@@ -336,7 +335,8 @@ def initialize_field_grid_3d(field, domask=False):
 
     return field
 
-def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None):
+def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None, 
+                      uninitval=422397696.):
     '''
     PRECONDITIONS: Two Fields have been created and initialized.  
                    'valuefield' contains data values of a field built 
@@ -352,10 +352,12 @@ def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None):
     mass = 0.0
     areafield.get_area()
 
+    ind = np.where(valuefield.data != uninitval)
+
     if dofrac:
-        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+        mass = np.sum(areafield.data[ind] * valuefield.data[ind] * fracfield.data[ind])
     else:
-        mass = np.sum(areafield.data * valuefield.data)
+        mass = np.sum(areafield.data[ind] * valuefield.data[ind])
 
     return mass
 

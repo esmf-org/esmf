@@ -256,7 +256,7 @@ weights are properly generated for the cell centers in the file.
 A Mesh may also be created with boolean flags to specify whether or not to
 add an area property to the Mesh 'add_user_area', or to add a mask
 'add_mask' held by the NetCDF variable indicated in the optional argument, 
-'varname'.
+'varname'.  These argument are only valid for UGRID formatted files.
 
 ----------------
 Grids From File
@@ -265,11 +265,14 @@ Grids From File
 A number of optional boolean arguments are also supported to create a
 structured Grid from a file.  These include 'is_sphere' to indicate whether
 the grid is spherical or regional, 'add_corner_stagger' to add the corner
-stagger information to the Grid for conservative regridding,
+stagger information to the Grid for conservative regridding, and
 'add_user_area' to specify whether to read in the cell area from the
-NetCDF file or to calculate them, and 'add_mask'
+NetCDF file or to calculate them.  Also, for GRIDSPEC formmated files
+there is the 'add_mask' optional argument
 to add a mask held by the NetCDF variable indicated in optional
-argument, 'varname'.   
+argument, 'varname', and the 'coord_names' argument to specify the longitude
+and latitude variable names in GRIDSPEC file containing multiple sets of 
+coordinates.
 
 ================
 Field regridding

@@ -66,6 +66,7 @@ program ESMF_IO_PIOUTest
   integer :: pio_dims(1)
   integer, parameter :: dim_x=10
   integer :: dimid_x
+  integer :: addr_diff, desc_len
   real(ESMF_KIND_R8), dimension(dim_x) :: test_data, read_data
 
 #if defined (ESMF_PIO)
@@ -98,16 +99,22 @@ program ESMF_IO_PIOUTest
 ! the ESMF API.
 !------------------------------------------------------------------------
 
+  addr_diff = -1
+  desc_len  = -1
 !------------------------------------------------------------------------
   !NEX_UTest
   ! Ensure at least enough C++ space to hold Fortran derived type
 
 #if defined (ESMF_PIO)
-  call ESMCI_pio_size_check ('iosystem_desc_t', iosysdesc(1), iosysdesc(2), rc)
+  call ESMCI_pio_size_check ('iosystem_desc_t', iosysdesc(1), iosysdesc(2),  &
+      addr_diff, desc_len,  &
+      rc)
+  if (rc /= ESMF_SUCCESS)  &
+      print *, 'iosystem_desc_t:  Fortran addr_diff =', addr_diff, ', C++ desc_len =', desc_len
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_IOSYSTEM_DESC"
+  write(failMsg, *) "PIO_SIZE_IOSYSTEM_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(iosystem_desc_t) vs PIO_SIZE_IOSYSTEM_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -117,11 +124,15 @@ program ESMF_IO_PIOUTest
   ! Ensure at least enough C++ space to hold Fortran derived type
 
 #if defined (ESMF_PIO)
-  call ESMCI_pio_size_check ('file_desc_t', filedesc(1), filedesc(2), rc)
+  call ESMCI_pio_size_check ('file_desc_t', filedesc(1), filedesc(2),  &
+      addr_diff, desc_len,  &
+      rc)
+  if (rc /= ESMF_SUCCESS)  &
+      print *, 'file_desc_t:  Fortran addr_diff =', addr_diff, ', C++ desc_len =', desc_len
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_FILE_DESC"
+  write(failMsg, *) "PIO_SIZE_FILE_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(file_desc_t) vs PIO_SIZE_FILE_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -131,11 +142,15 @@ program ESMF_IO_PIOUTest
   ! Ensure at least enough C++ space to hold Fortran derived type
 
 #if defined (ESMF_PIO)
-  call ESMCI_pio_size_check ('io_desc_t', iodesc(1), iodesc(2), rc)
+  call ESMCI_pio_size_check ('io_desc_t', iodesc(1), iodesc(2),  &
+      addr_diff, desc_len,  &
+      rc)
+  if (rc /= ESMF_SUCCESS)  &
+      print *, 'io_desc_t:  Fortran addr_diff =', addr_diff, ', C++ desc_len =', desc_len
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_IO_DESC"
+  write(failMsg, *) "PIO_SIZE_IO_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(io_desc_t) vs PIO_SIZE_IO_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -145,11 +160,15 @@ program ESMF_IO_PIOUTest
   ! Ensure at least enough C++ space to hold Fortran derived type
 
 #if defined (ESMF_PIO)
-  call ESMCI_pio_size_check ('var_desc_t', vardesc(1), vardesc(2), rc)
+  call ESMCI_pio_size_check ('var_desc_t', vardesc(1), vardesc(2),  &
+      addr_diff, desc_len,  &
+      rc)
+  if (rc /= ESMF_SUCCESS)  &
+      print *, 'var_desc_t:  Fortran addr_diff =', addr_diff, ', C++ desc_len =', desc_len
 #else
   rc = ESMF_SUCCESS
 #endif
-  write(failMsg, *) "PIO_SIZE_VAR_DESC"
+  write(failMsg, *) "PIO_SIZE_VAR_DESC size =", desc_len, ", reserved space =", addr_diff
   write(name, *) "Checking sizeof(var_desc_t) vs PIO_SIZE_VAR_DESC"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------

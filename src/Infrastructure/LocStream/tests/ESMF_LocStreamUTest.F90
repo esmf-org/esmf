@@ -1474,7 +1474,10 @@ program ESMF_LocStreamCreateUTest
 
   ! Create LocStream
   locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
      
   ! Allocate X array
   allocate(X(pntCount))
@@ -1507,11 +1510,17 @@ program ESMF_LocStreamCreateUTest
 
   ! Add key X
   call ESMF_LocStreamAddKey(locstream, keyName="X", farray=X,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   ! Add key Y
   call ESMF_LocStreamAddKey(locstream, keyName="Y", farray=Y,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
 
   ! Do locStream create from background mesh
@@ -1519,12 +1528,15 @@ program ESMF_LocStreamCreateUTest
                  background=mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
-     go to 100
+     goto 100
   endif
 
 
   call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   ! deallocate array
   deallocate(X)
@@ -1533,17 +1545,26 @@ program ESMF_LocStreamCreateUTest
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   !!!!!!!!! Check results !!!!!!!!!!!!!!!!!
   call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="X", &
          farray=tstX, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="Y", &
          farray=tstY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   ! Test points
   if (localPet .eq. 0) then  
@@ -1570,7 +1591,10 @@ program ESMF_LocStreamCreateUTest
 
 
   call ESMF_LocStreamDestroy(newLocstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (localrc .ne. ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    goto 100
+  endif
 
   ! endif for skip for ==4 proc
   endif 

@@ -122,9 +122,6 @@ class Field(ma.MaskedArray):
         data = 0
         mask = None
         if isinstance(grid, Grid):
-            # check some stuff
-            assert (grid.staggerloc[staggerloc])
-
             # call into ctypes layer
             struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc,
                                           local_grid_to_field_map, 
@@ -197,6 +194,7 @@ class Field(ma.MaskedArray):
         # find the size of the local coordinates at this stagger location
         size = 0
         if isinstance(grid, Grid):
+            grid.verify_grid_bounds(StaggerLoc.CENTER)
             size = reduce(mul,grid.size_local[staggerloc])
         elif isinstance(grid, Mesh):
             size = grid.size_local[staggerloc]

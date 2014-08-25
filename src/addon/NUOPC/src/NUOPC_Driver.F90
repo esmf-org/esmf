@@ -114,6 +114,8 @@ module NUOPC_Driver
   interface NUOPC_DriverGetComp
     module procedure NUOPC_DriverGetGridComp
     module procedure NUOPC_DriverGetCplComp
+    module procedure NUOPC_DriverGetAllGridComp
+    module procedure NUOPC_DriverGetAllCplComp
   end interface
   
   ! Internal drived types
@@ -208,7 +210,7 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -1461,7 +1463,7 @@ module NUOPC_Driver
             call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
               msg="Initialize data-dependency resolution loop "// &
               "has entered a dead-lock situation.", &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return  ! bail out of data-dependency resolution loop, prevent lock
           endif
           
@@ -2086,7 +2088,6 @@ module NUOPC_Driver
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: iComp
@@ -2130,7 +2131,7 @@ module NUOPC_Driver
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2169,16 +2170,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: iComp, i
     type(ESMF_GridComp)             :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2218,48 +2214,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error
@@ -2268,7 +2235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2305,7 +2272,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: src, dst
@@ -2356,7 +2322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2369,7 +2335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2407,17 +2373,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: src, dst, i
     type(ESMF_GridComp)             :: srcComp, dstComp
     type(ESMF_CplComp)              :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2464,7 +2425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2477,7 +2438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2489,43 +2450,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error
@@ -2534,7 +2466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2567,7 +2499,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
 
@@ -2730,6 +2661,158 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_DriverGetAllGridComp - Get all the GridComp child components from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetAllGridComp(driver, compList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    type(ESMF_GridComp), pointer               :: compList(:)
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get all the GridComp (i.e. Model, Mediator, or Driver) child components from a
+! Driver. The incoming {\tt compList} argument must be unassociated. On return
+! it becomes the responsibility of the caller to deallocate the associated
+! {\tt compList} argument.
+! 
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: stat
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: mapCount
+    integer                         :: i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! check the incoming pointer
+    if (associated(compList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="compList must enter unassociated", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)
+      return  ! bail out
+    endif
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! get basic information about map
+    call ESMF_ContainerGet(is%wrap%componentMap, itemCount=mapCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+      
+    ! allocate memory for the compList
+    allocate(compList(mapCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of compList failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! fill the compList
+    do i=1, mapCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
+        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      compList(i) = cmEntry%wrap%component
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverGetAllCplComp - Get all the CplComp child components from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGetComp()
+  subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    type(ESMF_CplComp),  pointer               :: compList(:)
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Get all the CplComp (i.e. Connector) child components from a
+! Driver. The incoming {\tt compList} argument must be unassociated. On return
+! it becomes the responsibility of the caller to deallocate the associated
+! {\tt compList} argument.
+! 
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: stat
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ConnectorMapEntry)         :: cmEntry
+    integer                         :: mapCount
+    integer                         :: i
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! check the incoming pointer
+    if (associated(compList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="compList must enter unassociated", &
+        line=__LINE__, file=trim(name)//":"//FILENAME)
+      return  ! bail out
+    endif
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! get basic information about map
+    call ESMF_ContainerGet(is%wrap%connectorMap, itemCount=mapCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+      
+    ! allocate memory for the compList
+    allocate(compList(mapCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of compList failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! fill the compList
+    do i=1, mapCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
+        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      compList(i) = cmEntry%wrap%connector
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_DriverNewRunSequence - Replace current RunSequence with a new one
 !
 ! !INTERFACE:
@@ -2793,12 +2876,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(ESMF_VM)                   :: vm
     logical                         :: forceOrder
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
+    type(ConnectorMapEntry)         :: cnEntry
     integer                         :: componentMapCount, connectorMapCount
     integer                         :: i, pet, petCount, localPet
 
@@ -2861,11 +2944,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, "  that they were added to the Driver:"
         do i=1, connectorMapCount
           call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
-            cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+            cnEntry, ESMF_ITEMORDER_ADDORDER, rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          print *, i,":  ", trim(cmEntry%wrap%label)
+          print *, i,":  ", trim(cnEntry%wrap%label)
         enddo
         
         ! Print the RunSequence
@@ -2904,7 +2987,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
 
@@ -3011,7 +3093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if ((compIndex<1) .or. (compIndex>is%wrap%modelCount)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="compIndex is out of bounds.", &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
     

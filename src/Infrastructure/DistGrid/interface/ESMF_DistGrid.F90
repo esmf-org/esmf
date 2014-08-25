@@ -374,6 +374,19 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(==)
+    module procedure ESMF_Decomp_FlagEQ
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(/=)
+    module procedure ESMF_Decomp_FlagNE
+  end interface
+!------------------------------------------------------------------------------
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -3336,6 +3349,79 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
   end subroutine ESMF_DistGridSetInitCreated
 !------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Decomp_FlagEQ"
+!BOPI
+! !IROUTINE: ESMF_DecompFlagEqual - Equality of DecompFlag statuses
+!
+! !INTERFACE:
+      function ESMF_Decomp_FlagEQ(decompFlag1, decompFlag2)
+
+! !RETURN VALUE:
+      logical :: ESMF_Decomp_FlagEQ
+
+! !ARGUMENTS:
+
+      type (ESMF_Decomp_Flag), intent(in) :: &
+         decompFlag1,      &! Two igrid statuses to compare for
+         decompFlag2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF DecompFlag statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[decompFlag1, decompFlag2]
+!          Two decomposition flags to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_Decomp_FlagEQ = (decompFlag1%value == &
+                            decompFlag2%value)
+
+      end function ESMF_Decomp_FlagEQ
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Decomp_FlagNE"
+!BOPI
+! !IROUTINE: ESMF_DecompFlagNotEqual - Non-equality of DecompFlag statuses
+!
+! !INTERFACE:
+      function ESMF_Decomp_FlagNE(decompFlag1, decompFlag2)
+
+! !RETURN VALUE:
+      logical :: ESMF_Decomp_FlagNE
+
+! !ARGUMENTS:
+
+      type (ESMF_Decomp_Flag), intent(in) :: &
+         decompFlag1,      &! Two DecompFlag Statuses to compare for
+         decompFlag2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF DecompFlag statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[decompFlag1, decompFlag2]
+!          Two decomposition flags to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_Decomp_FlagNE = (decompFlag1%value /= &
+                            decompFlag2%value)
+
+      end function ESMF_Decomp_FlagNE
+#undef  ESMF_METHOD
+
 
 
 end module ESMF_DistGridMod

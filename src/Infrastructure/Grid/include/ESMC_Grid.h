@@ -135,6 +135,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
+				  int *regDecomp, int *decompflag,
 				  int *isSphere, int *addCornerStagger,
 				  int *addUserArea, int *addMask, const char *varname,
 				  const char **coordNames, int *rc);
@@ -152,6 +153,17 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 // \item[fileTypeFlag]
 //     The Grid file format, please see Section~\ref{const:cfileformat}
 //         for a list of valid options. 
+// \item[regDecomp] 
+//      A 2 element array specifying how the grid is decomposed.
+//      Each entry is the number of decounts for that dimension.
+//      The total decounts cannot exceed the total number of PETs.  In other
+//      word, at most one DE is allowed per processor.
+// \item[{[decompflag]}]
+//      List of decomposition flags indicating how each dimension of the
+//      tile is to be divided between the DEs. The default setting
+//      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
+//      Section~\ref{const:decompflag} for a full description of the 
+//      possible options. 
 // \item[{[isSphere]}]
 //      Set to 1 for a spherical grid, or 0 for regional. Defaults to 1.
 // \item[{[addCornerStagger]}]
@@ -160,9 +172,11 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 //      regridding. If not specified, defaults to 0. 
 // \item[{[addUserArea]}]
 //      Set to 1 to read in the cell area from the Grid file; otherwise, ESMF will 
-//      calculate it.
+//      calculate it.  This feature is only supported when the grid file is in the SCRIP
+//      format.  
 // \item[{[addMask]}]
-//      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'
+//      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'.
+//      This flag is only needed when the grid file is in the GRIDSPEC format.
 // \item[{[varname]}]
 //      If addMask is non-zero, provide a variable name stored in the grid file and
 //      the mask will be generated using the missing value of the data value of
@@ -218,7 +232,7 @@ int ESMC_GridAddItem(
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
-//  Add coordinates to the Grid.
+//  Add an item (e.g. a mask) to the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -247,10 +261,10 @@ void * ESMC_GridGetItem(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to the item data. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to item data (e.g. mask data) in the Grid.
 //
 //  The arguments are:
 //  \begin{description}
@@ -311,10 +325,10 @@ void * ESMC_GridGetCoord(
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  A pointer to coordinate data in the Grid. 
 //
 // !DESCRIPTION:
-//  Get coordinatess from the Grid.
+//  Get a pointer to coordinate data in the Grid.
 //
 //  The arguments are:
 //  \begin{description}

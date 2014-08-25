@@ -1189,13 +1189,13 @@ ErrorCode RayIntersectSets::leaf( EntityHandle node )
       // Do not accept intersections if they are in the vector of previously intersected
       // facets.
       if( prevFacets &&
-	  ((*prevFacets).end() != find((*prevFacets).begin(), (*prevFacets).end(), *t) ) ) continue;
+	  ((*prevFacets).end() != std::find((*prevFacets).begin(), (*prevFacets).end(), *t) ) ) continue;
 
       // Do not accept intersections if they are in the neighborhood of previous
       // intersections.
       bool same_neighborhood = false;
       for(unsigned i=0; i<neighborhoods.size(); ++i) {
-        if( neighborhoods[i].end() != find(neighborhoods[i].begin(), 
+        if( neighborhoods[i].end() != std::find(neighborhoods[i].begin(), 
 		 			   neighborhoods[i].end(), *t ) ) {
           same_neighborhood = true;
           continue;

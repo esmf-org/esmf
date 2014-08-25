@@ -20,6 +20,7 @@
 
 #include "moab/Range.hpp"
 #include "moab/Compiler.hpp"
+#include <string>
 #include <vector>
 
 namespace moab {

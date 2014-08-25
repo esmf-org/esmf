@@ -17,6 +17,7 @@
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
 #include "FileOptions.hpp"
+#include <cstdio>
 #include <iostream>
 
 #ifdef USE_MPI

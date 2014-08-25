@@ -25,9 +25,12 @@
 
 #define VERIFY_(A)   if(  A/=0) then; if(present(rc)) rc=A; PRINT *, Iam, __LINE__; return; endif
 #define ASSERT_(A)   if(.not.A) then; if(present(rc)) rc=1; PRINT *, Iam, __LINE__; return; endif
+#define NEGASSERT_(A)   if(A) then; if(present(rc)) rc=1; PRINT *, Iam, __LINE__; return; endif
 #define RETURN_(A)   if(present(rc)) rc=A; return
 #define SUCCESS      0
 #define DEALOC_(A)   if(associated(A)) deallocate(A)
+#define DEALOCS_(A) if(associated(A)) then;A=0;call MAPL_DeAllocNodeArray(A,rc=STATUS);if(STATUS==MAPL_NoShm) deallocate(A);NULLIFY(A);endif
+
 
 #define R8  8
 
@@ -52,7 +55,7 @@
 
 module MAPL_HorzTransformMod
 
-!  $Id: MAPL_HorzTransform.F90,v 1.12.12.6 2013-03-31 20:00:43 atrayano Exp $
+!  $Id: MAPL_HorzTransform.F90,v 1.12.12.6.4.1.4.4.4.2 2014-02-06 20:52:20 atrayano Exp $
 
 
   use ESMF
@@ -61,6 +64,8 @@ module MAPL_HorzTransformMod
   use MAPL_IOMod
   use MAPL_LocStreamMod
   use CubeLatLonTransformMod
+  use MAPL_ShmemMod
+  use MAPL_CommsMod
 
   implicit none
   private
@@ -209,7 +214,7 @@ module MAPL_HorzTransformMod
      logical                :: Transpose=.false.
      logical                :: runTile=.false.
      type(T_CubeLatLonTransform) :: CubeTrans
-     type(T_CubeCubeTransform) :: C2CTrans
+     type(T_CubeCubeTransform)   :: C2CTrans
      type(MAPL_RegridConserv) :: ConsrvTrans
      integer                 :: subset(4)
   end type MAPL_HorzTransform
@@ -220,7 +225,7 @@ module MAPL_HorzTransformMod
      module procedure MAPL_HorzTransformCreateBySize
      module procedure MAPL_HorzTransformCreateGEOS
      module procedure MAPL_HorzTransformCreateFromGrids
-     module procedure MAPL_HorsTransformCreateConservative
+     module procedure MAPL_HorzTransformCreateConservative
   end interface
 
   interface MAPL_HorzTransformRun
@@ -264,13 +269,15 @@ contains
 
 !==============================================================
 
-  subroutine MAPL_HorzTransformGet  (Trans,GridTypeIn, GridTypeOut)
+  subroutine MAPL_HorzTransformGet  (Trans,GridTypeIn, GridTypeOut, order)
 
     type (MAPL_HorzTransform), intent(INout) :: Trans
     character*(*), optional :: GridTypeIn, GridTypeOut
+    integer, optional,         intent(  OUT) :: order
 
     if(present(GridTypeIn )) GridTypeIn  = Trans%GridTypeIn
     if(present(GridTypeOut)) GridTypeOut = Trans%GridTypeOut
+    if(present(order)) order = Trans%order
 
   end subroutine MAPL_HorzTransformGet
 
@@ -1122,7 +1129,8 @@ contains
        if (Trans%ConsrvTrans%runDistributed) then
           call RunTileTransform(TRANS%CubeTrans, QIN, QOUT, TRANS%TRANSPOSE, RC)
        else
-          ASSERT_(.not. Trans%transpose) 
+          NEGASSERT_(.not. Trans%transpose) 
+
           if (Trans%order == MAPL_HorzTransOrderSample) then
              call MAPL_RegridConservativeRun(Trans%consrvTrans, QIN, QOUT, SAMPLE=.true., rc=STATUS )
           else
@@ -1198,7 +1206,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              nlon = Trans%N_in (1)
              nlat = Trans%N_in (2)
@@ -1212,7 +1220,7 @@ contains
           end if
        end if
     else
-       ASSERT_(.not.Trans%transpose)
+       NEGASSERT_(.not.Trans%transpose)
 
        do j=1,Trans%N_out(2)
           j0 = lbound(Trans%DimMapping(2)%WeightList(j)%f,1)
@@ -1282,23 +1290,57 @@ contains
     real              :: Wout(size(uout,1),size(uout,2),size(uout,3)*3)
     logical           :: InputIsLL
 
+    integer           :: IM, JM, LM
+    logical           :: Cube2Cube
+
     if(present(rc)) rc = 0
    
-    ASSERT_(CubeLatLonIsCreated(Trans%CubeTrans))
     ASSERT_(size(uin,3)==size(uout,3))
 
-    InputIsLL = Trans%gridtypeOut == 'Cubed-Sphere'
+    Cube2Cube = Trans%N_in(2) == Trans%N_in(1)*6 .and. Trans%N_out(2) == Trans%N_out(1)*6
 
-    call SphericalToCartesian(Trans%CubeTrans, uin , vin , Win , &
-          Trans%Transpose, SphIsLL=InputIsLL)
+    if (Cube2Cube) then
+! ALT: Here we assume that the winds are on a D-grid, and therefore
+!      we need to make D2A, rotate them, transform, rotate back, and do A2D
+       if (present(Rotate)) then
+          ASSERT_(Rotate)
+       end if
+       ASSERT_(CubeCubeIsCreated(Trans%C2CTrans))
 
-    call MAPL_HorzTransformRun3(Trans, Win, Wout, undef=undef, rc=status)
-    VERIFY_(STATUS)
+       IM = size(Uin,1)
+       JM = size(Uin,2)
+       LM = size(Uin,3) ! This LM is the number of vertical levels passed in
+                        ! and it may not be the same as LM in the model
 
-    call CartesianToSpherical(Trans%CubeTrans, Wout, uout, vout, &
-          Trans%Transpose, SphIsLL=.not.InputIsLL, Rotate=Rotate)
+       call RestaggerWindsCube(Uin, Vin, D2A=.true.)
 
+       call SphericalToCartesian(Trans%C2CTrans, Uin, Vin, Win)
+
+       call MAPL_HorzTransformRun3(Trans, Win, Wout, undef=undef, rc=status)
+       VERIFY_(STATUS)
+
+       call CartesianToSpherical(Trans%C2CTrans, Wout, Uout, Vout)
+
+       call RestaggerWindsCube(Uout, Vout, D2A=.false.)
+       
+    else
+
+       ASSERT_(CubeLatLonIsCreated(Trans%CubeTrans))
+
+       InputIsLL = Trans%gridtypeOut == 'Cubed-Sphere'
+
+       call SphericalToCartesian(Trans%CubeTrans, uin , vin , Win , &
+            Trans%Transpose, SphIsLL=InputIsLL)
+
+       call MAPL_HorzTransformRun3(Trans, Win, Wout, undef=undef, rc=status)
+       VERIFY_(STATUS)
+
+       call CartesianToSpherical(Trans%CubeTrans, Wout, uout, vout, &
+            Trans%Transpose, SphIsLL=.not.InputIsLL, Rotate=Rotate)
+
+    end if
     RETURN_(SUCCESS)
+
   end subroutine MAPL_HorzTransformRunV3
 
   recursive subroutine MAPL_HorzTransformRun3(Trans, qin, qout, undef, rc)
@@ -1341,7 +1383,8 @@ contains
        return
     endif
 
-    if(CubeLatLonIsCreated(Trans%CubeTrans)) then
+    if(CubeLatLonIsCreated(Trans%CubeTrans) .or. &
+         CubeCubeIsCreated(Trans%C2CTrans)) then
        do k=1,size(qin,3)
           call MAPL_HorzTransformRun2(Trans, qin(:,:,k), qout(:,:,k), undef, rc=status)
           VERIFY_(STATUS)
@@ -1349,7 +1392,7 @@ contains
        return
     end if
 
-    ASSERT_(.not.Trans%transpose)
+    NEGASSERT_(.not.Trans%transpose)
 
     doCube2Latlon = Trans%gridtypeIN =='Cubed-Sphere'
     doLatlon2Cube = Trans%gridtypeOUT=='Cubed-Sphere'
@@ -1646,7 +1689,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              npx  = Trans%N_in (1)
              npy  = Trans%N_in (2)
@@ -1674,7 +1717,7 @@ contains
           else
 
 #ifdef USE_CUBEDSPHERE
-             ASSERT_(.not.Trans%transpose)
+             NEGASSERT_(.not.Trans%transpose)
 
              nlon = Trans%N_in (1)
              nlat = Trans%N_in (2)
@@ -1688,7 +1731,7 @@ contains
           end if
        end if
     else
-       ASSERT_(.not.Trans%transpose)
+       NEGASSERT_(.not.Trans%transpose)
 
        if(present(undef)) then
           undef_ = undef
@@ -1795,7 +1838,7 @@ contains
        return
     end if
 
-    ASSERT_(.not.Trans%transpose)
+    NEGASSERT_(.not.Trans%transpose)
 
     doCube2Latlon = Trans%gridtypeIN =='Cubed-Sphere'
     doLatlon2Cube = Trans%gridtypeOUT=='Cubed-Sphere'
@@ -1996,13 +2039,14 @@ contains
 !JK patch for conservative interp---------------
 
 
-  subroutine MAPL_HorsTransformCreateConservative(Trans, FILENAME, &
-       GridIn, GridOut, VM, RC)
+  subroutine MAPL_HorzTransformCreateConservative(Trans, FILENAME, &
+       GridIn, GridOut, RootOnly, VM, RC)
 ! args
     type (MAPL_HorzTransform), target, intent(INOUT) :: Trans
     character (len=*), intent(IN   ) :: FILENAME
     character (len=*), intent(IN   ) :: GridIn
-    character (len=*), intent(IN   ) :: GridOut
+    character (len=*), optional, intent(IN   ) :: GridOut
+    logical,           optional, intent(IN   ) :: RootOnly
     type(ESMF_VM), optional          :: VM
     integer, optional, intent(  OUT) :: RC
 
@@ -2011,6 +2055,14 @@ contains
     integer :: I
     type(MAPL_RegridConserv), pointer  :: ConsrvTrans
     type(GlobalTileTrans),    pointer  :: GlobalTrans
+    type(ESMF_VM)                      :: usableVM
+
+    if (present(VM)) then
+       usableVM = VM
+    else
+       call ESMF_VmGetCurrent(usableVM, RC=STATUS)
+       VERIFY_(STATUS)
+    end if
 
 ! first check if this transform was already created
     do i=1,MAX_AvailableTransforms
@@ -2021,11 +2073,13 @@ contains
           if (Trans%runTile) then
              if (ConsrvTrans%created .and. &
                  ConsrvTrans%tilefile == filename .and. &
-                 GlobalTrans%GInfo(1)%GridName == GridIn .and. &
-                 GlobalTrans%GInfo(2)%GridName == GridOut) then
+                 GlobalTrans%GInfo(1)%GridName == GridIn ) then
+                if (present(GridOut)) then
+                   ASSERT_(GlobalTrans%GInfo(2)%GridName == GridOut)
+                end if
                 ! found it!
                 if (.not. ConsrvTrans%tileDataGlobal) then
-                   call MAPL_TileTransGather(vm, ConsrvTrans%GlobalTrans, RC=status)
+                   call MAPL_TileTransGather(usableVM, ConsrvTrans%GlobalTrans, RC=status)
                    VERIFY_(STATUS)
                 end if
                 return
@@ -2037,15 +2091,16 @@ contains
 
 ! not found, do a full create
 
-    if (present(VM)) then
-       Trans%ConsrvTrans%tileDataGlobal=.false.
-    else
-       Trans%ConsrvTrans%tileDataGlobal=.true.
-    end if
+    Trans%ConsrvTrans%tileDataGlobal=.true.
+!    if (present(VM)) then
+!       Trans%ConsrvTrans%tileDataGlobal=.false.
+!    else
+!       Trans%ConsrvTrans%tileDataGlobal=.true.
+!    end if
 
-    call MAPL_RegridConservativeCreate(FILENAME, GridIn, GridOut, &
+    call MAPL_RegridConservativeCreate(FILENAME, GridIn, GridOut, RootOnly, &
                                        ConsrvTrans=Trans%ConsrvTrans, &
-                                       VM=VM, RC=status)
+                                       VM=usableVM, RC=status)
     VERIFY_(STATUS)
     Trans%created = .true.
     Trans%runTile = .true.
@@ -2080,103 +2135,240 @@ contains
     end do
 
     RETURN_(ESMF_SUCCESS)
-  end subroutine MAPL_HorsTransformCreateConservative
+  end subroutine MAPL_HorzTransformCreateConservative
 
-  subroutine MAPL_RegridConservativeCreate(FILENAME, GridIn, GridOut, ConsrvTrans, VM, RC)
+  subroutine MAPL_RegridConservativeCreate(FILENAME, GridIn, GridOut, RootOnly, ConsrvTrans, VM, RC)
 ! args
     character (len=*), intent(IN   ) :: FILENAME
     character (len=*), intent(IN   ) :: GridIn
-    character (len=*), intent(IN   ) :: GridOut
+    character (len=*), optional, intent(IN   ) :: GridOut
+    logical,           optional, intent(IN   ) :: RootOnly
     type(MAPL_RegridConserv), target :: ConsrvTrans
-    type(ESMF_VM), optional          :: VM
+    type(ESMF_VM)                    :: VM
     integer, optional, intent(  OUT) :: RC
 
-! local args
+! local vars
     integer :: status
-    integer :: NT, UNIT, N, NPES
+    integer :: NT, UNIT, NGRIDS, NPES
     integer :: I, IM, JM
     integer :: LT, deId
     logical :: amIRoot
     character(len=ESMF_MAXSTR) :: STRING
-    real, pointer :: buffer(:)
+    real, pointer :: buffer(:) => NULL()
     type(GlobalTileTrans),  pointer  :: GT
+    logical :: found
+    logical :: RootOnly_
+    logical :: TransRoot
+    integer :: gridInIndex
 
 ! convenient alias
     GT => ConsrvTrans%GlobalTrans
 
 ! do not allow to create again
-!    ASSERT_(.not. ConsrvTrans%created)
+!    NEGASSERT_(.not. ConsrvTrans%created)
 
-    ASSERT_(.not. ConsrvTrans%runDistributed)
+    NEGASSERT_(.not. ConsrvTrans%runDistributed)
 
-    if (.not. ConsrvTrans%tileDataGlobal) then
-       ASSERT_(present(VM))
+    if (present(RootOnly)) then
+       RootOnly_ = RootOnly
+    else
+       RootOnly_ = .true.
     end if
 
     ConsrvTrans%created = .true.
-    GT%GInfo(1)%GridName = GridIn
-    GT%GInfo(2)%GridName = GridOut
 
     amIRoot = MAPL_AM_I_Root(VM)
 
+    if (RootOnly_) then
+       TransRoot = amIRoot
+    else
+       TransRoot = .true.
+    end if
+
     ConsrvTrans%tilefile = filename
-    if (amIRoot) then
-       UNIT = GETFILE(FILENAME, form='UNFORMATTED', RC=status)
-       VERIFY_(STATUS)
 
-       read(UNIT) NT
-       read(unit) N ! N_GRIDS
-       ASSERT_(N == 2)
+    UNIT = GETFILE(FILENAME, form='UNFORMATTED', RC=status)
+    VERIFY_(STATUS)
+
+    if(amIRoot) read(UNIT) NT
+    call MAPL_CommsBcast(vm, DATA=NT, N=1, ROOT=0, RC=status)
+    VERIFY_(STATUS)
+
+    if(amIRoot) then
+       read(unit) NGRIDS
+       ASSERT_(NGRIDS == 2)
+    end if
+    NGRIDS = 2
        
-       GT%NT = NT
+    GT%NT = NT
 
-       DO I = 1,N
+    DO I = 1,NGRIDS
+       if(amIRoot) then
           read(unit) STRING
           read(unit) IM
           read(unit) JM
-          GT%GInfo(I)%GridName = STRING
-          GT%GInfo(I)%IM = IM
-          GT%GInfo(I)%JM = JM
-       end DO
-
-       allocate( GT%Global%IN%II(NT), &
-                 GT%Global%IN%JJ(NT), &
-                 GT%Global%OUT%II(NT), &
-                 GT%Global%OUT%JJ(NT), &
-                 GT%Global%OUT%W(NT), stat=status)
+       end if
+       call MAPL_CommsBcast(vm, DATA=STRING, N=ESMF_MAXSTR, ROOT=0, RC=status)
        VERIFY_(STATUS)
-    
+       call MAPL_CommsBcast(vm, DATA=IM, N=1, ROOT=0, RC=status)
+       VERIFY_(STATUS)
+       call MAPL_CommsBcast(vm, DATA=JM, N=1, ROOT=0, RC=status)
+       VERIFY_(STATUS)
+       GT%GInfo(I)%GridName = STRING
+       GT%GInfo(I)%IM = IM
+       GT%GInfo(I)%JM = JM
+    end DO
 
+    ! find "complement" of attached grid
+    found = .false.
+    do I = 1, NGRIDS
+       if ( GT%GInfo(I)%GridName == GridIn) then
+          found = .true.
+          exit
+       endif
+    enddo
+! if not found we assume the tile file has new-style gridnames    
+    if (.not. found) then
+       do I = 1, NGRIDS
+          ! convert to GEOS-5 convention grid names
+          call GenOldGridName_(GT%GInfo(I)%GridName)
+       enddo
+
+       ! search again
+       do I = 1, NGRIDS
+          if ( GT%GInfo(I)%GridName == GridIn) then
+             found = .true.
+             exit
+          endif
+       enddo
+    end if
+
+    ASSERT_(found)
+    gridInIndex = I
+!    NG = 3-I
+
+    if (gridInIndex /= 1) then
+       ! the input grid is the second grid in the tile file.
+       ! Reorder the table (for convenience)
+        string = GT%GInfo(2)%GridName
+        GT%GInfo(2)%GridName =  GT%GInfo(1)%GridName 
+        GT%GInfo(1)%GridName = string 
+
+        IM = GT%GInfo(2)%IM
+        GT%GInfo(2)%IM =  GT%GInfo(1)%IM 
+        GT%GInfo(1)%IM = IM
+
+        JM = GT%GInfo(2)%JM
+        GT%GInfo(2)%JM =  GT%GInfo(1)%JM 
+        GT%GInfo(1)%JM = JM
+     end if
+
+!ALT for simplicity (FOR NOW) assume first grid is IN, second is OUT
+    ASSERT_(GT%GInfo(1)%GridName == GridIn)
+    if (present(GridOut)) then
+       ASSERT_(GT%GInfo(2)%GridName == GridOut)
+    end if
+
+    call MAPL_AllocateShared(GT%Global%IN%II, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+    call MAPL_AllocateShared(GT%Global%IN%JJ, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+    call MAPL_AllocateShared(GT%Global%OUT%II, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+    call MAPL_AllocateShared(GT%Global%OUT%JJ, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+    call MAPL_AllocateShared(GT%Global%OUT%W, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+
+    ! we need a buffer (REAL) for real to INT conversion
+    ! to save memory, we temporary "borrow" W
+    call MAPL_AllocateShared(buffer, (/NT/), TransRoot=TransRoot, RC=STATUS)
+    VERIFY_(STATUS)
+
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    if (amIRoot) then
        read(unit) ! skip Type
        read(unit) ! skip X
        read(unit) ! skip Y
 
-!ALT for simplicity (FOR NOW) assume first grid is IN, second is OUT
-       ASSERT_( GT%GInfo(1)%GridName == GridIn )
-       ASSERT_( GT%GInfo(2)%GridName == GridOut )
-
-       ! we need a buffer (REAL) for real to INT conversion
-       ! to save memory, we temporary "borrow" W
-       buffer => GT%Global%OUT%W
-
        read(unit) buffer
+    end if
+    call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+    if (gridInIndex == 1) then
        GT%Global%IN%II = NINT(buffer)
-       
-       read(unit) buffer
-       GT%Global%IN%JJ = NINT(buffer)
-       
-       read(unit) ! skip W_IN
-       
-       read(unit) buffer
+    else
        GT%Global%OUT%II = NINT(buffer)
-       
+    end if
+
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    if (amIRoot) then
        read(unit) buffer
+    end if
+    call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    if (gridInIndex == 1) then
+       GT%Global%IN%JJ = NINT(buffer)
+    else
        GT%Global%OUT%JJ = NINT(buffer)
+    end if
 
-       read(unit) buffer ! now this REALLY points to W_OUT
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
 
-       call FREE_FILE(UNIT)
-    end if ! master
+    if (gridInIndex == 1) then
+       if (amIRoot) then
+          read(unit) ! skip W_IN
+       end if
+    else
+       if (amIRoot) then
+          read(unit) buffer
+       end if
+       call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+       call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+       GT%Global%OUT%W = buffer
+    endif
+
+    if (amIRoot) then
+       read(unit) buffer
+    end if
+    call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    if (gridInIndex == 1) then
+       GT%Global%OUT%II = NINT(buffer)
+    else
+       GT%Global%IN%II = NINT(buffer)
+    end if
+       
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+
+    if (amIRoot) then
+       read(unit) buffer
+    end if
+    call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    if (gridInIndex == 1) then
+       GT%Global%OUT%JJ = NINT(buffer)
+    else
+       GT%Global%IN%JJ = NINT(buffer)
+    end if
+
+    call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+
+    if (gridInIndex == 1) then
+       if (amIRoot) then
+          read(unit) buffer
+       end if
+       call MAPL_BcastShared(vm, DATA=buffer, N=NT, ROOT=0, RootOnly=RootOnly_, RC=status)
+       call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+       GT%Global%OUT%W = buffer
+       call MAPL_SyncSharedMemory(RC=STATUS); VERIFY_(STATUS)
+    end if
+    DEALOCS_(buffer)
+
+    call FREE_FILE(UNIT)
+
+      !print*, 'Read(1): ', trim(FILENAME), GT%GInfo(1)%IM, GT%GInfo(1)%JM 
+      !print*, 'Read(2): ', trim(FILENAME), GT%GInfo(2)%IM, GT%GInfo(2)%JM
+
 
     if (.not. ConsrvTrans%tileDataGlobal) then
        ! bcast/scatter
@@ -2251,6 +2443,51 @@ contains
 
     RETURN_(ESMF_SUCCESS)
 
+  contains
+   subroutine GenOldGridName_(name)
+     character(len=*) :: name
+
+     integer :: im, jm
+     integer :: nn, xpos
+     character(len=128) :: gridname
+     character(len=2)   :: dateline, pole
+     character(len=8)   :: imsz, jmsz
+     character(len=128) :: imstr, jmstr
+     
+
+     ! Parse name for grid info 
+     !-------------------------
+
+     Gridname = AdjustL(name)
+     nn   = len_trim(Gridname)
+     xpos = index(Gridname,'x')
+     imsz = Gridname(3:xpos-1)
+     dateline = Gridname(1:2)
+     pole = Gridname(xpos+1:xpos+2)
+
+
+     if (pole=='6C') then ! cubed-sphere
+        dateline='CF'
+        pole='PE'
+
+        read(IMSZ,*) IM
+        jm = 6*im
+     else
+        jmsz = Gridname(xpos+3:nn)
+        read(IMSZ,*) IM
+        read(JMSZ,*) JM
+     endif
+    
+     write(imstr,*) im
+     write(jmstr,*) jm
+     gridname =  pole // trim(adjustl(imstr))//'x'//&
+                 trim(adjustl(jmstr))//'-'//dateline
+
+     name = gridname
+
+   end subroutine GenOldGridName_
+
+
   end subroutine MAPL_RegridConservativeCreate
 
   subroutine MAPL_RegridConservativeDestroy(ConsrvTrans, RC)
@@ -2262,7 +2499,7 @@ contains
     integer :: status
 
 
-    ASSERT_(.not. ConsrvTrans%runDistributed)
+    NEGASSERT_(.not. ConsrvTrans%runDistributed)
 
     if (ConsrvTrans%created) then
 
@@ -2358,6 +2595,9 @@ contains
       end if
 
       OUTPUT = 0.0
+      if(uSample) then
+         OUTPUT = MAPL_Undef
+      end if
 
       allocate(FF(size(OUTPUT,1),size(OUTPUT,2)), stat=STATUS)
       VERIFY_(STATUS)
@@ -2383,6 +2623,8 @@ contains
        if(.not.uSample) then
           where(FF>0.0)
              OUTPUT = OUTPUT / FF
+          elsewhere 
+             OUTPUT = MAPL_Undef
           end where
        end if
 
@@ -2397,9 +2639,11 @@ contains
   subroutine MAPL_TileInfoDestroy(TI)
     type(TileInfo) :: TI
 
-    DEALOC_(TI%II)
-    DEALOC_(TI%JJ)
-    DEALOC_(TI%W)
+    integer :: status
+
+    DEALOCS_(TI%II)
+    DEALOCS_(TI%JJ)
+    DEALOCS_(TI%W)
 
     call MAPL_TileInfoMarkDestroyed(TI)
 
