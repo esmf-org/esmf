@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "ESMCI_Grid.h"
+#include "ESMCI_PointList.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 
 
@@ -39,6 +40,9 @@ class Array;
  void CpMeshElemDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 
  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
+
+ void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt *maskValuesArg, ESMCI::PointList **_pl, int *localrc);
+
 
 } // namespace
 

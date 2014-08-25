@@ -44,6 +44,7 @@
 #ifdef PNTLIST
 #include "Mesh/include/ESMCI_PntList.h"
 #endif
+//mvr #include "PntList/include/ESMCI_PntList.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.

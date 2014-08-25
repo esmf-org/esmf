@@ -123,13 +123,16 @@ dcfg(cfg),
 srcComm(),
 dstComm(),
 built(false),
-sdim(_srcmesh.spatial_dim()),
+sdim(999),     //mvr must fix this - should be size of src mesh or pointlist
 iter_is_obj(cfg.iter_obj_type == cfg.obj_type),
 freeze_src(freeze_src_)
 {
-  ThrowRequire(_srcmesh.spatial_dim() == _dstmesh.spatial_dim());
+  //mvr  ThrowRequire(_srcmesh.spatial_dim() == _dstmesh.spatial_dim());
+  //mvr  ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
+  //mvr               dcfg.iter_obj_type == srcmesh.side_type());
   ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
-               dcfg.iter_obj_type == srcmesh.side_type());
+	       dcfg.iter_obj_type == MeshObj::NODE);
+
 
   // For now only allow the 'conservative case for elements (since sides have no relations otherwise)
   ThrowRequire(!iter_is_obj || dcfg.obj_type == MeshObj::ELEMENT);

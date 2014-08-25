@@ -20,6 +20,7 @@
 #include <Mesh/include/ESMCI_WMat.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/src/Zoltan/zoltan.h>
+#include "PointList/include/ESMCI_PointList.h"
 
 #include <vector>
 #include <ostream>
@@ -147,7 +148,7 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_dst_, const std::vector<FieldPair> &Fields,
+  Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int mvr_imethod,
          MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
   
   ~Interp();
@@ -171,8 +172,8 @@ public:
   private:
 
   // interpolation parallel?
-  void transfer_serial();
-  void transfer_parallel();
+  //mvr  void transfer_serial();
+  //mvr void transfer_parallel();
 
   // interpolation type
   void mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac);
@@ -184,7 +185,6 @@ public:
 
   SearchResult sres;
   GeomRend grend;
-  std::vector<FieldPair> fpairs;
   bool is_parallel;
   std::vector<MEField<>*> srcF;
   std::vector<MEField<>*> dstF;
@@ -195,10 +195,13 @@ public:
   bool has_cnsrv; // true if a conserve interp exists
   bool has_nearest_src_to_dst; // true if a nearest interp exists
   bool has_nearest_dst_to_src; // true if a nearest interp exists
-  Mesh &srcmesh;
-  Mesh &dstmesh;
+  Mesh *srcmesh;
+  PointList *srcpointlist;
+  Mesh *dstmesh;
+  PointList *dstpointlist;
   Mesh *midmesh;
   Zoltan_Struct * zz;
+  int mvr_interp;
 };
 
 } // namespace

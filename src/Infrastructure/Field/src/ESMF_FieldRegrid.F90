@@ -43,7 +43,7 @@ module ESMF_FieldRegridMod
   use ESMF_FieldSMMMod
   use ESMF_XGridMod
   use ESMF_XGridGetMod
-
+  use ESMF_PointListMod
   
   implicit none
   private
@@ -353,6 +353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout), optional :: dstFracField
       integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
       integer,                        intent(out),   optional :: rc 
+      type(ESMF_PointList) :: dstPointList, srcPointList
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -581,7 +582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: fracArray
         type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh, srcMeshDual
-        type(ESMF_Mesh)      :: dstMesh, dstMeshDual
+        type(ESMF_Mesh)      :: dstMesh, tempMesh
         type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
@@ -598,7 +599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical :: localIgnoreDegenerate
         type(ESMF_LineType_Flag):: localLineType
         type(ESMF_NormType_Flag):: localNormType
-        logical :: srcDual, dstDual
+        logical :: srcDual, src_pl_used, dst_pl_used
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -651,8 +652,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! Init variables
         srcDual=.false.
-        dstDual=.false.
-
+        src_pl_used=.false.
+	dst_pl_used=.false.
 
         ! Set this for now just to not have to remove it everywhere
         ! TODO get rid of it. 
@@ -826,14 +827,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-          ! Convert Grid to Mesh
-          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
-                      maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+              lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+
+
+            srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerlocG2M, &
+                                              maskValues=srcMaskValues, &
+                                              rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_PointListSort(srcPointList)
+	    src_pl_used=.true.
+
+          else
+
+            ! Convert Grid to Mesh
+            srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
+                        maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
 
         else
-          call ESMF_FieldGet(srcField, mesh=srcMesh, meshloc=srcMeshloc, rc=localrc)
+          call ESMF_FieldGet(srcField, mesh=tempMesh, meshloc=srcMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -845,16 +861,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                      ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
              endif
-          else
+
+             ! Turn on masking
+             if (present(srcMaskValues)) then
+                call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=srcMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
+             endif
+             srcMesh=tempMesh
+
+
+          else if (lregridmethod .eq. ESMF_REGRIDMETHOD_BILINEAR .or. &
+                   lregridmethod .eq. ESMF_REGRIDMETHOD_PATCH) then
+
              if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
                 if (srcMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
                    ! Create a dual of the Mesh
-                   srcMeshDual=ESMF_MeshCreateDual(srcMesh, rc)
+                   srcMeshDual=ESMF_MeshCreateDual(tempMesh, rc)
                    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc)) return
                    
                    ! Use the dual as the srcMesh
-                   srcMesh=srcMeshDual
+                   tempMesh=srcMeshDual
                    
                    ! Record that we created the dual
                    srcDual=.true.
@@ -865,20 +893,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    return	  
                 endif
              endif
+
+             ! Turn on masking
+             if (present(srcMaskValues)) then
+                call ESMF_MeshTurnOnNodeMask(tempMesh, maskValues=srcMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
+             endif
+             srcMesh=tempMesh
+          else
+
+             if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
+	       if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                 msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+                 return
+               endif
+             endif
+
+             srcPointList=ESMF_PointListCreate(tempMesh, srcMeshloc, &
+                                               maskValues=srcMaskValues, &
+                                               rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
+             src_pl_used=.true.
+
+
           endif
 
-          ! Turn on masking
-          if (present(srcMaskValues)) then
-             if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
-                call ESMF_MeshTurnOnCellMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             else
-                call ESMF_MeshTurnOnNodeMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             endif
-          endif
+
        endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -916,23 +960,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
             endif
 
+            ! check grid
+            call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Convert Grid to Mesh
+            dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
+                        maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
 	    dstStaggerlocG2M=dstStaggerloc
+
+            ! check grid
+            call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+	    dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
+                                              maskValues=dstMaskValues, &
+                                              rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_PointListSort(dstPointList)
+
+            dst_pl_used=.true.
           endif
 
-          ! check grid
-          call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
-          ! Convert Grid to Mesh
-          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
-                      maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
         else
-          call ESMF_FieldGet(dstField, mesh=dstMesh, meshloc=dstMeshloc, rc=localrc)
+          call ESMF_FieldGet(dstField, mesh=tempMesh, meshloc=dstMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -944,41 +1007,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
               endif
+
+              ! Turn on masking
+              if (present(dstMaskValues)) then
+                call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=dstMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+              dstMesh=tempMesh
+
           else
              if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
-                if (dstMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
-                   ! Create a dual of the Mesh
-                   dstMeshDual=ESMF_MeshCreateDual(dstMesh, rc)
-                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
-                   
-                   ! Use the dual as the srcMesh
-                   dstMesh=dstMeshDual
-                   
-                   ! Record that we created the dual
-                   dstDual=.true.
-                else
+                if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
+                   msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
                      ESMF_CONTEXT, rcToReturn=rc) 
                    return	  
                 endif
              endif
+
+             dstPointList=ESMF_PointListCreate(tempMesh, dstMeshloc, &
+                                               maskValues=dstMaskValues, &
+                                               rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
+	     dst_pl_used=.true.
+
           endif
           
-          ! Turn on masking
-          if (present(dstMaskValues)) then
-             if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
-                call ESMF_MeshTurnOnCellMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             else
-                call ESMF_MeshTurnOnNodeMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             endif
-          endif
-	
+
+
         endif
 
         ! At this point, we have the meshes, so we are ready to call
@@ -986,19 +1044,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! call into the Regrid mesh interface
         if (present(weights) .or. present(factorList) .or. &
-             present(indices) .or. present(factorIndexList)) then
-           call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-                lregridmethod, &
-                localLineType, &
-                localNormType, &
-                localpolemethod, localRegridPoleNPnts, &
-                lregridScheme, &
-                unmappedaction, &
-                localIgnoreDegenerate, &
-                srcTermProcessing, &
-                pipeLineDepth, &
-                routehandle, &
-                tmp_indices, tmp_weights, unmappedDstList, localrc)
+            present(indices) .or. present(factorIndexList)) then
+
+          !mvr what should be sent for dstPointList if conservative?
+
+            call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
+                                  dstMesh, dstArray, dstPointList, dst_pl_used, &
+                                  lregridmethod, &
+                                  localLineType, &
+                                  localNormType, &
+                                  localpolemethod, localRegridPoleNPnts, &
+                                  lregridScheme, &
+                                  unmappedaction, &
+                                  localIgnoreDegenerate, &
+                                  srcTermProcessing, &
+                                  pipeLineDepth, &
+                                  routehandle, &
+                                  tmp_indices, tmp_weights, unmappedDstList, localrc)
+
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1013,23 +1076,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (.not. (present(weights) .or. present(factorList))) deallocate(tmp_weights)
            if (.not. (present(indices) .or. present(factorIndexList))) deallocate(tmp_indices)
         else
-           call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-                lregridmethod, &
-                localLineType, &
-                localNormType, &
-                localpolemethod, localRegridPoleNPnts, &
-                lregridScheme, &
-                unmappedaction, &
-                localIgnoreDegenerate, &
-                srcTermProcessing, &
-                pipeLineDepth, &
-                routehandle, &
-                unmappedDstList=unmappedDstList, &
-                rc=localrc)
+
+          !mvr what should be sent for dstPointList if conservative?
+
+            call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
+                                  dstMesh, dstArray, dstPointList, dst_pl_used, &
+                                  lregridmethod, &
+                                  localLineType, &
+                                  localNormType, &
+                                  localpolemethod, localRegridPoleNPnts, &
+                                  lregridScheme, &
+                                  unmappedaction, &
+                                  localIgnoreDegenerate, &
+                                  srcTermProcessing, &
+                                  pipeLineDepth, &
+                                  routehandle, &
+                                  unmappedDstList=unmappedDstList, &
+                                  rc=localrc)
+
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+
+
+
+        if (dst_pl_used) then
+          call ESMF_PointListDestroy(dstPointList,rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+	endif
+        if (src_pl_used) then
+          call ESMF_PointListDestroy(srcPointList,rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+	endif
+
 
 
         ! Get Fraction info
@@ -1129,13 +1212,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      
         ! Clean up Meshes
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-           call ESMF_MeshDestroy(srcMesh,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+          if (.not. src_pl_used) then
+            call ESMF_MeshDestroy(srcMesh,rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
            
         else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
            ! Otherwise reset masking
+           if (lregridmethod .ne. ESMF_REGRIDMETHOD_NEAREST_STOD .and. &
+               lregridmethod .ne. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+
            if (present(srcMaskValues)) then
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                  call ESMF_MeshTurnOffCellMask(srcMesh, rc=localrc);
@@ -1148,6 +1236,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               endif
            endif
 
+           endif
+
            ! Get rid of dual mesh
            if (srcDual) then
               call ESMF_MeshDestroy(srcMeshDual,rc=localrc)
@@ -1158,12 +1248,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
-           call ESMF_MeshDestroy(dstMesh,rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           
+           if (.not. dst_pl_used) then
+             call ESMF_MeshDestroy(dstMesh,rc=localrc)
+             if (ESMF_LogFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
+           endif           
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+           if (.not. dst_pl_used) then
+
            ! Otherwise reset masking
            if (present(dstMaskValues)) then
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
@@ -1177,12 +1270,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               endif
            endif
 
-           ! Get rid of dual mesh
-           if (dstDual) then
-              call ESMF_MeshDestroy(dstMeshDual,rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                   ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
            endif
         endif
 

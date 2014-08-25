@@ -299,6 +299,142 @@ struct SearchData {
   }
 
 
+  void SearchNearestDstToSrc_w_dst_pl(const Mesh &src, PointList &dst_pl, int unmappedaction, SearchResult &result) {
+  Trace __trace("Search(const Mesh &src, PointList &dst_pl, int unmappedaction, SearchResult &result)");
+
+
+  printf("mvr: in d2s w_pl \n");
+  fflush(stdout);
+
+  // Get src fields
+  MEField<> *src_coord = src.GetCoordField();
+  MEField<> *src_mask = src.GetField("mask");
+
+  
+  // Get spatial dim and make sure both have the same
+  int sdim=src.spatial_dim();
+  if (sdim != dst_pl.get_coord_dim()) {
+    Throw() << "Mesh and pointlist must have same spatial dim for search";
+  }
+  
+  int num_nodes_to_search=dst_pl.get_curr_num_pts();
+
+ 
+  // Create search tree
+  OTree *tree=new OTree(num_nodes_to_search); 
+
+  // Add unmasked nodes to search tree
+  double pnt[3];
+  for (UInt p = 0; p < num_nodes_to_search; ++p) {
+
+    const double *pnt_crd=dst_pl.get_coord_ptr(p);
+    int pnt_id=dst_pl.get_id(p);
+
+    // Set coord value in 3D point
+    pnt[0] = pnt_crd[0];
+    pnt[1] = pnt_crd[1];
+    pnt[2] = sdim == 3 ? pnt_crd[2] : 0.0;
+
+    //mvr    tree->add(pnt, pnt, (void*)&node);
+    tree->add(pnt, pnt, NULL);
+  }
+
+  // Commit tree
+  tree->commit();
+
+
+  // Load the destination objects into a list
+  std::vector<const MeshObj*> src_nlist;
+  if (src_mask==NULL) {
+    MeshDB::const_iterator ni=src.node_begin(), ne=src.node_end();
+    for (; ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+
+      src_nlist.push_back(&node);
+    }
+  } else {
+    MeshDB::const_iterator ni=src.node_begin(), ne=src.node_end();
+    for (; ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+
+      // Get mask value
+      double *m=src_mask->data(node);
+      
+      // Only put objects in if they're not masked
+      if (!IS_MASKED(*m)) {
+        src_nlist.push_back(&node);
+      }
+    }
+  }
+
+
+  // Set initial search box to the largest possible
+  double pmin[3], pmax[3];
+
+  double min,max;
+  if (std::numeric_limits<double>::has_infinity) {
+    min= -std::numeric_limits<double>::infinity();
+    max= std::numeric_limits<double>::infinity();
+  } else {
+    min = -std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::max();
+  }
+
+  pmin[0] = min;
+  pmin[1] = min;
+  pmin[2] = min;
+  
+  pmax[0] = max;
+  pmax[1] = max;
+  pmax[2] = max;
+   
+  // Loop the destination points, find hosts.
+  for (UInt p = 0; p < src_nlist.size(); ++p) {
+    
+   const MeshObj &src_node = *src_nlist[p];
+
+    // Get destination node coords
+    double *c = src_coord->data(src_node);
+    
+    // Setup search structure
+    SearchData sd;
+    sd.sdim=sdim;
+    sd.src_pnt[0] = c[0];
+    sd.src_pnt[1] = c[1];
+    sd.src_pnt[2] = (sdim == 3 ? c[2] : 0.0);
+    sd.closest_dst_node=NULL;
+    sd.closest_dist2=std::numeric_limits<double>::max();
+    //mvr    sd.dst_coord=dst_coord;
+    sd.dst_coord=NULL;
+
+    // Find closest source node to this destination node
+    tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+    
+    // If we've found a nearest source point, then add to the search results list...
+    if (sd.closest_dst_node != NULL) {
+      Search_result *sr=new Search_result();       
+      sr->src_gid=src_node.get_id();
+      sr->dst_gid=sd.closest_dst_node->get_id();
+      result.push_back(sr);
+    } else { // ...otherwise deal with the unmapped point
+
+      if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+        Throw() << " Some destination points cannot be mapped to the source grid";
+      } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+        // don't do anything
+      } else {
+        Throw() << " Unknown unmappedaction option";
+      }
+    }
+     
+  } // for src nodes
+  
+
+  // Get rid of tree
+  if (tree) delete tree;
+  }
+
+
 
 
 struct CommData {

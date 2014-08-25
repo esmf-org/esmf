@@ -47,7 +47,7 @@
       use ESMF_ArrayMod
       use ESMF_F90InterfaceMod
       use ESMF_MeshMod
-
+      use ESMF_PointListMod
 
       implicit none
 
@@ -146,8 +146,8 @@ end function my_xor
 ! !IROUTINE: ESMF_RegridStore - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridStore(srcMesh, srcArray, &
-                 dstMesh, dstArray, &
+      subroutine ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
+                 dstMesh, dstArray, dstPointList, dst_pl_used, &
                  regridmethod, &
                  lineType, &
                  normType, &
@@ -165,8 +165,12 @@ end function my_xor
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(inout)         :: srcMesh
       type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_PointList), intent(inout)    :: srcPointList
+      logical, intent(in)                    :: src_pl_used
       type(ESMF_Mesh), intent(inout)         :: dstMesh
       type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_PointList), intent(inout)    :: dstPointList
+      logical, intent(in)                    :: dst_pl_used
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
       type(ESMF_LineType_Flag), intent(in)    :: lineType
       type(ESMF_NormType_Flag), intent(in)    :: normType
@@ -231,6 +235,9 @@ end function my_xor
        logical :: isMemFreed
        integer :: localIgnoreDegenerate
 
+
+       print*,'mvr: just in regridstore1'
+
        ! Logic to determine if valid optional args are passed.  
 
        ! First thing to check is that indices <=> weights
@@ -240,6 +247,7 @@ end function my_xor
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
+       print*,'mvr: just in regridstore2'
        ! Next, we require that the user request at least something
        if (.not.(present(routehandle) .or. present(indices))) then
          localrc = ESMF_RC_ARG_BAD
@@ -247,6 +255,7 @@ end function my_xor
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
+       print*,'mvr: just in regridstore3'
        ! **************************************************
        ! Tests passed, so proceed
 
@@ -254,6 +263,7 @@ end function my_xor
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+       print*,'mvr: just in regridstore4'
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -278,34 +288,39 @@ end function my_xor
           localIgnoreDegenerate=0
        endif
 
+       if (.not. src_pl_used) then
+         ! Make sure the srcMesh has its internal bits in place
+         call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Make sure the srcMesh has its internal bits in place
-       call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       if (isMemFreed)  then
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- source Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-          return 
+         if (isMemFreed)  then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                   msg="- source Mesh has had its coordinate and connectivity info freed", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+             return 
+         endif
        endif
 
-       ! Make sure the dstMesh has its internal bits in place
-       call ESMF_MeshGet(dstMesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
-       if (isMemFreed)  then
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- destination Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-          return 
+       !mvr added this conditional, but maybe it should be if dstmesh not null or present?
+       if (.not. dst_pl_used) then
+         ! Make sure the dstMesh has its internal bits in place
+         call ESMF_MeshGet(dstMesh, isMemFreed=isMemFreed, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+         if (isMemFreed)  then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                   msg="- dest Mesh has had its coordinate and connectivity info freed", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+             return 
+         endif
        endif
 
        ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, &
-                   dstMesh%this, dstArray, &
+       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList%this, &
+                   dstMesh%this, dstArray, dstPointList%this, &
                    regridmethod,  &
                    lineType, &
                    normType, &
@@ -317,8 +332,13 @@ end function my_xor
                    nentries, tweights, &
                    has_udl, num_udl, tudl, &
                    localrc)
+
+       print*,'mvr: just after regrid_create'
+
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
+       print*,'mvr: just after error check for regrid_create'
 
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
@@ -344,6 +364,7 @@ end function my_xor
       endif
 
       rc = ESMF_SUCCESS
+      print*,'mvr: regridstore success???'
 
       end subroutine ESMF_RegridStore
 

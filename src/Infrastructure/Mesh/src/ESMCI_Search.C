@@ -19,9 +19,7 @@
 #include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/include/ESMCI_OTree.h>
 
-#ifdef PNTLIST
-#include <Mesh/include/ESMCI_PntList.h>
-#endif
+#include "PointList/include/ESMCI_PointList.h"
  
 #include <iostream>
 #include <fstream>
@@ -312,13 +310,13 @@ static int found_func(void *c, void *y) {
 
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-#ifdef PNTLIST
+  //#ifdef PNTLIST
   if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
     printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],dist,elem.get_id());
-#else
-  if (si.snr.node->get_id()== ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.node->get_id(),in,pcoord[0],pcoord[1],dist,elem.get_id());
-#endif
+    //#else
+      //if (si.snr.node->get_id()== ESMF_REGRID_DEBUG_MAP_NODE) {
+    //printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.node->get_id(),in,pcoord[0],pcoord[1],dist,elem.get_id());
+    //#endif
 
     double coords[3*40];
     int num_nds;
@@ -330,6 +328,7 @@ static int found_func(void *c, void *y) {
       printf("%d ",ids[i]);
     }
     printf("]\n");
+    fflush(stdout);
 
     mathutil_debug=false;
   }
@@ -463,7 +462,8 @@ static int found_func(void *c, void *y) {
   std::vector<const MeshObj *> again;
   
   std::set<Search_result> tmp_sr; // store in map for quick lookup
-  
+
+
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < dest_nlist.size(); ++p) {
     
@@ -494,8 +494,7 @@ static int found_func(void *c, void *y) {
 
     // The node coordinates.
     si.coords[0] = c[0]; si.coords[1] = c[1]; si.coords[2] = (sdim == 3 ? c[2] : 0.0);
-    
-    
+
     // Set global map_type
     // TODO: pass this directly to is_in_cell mapping function
     MAP_TYPE old_sph_map_type=sph_map_type;
@@ -869,8 +868,8 @@ void DestroySearchResult(SearchResult &result) {
   result.clear();
 }
 
-#ifdef PNTLIST
-BBox bbox_from_pl(PntList &pl) {
+//#ifdef PNTLIST
+BBox bbox_from_pl(PointList &dst_pl) {
 
     // Init min to biggest double
     double min[3];
@@ -886,7 +885,7 @@ BBox bbox_from_pl(PntList &pl) {
 
     // Calc min max from point list depending on dim
     if (dst_pl.get_coord_dim()==2) {   
-      for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+      for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
         const double *coords=dst_pl.get_coord_ptr(i);
         
         if (coords[0] < min[0]) min[0]=coords[0];      
@@ -896,16 +895,16 @@ BBox bbox_from_pl(PntList &pl) {
         if (coords[1] > max[1]) max[1]=coords[1];      
       }
     } else if (dst_pl.get_coord_dim()==3) { 
-      for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+      for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
         const double *coords=dst_pl.get_coord_ptr(i);
-        
+
         if (coords[0] < min[0]) min[0]=coords[0];      
         if (coords[1] < min[1]) min[1]=coords[1];      
-        if (coords[2] < min[2]) min[0]=coords[2];      
+        if (coords[2] < min[2]) min[2]=coords[2];      
         
         if (coords[0] > max[0]) max[0]=coords[0];      
         if (coords[1] > max[1]) max[1]=coords[1];      
-        if (coords[2] > max[2]) max[0]=coords[2];      
+        if (coords[2] > max[2]) max[2]=coords[2];      
       }      
     } else {
       Throw() << "unsupported number of coordinate dimensions \n";
@@ -913,13 +912,13 @@ BBox bbox_from_pl(PntList &pl) {
 
     // Create BBox
     return BBox(dst_pl.get_coord_dim(), min, max);
-  }
+}
 
 
 // The main routine
 // dst_pl is assumed to only contain non-masked points
-void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
-  Trace __trace("OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+void OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+  Trace __trace("OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
 
 
   MEField<> &coord_field = *src.GetCoordField();
@@ -933,7 +932,7 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
   // Get spatial dim  and error check
   UInt sdim = src.spatial_dim();
   if (sdim != dst_pl.get_coord_dim()) {
-    Throw() << "Mesh and points must have same spatial dim for search";
+    Throw() << "Mesh and pointlist must have same spatial dim for search";
   }
 
 
@@ -964,11 +963,11 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
   std::vector<int> dst_loc_new;  
 
   // Either create a new one or use list from the finer search
-  if (dst_loc_again) dst_loc=dst_loc_again; 
+  if (revised_dst_loc) dst_loc=revised_dst_loc; 
   else {  
-    dst_loc_new.resize(dst_pl.get_curr_num_pnts(),-1);
+    dst_loc_new.reserve(dst_pl.get_curr_num_pts());
 
-    for(int i=0; i<dst_pl.get_curr_num_pnts(); i++) {
+    for(int i=0; i<dst_pl.get_curr_num_pts(); i++) {
       dst_loc_new.push_back(i);
     }
     
@@ -981,10 +980,9 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
   // temp search results
   std::set<Search_result> tmp_sr; 
 
-
   // Loop the destination loc, find hosts.
-  for (p = 0; p < dst_loc.size(); ++p) {
-    int loc = dst_loc[p];
+  for (UInt p = 0; p < dst_loc->size(); ++p) {
+    int loc = (*dst_loc)[p];
         
     // Get info out of point list
     const double *pnt_crd=dst_pl.get_coord_ptr(loc);
@@ -1012,6 +1010,7 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
 
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+
 
     // STOPPED HERE //
         
@@ -1066,7 +1065,7 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
   }
   
   std::set<Search_result>().swap(tmp_sr);
-  std::vector<int>().swap(dst_loc);
+  std::vector<int>().swap(*dst_loc);
 
   if (!again.empty()) {
      if (stol > 1e-6) {
@@ -1084,7 +1083,7 @@ void OctSearch_w_dst_pl(const Mesh &src, const PntList &dst_pl, MAP_TYPE mtype, 
   if (!box_in) delete box;
 
 }
-#endif
+//#endif
 
 
 } // namespace

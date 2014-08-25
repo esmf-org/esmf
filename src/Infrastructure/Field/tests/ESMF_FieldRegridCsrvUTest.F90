@@ -57,6 +57,8 @@
       ! initialize 
       rc=ESMF_SUCCESS
 
+
+
       ! do test
       call test_csrvregrid(itrp, csrv, rc)
 
@@ -224,6 +226,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest

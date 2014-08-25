@@ -19,6 +19,8 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_Mask.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
+
+#include "PointList/include/ESMCI_PointList.h"
  
 #include <iostream>
 #include <fstream>
@@ -55,15 +57,21 @@ struct SearchData {
   const MeshObj *closest_src_node;
   double closest_dist2;  // closest distance squared  
   MEField<> *src_coord;
+
+  int *closest_src_id;      //mvr
+  PointList *srcpointlist;  //mvr
 };
 
   static int nearest_func(void *n, void *y, double *min, double *max) {
-  MeshObj *src_node = static_cast<MeshObj*>(n);
-  SearchData *sd = static_cast<SearchData*>(y);
 
- 
+    //mvr  MeshObj *src_node = static_cast<MeshObj*>(n);
+    int *mvr_id = static_cast<int*>(n);
+
+    SearchData *sd = static_cast<SearchData*>(y);
+
   // Get source node coords
-  double *c=sd->src_coord->data(*src_node);  
+    //mvr  const double *c=sd->srcpointlist->get_coord_ptr(*mvr_id-1);  
+  const double *c=sd->srcpointlist->get_coord_ptr_from_id(mvr_id);  
 
   // Convert to 3D point
   double src_pnt[3];
@@ -71,15 +79,18 @@ struct SearchData {
   src_pnt[1] = c[1];
   src_pnt[2] = (sd->sdim == 3 ? c[2] : 0.0);
 
+
   // Calculate squared distance
  double dist2=(sd->dst_pnt[0]-src_pnt[0])*(sd->dst_pnt[0]-src_pnt[0])+
               (sd->dst_pnt[1]-src_pnt[1])*(sd->dst_pnt[1]-src_pnt[1])+
               (sd->dst_pnt[2]-src_pnt[2])*(sd->dst_pnt[2]-src_pnt[2]);
 
-
   // If this node is closer than make it the closest node
+ printf("mvr: dist2= %8.8f  closest_dist2= %8.8f\n",dist2,sd->closest_dist2);
+ fflush(stdout);
   if (dist2 < sd->closest_dist2) {
-    sd->closest_src_node=src_node;
+    //mvr    sd->closest_src_node=src_node;
+    sd->closest_src_id=mvr_id;
     sd->closest_dist2=dist2;
 
     // compute a new min-max box
@@ -95,14 +106,17 @@ struct SearchData {
   } else if (dist2 == sd->closest_dist2) {
     // In ParSearchNearest, this can happen when sd->closest_src_node is NULL
     // so check for that first. 
-    if (sd->closest_src_node != NULL) {
+    if (sd->closest_src_id != NULL) {
       // If exactly the same distance chose the point with the smallest id
       // (To make things consistent when running on different numbers of procs)
-      if (src_node->get_id() < sd->closest_src_node->get_id()) {
-        sd->closest_src_node=src_node;
+    //mvr      if (src_node->get_id() < sd->closest_src_node->get_id()) {
+      if (*mvr_id < *(sd->closest_src_id)) {
+	  //mvr sd->closest_src_node=src_node;
+	  sd->closest_src_id=mvr_id;
       }
     } else { // If there is no closest yet, then just use the one you found. 
-      sd->closest_src_node=src_node;
+	  //mvr      sd->closest_src_node=src_node;
+      sd->closest_src_id=mvr_id;
     }
 
     // Don't need to change the closest_dist2  because at exactly the same dist 
@@ -278,6 +292,114 @@ struct SearchData {
       Search_result *sr=new Search_result();       
       sr->dst_gid=dst_node.get_id();
       sr->src_gid=sd.closest_src_node->get_id();
+      result.push_back(sr);
+    } else { // ...otherwise deal with the unmapped point
+      if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+        Throw() << " Some destination points cannot be mapped to the source grid";
+      } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
+        // don't do anything
+      } else {
+        Throw() << " Unknown unmappedaction option";
+      }
+    }
+     
+  } // for dst nodes
+  
+
+  // Get rid of tree
+  if (tree) delete tree;
+  }
+
+
+
+
+// The main routine
+  void SearchNearestSrcToDst_w_dst_pl(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result) {
+  Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
+
+
+  // Get spatial dim and make sure both have the same
+  UInt sdim=src_pl.get_coord_dim();
+  if (sdim != dst_pl.get_coord_dim()) {
+    Throw() << "src and dst must have same spatial dim for search";
+  }
+  
+  int num_nodes_to_search=src_pl.get_curr_num_pts();
+
+  // Create search tree
+  OTree *tree=new OTree(num_nodes_to_search); 
+
+  // Add unmasked nodes to search tree
+  double pnt[3];
+  for (UInt p = 0; p < num_nodes_to_search; ++p) {
+
+    const double *pnt_crd=src_pl.get_coord_ptr(p);
+    const int &pnt_id=src_pl.get_id_ref(p);
+
+    // Set coord value in 3D point
+    pnt[0] = pnt_crd[0];
+    pnt[1] = pnt_crd[1];
+    pnt[2] = sdim == 3 ? pnt_crd[2] : 0.0;
+
+    //mvr    tree->add(pnt, pnt, (void*)&node); 
+    tree->add(pnt, pnt, (void*)&pnt_id);
+  }
+
+  // Commit tree
+  tree->commit();
+
+
+  // Set initial search box to the largest possible
+  double pmin[3], pmax[3];
+
+  double min,max;
+  if (std::numeric_limits<double>::has_infinity) {
+    min= -std::numeric_limits<double>::infinity();
+    max= std::numeric_limits<double>::infinity();
+  } else {
+    min = -std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::max();
+  }
+
+  pmin[0] = min;
+  pmin[1] = min;
+  pmin[2] = min;
+  
+  pmax[0] = max;
+  pmax[1] = max;
+  pmax[2] = max;
+
+
+  int dst_size=dst_pl.get_curr_num_pts();
+   
+  // Loop the destination points, find hosts.
+  for (UInt p = 0; p < dst_size; ++p) {
+    
+    const double *pnt_crd=dst_pl.get_coord_ptr(p);
+    int pnt_id=dst_pl.get_id(p);
+
+    // Setup search structure
+    SearchData sd;
+    sd.sdim=sdim;
+    sd.dst_pnt[0] = pnt_crd[0];
+    sd.dst_pnt[1] = pnt_crd[1];
+    sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+    sd.closest_src_node=NULL;
+    sd.closest_dist2=std::numeric_limits<double>::max();
+    //mvr    sd.src_coord=src_coord;
+    sd.src_coord=NULL;
+
+    sd.closest_src_id=NULL;
+    sd.srcpointlist=&src_pl;
+
+    // Find closest source node to this destination node
+    tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+    
+    // If we've found a nearest source point, then add to the search results list...
+    if (sd.closest_src_id != NULL) {
+      Search_result *sr=new Search_result();       
+      sr->dst_gid=pnt_id;
+      sr->src_gid=*sd.closest_src_id;
       result.push_back(sr);
     } else { // ...otherwise deal with the unmapped point
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
