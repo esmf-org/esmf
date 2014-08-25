@@ -4553,29 +4553,33 @@ int Array::redistStore(
   
   // set factorLocal
   void *factorLocal;
+  ESMC_R4 factorLocalTR4; // type specific factor, persisting during store call
+  ESMC_R8 factorLocalTR8; // type specific factor, persisting during store call
+  ESMC_I4 factorLocalTI4; // type specific factor, persisting during store call
+  ESMC_I8 factorLocalTI8; // type specific factor, persisting during store call
   if (typekindFactor == ESMC_TYPEKIND_R4){
-    ESMC_R4 *factorLocalT = new ESMC_R4;
+    ESMC_R4 *factorLocalT = &factorLocalTR4;
     if (factor)
       *factorLocalT = *(ESMC_R4 *)factor;
     else
       *factorLocalT = 1.;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_R8){
-    ESMC_R8 *factorLocalT = new ESMC_R8;
+    ESMC_R8 *factorLocalT = &factorLocalTR8;
     if (factor)
       *factorLocalT = *(ESMC_R8 *)factor;
     else
       *factorLocalT = 1.;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_I4){
-    ESMC_I4 *factorLocalT = new ESMC_I4;
+    ESMC_I4 *factorLocalT = &factorLocalTI4;
     if (factor)
       *factorLocalT = *(ESMC_I4 *)factor;
     else
       *factorLocalT = 1;
     factorLocal = (void *)factorLocalT;
   }else if (typekindFactor == ESMC_TYPEKIND_I8){
-    ESMC_I8 *factorLocalT = new ESMC_I8;
+    ESMC_I8 *factorLocalT = &factorLocalTI8;
     if (factor)
       *factorLocalT = *(ESMC_I8 *)factor;
     else
@@ -4894,25 +4898,21 @@ for (int i=0; i<factorListCount; i++)
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_R4 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_R4 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_R8){
     ESMC_R8 *factorListT = new ESMC_R8[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_R8 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_R8 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_I4){
     ESMC_I4 *factorListT = new ESMC_I4[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_I4 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_I4 *)factorLocal;
   }else if (typekindFactor == ESMC_TYPEKIND_I8){
     ESMC_I8 *factorListT = new ESMC_I8[factorListCount];
     for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_I8 *)factorLocal;
     factorList = (void *)factorListT;
-    delete (ESMC_I4 *)factorLocal;
   }
   
   // prepare SparseMatrix vector
