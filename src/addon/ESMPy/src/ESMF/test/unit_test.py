@@ -352,210 +352,210 @@ def grid_area_3D_test():
     return True
 
 def grid_create_from_file_scrip_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp)
+                              reg_decomp=reg_decomp)
     except:
         raise NameError('grid_create_from_file_scrip failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_balanced_balanced_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_balanced_balanced failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_balanced_restfirst_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_balanced_restfirst failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_balanced_restlast_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_balanced_restlast failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_balanced_cyclic_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_balanced_cyclic failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restfirst_balanced_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restfirst_balanced failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restfirst_restfirst_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restfirst_restfirst failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restfirst_restlast_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restfirst_restlast failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_restfirst_cyclic_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restfirst_cyclic failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restlast_balanced_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restlast_balanced failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restlast_restfirst_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restlast_restfirst failed!')
     return True
 
 def grid_create_from_file_scrip_decomp_restlast_restlast_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restlast_restlast failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_restlast_cyclic_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_restlast_cyclic failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_cyclic_balanced_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_cyclic_balanced failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_cyclic_restfirst_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_cyclic_restfirst failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_cyclic_restlast_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_cyclic_restlast failed!')
     return True
 
 @expected_failure
 def grid_create_from_file_scrip_decomp_cyclic_cyclic_test():
-    regDecomp = [pet_count(), 1]
+    reg_decomp = [pet_count(), 1]
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
         grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
-                              regDecomp=regDecomp, decompflag=decompflag)
+                              reg_decomp=reg_decomp, decompflag=decompflag)
     except:
         raise NameError('grid_create_from_file_scrip_cyclic_cyclic failed!')
     return True
