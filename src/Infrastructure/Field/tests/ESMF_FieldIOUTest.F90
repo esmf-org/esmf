@@ -605,6 +605,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) ""
   write(name, *) "Create a gloablly indexed grid"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -620,6 +621,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Get Array pointer from Field
+  allocate(exclusiveLBound(2))         ! dimCount=2
+  allocate(exclusiveUBound(2))         ! dimCount=2
   call ESMF_FieldGet(field_gw, localDe=0, farrayPtr=Farray_w, &
       exclusiveLBound=exclusiveLBound, &
       exclusiveUBound=exclusiveUBound, rc=rc)
