@@ -833,6 +833,22 @@ def meshvtk_test():
     # return True from unit test
     return True
 
+def mesh_create_from_file_scrip_test():
+    try:
+        mesh_from_file=Mesh(filename="src/ESMF/test/data/ne4np4-pentagons.nc",
+                            filetype=FileFormat.SCRIP)
+    except:
+        raise NameError('mesh_create_from_file_scrip_test failed!')
+    return True
+
+def mesh_create_from_file_esmfmesh_test():
+    try:
+        mesh_from_file=Mesh(filename="src/ESMF/test/data/ne4np4-esmf.nc",
+                            filetype=FileFormat.ESMFMESH)
+    except:
+        raise NameError('mesh_create_from_file_scrip_test failed!')
+    return True
+
 def interfaceint_test():
     Narray = np.array([4,5,6], dtype=np.int32)
     interfaceint = ESMP_InterfaceIntCreate(Narray, len(Narray))
@@ -1541,6 +1557,8 @@ def main():
     (1,'LogSet flush immediately') : log_test,
     (2,'VMGetGlobal, VMPrint, and VMGet') : vm_test,
     (3,'Mesh create and destroy') : mesh_test,
+    (3.1,'Mesh create from file - SCRIP') : mesh_create_from_file_scrip_test,
+    (3.2,'Mesh create from file - ESMFMESH') : mesh_create_from_file_esmfmesh_test_test,
     (4,'Grid create and destroy') : grid_create_test,
     (4.1,'Grid 3D create and destroy') : grid_create_3D_test,
     (4.2,'Grid coordinates') : grid_coords_test,
