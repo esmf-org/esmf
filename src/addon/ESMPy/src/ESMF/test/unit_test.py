@@ -354,7 +354,7 @@ def grid_area_3D_test():
 def grid_create_from_file_scrip_test():
     regDecomp = [pet_count(), 1]
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp)
     except:
@@ -366,7 +366,7 @@ def grid_create_from_file_scrip_decomp_balanced_balanced_test():
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -378,7 +378,7 @@ def grid_create_from_file_scrip_decomp_balanced_restfirst_test():
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -390,7 +390,7 @@ def grid_create_from_file_scrip_decomp_balanced_restlast_test():
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -403,7 +403,7 @@ def grid_create_from_file_scrip_decomp_balanced_cyclic_test():
     decompflag = np.array([DecompFlag.BALANCED,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -415,7 +415,7 @@ def grid_create_from_file_scrip_decomp_restfirst_balanced_test():
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -427,7 +427,7 @@ def grid_create_from_file_scrip_decomp_restfirst_restfirst_test():
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -439,7 +439,7 @@ def grid_create_from_file_scrip_decomp_restfirst_restlast_test():
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -452,7 +452,7 @@ def grid_create_from_file_scrip_decomp_restfirst_cyclic_test():
     decompflag = np.array([DecompFlag.RESTFIRST,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -464,7 +464,7 @@ def grid_create_from_file_scrip_decomp_restlast_balanced_test():
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -476,7 +476,7 @@ def grid_create_from_file_scrip_decomp_restlast_restfirst_test():
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -488,7 +488,7 @@ def grid_create_from_file_scrip_decomp_restlast_restlast_test():
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -501,7 +501,7 @@ def grid_create_from_file_scrip_decomp_restlast_cyclic_test():
     decompflag = np.array([DecompFlag.RESTLAST,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -514,7 +514,7 @@ def grid_create_from_file_scrip_decomp_cyclic_balanced_test():
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.BALANCED],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -527,7 +527,7 @@ def grid_create_from_file_scrip_decomp_cyclic_restfirst_test():
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.RESTFIRST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -540,7 +540,7 @@ def grid_create_from_file_scrip_decomp_cyclic_restlast_test():
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.RESTLAST],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
@@ -553,7 +553,7 @@ def grid_create_from_file_scrip_decomp_cyclic_cyclic_test():
     decompflag = np.array([DecompFlag.CYCLIC,DecompFlag.CYCLIC],
                           dtype=np.int32)
     try:
-        grid_from_file = Grid(filename="data/T42_grid.nc",
+        grid_from_file = Grid(filename="src/ESMF/test/data/T42_grid.nc",
                               filetype=FileFormat.SCRIP,
                               regDecomp=regDecomp, decompflag=decompflag)
     except:
