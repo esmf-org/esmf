@@ -368,6 +368,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -375,6 +377,10 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -445,6 +451,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -452,6 +459,10 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -500,6 +511,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -507,6 +519,10 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -520,6 +536,7 @@ program ESMF_FieldIOUTest
 
   deallocate (computationalLBound, computationalUBound)
   deallocate (exclusiveLBound, exclusiveUBound)
+  deallocate (Farray_sw)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -605,6 +622,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) ""
   write(name, *) "Create a gloablly indexed grid"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -620,6 +638,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Get Array pointer from Field
+  allocate(exclusiveLBound(2))         ! dimCount=2
+  allocate(exclusiveUBound(2))         ! dimCount=2
   call ESMF_FieldGet(field_gw, localDe=0, farrayPtr=Farray_w, &
       exclusiveLBound=exclusiveLBound, &
       exclusiveUBound=exclusiveUBound, rc=rc)
