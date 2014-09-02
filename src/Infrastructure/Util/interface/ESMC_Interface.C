@@ -54,7 +54,17 @@ int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
   printf("], length = %d\n", lenArg);
   */
   
-  ((ESMCI::InterfaceInt *)(interfaceIntArg))->set(arrayArg, lenArg);
+  ESMCI::InterfaceInt *ii = ((ESMCI::InterfaceInt *)(interfaceIntArg));
+  
+  ii->set(arrayArg, lenArg);
+
+  /*
+  // this is a test to see if the data is passed in correctly
+  printf("ESMC_InterfaceIntCreate - arrayArg = [");
+  for (int i=0; i<ii->extent[0]; ++i)
+    printf("%d,", ii->array[i]);
+  printf("], length = %d\n", ii->extent[0]);
+  */
 
   // return successfully
   rc = ESMF_SUCCESS;

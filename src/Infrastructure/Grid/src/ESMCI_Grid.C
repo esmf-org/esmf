@@ -182,7 +182,7 @@ int setDefaultsLUA(int dimCount,
 //     pointer to newly allocated ESMCI::Grid object
 //
 // !ARGUMENTS:
-    ESMC_InterfaceInt maxIndex, 
+    ESMC_InterfaceInt *maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     int *rc) {           // out - return code
@@ -202,8 +202,17 @@ int setDefaultsLUA(int dimCount,
     cs_present = 0;
     ctk_present = 0;
 
-    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)&maxIndex;
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)maxIndex;
   
+    /*
+    // this is a test to see if the data is passed in correctly
+    printf("Grid::createnoperidim - arrayArg = [");
+    for (int i=0; i<mi->extent[0]; ++i)
+      printf("%d,", mi->array[i]);
+    printf("], length = %d\n", mi->extent[0]);
+    printf("dimCount = %d\n", mi->dimCount);
+    */
+
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
          "- maxIndex array must be of rank 1", ESMC_CONTEXT, rc);
@@ -246,7 +255,7 @@ int setDefaultsLUA(int dimCount,
 //     pointer to newly allocated ESMCI::Grid object
 //
 // !ARGUMENTS:
-    ESMC_InterfaceInt maxIndex, 
+    ESMC_InterfaceInt *maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_PoleKind_Flag *poleKind,
@@ -270,7 +279,7 @@ int setDefaultsLUA(int dimCount,
 
     int pksize = 2;
 
-    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)&maxIndex;
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)maxIndex;
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,

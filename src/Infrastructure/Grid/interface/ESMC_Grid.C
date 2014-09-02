@@ -64,7 +64,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
-ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
+ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
                                    enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    int *rc){
@@ -90,7 +90,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
-ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
+ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
                                    enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    enum ESMC_PoleKind_Flag *poleKind, 
