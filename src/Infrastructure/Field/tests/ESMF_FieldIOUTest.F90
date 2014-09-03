@@ -629,7 +629,7 @@ program ESMF_FieldIOUTest
   ! Create Field
   field_gw=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
            indexflag=ESMF_INDEX_GLOBAL,  &
-           name="temperature_gw",  rc=rc)
+           name="temperature_g",  rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create a gloablly indexed field from grid and fortran dummy array"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -668,9 +668,9 @@ program ESMF_FieldIOUTest
   ! Create Field
   field_gr=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
            indexflag=ESMF_INDEX_GLOBAL,  &
-           name="temperature_gr",  rc=rc)
+           name="temperature_g",  rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Create a gloablly indexed field from grid and fortran dummy array"
+  write(name, *) "Create a globally indexed field from grid and fortran dummy array"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
