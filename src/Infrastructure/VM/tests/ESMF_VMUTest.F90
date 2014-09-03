@@ -1132,8 +1132,8 @@
 
 
       !------------------------------------------------------------------------
-
       ! allocate data arrays
+
       nsize = 2
       allocate(array1(nsize))
       allocate(array4(nsize))
@@ -1172,6 +1172,8 @@
       	enddo
       enddo
 
+      !------------------------------------------------------------------------
+
       rootPet = 0
 
       call test_vm_current
@@ -1189,6 +1191,31 @@
       call test_Reduce_max
       call test_AllFullReduce_max
       call test_AllReduce_max
+
+      !------------------------------------------------------------------------
+      ! deallocate data arrays
+      
+      deallocate(array1)
+      deallocate(array4)
+      deallocate(farray4)
+      deallocate(f4array4)
+      deallocate(farray1)
+      deallocate(f4array1)
+      deallocate(array5)
+      deallocate(farray5)
+      deallocate(f4array5)
+
+      deallocate(array3)
+      deallocate(farray3)
+      deallocate(f4array3)
+
+      deallocate(array3_soln)
+      deallocate(farray3_soln)
+      deallocate(f4array3_soln)
+
+      deallocate(array2)
+      deallocate(farray2)
+      deallocate(f4array2)
 
       !------------------------------------------------------------------------
       ! VMId tests
@@ -1269,13 +1296,13 @@
       call ESMF_VMIdDestroy (vmid1, rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Destroy #2 failed"
       write(name, *) "VMId destroy #2 Test"
       call ESMF_VMIdDestroy (vmid2, rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+            
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 
