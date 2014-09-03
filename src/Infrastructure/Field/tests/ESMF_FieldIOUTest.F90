@@ -676,8 +676,7 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  ! Fill array and write
-  Farray_w = localPet
+  ! read array into Field.
   call ESMF_FieldRead(field_gr, file="field_globalindex.nc",        &
        rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
