@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/DELayout/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest \
                 $(ESMF_TESTDIR)/ESMF_DELayoutWorkQueueUTest
 

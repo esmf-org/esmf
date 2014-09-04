@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/XGrid/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_XGridUTest $(ESMF_TESTDIR)/ESMF_XGridMaskingUTest
 
 TESTS_RUN     = RUN_ESMF_XGridUTest RUN_ESMF_XGridMaskingUTest

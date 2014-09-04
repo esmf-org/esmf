@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR    = src/Infrastructure/Mesh/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshMOABUTest \

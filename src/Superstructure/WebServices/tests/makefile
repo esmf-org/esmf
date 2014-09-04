@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/WebServices/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
                   $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest \
                   $(ESMF_TESTDIR)/ESMC_WebServProcCtrlUTest \

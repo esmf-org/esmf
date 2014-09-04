@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/prologue/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \

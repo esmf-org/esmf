@@ -6,7 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Superstructure/Component/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_AppMainEx \
                  $(ESMF_EXDIR)/ESMF_CplEx \
                  $(ESMF_EXDIR)/ESMF_GCompEx \

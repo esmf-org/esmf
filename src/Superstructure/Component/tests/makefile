@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/Component/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
 		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest \

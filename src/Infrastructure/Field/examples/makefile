@@ -6,6 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/Field/examples
 
+.NOTPARALLEL:
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx \

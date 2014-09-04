@@ -6,7 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/Grid/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_GridUsageEx \
 	            $(ESMF_EXDIR)/ESMF_GridCreateRegFromDGEx
 

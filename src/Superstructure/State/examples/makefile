@@ -6,7 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Superstructure/State/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx \
                  $(ESMF_EXDIR)/ESMF_StateReconcileEx \
                  $(ESMF_EXDIR)/ESMF_StateReadWriteEx

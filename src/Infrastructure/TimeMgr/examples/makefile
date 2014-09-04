@@ -6,6 +6,7 @@ run: run_examples
 
 LOCDIR	  = src/Infrastructure/TimeMgr/examples
 
+.NOTPARALLEL:
 EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_TimeIntervalEx \
                     $(ESMF_EXDIR)/ESMF_CalendarEx \
