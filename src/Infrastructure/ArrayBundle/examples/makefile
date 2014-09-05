@@ -7,6 +7,7 @@ run_uni:  run_examples_uni
 LOCDIR	  = src/Infrastructure/ArrayBundle/examples
 
 
+.NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayBundleEx \
                     $(ESMF_EXDIR)/ESMF_ArrayBundleHaloEx
 
