@@ -1,7 +1,7 @@
 #!/bin/sh
 # this script expects the pgf90 command (or a wrapper to pgf90, e.g. mpif90)
 # and returns the path of the pgf90 system libraries
-LIBPATH=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
+LIBPATH=`$1 -fpic -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
 LIBPATH=$LIBPATH"TermX"
-LIBPATH=`echo $LIBPATH | sed 's/bin\/\.pg.*TermX/lib/g'`
+LIBPATH=`echo $LIBPATH | sed 's/bin\/\.pg.*TermX/libso/g'`
 echo $LIBPATH
