@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/DistGrid/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DistGridCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMC_DistGridUTest
 
