@@ -639,11 +639,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelIS(i), &
+      call NUOPC_StateAttributeSet(is%wrap%modelIS(i), &
         name="Namespace", value=trim(namespace), &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
-        convention="NUOPC", purpose="General", &
-#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -653,11 +650,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelES(i), &
+      call NUOPC_StateAttributeSet(is%wrap%modelES(i), &
         name="Namespace", value=trim(namespace), &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
-        convention="NUOPC", purpose="General", &
-#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -882,7 +876,11 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv04p5", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv04p5a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv04p5b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

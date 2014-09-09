@@ -74,6 +74,7 @@ module NUOPC
   public NUOPC_StateIsUpdated
   public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
+  public NUOPC_StateReconcile
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite

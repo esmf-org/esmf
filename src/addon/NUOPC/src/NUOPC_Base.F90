@@ -77,6 +77,7 @@ module NUOPC_Base
   public NUOPC_StateIsUpdated
   public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
+  public NUOPC_StateReconcile
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
@@ -833,7 +834,7 @@ module NUOPC_Base
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Updates the time stamp on all Fields in the {\tt dstFields} FieldBundle to
-!   be the same as in the {\tt dstFields} FieldBundle.
+!   be the same as in the {\tt srcFields} FieldBundle.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -842,8 +843,8 @@ module NUOPC_Base
     type(ESMF_Field), allocatable :: dstFieldList(:)
     integer                       :: i, valueList(9), srcCount, dstCount
     
-!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
-!gjtdebug    character(5*ESMF_MAXSTR):: msgString
+!gjtdebug character(ESMF_MAXSTR)  :: tempString1, tempString2
+!gjtdebug character(5*ESMF_MAXSTR):: msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2584,7 +2585,12 @@ endif
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        if (.not.NUOPC_StateIsAtTime) exit
+        if (.not.NUOPC_StateIsAtTime) then
+          write (msgString, *) "Field not at expected time for item "// &
+            trim(adjustl(iString))//": "//trim(stdItemNameList(i))
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+          exit
+        endif
       enddo
     endif
     
@@ -2807,7 +2813,7 @@ endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    ! Obtain basic attributes from the adevertised Field
+    ! Obtain basic attributes from the advertised Field
       
     call NUOPC_FieldAttributeGet(advertisedField, name="StandardName", &
       value=StandardName, rc=rc)
@@ -2855,6 +2861,27 @@ endif
     ! Finally replace the advertised Field with the realizing Field
       
     call ESMF_StateReplace(state, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateReconcile - Reconcile a State
+! !INTERFACE:
+  subroutine NUOPC_StateReconcile(state, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Reconcile the {\tt state} as required by NUOPC Layer.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
@@ -2980,7 +3007,7 @@ endif
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
     
-!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, msgString
+!gjtdebug character(ESMF_MAXSTR)  :: tempString1, msgString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
