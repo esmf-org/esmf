@@ -786,7 +786,11 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(phaseString="IPDv00p2", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv00p2a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv00p2b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -864,14 +868,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(phaseString="IPDv00p2a", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv00p2b", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
     call loopConnectorCompsS(phaseString="IPDv01p3a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1162,7 +1158,8 @@ module NUOPC_Driver
           tempString = modelPhaseMap(i)%phases(k)
           ind = index(trim(tempString), "=")
           modelPhaseMap(i)%phaseKey(k) = tempString(1:ind-1)
-          read (tempString(ind+1:ind+2), "(i1)") modelPhaseMap(i)%phaseValue(k)
+          read (tempString(ind+1:len(tempString)), "(i4)") &
+            modelPhaseMap(i)%phaseValue(k)
 !print *, "setupModelPhaseMap", k, ":", trim(tempString), " ", &
 !  trim(modelPhaseMap(i)%phaseKey(k)), modelPhaseMap(i)%phaseValue(k)
         enddo
@@ -1205,7 +1202,8 @@ module NUOPC_Driver
           tempString = connectorPhaseMap(i,j)%phases(k)
           ind = index(trim(tempString), "=")
           connectorPhaseMap(i,j)%phaseKey(k) = tempString(1:ind-1)
-          read (tempString(ind+1:ind+2), "(i1)") connectorPhaseMap(i,j)%phaseValue(k)
+          read (tempString(ind+1:len(tempString)), "(i4)") &
+            connectorPhaseMap(i,j)%phaseValue(k)
 !print *, "setupConnectorPhaseMap", k, ":", trim(tempString), " ", &
 !  trim(connectorPhaseMap(i,j)%phaseKey(k)), connectorPhaseMap(i,j)%phaseValue(k)
         enddo
