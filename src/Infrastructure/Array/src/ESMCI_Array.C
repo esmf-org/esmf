@@ -4611,7 +4611,7 @@ int Array::redistStore(
       dstArray->distgrid->getElementCountPTile();
     for (int i=0; i<dstArray->distgrid->getTileCount(); i++)
       dstElementCount += dstElementCountPTile[i];
-    if (srcElementCount != dstElementCount){
+    if (!ignoreUnmatched && (srcElementCount != dstElementCount)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- srcArray and dstArray must provide identical number of exclusive"
         " elements", ESMC_CONTEXT, &rc);
