@@ -357,7 +357,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#if (defined ESMF_PIO && ESMF_MPIIO)
+#if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -391,7 +391,6 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare read in and the existing file
   write(name, *) "Compare read in data to the existing binary data - 3D with halo"
-  write(failMsg, *) "Comparison failed"
   Maxvalue(1) = 0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
@@ -402,6 +401,7 @@ program ESMF_ArrayIOUTest
   enddo
   enddo
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
+  write(failMsg, *) "Comparison failed.  Max error =", Maxvalue(1)
   write(*,*)"Maximum Error (3D with Halo binary data case) = ", Maxvalue(1)
   call ESMF_Test((Maxvalue(1) == 0), name, failMsg, result,ESMF_SRCLINE)
 #else
