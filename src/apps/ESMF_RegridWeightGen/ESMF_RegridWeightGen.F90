@@ -128,6 +128,11 @@ program ESMF_RegridWeightGenApp
 	    call PrintVersionInfo()
       terminateProg=.true.
     endif
+    call ESMF_UtilGetArgIndex('-V', argindex=ind)
+    if (ind /= -1) then
+        print *, ESMF_VERSION_STRING
+        terminateProg=.true.
+    endif
     if (terminateProg) goto 1110
     call ESMF_UtilGetArgIndex('-s', argindex=ind)
     if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
@@ -802,6 +807,7 @@ contains
     print *, "                      [--check]"
     print *, "                      [--help]"
     print *, "                      [--version]"
+    print *, "                      [-V]"
     print *, "where"
     print *, "--source or -s - a required argument specifying the source grid file"
     print *, "                 name"
@@ -876,6 +882,7 @@ contains
     print *, "             of the source and destination fields in the conservative case."
     print *, "--help     - Print this help message and exit."
     print *, "--version  - Print ESMF version and license information and exit."
+    print *, "-V        - Print ESMF version number and exit."
     print *, ""
     print *, "For questions, comments, or feature requests please send email to:"
     print *, "esmf_support@list.woc.noaa.gov"
