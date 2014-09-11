@@ -6,6 +6,7 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_ClockUTest \
 		$(ESMF_TESTDIR)/ESMC_TimeIntervalUTest \
 		$(ESMF_TESTDIR)/ESMC_TimeUTest \

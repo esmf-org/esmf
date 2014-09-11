@@ -280,7 +280,7 @@ int main(void){
   maxIndex[1] = 4;
   rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, 2);
   rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
-  grid=ESMC_GridCreateNoPeriDim(i_maxIndex, 0, 0, &rc);
+  grid=ESMC_GridCreateNoPeriDim(&i_maxIndex, 0, 0, &rc);
   field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, "must have a name", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

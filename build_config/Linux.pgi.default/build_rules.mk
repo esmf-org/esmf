@@ -149,10 +149,13 @@ ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          += 
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -mcmodel=small
-ESMF_CXXLINKOPTS          += -mcmodel=small
-ESMF_F90COMPILEOPTS       += -mcmodel=small
-ESMF_F90LINKOPTS          += -mcmodel=small
+# mcmodel is small by default.  But due to a bug in PGI 14.7 and
+# earlier overcompiler, the libso directory is not searched prior to
+# the lib directory.  This causes the fullylinked shared lib build to fail.
+# ESMF_CXXCOMPILEOPTS       += -mcmodel=small
+# ESMF_CXXLINKOPTS          += -mcmodel=small
+# ESMF_F90COMPILEOPTS       += -mcmodel=small
+# ESMF_F90LINKOPTS          += -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -mcmodel=medium

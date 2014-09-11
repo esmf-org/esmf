@@ -242,11 +242,11 @@ template <class TYPE>
  public:
 
   // ESMC interface:
-  static Grid* createnoperidim(ESMC_InterfaceInt maxIndex, 
+  static Grid* createnoperidim(ESMC_InterfaceInt *maxIndex, 
                                ESMC_CoordSys_Flag *coordSys,
                                ESMC_TypeKind_Flag *coordTypeKind, 
                                int *rc);
-  static Grid* create1peridim(ESMC_InterfaceInt maxIndex, 
+  static Grid* create1peridim(ESMC_InterfaceInt *maxIndex, 
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 

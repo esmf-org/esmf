@@ -58,7 +58,7 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateNoPeriDim(
-  ESMC_InterfaceInt maxIndex,  // in
+  ESMC_InterfaceInt *maxIndex,  // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   int *rc                      // out
@@ -93,7 +93,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
-  ESMC_InterfaceInt maxIndex,  // in
+  ESMC_InterfaceInt *maxIndex,  // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   enum ESMC_PoleKind_Flag *poleKind, // in

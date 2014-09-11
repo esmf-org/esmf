@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/ArrayBundle/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayBundleCreateUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayBundleIOUTest
 

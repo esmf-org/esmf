@@ -25,23 +25,6 @@ class ESMP_Field(ct.Structure):
 class ESMP_Mesh(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
-class ESMP_InterfaceIntStruct(ct.Structure):
-    _fields_ = [("ptr", ct.c_void_p)]
-
-class ESMP_InterfaceInt(object):
-    def __init__(self, array):
-        # segfault in 32 bit mode because was not copying array
-        arraycopy = array.copy()
-        self.ptr = ESMP_InterfaceIntCreate(array, len(array))
-        self.size = len(array)
-        # regist with atexit
-        import atexit; atexit.register(self.__del__)
-        self.__finalized = False
-    def __del__(self):
-        if not self.__finalized:
-            ESMP_InterfaceIntDestroy(self.ptr)
-            self.__finalized = True
-
 class ESMP_VM(ct.Structure):
         _fields_ = [("ptr", ct.c_void_p)]
 
@@ -57,17 +40,17 @@ class OptionalNumpyArrayFloat64(object):
             else:
                 return param.ctypes
 
-# this class allows optional arguments to be passed in place of pointers to
-# ctypes structures, such as Fields and InterfaceInts
+# this class allows ESMP_InterfaceInts to be passed in place of 
+# pointers to ctypes structures
 class OptionalStructPointer(object):
         @classmethod
         def from_param(self, param):
             if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_void_p)
-                fieldptr = ptr(ct.c_void_p(param.ptr))
-                return fieldptr
+                ptr = ct.POINTER(ESMP_InterfaceInt)
+                interfaceintptr = ptr(param)
+                return interfaceintptr
 
 # this class allows optional array of strings to be passed in plass of
 # a python list of strings
@@ -162,44 +145,38 @@ def ESMP_Finalize():
 
 #### INTERFACEINT #############################################################
 
-_ESMF.ESMC_InterfaceIntCreate.restype = ESMP_InterfaceIntStruct
-_ESMF.ESMC_InterfaceIntCreate.argtypes = [np.ctypeslib.ndpointer(dtype=np.int32),
-                                          ct.c_int, ct.POINTER(ct.c_int)]
-@deprecated
-def ESMP_InterfaceIntCreate(arrayArg, lenArg):
+class ESMP_InterfaceInt(ct.Structure):
+    _fields_ = [("array", ct.POINTER(ct.c_int))]
+                
+    def __init__(self, arrayArg):
+        self.array = (ct.c_int*len(arrayArg))()
+        self.extent = arrayArg.shape
+        # initialize the InterfaceInt on the ESMF side
+        ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
+
+    def __repr__(self):
+        return 'ESMPyInterfaceInt [{}], length = {}'.format(
+            ','.join(str(self.array[i]) for i in range(self.extent[0])), 
+            self.extent[0])
+
+_ESMF.ESMC_InterfaceIntSet.restype = ct.c_int
+_ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt), 
+                                       np.ctypeslib.ndpointer(dtype=np.int32),
+                                       ct.c_int]
+def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
     """
     Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy 
-                   array of type int.\n
-    Postconditions: An ESMP_InterfaceInt has been created.\n
+                   array of type int and 'lenArg' is the length of 'arrayArg'.\n
+    Postconditions: An ESMP_InterfaceInt pointer has been created.\n
     Arguments:\n
-        :RETURN: ESMP_InterfaceInt  :: interfaceInt\n
-        Numpy.array(dtype=np.int32) :: arrayArg\n
-        integer                     :: lenArg\n
+        :RETURN: ESMP_InterfaceInt.ptr :: grid\n
+        ESMP_InterfaceIntStruct.ptr    :: iiptr\n
+        Numpy.array(dtype=np.int32)    :: arrayArg\n
+        integer                        :: lenArg\n
     """
-    lrc = ct.c_int(0)
-    interfaceInt = _ESMF.ESMC_InterfaceIntCreate(arrayArg, lenArg, 
-                                                 ct.byref(lrc))
-    rc = lrc.value
+    rc = _ESMF.ESMC_InterfaceIntSet(ct.byref(iiptr), arrayArg, lenArg)
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_InterfaceIntCreate() failed with rc = '+str(rc)+
-                        '.    '+constants._errmsg)
-    return interfaceInt.ptr
-
-_ESMF.ESMC_InterfaceIntDestroy.restype = ct.c_int
-_ESMF.ESMC_InterfaceIntDestroy.argtypes = [ct.c_void_p]
-@deprecated
-def ESMP_InterfaceIntDestroy(interfaceInt):
-    """
-    Preconditions: An ESMP_InterfaceInt has been created.\n
-    Postconditions: The 'interfaceInt' has been destroyed.\n
-    Arguments:\n
-        ESMP_InterfaceInt :: interfaceInt\n
-    """
-    # segfault in Python with 'pointer being freed was not allocated' 
-    # without ct.byref()
-    rc = _ESMF.ESMC_InterfaceIntDestroy(ct.byref(ct.c_void_p(interfaceInt)))
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_InterfaceIntDestroy() failed with rc = '+str(rc)+
+        raise ValueError('ESMC_InterfaceIntSet() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
 #### VM #######################################################################
@@ -291,7 +268,7 @@ def ESMP_LogSet(flush):
 #### GRID #####################################################
 
 _ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.c_void_p,
+_ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -326,7 +303,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(maxIndex_i.ptr, coordSys,
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))
 
@@ -340,7 +317,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     return gridstruct
 
 _ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.c_void_p,
+_ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                            OptionalNamedConstant,
                                            OptionalNamedConstant,
                                            ct.POINTER(ct.c_int)]
@@ -375,7 +352,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreateNoPeriDim(maxIndex_i.ptr, coordSys,
+    gridstruct = _ESMF.ESMC_GridCreateNoPeriDim(ct.byref(maxIndex_i), coordSys,
                                                 coordTypeKind, ct.byref(lrc))
 
     # check the return code from ESMF

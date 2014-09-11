@@ -88,6 +88,7 @@ program ESMF_VMGetMPICommunicatorEx
   ! code. Here the MPI_Barrier() routine is called.
   call MPI_Barrier(mpic2, ierr)
 !EOC
+  call MPI_Comm_free(mpic2, ierr)
 #endif
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.

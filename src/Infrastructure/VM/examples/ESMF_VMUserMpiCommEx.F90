@@ -84,6 +84,7 @@ program ESMF_VMUserMpiCommEx
   else
     call MPI_COMM_SPLIT(MPI_COMM_WORLD, 1, 0, esmfComm, ierr)
   endif
+  if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   rank = 0
 #endif
@@ -115,8 +116,10 @@ program ESMF_VMUserMpiCommEx
 !EOC
 #ifndef ESMF_MPIUNI     
 !BOC
+  ! First free the MPI communicator.
+  call MPI_Comm_free(esmfComm, ierr)
+  ! Then user code finalizes MPI.
   call MPI_Finalize(ierr)
-  ! User code finalizes MPI.
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif

@@ -6,6 +6,7 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/IO/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
 	$(ESMF_TESTDIR)/ESMF_IO_PIOUTest \
         $(ESMF_TESTDIR)/ESMCI_IO_PIOUTest
