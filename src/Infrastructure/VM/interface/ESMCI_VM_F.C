@@ -487,7 +487,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmgetpetlocalinfo)(ESMCI::VM **ptr, int *pet, int *peCount, 
-    int *ssiId, int *threadCount, int *threadId, int *vas, int *rc){
+    int *accDeviceCount, int *ssiId, int *threadCount, int *threadId,
+    int *vas, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetpetlocalinfo()"
     // Initialize return code; assume routine not implemented
@@ -502,6 +503,8 @@ extern "C" {
     // fill return values
     if (ESMC_NOT_PRESENT_FILTER(peCount) != ESMC_NULL_POINTER)
       *peCount = (*ptr)->getNcpet(*pet);
+    if (ESMC_NOT_PRESENT_FILTER(accDeviceCount) != ESMC_NULL_POINTER)
+      *accDeviceCount = (*ptr)->getNadevs(*pet);
     if (ESMC_NOT_PRESENT_FILTER(ssiId) != ESMC_NULL_POINTER)
       *ssiId = (*ptr)->getSsiid(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadCount) != ESMC_NULL_POINTER)

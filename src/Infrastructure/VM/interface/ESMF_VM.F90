@@ -4211,14 +4211,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
-    threadCount, threadId, vas, rc)
+  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, &
+    accDeviceCount, ssiId, threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
     integer,       intent(in)            :: pet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: peCount
+    integer,       intent(out), optional :: accDeviceCount
     integer,       intent(out), optional :: ssiId
     integer,       intent(out), optional :: threadCount
     integer,       intent(out), optional :: threadId
@@ -4243,6 +4244,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[peCount]}]
 !        Upon return this holds the number of PEs associated with the specified
 !        PET in the {\tt ESMF\_VM} object.
+!   \item[{[accDeviceCount]}]
+!        Upon return this holds the number of accelerated devices accessible
+!        from the specified PET in the {\tt ESMF\_VM} object.
 !   \item[{[ssiId]}]
 !        Upon return this holds the id of the single-system image (SSI) the
 !        specified PET is running on.
@@ -4270,8 +4274,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
-      threadId, vas, localrc)
+    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, accDeviceCount, &
+      ssiId, threadCount, threadId, vas, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -65,6 +65,11 @@ using namespace std;
 
 #include <fcntl.h>
 
+#ifdef ESMF_ACC_FRAMEWORK
+// FIXME: Do we need to move this decl to a header?
+int fw_get_num_devices(void );
+#endif
+
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
@@ -446,15 +451,22 @@ void VMK::init(MPI_Comm mpiCommunicator){
   pid = new int[npets];
   tid = new int[npets];
   ncpet = new int[npets];
+  nadevs = new int[npets];
   cid = new int*[npets];
   for (int i=0; i<npets; i++){
     lpid[i]=i;
     pid[i]=i;
     tid[i]=0;
     ncpet[i]=1;
+    nadevs[i]=0;
     cid[i] = new int[ncpet[i]];
     cid[i][0]=i;
   }
+#ifdef ESMF_ACC_FRAMEWORK
+  int num_adevices = fw_get_num_devices();
+  MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
+                nadevs, 1, MPI_INTEGER, mpi_c);              
+#endif
 }
 
 
@@ -496,6 +508,7 @@ void VMK::finalize(int finalizeMpi){
   delete [] pid;
   delete [] tid;
   delete [] ncpet;
+  delete [] nadevs;
   for (int i=0; i<npets; i++)
     delete [] cid[i];
   delete [] cid;
@@ -537,6 +550,7 @@ struct SpawnArg{
   int *pid;
   int *tid;
   int *ncpet;
+  int *nadevs;
   int **cid;
   MPI_Comm mpi_c;
   int mpi_c_freeflag;
@@ -575,12 +589,14 @@ void VMK::construct(void *ssarg){
   pid = new int[npets];
   tid = new int[npets];
   ncpet = new int[npets];
+  nadevs = new int[npets];
   cid = new int*[npets];
   for (int i=0; i<npets; i++){
     lpid[i]=sarg->lpid[i];
     pid[i]=sarg->pid[i];
     tid[i]=sarg->tid[i];
     ncpet[i]=sarg->ncpet[i];
+    nadevs[i]=sarg->nadevs[i];
     cid[i] = new int[ncpet[i]];
     for (int k=0; k<ncpet[i]; k++)
       cid[i][k] = sarg->cid[i][k];
@@ -794,6 +810,7 @@ void VMK::destruct(){
   delete [] pid;
   delete [] tid;
   delete [] ncpet;
+  delete [] nadevs;
   for (int i=0; i<npets; i++)
     delete [] cid[i];
   delete [] cid;
@@ -1164,6 +1181,7 @@ void *VMK::startup(class VMKPlan *vmp,
   int *new_pid = new int[new_npets];
   int *new_tid = new int[new_npets];
   int *new_ncpet = new int[new_npets];
+  int *new_nadevs = new int[new_npets];
   int *new_ncontributors = new int[new_npets];
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
@@ -1216,6 +1234,7 @@ void *VMK::startup(class VMKPlan *vmp,
       new_tid[new_petid]=local_tid;   // new tid is continuous count per pid
       // next, determine how many cores the new pet will have & its contributors
       new_ncpet[new_petid]=0;         // reset the counter
+      new_nadevs[new_petid]=nadevs[i];         // FIXME: Is this correct?
       new_ncontributors[new_petid]=0; // reset the counter
       for (int kk=0; kk<npets; kk++){
         int k = vmp->petlist[kk];   // indirection to preserve petlist order
@@ -1641,6 +1660,7 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].pid = new int[new_npets];
     sarg[i].tid = new int[new_npets];
     sarg[i].ncpet = new int[new_npets];
+    sarg[i].nadevs = new int[new_npets];
     sarg[i].cid = new int*[new_npets];
     sarg[i].ncontributors = new int[new_npets];
     sarg[i].contributors = new contrib_id*[new_npets];
@@ -1649,6 +1669,7 @@ void *VMK::startup(class VMKPlan *vmp,
       sarg[i].pid[j] = new_pid[j];
       sarg[i].tid[j] = new_tid[j];
       sarg[i].ncpet[j] = new_ncpet[j];
+      sarg[i].nadevs[j] = new_nadevs[j];
       sarg[i].cid[j] = new int[new_ncpet[j]];
       for (int k=0; k<new_ncpet[j]; k++)
         sarg[i].cid[j][k] = new_cid[j][k];
@@ -1715,6 +1736,7 @@ void *VMK::startup(class VMKPlan *vmp,
   delete [] new_pid;
   delete [] new_tid;
   delete [] new_ncpet;
+  delete [] new_nadevs;
   delete [] new_ncontributors;
   for (int i=0; i<new_npets; i++){
     delete [] new_cid[i];
@@ -1844,6 +1866,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     delete [] sarg[i].pid;
     delete [] sarg[i].tid;
     delete [] sarg[i].ncpet;
+    delete [] sarg[i].nadevs;
     delete [] sarg[i].ncontributors;
     for (int j=0; j<sarg[i].npets; j++){
       delete [] sarg[i].cid[j];
@@ -1897,8 +1920,8 @@ void VMK::print()const{
   printf("mpionly: %d\n", mpionly);
   printf("nothreadsflag: %d\n", nothreadsflag);
   for (int i=0; i<npets; i++){
-    printf("  lpid[%d]=%d, tid[%d]=%d, vas[%d]=%d, ncpet[%d]=%d",
-      i, lpid[i], i, tid[i], i, pid[i], i, ncpet[i]);
+    printf("  lpid[%d]=%d, tid[%d]=%d, vas[%d]=%d, ncpet[%d]=%d, nadevs[%d]=%d",
+      i, lpid[i], i, tid[i], i, pid[i], i, ncpet[i], i, nadevs[i]);
     for (int j=0; j<ncpet[i]; j++)
       printf(", cid[%d][%d]=%d", i, j, cid[i][j]);
     printf("\n");
@@ -1927,6 +1950,11 @@ esmf_pthread_t VMK::getMypthid(){
 
 int VMK::getNcpet(int i){
   return ncpet[i];
+}
+
+
+int VMK::getNadevs(int i){
+  return nadevs[i];
 }
 
 

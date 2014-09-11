@@ -182,6 +182,7 @@ class VMK{
     int *pid;       // pid (equal to rank in MPI_COMM_WORLD)
     int *tid;       // thread index
     int *ncpet;     // number of cores this pet references
+    int *nadevs;     // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
@@ -273,6 +274,7 @@ class VMK{
     int getMypet();                // return mypet
     esmf_pthread_t getMypthid();   // return mypthid
     int getNcpet(int i);           // return ncpet
+    int getNadevs(int i);          // return nadevs
     int getSsiid(int i);           // return ssiid
     MPI_Comm getMpi_c();           // return mpi_c
     int getNthreads(int i);        // return number of threads in group PET

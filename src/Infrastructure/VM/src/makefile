@@ -6,6 +6,10 @@ SOURCEC	  = ESMCI_VM.C ESMCI_VMKernel.C
 SOURCEF	  = 
 SOURCEH	  = 
 
+ifeq ($(ESMF_ACC_FRAMEWORK),opencl)
+SOURCEC += ESMC_OpenCLInfo.C
+endif
+
 # List all .h files which should be copied to common include dir
 STOREH	  = ESMCI_VM.h ESMCI_VMKernel.h
 
@@ -15,11 +19,11 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/VM/src
 
+include ${ESMF_DIR}/makefile
+
 CLEANDIRS  =
 CLEANFILES =
 CLOBBERDIS =
-
-include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 

@@ -236,6 +236,10 @@ ifndef ESMF_MOAB
 export ESMF_MOAB = default
 endif
 
+ifndef ESMF_ACC_FRAMEWORK
+export ESMF_ACC_FRAMEWORK = none
+endif
+
 
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
@@ -1125,6 +1129,33 @@ ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_MOAB_LIBPATH)
 endif
 endif
 
+#-------------------------------------------------------------------------------
+# ESMF Accelerator Framework
+#-------------------------------------------------------------------------------
+ifdef ESMF_ACC_FRAMEWORK
+ifeq ($(ESMF_ACC_FRAMEWORK),opencl)
+ESMF_CPPFLAGS             += -DESMF_ACC_FRAMEWORK=1
+endif
+ifeq ($(ESMF_ACC_FRAMEWORK),none)
+ESMF_CPPFLAGS             += -DESMF_NO_ACC_FRAMEWORK=1
+endif
+ifdef ESMF_ACC_FRAMEWORK_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_ACC_FRAMEWORK_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_ACC_FRAMEWORK_INCLUDE)
+endif
+ifdef ESMF_ACC_FRAMEWORK_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_ACC_FRAMEWORK_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_ACC_FRAMEWORK_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_ACC_FRAMEWORK_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_ACC_FRAMEWORK_LIBS))))
+endif
+ifdef ESMF_ACC_FRAMEWORK_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_ACC_FRAMEWORK_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_ACC_FRAMEWORK_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_ACC_FRAMEWORK_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_ACC_FRAMEWORK_LIBPATH)
+endif
+endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
