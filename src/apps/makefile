@@ -5,7 +5,6 @@ ALL: build_apps
 LOCDIR   = src/apps
 
 include $(ESMF_DIR)/makefile
-.NOTPARALLEL:
 DIRS      = ESMF_Info ESMF_InfoC ESMF_RegridWeightGen ESMF_WebServController ESMF_Scrip2Unstruct
 
 CLEANDIRS   =
