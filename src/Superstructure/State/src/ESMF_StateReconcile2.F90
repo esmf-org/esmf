@@ -155,6 +155,8 @@ contains
 !     for this capability is to {\it not} reconcile metadata unless told
 !     otherwise.
 !
+!     This call is collective across the specified VM.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
