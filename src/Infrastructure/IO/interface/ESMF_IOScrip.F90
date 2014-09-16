@@ -90,7 +90,6 @@
     integer:: localrc, ncStatus
     integer :: DimId, VarId
     integer :: ncid, local_rank
-    integer, pointer :: temp_dims(:)
     character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
@@ -182,24 +181,12 @@
         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
-      if (size(grid_dims,1) /= local_rank) then 
-      	 allocate(temp_dims(local_rank))
-         ncStatus = nf90_get_var (ncid, VarId, temp_dims)
-         if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE,&
-           errmsg,&
-           rc)) return
-	 grid_dims(1:local_rank)=temp_dims
-	 deallocate(temp_dims)
-       else  	   
-         ncStatus = nf90_get_var (ncid, VarId, grid_dims)
-         if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE,&
-           errmsg,&
-           rc)) return
-       endif	   
+      ncStatus = nf90_get_var (ncid, VarId, grid_dims(1:local_rank))
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
     end if
     ncStatus = nf90_close(ncid)
     if (CDFCheckError (ncStatus, &
