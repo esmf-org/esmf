@@ -3430,6 +3430,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif    
    
    ! Add pole information, if created from a 2D grid file
+    allocate(gridDims(2))
     call ESMF_ScripInq(filename, grid_rank=gridRank, grid_dims=gridDims, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
