@@ -1437,6 +1437,17 @@ def field_regrid_area_test():
     # return correct from unit test
     return correct
 
+def scrip_inq_test():
+    rank, dims = ESMP_ScripInq("src/ESMF/test/data/T42_grid.nc")
+    correct = True
+    if (rank != 2):
+        print "rank = {0}, but expected 2".format(rank)
+        correct = False
+    if (dims != np.array([128,64])).all():
+        print "dims = ",dims, " but expected [128,64]."
+        correct = False
+    return correct
+
 def version_compare_test():
     correct = True
     # should be -1
@@ -1611,7 +1622,8 @@ def main():
     (12,'Field regridding') : field_regrid_test,
     (12.1,'Field regridding grid and mesh') : field_regrid_gridmesh_test,
     (12.2,'Field regridding with zeroregion') : field_regrid_zeroregion_test,
-    (13.1,'Field regrid areas') : field_regrid_area_test}
+    (13.1,'Field regrid areas') : field_regrid_area_test,
+    (14.1,'Retrieve rank and dimensions from SCRIP file') : scrip_inq_test}
 
     # here we run the tests that are in the dispatch dictionary
     for test in sorted(dispatch.keys()):
