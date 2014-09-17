@@ -1384,38 +1384,32 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
-_ESMF.ESMC_ScripInqRank.restype = ct.c_int
-_ESMF.ESMC_ScripInqRank.argtypes = [ct.c_char_p]
-@deprecated
-@netcdf
-def ESMP_ScripInqRank(filename):
-    """
-    Preconditions: ESMP has been initialized.\n
-    Postconditions:  The grid rank of the specified SCRIP NetCDF file or an error code
-                     has been returned.\n
-    Arguments:\n
-        String :: filename\n
-    """
-    grid_rank = _ESMF.ESMC_ScripInqRank(filename)
-    return grid_rank
 
-_ESMF.ESMC_ScripInqDims.restype = ct.c_int
-_ESMF.ESMC_ScripInqDims.argtypes = [ct.c_char_p, 
-                                    np.ctypeslib.ndpointer(dtype=np.int32)]
+_ESMF.ESMC_ScripInq.restype = None
+_ESMF.ESMC_ScripInq.argtypes = [ct.c_char_p, 
+                                np.ctypeslib.ndpointer(dtype=np.int32), 
+                                ct.POINTER(ct.c_int),
+                                ct.POINTER(ct.c_int)]
 @deprecated
 @netcdf
-def ESMP_ScripInqDims(filename):
+def ESMP_ScripInq(filename):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions:  The grid dimensions of the specified SCRIP NetCDF file or an error code
-                     has been returned.\n
+    Postconditions:  The rank and grid dimensions of the specified SCRIP 
+                     NetCDF file or an error code have been returned.\n
     Arguments:\n
         String :: filename\n
     """
-    grid_rank = ESMP_ScripInqRank(filename)
-    dims = np.array(np.zeros(grid_rank),dtype=np.int32)
-    status = _ESMF.ESMC_ScripInqDims(filename, dims)
-    return dims
+    lrc = ct.c_int(0)
+    lrank = ct.c_int(0)
+    grid_dims = np.array([0,0], dtype=np.int32)
+    _ESMF.ESMC_ScripInq(filename, grid_dims, ct.byref(lrank), ct.byref(lrc))
+    rank = lrank.value
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
+                         constants._errmsg)
+    return rank, grid_dims
 
 _ESMF.ESMC_GridspecInq.restype = None
 _ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 
