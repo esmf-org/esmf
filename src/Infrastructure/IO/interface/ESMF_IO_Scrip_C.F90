@@ -40,7 +40,7 @@
 
     !arguments
     character(len=*), intent(in)  :: filename
-    integer, intent(out)          :: grid_dims(:)
+    integer, intent(out)          :: grid_dims(2)
     integer, intent(out)          :: grid_rank
     integer, intent(out)          :: rc
 
