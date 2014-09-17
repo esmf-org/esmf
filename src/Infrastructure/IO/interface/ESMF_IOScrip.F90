@@ -83,7 +83,7 @@
     character(len=*), intent(in)  :: filename
     integer, intent(out), optional :: grid_size
     integer, intent(out), optional :: grid_corners
-    integer, pointer, optional     :: grid_dims(:)
+    integer, intent(out), optional :: grid_dims(:)
     integer, intent(out), optional :: grid_rank
     integer, intent(out), optional :: rc
 
