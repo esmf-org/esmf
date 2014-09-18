@@ -267,6 +267,7 @@ def ESMP_LogSet(flush):
 
 #### GRID #####################################################
 
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
@@ -316,6 +317,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
 
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                            OptionalNamedConstant,

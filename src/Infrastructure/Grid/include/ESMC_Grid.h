@@ -53,6 +53,7 @@ typedef struct{
 
 
 //------------------------------------------------------------------------------
+//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreateNoPeriDim - Create a Grid with no periodic dimensions
 //
@@ -88,6 +89,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 //BOP
 // !IROUTINE: ESMC_GridCreate1PeriDim - Create a Grid with 1 periodic dimension
 //

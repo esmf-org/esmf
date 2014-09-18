@@ -62,6 +62,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
                           int *spherical, int *islatlondeg,
                           ESMCI_FortranStrLenArg nlen);
 //-----------------------------------------------------------------------------
+//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
 ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
@@ -88,6 +89,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+//TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
