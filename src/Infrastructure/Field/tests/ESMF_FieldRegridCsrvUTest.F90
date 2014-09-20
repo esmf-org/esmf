@@ -9366,9 +9366,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !              Mesh Ids
   !
   !   2.0   7 ------- 8 
-  !         |         |\ 
+  !         |         |\
   !   1.3   |    3    |  9 
-  !         |         |4    \  
+  !         |         |4    \
   !   1.0   4 ------- 5 -------- 6
   !         |         |          |
   !         |    1    |    2     |
@@ -9388,9 +9388,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !             Mesh Owners
   !
   !   2.0  2 ------- 2 
-  !        |         |\   
+  !        |         |\
   !   1.3  |    2    |  3 
-  !        |         |3   \    
+  !        |         |3   \
   !   1.0  0 ------- 0 -------- 1
   !        |         |          |
   !        |    0    |    1     |
@@ -9679,9 +9679,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !              Mesh Ids
   !
   !   2.0   7 ------- 8 
-  !         |         |\        
+  !         |         |\
   !   1.4   |    3    |  9 
-  !         |         |4    \  
+  !         |         |4    \
   !   1.0   4 ------- 5 -------- 6
   !         |         |          |
   !         |    1    |    2     |
@@ -9701,9 +9701,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !             Mesh Owners
   !
   !   2.0  2 ------- 2 
-  !        |         |\   
+  !        |         |\
   !   1.4  |    2    |  3 
-  !        |         |3   \    
+  !        |         |3   \
   !   1.0  0 ------- 0 -------- 1
   !        |         |          |
   !        |    0    |    1     |
@@ -10357,9 +10357,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !              Mesh Ids
   !
   !   20   7 ------- 8 
-  !         |         |\ 
+  !         |         |\
   !   13    |    3    |  9 
-  !         |         |4    \  
+  !         |         |4    \
   !   10   4 ------- 5 -------- 6
   !         |         |          |
   !         |    1    |    2     |
@@ -10379,9 +10379,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !             Mesh Owners
   !
   !   20  2 ------- 2 
-  !        |         |\   
+  !        |         |\
   !   12   |    2    |  3 
-  !        |         |3   \    
+  !        |         |3   \
   !   10   0 ------- 0 -------- 1
   !        |         |          |
   !        |    0    |    1     |
@@ -10671,9 +10671,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !              Mesh Ids
   !
   !   20.0   7 ------- 8 
-  !         |         |\        
+  !         |         |\
   !   14.0  |    3    |  9 
-  !         |         |4    \  
+  !         |         |4    \
   !   10.0  4 ------- 5 -------- 6
   !         |         |          |
   !         |    1    |    2     |
@@ -10693,9 +10693,9 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   !             Mesh Owners
   !
   !   20.0 2 ------- 2 
-  !        |         |\   
+  !        |         |\
   !   14.0 |    2    |  3 
-  !        |         |3   \    
+  !        |         |3   \
   !   10.0 0 ------- 0 -------- 1
   !        |         |          |
   !        |    0    |    1     |
