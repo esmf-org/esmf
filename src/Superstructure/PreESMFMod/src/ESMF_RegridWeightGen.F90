@@ -700,7 +700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	print *, "  Source File is in GRIDSPEC foramt"
 	if (useSrcCoordVar) then
 	   print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
-	               "' as the longitude and latitude variables"
+	               "' as the coordinate variables"
 	endif
 	if (srcMissingValue) then
 	   print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
@@ -730,7 +730,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	print *, "  Destination File is in GRIDSPEC format"	
 	if (useDstCoordVar) then
 	   print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), &
-	               "' as the longitude and latitude variables"
+	               "' as the coordinate variables"
 	endif
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
