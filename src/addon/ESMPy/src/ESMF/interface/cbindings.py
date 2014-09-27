@@ -1409,7 +1409,7 @@ def ESMP_ScripInq(filename):
     rank = lrank.value
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
+        raise ValueError('ESMC_ScripInq() failed with rc = '+str(rc)+'.    '+
                          constants._errmsg)
     return rank, grid_dims
 
