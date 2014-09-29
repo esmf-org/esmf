@@ -1512,7 +1512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: ncStatus
     integer ::  gridid, varid, len
     integer :: i
-    integer :: dimids(NF90_MAX_VAR_DIMS)
+    integer :: dimids(MAX_VARDIMS)
     integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
