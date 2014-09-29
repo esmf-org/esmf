@@ -1407,9 +1407,11 @@ def ESMP_ScripInq(filename):
     grid_dims = np.array([0,0], dtype=np.int32)
     _ESMF.ESMC_ScripInq(filename, grid_dims, ct.byref(lrank), ct.byref(lrc))
     rank = lrank.value
+    if rank == 1:
+        grid_dims = grid_dims[0:1]
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
+        raise ValueError('ESMC_ScripInq() failed with rc = '+str(rc)+'.    '+
                          constants._errmsg)
     return rank, grid_dims
 
