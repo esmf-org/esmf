@@ -1579,7 +1579,7 @@ void VM::getMemInfo(
 
   *virtMemPet = *physMemPet = -1; // initialize
   
-#ifdef ESMF_OS_Linux
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();
@@ -1626,7 +1626,7 @@ void VM::logMemInfo(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
-#ifdef ESMF_OS_Linux
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();

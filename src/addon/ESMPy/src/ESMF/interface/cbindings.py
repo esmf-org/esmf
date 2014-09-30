@@ -25,23 +25,6 @@ class ESMP_Field(ct.Structure):
 class ESMP_Mesh(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
-class ESMP_InterfaceIntStruct(ct.Structure):
-    _fields_ = [("ptr", ct.c_void_p)]
-
-class ESMP_InterfaceInt(object):
-    def __init__(self, array):
-        # segfault in 32 bit mode because was not copying array
-        arraycopy = array.copy()
-        self.ptr = ESMP_InterfaceIntCreate(array, len(array))
-        self.size = len(array)
-        # regist with atexit
-        import atexit; atexit.register(self.__del__)
-        self.__finalized = False
-    def __del__(self):
-        if not self.__finalized:
-            ESMP_InterfaceIntDestroy(self.ptr)
-            self.__finalized = True
-
 class ESMP_VM(ct.Structure):
         _fields_ = [("ptr", ct.c_void_p)]
 
@@ -50,24 +33,24 @@ class ESMP_VM(ct.Structure):
 class OptionalNumpyArrayFloat64(object):
         @classmethod
         def from_param(self, param):
-            if param == None:
+            if param is None:
                 return None
             elif param.dtype != np.float64:
                 raise TypeError("array must have data type Numpy.float64")
             else:
                 return param.ctypes
 
-# this class allows optional arguments to be passed in place of pointers to
-# ctypes structures, such as Fields and InterfaceInts
+# this class allows ESMP_InterfaceInts to be passed in place of 
+# pointers to ctypes structures
 class OptionalStructPointer(object):
         @classmethod
         def from_param(self, param):
-            if param == None:
+            if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_void_p)
-                fieldptr = ptr(ct.c_void_p(param.ptr))
-                return fieldptr
+                ptr = ct.POINTER(ESMP_InterfaceInt)
+                interfaceintptr = ptr(param)
+                return interfaceintptr
 
 # this class allows optional array of strings to be passed in plass of
 # a python list of strings
@@ -86,7 +69,7 @@ class OptionalArrayOfStrings(object):
 class OptionalField(object):
         @classmethod
         def from_param(self, param):
-            if param == None:
+            if param is None:
                 return None
             else:
                 ptr = ct.POINTER(ct.c_void_p)
@@ -97,7 +80,7 @@ class OptionalField(object):
 class OptionalNamedConstant(object):
         @classmethod
         def from_param(self, param):
-            if param == None:
+            if param is None:
                 return None
             else:
                 ptr = ct.POINTER(ct.c_uint)
@@ -109,7 +92,7 @@ class OptionalNamedConstant(object):
 class OptionalNumpyArrayInt32(object):
         @classmethod
         def from_param(self, param):
-            if param == None:
+            if param is None:
                 return None
             elif param.dtype != np.int32:
                 raise TypeError("array must have data type Numpy.int32")
@@ -162,44 +145,38 @@ def ESMP_Finalize():
 
 #### INTERFACEINT #############################################################
 
-_ESMF.ESMC_InterfaceIntCreate.restype = ESMP_InterfaceIntStruct
-_ESMF.ESMC_InterfaceIntCreate.argtypes = [np.ctypeslib.ndpointer(dtype=np.int32),
-                                          ct.c_int, ct.POINTER(ct.c_int)]
-@deprecated
-def ESMP_InterfaceIntCreate(arrayArg, lenArg):
+class ESMP_InterfaceInt(ct.Structure):
+    _fields_ = [("array", ct.POINTER(ct.c_int))]
+                
+    def __init__(self, arrayArg):
+        self.array = (ct.c_int*len(arrayArg))()
+        self.extent = arrayArg.shape
+        # initialize the InterfaceInt on the ESMF side
+        ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
+
+    def __repr__(self):
+        return 'ESMPyInterfaceInt [{}], length = {}'.format(
+            ','.join(str(self.array[i]) for i in range(self.extent[0])), 
+            self.extent[0])
+
+_ESMF.ESMC_InterfaceIntSet.restype = ct.c_int
+_ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt), 
+                                       np.ctypeslib.ndpointer(dtype=np.int32),
+                                       ct.c_int]
+def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
     """
     Preconditions: ESMP has been initialized and 'arrayArg' is a Numpy 
-                   array of type int.\n
-    Postconditions: An ESMP_InterfaceInt has been created.\n
+                   array of type int and 'lenArg' is the length of 'arrayArg'.\n
+    Postconditions: An ESMP_InterfaceInt pointer has been created.\n
     Arguments:\n
-        :RETURN: ESMP_InterfaceInt  :: interfaceInt\n
-        Numpy.array(dtype=np.int32) :: arrayArg\n
-        integer                     :: lenArg\n
+        :RETURN: ESMP_InterfaceInt.ptr :: grid\n
+        ESMP_InterfaceIntStruct.ptr    :: iiptr\n
+        Numpy.array(dtype=np.int32)    :: arrayArg\n
+        integer                        :: lenArg\n
     """
-    lrc = ct.c_int(0)
-    interfaceInt = _ESMF.ESMC_InterfaceIntCreate(arrayArg, lenArg, 
-                                                 ct.byref(lrc))
-    rc = lrc.value
+    rc = _ESMF.ESMC_InterfaceIntSet(ct.byref(iiptr), arrayArg, lenArg)
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_InterfaceIntCreate() failed with rc = '+str(rc)+
-                        '.    '+constants._errmsg)
-    return interfaceInt.ptr
-
-_ESMF.ESMC_InterfaceIntDestroy.restype = ct.c_int
-_ESMF.ESMC_InterfaceIntDestroy.argtypes = [ct.c_void_p]
-@deprecated
-def ESMP_InterfaceIntDestroy(interfaceInt):
-    """
-    Preconditions: An ESMP_InterfaceInt has been created.\n
-    Postconditions: The 'interfaceInt' has been destroyed.\n
-    Arguments:\n
-        ESMP_InterfaceInt :: interfaceInt\n
-    """
-    # segfault in Python with 'pointer being freed was not allocated' 
-    # without ct.byref()
-    rc = _ESMF.ESMC_InterfaceIntDestroy(ct.byref(ct.c_void_p(interfaceInt)))
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_InterfaceIntDestroy() failed with rc = '+str(rc)+
+        raise ValueError('ESMC_InterfaceIntSet() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
 #### VM #######################################################################
@@ -290,8 +267,9 @@ def ESMP_LogSet(flush):
 
 #### GRID #####################################################
 
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.c_void_p,
+_ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -326,7 +304,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(maxIndex_i.ptr, coordSys,
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))
 
@@ -339,8 +317,9 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     # create the ESMP Grid object from ctypes pointer
     return gridstruct
 
+#TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.c_void_p,
+_ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                            OptionalNamedConstant,
                                            OptionalNamedConstant,
                                            ct.POINTER(ct.c_int)]
@@ -375,7 +354,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreateNoPeriDim(maxIndex_i.ptr, coordSys,
+    gridstruct = _ESMF.ESMC_GridCreateNoPeriDim(ct.byref(maxIndex_i), coordSys,
                                                 coordTypeKind, ct.byref(lrc))
 
     # check the return code from ESMF
@@ -1094,21 +1073,21 @@ def ESMP_FieldCreateGrid(grid, name,
 
     # InterfaceInt requires int32 type numpy arrays
     gridToFieldMap_i = gridToFieldMap
-    if (gridToFieldMap != None):
+    if (gridToFieldMap is not None):
         if (gridToFieldMap.dtype != np.int32):
             raise TypeError('gridToFieldMap must have dtype=int32')
         gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedLBound_i = ungriddedLBound
-    if (ungriddedLBound != None):
+    if (ungriddedLBound is not None):
         if (ungriddedLBound.dtype != np.int32):
             raise TypeError('ungriddedLBound must have dtype=int32')
         ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedUBound_i = ungriddedUBound
-    if (ungriddedUBound != None):
+    if (ungriddedUBound is not None):
         if (ungriddedUBound.dtype != np.int32):
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
@@ -1168,21 +1147,21 @@ def ESMP_FieldCreate(mesh, name,
 
     # InterfaceInt requires int32 type numpy arrays
     gridToFieldMap_i = gridToFieldMap
-    if (gridToFieldMap != None):
+    if (gridToFieldMap is not None):
         if (gridToFieldMap.dtype != np.int32):
             raise TypeError('gridToFieldMap must have dtype=int32')
         gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedLBound_i = ungriddedLBound
-    if (ungriddedLBound != None):
+    if (ungriddedLBound is not None):
         if (ungriddedLBound.dtype != np.int32):
             raise TypeError('ungriddedLBound must have dtype=int32')
         ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedUBound_i = ungriddedUBound
-    if (ungriddedUBound != None):
+    if (ungriddedUBound is not None):
         if (ungriddedUBound.dtype != np.int32):
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
@@ -1358,14 +1337,14 @@ def ESMP_FieldRegridStore(srcField, dstField,
         
     #InterfaceInt requires int32 type numpy arrays
     srcMaskValues_i = srcMaskValues
-    if (srcMaskValues != None):
+    if (srcMaskValues is not None):
         if (srcMaskValues.dtype != np.int32):
             raise TypeError('srcMaskValues must have dtype=int32')
         srcMaskValues_i = ESMP_InterfaceInt(srcMaskValues)
 
     #InterfaceInt requires int32 type numpy arrays
     dstMaskValues_i = dstMaskValues
-    if (dstMaskValues != None):
+    if (dstMaskValues is not None):
         if (dstMaskValues.dtype != np.int32):
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
@@ -1407,38 +1386,34 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
-_ESMF.ESMC_ScripInqRank.restype = ct.c_int
-_ESMF.ESMC_ScripInqRank.argtypes = [ct.c_char_p]
-@deprecated
-@netcdf
-def ESMP_ScripInqRank(filename):
-    """
-    Preconditions: ESMP has been initialized.\n
-    Postconditions:  The grid rank of the specified SCRIP NetCDF file or an error code
-                     has been returned.\n
-    Arguments:\n
-        String :: filename\n
-    """
-    grid_rank = _ESMF.ESMC_ScripInqRank(filename)
-    return grid_rank
 
-_ESMF.ESMC_ScripInqDims.restype = ct.c_int
-_ESMF.ESMC_ScripInqDims.argtypes = [ct.c_char_p, 
-                                    np.ctypeslib.ndpointer(dtype=np.int32)]
+_ESMF.ESMC_ScripInq.restype = None
+_ESMF.ESMC_ScripInq.argtypes = [ct.c_char_p, 
+                                np.ctypeslib.ndpointer(dtype=np.int32), 
+                                ct.POINTER(ct.c_int),
+                                ct.POINTER(ct.c_int)]
 @deprecated
 @netcdf
-def ESMP_ScripInqDims(filename):
+def ESMP_ScripInq(filename):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions:  The grid dimensions of the specified SCRIP NetCDF file or an error code
-                     has been returned.\n
+    Postconditions:  The rank and grid dimensions of the specified SCRIP 
+                     NetCDF file or an error code have been returned.\n
     Arguments:\n
         String :: filename\n
     """
-    grid_rank = ESMP_ScripInqRank(filename)
-    dims = np.array(np.zeros(grid_rank),dtype=np.int32)
-    status = _ESMF.ESMC_ScripInqDims(filename, dims)
-    return dims
+    lrc = ct.c_int(0)
+    lrank = ct.c_int(0)
+    grid_dims = np.array([0,0], dtype=np.int32)
+    _ESMF.ESMC_ScripInq(filename, grid_dims, ct.byref(lrank), ct.byref(lrc))
+    rank = lrank.value
+    if rank == 1:
+        grid_dims = grid_dims[0:1]
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_ScripInq() failed with rc = '+str(rc)+'.    '+
+                         constants._errmsg)
+    return rank, grid_dims
 
 _ESMF.ESMC_GridspecInq.restype = None
 _ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 

@@ -1567,7 +1567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag
 !      different from the one stored in the {\tt ESMF\_Grid} object. The default
-!      value is {\tt ESMF\_INDEXFLAG\_DELOCAL}
+!      value is {\tt ESMF\_INDEX\_DELOCAL}
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -1680,7 +1680,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateGridTKR = ESMF_FieldCreate(grid, arrayspec, &
       indexflag=indexflag, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=name, rc=rc)
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1745,7 +1745,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag 
 !      different from the one stored in the {\tt ESMF\_Grid} object.The default
-!      value is {\tt ESMF\_INDEXFLAG\_DELOCAL}
+!      value is {\tt ESMF\_INDEX\_DELOCAL}
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -2670,7 +2670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateLSTKR = ESMF_FieldCreate(locstream, arrayspec, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        name=name, rc=rc)
+        name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3342,7 +3342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, &
       meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      name=name, rc=rc)
+      name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4061,7 +4061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, arrayspec, &
         xgridside=xgridside, gridindex=gridIndex, &
         gridToFieldMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
-        ungriddedUBound=ungriddedUBound, name=name, rc=rc)
+        ungriddedUBound=ungriddedUBound, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

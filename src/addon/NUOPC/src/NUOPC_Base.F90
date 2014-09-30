@@ -77,6 +77,7 @@ module NUOPC_Base
   public NUOPC_StateIsUpdated
   public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
+  public NUOPC_StateReconcile
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
@@ -126,7 +127,7 @@ module NUOPC_Base
 !   to the currentTime of {\tt checkClock}.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     type(ESMF_Time)           :: checkCurrTime, currTime, stopTime, startTime
     type(ESMF_TimeInterval)   :: checkTimeStep, timeStep
     type(ESMF_Direction_Flag) :: direction
@@ -833,7 +834,7 @@ module NUOPC_Base
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Updates the time stamp on all Fields in the {\tt dstFields} FieldBundle to
-!   be the same as in the {\tt dstFields} FieldBundle.
+!   be the same as in the {\tt srcFields} FieldBundle.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -842,8 +843,8 @@ module NUOPC_Base
     type(ESMF_Field), allocatable :: dstFieldList(:)
     integer                       :: i, valueList(9), srcCount, dstCount
     
-!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
-!gjtdebug    character(5*ESMF_MAXSTR):: msgString
+!gjtdebug character(ESMF_MAXSTR)  :: tempString1, tempString2
+!gjtdebug character(5*ESMF_MAXSTR):: msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1319,7 +1320,7 @@ endif
 !   account the direction of the Clock.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
+    ! local variables
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2584,7 +2585,12 @@ endif
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        if (.not.NUOPC_StateIsAtTime) exit
+        if (.not.NUOPC_StateIsAtTime) then
+          write (msgString, *) "Field not at expected time for item "// &
+            trim(adjustl(iString))//": "//trim(stdItemNameList(i))
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+          exit
+        endif
       enddo
     endif
     
@@ -2771,7 +2777,8 @@ endif
     type(ESMF_Field), intent(in)            :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Realizes a previously advertised Field in {\tt state}.
+!   Realizes a previously advertised Field in {\tt state} by replacing the
+!   advertised Field with {\tt field}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2781,12 +2788,22 @@ endif
     character(ESMF_MAXSTR)  :: Units
     character(ESMF_MAXSTR)  :: LongName
     character(ESMF_MAXSTR)  :: ShortName
-    character(ESMF_MAXSTR)  :: ProducerConnection
-    character(ESMF_MAXSTR)  :: ConsumerConnection
-    character(ESMF_MAXSTR)  :: TransferOfferGeomObject
-    character(ESMF_MAXSTR)  :: TransferActionGeomObject
+    integer                 :: i
+    integer, parameter      :: attrCount=6
+    character(ESMF_MAXSTR)  :: attrList(attrCount)
+    character(ESMF_MAXSTR)  :: tempString
     
     if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Set up a customized list of Attributes to be copied
+    attrList(1) = "Connected"
+    attrList(2) = "ProducerConnection"
+    attrList(3) = "ConsumerConnection"
+    attrList(4) = "Updated"
+    attrList(5) = "TransferOfferGeomObject"
+    attrList(6) = "TransferActionGeomObject"
+    
+    ! Obtain the advertised Field
     
     call ESMF_FieldGet(field, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2795,6 +2812,8 @@ endif
     call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! Obtain basic attributes from the advertised Field
       
     call NUOPC_FieldAttributeGet(advertisedField, name="StandardName", &
       value=StandardName, rc=rc)
@@ -2815,60 +2834,54 @@ endif
       value=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, name="ProducerConnection", &
-      value=ProducerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, name="ConsumerConnection", &
-      value=ConsumerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, &
-      name="TransferOfferGeomObject", value=TransferOfferGeomObject, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(advertisedField, &
-      name="TransferActionGeomObject", value=TransferActionGeomObject, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
+    
+    ! Add the Field attributes to the realizing Field and set basic values
+    
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
       Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
-    ! set ProducerConnection
-    call NUOPC_FieldAttributeSet(field, &
-      name="ProducerConnection", value=ProducerConnection, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    ! Loop over the list of Attributes and transfer between Fields
+    
+    do i=1, attrCount
       
-    ! set ConsumerConnection
-    call NUOPC_FieldAttributeSet(field, &
-      name="ConsumerConnection", value=ConsumerConnection, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_FieldAttributeGet(advertisedField, name=trim(attrList(i)), &
+        value=tempString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set TransferOfferGeomObject
-    call NUOPC_FieldAttributeSet(field, &
-      name="TransferOfferGeomObject", value=TransferOfferGeomObject, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_FieldAttributeSet(field, name=trim(attrList(i)), &
+        value=trim(tempString), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set TransferActionGeomObject
-    call NUOPC_FieldAttributeSet(field, &
-      name="TransferActionGeomObject", value=TransferActionGeomObject, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    enddo
+    
+    ! Finally replace the advertised Field with the realizing Field
       
     call ESMF_StateReplace(state, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateReconcile - Reconcile a State
+! !INTERFACE:
+  subroutine NUOPC_StateReconcile(state, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Reconcile the {\tt state} as required by NUOPC Layer.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_StateReconcile(state, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
@@ -2893,6 +2906,7 @@ endif
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field),       pointer       :: stdFieldList(:)
     character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     type(ESMF_Time)         :: time
@@ -2917,9 +2931,10 @@ endif
   
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
+    nullify(stdFieldList)
   
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, rc=rc)
+      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -2927,11 +2942,7 @@ endif
     
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
-        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        field=stdFieldList(i)
         if (present(selective)) then
           if (selective) then
             call ESMF_AttributeGet(field, &
@@ -2968,6 +2979,7 @@ endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    if (associated(stdFieldList)) deallocate(stdFieldList)
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2990,19 +3002,21 @@ endif
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field),       pointer       :: stdFieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
     
-!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, msgString
+!gjtdebug character(ESMF_MAXSTR)  :: tempString1, msgString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
+    nullify(stdFieldList)
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, rc=rc)
+      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -3022,14 +3036,7 @@ endif
 
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
-
-        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-          
+        field=stdFieldList(i)
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="General", &
@@ -3074,6 +3081,7 @@ endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    if (associated(stdFieldList)) deallocate(stdFieldList)
     
   end subroutine
   !-----------------------------------------------------------------------------

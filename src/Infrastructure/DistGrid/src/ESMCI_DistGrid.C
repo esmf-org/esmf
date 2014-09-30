@@ -101,7 +101,8 @@ DistGrid *DistGrid::create(
     delayout = dg->delayout;
   }
   
-  if (firstExtra || lastExtra || indexflag || connectionList || vm){
+  if (present(firstExtra) || present(lastExtra) || indexflag ||
+    present(connectionList) || vm){
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterfaceInt usage
     int dimInterfaceInt;
@@ -109,7 +110,7 @@ DistGrid *DistGrid::create(
     // prepare connectionList
     bool connectionListInternalFlag = false;
     int *connectionListAlloc = NULL; // default
-    if (connectionList){
+    if (present(connectionList)){
       // connectionList was provided -> check for correct format
       int elementSize = 2*dg->dimCount+2;
       if (connectionList->dimCount != 2){
@@ -174,7 +175,7 @@ DistGrid *DistGrid::create(
     int totalCountInterfaceInt = dimCountInterfaceInt[0]
       * dimCountInterfaceInt[1];
     // consistency check the input argument firstExtra
-    if (firstExtra){
+    if (present(firstExtra)){
       if (firstExtra->dimCount != dimInterfaceInt){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
           "- distgrid and firstExtra arguments differ single/multi tile",
@@ -197,7 +198,7 @@ DistGrid *DistGrid::create(
       }
     }
     // consistency check the input argument lastExtra
-    if (lastExtra){
+    if (present(lastExtra)){
       if (lastExtra->dimCount != dimInterfaceInt){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
           "- distgrid and lastExtra arguments differ single/multi tile",
@@ -224,7 +225,7 @@ DistGrid *DistGrid::create(
 #if 0
     // TURN OFF ERROR WITH CONNECTIONS ON Extra edge, BECAUSE GRID NEEDS TO DO IT
     // edges modified by firstExtra or lastExtra cannot also be connected
-    if (connectionList){
+    if (present(connectionList)){
       // there are connections
       int elementSize = connectionList->extent[0];
       int connectionCount = connectionList->extent[1];
@@ -233,7 +234,7 @@ DistGrid *DistGrid::create(
         int tileA = element[0];
         int tileB = element[1];
         int *positionVector = element + 2;
-        if (firstExtra){
+        if (present(firstExtra)){
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
             if (positionVector[j]==0) continue; // BOB 
@@ -252,7 +253,7 @@ DistGrid *DistGrid::create(
             }
           }
         }
-        if (lastExtra){
+        if (present(lastExtra)){
           // there are possible modifications on the upper edge
           for (int j=0; j<dg->dimCount; j++){
             if (positionVector[j]==0) continue; // BOB 
@@ -277,7 +278,7 @@ DistGrid *DistGrid::create(
 #endif
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterfaceInt];
-    if (firstExtra)
+    if (present(firstExtra))
       for (int i=0; i<totalCountInterfaceInt; i++)
         minIndexAlloc[i] = dg->minIndexPDimPTile[i]
           - firstExtra->array[i];
@@ -287,7 +288,7 @@ DistGrid *DistGrid::create(
     InterfaceInt *minIndex = new InterfaceInt(minIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     int *maxIndexAlloc = new int[totalCountInterfaceInt];
-    if (lastExtra)
+    if (present(lastExtra))
       for (int i=0; i<totalCountInterfaceInt; i++)
         maxIndexAlloc[i] = dg->maxIndexPDimPTile[i]
           + lastExtra->array[i];
@@ -359,7 +360,7 @@ DistGrid *DistGrid::create(
           for (int k=0; k<dimCount; k++){
             deBlockListAlloc[i*2*dimCount+k] =
               dg->minIndexPDimPDe[i*dimCount+k];
-            if (firstExtra){
+            if (present(firstExtra)){
               if (deBlockListAlloc[i*2*dimCount+k]
                 == dg->minIndexPDimPTile[k]){
                 // found edge DE on single tile DistGrid
@@ -369,7 +370,7 @@ DistGrid *DistGrid::create(
             }
             deBlockListAlloc[i*2*dimCount+dimCount+k] =
               dg->maxIndexPDimPDe[i*dimCount+k];
-            if (firstExtra){
+            if (present(lastExtra)){
               if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
                 dg->maxIndexPDimPTile[k]){
                 // found edge DE on single tile DistGrid
@@ -398,7 +399,7 @@ DistGrid *DistGrid::create(
     delete maxIndex;
     delete [] maxIndexAlloc;
     if (connectionListInternalFlag){
-      if (connectionList)
+      if (present(connectionList))
         delete connectionList;
       if (connectionListAlloc)
         delete [] connectionListAlloc;
@@ -587,13 +588,13 @@ DistGrid *DistGrid::create(
   }
   
   // check the input and get the information together to call construct()
-  if (minIndex == NULL){
+  if (!present(minIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (maxIndex == NULL){
+  if (!present(maxIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to maxIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -629,7 +630,7 @@ DistGrid *DistGrid::create(
   }
   int petCount = vm->getNpets();
   int deCount=1;  // reset
-  if (regDecomp != ESMC_NULL_POINTER){
+  if (present(regDecomp)){
     if (regDecomp->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- regDecomp array must be of rank 1", ESMC_CONTEXT, rc);
@@ -666,7 +667,7 @@ DistGrid *DistGrid::create(
   }
   int *dummy;
   bool regDecompDeleteFlag = false;  // reset
-  if (regDecomp == ESMC_NULL_POINTER){
+  if (!present(regDecomp)){
     // regDecomp was not provided -> create a temporary default regDecomp
     regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount];
@@ -699,7 +700,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   bool deLabelListDeleteFlag = false;  // reset
-  if (deLabelList == ESMC_NULL_POINTER){
+  if (!present(deLabelList)){
     // deLabelList was not provided -> create a temporary default deLabelList
     deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
@@ -729,7 +730,7 @@ DistGrid *DistGrid::create(
     }
   }
   bool regDecompFirstExtraDeleteFlag = false;  // reset
-  if (regDecompFirstExtra == ESMC_NULL_POINTER){
+  if (!present(regDecompFirstExtra)){
     // regDecompFirstExtra was not provided -> create a temporary default
     regDecompFirstExtraDeleteFlag = true;  // set
     dummy = new int[dimCount];
@@ -751,7 +752,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   bool regDecompLastExtraDeleteFlag = false;  // reset
-  if (regDecompLastExtra == ESMC_NULL_POINTER){
+  if (!present(regDecompLastExtra)){
     // regDecompLastExtra was not provided -> create a temporary default
     regDecompLastExtraDeleteFlag = true;  // set
     dummy = new int[dimCount];
@@ -1047,13 +1048,13 @@ DistGrid *DistGrid::create(
   }
 
   // check the input and get the information together to call construct()
-  if (minIndex == NULL){
+  if (!present(minIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (maxIndex == NULL){
+  if (!present(maxIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to maxIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1088,7 +1089,7 @@ DistGrid *DistGrid::create(
     }
   }
   int petCount = vm->getNpets();
-  if (deBlockList == NULL){
+  if (!present(deBlockList)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to deBlockList array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1137,7 +1138,7 @@ DistGrid *DistGrid::create(
   }
   int *dummy;
   bool deLabelListDeleteFlag = false;  // reset
-  if (deLabelList == ESMC_NULL_POINTER){
+  if (!present(deLabelList)){
     // deLabelList was not provided -> create a temporary default deLabelList
     deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
@@ -1373,13 +1374,13 @@ DistGrid *DistGrid::create(
   }
 
   // check the input and get the information together to call construct()
-  if (minIndex == NULL){
+  if (!present(minIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to minIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (maxIndex == NULL){
+  if (!present(maxIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to maxIndex array", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1423,7 +1424,7 @@ DistGrid *DistGrid::create(
   int petCount = vm->getNpets();
   int deCount=0;  // reset
   int *deCountPTile;
-  if (regDecomp != ESMC_NULL_POINTER){
+  if (present(regDecomp)){
     if (regDecomp->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- regDecomp array must be of rank 2", ESMC_CONTEXT, rc);
@@ -1476,7 +1477,7 @@ DistGrid *DistGrid::create(
   }
   int *dummy, dummyLen[2];
   bool regDecompDeleteFlag = false;  // reset
-  if (regDecomp == ESMC_NULL_POINTER){
+  if (!present(regDecomp)){
     // regDecomp was not provided -> create a temporary default regDecomp
     regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount*tileCount];
@@ -1518,7 +1519,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   bool deLabelListDeleteFlag = false;  // reset
-  if (deLabelList == ESMC_NULL_POINTER){
+  if (!present(deLabelList)){
     // deLabelList was not provided -> create a temporary default deLabelList
     deLabelListDeleteFlag = true;  // set
     dummy = new int[deCount];
@@ -1548,7 +1549,7 @@ DistGrid *DistGrid::create(
     }
   }
   bool regDecompFirstExtraDeleteFlag = false;  // reset
-  if (regDecompFirstExtra == ESMC_NULL_POINTER){
+  if (!present(regDecompFirstExtra)){
     // regDecompFirstExtra was not provided -> create a temporary default
     regDecompFirstExtraDeleteFlag = true;  // set
     dummy = new int[dimCount*tileCount];
@@ -1580,7 +1581,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
   bool regDecompLastExtraDeleteFlag = false;  // reset
-  if (regDecompLastExtra == ESMC_NULL_POINTER){
+  if (!present(regDecompLastExtra)){
     // regDecompLastExtra was not provided -> create a temporary default
     regDecompLastExtraDeleteFlag = true;  // set
     dummy = new int[dimCount*tileCount];
@@ -1975,7 +1976,7 @@ int DistGrid::construct(
   // fill in the DistGrid object
   dimCount = dimCountArg;
   tileCount = tileCountArg;
-  if (connectionListArg != NULL){
+  if (present(connectionListArg)){
     // connectionList was provided
     int elementSize = 2*dimCount+2;
     if (connectionListArg->dimCount != 2){
@@ -2220,7 +2221,7 @@ int DistGrid::fillSeqIndexList(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  if (seqIndexList != NULL){
+  if (present(seqIndexList)){
     // seqIndexList provided -> error checking
     if ((seqIndexList)->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -3950,7 +3951,7 @@ int DistGrid::connection(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // check connetion argument
-  if (connection == NULL){
+  if (!present(connection)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to connection array", ESMC_CONTEXT, &rc);
     return rc;
@@ -3973,7 +3974,7 @@ int DistGrid::connection(
   connection->array[1] = tileIndexB;
   
   // check positionVector argument
-  if (positionVector == NULL){
+  if (!present(positionVector)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to positionVector array", ESMC_CONTEXT, &rc);
     return rc;
@@ -3995,7 +3996,7 @@ int DistGrid::connection(
     sizeof(int)*dimCount);
   
   // check on orientationVector
-  if (orientationVector != NULL){
+  if (present(orientationVector)){
     // orientationVector was provided
     if (orientationVector->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -4051,7 +4052,7 @@ int DistGrid::setCollocationPDim(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // check input
-  if (collocationPDimArg == NULL){
+  if (!present(collocationPDimArg)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to collocationPDimArg array", ESMC_CONTEXT, &rc);
     return rc;
@@ -4165,7 +4166,7 @@ int DistGrid::setArbSeqIndex(
       "- Specified collocation not found", ESMC_CONTEXT, &rc);
     return rc;
   }
-  if (arbSeqIndex == NULL){
+  if (!present(arbSeqIndex)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to arbSeqIndex array", ESMC_CONTEXT, &rc);
     return rc;

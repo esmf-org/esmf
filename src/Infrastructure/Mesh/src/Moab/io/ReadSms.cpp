@@ -31,6 +31,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <cstdio>
 #include <map>
 #include <set>
 #include <iostream>

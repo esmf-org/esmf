@@ -90,6 +90,54 @@ namespace ESMCI {
     dimCount = 0;
   }
   
+  void InterfaceInt::set(void){
+    // set NULL
+    array = NULL;
+    dimCount = 0;
+  }
+
+  void InterfaceInt::set(int *arrayArg, int lenArg){
+    /*
+    // this is a test to see if the data is passed in correctly
+    printf("InterfaceInt::set - arrayArg = [");
+    for (int i=0; i<lenArg; ++i)
+      printf("%d,", arrayArg[i]);
+    printf("], length = %d\n", lenArg);
+    */
+
+    // set special case 1d
+    array = arrayArg;
+    dimCount = 1;
+    extent[0]=lenArg;
+
+    /*
+    // this is a test to see if the data is passed in correctly
+    printf("InterfaceInt::set - arrayArg = [");
+    for (int i=0; i<extent[0]; ++i)
+      printf("%d,", array[i]);
+    printf("], length = %d\n", extent[0]);
+    printf("dimCount = %d\n", dimCount);
+    */
+
+  }
+
+  void InterfaceInt::set(std::vector<int> &arrayArg){
+    // set special case 1d
+    array = &(arrayArg[0]);
+    dimCount = 1;
+    extent[0]=arrayArg.size();
+  }
+
+  void InterfaceInt::set(int *arrayArg, int dimArg, const int *lenArg){
+    // set
+    array = arrayArg;
+    dimCount = dimArg;
+    for (int i=0; i<dimCount; i++)
+      extent[i]=lenArg[i];
+  }
   
+  bool present(InterfaceInt *ptr){
+    return ( (ptr != NULL) && (ptr->array != NULL) );
+  }
 
 } // namespace ESMCI

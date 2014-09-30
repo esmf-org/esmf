@@ -102,7 +102,7 @@ int main(void){
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
   maxIndex[1] = int(ub_y);
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   //----------------------------------------------------------------------------
   //EX_UTest_Multi_Proc_Only
@@ -110,12 +110,11 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
+  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

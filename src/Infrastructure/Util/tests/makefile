@@ -5,6 +5,7 @@ run:  run_unit_tests
 
 LOCDIR	  = src/Infrastructure/Util/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_UtilUTest \
                 $(ESMF_TESTDIR)/ESMF_FortranWordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_TypeKindGetUTest \

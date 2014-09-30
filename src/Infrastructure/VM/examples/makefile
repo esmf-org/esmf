@@ -6,7 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/VM/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiEx \

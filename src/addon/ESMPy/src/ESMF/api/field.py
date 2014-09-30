@@ -36,7 +36,7 @@ class Field(ma.MaskedArray):
         Required Arguments: \n
             grid: either a Grid or a Mesh with coordinates allocated on
                   at least one stagger location. \n
-            name: user friendly name for the Grid or Mesh. \n
+            name: user friendly name for the Field. \n
         Optional Arguments: \n
             typekind: the type of the Field data. \n
                 Argument values are: \n
@@ -122,9 +122,6 @@ class Field(ma.MaskedArray):
         data = 0
         mask = None
         if isinstance(grid, Grid):
-            # check some stuff
-            assert (grid.staggerloc[staggerloc])
-
             # call into ctypes layer
             struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc,
                                           local_grid_to_field_map, 
@@ -184,9 +181,10 @@ class Field(ma.MaskedArray):
         obj.ungridded_lower_bound = local_ungridded_lower_bound
         obj.ungridded_upper_bound = local_ungridded_upper_bound
         obj.grid = grid
+        obj.name = name
  
         return obj
-    
+
     @staticmethod
     def link_field_data(struct, grid, staggerloc, typekind):
         from operator import mul
@@ -197,6 +195,7 @@ class Field(ma.MaskedArray):
         # find the size of the local coordinates at this stagger location
         size = 0
         if isinstance(grid, Grid):
+            grid.verify_grid_bounds(StaggerLoc.CENTER)
             size = reduce(mul,grid.size_local[staggerloc])
         elif isinstance(grid, Mesh):
             size = grid.size_local[staggerloc]

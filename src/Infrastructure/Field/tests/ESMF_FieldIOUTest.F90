@@ -41,6 +41,7 @@ program ESMF_FieldIOUTest
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
   type(ESMF_Field) :: field_w_nohalo
+  type(ESMF_Field) :: field_gw, field_gr
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
@@ -49,7 +50,7 @@ program ESMF_FieldIOUTest
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
   ! field_s---Farray_sw; field_sr---Farray_sr
-  type(ESMF_Grid) :: grid
+  type(ESMF_Grid) :: grid, grid_g
 
   integer                                 :: rc
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
@@ -67,6 +68,9 @@ program ESMF_FieldIOUTest
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
   ! Set up
@@ -364,6 +368,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -371,13 +377,17 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
@@ -441,6 +451,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -448,13 +459,17 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error with Halos (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
@@ -496,6 +511,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Compare readin and the existing file
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
@@ -503,19 +519,24 @@ program ESMF_FieldIOUTest
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
+#else
+  Maxvalue = 1.0
+#endif
+
   write(name, *) "Compare readin data to the existing data"
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error without Halos (read-write) = ", Maxvalue
   call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Comparison did not failed as was expected"
+  write(failMsg, *) "Comparison did not fail as was expected"
   call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 
   deallocate (computationalLBound, computationalUBound)
   deallocate (exclusiveLBound, exclusiveUBound)
+  deallocate (Farray_sw)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -523,7 +544,10 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
 
+!------------------------------------------------------------------------
+! Test Field with STAGGERLOC_EDGE1 specified
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   rc = ESMF_SUCCESS                   ! Initialize
@@ -551,7 +575,7 @@ program ESMF_FieldIOUTest
     if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
         line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
-    print *, tlb, tub
+!    print *, tlb, tub
 
     ! Replace file first time through
     statusFlag = ESMF_FILESTATUS_REPLACE
@@ -586,13 +610,132 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
+! Test with ESMF_INDEX_GLOBAL
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Grid
+  grid_g = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
+      regDecomp=(/2,2/), indexflag=ESMF_INDEX_GLOBAL,  &
+      rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a gloablly indexed grid"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_gw=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
+           indexflag=ESMF_INDEX_GLOBAL,  &
+           name="temperature_g",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a gloablly indexed field from grid and fortran dummy array"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  allocate(exclusiveLBound(2))         ! dimCount=2
+  allocate(exclusiveUBound(2))         ! dimCount=2
+  call ESMF_FieldGet(field_gw, localDe=0, farrayPtr=Farray_w, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_gw from field"
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Fill array and write
+  Farray_w = localPet ! Fill
+  call ESMF_FieldWrite(field_gw, file="field_globalindex.nc",        &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write globally indexed Field"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_gr=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
+           indexflag=ESMF_INDEX_GLOBAL,  &
+           name="temperature_g",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a globally indexed field from grid and fortran dummy array"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! read array into Field.
+  call ESMF_FieldRead(field_gr, file="field_globalindex.nc",        &
+       rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Read globally indexed Field data"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  call ESMF_FieldGet(field_gr, localDe=0, farrayPtr=Farray_r, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_gr from field"
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Compare read-in data with expected
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_r == localPet))
+#else
+  rc = ESMF_FAILURE
+#endif
+  write(failMsg, *) "Failed comparison check"
+  write(name, *) "Compare read-in data with expected"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as was expected"
+  call ESMF_Test((rc==ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy globally indexed Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid_g, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Destroy all Fields and cleanup
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Field with no data can be destroyed
   call ESMF_FieldDestroy(field, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying a Field "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -607,6 +750,8 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_w_nohalo, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_w, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_gw, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"

@@ -80,7 +80,7 @@ void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt **factorIndexList,
+    ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
@@ -115,7 +115,16 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
-  ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_TRACE);
+#define PROGRESSLOG_off
+#define MEMLOG_off
+
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
+#endif
+
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate1.0"));
+#endif
  
   try {
 
@@ -133,7 +142,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // Check source mesh elements 
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check cells for conservative
-      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+//BOB      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
     } else {
 #if 0
       // STILL NEED TO FINISH THIS
@@ -170,7 +179,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+//BOB      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
       // Concave
       if (concave) {
@@ -195,8 +204,14 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
           "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
+#endif
 
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_TRACE);
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate2.0"));
+#endif
+
 
     // Compute Weights matrix
     IWeights wts;
@@ -217,8 +232,13 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
+#endif
 
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_TRACE);
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate3.0"));
+#endif
 
     // If requested get list of unmapped destination points
     std::vector<int> unmappedDstList;
@@ -234,8 +254,9 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         get_mesh_node_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
       }
     }
-
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): More unmapped points checking.", ESMC_LOGMSG_TRACE);
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): More unmapped points checking.", ESMC_LOGMSG_INFO);
+#endif
 
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
@@ -273,8 +294,13 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         }
       }
     }
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Prepare for ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
 
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): Prepare for ArraySMMStore().", ESMC_LOGMSG_TRACE);
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate4.0"));
+#endif
 
     /////// We have the weights, now set up the sparsemm object /////
 
@@ -364,24 +390,36 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
       if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
+#ifdef PROGRESSLOG_on
     char msgString[1024];
     sprintf(msgString, "c_esmc_regrid_create(): num_entries=%d.", num_entries);
-    
-    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_TRACE);
+    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
 
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering ArraySMMStore().", ESMC_LOGMSG_TRACE);
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate5.0"));
+#endif
 
     // Build the ArraySMM
     if (*has_rh != 0) {
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+      ESMC_Logical ignoreUnmatched = ESMF_FALSE;
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-            &num_entries, &iiptr, srcTermProcessing, pipelineDepth, &localrc);
+            &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
+            pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-    ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_TRACE);
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
+
+#ifdef MEMLOG_on
+  VM::logMemInfo(std::string("RegridCreate6.0"));
+#endif
 
     *nentries = num_entries;
     // Clean up.  If has_iw, then we will use the arrays to
@@ -451,7 +489,9 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     return;
   }
 
-  ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_TRACE);
+#ifdef PROGRESSLOG_on
+  ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
+#endif
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -885,6 +925,10 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
   int num_poly_nodes_orig;
   double poly_coords_orig[MAX_NUM_POLY_COORDS];
   
+
+printf(" IN CONCAVE\n");
+
+
   // Init variables
   *concave=false;
   *clockwise=false;

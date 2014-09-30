@@ -49,45 +49,6 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-/*
-  void FTN_X(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
-    ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
-    ESMCI::InterfaceInt **distgridToArrayMap,
-    ESMCI::InterfaceInt **computationalEdgeLWidthArg,
-    ESMCI::InterfaceInt **computationalEdgeUWidthArg,
-    ESMCI::InterfaceInt **computationalLWidthArg,
-    ESMCI::InterfaceInt **computationalUWidthArg, 
-    ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
-    ESMCI::InterfaceInt **undistUBoundArg,
-    char *name, int *len_name, int *rc,
-    ESMCI_FortranStrLenArg name_l){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraycreateallocate()"
-    // Initialize return code; assume routine not implemented
-    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    int localrc = ESMC_RC_NOT_IMPL;
-    // call into C++
-    *ptr = ESMCI::Array::create(arrayspec, *distgrid, *distgridToArrayMap,
-      *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
-      *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
-      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
-      *undistLBoundArg, *undistUBoundArg, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-    // set the name in the Array object
-    char *cname = ESMC_F90toCstring(name, *len_name);
-    if (cname){
-      (*ptr)->setName(cname);
-      delete [] cname;
-    }else if(*len_name){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-      return;
-    }
-  }
-*/
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //  Attribute object methods

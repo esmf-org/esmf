@@ -24,7 +24,8 @@ The following tables document the meaning of each initialization phase of the av
      {\tt IPDv00p1} & connectors                  & Construct their {\tt CplList} Attribute.\\ \hline
      {\tt IPDv00p2} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv00p2} & models, mediators, drivers  & Realize their import and export Fields.\\ \hline
-     {\tt IPDv00p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute and precompute the RouteHandle.\\ \hline
+     {\tt IPDv00p2a}& connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute. Reconcile the import and export States.\\ \hline
+     {\tt IPDv00p2b}& connectors                  & Precompute the RouteHandle.\\ \hline
      {\tt IPDv00p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv00p3} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv00p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
@@ -45,7 +46,8 @@ The following tables document the meaning of each initialization phase of the av
      {\tt IPDv01p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv01p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv01p3} & models, mediators, drivers  & Realize their "connected" import and export Fields.\\ \hline
-     {\tt IPDv01p3} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv01p3a}& connectors                  & Reconcile the import and export States.\\ \hline
+     {\tt IPDv01p3b}& connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv01p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv01p4} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv01p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
@@ -66,7 +68,8 @@ The following tables document the meaning of each initialization phase of the av
      {\tt IPDv02p2} & connectors                  & Set the {\tt Connected} Attribute on each import and export Field according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv02p3} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv02p3} & models, mediators, drivers  & Realize their "connected" import and export Fields.\\ \hline
-     {\tt IPDv02p3} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv02p3a}& connectors                  & Reconcile the import and export States.\\ \hline
+     {\tt IPDv02p3b}& connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv02p4} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv02p4} & models, mediators, drivers  & Check for compatibility of their Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv02p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
@@ -99,7 +102,8 @@ The following tables document the meaning of each initialization phase of the av
      {\tt IPDv03p4} & connectors                  & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline
      {\tt IPDv03p5} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv03p5} & models, mediators, drivers  & Realize all Fields that have {\tt TransferActionGeomObject} equal to "accept" on the transferred Grid/Mesh objects.\\ \hline
-     {\tt IPDv03p5} & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv03p5a}& connectors                  & Reconcile the import and export States.\\ \hline
+     {\tt IPDv03p5b}& connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv03p6} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv03p6} & models, mediators, drivers  & Check compatibility of their Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv03p7} & driver-self                 & {\em unspecified by NUOPC}\\ \hline
@@ -133,7 +137,8 @@ The following tables document the meaning of each initialization phase of the av
      {\tt IPDv04p4}   & connectors                  & Transfer the full Grid/Mesh objects (with coordinates) for Field pairs that have a provider and an acceptor side.\\ \hline
      {\tt IPDv04p5}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv04p5}   & models, mediators, drivers  & Realize all Fields that have {\tt TransferActionGeomObject} equal to "accept" on the transferred Grid/Mesh objects.\\ \hline
-     {\tt IPDv04p5}   & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv04p5a}  & connectors                  & Reconcile the import and export States.\\ \hline
+     {\tt IPDv04p5b}  & connectors                  & Precompute the RouteHandle according to the {\tt CplList} Attribute.\\ \hline
      {\tt IPDv04p6}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv04p6}   & models, mediators, drivers  & Check compatibility of their Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv04p7}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline

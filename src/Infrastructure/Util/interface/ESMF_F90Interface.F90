@@ -48,9 +48,9 @@ module ESMF_F90InterfaceMod
 #endif
   private
 #ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+    integer(ESMF_KIND_I8), dimension(10) :: shallowMemory = 0
 #else
-    type(ESMF_Pointer) :: this
+    integer(ESMF_KIND_I8), dimension(10) :: shallowMemory
 #endif
     integer, pointer   :: farray1D(:)       ! holding Fortran reference
     integer, pointer   :: farray2D(:,:)     ! holding Fortran reference
@@ -143,9 +143,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    ! mark this InterfaceInt as invalid
-    array%this = ESMF_NULL_POINTER
-    
     ! initialize
     nullify(farray1DPtr)
     nullify(farray2DPtr)
@@ -225,7 +222,9 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! mark this InterfaceInt as invalid
-    array%this = ESMF_NULL_POINTER
+    call c_ESMC_InterfaceIntSetInvalid(array, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! initialize Fortran array references
     nullify(array%farray1D)
@@ -259,11 +258,13 @@ contains
         len = shape(farray1D)
         if (all(len .ne. 0)) then
           call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call c_ESMC_InterfaceIntCreate1D(array, 0, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(len)
       endif
     endif
@@ -275,11 +276,13 @@ contains
         len = shape(farray2D)
         if (all(len .ne. 0)) then
           call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call c_ESMC_InterfaceIntCreate2D(array, 0, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(len)
       endif
     endif
@@ -291,11 +294,13 @@ contains
         len = shape(farray3D)
         if (all(len .ne. 0)) then
           call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call c_ESMC_InterfaceIntCreate3D(array, 0, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(len)
       endif
     endif
@@ -344,11 +349,6 @@ contains
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! call into the C++ interface
-    call c_ESMC_InterfaceIntDestroy(array, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! deallocate Fortran arrays whose ownership was transferred
     if (associated(array%farray1D)) then

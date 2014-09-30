@@ -1365,10 +1365,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                         :: localrc        ! local return code
-    type(ESMF_StartRegion_Flag)  :: opt_startregion ! helper variable
-    type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
-    type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
+    integer                         :: localrc          ! local return code
+    type(ESMF_StartRegion_Flag)     :: opt_startregion  ! helper variable
+    type(ESMF_InterfaceInt)         :: haloLDepthArg    ! helper variable
+    type(ESMF_InterfaceInt)         :: haloUDepthArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2066,7 +2066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleRedistStore()"
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreNF()"
 !BOP
 ! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute an ArrayBundle redistribution without local factor argument
 !

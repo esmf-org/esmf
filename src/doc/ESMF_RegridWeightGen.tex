@@ -100,8 +100,8 @@ currently work for nearest destination to source method ("-m nearestdtos"), so w
 
  The default interpolation method for the weight generation application is bilinear. The algorithm used by this application to 
 generate the bilinear weights is the standard one found in many textbooks.  Each destination point is mapped to a location
-in the source Mesh, the position of the destination point relative
-to the source points surrounding it is used to calculate the interpolation weights.
+in the source Mesh, the position of the destination point relative to the source points surrounding it is used to calculate the interpolation weights. A restriction on
+bilinear interpolation is that ESMF doesn't support self-intersecting cells (e.g. a cell twisted into a bow tie). 
 
 This application can also be used to generate patch interpolation weights. Patch
 interpolation is the ESMF version of a technique called "patch recovery" commonly
@@ -129,7 +129,8 @@ polynomial is the bilinear weight of the destination point with regard to that c
 The patch method has a larger stencil than the bilinear, for this reason the patch weight matrix can be correspondingly larger
 than the bilinear matrix (e.g. for a quadrilateral grid the patch matrix is around 4x the size of
 the bilinear matrix). This can be an issue when performing a regrid weight generation operation close to the memory
-limit on a machine.
+limit on a machine. A restriction on patch interpolation is that ESMF doesn't support self-intersecting cells (e.g. a cell twisted into a 
+bow tie). 
 
 The nearest neighbor interpolation options work by associating a point in one set with the closest point in another set. If two points are equally
 close then the point with the smallest index is arbitrarily used (i.e. the point with that would have the smallest index in the weight matrix). There are two
@@ -157,10 +158,8 @@ the user expects cell edges as straight lines in latitude longitude space, they 
 user should also avoid using cells which contain one edge that runs half way or more around the earth, because the regrid weight calculation assumes the
 edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth from one another (antipodal points).
 However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into two or more smaller grid cells.
-This allows the application to resolve the ambiguity in edge direction. One other unexpected case which might cause problems is a grid 
-containing a concave cell with exactly four sides, this will cause the application to return an error. The application will work for a
-grid containing concave cells as long as all of them have more than four sides. 
-
+This allows the application to resolve the ambiguity in edge direction. Another restriction is that ESMF doesn't support self-intersecting cells (e.g. a cell twisted into a 
+bow tie). 
 
  It is important to note that by default (i.e. using destination area normalization) conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the true interpolated values for cells which are only partially covered by the source grid.
 The fraction also needs to be included when computing the total source and destination integrals. To include the fraction in the conservative weights, the user can specify the fraction area normalization type. This can be done by specifying "\verb+--+norm\_type fracarea'' on the command line. 

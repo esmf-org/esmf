@@ -196,7 +196,7 @@ int ESMC_ArraySetLWidth(ESMC_Array array,
  
   // call into ESMCI method
   localrc = ap->setComputationalLWidth(
-    (ESMCI::InterfaceInt *)(computationalLWidthArg.ptr));
+    (ESMCI::InterfaceInt *)&computationalLWidthArg);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 

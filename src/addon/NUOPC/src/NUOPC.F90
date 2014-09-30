@@ -74,6 +74,7 @@ module NUOPC
   public NUOPC_StateIsUpdated
   public NUOPC_StateNamespaceAdd
   public NUOPC_StateRealizeField
+  public NUOPC_StateReconcile
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
@@ -91,6 +92,7 @@ module NUOPC
   ! defined in NUOPC_Comp
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSpecialize

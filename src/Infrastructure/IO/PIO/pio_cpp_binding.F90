@@ -1302,7 +1302,11 @@ end subroutine pio_cpp_setnum_ost
 function pio_cpp_file_is_open(file) result(is_open) bind(c)
 
   !  bind to C
+#if !defined (ESMF_PGI_C_BOOL_BUG)
   use, intrinsic :: iso_c_binding, only: c_bool, c_ptr, c_f_pointer
+#else
+  use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
+#endif
 
   !  import pio types
   use esmfpio_types, only: file_desc_t
@@ -1313,7 +1317,11 @@ function pio_cpp_file_is_open(file) result(is_open) bind(c)
   implicit none
 
   !  function result
+#if !defined (ESMF_PGI_C_BOOL_BUG)
   logical(c_bool) :: is_open
+#else
+  integer(4) :: is_open
+#endif
 
   !  dummy arguments
   type(c_ptr), value :: file
@@ -1332,7 +1340,11 @@ function pio_cpp_file_is_open(file) result(is_open) bind(c)
   o = pio_file_is_open(file_desc)
 
   !  convert the arguments back to C
+#if !defined (ESMF_PGI_C_BOOL_BUG)
   is_open = logical(o, c_bool)
+#else
+  is_open = merge (1, 0, o)
+#endif
 
   !  return to the cpp caller
   return

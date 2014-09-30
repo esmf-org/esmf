@@ -230,6 +230,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 {\bf Restrictions:}
  \begin{itemize}
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported 
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
@@ -269,6 +270,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 {\bf Restrictions:}
  \begin{itemize}
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 
@@ -464,8 +466,8 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
 
 {\bf Restrictions:}
  \begin{itemize}
- \item Concave cells are currently not supported
  \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 

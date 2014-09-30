@@ -160,6 +160,10 @@ endif
 endif
 
 ############################################################
+# Disable PIO until F2003 C Interop is verified to work
+ESMF_PIO               =
+
+############################################################
 # How to specify module directories
 #
 ESMF_F90IMOD        = -p

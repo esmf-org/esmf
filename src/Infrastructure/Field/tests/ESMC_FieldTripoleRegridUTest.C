@@ -48,7 +48,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(max_x);
   maxIndex[1] = int(max_y);
-  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, NULL);
+  ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
 
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
@@ -57,11 +57,10 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   polekind[1] = ESMC_POLEKIND_BIPOLE;
   ESMC_PoleKind_Flag *pkptr = polekind;
 
-  grid = ESMC_GridCreate1PeriDim(i_maxIndex, &coordsys, &typekind, pkptr, NULL);
+  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, &coordsys, &typekind, pkptr, NULL);
 
   // free memory
   free(maxIndex);
-  ESMC_InterfaceIntDestroy(&i_maxIndex);
   //----------------------------------------------------------------------------
 
   // add coordinates to center
@@ -249,7 +248,8 @@ int main(void){
   //----------------------------------------------------------------------------
   int *maskValues = (int *)malloc(sizeof(int));
   maskValues[0] = 1;
-  ESMC_InterfaceInt i_maskValues = ESMC_InterfaceIntCreate(maskValues, 1, &rc);
+  ESMC_InterfaceInt i_maskValues;
+  rc = ESMC_InterfaceIntSet(&i_maskValues, maskValues, 1);
 
   //----------------------------------------------------------------------------
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;

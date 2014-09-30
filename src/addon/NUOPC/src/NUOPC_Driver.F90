@@ -210,7 +210,7 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
-    ! local variables    
+    ! local variables
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -639,11 +639,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelIS(i), &
+      call NUOPC_StateAttributeSet(is%wrap%modelIS(i), &
         name="Namespace", value=trim(namespace), &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
-        convention="NUOPC", purpose="General", &
-#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -653,11 +650,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelES(i), &
+      call NUOPC_StateAttributeSet(is%wrap%modelES(i), &
         name="Namespace", value=trim(namespace), &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
-        convention="NUOPC", purpose="General", &
-#endif
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -792,6 +786,14 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
+    call loopConnectorCompsS(phaseString="IPDv00p2a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv00p2b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call loopConnectorCompsS(phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -866,23 +868,35 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! connectorComps
-    call loopConnectorCompsS(phaseString="IPDv00p2", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv01p3a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv01p3", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv01p3b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv02p3", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv02p3a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv03p5", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv02p3b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv04p5", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv03p5a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv03p5b", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv04p5a", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    call loopConnectorCompsS(phaseString="IPDv04p5b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1144,7 +1158,8 @@ module NUOPC_Driver
           tempString = modelPhaseMap(i)%phases(k)
           ind = index(trim(tempString), "=")
           modelPhaseMap(i)%phaseKey(k) = tempString(1:ind-1)
-          read (tempString(ind+1:ind+2), "(i1)") modelPhaseMap(i)%phaseValue(k)
+          read (tempString(ind+1:len(tempString)), "(i4)") &
+            modelPhaseMap(i)%phaseValue(k)
 !print *, "setupModelPhaseMap", k, ":", trim(tempString), " ", &
 !  trim(modelPhaseMap(i)%phaseKey(k)), modelPhaseMap(i)%phaseValue(k)
         enddo
@@ -1187,7 +1202,8 @@ module NUOPC_Driver
           tempString = connectorPhaseMap(i,j)%phases(k)
           ind = index(trim(tempString), "=")
           connectorPhaseMap(i,j)%phaseKey(k) = tempString(1:ind-1)
-          read (tempString(ind+1:ind+2), "(i1)") connectorPhaseMap(i,j)%phaseValue(k)
+          read (tempString(ind+1:len(tempString)), "(i4)") &
+            connectorPhaseMap(i,j)%phaseValue(k)
 !print *, "setupConnectorPhaseMap", k, ":", trim(tempString), " ", &
 !  trim(connectorPhaseMap(i,j)%phaseKey(k)), connectorPhaseMap(i,j)%phaseValue(k)
         enddo
@@ -1463,7 +1479,7 @@ module NUOPC_Driver
             call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
               msg="Initialize data-dependency resolution loop "// &
               "has entered a dead-lock situation.", &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return  ! bail out of data-dependency resolution loop, prevent lock
           endif
           
@@ -2131,7 +2147,7 @@ module NUOPC_Driver
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2174,11 +2190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(type_InternalState)        :: is
     integer                         :: iComp, i
     type(ESMF_GridComp)             :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2218,48 +2230,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error
@@ -2268,7 +2251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2355,7 +2338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2368,7 +2351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2411,11 +2394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: src, dst, i
     type(ESMF_GridComp)             :: srcComp, dstComp
     type(ESMF_CplComp)              :: comp
-    logical                         :: phaseFlag
     integer                         :: phase
-    integer                         :: itemCount, stat, ind, max
-    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
-    character(len=NUOPC_PhaseMapStringLength)           :: tempString
     logical                         :: relaxed
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2462,7 +2441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="src component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2475,7 +2454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="dst component could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -2487,43 +2466,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Figure out the phase number
-    phaseFlag = .false.           ! initialize
-    call ESMF_AttributeGet(comp, name="RunPhaseMap", itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+    ! Figure out the phase index
+    call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
+      phaseLabel=phaseLabel, phaseIndex=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      allocate(phases(itemCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg="Allocation of temporary data structure.", &
-        line=__LINE__, &
-        file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_AttributeGet(comp, name="RunPhaseMap", valueList=phases, &
-      convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (present(phaseLabel)) then
-        do i=1, itemCount
-          if (index(phases(i),trim(phaseLabel//"=")) > 0) exit
-        enddo
-        if (i <= itemCount) then
-          phaseFlag = .true.
-          tempString = trim(phases(i))
-        endif
-      else
-        phaseFlag = .true.
-        tempString = trim(phases(1))  ! by default select the first map entry
-      endif
-      if (phaseFlag) then
-        ind = index(tempString, "=")
-        max = len(tempString)
-        read (tempString(ind+1:max), "(i4)") phase    ! obtain phase index
-      endif
-      ! clean-up
-      deallocate(phases)
-    endif
-    if (.not.phaseFlag) then
+    
+    ! check the result of the seach
+    if (phase < 0) then
       ! phase could not be identified -> consider relaxedFlag
       if (relaxed) then
         ! bail out without error
@@ -2532,7 +2482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
     endif
@@ -3159,7 +3109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if ((compIndex<1) .or. (compIndex>is%wrap%modelCount)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="compIndex is out of bounds.", &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
     

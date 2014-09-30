@@ -575,8 +575,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Should I have only PetNO=0 to open the file and find out the size?
     if (PetNo == 0) then
       if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-	      call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
-	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+        allocate(srcdims(2))
+        call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
+        if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
           write(*,*)
 	        print *, 'ERROR: Unable to get dimension information from:', srcfile
         endif
@@ -590,12 +591,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
         allocate(srcdims(2))
-	      if (useSrcCoordVar) then
-   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
-	      else
-	        call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
- 	      endif
-	      if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
+        if (useSrcCoordVar) then
+           call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
+        else
+           call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
+        endif
+        if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
           write(*,*)
 	        print *, 'ERROR: Unable to get dimension information from:', srcfile
         endif
@@ -608,6 +609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         allocate(srcdims(2))
 	srcIsReg = .false.
       endif
+      allocate(dstdims(2))
       if (localdstFileType == ESMF_FILEFORMAT_SCRIP) then
 	call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
 	if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
@@ -623,7 +625,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstIsReg = .false.
         endif
       elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	allocate(dstdims(2))
 	if (useDstCoordVar) then
 	    call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordinateVars, rc=localrc)
 	else
@@ -639,7 +640,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	dstrank = 2
 	dstIsReg = .true.
       else
-        allocate(dstdims(2))
 	dstIsReg = .false.
       endif
       commandbuf(:) = 0
@@ -700,7 +700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	print *, "  Source File is in GRIDSPEC foramt"
 	if (useSrcCoordVar) then
 	   print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
-	               "' as the longitude and latitude variables"
+	               "' as the coordinate variables"
 	endif
 	if (srcMissingValue) then
 	   print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
@@ -730,7 +730,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	print *, "  Destination File is in GRIDSPEC format"	
 	if (useDstCoordVar) then
 	   print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), &
-	               "' as the longitude and latitude variables"
+	               "' as the coordinate variables"
 	endif
 	if (dstMissingValue) then
 	   print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"

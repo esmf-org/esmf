@@ -654,7 +654,9 @@ void PIO_Handler::arrayRead(
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
     localrc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
     // An error here means the variable is not in the file
-    statusOK = CHECKPIOERROR(localrc, "variable not found in file",
+    std::string errmsg;
+    errmsg = std::string("variable ").append (varname).append (" not found in file");
+    statusOK = CHECKPIOERROR(localrc, errmsg.c_str(),
                              localrc);
   }
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
@@ -1302,7 +1304,7 @@ void PIO_Handler::open(
 #endif // ESMFIO_DEBUG
     localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
-    if (!CHECKPIOWARN(localrc, "Unable to create file", (*rc))) {
+    if (!CHECKPIOWARN(localrc, std::string("Unable to create file: ").append(getFilename()).c_str(), (*rc))) {
       free (pioFileDesc);
       pioFileDesc = NULL;
       return;
@@ -1320,7 +1322,7 @@ void PIO_Handler::open(
     localrc = pio_cpp_openfile(&pioSystemDesc, pioFileDesc,
                                iotype, getFilename(), mode);
     PRINTMSG(", called pio_cpp_openfile on " << getFilename());
-    if (!CHECKPIOWARN(localrc, "Unable to open file", (*rc))) {
+    if (!CHECKPIOWARN(localrc, std::string("Unable to open existing file: ").append(getFilename()).c_str(), (*rc))) {
       free (pioFileDesc);
       pioFileDesc = NULL;
       return;

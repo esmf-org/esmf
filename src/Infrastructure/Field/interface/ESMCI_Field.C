@@ -177,8 +177,8 @@ namespace ESMCI {
     ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
-    if (gridToFieldMap != NULL) {
-      gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -188,8 +188,8 @@ namespace ESMCI {
     } else
       gtfm = new ESMCI::InterfaceInt();
 
-    if (ungriddedLBound != NULL) {
-      uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -199,8 +199,8 @@ namespace ESMCI {
     } else
       uglb = new ESMCI::InterfaceInt();
 
-    if (ungriddedUBound != NULL) {
-      ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -312,8 +312,8 @@ namespace ESMCI {
     ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
-    if (gridToFieldMap != NULL) {
-      gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -323,8 +323,8 @@ namespace ESMCI {
     } else
       gtfm = new ESMCI::InterfaceInt();
 
-    if (ungriddedLBound != NULL) {
-      uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -334,8 +334,8 @@ namespace ESMCI {
     } else
       uglb = new ESMCI::InterfaceInt();
 
-    if (ungriddedUBound != NULL) {
-      ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -446,8 +446,8 @@ namespace ESMCI {
     ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
-    if (gridToFieldMap != NULL) {
-      gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -457,8 +457,8 @@ namespace ESMCI {
     } else
       gtfm = new ESMCI::InterfaceInt();
 
-    if (ungriddedLBound != NULL) {
-      uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -468,8 +468,8 @@ namespace ESMCI {
     } else
       uglb = new ESMCI::InterfaceInt();
 
-    if (ungriddedUBound != NULL) {
-      ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -576,8 +576,8 @@ namespace ESMCI {
     ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
-    if (gridToFieldMap != NULL) {
-      gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
@@ -587,8 +587,8 @@ namespace ESMCI {
     } else
       gtfm = new ESMCI::InterfaceInt();
 
-    if (ungriddedLBound != NULL) {
-      uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -598,8 +598,8 @@ namespace ESMCI {
     } else
       uglb = new ESMCI::InterfaceInt();
 
-    if (ungriddedUBound != NULL) {
-      ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
@@ -925,8 +925,8 @@ namespace ESMCI {
     ESMCI::InterfaceInt *smv, *dmv;
     ESMCI::Field *sff, *dff;
 
-    if (srcMaskValues != NULL) {
-      smv = (ESMCI::InterfaceInt *)(srcMaskValues->ptr);
+    smv = (ESMCI::InterfaceInt *)srcMaskValues;
+    if (present(smv)) {
       if(smv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- srcMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
@@ -938,8 +938,8 @@ namespace ESMCI {
       smv_created = true;
     }
  
-    if (dstMaskValues != NULL) {
-      dmv = (ESMCI::InterfaceInt *)(dstMaskValues->ptr);
+    dmv = (ESMCI::InterfaceInt *)dstMaskValues;
+    if (present(dmv)) {
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- dstMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);

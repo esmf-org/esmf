@@ -1358,12 +1358,12 @@ num_elems, &
     if(present(parametricDim)) l_pdim = parametricDim
     if(present(spatialDim))    l_sdim = spatialDim
 
-   ! Set Default coordSys
-   if (present(coordSys)) then
-      coordSysLocal=coordSys
-   else 
-      coordSysLocal=ESMF_COORDSYS_CART
-   endif
+    ! Set Default coordSys
+    if (present(coordSys)) then
+       coordSysLocal=coordSys
+    else 
+       coordSysLocal=ESMF_COORDSYS_CART
+    endif
 
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
                            coordSysLocal, rc=localrc)
@@ -3430,6 +3430,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif    
    
    ! Add pole information, if created from a 2D grid file
+    allocate(gridDims(2))
     call ESMF_ScripInq(filename, grid_rank=gridRank, grid_dims=gridDims, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &

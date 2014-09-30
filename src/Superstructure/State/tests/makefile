@@ -6,6 +6,7 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/State/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateCreateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest \

@@ -722,12 +722,11 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
+  src_nx = 100
+  src_ny = 50
 
   dst_nx = 90
-  dst_ny = 50
-
-  src_nx = 90
-  src_ny = 50
+  dst_ny = 40
 
   ! setup source grid
   grid360=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &

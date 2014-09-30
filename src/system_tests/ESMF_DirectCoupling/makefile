@@ -13,6 +13,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_DirectCouplingSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
+.NOTPARALLEL:
 SYSTEM_TESTS_OBJ      = cplComp.o ioComp.o modelAComp.o modelBComp.o modelComp.o
 
 SYSTEM_TESTS_RUN      = RUN_DirectCoupling

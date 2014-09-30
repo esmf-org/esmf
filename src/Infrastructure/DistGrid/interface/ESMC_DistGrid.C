@@ -51,9 +51,9 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
   
   // typecast into ESMCI types
   ESMCI::InterfaceInt *minIndexInterface =
-    (ESMCI::InterfaceInt *)(minIndexInterfaceArg.ptr);
+    (ESMCI::InterfaceInt *)&minIndexInterfaceArg;
   ESMCI::InterfaceInt *maxIndexInterface =
-    (ESMCI::InterfaceInt *)(maxIndexInterfaceArg.ptr);
+    (ESMCI::InterfaceInt *)&maxIndexInterfaceArg;
   
   distgrid.ptr = (void *)
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,

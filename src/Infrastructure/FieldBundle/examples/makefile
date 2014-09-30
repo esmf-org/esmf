@@ -6,6 +6,7 @@ run: run_examples
 
 LOCDIR    = src/Infrastructure/FieldBundle/examples
 
+.NOTPARALLEL:
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldBundleCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldBundleRedistEx \
                  $(ESMF_EXDIR)/ESMF_FieldBundleSMMEx \

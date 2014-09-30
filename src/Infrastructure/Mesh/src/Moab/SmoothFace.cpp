@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <cstdio>
+
 #include "assert.h"
 // included in the header now
 // #include "Range.hpp"

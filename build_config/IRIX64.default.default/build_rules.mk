@@ -78,6 +78,10 @@ ESMF_PTHREADSDEFAULT       = OFF
 ESMF_LAPACKDEFAULT         = scsl
 
 ############################################################
+# Disable PIO due to no F2003 C Interop support
+ESMF_PIO               =
+
+############################################################
 # Special compiler flags
 #
 # abide to C++ language standard; don't put libc into std name space

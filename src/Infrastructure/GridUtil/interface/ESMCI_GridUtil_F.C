@@ -49,8 +49,8 @@ using namespace ESMCI;
 
 extern "C" {
 
-void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
-                    char*name, int *rc,
+void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
+  int *staggerLoc, int *num_arrays, char*name, int *rc,
                              ESMCI::Array **arraypp1,
                              ESMCI::Array **arraypp2,
                              ESMCI::Array **arraypp3,
@@ -117,8 +117,8 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLo
 
 
 
-void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
-                    char*name, int *rc,
+void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
+  int *num_arrays, char*name, int *rc,
                              ESMCI::Array **arraypp1,
                              ESMCI::Array **arraypp2,
                              ESMCI::Array **arraypp3,
@@ -135,8 +135,8 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   // Get VM
   int localrc;
   ESMCI::VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
 
   // Get pet info
   int localPet = vm->getLocalPet();
@@ -202,7 +202,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
 
 
 
-  void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, int *islatlondeg, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *regridConserve, int *rc) {
+  void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
+    int *isSphere, int *islatlondeg, Mesh **meshpp,
+    ESMCI::InterfaceInt *maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
 
@@ -222,7 +224,8 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   try {
 
     std::vector<ESMCI::Array*> arrays;
-    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, *maskValuesArg, regridConserve);
+    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, maskValuesArg,
+      regridConserve);
 //WriteMesh(*meshp, "gridtomesh");
 
     *meshpp = meshp;
