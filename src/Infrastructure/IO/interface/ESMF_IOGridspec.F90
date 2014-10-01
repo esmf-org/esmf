@@ -105,6 +105,8 @@
     integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
+    foundlat = .false.
+    foundlon = .false.
     ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_nowrite, ncid=gridid)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -126,8 +128,11 @@
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-        ! Check units attribute, make sure it is degrees_east, degree_east, degree_E, 
-        ! degreeE or degreesE
+        ! The coordinate variables are not in particular order.  It could be lon, lat
+        ! or lat, lon.  We need to use its units value to decide whether it is longitude or
+        ! latitude. 
+        ! First check units attribute for longitude, it has to be one of degrees_east, 
+        ! degree_east, degree_E, degreeE or degreesE
   	ncStatus = nf90_inquire_attribute(gridid, varids(1), "units", len=len)
 	errmsg ="attribute units for "//trim(coord_names(1))//" in "//trim(grid_filename)
 	if (CDFCheckError (ncStatus, &
@@ -148,42 +153,72 @@
 	        attstr(1:len) .eq. 'degrees_E' .or. &
 	        attstr(1:len) .eq. 'degreeE' .or. &
 	        attstr(1:len) .eq. 'degreesE'))  then 
-            call ESMF_LogSetError(ESMF_FAILURE, & 
-                 msg="- The unit attribute for longitude variable is not degrees_east", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-	    return
+            ! It is not longitude, check for Latitude units
+  	    if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
+	        attstr(1:len) .eq. 'degree_north' .or. &
+	        attstr(1:len) .eq. 'degree_N' .or. &
+	        attstr(1:len) .eq. 'degrees_N' .or. &
+	        attstr(1:len) .eq. 'degreeN' .or. &
+	        attstr(1:len) .eq. 'degreesN'))  then 
+                call ESMF_LogSetError(ESMF_FAILURE, & 
+                   msg="- The unit of the coordinate variable is incorrect.", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+	        return
+            else
+                ! It is a latitude variable
+		varids(2)=varids(1)
+                foundlat = .true.
+            endif
 	endif
-	ncStatus = nf90_inq_varid(gridid, coord_names(2), varids(2))
+	ncStatus = nf90_inq_varid(gridid, coord_names(2), varid)
 	errmsg ="variable "//trim(coord_names(2))//" in "//trim(grid_filename)
 	if (CDFCheckError (ncStatus, &
         	ESMF_METHOD,  &
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-  	ncStatus = nf90_inquire_attribute(gridid, varids(2), "units", len=len)
+  	ncStatus = nf90_inquire_attribute(gridid, varid, "units", len=len)
 	errmsg ="attribute units for "//trim(coord_names(2))//" in "//trim(grid_filename)
 	if (CDFCheckError (ncStatus, &
         	ESMF_METHOD,  &
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-	ncStatus = nf90_get_att(gridid, varids(2), 'units',attstr)
+	ncStatus = nf90_get_att(gridid, varid, 'units',attstr)
 	if (CDFCheckError (ncStatus, &
         	ESMF_METHOD,  &
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-         if (attstr(len:len) .eq. achar(0)) len = len-1
-	if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
+        if (attstr(len:len) .eq. achar(0)) len = len-1
+        if (foundlat) then
+	  ! Check if the variable is a longitude variable
+ 	  if (.not. (attstr(1:len) .eq. 'degrees_east' .or. &
+	        attstr(1:len) .eq. 'degree_east' .or. &
+	        attstr(1:len) .eq. 'degree_E' .or. &
+	        attstr(1:len) .eq. 'degrees_E' .or. &
+	        attstr(1:len) .eq. 'degreeE' .or. &
+	        attstr(1:len) .eq. 'degreesE'))  then 
+             call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg="- The units attribute for longitude variable is incorrect", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+             return
+          endif
+	  varids(1)=varid
+        else  !Check for latitude variable
+  	  if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
 	        attstr(1:len) .eq. 'degree_north' .or. &
 	        attstr(1:len) .eq. 'degree_N' .or. &
 	        attstr(1:len) .eq. 'degrees_N' .or. &
 	        attstr(1:len) .eq. 'degreeN' .or. &
 	        attstr(1:len) .eq. 'degreesN'))  then 
-            call ESMF_LogSetError(ESMF_FAILURE, & 
-                 msg="- The unit attribute for longitude variable is not degrees_north", & 
+             call ESMF_LogSetError(ESMF_FAILURE, & 
+        
+         msg="- The units attribute for latitude variable is incorrect", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
-	    return
+	     return
+	  endif
+	  varids(2)=varid
 	endif
     else
         ! get a list of variables in the file, inquire its standard_name and/or long_name to

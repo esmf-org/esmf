@@ -17,23 +17,19 @@
 #include <stdlib.h>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_IO_Gridspec.h"
+#include "ESMCI_IO_Scrip.h"
 
 extern "C" {
-  void ESMC_GridspecInq (const char *, int *, int *, int *);
+  void ESMC_ScripInq (const char *, int *, int *, int *);
 }
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMC_GridspecInq"
-void ESMC_GridspecInq (const char *filename, int *ndims, int *grid_dims, int *rc)
+#define ESMC_METHOD "ESMC_ScripInq"
+void ESMC_ScripInq (const char *filename, int *grid_dims, int *grid_rank,
+                    int *rc)
 {
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
-  ESMCI::IO_Gridspec::inq(filename, ndims, grid_dims, &localrc);
-  /////////////////////////start test
-  //*ndims = 42;
-  //grid_dims[0] = 4;
-  //grid_dims[1] = 2;
-  //////////////////////////end test
+  ESMCI::IO_Scrip::inq(filename, grid_dims, grid_rank, &localrc);
   localrc = ESMF_SUCCESS;
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				    rc)) return; // bail out

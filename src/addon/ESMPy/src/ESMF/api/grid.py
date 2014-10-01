@@ -231,8 +231,7 @@ class Grid(object):
                                                   coordNames=coord_names)
             # grid rank and dims
             if filetype == FileFormat.SCRIP:
-                self.rank = ESMP_ScripInqRank(filename)
-                self.max_index = ESMP_ScripInqDims(filename)
+                self.rank, self.max_index = ESMP_ScripInq(filename)
                 self.ndims = self.rank
             else: # must be GRIDSPEC
                 self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)
