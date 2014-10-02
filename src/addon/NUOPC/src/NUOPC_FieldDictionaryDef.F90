@@ -84,12 +84,12 @@ module NUOPC_FieldDictionaryDef
     if (present(defaultLongName)) then
       fdEntry%wrap%defaultLongName  = defaultLongName
     else
-      fdEntry%wrap%defaultLongName  = ""
+      fdEntry%wrap%defaultLongName  = "unknown"
     endif
     if (present(defaultShortName)) then
       fdEntry%wrap%defaultShortName = defaultShortName
     else
-      fdEntry%wrap%defaultShortName = ""
+      fdEntry%wrap%defaultShortName = "unknown"
     endif
     
     ! add fdEntry to the FieldDictionary
