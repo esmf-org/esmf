@@ -77,12 +77,17 @@ typedef std::vector<Search_result*> SearchResult;
 
 
 void SearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
-void SearchNearestSrcToDst_w_dst_pl(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result);
+void SearchNearestSrcToDst_w_plist(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
 
 void ParSearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 
+void ParSearchNearestSrcToDst_w_plist(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
+
 void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
-void SearchNearestDstToSrc_w_dst_pl(const Mesh &src, PointList &dst_pl, int unmappedaction, SearchResult &result);
+
+#if 0  //not working (mvr)
+void SearchNearestDstToSrc_w_plist(const Mesh &src, const PointList &dst_pl, int unmappedaction, SearchResult &result);
+#endif
 
 void ParSearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 

@@ -145,6 +145,8 @@ static int initialize_dot(
  *  Function that initializes the dot data structure for RCB and RIB. 
  *  It uses the global ID, coordinates and weight provided by the application.  
  */
+
+
 int ierr = ZOLTAN_OK;
 int i, j, tmp, np, fpart;
 double *geom_vec = NULL;

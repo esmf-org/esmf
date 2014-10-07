@@ -121,9 +121,6 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 		    int *map_type, int *unmappedaction) {
 
 
-    printf("mvr: just in online_regrid\n");
-    fflush(stdout);
-
     // Conservative regridding
     switch (*regridConserve) {
     case (ESMC_REGRID_CONSERVE_ON): {
@@ -144,14 +141,10 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
     // NON Conservative regridding
     case (ESMC_REGRID_CONSERVE_OFF): {
 
-    printf("mvr: just before regrid\n");
-    fflush(stdout);
       if (!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, NULL, 
 		  wts, regridMethod, regridScheme, 
                   regridPoleType, regridPoleNPnts, map_type, unmappedaction))
         Throw() << "Regridding error" << std::endl;
-    printf("mvr: just after regrid\n");
-    fflush(stdout);
 
       // Remove non-locally owned weights (assuming destination mesh decomposition)
 
@@ -302,9 +295,6 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 	    int *map_type, int *unmappedaction) {
 
 
-   printf("mvr: just in regrid\n");
-   fflush(stdout);
-
    // See if it could have a pole
    bool maybe_pole=false;
    if ((*regridMethod == ESMC_REGRID_METHOD_BILINEAR || 
@@ -357,12 +347,6 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       rcv[num_snd]=psc;
       num_snd++;
 
-      if (srcmesh == NULL) {
-	printf("mvr: uh oh, this is path, should have srcmesh\n");
-      } else
-	printf("mvr: srcmesh looks fine for patch\n");
-      fflush(stdout);
-
       // Load mask field
       MEField<> *psm = srcmesh->GetField("mask");
       if (psm != NULL) {
@@ -382,16 +366,10 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     else Throw() << "Unrecognized map type";
 
 
-   printf("mvr: just before interp\n");
-   fflush(stdout);
-
-
     // Build the rendezvous grids
     Interp interp(srcmesh, srcpointlist, dstmesh, dstpointlist, 
 		  midmesh, false, *regridMethod, mtype, *unmappedaction);
     
-   printf("mvr: just after interp\n");
-   fflush(stdout);
      // Create the weight matrix
      interp(0, wts);
 

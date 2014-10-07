@@ -605,6 +605,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_NormType_Flag):: localNormType
         logical :: srcDual, src_pl_used, dst_pl_used
 
+
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -984,6 +985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+
 	    dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
                                               maskValues=dstMaskValues, &
                                               rc=localrc)
@@ -1052,6 +1054,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           !mvr what should be sent for dstPointList if conservative?
 
+	  print*,'mvr: fieldregrid.f90: before regridstore1'
+
             call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
                                   dstMesh, dstArray, dstPointList, dst_pl_used, &
                                   lregridmethod, &
@@ -1066,6 +1070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   routehandle, &
                                   tmp_indices, tmp_weights, unmappedDstList, localrc)
 
+	  print*,'mvr: fieldregrid.f90: after regridstore1'
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1083,6 +1088,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           !mvr what should be sent for dstPointList if conservative?
 
+	  print*,'mvr: fieldregrid.f90: before regridstore2'
             call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
                                   dstMesh, dstArray, dstPointList, dst_pl_used, &
                                   lregridmethod, &
@@ -1098,6 +1104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   unmappedDstList=unmappedDstList, &
                                   rc=localrc)
 
+	  print*,'mvr: fieldregrid.f90: after regridstore2'
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

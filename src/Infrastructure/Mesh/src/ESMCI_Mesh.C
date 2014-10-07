@@ -1895,14 +1895,12 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 
    } else {
 
-     if (maskValuesArg==NULL) {
-       numMaskValues=0;
-       ptrMaskValues = NULL;
-
-     } else {
+     if (present(maskValuesArg)) {
        numMaskValues=maskValuesArg->extent[0];
        ptrMaskValues=&(maskValuesArg->array[0]);
-
+     } else {
+       numMaskValues=0;
+       ptrMaskValues = NULL;
      }
 
      int num_local_pts=0;

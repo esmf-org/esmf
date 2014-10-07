@@ -493,8 +493,6 @@ int OTree::runon(
     for (ONode *chn=node->children; chn!=NULL; chn=chn->next) {
 
       int *n=static_cast<int*>(chn->data);
-      printf("mvr: chn= %d\n",*n);
-      fflush(stdout);
 
       // Calculate our search code based on search min-max and node min-max
       int search_code_2D=CALC_SEARCH_CODE_2D(ri->min,ri->max,node->min,node->max);

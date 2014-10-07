@@ -112,9 +112,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
-  printf("mvr: just in regrid_create1\n");
-  fflush(stdout);
-
 
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
@@ -168,8 +165,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     }
 
 
-  printf("mvr: just in regrid_create3\n");
-  fflush(stdout);
     // Concave
     if (concave) {
       int localrc;
@@ -193,8 +188,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
-  printf("mvr: just in regrid_create4\n");
-  fflush(stdout);
     // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
@@ -232,18 +225,12 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
-  printf("mvr: just in regrid_create5\n");
-  fflush(stdout);
-
     // Compute Weights matrix
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
 
-
-    printf("mvr: before online_regrid, regirdmethod= %d\n",*regridMethod);
-    fflush(stdout);
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
@@ -268,14 +255,9 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate3.0"));
 #endif
 
-    printf("mvr: after online_regrid6\n");
-    fflush(stdout);
-
     // If requested get list of unmapped destination points
     std::vector<int> unmappedDstList;
     if (*has_udl) {
-    printf("mvr: has udl?\n");
-    fflush(stdout);
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
@@ -293,11 +275,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
 
       } else { // Non-conservative
-    printf("mvr: before get\n");
-    fflush(stdout);
         get_mesh_node_ids_not_in_wmat(dstpointlist, wts, &unmappedDstList);
-    printf("mvr: after get\n");
-    fflush(stdout);
       }
     }
 #ifdef PROGRESSLOG_on
@@ -329,7 +307,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         }
 #endif
 
-
 	//mvr temporarily needed for NEAREST_SRC_TO_DST
 	//mvr      } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) { 
 	//mvr        int missing_id;
@@ -348,13 +325,12 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
       } else { // bilinear, patch, ...
         int missing_id;
-    printf("mvr: before all\n");
-    fflush(stdout);
-        if (!all_mesh_node_ids_in_wmat(dstpointlist, wts, &missing_id)) {
-    printf("mvr: after all\n");
-    fflush(stdout);
+
+	if (!all_mesh_node_ids_in_wmat(dstpointlist, wts, &missing_id)) {
           int localrc;
           char msg[1024];
+	  printf("mvr: yup, right here\n");
+	  fflush(stdout);
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
             "source cell",missing_id);
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
@@ -970,6 +946,10 @@ bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id)
   wi=wts.begin_row();
   int id;
   int curr_num_pts = pointlist->get_curr_num_pts();
+
+  printf("mvr: all_mesh_node_ids_in_wmat:  rank= %d  curr_num_pts= %d\n",Par::Rank(),curr_num_pts);
+  fflush(stdout);
+
   for (int i=0; i<curr_num_pts; i++) {
 
     // Skip non local nodes
@@ -977,6 +957,9 @@ bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id)
 
     // get node id
     id = pointlist->get_id(i);
+
+    printf("mvr: all_mesh_node_ids_in_wmat:  rank= %d  id(%d)= %d\n",Par::Rank(),i,id);
+    fflush(stdout);
 
     // get weight id
     int wt_id=wi->first.id;

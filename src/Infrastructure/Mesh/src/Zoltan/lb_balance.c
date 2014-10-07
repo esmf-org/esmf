@@ -263,6 +263,7 @@ int *export_all_procs, *export_all_to_part, *parts=NULL;
 ZOLTAN_ID_PTR all_global_ids=NULL, all_local_ids=NULL;
 ZOLTAN_ID_PTR gid;
 
+
   ZOLTAN_TRACE_ENTER(zz, yo);
 
   if (zz->Proc == zz->Debug_Proc && zz->Debug_Level >= ZOLTAN_DEBUG_PARAMS)
@@ -696,10 +697,13 @@ ZOLTAN_ID_PTR gid;
   *changes = 1;
 
   ZOLTAN_TRACE_EXIT(zz, yo);
-  if (error)
+ if (error) {
+
     return (error);
-  else
+ }  else {
+
     return (ZOLTAN_OK);
+ }
 }
 
 /*****************************************************************************/

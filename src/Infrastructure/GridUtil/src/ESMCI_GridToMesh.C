@@ -151,6 +151,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
  int *ptrMaskValues;
  if (hasMask) {
    if (present(maskValuesArg)) {
+   //mvr   if (maskValuesArg != NULL) {
      // Error check mask values
      if (maskValuesArg->dimCount != 1) {
        Throw() << " Mask values must be of rank 1.";
@@ -1009,13 +1010,14 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
       int numMaskValues;
       int *ptrMaskValues;
 
-      if (maskValuesArg==NULL) {
-	numMaskValues=0;
-	ptrMaskValues = NULL;
-      } else {
+      if (present(maskValuesArg)) {
 	numMaskValues=maskValuesArg->extent[0];
 	ptrMaskValues=&(maskValuesArg->array[0]);
+      } else {
+	numMaskValues=0;
+	ptrMaskValues = NULL;
       }
+
 
       // Count all local pnts in the Grid
       int num_local_pts=0;

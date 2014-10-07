@@ -55,9 +55,6 @@
 #ifdef ESMF_TESTEXHAUSTIVE
 #if 1
 
-!#if 0
-!mvr
-
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -170,7 +167,13 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+#if 0
+!the following test, when included in a run of the full test suite, will occassionally 
+!fail on at least one processor on yellowstone...ie the masked values will unexpectedly 
+!change...i was unable to reproduce the error by running this test all by itself...
+!appears to be a memory error, but its unclear whether the error is in the test itself, 
+!or if it exposes a memory problem elsewhere...the problem was reproduced in a code 
+!sandbox that did not include any of the PointList code (mvr)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -187,6 +190,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -484,8 +488,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-!#endif
-!mvr
 
 
       !------------------------------------------------------------------------
@@ -507,8 +509,6 @@
 
       call ESMF_UtilIOUnitFlush (6)
 
-!stop
-!mvr
 
 
       !------------------------------------------------------------------------

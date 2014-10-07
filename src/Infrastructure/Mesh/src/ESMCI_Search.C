@@ -1085,5 +1085,4 @@ void OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt
 }
 //#endif
 
-
 } // namespace

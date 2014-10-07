@@ -236,8 +236,6 @@ end function my_xor
        integer :: localIgnoreDegenerate
 
 
-       print*,'mvr: just in regridstore1'
-
        ! Logic to determine if valid optional args are passed.  
 
        ! First thing to check is that indices <=> weights
@@ -247,7 +245,6 @@ end function my_xor
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
-       print*,'mvr: just in regridstore2'
        ! Next, we require that the user request at least something
        if (.not.(present(routehandle) .or. present(indices))) then
          localrc = ESMF_RC_ARG_BAD
@@ -255,7 +252,6 @@ end function my_xor
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
-       print*,'mvr: just in regridstore3'
        ! **************************************************
        ! Tests passed, so proceed
 
@@ -263,7 +259,6 @@ end function my_xor
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       print*,'mvr: just in regridstore4'
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -333,12 +328,8 @@ end function my_xor
                    has_udl, num_udl, tudl, &
                    localrc)
 
-       print*,'mvr: just after regrid_create'
-
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
-       print*,'mvr: just after error check for regrid_create'
 
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
@@ -364,8 +355,6 @@ end function my_xor
       endif
 
       rc = ESMF_SUCCESS
-      print*,'mvr: regridstore success???'
-
       end subroutine ESMF_RegridStore
 
 !------------------------------------------------------------------------------

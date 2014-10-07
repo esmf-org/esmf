@@ -1457,6 +1457,7 @@ static GeomRend::DstConfig get_dst_config(int mvr_interp) {
   else if (mvr_interp == Interp::INTERP_CONSERVE) cnsrv = true;
 
   Context default_context;
+  default_context.flip();
   
   // TODO: make this more general
   if (cnsrv) {
@@ -1467,9 +1468,9 @@ static GeomRend::DstConfig get_dst_config(int mvr_interp) {
 }
   
 
-Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_src_, int mvr_imethod, MAP_TYPE mtype, int unmappedaction) :
+Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, bool freeze_src_, int mvr_imethod, MAP_TYPE mtype, int unmappedaction) :
 sres(),
-grend(*src, *dest, get_dst_config(mvr_imethod), freeze_src_),
+grend(src, srcplist, dest, dstplist, get_dst_config(mvr_imethod), freeze_src_),
 is_parallel(Par::Size() > 1),
 srcF(),
 dstF(),
@@ -1480,7 +1481,7 @@ has_nearest_src_to_dst(false),
 has_nearest_dst_to_src(false),
 srcmesh(src),
 dstmesh(dest),
-dstpointlist(destplist),
+dstpointlist(dstplist),
 srcpointlist(srcplist),
 midmesh(midmesh),
 zz(0),
@@ -1489,6 +1490,16 @@ mvr_interp(mvr_imethod)
 
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
+
+  printf("mvr: search_obj_type= %d\n",search_obj_type);
+  if (search_obj_type == MeshObj::NODE)
+    printf("mvr: which equates to NODE\n");
+  else if (search_obj_type == MeshObj::ELEMENT)
+    printf("mvr: which equates to ELEMENT\n");
+  else
+    printf("mvr: which equates to ???\n");
+  fflush(stdout);
+  
   
   //mvr dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
 
@@ -1519,15 +1530,31 @@ mvr_interp(mvr_imethod)
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
+
+
+    printf("mvr: before grend.build\n");
+    fflush(stdout);
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
-    
+    printf("mvr: after grend.build\n");
+    fflush(stdout);
+
     if (has_nearest_dst_to_src) {
       ParSearchNearestDstToSrc(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
     } else if (has_nearest_src_to_dst) {
-      ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+      printf("mvr: before parsearchnearestsrctodst\n");
+      fflush(stdout);
+      //mvr ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+      ParSearchNearestSrcToDst_w_plist(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres);
+      printf("mvr: after parsearchnearestsrctodst\n");
+      fflush(stdout);
     } else {
       if (search_obj_type == MeshObj::NODE) {
-        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+	//mvr        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+	printf("mvr: before octsearch\n");
+	fflush(stdout);
+	OctSearch_w_dst_pl(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
+	printf("mvr: after octsearch\n");
+	fflush(stdout);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_)
@@ -1548,9 +1575,11 @@ mvr_interp(mvr_imethod)
     // the subset of the mesh for interpolating??)
 
     if (has_nearest_dst_to_src) {
-        SearchNearestDstToSrc_w_dst_pl(*src, *dstpointlist, unmappedaction, sres);
+#if 0  //not working  (mvr)
+        SearchNearestDstToSrc_w_plist(*src, *dstpointlist, unmappedaction, sres);
+#endif 
     } else if (has_nearest_src_to_dst) {
-        SearchNearestSrcToDst_w_dst_pl(*srcpointlist, *dstpointlist, unmappedaction, sres);
+        SearchNearestSrcToDst_w_plist(*srcpointlist, *dstpointlist, unmappedaction, sres);
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
@@ -1589,7 +1618,6 @@ void Interp::operator()() {
 void Interp::operator()(int fpair_num, IWeights &iw) {
   Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
   
-
   IWeights src_frac,dst_frac; // Use IW to get out source and dst frac and to migrate it to the correct procs
                               // eventually make a dedicated class for migrating values associated with mesh
 
@@ -1618,7 +1646,12 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
   // (use node or elem migration depending on interpolation)
   if (!has_cnsrv) {
     if (is_parallel) {
-      iw.Migrate(*dstmesh);
+
+      if (dstpointlist == NULL ) 
+	iw.Migrate(*dstmesh);
+      else
+	iw.Migrate(*dstpointlist);
+
     }
   } else {
     if (is_parallel) {
@@ -1833,7 +1866,6 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     
   // By all rights, here we don't HAVE to actually perform the interpolation.
   // However, we actually do it as a cross check.
-    
 
   if (mvr_interp == INTERP_CONSERVE) {
     calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
@@ -1859,11 +1891,16 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     
     // Calc. Matrix for bilinear and patch
 
-    if (mvr_interp == INTERP_STD)
-      mat_point_serial_transfer(*sFR, sres, iw, dstpointlist);
-    else if (mvr_interp == INTERP_PATCH)
+  //mvr try vvvv
+  PointList &plist_rend = grend.GetDstPlistRend();
+  printf("mvr: rank= %d  rend(0)= %d\n",Par::Rank(),plist_rend.get_id(0));
+  fflush(stdout);
+
+  if (mvr_interp == INTERP_STD) {
+      mat_point_serial_transfer(*sFR, sres, iw, &plist_rend);
+  } else if (mvr_interp == INTERP_PATCH) {
       mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, sres, &grend.GetSrcRend(), iw, dstpointlist);
-    
+  }    
     // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM VALUES    
     // Retrieve the interpolated data
     //CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
@@ -2063,6 +2100,7 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
   // now migrate to the destination mesh decomposition (srcmesh in here)
   iw2->Migrate(*srcmesh);
   iw2->Prune(*srcmesh, 0);
+
 
   // OK, now we should have the weights matrix in the destination mesh decomposition
   // combine the Entries of duplicate rows

@@ -37,7 +37,19 @@ typedef std::vector<MeshObj*> MeshObjVect;
 static int GetNumAssignedObj(void *user, int *err) {
   GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
   *err = 0;
-  return udata.srcObj.size() + udata.dstObj.size();
+
+  int num=0;
+  if (udata.src_pointlist == NULL)
+    num+=udata.srcObj.size();
+  else
+    num+=udata.src_pointlist->get_curr_num_pts();
+
+  if (udata.dst_pointlist == NULL)
+    num+=udata.dstObj.size();
+  else
+    num+=udata.dst_pointlist->get_curr_num_pts();
+
+  return num;
 }
 
 static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
@@ -45,21 +57,63 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
 {
   GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
 
+  MeshObjVect::iterator ni,ne;
   UInt i = 0;
-  MeshObjVect::iterator ni = udata.srcObj.begin(), ne = udata.srcObj.end();
-  for (; ni != ne; ++ni) {
-    gids[2*i] = 0;
-    gids[2*i + 1] = (*ni)->get_id();
-    lids[i] = i;
-    i++;
+
+  if (udata.src_pointlist == NULL) {
+    ni = udata.srcObj.begin(), ne = udata.srcObj.end();
+    for (; ni != ne; ++ni) {
+      gids[2*i] = 0;
+      gids[2*i + 1] = (*ni)->get_id();
+      lids[i] = i;
+      i++;
+    }
+  } else {
+    int pl_size=udata.src_pointlist->get_curr_num_pts();
+    for (int loc=0; loc<pl_size; loc++) {
+      gids[2*i] = 0;
+      gids[2*i + 1] = loc;  //udata.src_pointlist->get_id(loc);
+      lids[i] = i;
+
+      //mvr vvvvv
+      int myid=udata.dst_pointlist->get_id(loc);
+      int num_procs_i_think=Par::Size();
+      int rank = Par::Rank(); 
+      printf("mvrs: num_procs= %d  rank= %d  lid= %d  gid= %d\n",num_procs_i_think,rank,lids[i],myid);
+      fflush(stdout);
+
+
+      i++;
+    }
   }
 
-  ni = udata.dstObj.begin(), ne = udata.dstObj.end();
-  for (; ni != ne; ++ni) {
-    gids[2*i] = 1;
-    gids[2*i + 1] = (*ni)->get_id();
-    lids[i] = i;
-    i++;
+
+  if (udata.dst_pointlist == NULL) {
+    ni = udata.dstObj.begin(), ne = udata.dstObj.end();
+    for (; ni != ne; ++ni) {
+      gids[2*i] = 1;
+      gids[2*i + 1] = (*ni)->get_id();
+      lids[i] = i;
+      i++;
+    }
+  } else {
+    int pl_size=udata.dst_pointlist->get_curr_num_pts();
+
+    for (int loc=0; loc<pl_size; loc++) {
+      gids[2*i] = 1;
+      gids[2*i + 1] = loc;  //udata.dst_pointlist->get_id(loc);
+
+      lids[i] = i;
+
+      //mvr vvvvv
+      int myid=udata.dst_pointlist->get_id(loc);
+      int num_procs_i_think=Par::Size();
+      int rank = Par::Rank(); 
+      printf("mvrd: num_procs= %d  rank= %d  lid= %d  gid= %d\n",num_procs_i_think,rank,lids[i],myid);
+      fflush(stdout);
+
+      i++;
+    }
   }
 
   *err = 0;
@@ -78,32 +132,50 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
   MEField<> *coord_src = udata.coord_src;
   MEField<> *coord_dst = udata.coord_dst;
+
   *err = 0;
 
+  UInt list1_size;
+  if (udata.src_pointlist == NULL)
+    list1_size = udata.srcObj.size();
+  else
+    list1_size = udata.src_pointlist->get_curr_num_pts();
 
-  UInt list1_size = udata.srcObj.size();
+
   for (UInt i = 0; i < (UInt) numObjs; i++) {
     UInt mesh = gids[2*i]; // 0 = src, 1 = dst
     UInt idx = lids[i];
 
     std::vector<double> ndata(numDim);
-    double *c;
+    const double *c;
 
     if (mesh == 0) {
-      MeshObj *elemp = udata.srcObj[idx];
-      elemCentroid(*coord_src, *elemp, &ndata[0]);
-      c = &ndata[0];
-      // Average node coords
+      if (udata.src_pointlist == NULL) {
+	MeshObj *elemp = udata.srcObj[idx];
+	elemCentroid(*coord_src, *elemp, &ndata[0]);
+	c = &ndata[0];
+	// Average node coords
+      } else {
+	int loc = gids[2*i+1];
+	c = udata.src_pointlist->get_coord_ptr(loc);
+      }
     } else if (mesh == 1) {
       UInt sidx = idx - list1_size; // local indices start from first list, continue into second
-      MeshObj *nodep = udata.dstObj[sidx];
 
-      // Get destination coord depending on object type
-      if (udata.iter_is_obj) {
-	elemCentroid(*coord_dst, *nodep, &ndata[0]);
-	c = &ndata[0];
+      if (udata.dst_pointlist == NULL) {
+
+	MeshObj *nodep = udata.dstObj[sidx];
+
+	// Get destination coord depending on object type
+	if (udata.iter_is_obj) {
+	  elemCentroid(*coord_dst, *nodep, &ndata[0]);
+	  c = &ndata[0];
+	} else {
+	  c = coord_dst->data(*nodep);
+	}
       } else {
-	c = coord_dst->data(*nodep);
+	int loc = gids[2*i+1];
+	c = udata.dst_pointlist->get_coord_ptr(loc);
       }
 
     } else throw("GetObject, unknown mesh from global id");
@@ -116,18 +188,36 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 // GeomRend functions
 /*-----------------------------------------------------------------------------------*/
 
-GeomRend::GeomRend(Mesh &_srcmesh, Mesh &_dstmesh, const DstConfig &cfg, bool freeze_src_) :
+  GeomRend::GeomRend(Mesh *_srcmesh, PointList *_srcplist, 
+		     Mesh *_dstmesh, PointList *_dstplist, 
+		     const DstConfig &cfg, bool freeze_src_) :
 srcmesh(_srcmesh),
+srcplist(_srcplist),
 dstmesh(_dstmesh),
+dstplist(_dstplist),
 dcfg(cfg),
 srcComm(),
 dstComm(),
 built(false),
-sdim(999),     //mvr must fix this - should be size of src mesh or pointlist
+sdim(),     
 iter_is_obj(cfg.iter_obj_type == cfg.obj_type),
-freeze_src(freeze_src_)
+freeze_src(freeze_src_),
+srcplist_rend(NULL),
+dstplist_rend(NULL)
 {
-  //mvr  ThrowRequire(_srcmesh.spatial_dim() == _dstmesh.spatial_dim());
+
+  if (_srcplist != NULL) 
+    sdim = _srcplist->get_coord_dim();
+  else
+    sdim = _srcmesh->spatial_dim();
+
+  int dst_dim;
+  if (_dstplist != NULL) 
+    dst_dim = _dstplist->get_coord_dim();
+  else
+    dst_dim = _dstmesh->spatial_dim();
+
+  ThrowRequire(sdim == dst_dim);
   //mvr  ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
   //mvr               dcfg.iter_obj_type == srcmesh.side_type());
   ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
@@ -139,6 +229,10 @@ freeze_src(freeze_src_)
 }
 
 GeomRend::~GeomRend() {
+  if (srcplist_rend != NULL)
+    delete srcplist_rend;
+  if (dstplist_rend != NULL)
+    delete dstplist_rend;
 }
 
 void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
@@ -148,10 +242,10 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
   std::fill(cmin, cmin+sdim, std::numeric_limits<double>::max());
   std::fill(cmax, cmax+sdim, -std::numeric_limits<double>::max());
 
-  MEField<> &coord = *dstmesh.GetCoordField();
+  MEField<> &coord = *dstmesh->GetCoordField();
   
   // Loop the kernels
-  KernelList::iterator ki = dstmesh.set_begin(), ke = dstmesh.set_end();
+  KernelList::iterator ki = dstmesh->set_begin(), ke = dstmesh->set_end();
   for (; ki != ke; ++ki) {
     Kernel &ker = *ki;
     // select all objs of this type and not the newly created ones (which have bogus ids)
@@ -212,13 +306,33 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
   
 }
 
+  //mvr pass cmin,cmax by reference?? same goes for original build_dest?
+void GeomRend::build_dest_plist(double cmin[], double cmax[], PointList *dstpointlist) {
+  Trace __trace("GeomRend::build_dest_plist(double cmin[], double cmax[], Pointlist *dstpointlist)");
+
+  // Init cmin, cmax
+  std::fill(cmin, cmin+sdim, std::numeric_limits<double>::max());
+  std::fill(cmax, cmax+sdim, -std::numeric_limits<double>::max());
+
+  int pointlist_size = dstpointlist->get_curr_num_pts();
+  const double *c;
+  for (int i=0; i<pointlist_size; i++) {
+    c=dstpointlist->get_coord_ptr(i);
+
+    for (UInt d = 0; d < sdim; d++) {
+      if (c[d] < cmin[d]) cmin[d] = c[d];
+      if (c[d] > cmax[d]) cmax[d] = c[d];
+    }
+  }
+}
+
 void GeomRend::build_src(const BBox &dstBound, ZoltanUD &zud) {
   Trace __trace("GeomRend::build_src(const BBox &dstBound, ZoltanUD &zud)");
 
-  MEField<> &coord = *srcmesh.GetCoordField();
+  MEField<> &coord = *srcmesh->GetCoordField();
   // Add all elements that intersect the bounding box of the dst
 
-  Mesh::iterator ei = srcmesh.elem_begin(), ee = srcmesh.elem_end();
+  Mesh::iterator ei = srcmesh->elem_begin(), ee = srcmesh->elem_end();
   for (; ei != ee; ++ei) {
 
     MeshObj &elem = *ei;
@@ -345,7 +459,7 @@ static void add_neighbors(CommRel &src_mig) {
 void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
   Trace __trace("GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud)");
 
-  MEField<> &coord = *srcmesh.GetCoordField();
+  MEField<> &coord = *srcmesh->GetCoordField();
 
   std::vector<CommRel::CommNode> mignode;
 
@@ -353,7 +467,8 @@ void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
 
   // Add our result to the migspec
   CommRel &src_migration = srcComm.GetCommRel(MeshObj::ELEMENT);
-  src_migration.Init("src_migration", srcmesh, srcmesh_rend, false);
+  src_migration.Init("src_migration", *srcmesh, srcmesh_rend, false);
+
   src_migration.add_domain(mignode);
 
   // Add the neighbors to the spec, if necessary
@@ -371,6 +486,299 @@ src_migration.Print(Par::Out());
   src_migration.dependants(srcComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
 
 }
+
+
+void GeomRend::build_src_mig_plist(Zoltan_Struct *zz, ZoltanUD &zud) {
+  Trace __trace("GeomRend::build_src_mig_plist(Zoltan_Struct *zz, ZoltanUD &zud)");
+
+
+
+#if 0 //mvr
+  UInt csize = Par::Size();
+  int numprocs;
+  std::vector<int> procs(csize);
+
+  int num_pts=srcplist->get_curr_num_pts();
+  for (int loc=0; loc<num_pts; loc++) {
+    const double *pnt = srcplist->get_coord_ptr(loc);
+
+    Zoltan_LB_Box_Assign(zz, pnt[0]-dcfg.geom_tol,
+                             pnt[1]-dcfg.geom_tol,
+                             (sdim > 2 ? pnt[2] : 0) - dcfg.geom_tol,
+                             pnt[0]+dcfg.geom_tol,
+                             pnt[1]+dcfg.geom_tol,
+                             (sdim > 2 ? pnt[2] : 0) + dcfg.geom_tol,
+                             &procs[0],
+                             &numprocs);
+
+#endif //mvr
+    //chere
+
+
+
+
+
+
+
+
+  MEField<> &coord = *srcmesh->GetCoordField();
+
+  std::vector<CommRel::CommNode> mignode;
+
+#if 0 //mvr
+  rcb_isect(zz, coord, zud.srcObj, mignode, dcfg.geom_tol, sdim);
+static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist,
+        std::vector<CommRel::CommNode> &mignode, double geom_tol, UInt sdim) {
+  Trace __trace("rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist, std::vector<CommRel::CommNode> &res)");
+
+  UInt csize = Par::Size();
+
+  // We have already narrowed the source mesh down to those cells
+  // which intersect the bbox of the dest, so loop back through these and
+  // figure out where these cells go.
+  std::vector<MeshObj*>::iterator si = objlist.begin(), se = objlist.end();
+  int numprocs;
+  std::vector<int> procs(csize);
+
+  for (; si != se; ++si) {
+
+    MeshObj &elem = **si;
+
+    BBox ebox(coord, elem, geom_tol);
+
+    // Insersect with the cuts
+    Zoltan_LB_Box_Assign(zz, ebox.getMin()[0]-geom_tol,
+                             ebox.getMin()[1]-geom_tol,
+                             (sdim > 2 ? ebox.getMin()[2] : 0) - geom_tol,
+                             ebox.getMax()[0]+geom_tol,
+                             ebox.getMax()[1]+geom_tol,
+                             (sdim > 2 ? ebox.getMax()[2] : 0) + geom_tol,
+                             &procs[0],
+                             &numprocs);
+
+    // Add to comm
+    for (UInt i = 0; i < (UInt) numprocs; i++) {
+      CommRel::CommNode cnode(&elem, procs[i]);
+
+      std::vector<CommRel::CommNode>::iterator lb =
+        std::lower_bound(mignode.begin(), mignode.end(), cnode);
+
+      // Add if not already there
+      if (lb == mignode.end() || *lb != cnode)
+        mignode.insert(lb, cnode);
+
+    } // for nproc
+  } // for si
+}
+
+#endif //mvr
+
+
+
+
+  // Add our result to the migspec
+  CommRel &src_migration = srcComm.GetCommRel(MeshObj::ELEMENT);
+  src_migration.Init("src_migration", *srcmesh, srcmesh_rend, false);
+
+  src_migration.add_domain(mignode);
+
+  // Add the neighbors to the spec, if necessary
+  if (dcfg.neighbors)
+    add_neighbors(src_migration);
+
+#ifdef GEOM_DEBUG
+Par::Out() << "** source mig:" << std::endl;
+src_migration.Print(Par::Out());
+#endif
+
+  // Now form the lower order commspecs
+  src_migration.dependants(srcComm.GetCommRel(MeshObj::NODE), MeshObj::NODE);
+  src_migration.dependants(srcComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
+  src_migration.dependants(srcComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
+
+}
+
+  //mvr the following is very much like build_dst_mig_plist - combine?
+void GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport,
+				       ZOLTAN_ID_PTR exportGids, 
+				       int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids)
+{
+  Trace __trace("GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport, ZOLTAN_ID_PTR exportGids, int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids)");
+
+  int num_procs=Par::Size();
+  int myrank=Par::Rank();
+
+  SparseMsg comm;
+
+  std::vector<int> mymoving(srcplist->get_curr_num_pts(),0);
+
+  std::vector<int> proc_counts;
+  proc_counts.resize(num_procs,0);
+  std::vector<int> mvr[num_procs];
+  int num_snd_pts=0;
+  for (int i=0; i<numExport; i++) {
+    if (exportGids[i*2]==0) {
+      num_snd_pts++;
+      proc_counts[exportProcs[i]]++;
+      mvr[exportProcs[i]].push_back(exportGids[i*2+1]);
+      mymoving[exportGids[i*2+1]]=1;
+    }
+  }
+
+  int snd_size=(sdim+1)*sizeof(double);
+  int num_snd_procs=0;
+  std::vector<int> snd_pets;
+  std::vector<int> snd_sizes;
+  std::vector<int> snd_counts;
+  std::vector< std::vector<int> > mvr2;
+  for (int i=0; i<num_procs; i++) {
+    if (proc_counts[i] > 0) {
+      num_snd_procs++;
+      snd_pets.push_back(i);
+      snd_sizes.push_back(proc_counts[i]*snd_size);
+      snd_counts.push_back(proc_counts[i]);
+      mvr2.push_back(mvr[i]);
+    }
+  }
+
+
+  printf("mvrs: rank= %d  num_snd_procs= %d\n",myrank,num_snd_procs);
+  fflush(stdout);
+  for (int i=0; i<num_snd_procs; i++) {
+    printf("mvrs: rank= %d  snd_pets[%d]= %d  snd_sizes[%d]= %d  snd_counts[%d]= %d  ",myrank,i,snd_pets[i],i,snd_sizes[i],i,snd_counts[i]);
+    fflush(stdout);
+    for(int j=0; j<snd_counts[i]; j++) 
+      printf("mvr2[%d][%d]= %d  ",i,j,mvr2[i][j]);
+    printf("\n");
+    fflush(stdout);
+  }
+
+
+
+  // Setup pattern and sizes
+  if (num_snd_procs >0) {
+    comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
+    comm.setSizes((UInt *)&(snd_sizes[0]));
+  } else {
+    comm.setPattern(0, (const UInt *)NULL);
+    comm.setSizes((UInt *)NULL);
+  }
+
+  // Reset buffers
+  comm.resetBuffers();
+
+  // Pack points into buffers
+  for (int i=0; i< num_snd_procs; i++) {
+    SparseMsg:: buffer *b=comm.getSendBuffer(snd_pets[i]);
+    for (int j=0; j<snd_counts[i]; j++) {
+
+      
+      // Get index of node
+      int loc=mvr2[i][j];
+
+      const double *pnt = zud.src_pointlist->get_coord_ptr(loc);
+      int mvr_id = zud.src_pointlist->get_id(loc);
+
+      // pack buf
+      double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
+      buf[0]=pnt[0];
+      printf("mvrs: rank= %d  i= %d  j= %d  buf[0]= %8.8f\n",myrank,i,j,buf[0]);
+      fflush(stdout);
+      buf[1]=pnt[1];
+      printf("mvrs: rank= %d  i= %d  j= %d  buf[1]= %8.8f\n",myrank,i,j,buf[1]);
+      fflush(stdout);
+      if (sdim < 3)
+	buf[2]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
+      else {
+        buf[2]=pnt[2];
+	printf("mvrs: rank= %d  i= %d  j= %d  buf[2]= %8.8f\n",myrank,i,j,buf[2]);
+	fflush(stdout);
+        buf[3]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
+      }
+
+      // Push buf onto send struct
+      b->push((const UChar *)buf, (UInt)snd_size);
+    }
+  }
+
+  // Communicate point information
+  comm.communicate();
+
+  //create pointlist_rend
+  int num_rcv_pts=0;
+  for (int i=0; i<numImport; i++) {
+    if (importGids[i*2]==0) {
+      num_rcv_pts++;
+    }
+  }
+
+  int plist_rend_size=srcplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
+  printf("mvrs: rank= %d  plist_rend_size= %d\n",myrank,plist_rend_size);
+  fflush(stdout);
+
+  if (plist_rend_size > 0) {
+
+    //mvr will need to free this somewhere - perhaps at destruction of grend?
+    srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+
+    int orig_srcpointlist_size = srcplist->get_curr_num_pts();
+    for (int i=0; i<orig_srcpointlist_size; i++) {
+      if (mymoving[i] == 0) {
+	int temp_id=srcplist->get_id(i);
+	double *temp_pnt = (double *)srcplist->get_coord_ptr(i);  //mvr remove const?
+	srcplist_rend->add(temp_id,temp_pnt);
+      }
+    }
+
+    int ip=0;
+    for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+      UInt proc = *p;
+      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+
+      // Unpack everything from this processor
+      while (!b->empty()) {
+	double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
+
+	/* XMRKX */
+	b->pop((UChar *)buf, (UInt)snd_size);
+	//      printf(" [%f %f %f], ",pnt[0],pnt[1],pnt[2]);
+
+
+	// Unpack buf
+	double pnt[3]={0.0,0.0,0.0};
+	int mvr_id;
+	
+	pnt[0]=buf[0];
+	printf("mvrs: received?: rank= %d  pnt[0]= %8.8f\n",myrank,pnt[0]);
+	fflush(stdout);
+	pnt[1]=buf[1];
+	printf("mvrs: received?: rank= %d  pnt[1]= %8.8f\n",myrank,pnt[1]);
+	fflush(stdout);
+	if (sdim < 3) {
+	  mvr_id=(int)buf[2];
+	  printf("mvrs: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
+	  fflush(stdout);
+	} else {
+	  pnt[2]=buf[2];
+	  printf("mvrs: received?: rank= %d  pnt[2]= %8.8f\n",myrank,pnt[2]);
+	  fflush(stdout);
+	  mvr_id=(int)buf[3];
+	  printf("mvrs: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
+	  fflush(stdout);
+	}
+
+	srcplist_rend->add(mvr_id,pnt);
+
+      }
+
+      ip++;
+    }
+  }
+
+  //mvr clean up?
+    
+}
+
 
 void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
      ZOLTAN_ID_PTR exportLids, ZOLTAN_ID_PTR exportGids, int *exportProcs)
@@ -390,7 +798,8 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
     // Element/side case. Intersect
     /*--------------------------------------------------------------*/
 
-    MEField<> &coord = *dstmesh.GetCoordField();
+    //mvr this code appears to only be reached during conservative regridding                     
+    MEField<> &coord = *dstmesh->GetCoordField();
 
     std::vector<CommRel::CommNode> mignode;
 
@@ -399,7 +808,7 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
     // Add results to the migspec
     CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type); 
     //    CommRel &dst_migration = dstComm.GetCommRel(MeshObj::ELEMENT);
-    dst_migration.Init("dst_migration", dstmesh, dstmesh_rend, false);
+    dst_migration.Init("dst_migration", *dstmesh, dstmesh_rend, false);
     dst_migration.add_domain(mignode); // BOB added
     
     // Now flush out the comm with lower hierarchy
@@ -416,8 +825,11 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
     /*--------------------------------------------------------------*/
 
     std::vector<CommRel::CommNode> mignode;
-    int es_size = zud.srcObj.size();
-    int nd_size = zud.dstObj.size();
+    int es_size;
+    es_size = zud.srcObj.size();
+
+    int nd_size;
+    nd_size = zud.dstObj.size();
 
     // Mark those that have been added to move
     std::vector<int> moving(nd_size, 0);
@@ -431,6 +843,7 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
     // Add in all the local objects that are not moving
     for (UInt i = 0; i < nd_size; i++) {
       if (moving[i] == 0) {
+	//mvr chere
         CommRel::CommNode cn(zud.dstObj[i], rank);
         mignode.push_back(cn);
       }
@@ -447,88 +860,271 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
     
     // Now build the comm from mignode
     CommRel &dst_migration = dstComm.GetCommRel(MeshObj::NODE);
-    dst_migration.Init("dst_migration", dstmesh, dstmesh_rend, false);
+    dst_migration.Init("dst_migration", *dstmesh, dstmesh_rend, false);
     dst_migration.add_domain(mignode);
     
   } // node/interp case
 }
 
+void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
+				   ZOLTAN_ID_PTR exportGids, 
+				   int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids)
+{
+  Trace __trace("GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport, ZOLTAN_ID_PTR exportGids, int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids)");
+
+  int num_procs=Par::Size();
+  int myrank=Par::Rank();
+
+  SparseMsg comm;
+
+  std::vector<int> mymoving(dstplist->get_curr_num_pts(),0);
+
+  std::vector<int> proc_counts;
+  proc_counts.resize(num_procs,0);
+  std::vector<int> mvr[num_procs];
+  int num_snd_pts=0;
+  for (int i=0; i<numExport; i++) {
+    if (exportGids[i*2]==1) {
+      num_snd_pts++;
+      proc_counts[exportProcs[i]]++;
+      mvr[exportProcs[i]].push_back(exportGids[i*2+1]);
+      mymoving[exportGids[i*2+1]]=1;
+    }
+  }
+
+  int snd_size=(sdim+1)*sizeof(double);
+  int num_snd_procs=0;
+  std::vector<int> snd_pets;
+  std::vector<int> snd_sizes;
+  std::vector<int> snd_counts;
+  std::vector< std::vector<int> > mvr2;
+  for (int i=0; i<num_procs; i++) {
+    if (proc_counts[i] > 0) {
+      num_snd_procs++;
+      snd_pets.push_back(i);
+      snd_sizes.push_back(proc_counts[i]*snd_size);
+      snd_counts.push_back(proc_counts[i]);
+      mvr2.push_back(mvr[i]);
+    }
+  }
+
+
+  printf("mvrd: rank= %d  num_snd_procs= %d\n",myrank,num_snd_procs);
+  fflush(stdout);
+  for (int i=0; i<num_snd_procs; i++) {
+    printf("mvrd: rank= %d  snd_pets[%d]= %d  snd_sizes[%d]= %d  snd_counts[%d]= %d  ",myrank,i,snd_pets[i],i,snd_sizes[i],i,snd_counts[i]);
+    fflush(stdout);
+    for(int j=0; j<snd_counts[i]; j++) 
+      printf("mvr2[%d][%d]= %d  ",i,j,mvr2[i][j]);
+    printf("\n");
+    fflush(stdout);
+  }
+
+
+
+  // Setup pattern and sizes
+  if (num_snd_procs >0) {
+    comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
+    comm.setSizes((UInt *)&(snd_sizes[0]));
+  } else {
+    comm.setPattern(0, (const UInt *)NULL);
+    comm.setSizes((UInt *)NULL);
+  }
+
+  // Reset buffers
+  comm.resetBuffers();
+
+  // Pack points into buffers
+  for (int i=0; i< num_snd_procs; i++) {
+    SparseMsg:: buffer *b=comm.getSendBuffer(snd_pets[i]);
+    for (int j=0; j<snd_counts[i]; j++) {
+
+      
+      // Get index of node
+      int loc=mvr2[i][j];
+
+      const double *pnt = zud.dst_pointlist->get_coord_ptr(loc);
+      int mvr_id = zud.dst_pointlist->get_id(loc);
+
+      // pack buf
+      double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
+      buf[0]=pnt[0];
+      printf("mvrd: rank= %d  i= %d  j= %d  buf[0]= %8.8f\n",myrank,i,j,buf[0]);
+      fflush(stdout);
+      buf[1]=pnt[1];
+      printf("mvrd: rank= %d  i= %d  j= %d  buf[1]= %8.8f\n",myrank,i,j,buf[1]);
+      fflush(stdout);
+      if (sdim < 3)
+	buf[2]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
+      else {
+        buf[2]=pnt[2];
+	printf("mvrd: rank= %d  i= %d  j= %d  buf[2]= %8.8f\n",myrank,i,j,buf[2]);
+	fflush(stdout);
+        buf[3]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
+      }
+
+      // Push buf onto send struct
+      b->push((const UChar *)buf, (UInt)snd_size);
+    }
+  }
+
+  // Communicate point information
+  comm.communicate();
+
+  //create pointlist_rend
+  int num_rcv_pts=0;
+  for (int i=0; i<numImport; i++) {
+    if (importGids[i*2]==1) {
+      num_rcv_pts++;
+    }
+  }
+
+  int plist_rend_size=dstplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
+  printf("mvrd: rank= %d  plist_rend_size= %d\n",myrank,plist_rend_size);
+  fflush(stdout);
+
+  if (plist_rend_size > 0) {
+
+    //mvr will need to free this somewhere - perhaps at destruction of grend?
+    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+
+    int orig_dstpointlist_size = dstplist->get_curr_num_pts();
+    for (int i=0; i<orig_dstpointlist_size; i++) {
+      if (mymoving[i] == 0) {
+	int temp_id=dstplist->get_id(i);
+	double *temp_pnt = (double *)dstplist->get_coord_ptr(i);  //mvr remove const?
+	dstplist_rend->add(temp_id,temp_pnt);
+      }
+    }
+
+    int ip=0;
+    for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+      UInt proc = *p;
+      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+
+      // Unpack everything from this processor
+      while (!b->empty()) {
+	double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
+
+	/* XMRKX */
+	b->pop((UChar *)buf, (UInt)snd_size);
+	//      printf(" [%f %f %f], ",pnt[0],pnt[1],pnt[2]);
+
+
+	// Unpack buf
+	double pnt[3]={0.0,0.0,0.0};
+	int mvr_id;
+	
+	pnt[0]=buf[0];
+	printf("mvrd: received?: rank= %d  pnt[0]= %8.8f\n",myrank,pnt[0]);
+	fflush(stdout);
+	pnt[1]=buf[1];
+	printf("mvrd: received?: rank= %d  pnt[1]= %8.8f\n",myrank,pnt[1]);
+	fflush(stdout);
+	if (sdim < 3) {
+	  mvr_id=(int)buf[2];
+	  printf("mvrd: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
+	  fflush(stdout);
+	} else {
+	  pnt[2]=buf[2];
+	  printf("mvrd: received?: rank= %d  pnt[2]= %8.8f\n",myrank,pnt[2]);
+	  fflush(stdout);
+	  mvr_id=(int)buf[3];
+	  printf("mvrd: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
+	  fflush(stdout);
+	}
+
+	dstplist_rend->add(mvr_id,pnt);
+
+      }
+
+      ip++;
+    }
+  }
+
+  //mvr clean up?
+    
+}
+
 void GeomRend::prep_meshes() {
   Trace __trace("GeomRend::prep_meshes()");
   
+  if (srcplist == NULL) {   //mvr?
   // Source Mesh //
   // Mesh dims
   if(!freeze_src){
-    srcmesh_rend.set_spatial_dimension(srcmesh.spatial_dim());
-    srcmesh_rend.set_parametric_dimension(srcmesh.parametric_dim());
+    srcmesh_rend.set_spatial_dimension(srcmesh->spatial_dim());
+    srcmesh_rend.set_parametric_dimension(srcmesh->parametric_dim());
     
     // Contexts
-    srcmesh_rend.AssumeContexts(srcmesh);
+    srcmesh_rend.AssumeContexts(*srcmesh);
     
     // Coordfield
-    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &scoord = *srcmesh->GetCoordField();
     srcmesh_rend.RegisterField("coordinates", scoord.GetMEFamily(),
                      MeshObj::ELEMENT, scoord.GetContext(), scoord.dim());
     
-    MEField<> *smask = srcmesh.GetField("mask");
+    MEField<> *smask = srcmesh->GetField("mask");
     if (smask != NULL) {
       srcmesh_rend.RegisterField("mask", smask->GetMEFamily(),
        MeshObj::ELEMENT, smask->GetContext(), smask->dim());
     }
 
 
-    MEField<> *src_elem_mask = srcmesh.GetField("elem_mask");
+    MEField<> *src_elem_mask = srcmesh->GetField("elem_mask");
     if (src_elem_mask != NULL) {
       srcmesh_rend.RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
        MeshObj::ELEMENT, src_elem_mask->GetContext(), src_elem_mask->dim());
     }
 
 
-    MEField<> *src_elem_area = srcmesh.GetField("elem_area");
+    MEField<> *src_elem_area = srcmesh->GetField("elem_area");
     if (src_elem_area != NULL) {
       srcmesh_rend.RegisterField("elem_area", src_elem_area->GetMEFamily(),
        MeshObj::ELEMENT, src_elem_area->GetContext(), src_elem_area->dim());
     }
 
-    MEField<> *src_elem_frac2 = srcmesh.GetField("elem_frac2");
+    MEField<> *src_elem_frac2 = srcmesh->GetField("elem_frac2");
     if (src_elem_frac2 != NULL) {
       srcmesh_rend.RegisterField("elem_frac2", src_elem_frac2->GetMEFamily(),
        MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
     }
-  }
 
+  }
+  }
+  if (dstplist == NULL) {   //mvr?
 
   // Destination Mesh //
   
   // Mesh dims
-  dstmesh_rend.set_spatial_dimension(dstmesh.spatial_dim());
-  dstmesh_rend.set_parametric_dimension(dstmesh.parametric_dim());
+  dstmesh_rend.set_spatial_dimension(dstmesh->spatial_dim());
+  dstmesh_rend.set_parametric_dimension(dstmesh->parametric_dim());
   
   // Contexts
-  dstmesh_rend.AssumeContexts(dstmesh); 
+  dstmesh_rend.AssumeContexts(*dstmesh); 
   
   // Coordfield.  If dstmesh if 'conserv', register coordinates as usual.  If it
   // is nodal, we cannot do this, since we have no elements to host the MEField.
   // Instead, just register the low-level field and operate with that.
   if (iter_is_obj) {
-    MEField<> &dcoord = *dstmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh->GetCoordField();
     dstmesh_rend.RegisterField("coordinates", dcoord.GetMEFamily(), MeshObj::ELEMENT,
                                dcoord.GetContext(), dcoord.dim());
 
-    MEField<> *dst_elem_mask = dstmesh.GetField("elem_mask");
+    MEField<> *dst_elem_mask = dstmesh->GetField("elem_mask");
     if (dst_elem_mask != NULL) {
       dstmesh_rend.RegisterField("elem_mask", dst_elem_mask->GetMEFamily(),
                                  MeshObj::ELEMENT, dst_elem_mask->GetContext(), dst_elem_mask->dim());
     }
 
 
-    MEField<> *dst_elem_area = dstmesh.GetField("elem_area");
+    MEField<> *dst_elem_area = dstmesh->GetField("elem_area");
     if (dst_elem_area != NULL) {
       dstmesh_rend.RegisterField("elem_area", dst_elem_area->GetMEFamily(),
                                  MeshObj::ELEMENT, dst_elem_area->GetContext(), dst_elem_area->dim());
     }
 
-    MEField<> *dst_elem_frac2 = dstmesh.GetField("elem_frac2");
+    MEField<> *dst_elem_frac2 = dstmesh->GetField("elem_frac2");
     if (dst_elem_frac2 != NULL) {
       dstmesh_rend.RegisterField("elem_frac2", dst_elem_frac2->GetMEFamily(),
                                  MeshObj::ELEMENT, dst_elem_frac2->GetContext(), dst_elem_frac2->dim());
@@ -536,13 +1132,14 @@ void GeomRend::prep_meshes() {
 
   } else {
     
-     MEField<> &dcoord = *dstmesh.GetCoordField();
+
+     MEField<> &dcoord = *dstmesh->GetCoordField();
     _field *cf = dcoord.GetNodalfield();
     
     dstmesh_rend.Registerfield(cf->name(), cf->GetAttr(), dcoord.FType(), cf->dim());
 
     // Do masks, if they exist
-    MEField<> *dmptr = dstmesh.GetField("mask");
+    MEField<> *dmptr = dstmesh->GetField("mask");
 
     if (dmptr != NULL) {
       _field *mf = dmptr->GetNodalfield();
@@ -550,12 +1147,14 @@ void GeomRend::prep_meshes() {
       dstmesh_rend.Registerfield(mf->name(), mf->GetAttr(), dmptr->FType(), mf->dim());
     }
   }
+  }
   
 }
 
 void GeomRend::migrate_meshes() { 
   Trace __trace("GeomRend::migrate_meshes()");
   
+  if (srcplist == NULL) {   //mvr?
   if(!freeze_src){
     // First the sourcemesh
     srcComm.GetCommRel(MeshObj::NODE).build_range();
@@ -563,11 +1162,12 @@ void GeomRend::migrate_meshes() {
     srcComm.GetCommRel(MeshObj::FACE).build_range();
     srcComm.GetCommRel(MeshObj::ELEMENT).build_range();
 
+
     {
       int num_snd=0;
       MEField<> *snd[5],*rcv[5];
 
-      MEField<> *sc = srcmesh.GetCoordField();
+      MEField<> *sc = srcmesh->GetCoordField();
       MEField<> *sc_r = srcmesh_rend.GetCoordField();
 
       // load coordinate fields
@@ -576,7 +1176,7 @@ void GeomRend::migrate_meshes() {
       num_snd++;            
 
       // Do masks if necessary
-      MEField<> *sm = srcmesh.GetField("mask");
+      MEField<> *sm = srcmesh->GetField("mask");
       if (sm != NULL) {
         MEField<> *sm_r = srcmesh_rend.GetField("mask");
 
@@ -587,7 +1187,7 @@ void GeomRend::migrate_meshes() {
       }
 
       // Do elem masks if necessary
-      MEField<> *sem = srcmesh.GetField("elem_mask");
+      MEField<> *sem = srcmesh->GetField("elem_mask");
       if (sem != NULL) {
         MEField<> *sem_r = srcmesh_rend.GetField("elem_mask");
 
@@ -598,7 +1198,7 @@ void GeomRend::migrate_meshes() {
       }
 
       // Do elem masks if necessary
-      MEField<> *sea = srcmesh.GetField("elem_area");
+      MEField<> *sea = srcmesh->GetField("elem_area");
       if (sea != NULL) {
         MEField<> *sea_r = srcmesh_rend.GetField("elem_area");
 
@@ -609,7 +1209,7 @@ void GeomRend::migrate_meshes() {
       }
 
       // Do elem creeped frac if necessary
-      MEField<> *sef = srcmesh.GetField("elem_frac2");
+      MEField<> *sef = srcmesh->GetField("elem_frac2");
       if (sef != NULL) {
         MEField<> *sef_r = srcmesh_rend.GetField("elem_frac2");
 
@@ -620,10 +1220,14 @@ void GeomRend::migrate_meshes() {
       }
 
        srcmesh_rend.Commit();
-    
+
        srcComm.SendFields(num_snd, snd, rcv);
     }
   }
+  }
+
+  if (dstplist == NULL) {   //mvr?
+
 
   // And now the destination
   dstComm.GetCommRel(MeshObj::NODE).build_range();
@@ -642,7 +1246,7 @@ void GeomRend::migrate_meshes() {
     int num_snd=0;
     MEField<> *snd[5],*rcv[5];
 
-    MEField<> *dc = dstmesh.GetCoordField();
+    MEField<> *dc = dstmesh->GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
 
     // load coordinate fields
@@ -651,7 +1255,7 @@ void GeomRend::migrate_meshes() {
     num_snd++;            
 
     // Do masks if necessary
-    MEField<> *dm = dstmesh.GetField("mask");
+    MEField<> *dm = dstmesh->GetField("mask");
     if (dm != NULL) {
       MEField<> *dm_r = dstmesh_rend.GetField("mask");
 
@@ -662,7 +1266,7 @@ void GeomRend::migrate_meshes() {
     }
 
     // Do elem masks if necessary
-    MEField<> *dem = dstmesh.GetField("elem_mask");
+    MEField<> *dem = dstmesh->GetField("elem_mask");
     if (dem != NULL) {
       MEField<> *dem_r = dstmesh_rend.GetField("elem_mask");
 
@@ -673,7 +1277,7 @@ void GeomRend::migrate_meshes() {
     }
 
     // Do elem area if necessary
-    MEField<> *dea = dstmesh.GetField("elem_area");
+    MEField<> *dea = dstmesh->GetField("elem_area");
     if (dea != NULL) {
       MEField<> *dea_r = dstmesh_rend.GetField("elem_area");
 
@@ -684,7 +1288,7 @@ void GeomRend::migrate_meshes() {
     }
 
     // Do elem creeped frac if necessary
-    MEField<> *def = dstmesh.GetField("elem_frac2");
+    MEField<> *def = dstmesh->GetField("elem_frac2");
     if (def != NULL) {
       MEField<> *def_r = dstmesh_rend.GetField("elem_frac2");
 
@@ -700,8 +1304,8 @@ void GeomRend::migrate_meshes() {
     int num_snd=0;
     _field *snd[2],*rcv[2];
 
-    MEField<> *dc = dstmesh.GetCoordField();
-    MEField<> *dm = dstmesh.GetField("mask");
+    MEField<> *dc = dstmesh->GetCoordField();
+    MEField<> *dm = dstmesh->GetField("mask");
       
     _field *dcf = dc->GetNodalfield();
     _field *dc_rf = dstmesh_rend.Getfield("coordinates_1");
@@ -729,7 +1333,7 @@ void GeomRend::migrate_meshes() {
         Trace __trace1("dst_node post send fields->");
 
   }
-
+  }
 
 }
 
@@ -779,18 +1383,18 @@ void mesh_isect(const MEField<> & scoord, const BBox & srcBBox, const MEField<> 
 
 void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, struct Zoltan_Struct **zzp) {
   // Should not use neighbors flag unless source has ghosting enabled
-  ThrowRequire(!dcfg.neighbors || srcmesh.HasGhost());
+  ThrowRequire(!dcfg.neighbors || srcmesh->HasGhost());
 	
-  MEField<> &scoord = *srcmesh.GetCoordField();
-  BBox srcBBox(scoord, srcmesh);
+  MEField<> &scoord = *srcmesh->GetCoordField();
+  BBox srcBBox(scoord, *srcmesh);
   BBox gsrcBBox = BBoxParUnion(srcBBox);
 
-  MEField<> &dcoord = *dstmesh.GetCoordField();
+  MEField<> &dcoord = *dstmesh->GetCoordField();
   // Because src mesh is not allowed to migrate,
   // Add all dst mesh elements that intersect the global bounding box of the src
   // to a separate list for zoltan to compute dst proc
   std::vector<MeshObj *> dstObjList;
-  Mesh::iterator ei = dstmesh.elem_begin(), ee = dstmesh.elem_end();
+  Mesh::iterator ei = dstmesh->elem_begin(), ee = dstmesh->elem_end();
   for (; ei != ee; ++ei) {
     MeshObj &elem = *ei;
     BBox ebox(dcoord, elem, 0.25);
@@ -803,7 +1407,7 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
   mesh_isect(scoord, srcBBox, dcoord, dstObjList, mignode, dcfg.geom_tol, sdim);
   // Add results to the migspec
   CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type); 
-  dst_migration.Init("dst_migration", dstmesh, dstmesh_rend, false);
+  dst_migration.Init("dst_migration", *dstmesh, dstmesh_rend, false);
   dst_migration.add_domain(mignode); 
   // Now flush out the comm with lower hierarchy
   dst_migration.dependants(dstComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
@@ -824,6 +1428,7 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
       src_rend_Fields.push_back(srcmesh_rend.RegisterField(fptr->name(), fptr->GetMEFamily(),
                    fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
   }
+
   // Slightly different for destination; use interp field if not 'conserv'
   for (UInt i = 0; i < ndstF; i++) {
     MEField<> *fptr = dstF[i];
@@ -863,18 +1468,40 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   }
   
   // Should not use neighbors flag unless source has ghosting enabled
-  ThrowRequire(!dcfg.neighbors || srcmesh.HasGhost());
+  //mvr   ThrowRequire(!dcfg.neighbors || srcmesh->HasGhost());
 	
-  ZoltanUD zud(sdim, srcmesh.GetCoordField(), dstmesh.GetCoordField(), iter_is_obj);
+
+  MEField<> *mvr_blah1, *mvr_blah2;
+  if (srcmesh != NULL)
+    mvr_blah1 = srcmesh->GetCoordField();
+  else
+    mvr_blah1 = NULL;
+
+  if (dstmesh != NULL)
+    mvr_blah2 = dstmesh->GetCoordField();
+  else
+    mvr_blah2 = NULL;
+
+
+  ZoltanUD zud(sdim, mvr_blah1, mvr_blah2, srcplist, dstplist, iter_is_obj);
 
   // Gather the destination points.  Also get a min/max
   double cmin[3], cmax[3];
 
-  build_dest(cmin, cmax, zud);
+  if (dstplist != NULL)
+    build_dest_plist(cmin, cmax, dstplist);
+  else
+    build_dest(cmin, cmax, zud);
+
+  printf("mvr: sdim= %d\n",sdim);
+  printf("mvr: cmin= %8.8f  %8.8f  %8.8f\n",cmin[0],cmin[1],cmin[2]);
+  printf("mvr: cmax= %8.8f  %8.8f  %8.8f\n",cmax[0],cmax[1],cmax[2]);
+  fflush(stdout);
 
   BBox dstBound = BBoxParUnion(BBox(sdim, cmin, cmax));
 
-  build_src(dstBound, zud);
+  if (srcplist == NULL)
+    build_src(dstBound, zud);
 
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
@@ -904,6 +1531,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   int *exportProcs;
   int *exportToPart;
 
+
   // Set the mesh description callbacks
   Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObj, (void*) &zud);
   Zoltan_Set_Obj_List_Fn(zz, GetObjList, (void*) &zud);
@@ -915,19 +1543,47 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     &numImport, &importGlobalids, &importLocalids, &importProcs, &importToPart,
     &numExport, &exportGlobalids, &exportLocalids, &exportProcs, &exportToPart);
 
+  printf("mvr: after: rank= %d  numImport= %d\n",rank,numImport);
+  printf("mvr: after: rank= %d  numExport= %d\n",rank,numExport);
+  for (int xx=0; xx<numImport; xx++) {
+    printf("mvr: after: rank= %d  importGIDflag?= %d  importGID?= %d  importLocalids[]= %d  importProcs[]= %d\n",rank,importGlobalids[xx*2],importGlobalids[xx*2+1],importLocalids[xx],importProcs[xx]);
+  }
+  for (int xx=0; xx<numExport; xx++) {
+    printf("mvr: after: rank= %d  exportGIDflag?= %d  exportGID?= %d  exportLocalids[]= %d  exportProcs[]= %d\n",rank,exportGlobalids[xx*2],exportGlobalids[xx*2+1],exportLocalids[xx],exportProcs[xx]);
+  }
+
+
+  printf("mvr: hello1\n");
+  fflush(stdout);
+
   // Build up the source migration comm using the RCB cuts
-  build_src_mig(zz, zud);
+  if (zud.src_pointlist == NULL)
+    build_src_mig(zz, zud);
+  else {
+    build_src_mig_plist_try(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
+  }
 
+  printf("mvr: hello2\n");
+  fflush(stdout);
   // Build the destination migration
-  build_dst_mig(zz, zud, numExport, exportLocalids, exportGlobalids, exportProcs);
+  if (zud.dst_pointlist == NULL)
+    build_dst_mig(zz, zud, numExport, exportLocalids, exportGlobalids, exportProcs);
+  else
+    build_dst_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
 
+  printf("mvr: hello3\n");
+  fflush(stdout);
   // Ok.  Done with zud lists, so free them in the intests of memory
   std::vector<MeshObj*>().swap(zud.srcObj);
   std::vector<MeshObj*>().swap(zud.dstObj);
   
+  printf("mvr: hello4\n");
+  fflush(stdout);
   // Set up the rendezvous mesh metadata
   prep_meshes();
   
+  printf("mvr: hello5\n");
+  fflush(stdout);
   // Register the necessary fields (could put this in a function, but passing the args
   // would be a pain)
   for (UInt i = 0; i < nsrcF; i++) {
@@ -935,6 +1591,9 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
       src_rend_Fields.push_back(srcmesh_rend.RegisterField(fptr->name(), fptr->GetMEFamily(),
                    fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
   }
+
+  printf("mvr: hello6\n");
+  fflush(stdout);
   // Slightly different for destination; use interp field if not 'conserv'
   for (UInt i = 0; i < ndstF; i++) {
     MEField<> *fptr = dstF[i];
@@ -948,25 +1607,39 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     }
   }
 
-
+  printf("mvr: hello7\n");
+  fflush(stdout);
   // Now migrate the meshes.
   migrate_meshes();
   
+  printf("mvr: hello8\n");
+  fflush(stdout);
   //WriteMesh(srcmesh_rend, "srcrend");
 
+  printf("mvr: hello9\n");
+  fflush(stdout);
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be
   // used until destruction.
-  dstComm.Transpose();
-
+  if (dstplist == NULL)    //mvr?
+    dstComm.Transpose();
+  
+  printf("mvr: hello10\n");
+  fflush(stdout);
   // Release zoltan memory
   Zoltan_LB_Free_Part(&importGlobalids, &importLocalids,
                       &importProcs, &importToPart);
+  printf("mvr: hello11\n");
+  fflush(stdout);
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
 
+  printf("mvr: hello12\n");
+  fflush(stdout);
   if(free_zz){
     Zoltan_Destroy(&zz);
   }
+  printf("mvr: hello13\n");
+  fflush(stdout);
 }
 
 } // namespace ESMCI
