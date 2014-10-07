@@ -468,7 +468,6 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
  \begin{itemize}
  \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
  \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
- \item Concave cells with 4 sides are currently not supported (note that concave cells with more than 4 sides are supported)
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
 

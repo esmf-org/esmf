@@ -26,7 +26,7 @@ class Grid(object):
                  staggerloc=None,
                  filename=None,
                  filetype=None,
-                 regDecomp=None,
+                 reg_decomp=None,
                  decompflag=None,
                  is_sphere=None,
                  add_corner_stagger=None,
@@ -66,11 +66,11 @@ class Grid(object):
                         FileFormat.SCRIP \n
                         FileFormat.GRIDSPEC \n
             Optional arguments for creating a Grid from file: \n
-                regDecomp: A 2 element integer list specifying how the grid
-                           is decomposed.  Each entry is the number of decounts
-                           for that dimension.  The total decounts cannot
-                           exceed the total number of PETs.  In other words,
-                           at most one DE is allowed per processor. \n
+                reg_decomp: A 2 element integer list specifying how the grid
+                            is decomposed.  Each entry is the number of decounts
+                            for that dimension.  The total decounts cannot
+                            exceed the total number of PETs.  In other words,
+                            at most one DE is allowed per processor. \n
                 decompflag: List of decomposition flags indicating how each
                             dimension of the tile is to be divided between the
                             DEs. The default setting is BALANCED in all
@@ -142,8 +142,8 @@ class Grid(object):
                 warnings.warn("filename is only used for grids created from file, this argument will be ignored.")
             if filetype is not None:
                 warnings.warn("filetype is only used for grids created from file, this argument will be ignored.")
-            if regDecomp is not None:
-                warnings.warn("regDecomp is only used for grids created from file, this argument will be ignored.")
+            if reg_decomp is not None:
+                warnings.warn("reg_decomp is only used for grids created from file, this argument will be ignored.")
             if decompflag is not None:
                 warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
@@ -217,12 +217,12 @@ class Grid(object):
         self.struct = None
 
         if from_file:
-            # create default regDecomp if it is not passed as an argument
-            if regDecomp is None:
-                regDecomp = [pet_count(), 1]
+            # create default reg_decomp if it is not passed as an argument
+            if reg_decomp is None:
+                reg_decomp = [pet_count(), 1]
             # create the grid from file
             self.struct = ESMP_GridCreateFromFile(filename, filetype,
-                                                  regDecomp,
+                                                  reg_decomp,
                                                   decompflag=decompflag,
                                                   isSphere=is_sphere,
                                                   addCornerStagger=add_corner_stagger,
@@ -231,8 +231,7 @@ class Grid(object):
                                                   coordNames=coord_names)
             # grid rank and dims
             if filetype == FileFormat.SCRIP:
-                self.rank = ESMP_ScripInqRank(filename)
-                self.max_index = ESMP_ScripInqDims(filename)
+                self.rank, self.max_index = ESMP_ScripInq(filename)
                 self.ndims = self.rank
             else: # must be GRIDSPEC
                 self.rank, self.ndims, self.max_index = ESMP_GridspecInq(filename)

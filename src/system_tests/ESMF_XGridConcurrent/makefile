@@ -13,6 +13,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_XGridConcurrentSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
+.NOTPARALLEL:
 SYSTEM_TESTS_OBJ      = util_mod.o atmos_comp.o land_comp.o coupler_comp.o
 
 SYSTEM_TESTS_RUN      = RUN_XGridConcurrent

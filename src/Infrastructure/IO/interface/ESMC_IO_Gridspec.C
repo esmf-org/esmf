@@ -23,7 +23,7 @@ extern "C" {
   void ESMC_GridspecInq (const char *, int *, int *, int *);
 }
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMC_ScripInqRank"
+#define ESMC_METHOD "ESMC_GridspecInq"
 void ESMC_GridspecInq (const char *filename, int *ndims, int *grid_dims, int *rc)
 {
   int localrc = ESMC_RC_NOT_IMPL;

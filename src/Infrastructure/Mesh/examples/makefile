@@ -10,6 +10,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 LOCDIR	  = src/Infrastructure/Mesh/examples
 
 
+.NOTPARALLEL:
 EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
                       $(ESMF_EXDIR)/ESMC_RendEx \

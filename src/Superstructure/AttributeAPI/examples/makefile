@@ -6,7 +6,7 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Superstructure/AttributeAPI/examples
 
-
+.NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
 		    $(ESMF_EXDIR)/ESMF_AttributePackageEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeCustPackEx \

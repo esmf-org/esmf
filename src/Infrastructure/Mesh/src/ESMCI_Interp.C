@@ -664,9 +664,38 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
 
-  // Loop through search results
+  // Declare vectors to hold weight and auxilary information
+  std::vector<int> valid;
+  std::vector<double> wgts;
+  std::vector<double> areas;
+  std::vector<double> dst_areas;
+
+  // Temporary buffers for concave case, 
+  // so there isn't lots of reallocation
+  std::vector<int> tmp_valid;
+  std::vector<double> tmp_areas;
+  std::vector<double> tmp_dst_areas;
+
+  // Find maximum number of dst elements in search results
+  int max_num_dst_elems=0;
   SearchResult::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
+    // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() > max_num_dst_elems) max_num_dst_elems=sr.elems.size();
+  }
+
+
+  // Allocate space for weight calc output arrays
+  valid.resize(max_num_dst_elems,0);
+  wgts.resize(max_num_dst_elems,0.0);
+  areas.resize(max_num_dst_elems,0.0);
+  dst_areas.resize(max_num_dst_elems,0.0);
+
+  // Loop through search results
+  for (sb = sres.begin(); sb != se; sb++) {
     
     // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
     Search_result &sr = **sb;
@@ -695,28 +724,15 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
 
     // Declare src_elem_area
     double src_elem_area;
-
-    // Declare weight vector
-    // TODO: Move these out of the loop, to save the time of allocating them
-    std::vector<int> valid;
-    std::vector<double> wgts;
-    std::vector<double> areas;
-    std::vector<double> dst_areas;
-
-    // Allocate space for weight calc output arrays
-    valid.resize(sr.elems.size(),0);
-    wgts.resize(sr.elems.size(),0.0);
-    areas.resize(sr.elems.size(),0.0);
-    dst_areas.resize(sr.elems.size(),0.0);
-
+  
     // Calculate weights
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,
-                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
-                                     &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                     midmesh, &tmp_nodes, &tmp_cells, 0, zz);
-
+                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
+                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
 
 
     // Invalidate masked destination elements
@@ -875,16 +891,44 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
 
-  // Loop through search results
+  // Declare vectors to hold weight and auxilary information
+  std::vector<int> valid;
+  std::vector<double> wgts;
+  std::vector<double> areas;
+  std::vector<double> dst_areas;
+
+  // Temporary buffers for concave case, 
+  // so there isn't lots of reallocation
+  std::vector<int> tmp_valid;
+  std::vector<double> tmp_areas;
+  std::vector<double> tmp_dst_areas;
+
+  // Find maximum number of dst elements in search results
+  int max_num_dst_elems=0;
   SearchResult::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
+    // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() > max_num_dst_elems) max_num_dst_elems=sr.elems.size();
+  }
+
+
+  // Allocate space for weight calc output arrays
+  valid.resize(max_num_dst_elems,0);
+  wgts.resize(max_num_dst_elems,0.0);
+  areas.resize(max_num_dst_elems,0.0);
+  dst_areas.resize(max_num_dst_elems,0.0);
+
+  // Loop through search results
+  for (sb = sres.begin(); sb != se; sb++) {
     
     // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
     Search_result &sr = **sb;
 
     // If there are no associated dst elements then skip it
     if (sr.elems.size() == 0) continue;
-
 
     // If this source element is masked then skip it
     if (src_mask_field) {
@@ -907,25 +951,13 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     // Declare src_elem_area
     double src_elem_area;
 
-    // Declare weight vector
-    // TODO: Move these out of the loop, to save the time of allocating them
-    std::vector<int> valid;
-    std::vector<double> wgts;
-    std::vector<double> areas;
-    std::vector<double> dst_areas;
-
-    // Allocate space for weight calc output arrays
-    valid.resize(sr.elems.size(),0);
-    wgts.resize(sr.elems.size(),0.0);
-    areas.resize(sr.elems.size(),0.0);
-    dst_areas.resize(sr.elems.size(),0.0);
-
     // Calculate weights
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                     &tmp_valid, &tmp_areas, &tmp_dst_areas,
                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
 
     // Invalidate masked destination elements

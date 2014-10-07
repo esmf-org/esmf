@@ -2492,7 +2492,7 @@ contains
     select case(iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
        if(present(amode_in) .and. iosystem%io_rank==0) then
-          print *, 'warning, the mode argument is currently ignored for binary file operations'
+          print *, 'PIO warning, the mode argument is currently ignored for binary file operations'
        end if
        ierr = create_mpiio(file,myfname)
     case( pio_iotype_pnetcdf, pio_iotype_netcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c)
@@ -2500,7 +2500,7 @@ contains
        ierr = create_nf(file,trim(myfname), amode)	
        if(debug .and. iosystem%io_rank==0)print *,__PIO_FILE__,__LINE__,' open: ', myfname, file%fh, ierr
     case(pio_iotype_binary)
-       print *,'createfile: io type not supported'
+       print *,'PIO createfile: pio_iotype_binary not supported'
 #ifdef _COMPRESSION
     case(pio_iotype_vdc2)
        restart=0
@@ -2656,7 +2656,7 @@ contains
     select case(iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
        if(amode /=0) then
-          print *, 'warning, the mode argument is currently ignored for binary file operations'
+          print *, 'PIO warning, the mode argument is currently ignored for binary file operations'
        end if
        ierr = open_mpiio(file,myfname)
     case( pio_iotype_pnetcdf, pio_iotype_netcdf, pio_iotype_netcdf4c, pio_iotype_netcdf4p)

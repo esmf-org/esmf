@@ -15,6 +15,7 @@ CLEANFILES  = Application $(APPOBJS)
 CLOBBERDIRS =
 
 # object files which need to be compiled into the executable.
+.NOTPARALLEL:
 APPOBJS = CplCompTemplate.o GridComp1Template.o GridComp2Template.o \
           ParentGridCompTemplate.o AppDriver.o
 

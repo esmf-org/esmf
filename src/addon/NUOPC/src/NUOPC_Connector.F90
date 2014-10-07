@@ -95,14 +95,12 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p2", "IPDv01p2", "IPDv02p2", "IPDv03p2", &
-      "IPDv04p2"/), &
+      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p3", "IPDv01p3", "IPDv02p3", "IPDv03p3", &
-      "IPDv04p3"/), &
+      phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -112,8 +110,13 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p5", "IPDv04p5"/), &
-      userRoutine=InitializeP5, rc=rc)
+      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
+      userRoutine=InitializeP5a, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
+      userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
@@ -124,6 +127,17 @@ module NUOPC_Connector
     call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1b"/), &
       userRoutine=InitializeP1b, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p2a"/), &
+      userRoutine=Initialize00P2a, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p2b"/), &
+      userRoutine=Initialize00P2b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -159,7 +173,7 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! filter all other entries but those of type IPDv03
+    ! filter all other entries but those of type IPDv04
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv04p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -199,12 +213,10 @@ module NUOPC_Connector
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP1a Reconcile")
 #endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -275,6 +287,9 @@ print *, "current bondLevel=", bondLevel
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
             else
+#if 0
+print *, "connectionString: ", connectionString
+#endif
               ! see if a new bondLevel highmark was found
               read (connectionString, "(i10)") bondLevelMax
 #if 0
@@ -338,12 +353,10 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP1b Reconcile")
 #endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -585,12 +598,10 @@ print *, "current bondLevel=", bondLevel
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP2 Reconcile")
 #endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -890,12 +901,10 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP3 Reconcile")
 #endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -1159,12 +1168,10 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP4 Reconcile")
 #endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
+    call NUOPC_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -1351,7 +1358,42 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP5(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeP5a(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! re-reconcile the States because they may have changed
+    ! (previous proxy objects are dropped before fresh reconcile)
+#ifdef RECONCILE_MEMORY_DEBUG_on
+call ESMF_VMLogMemInfo("befP5 Reconcile")
+#endif
+    call NUOPC_StateReconcile(importState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_StateReconcile(exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#ifdef RECONCILE_MEMORY_DEBUG_on
+call ESMF_VMLogMemInfo("aftP5 Reconcile")
+#endif
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP5b(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -1400,23 +1442,6 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! re-reconcile the States because they may have changed
-    ! (previous proxy objects are dropped before fresh reconcile)
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("befP5 Reconcile")
-#endif
-    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#ifdef RECONCILE_MEMORY_DEBUG_on
-call ESMF_VMLogMemInfo("aftP5 Reconcile")
-#endif
-    
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1579,6 +1604,61 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     
   end subroutine
     
+  !-----------------------------------------------------------------------------
+
+  subroutine Initialize00P2a(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(ESMF_Clock)                      :: internalClock
+    character(ESMF_MAXSTR)                :: name
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! Simply the combination of P2 + P5a
+    call InitializeP2(cplcomp, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call InitializeP5a(cplcomp, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  subroutine Initialize00P2b(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(ESMF_Clock)                      :: internalClock
+    character(ESMF_MAXSTR)                :: name
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! Simply same as P5b
+    call InitializeP5b(cplcomp, importState, exportState, clock, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+  end subroutine
+  
   !-----------------------------------------------------------------------------
 
   subroutine Run(cplcomp, importState, exportState, clock, rc)

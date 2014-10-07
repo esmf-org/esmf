@@ -33,7 +33,7 @@ def nc_is_mesh(filename, filetype):
     if (filetype == ESMF.FileFormat.UGRID) or (filetype == ESMF.FileFormat.ESMFMESH):
         is_mesh = True
     elif filetype == ESMF.FileFormat.SCRIP:
-        grid_rank = ESMF.ESMP_ScripInqRank(filename)
+        grid_rank, dims = ESMF.ESMP_ScripInq(filename)
         if grid_rank == 1:
             is_mesh = True
     return is_mesh

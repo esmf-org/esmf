@@ -97,10 +97,28 @@ namespace ESMCI {
   }
 
   void InterfaceInt::set(int *arrayArg, int lenArg){
+    /*
+    // this is a test to see if the data is passed in correctly
+    printf("InterfaceInt::set - arrayArg = [");
+    for (int i=0; i<lenArg; ++i)
+      printf("%d,", arrayArg[i]);
+    printf("], length = %d\n", lenArg);
+    */
+
     // set special case 1d
     array = arrayArg;
     dimCount = 1;
     extent[0]=lenArg;
+
+    /*
+    // this is a test to see if the data is passed in correctly
+    printf("InterfaceInt::set - arrayArg = [");
+    for (int i=0; i<extent[0]; ++i)
+      printf("%d,", array[i]);
+    printf("], length = %d\n", extent[0]);
+    printf("dimCount = %d\n", dimCount);
+    */
+
   }
 
   void InterfaceInt::set(std::vector<int> &arrayArg){

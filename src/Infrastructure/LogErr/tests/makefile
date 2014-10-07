@@ -8,6 +8,7 @@ LOCDIR	  = src/Infrastructure/LogErr/tests
 
 # TODO:FIELDINTEGRATION Restore LogErrHaltUTest
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_LogErrUTest \
 		$(ESMF_TESTDIR)/ESMF_LogErrUTest
 #		$(ESMF_TESTDIR)/ESMF_LogErrHaltUTest

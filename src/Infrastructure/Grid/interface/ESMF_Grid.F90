@@ -6053,6 +6053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get the grid rank and dimensions from the SCRIP file on PET 0, broadcast the
     ! data to all the PETs
+    allocate(dims(2))
     if (PetNo == 0) then
        call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
 			  grid_size=totalpoints, grid_corners=grid_corners, rc=localrc)
@@ -6073,7 +6074,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_VMBroadcast(vm, msgbuf, 4, 0, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate(dims(2))
       totaldims = msgbuf(1)
       dims(1)=msgbuf(2)
       dims(2)=msgbuf(3)

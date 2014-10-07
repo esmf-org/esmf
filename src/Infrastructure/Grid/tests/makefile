@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/Array/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_GridUTest \
                 $(ESMF_TESTDIR)/ESMF_GridCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_GridCoordUTest \

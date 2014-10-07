@@ -83,7 +83,7 @@
     character(len=*), intent(in)  :: filename
     integer, intent(out), optional :: grid_size
     integer, intent(out), optional :: grid_corners
-    integer, pointer, optional     :: grid_dims(:)
+    integer, intent(out), optional :: grid_dims(:)
     integer, intent(out), optional :: grid_rank
     integer, intent(out), optional :: rc
 
@@ -174,7 +174,6 @@
           errmsg,&
         rc)) return
       end if   
-      allocate(grid_dims(local_rank))
       ncStatus = nf90_inq_varid (ncid, "grid_dims", VarId)
       errmsg = "dimension grid_dims in "//trim(filename)
       if (CDFCheckError (ncStatus, &
@@ -182,8 +181,7 @@
         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
-
-      ncStatus = nf90_get_var (ncid, VarId, grid_dims)
+      ncStatus = nf90_get_var (ncid, VarId, grid_dims(1:local_rank))
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -867,6 +865,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
  
         ! Get Source Grid dimension and variables
 	if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then 
+          allocate(src_grid_dims(2))
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
 	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
@@ -930,6 +929,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           src_grid_rank = 1    
         endif 
         if (dstFileTypelocal == ESMF_FILEFORMAT_SCRIP) then
+          allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
 	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
@@ -1325,22 +1325,22 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
        
         ! write src_grid_dims and dst_grid_dims
 	ncStatus=nf90_inq_varid(ncid,"src_grid_dims",VarId)
-        ncStatus=nf90_put_var(ncid,VarId, src_grid_dims )          
+        ncStatus=nf90_put_var(ncid,VarId, src_grid_dims(1:src_grid_rank))          
         errmsg = "Variable src_grid_dims in "//trim(wgtfile)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
 	  errmsg,&
-          rc)) return
+        rc)) return
 
 	ncStatus=nf90_inq_varid(ncid,"dst_grid_dims",VarId)
-        ncStatus=nf90_put_var(ncid,VarId, dst_grid_dims)          
+        ncStatus=nf90_put_var(ncid,VarId, dst_grid_dims(1:dst_grid_rank))          
         errmsg = "Variable dst_grid_dims in "//trim(wgtfile)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
 	  errmsg,&
-          rc)) return
+        rc)) return
 
         if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then
            ! Read the srcGrid variables and write them out

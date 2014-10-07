@@ -875,8 +875,14 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
 
+    std::vector<int> tmp_valid;
+    std::vector<double> tmp_sintd_areas;
+    std::vector<double> tmp_dst_areas;
+
+
     calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield, dst_mask_field, dst_frac2_field,
-      &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 0, &tmp_nodes, &tmp_cells, res_map, 0);
+                                      &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 
+                                      &tmp_valid, &tmp_sintd_areas, &tmp_dst_areas, 0, &tmp_nodes, &tmp_cells, res_map, 0);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -952,8 +958,14 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
 
+    std::vector<int> tmp_valid;
+    std::vector<double> tmp_sintd_areas;
+    std::vector<double> tmp_dst_areas;
+
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield, dst_mask_field, dst_frac2_field,
-      &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 0, sintd_nodes, sintd_cells, res_map, 0);
+                                     &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 
+                                     &tmp_valid, &tmp_sintd_areas, &tmp_dst_areas, 
+                                     0, sintd_nodes, sintd_cells, res_map, 0);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {

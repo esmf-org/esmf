@@ -580,8 +580,8 @@
 
 
       !------------------------------------------------------------------------
-
       ! allocate data arrays
+
       nsize = 2
       allocate(array1(nsize))
       allocate(farray1(nsize))
@@ -623,6 +623,25 @@
 
       call test_AllFullReduce_max
       call test_AllReduce_max
+
+      !------------------------------------------------------------------------
+      ! deallocate data arrays
+      
+      deallocate(array1)
+      deallocate(farray1)
+      deallocate(f4array1)
+
+      deallocate(array3)
+      deallocate(farray3)
+      deallocate(f4array3)
+
+      deallocate(array3_soln)
+      deallocate(farray3_soln)
+      deallocate(f4array3_soln)
+
+      deallocate(array2)
+      deallocate(farray2)
+      deallocate(f4array2)
 
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)

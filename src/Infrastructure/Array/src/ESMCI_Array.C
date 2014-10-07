@@ -462,7 +462,8 @@ Array *Array::create(
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
   // check if distgridToArrayMap was provided and matches rest of arguments
-  int *distgridToArrayMapArray = new int[dimCount];
+  vector<int> distgridToArrayMapArrayV(dimCount);
+  int *distgridToArrayMapArray = &distgridToArrayMapArrayV[0];
   for (int i=0; i<dimCount; i++){
     if (i < rank)
       distgridToArrayMapArray[i] = i+1; // default (basis 1)
@@ -485,7 +486,7 @@ Array *Array::create(
   }
   {
     // check distgridToArrayMapArray
-    bool *check = new bool[rank];
+    vector<bool> check(rank);
     for (int i=0; i<rank; i++)
       check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
@@ -503,7 +504,6 @@ Array *Array::create(
         check[distgridToArrayMapArray[i]-1] = true;
       }
     }
-    delete [] check;
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
@@ -515,14 +515,16 @@ Array *Array::create(
   int tensorCount = rank - redDimCount;
   if (tensorCount < 0) tensorCount = 0;
   // generate arrayToDistGridMap
-  int *arrayToDistGridMapArray = new int[rank];
+  vector<int> arrayToDistGridMapArrayV(rank);
+  int *arrayToDistGridMapArray = &arrayToDistGridMapArrayV[0];
   for (int i=0; i<rank; i++)
     arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
   for (int i=0; i<dimCount; i++)
     if (int j=distgridToArrayMapArray[i])
       arrayToDistGridMapArray[j-1] = i+1;
   // generate distgridToPackedArrayMap - labels the distributed Array dims 1,2,.
-  int *distgridToPackedArrayMap = new int[dimCount];
+  vector<int> distgridToPackedArrayMapV(dimCount);
+  int *distgridToPackedArrayMap = &distgridToPackedArrayMapV[0];
   for (int i=0; i<dimCount; i++)
     distgridToPackedArrayMap[i] = 0; // reset  (basis 1), 0 indicates repl. dim
   {
@@ -536,7 +538,7 @@ Array *Array::create(
   }
   // check for undistLBound and undistUBound arguments and that they match
   // tensorCount
-  int undistLBoundArrayAllocFlag = 0;  // reset
+  vector<int> undistLBoundArrayV(tensorCount);
   int *undistLBoundArray = NULL; // reset
   if (present(undistLBoundArg)){
     if (undistLBoundArg->dimCount != 1){
@@ -554,8 +556,7 @@ Array *Array::create(
     // tensor dimensions are present, but no explicit bounds provided'
     // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
     const int *undistLBound = larrayListArg[0]->getLbounds();
-    undistLBoundArrayAllocFlag = 1;  // set
-    undistLBoundArray = new int[tensorCount];
+    undistLBoundArray = &undistLBoundArrayV[0];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
       if (arrayToDistGridMapArray[i] == 0){
@@ -563,7 +564,7 @@ Array *Array::create(
         ++tensorIndex;
       }
   }
-  int undistUBoundArrayAllocFlag = 0;  // reset
+  vector<int> undistUBoundArrayV(tensorCount);
   int *undistUBoundArray = NULL; // reset
   if (present(undistUBoundArg)){
     if (undistUBoundArg->dimCount != 1){
@@ -582,8 +583,7 @@ Array *Array::create(
     // -> set to bounds of incoming array at DE 0
     // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
     const int *undistUBound = larrayListArg[0]->getUbounds();
-    undistUBoundArrayAllocFlag = 1;  // set
-    undistUBoundArray = new int[tensorCount];
+    undistUBoundArray = &undistUBoundArrayV[0];
     int tensorIndex = 0;  // reset
     for (int i=0; i<rank; i++)
       if (arrayToDistGridMapArray[i] == 0){
@@ -613,8 +613,10 @@ Array *Array::create(
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
   // figure exclusive region
-  int *exclusiveLBound = new int[redDimCount*localDeCount];
-  int *exclusiveUBound = new int[redDimCount*localDeCount];
+  vector<int> exclusiveLBoundV(redDimCount*localDeCount);
+  vector<int> exclusiveUBoundV(redDimCount*localDeCount);
+  int *exclusiveLBound = &exclusiveLBoundV[0];
+  int *exclusiveUBound = &exclusiveUBoundV[0];
   for (int i=0; i<redDimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
@@ -657,8 +659,10 @@ Array *Array::create(
     } // i
   }
   // deal with computationalEdge widths
-  int *computationalEdgeLWidth = new int[redDimCount];
-  int *computationalEdgeUWidth = new int[redDimCount];
+  vector<int> computationalEdgeLWidthV(redDimCount);
+  vector<int> computationalEdgeUWidthV(redDimCount);
+  int *computationalEdgeLWidth = &computationalEdgeLWidthV[0];
+  int *computationalEdgeUWidth = &computationalEdgeUWidthV[0];
   if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -696,8 +700,10 @@ Array *Array::create(
       computationalEdgeUWidth[i] = 0;
   }
   // deal with computational widths
-  int *computationalLBound = new int[redDimCount*localDeCount];
-  int *computationalUBound = new int[redDimCount*localDeCount];
+  vector<int> computationalLBoundV(redDimCount*localDeCount);
+  vector<int> computationalUBoundV(redDimCount*localDeCount);
+  int *computationalLBound = &computationalLBoundV[0];
+  int *computationalUBound = &computationalUBoundV[0];
   if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -761,14 +767,13 @@ Array *Array::create(
       }
     }
   }
-  // clean-up
-  delete [] computationalEdgeLWidth;
-  delete [] computationalEdgeUWidth;
   // deal with total widths
   int totalLBoundFlag = 0;  // reset
   int totalUBoundFlag = 0;  // reset
-  int *totalLBound = new int[redDimCount*localDeCount];
-  int *totalUBound = new int[redDimCount*localDeCount];
+  vector<int> totalLBoundV(redDimCount*localDeCount);
+  vector<int> totalUBoundV(redDimCount*localDeCount);
+  int *totalLBound = &totalLBoundV[0];
+  int *totalUBound = &totalUBoundV[0];
   if (present(totalLWidthArg)){
     totalLBoundFlag = 1;  // set
     if (totalLWidthArg->dimCount != 1){
@@ -861,9 +866,10 @@ Array *Array::create(
   }
 
   // allocate LocalArray list that holds all PET-local DEs and adjust elements
-  LocalArray **larrayList = new LocalArray*[localDeCount];
-  int *temp_larrayLBound = new int[rank];
-  int *temp_larrayUBound = new int[rank];
+  vector<LocalArray *> larrayListV(localDeCount);
+  LocalArray **larrayList = &larrayListV[0];
+  vector<int> temp_larrayLBound(rank);
+  vector<int> temp_larrayUBound(rank);
   for (int i=0; i<localDeCount; i++){
     if (indexflag == ESMF_INDEX_USER){
       // don't adjust dope vector, use F90 pointers directly and their bounds
@@ -1037,13 +1043,11 @@ Array *Array::create(
       // Depending on copyflag the original memory used for data storage will
       // either be referenced, or a copy of the data will have been made.
       larrayList[i] = LocalArray::create(larrayListArg[i], copyflag,
-        temp_larrayLBound, temp_larrayUBound, &localrc);
+        &temp_larrayLBound[0], &temp_larrayUBound[0], &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }        
   }
-  delete [] temp_larrayLBound;
-  delete [] temp_larrayUBound;
   
   // call class constructor
   try{
@@ -1070,20 +1074,6 @@ Array *Array::create(
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
-  // garbage collection
-  delete [] larrayList;
-  delete [] exclusiveLBound;
-  delete [] exclusiveUBound;
-  delete [] computationalLBound;
-  delete [] computationalUBound;
-  delete [] totalLBound;
-  delete [] totalUBound;
-  delete [] distgridToArrayMapArray;
-  delete [] arrayToDistGridMapArray;
-  delete [] distgridToPackedArrayMap;
-  if (undistLBoundArrayAllocFlag) delete [] undistLBoundArray;
-  if (undistUBoundArrayAllocFlag) delete [] undistUBoundArray;
   
   }catch(int localrc){
     // catch standard ESMF return code
@@ -1167,7 +1157,8 @@ Array *Array::create(
   const DELayout *delayout = distgrid->getDELayout();
   int dimCount = distgrid->getDimCount();
   // check if distgridToArrayMap was provided and matches rest of arguments
-  int *distgridToArrayMapArray = new int[dimCount];
+  vector<int> distgridToArrayMapArrayV(dimCount);
+  int *distgridToArrayMapArray = &distgridToArrayMapArrayV[0];
   for (int i=0; i<dimCount; i++){
     if (i < rank)
       distgridToArrayMapArray[i] = i+1; // default (basis 1)
@@ -1190,7 +1181,7 @@ Array *Array::create(
   }
   {
     // check distgridToArrayMapArray
-    bool *check = new bool[rank];
+    vector<bool> check(rank);
     for (int i=0; i<rank; i++)
       check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
@@ -1208,7 +1199,6 @@ Array *Array::create(
         check[distgridToArrayMapArray[i]-1] = true;
       }
     }
-    delete [] check;
   }
   // determine replicatorCount
   int replicatorCount = 0;  // initialize
@@ -1220,14 +1210,16 @@ Array *Array::create(
   int tensorCount = rank - redDimCount;
   if (tensorCount < 0) tensorCount = 0;
   // generate arrayToDistGridMap
-  int *arrayToDistGridMapArray = new int[rank];
+  vector<int> arrayToDistGridMapArrayV(rank);
+  int *arrayToDistGridMapArray = &arrayToDistGridMapArrayV[0];
   for (int i=0; i<rank; i++)
     arrayToDistGridMapArray[i] = 0; // reset  (basis 1), 0 indicates tensor dim
   for (int i=0; i<dimCount; i++)
     if (int j=distgridToArrayMapArray[i])
       arrayToDistGridMapArray[j-1] = i+1;
   // generate distgridToPackedArrayMap - labels the distributed Array dims 1,2,.
-  int *distgridToPackedArrayMap = new int[dimCount];
+  vector<int> distgridToPackedArrayMapV(dimCount);
+  int *distgridToPackedArrayMap = &distgridToPackedArrayMapV[0];
   for (int i=0; i<dimCount; i++)
     distgridToPackedArrayMap[i] = 0; // reset  (basis 1), 0 indicates repl. dim
   {
@@ -1312,8 +1304,10 @@ Array *Array::create(
     }
   }
   // figure exclusive region
-  int *exclusiveLBound = new int[redDimCount*localDeCount];
-  int *exclusiveUBound = new int[redDimCount*localDeCount];
+  vector<int> exclusiveLBoundV(redDimCount*localDeCount);
+  vector<int> exclusiveUBoundV(redDimCount*localDeCount);
+  int *exclusiveLBound = &exclusiveLBoundV[0];
+  int *exclusiveUBound = &exclusiveUBoundV[0];
   for (int i=0; i<redDimCount*localDeCount; i++)
     exclusiveLBound[i] = 1; // excl. region starts at (1,1,1...) <- Fortran
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
@@ -1356,8 +1350,10 @@ Array *Array::create(
     } // i
   }
   // deal with computationalEdge widths
-  int *computationalEdgeLWidth = new int[redDimCount];
-  int *computationalEdgeUWidth = new int[redDimCount];
+  vector<int> computationalEdgeLWidthV(redDimCount);
+  vector<int> computationalEdgeUWidthV(redDimCount);
+  int *computationalEdgeLWidth = &computationalEdgeLWidthV[0];
+  int *computationalEdgeUWidth = &computationalEdgeUWidthV[0];
   if (present(computationalEdgeLWidthArg)){
     if (computationalEdgeLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1395,8 +1391,10 @@ Array *Array::create(
       computationalEdgeUWidth[i] = 0;
   }
   // deal with computational widths
-  int *computationalLBound = new int[redDimCount*localDeCount];
-  int *computationalUBound = new int[redDimCount*localDeCount];
+  vector<int> computationalLBoundV(redDimCount*localDeCount);
+  vector<int> computationalUBoundV(redDimCount*localDeCount);
+  int *computationalLBound = &computationalLBoundV[0];
+  int *computationalUBound = &computationalUBoundV[0];
   if (present(computationalLWidthArg)){
     if (computationalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1460,12 +1458,11 @@ Array *Array::create(
       }
     }
   }
-  // clean-up
-  delete [] computationalEdgeLWidth;
-  delete [] computationalEdgeUWidth;
   // deal with total widths
-  int *totalLBound = new int[redDimCount*localDeCount];
-  int *totalUBound = new int[redDimCount*localDeCount];
+  vector<int> totalLBoundV(redDimCount*localDeCount);
+  vector<int> totalUBoundV(redDimCount*localDeCount);
+  int *totalLBound = &totalLBoundV[0];
+  int *totalUBound = &totalUBoundV[0];
   if (present(totalLWidthArg)){
     if (totalLWidthArg->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1587,10 +1584,11 @@ Array *Array::create(
   }
   
   // allocate LocalArray list that holds all PET-local DEs
-  LocalArray **larrayList = new LocalArray*[localDeCount];
-  int *temp_counts = new int[rank];
-  int *temp_larrayLBound = new int[rank];
-  int *temp_larrayUBound = new int[rank];
+  vector<LocalArray *> larrayListV(localDeCount);
+  LocalArray **larrayList = &larrayListV[0];
+  vector<int> temp_counts(rank);
+  vector<int> temp_larrayLBound(rank);
+  vector<int> temp_larrayUBound(rank);
   for (int i=0; i<localDeCount; i++){
     int j=0;    // reset distributed index
     int jjj=0;  // reset undistributed index
@@ -1611,14 +1609,11 @@ Array *Array::create(
       }
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
-    larrayList[i] = LocalArray::create(typekind, rank, temp_counts,
-      temp_larrayLBound, temp_larrayUBound, NULL, DATA_REF, &localrc);
+    larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
+      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_REF, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
   }
-  delete [] temp_counts;
-  delete [] temp_larrayLBound;
-  delete [] temp_larrayUBound;
   
   // call class constructor
   try{
@@ -1645,18 +1640,6 @@ Array *Array::create(
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
-  // garbage collection
-  delete [] larrayList;
-  delete [] exclusiveLBound;
-  delete [] exclusiveUBound;
-  delete [] computationalLBound;
-  delete [] computationalUBound;
-  delete [] totalLBound;
-  delete [] totalUBound;
-  delete [] distgridToArrayMapArray;
-  delete [] arrayToDistGridMapArray;
-  delete [] distgridToPackedArrayMap;
   
   }catch(int localrc){
     // catch standard ESMF return code
@@ -4628,7 +4611,7 @@ int Array::redistStore(
       dstArray->distgrid->getElementCountPTile();
     for (int i=0; i<dstArray->distgrid->getTileCount(); i++)
       dstElementCount += dstElementCountPTile[i];
-    if (srcElementCount != dstElementCount){
+    if (!ignoreUnmatched && (srcElementCount != dstElementCount)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- srcArray and dstArray must provide identical number of exclusive"
         " elements", ESMC_CONTEXT, &rc);

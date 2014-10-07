@@ -112,7 +112,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
+  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory

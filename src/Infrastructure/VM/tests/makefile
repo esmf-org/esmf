@@ -14,6 +14,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/VM/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMOpenMPUTest \

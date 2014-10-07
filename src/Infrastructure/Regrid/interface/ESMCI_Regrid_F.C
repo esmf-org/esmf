@@ -155,7 +155,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // Check source mesh elements 
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check cells for conservative
-      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+//BOB      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
     } else {
 #if 0
       // STILL NEED TO FINISH THIS
@@ -192,7 +192,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+//BOB      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
       // Concave
       if (concave) {
@@ -1069,6 +1069,10 @@ void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *conca
   int num_poly_nodes_orig;
   double poly_coords_orig[MAX_NUM_POLY_COORDS];
   
+
+printf(" IN CONCAVE\n");
+
+
   // Init variables
   *concave=false;
   *clockwise=false;
