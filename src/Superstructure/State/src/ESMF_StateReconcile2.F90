@@ -1299,7 +1299,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call c_ESMC_AttributeCopy(base_temp, base, &
+        call c_ESMC_AttributeCopyReplace(base_temp, base, &
           ESMF_COPY_VALUE, ESMF_ATTTREE_OFF, localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
