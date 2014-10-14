@@ -51,6 +51,7 @@ module NUOPC
   public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
+  public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
   public NUOPC_GridCompAreServicesSet  
