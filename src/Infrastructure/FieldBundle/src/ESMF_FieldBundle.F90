@@ -1756,7 +1756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
+        call ESMF_ArrayBundleDestroy(arrayBundle, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1915,7 +1915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
+        call ESMF_ArrayBundleDestroy(arrayBundle, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2303,12 +2303,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! garbage collection
     if (present(srcFieldBundle)) then
-      call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+      call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstFieldBundle)) then
-      call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+      call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2530,10 +2530,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2610,10 +2610,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2690,10 +2690,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2770,10 +2770,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2950,10 +2950,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4154,12 +4154,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             
         ! garbage collection
         if (present(srcFieldBundle)) then
-          call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+          call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         if (present(dstFieldBundle)) then
-          call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+          call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -4408,10 +4408,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4487,10 +4487,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4566,10 +4566,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4645,10 +4645,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4816,10 +4816,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -123,7 +123,8 @@ ArrayBundle::ArrayBundle(
 // !INTERFACE:
 int ArrayBundle::destruct(bool followCreator){
 //
-// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: The followCreator flag is only needed until we have reference counting.
+// TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
 // TODO: sequence problems during automatic garbage collection unitl reference
 // TODO: counting comes in to solve this problem in the final manner.
@@ -241,7 +242,8 @@ int ArrayBundle::destroy(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle **arraybundle){  // in - ArrayBundle to destroy
+  ArrayBundle **arraybundle,    // in - ArrayBundle to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //
@@ -265,6 +267,12 @@ int ArrayBundle::destroy(
   
   // mark as invalid object
   (*arraybundle)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*arraybundle); // remove object from garbage collection
+    delete (*arraybundle);      // completely delete the object, free heap
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;
