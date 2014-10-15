@@ -57,8 +57,10 @@ RUN_ESMF_IO_PIOUTestUNI:
 
 RUN_ESMC_IO_InqUTest:
 	cp -f T42_grid.nc $(ESMF_TESTDIR)
+	cp -f GRIDSPEC_320x160.nc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IO_Inq NP=1 ctest
 
 RUN_ESMC_IO_InqUTestUNI:
 	cp -f T42_grid.nc $(ESMF_TESTDIR)
+	cp -f GRIDSPEC_320x160.nc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IO_Inq NP=1 ctest

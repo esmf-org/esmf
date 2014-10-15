@@ -22,6 +22,7 @@
 
 extern "C" {
   void ESMC_ScripInq (const char *, int *, int *, int *);
+  void ESMC_GridspecInq (const char *, int *, int *, int *);
 }
 
 //==============================================================================
@@ -81,6 +82,24 @@ int main(void){
   ESMC_ScripInq("./T42_grid.nc", grid_dims, &grid_rank, &rc);
   printf ("grid_rank=%d\n", grid_rank);
   printf ("grid_dims=[%d,%d]\n", grid_dims[0], grid_dims[1]);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Test Gridspec inquiry.
+  strcpy(name, "GridspecInq");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
+  int gridspec_grid_dims[2] = {0,0};
+  int ndims = 0;
+  ESMC_GridspecInq("./GRIDSPEC_320x160.nc", &ndims, gridspec_grid_dims, &rc);
+  printf ("ndims=%d\n", ndims);
+  printf ("grid_dims=[%d,%d]\n", gridspec_grid_dims[0], gridspec_grid_dims[1]);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
   // No NetCDF, so just PASS this test.
