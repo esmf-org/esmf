@@ -773,7 +773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      If set to {\tt .TRUE.} the object will be fully destroyed and removed
 !      from the garbage collection system. In this case there is no protection
 !      against following a dangling alias, which may lead to hard to debug
-!      application crashes. The default is {\tt .FALSE}, i.e. keep a reference
+!      application crashes. The default is {\tt .FALSE.}, i.e. keep a reference
 !      of the object in the garbage collection system.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
