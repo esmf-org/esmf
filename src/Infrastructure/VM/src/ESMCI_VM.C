@@ -1722,6 +1722,39 @@ void VM::addObject(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::rmObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::rmObject - Remove object from table for garbage collection
+//
+// !INTERFACE:
+void VM::rmObject(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  ESMC_Base *object){   // object to be removed
+//
+// !DESCRIPTION:
+//    Remove object from matchTable_Objects list for current VM.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  for (vector<ESMC_Base *>::iterator 
+    it = matchTable_Objects[matchTableIndex].begin();
+    it != matchTable_Objects[matchTableIndex].end(); ++it){
+    if (*it == object){
+      matchTable_Objects[matchTableIndex].erase(it);  // erase the object entry
+      break;
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::addFObject()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::addFObject - Add Fortran object to table for garb col.

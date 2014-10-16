@@ -70,12 +70,14 @@ class Attribute
     std::string attrObject;                 // Object of Attpack
 
     ESMC_Logical attrPack;             // an Attribute in an Attpack
+      // - only to be set on attPack attributes
     ESMC_Logical attrPackHead;         // the head of an Attpack
     ESMC_Logical attrNested;           // a nested Attpack
 
     ESMC_Logical deleteChange;         // flag for deletions
     ESMC_Logical linkChange;           // flag for link changes
     ESMC_Logical structChange;         // flag for structural changes
+      // - do NOT set on attPack head
     ESMC_Logical valueChange;          // flag for value changes
 
     ESMC_Base *attrBase;        // pointer to a root attr's Base object
@@ -195,6 +197,7 @@ class Attribute
 //    int  AttributeCopyReferenceTree(const Attribute &source);
     int  AttributeCopyValue(const Attribute &source);
 //    int  AttributeCopyValueTree(const Attribute &source);
+    int  AttributeCopyReplace(const Attribute &source);
     int  AttributeMove(Attribute *source);
     
     // count the number of objects in an attribute hierarchy

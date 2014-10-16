@@ -501,6 +501,9 @@ static const char *const version = "$Id$";
       strcpy(baseName, name);
 
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+  
+  
+  //printf("%s\n", baseName);
 
   return ESMF_SUCCESS;
 
@@ -928,14 +931,14 @@ static const char *const version = "$Id$";
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
   
-  // add object to list for automatic garbage collection
-  ESMCI::VM::addObject(this, vmID);
-
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
+
   // setup the root Attribute, passing the address of this
   root.setBase(this);
   
@@ -979,14 +982,14 @@ static const char *const version = "$Id$";
   ID = id;
   classID = 0;
   
-  // add object to list for automatic garbage collection
-  ESMCI::VM::addObject(this, vmID);
-
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
+
   // setup the root Attribute, passing the address of this
   root.setBase(this);
   
@@ -1027,9 +1030,6 @@ static const char *const version = "$Id$";
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
   
-  // add object to list for automatic garbage collection
-  ESMCI::VM::addObject(this, vmID);
-
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
@@ -1039,6 +1039,9 @@ static const char *const version = "$Id$";
   else
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+
+  // add object to list for automatic garbage collection
+  ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
   root.setBase(this);
