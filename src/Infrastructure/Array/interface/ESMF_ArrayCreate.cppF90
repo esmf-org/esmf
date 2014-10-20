@@ -1973,8 +1973,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[typekind] 
-!      The typekind of the Array.
+! \item[typekind]
+!      The typekind of the Array. See section \ref{const:typekind}
+!      for a list of valid typekind options.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default, the exclusive
 !      region of each DE is placed to start at the local index space origin,
@@ -2168,8 +2169,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[typekind] 
-!      The typekind of the Array.
+! \item[typekind]
+!      The typekind of the Array. See section \ref{const:typekind}
+!      for a list of valid typekind options.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
