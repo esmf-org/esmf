@@ -66,7 +66,7 @@ program ESMF_Info
       print *, "NASA Goddard Space Flight Center.  All rights reserved."
       print *, ""
       print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
-      print *, 'of this software and associated documentation files (the "Software"), to'
+      print *, "of this software and associated documentation files (the 'Software'), to"
       print *, "deal with the Software without restriction, including without limitation the"
       print *, "rights to use, copy, modify, merge, publish, distribute, sublicense, and/or"
       print *, "sell copies of the Software, and to permit persons to whom the Software is"
@@ -80,7 +80,7 @@ program ESMF_Info
       print *, "      its contributors may be used to endorse or promote products derived"
       print *, "      from this Software without specific prior written permission."
       print *, ""
-      print *, 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR'
+      print *, "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
       print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
       print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
       print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
