@@ -144,7 +144,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument must be weakly congruent and typekind conform to the Array used
 !   during {\tt ESMF\_ArrayHaloStore()}.
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -350,7 +351,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_ArrayHalo()} on any Array that is weakly congruent
 !   and typekind conform to {\tt array}.
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -649,7 +651,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   weakly congruent and typekind conform with the respective Arrays used 
 !   during {\tt ESMF\_ArrayRedistStore()}.
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -905,7 +908,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are weakly congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -1345,7 +1349,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are weakly congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair.
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
