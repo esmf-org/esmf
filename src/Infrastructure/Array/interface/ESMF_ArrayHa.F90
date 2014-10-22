@@ -835,18 +835,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_ArrayRedistStore()
 ! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, &
 !   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
-!   ignoreUnmatchedIndices, pipelineDepth, rc)
+!   ignoreUnmatchedIndices, pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),       intent(in)             :: srcArray
-!   type(ESMF_Array),       intent(inout)          :: dstArray
-!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
-!   <type>(ESMF_KIND_<kind>),intent(in)            :: factor
+!   type(ESMF_Array),       intent(in)              :: srcArray
+!   type(ESMF_Array),       intent(inout)           :: dstArray
+!   type(ESMF_RouteHandle), intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>),intent(in)             :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,               intent(in),    optional :: srcToDstTransposeMap(:)
-!   logical,               intent(in),    optional :: ignoreUnmatchedIndices
-!   integer,               intent(inout), optional :: pipelineDepth
-!   integer,               intent(out),   optional :: rc
+!   integer,                intent(in),    optional :: srcToDstTransposeMap(:)
+!   logical,                intent(in),    optional :: ignoreUnmatchedIndices
+!   integer,                intent(inout), optional :: pipelineDepth
+!   type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+!   integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -856,7 +857,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt pipelineDepth}.
 !              The new argument provide access to the tuning parameter
 !              affecting the sparse matrix execution.
-! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support situations 
+! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
+!              the transposed redist operation to be returned.\newline
+!              Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
 ! \end{description}
@@ -975,6 +978,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     determined value on return. Auto-tuning is also used if the optional 
 !     {\tt pipelineDepth} argument is omitted.
 !
+!   \item [{[transposeRoutehandle]}]
+!     If provided, a handle to the transposed matrix operation is returned. The
+!     transposed operation goes from {\tt dstArray} to {\tt srcArray}.
+!
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -993,7 +1000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI4(srcArray, dstArray, routehandle, &
     factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
-    pipelineDepth, rc)
+    pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1004,13 +1011,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
     logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
     integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
+    integer                 :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1041,6 +1051,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Invert the srcToDstTransposeMap
+      if (present(srcToDstTransposeMap)) then
+        allocate(dstToSrcTransposeMap(size(srcToDstTransposeMap)))
+        do i=1, size(srcToDstTransposeMap)
+          dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
+        enddo
+        ! garbage collection
+        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create new srcToDstTransposeMapArg
+        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayRedistStore(dstArray, srcArray, transposeRoutehandle, &
+        srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_ignoreUnmatched, &
+        pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! cleanup
+      if (present(srcToDstTransposeMap)) then
+        deallocate(dstToSrcTransposeMap)
+      endif
+    endif
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
@@ -1064,7 +1108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI8(srcArray, dstArray, routehandle, &
     factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
-    pipelineDepth, rc)
+    pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1075,13 +1119,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
     logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
     integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
+    integer                 :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1113,6 +1160,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Invert the srcToDstTransposeMap
+      if (present(srcToDstTransposeMap)) then
+        allocate(dstToSrcTransposeMap(size(srcToDstTransposeMap)))
+        do i=1, size(srcToDstTransposeMap)
+          dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
+        enddo
+        ! garbage collection
+        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create new srcToDstTransposeMapArg
+        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayRedistStore(dstArray, srcArray, transposeRoutehandle, &
+        srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_ignoreUnmatched, &
+        pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! cleanup
+      if (present(srcToDstTransposeMap)) then
+        deallocate(dstToSrcTransposeMap)
+      endif
+    endif
+    
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1135,7 +1216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR4(srcArray, dstArray, routehandle, &
     factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
-    pipelineDepth, rc)
+    pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1146,13 +1227,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
     logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
     integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
+    integer                 :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1184,6 +1268,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Invert the srcToDstTransposeMap
+      if (present(srcToDstTransposeMap)) then
+        allocate(dstToSrcTransposeMap(size(srcToDstTransposeMap)))
+        do i=1, size(srcToDstTransposeMap)
+          dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
+        enddo
+        ! garbage collection
+        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create new srcToDstTransposeMapArg
+        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayRedistStore(dstArray, srcArray, transposeRoutehandle, &
+        srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_ignoreUnmatched, &
+        pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! cleanup
+      if (present(srcToDstTransposeMap)) then
+        deallocate(dstToSrcTransposeMap)
+      endif
+    endif
+    
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1206,7 +1324,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR8(srcArray, dstArray, routehandle, &
     factor, keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
-    pipelineDepth, rc)
+    pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1217,13 +1335,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
     logical,                    intent(in),    optional :: ignoreUnmatchedIndices
     integer,                    intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle),     intent(inout), optional :: transposeRoutehandle
     integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
+    integer                 :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1255,6 +1376,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Invert the srcToDstTransposeMap
+      if (present(srcToDstTransposeMap)) then
+        allocate(dstToSrcTransposeMap(size(srcToDstTransposeMap)))
+        do i=1, size(srcToDstTransposeMap)
+          dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
+        enddo
+        ! garbage collection
+        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create new srcToDstTransposeMapArg
+        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayRedistStore(dstArray, srcArray, transposeRoutehandle, &
+        srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, opt_ignoreUnmatched, &
+        pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! cleanup
+      if (present(srcToDstTransposeMap)) then
+        deallocate(dstToSrcTransposeMap)
+      endif
+    endif
+    
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1277,7 +1432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
     keywordEnforcer, srcToDstTransposeMap, ignoreUnmatchedIndices, &
-    pipelineDepth, rc)
+    pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)              :: srcArray
@@ -1287,6 +1442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),    optional :: srcToDstTransposeMap(:)
     logical,                intent(in),    optional :: ignoreUnmatchedIndices
     integer,                intent(inout), optional :: pipelineDepth
+    type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
     integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
@@ -1297,7 +1453,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt pipelineDepth}.
 !              The new argument provide access to the tuning parameter
 !              affecting the sparse matrix execution.
-! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support situations 
+! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
+!              the transposed redist operation to be returned.\newline
+!              Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
 ! \end{description}
@@ -1409,6 +1567,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     determined value on return. Auto-tuning is also used if the optional 
 !     {\tt pipelineDepth} argument is omitted.
 !
+!   \item [{[transposeRoutehandle]}]
+!     If provided, a handle to the transposed matrix operation is returned. The
+!     transposed operation goes from {\tt dstArray} to {\tt srcArray}.
+!
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1417,7 +1579,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg  ! index helper
-    type(ESMF_Logical)      :: opt_ignoreUnmatched        ! helper variable
+    type(ESMF_Logical)      :: opt_ignoreUnmatched      ! helper variable
+    integer, allocatable    :: dstToSrcTransposeMap(:)  ! helper variable
+    integer                 :: i
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1447,6 +1611,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Optionally compute the transposeRoutehandle
+    if (present(transposeRoutehandle)) then
+      ! Invert the srcToDstTransposeMap
+      if (present(srcToDstTransposeMap)) then
+        allocate(dstToSrcTransposeMap(size(srcToDstTransposeMap)))
+        do i=1, size(srcToDstTransposeMap)
+          dstToSrcTransposeMap(srcToDstTransposeMap(i))=i
+        enddo
+        ! garbage collection
+        call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! create new srcToDstTransposeMapArg
+        srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(dstToSrcTransposeMap,&
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      ! Call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_ArrayRedistStoreNF(dstArray, srcArray, transposeRoutehandle, &
+        srcToDstTransposeMapArg, opt_ignoreUnmatched, pipelineDepth, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Mark transposeRoutehandle object as being created
+      call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! cleanup
+      if (present(srcToDstTransposeMap)) then
+        deallocate(dstToSrcTransposeMap)
+      endif
+    endif
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
