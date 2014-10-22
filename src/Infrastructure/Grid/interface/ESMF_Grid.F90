@@ -25488,6 +25488,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     integer :: varsize
     integer :: ndims, dims(ESMF_MAXDIM)
     integer :: PetNo, PetCnt
+    integer, pointer :: Staggers(:)
     integer :: staggercnt, decount, xdim, ydim
     integer :: londim, londim1, latdim, latdim1, gridid
     integer :: rankid, fourid, varid1, varid2, varid3, varid4
@@ -25521,6 +25522,13 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	 staggerlocCount=staggercnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Get list and number of active staggers
+    allocate(Staggers(staggercnt))
+    call c_ESMC_gridgetactivestaggers(grid%this, &
+           staggercnt, Staggers, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(Staggers)
     if (ndims /= 2) then
         call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- Grid dimension has to be 2 to write out to a SCRIP file", & 
@@ -25553,27 +25561,116 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     if (PetNo==0) then 
       ! Create the GRID file and define dimensions and variables
       ncStatus=nf90_create(filename, NF90_CLOBBER, ncid)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        trim(filename),&
+        rc)) return
       ncStatus=nf90_def_dim(ncid,"grid_size",elmtsize, nodedimid)
+      errmsg = "defining dimension grid_size in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ncStatus=nf90_def_dim(ncid,"grid_rank", 2, rankid)
+      errmsg = "defining dimension grid_rank in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       if (staggercnt > 1) then
          ncStatus=nf90_def_dim(ncid,"grid_corners", 4, fourid)
+	 errmsg = "defining dimension grid_corner in "//trim(filename)
+         if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg,&
+            rc)) return
       endif
       ncStatus=nf90_def_var(ncid,"grid_dims",NF90_INT, (/rankid/), gridid)
+      errmsg = "defining variable grid_dims in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ncStatus=nf90_def_var(ncid,"grid_center_lon",NF90_DOUBLE, (/nodedimid/), varid1)
+      errmsg = "defining variable grid_center_lon in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ! add units attribute based on the COORDSYS
       ncStatus=nf90_put_att(ncid,varid1,"units",trim(units))
+      errmsg = "Adding attribute units for grid_center_lon in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ncStatus=nf90_def_var(ncid,"grid_center_lat",NF90_DOUBLE, (/nodedimid/), varid2)
+      errmsg = "defining variable grid_center_lat in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ncStatus=nf90_put_att(ncid,varid2,"units",trim(units))
+      errmsg = "Adding attribute units for grid_center_lat in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       if (staggercnt > 1) then    
         ncStatus=nf90_def_var(ncid,"grid_corner_lon",NF90_DOUBLE, (/fourid,nodedimid/), varid3)
+        errmsg = "defining variable grid_corner_lon in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
         ! add units attribute based on the COORDSYS
         ncStatus=nf90_put_att(ncid,varid3,"units",trim(units))
+        errmsg = "Adding attribute units for grid_corner_lon in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
         ncStatus=nf90_def_var(ncid,"grid_corner_lat",NF90_DOUBLE, (/fourid, nodedimid/), varid4)
+        errmsg = "defining variable grid_corner_lat in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
         ncStatus=nf90_put_att(ncid,varid4,"units",trim(units))
+        errmsg = "Adding attribute units for grid_corner_lat in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
       endif
       ncStatus=nf90_enddef(ncid)
+      errmsg = "nf90_enddef in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
       ! write the grid_dims value
       ncStatus = nf90_put_var(ncid,gridid,(/londim, latdim/))
+      errmsg = "writing grid_dims in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
     endif
     call ESMF_VMBarrier(vm)
     ! Get Grid coordinates at center stagger
@@ -25648,12 +25745,24 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	       scripArray(i:i+londim)=lonArray1d
             enddo
    	    ncStatus=nf90_put_var(ncid, varid1, scripArray)
+            errmsg = "Writing variable grid_corner_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    j=1
             do i=1,latdim
                scripArray(j:j+londim)=latArray1d(i)
 	       j=j+londim
             enddo
    	    ncStatus=nf90_put_var(ncid, varid2, scripArray)
+            errmsg = "Writing variable grid_corner_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    deallocate(scripArray)
          else
 	    call ESMF_ArrayGet(array1,farrayPtr=lonArray2d, rc=localrc)
@@ -25665,8 +25774,20 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	    allocate(scripArray(elmtsize))
             scripArray=reshape(lonArray2d,(/elmtsize/))
    	    ncStatus=nf90_put_var(ncid, varid1, scripArray)
+            errmsg = "Writing variable grid_corner_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
             scripArray=reshape(latArray2d,(/elmtsize/))
    	    ncStatus=nf90_put_var(ncid, varid2, scripArray)
+            errmsg = "Writing variable grid_corner_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    deallocate(scripArray)
          endif
       endif
@@ -25813,6 +25934,12 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	     endif
             enddo
    	    ncStatus=nf90_put_var(ncid, varid3, scripArray2)
+            errmsg = "Writing variable grid_center_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    count = 1
 	    do j=1,latdim-1
              do i=1,londim
@@ -25841,6 +25968,12 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
               enddo
 	    endif
    	    ncStatus=nf90_put_var(ncid, varid4, scripArray2)
+            errmsg = "Writing variable grid_center_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    deallocate(scripArray2)
          else  !dims==2
 	    call ESMF_ArrayGet(array1,farrayPtr=lonArray2d, rc=localrc)
@@ -25879,6 +26012,12 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	     endif
             enddo
    	    ncStatus=nf90_put_var(ncid, varid3, scripArray2)
+            errmsg = "Writing variable grid_center_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    count = 1
 	    do j=1,latdim
 	     if (j==latdim .and. yperiod) then
@@ -25908,15 +26047,28 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 	     endif
 	    enddo
    	    ncStatus=nf90_put_var(ncid, varid4, scripArray2)
+            errmsg = "Writing variable grid_center_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
 	    deallocate(scripArray2)
          endif
-         ncStatus = nf90_close(ncid)
       endif !PetNo==0
       !call ESMF_ArrayDestroy(lonArray)
       !call ESMF_ArrayDestroy(latArray)
       call ESMF_ArrayDestroy(array1) 	    
       call ESMF_ArrayDestroy(array2) 	    
      endif !staggerloc > 1
+     if (PetNo == 0) then
+       ncStatus = nf90_close(ncid)
+       if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              trim(filename),&
+              rc)) return
+     endif
     endif !decount > 0 	 
     
 #else
@@ -25927,9 +26079,49 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 #endif
 end subroutine ESMF_OutputScripGridFile 
  
+!-----------------------------------------------------------------------
+!
+!  check CDF file error code
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CDFCheckError"
+function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
+
+    logical                       :: CDFCheckError
+
+    integer,          intent(in)  :: ncStatus
+    character(len=*), intent(in)  :: module
+    character(len=*), intent(in)  :: fileName
+    integer,          intent(in)  :: lineNo
+    character(len=*), intent(in)  :: errmsg
+    integer, intent(out),optional :: rc
+
+    integer, parameter :: nf90_noerror = 0
+
+    CDFCheckError = .FALSE.
+
+#ifdef ESMF_NETCDF
+    if ( ncStatus .ne. nf90_noerror) then
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+            line=lineNo, file=fileName, method=module)
+        print '("NetCDF Error: ", A, " : ", A)', &
+	trim(errmsg),trim(nf90_strerror(ncStatus))
+        call ESMF_LogFlush()
+        if (present(rc)) rc = ESMF_FAILURE
+ 	CDFCheckError = .TRUE.
+    else
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    end if
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end function CDFCheckError
 
 #undef  ESMF_METHOD
-
-
 
 end module ESMF_GridMod
