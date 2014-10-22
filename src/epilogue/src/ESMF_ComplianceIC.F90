@@ -1,3 +1,4 @@
+#define RECONCILE_STATE_ATTPACK_BUG_FIXED
 ! $Id$
 !
 ! Compliance Interface Component
