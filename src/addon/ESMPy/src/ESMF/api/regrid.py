@@ -128,7 +128,7 @@ class Regrid(object):
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
-        self.__finalized = False
+        self._finalized = False
 
     def __call__(self, srcfield, dstfield,
                  zero_region=None):
@@ -165,9 +165,9 @@ class Regrid(object):
         Returns: \n
             None \n
         """
-        if not self.__finalized:
+        if not self._finalized:
             ESMP_FieldRegridRelease(self.routehandle)
-            self.__finalized = True
+            self._finalized = True
 
 
     def __repr__(self):

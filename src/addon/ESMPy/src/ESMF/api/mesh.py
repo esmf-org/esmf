@@ -127,6 +127,7 @@ class Mesh(object):
         self.size_local = [None, None]
         self.parametric_dim = None
         self.spatial_dim = None
+        self.rank = 1
 
         
         if not fromfile:
@@ -166,7 +167,7 @@ class Mesh(object):
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
-        self.__finalized = False
+        self._finalized = False
 
     def __del__(self):
         """
@@ -178,9 +179,9 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if not self.__finalized:
+        if not self._finalized:
             ESMP_MeshDestroy(self)
-            self.__finalized = True
+            self._finalized = True
 
 
     def __repr__(self):

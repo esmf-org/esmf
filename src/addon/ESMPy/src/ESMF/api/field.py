@@ -27,9 +27,7 @@ class Field(ma.MaskedArray):
                 typekind=TypeKind.R8, 
                 staggerloc=StaggerLoc.CENTER,
                 meshloc=MeshLoc.NODE,
-                grid_to_field_map=None,
-                ungridded_lower_bound=None,
-                ungridded_upper_bound=None,
+                ndbounds=None,
                 mask_values=None):
         """
         Create a Field from a Grid or Mesh. \n
@@ -44,7 +42,7 @@ class Field(ma.MaskedArray):
                     TypeKind.I8 \n
                     TypeKind.R4 \n
                     (default) TypeKind.R8 \n
-            staggerloc: the stagger location on which to locate the 
+            staggerloc: the stagger location on which to locate the
                         Field data, only specify this argument when 
                         using a Grid. \n
                 Argument values are: \n
@@ -61,80 +59,54 @@ class Field(ma.MaskedArray):
                     StaggerLoc.CENTER_VFACE \n
                     StaggerLoc.EDGE1_VFACE \n
                     StaggerLoc.EDGE2_VFACE \n
-            meshloc: the mesh location on which to locate the Field 
+            meshloc: the mesh location on which to locate the Field
                      data, only specify this argument when using a 
                      Mesh. \n
                 Argument values are: \n
                     (default) MeshLoc.NODE \n
                     MeshLoc.ELEMENT \n
-            grid_to_field_map: A numpy array (internally cast to 
-                               dtype=numpy.int32) which 
-                               specifies a mapping from the dimensions
-                               of the grid to those of the field. \n
-                type: np.array \n
-                shape: [number of gridded dimensions, 1] \n
-            ungridded_lower_bound: A numpy array (internally cast to 
-                                   dtype=numpy.int32) which  
-                                   specifies the lower bounds of the
-                                   ungridded dimensions of the field. \n
-                type: np.array \n
-                shape: [number of ungridded dimensions, 1] \n
-            ungridded_upper_bound: A numpy array (internally cast to 
-                                   dtype=numpy.int32) which 
-                                   specifies the upper bounds of the 
-                                   ungridded dimensions of the field. \n
-                type: np.array \n
-                shape: [number of ungridded dimensions, 1] \n
-            mask_values: A Python list of integer values to use for masking. \n
+            levels: the number of vertical layers on an extra field dimension. \n
+            mask_values: Python list of integer values to use for masking. \n
                 type: Python list \n
                 shape: [grid.shape, 1] \n
         Returns: \n
             Field \n
         """
 
-        # type handling
-        local_grid_to_field_map = None
-        local_ungridded_lower_bound = None
-        local_ungridded_upper_bound = None
-        if grid_to_field_map is not None:
-            if grid_to_field_map.dtype is not np.int32:
-                local_grid_to_field_map = np.array(grid_to_field_map, 
-                                                  dtype=np.int32)
-            else:
-                local_grid_to_field_map = grid_to_field_map
-        # else case handled by initialization to None
-        if ungridded_lower_bound is not None:
-            if ungridded_lower_bound.dtype is not np.int32:
-                local_ungridded_lower_bound = np.array(ungridded_lower_bound, 
-                                                      dtype=np.int32)
-            else:
-                local_ungridded_lower_bound = ungridded_lower_bound
-        # else case handled by initialization to None
-        if ungridded_upper_bound is not None:
-            if ungridded_upper_bound.dtype is not np.int32:
-                local_ungridded_upper_bound = np.array(ungridded_upper_bound, 
-                                                      dtype=np.int32)
-            else:
-                local_ungridded_upper_bound = ungridded_upper_bound
+        # extra levels?
+        grid_to_field_map = None
+        ungridded_lower_bound = None
+        ungridded_upper_bound = None
+        rank = grid.rank
+        if ndbounds is None:
+            local_ndbounds = ndbounds
+        elif type(ndbounds) is list:
+            local_ndbounds = ndbounds
+        elif type(ndbounds) is tuple:
+            local_ndbounds = list(ndbounds)
+        else:
+            local_ndbounds = [ndbounds]
 
+        if local_ndbounds:
+            lb = [1 for a in range(len(local_ndbounds))]
+            ungridded_lower_bound = np.array(lb, dtype=np.int32)
+            ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
+            grid_to_field_map = np.array([1, 2], dtype=np.int32)
+            rank += len(local_ndbounds)
 
-        # switch on grid or mesh
-        data = 0
+        data = None
         mask = None
         if isinstance(grid, Grid):
             # call into ctypes layer
             struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc,
-                                          local_grid_to_field_map, 
-                                          local_ungridded_lower_bound, 
-                                          local_ungridded_upper_bound)
-
-            # link the field data
-            data = cls.link_field_data(struct, grid, staggerloc, typekind)
-            data[...] = 0
+                                          grid_to_field_map,
+                                          ungridded_lower_bound,
+                                          ungridded_upper_bound)
 
             # set the mask
             if (grid.item_done[staggerloc][GridItem.MASK]):
-                if (grid.mask[staggerloc].shape == data.shape):
+                lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
+                if (list(grid.mask[staggerloc].shape) == list(ubounds-lbounds)):
                     mask = grid.mask[staggerloc]
 
         elif isinstance(grid, Mesh):
@@ -148,13 +120,9 @@ class Field(ma.MaskedArray):
 
             # call into ctypes layer
             struct = ESMP_FieldCreate(grid, name, typekind, meshloc,
-                                      local_grid_to_field_map, 
-                                      local_ungridded_lower_bound, 
-                                      local_ungridded_upper_bound)
-
-            # link the field data
-            data = cls.link_field_data(struct, grid, staggerloc, typekind)
-            data[...] = 0
+                                      grid_to_field_map,
+                                      ungridded_lower_bound,
+                                      ungridded_upper_bound)
 
             # No masking on a Mesh
             mask = None
@@ -165,60 +133,52 @@ class Field(ma.MaskedArray):
         field_mask = False
         if mask is not None and mask_values is not None:
             field_mask = [True if x in mask_values else False for x in mask.flatten().tolist()]
-        
+
+        # link the field data
+        data = cls.link_field_data(struct, grid, staggerloc, typekind, rank)
+
         # create the new Field instance
         obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
 
         # register function with atexit
         import atexit; atexit.register(obj.__del__)
-        obj.__finalized = False
+        obj._finalized = False
 
         # initialize field data
         obj.struct = struct
+        obj.rank = rank
         obj.type = typekind
         obj.staggerloc = staggerloc
-        obj.grid_to_field_map = local_grid_to_field_map
-        obj.ungridded_lower_bound = local_ungridded_lower_bound
-        obj.ungridded_upper_bound = local_ungridded_upper_bound
+        obj.lower_bounds, obj.upper_bounds = ESMP_FieldGetBounds(struct, rank)
+        obj.ndbounds = local_ndbounds
         obj.grid = grid
         obj.name = name
  
         return obj
 
     @staticmethod
-    def link_field_data(struct, grid, staggerloc, typekind):
+    def link_field_data(struct, grid, staggerloc, typekind, rank):
         from operator import mul
         
-        # request the ESMF pointer to the Field coordinates
+        # get a pointer to the field data
         data_out = ESMP_FieldGetPtr(struct)
 
-        # find the size of the local coordinates at this stagger location
-        size = 0
-        if isinstance(grid, Grid):
-            grid.verify_grid_bounds(StaggerLoc.CENTER)
-            size = reduce(mul,grid.size_local[staggerloc])
-        elif isinstance(grid, Mesh):
-            size = grid.size_local[staggerloc]
-        else:
-            raise FieldDOError
+        # get the field bounds
+        lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
 
-        # create a numpy array to point to the ESMF allocation
+        # find the size of the local coordinates
+        size = reduce(mul,ubounds-lbounds)
+
+        # create a numpy array to point to the ESMF allocation of field data
         fieldbuffer = np.core.multiarray.int_asbuffer(
             ct.addressof(data_out.contents),
             np.dtype(constants._ESMF2PythonType[typekind]).itemsize*size)
         fieldDataP = np.frombuffer(fieldbuffer, constants._ESMF2PythonType[typekind])
 
         # reshape the numpy array of coordinates, account for Fortran
-        if isinstance(grid, Grid):
-            fieldDataP = np.reshape(fieldDataP,
-                                     newshape = grid.size_local[staggerloc],
-                                     order='F')
-        elif isinstance(grid, Mesh):
-            fieldDataP = np.reshape(fieldDataP,
-                                     newshape = grid.size_local[staggerloc],
-                                     order='F')
-        else:
-            raise FieldDOError
+        fieldDataP = np.reshape(fieldDataP,
+                                 newshape = ubounds-lbounds,
+                                 order='F')
 
         return fieldDataP
 
@@ -233,9 +193,11 @@ class Field(ma.MaskedArray):
         Returns: \n
             None \n
         """
-        if not self.__finalized:
+
+        if self._finalized is False:
             ESMP_FieldDestroy(self)
-            self.__finalized = True
+            self._finalized = True
+
 
 
     def __repr__(self):

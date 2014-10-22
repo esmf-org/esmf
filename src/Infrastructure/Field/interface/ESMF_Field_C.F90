@@ -515,7 +515,46 @@
   end subroutine f_esmf_fielddestroy
 
 
-  subroutine f_esmf_fieldcollectgarbage(field, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldgetbounds"
+  subroutine f_esmf_fieldgetbounds(field, localDe, exclusiveLBound, len1, exclusiveUBound, len2, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+    use ESMF_FieldGetMod
+
+    implicit none
+
+    type(ESMF_Field)     :: field
+    integer              :: localDe
+    integer              :: len1, len2
+    integer              :: exclusiveLBound(1:len1)
+    integer              :: exclusiveUBound(1:len2)
+    integer, intent(out) :: rc
+
+  ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldGetBounds(field, localDe=localDe, &
+      exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    /*
+    print *, "ESMF: localDE = ", localDe, " len1 = ", len1, " len2 = ", len2
+    print *, "ESMF: exclusiveLBound = [", exclusiveLBound(1), ", ", exclusiveLBound(2), ", ", exclusiveLBound(3), "]"
+    print *, "ESMF: exclusiveUBound = [", exclusiveUBound(1), ", ", exclusiveUBound(2), ", ", exclusiveUBound(3), "]"
+    */
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_fieldgetbounds
+
+
+subroutine f_esmf_fieldcollectgarbage(field, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcollectgarbage()"
     use ESMF_UtilTypesMod
