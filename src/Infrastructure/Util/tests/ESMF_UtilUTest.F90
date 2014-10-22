@@ -173,6 +173,34 @@
       call ESMF_Test(i >= 2, name, failMsg, result, ESMF_SRCLINE)      
     end if
 
+    !NEX_UTest
+    ! Print versions using version API
+    write (failMsg, *) "No arg VersionPrint test failed"
+    write (name, *) "No arg VersionPrint test"
+    call ESMF_UtilVersionPrint (rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    ! Print versions using version API
+    write (failMsg, *) "One line VersionPrint test failed"
+    write (name, *) "One line VersionPrint test"
+    call ESMF_UtilVersionPrint (vFlag=.true., rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    ! Print versions using version API
+    write (failMsg, *) "Multi-line VersionPrint test failed"
+    write (name, *) "Multi-line VersionPrint test"
+    call ESMF_UtilVersionPrint (versionFlag=.true., rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    ! Print versions using version API
+    write (failMsg, *) "Single and multi-line VersionPrint test failed"
+    write (name, *) "Single and multi-line VersionPrint test"
+    call ESMF_UtilVersionPrint (vflag=.true., versionFlag=.true., rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
 ! Test Fortran unit numbers
 ! =========================
 

@@ -986,6 +986,7 @@
       public ESMF_VERSION_REVISION, ESMF_VERSION_PATCHLEVEL
       public ESMF_VERSION_PUBLIC, ESMF_VERSION_BETASNAPSHOT
       public ESMF_VERSION_STRING 
+      public ESMF_UtilVersionPrint
 
       public ESMF_ObjectID
 
@@ -1797,4 +1798,97 @@ end function
 
       end function ESMF_NormTypeNotEqual
 
-      end module ESMF_UtilTypesMod
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilVersionPrint"
+!BOPI
+!  !IROUTINE:  ESMF_UtilPrintVersion
+!  
+! !INTERFACE: 
+  subroutine ESMF_UtilVersionPrint (keywordenforcer, vFlag, versionFlag, rc) 
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical, intent(in),  optional :: vFlag
+      logical, intent(in),  optional :: versionFlag
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Print the ESMF library version and copyright info to stdout.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[vFlag]}]
+!       Print one-line version information
+!     \item[{[versionFlag]}]
+!       Print full version and copyright output.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    if (present (vFlag)) then
+      if (vFlag) then
+        print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+      end if
+    end if
+
+    if (present (vFlag) .and. present (versionFlag)) then
+      if (vFlag .and. versionFlag) then
+        print *
+      end if
+    end if
+
+    if (present (versionFlag)) then
+      if (versionFlag) then
+        print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+        print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
+        print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
+        print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION
+        print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
+        print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
+        print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
+        print *, ""
+        print *, "Earth System Modeling Framework"
+        print *, ""
+        print *, "Copyright (c) 2002-2014 University Corporation for Atmospheric Research,"
+        print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
+        print *, "University of Michigan, National Centers for Environmental Prediction,"
+        print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
+        print *, "NASA Goddard Space Flight Center.  All rights reserved."
+        print *, ""
+        print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        print *, "of this software and associated documentation files (the 'Software'), to"
+        print *, "deal with the Software without restriction, including without limitation the"
+        print *, "rights to use, copy, modify, merge, publish, distribute, sublicense, and/or"
+        print *, "sell copies of the Software, and to permit persons to whom the Software is"
+        print *, "furnished to do so, subject to the following conditions:"
+        print *, "   1. Redistributions of source code must retain the above copyright notice,"
+        print *, "      this list of conditions and the following disclaimers."
+        print *, "   2. Redistributions in binary form must reproduce the above copyright"
+        print *, "      notice, this list of conditions and the following disclaimers in the"
+        print *, "      documentation and/or other materials provided with the distribution."
+        print *, "   3. Neither the names of the organizations developing this software, nor"
+        print *, "      its contributors may be used to endorse or promote products derived"
+        print *, "      from this Software without specific prior written permission."
+        print *, ""
+        print *, "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+        print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+        print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
+        print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+        print *, "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
+        print *, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
+        print *, "WITH THE SOFTWARE."
+      end if
+    end if
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_UtilVersionPrint
+
+end module ESMF_UtilTypesMod
