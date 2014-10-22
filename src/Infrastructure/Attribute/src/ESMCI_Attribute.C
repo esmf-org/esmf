@@ -1874,6 +1874,7 @@ if (attrRoot == ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &localrc)) return localrc;
   }
+
   // copy Attribute links by value
   for (i=0; i<source.linkList.size(); i++) {
     attr = source.linkList.at(i);
@@ -1995,7 +1996,7 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
   int localrc;
   unsigned int i;
-  Attribute *attr;
+  Attribute *attr, *attpack;
   
   attr = NULL;
   
@@ -2009,43 +2010,42 @@ if (attrRoot == ESMF_TRUE) {
 
   // copy base level Attributes by value
   for (i=0; i<source.attrList.size(); i++) {
-    attr = NULL;
-    attr = new Attribute(ESMF_FALSE);
+    // look to see if source.attrList.at(i) already exists on *this
+    attr = AttributeGet(source.attrList.at(i)->attrName);
     if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
-        "Failed allocating an Attribute", ESMC_CONTEXT, &localrc);
-      return localrc;
+      attr = new Attribute(ESMF_FALSE);
+
+      // recurse to set the attribute values
+      localrc = attr->AttributeCopyReplace(*(source.attrList.at(i)));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+
+      // add new attr to *this
+      localrc = AttributeSet(attr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &localrc)) return localrc;
     }
-    // set new attr to point to its intented destination and recurse
-    (attr->attrBase) = (this->attrBase);
-    (attr->parent) = this;
-    localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
-    // add newly initialized attr to destination
-    localrc = AttributeSet(attr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
   }
-  // copy base level Attributes by value
+
+  // copy base level Attribute packages by value
   for (i=0; i<source.packList.size(); i++) {
-    attr = NULL;
-    attr = new Attribute(ESMF_FALSE);
+    attpack = source.packList.at(i);
+    string empty("");
+    attr = AttPackGet(attpack->attrConvention, attpack->attrPurpose,
+                      attpack->attrObject, empty);
     if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
-        "Failed allocating an Attribute", ESMC_CONTEXT, &localrc);
-      return localrc;
+      attr = new Attribute(ESMF_FALSE);
+
+      // recurse through nested attribute packages
+      localrc = attr->AttributeCopyReplace(*(source.packList.at(i)));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+
+      // add new attr to *this
+      localrc = AttPackSet(attr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &localrc)) return localrc;
     }
-    // set new attr to point to its intented destination and recurse
-    (attr->attrBase) = (this->attrBase);
-    (attr->parent) = this;
-    localrc = attr->AttributeCopyValue(*(source.packList.at(i)));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
-    // add newly initialized attr to destination
-    localrc = AttPackSet(attr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
   }
 
   return ESMF_SUCCESS;
