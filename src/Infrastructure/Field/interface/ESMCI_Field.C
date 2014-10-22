@@ -99,6 +99,11 @@ void FTN_X(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
 void FTN_X(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer,
   int *rc);
 
+void FTN_X(f_esmf_fieldgetbounds)(ESMCI::Field *fieldp, int *localDe,
+  int *exclusiveLBound, int *len1,
+  int *exclusiveUBound, int *len2,
+  int *rc);
+
 void FTN_X(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
 void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
@@ -772,6 +777,50 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::getbounds()"
+//BOP
+// !IROUTINE:  ESMCI::Field::getbounds - get Field bounds
+//
+// !INTERFACE:
+      int Field::getbounds(
+//
+// !RETURN VALUE:
+//    int error return code
+
+// !ARGUMENTS:
+  Field *field,
+  int *localDe,
+  ESMCI::InterfaceInt *exLB,
+  ESMCI::InterfaceInt *exUB){
+
+// !DESCRIPTION:
+//      ESMF routine to return bounds from the Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+// !REQUIREMENTS:
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    FTN_X(f_esmf_fieldgetbounds)(field, localDe, exLB->array, &(exLB->extent[0]),
+      exUB->array, &exUB->extent[0], &localrc);
+
+    /*
+    printf("ESMCI: lbound = [%d, %d, %d]\n", exLB->array[0], exLB->array[1], exLB->array[2]);
+    printf("ESMCI: ubound = [%d, %d, %d]\n", exUB->array[0], exUB->array[1], exUB->array[2]);
+    */
+
+    localrc = ESMF_SUCCESS;
+
+    return localrc;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::print()"
 //BOP
 // !IROUTINE:  ESMCI::Field::print - print the internal data for a field
@@ -792,7 +841,7 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_fieldprint)(this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -825,7 +874,7 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_fieldcast)(fc, this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;

@@ -454,6 +454,40 @@ void *ESMC_FieldGetPtr(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_FieldGetBounds - Get the Field bounds
+//
+// !INTERFACE:
+int ESMC_FieldGetBounds(
+  ESMC_Field field,      // in
+  int *localDe,
+  ESMC_InterfaceInt *exclusiveLBound,
+  ESMC_InterfaceInt *exclusiveUBound
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Get the Field bounds from the {\tt ESMC\_Field}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[field]
+//    {\tt ESMC\_Field} whose bounds will be returned
+//  \item[localDe]
+//    The local DE of the {\tt ESMC\_Field} (not implemented)
+//  \item[exclusiveLBound]
+//    The exclusive lower bounds of the {\tt ESMC\_Field}
+//  \item[exclusiveUBound]
+//    The exclusive upper bounds of the {\tt ESMC\_Field}
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
 //
 // !INTERFACE:
