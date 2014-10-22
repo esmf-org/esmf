@@ -296,12 +296,6 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
-  /*
-  // print debug
-  printf("ESMC: exLB = [%d, %d, %d]\n", exLB->array[0], exLB->array[1], exLB->array[2]);
-  printf("ESMC: exUB = [%d, %d, %d]\n", exUB->array[0], exUB->array[1], exUB->array[2]);
-  */
-
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

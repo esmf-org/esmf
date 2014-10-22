@@ -808,11 +808,6 @@ namespace ESMCI {
     FTN_X(f_esmf_fieldgetbounds)(field, localDe, exLB->array, &(exLB->extent[0]),
       exUB->array, &exUB->extent[0], &localrc);
 
-    /*
-    printf("ESMCI: lbound = [%d, %d, %d]\n", exLB->array[0], exLB->array[1], exLB->array[2]);
-    printf("ESMCI: ubound = [%d, %d, %d]\n", exUB->array[0], exUB->array[1], exUB->array[2]);
-    */
-
     localrc = ESMF_SUCCESS;
 
     return localrc;
