@@ -543,12 +543,6 @@
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    /*
-    print *, "ESMF: localDE = ", localDe, " len1 = ", len1, " len2 = ", len2
-    print *, "ESMF: exclusiveLBound = [", exclusiveLBound(1), ", ", exclusiveLBound(2), ", ", exclusiveLBound(3), "]"
-    print *, "ESMF: exclusiveUBound = [", exclusiveUBound(1), ", ", exclusiveUBound(2), ", ", exclusiveUBound(3), "]"
-    */
-
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_fieldgetbounds
