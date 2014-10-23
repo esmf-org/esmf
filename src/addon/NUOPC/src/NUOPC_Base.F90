@@ -1,4 +1,3 @@
-#define RECONCILE_STATE_ATTPACK_BUG_FIXED
 ! $Id$
 !
 ! Earth System Modeling Framework
@@ -2159,13 +2158,11 @@ endif
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Namespace"           ! namespace of this State
     
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
     ! add Attribute packages
     call ESMF_AttributeAdd(state, convention="NUOPC", purpose="General", &
       attrList=attrList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-#endif
 
     ! set Attributes to defaults
     ! <no defaults currently>
@@ -2198,9 +2195,7 @@ endif
 
     call ESMF_AttributeGet(state, name=name, value=value, &
       defaultvalue=defaultvalue, &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
       convention="NUOPC", purpose="General", &
-#endif
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -2244,9 +2239,7 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(state, name=name, value=value, &
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
       convention="NUOPC", purpose="General", &
-#endif
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
