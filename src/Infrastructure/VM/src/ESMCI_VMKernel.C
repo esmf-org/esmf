@@ -11,6 +11,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VMKernel.h"
+#include "ESMC_Conf.h"
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -65,9 +66,18 @@ using namespace std;
 
 #include <fcntl.h>
 
-#ifdef ESMF_ACC_FRAMEWORK
 // FIXME: Do we need to move this decl to a header?
+// The ESMF Accelerator framework interface
+#ifdef ESMF_ACC_FRAMEWORK
+#ifdef ESMF_ACC_FW_HAS_FTN_INTERFACE
+// We have a fortran interface for OpenACC fwk
+extern "C"{
+int FTN_X(fw_get_num_devices)(void );
+}
+#else
+// We have a C interface for non-OpenACC fwks
 int fw_get_num_devices(void );
+#endif
 #endif
 
 // macros used within this source file
@@ -463,7 +473,14 @@ void VMK::init(MPI_Comm mpiCommunicator){
     cid[i][0]=i;
   }
 #ifdef ESMF_ACC_FRAMEWORK
-  int num_adevices = fw_get_num_devices();
+  int num_adevices = 0;
+#ifdef ESMF_ACC_FW_HAS_FTN_INTERFACE
+  // We have a fortran interface for OpenACC fwk
+  num_adevices = FTN_X(fw_get_num_devices)();
+#else
+  // We have a C interface for non-OpenACC fwks
+  num_adevices = fw_get_num_devices();
+#endif
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
                 nadevs, 1, MPI_INTEGER, mpi_c);              
 #endif

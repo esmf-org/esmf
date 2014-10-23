@@ -1133,7 +1133,15 @@ endif
 # ESMF Accelerator Framework
 #-------------------------------------------------------------------------------
 ifdef ESMF_ACC_FRAMEWORK
+# FIXME: Differentiate between 
+# 1. unsupported/unrecognized_framework
+#    (framework specified but not supported)
+# AND
+# 2. no_framework (none)
 ifeq ($(ESMF_ACC_FRAMEWORK),opencl)
+ESMF_CPPFLAGS             += -DESMF_ACC_FRAMEWORK=1
+endif
+ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
 ESMF_CPPFLAGS             += -DESMF_ACC_FRAMEWORK=1
 endif
 ifeq ($(ESMF_ACC_FRAMEWORK),none)
