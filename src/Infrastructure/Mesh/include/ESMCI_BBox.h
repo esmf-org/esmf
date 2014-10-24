@@ -38,7 +38,7 @@ BBox(UInt _dim) : isempty(true), dim(_dim) {}
 BBox(UInt dim, const double min[], const double max[]); 
 // Construct a box around an element.  If the object is a shell, the box
 // will be expanded in the normal direction by normexp*diameter of object
-BBox(const MEField<> &coords, const MeshObj &obj, double normexp = 0.0);
+ BBox(const MEField<> &coords, const MeshObj &obj, double normexp = 0.0, bool is_sph=false);
 
 // Build a box around the whole mesh.  Not a cheap operation (loops nodes)
 BBox(const MEField<> &coords, const MeshDB &mesh);
@@ -46,7 +46,7 @@ BBox(const MEField<> &coords, const MeshDB &mesh);
 BBox(_field &coords, const MeshDB &mesh);
 
 #if 0
- BBox(_field &coords, const MeshObj &obj);
+  BBox(_field &coords, const MeshObj &obj);
 #endif
 
 BBox(const BBox &rhs);
