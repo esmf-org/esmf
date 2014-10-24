@@ -1831,12 +1831,17 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // call local copy on this Attribute 
+  // copy all Attributes and Attribute packages by value
+  localrc = AttributeCopyIgnore(source);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+/*
+  // call local copy on this Attribute
   localrc = AttributeCopy(source);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &localrc)) return localrc;
 
-  // copy Attributes and Attribute packages by reference
+  // copy Attributes and Attribute packages by value
   for (i=0; i<source.attrList.size(); i++) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
@@ -1855,7 +1860,7 @@ if (attrRoot == ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &localrc)) return localrc;
   }
-  // copy Attribute packages by reference
+  // copy Attribute packages by value
   for (i=0; i<source.packList.size(); i++) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
@@ -1874,8 +1879,8 @@ if (attrRoot == ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &localrc)) return localrc;
   }
-
-  // copy Attribute links by value
+*/
+  // link from this Attribute to all links of the source Attribute
   for (i=0; i<source.linkList.size(); i++) {
     attr = source.linkList.at(i);
     ESMC_Logical temp_linkChange = ESMF_TRUE;
@@ -1887,6 +1892,83 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
  } // end AttributeCopyHybrid
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeCopyIgnore"
+//BOPI
+// !IROUTINE:  AttributeCopyIgnore - copy {\tt Attributes} between ESMF objects
+//
+// !INTERFACE:
+      int Attribute::AttributeCopyIgnore(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+        const Attribute &source) {   // in - source
+//
+// !DESCRIPTION:
+//   Copy all {\tt Attribute} data and copy by value all {\tt Attributes} in
+//   this base level.
+//
+//EOPI
+  int localrc;
+  unsigned int i;
+  Attribute *attr, *attpack;
+
+  attr = NULL;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // call local copy on source
+  localrc = AttributeCopy(source);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+
+  // copy base level Attributes by value
+  for (i=0; i<source.attrList.size(); i++) {
+    // look to see if source.attrList.at(i) already exists on *this
+    attr = AttributeGet(source.attrList.at(i)->attrName);
+    if (!attr) {
+      attr = new Attribute(ESMF_FALSE);
+
+      // recurse to set the attribute values
+      localrc = attr->AttributeCopyIgnore(*(source.attrList.at(i)));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+
+      // add new attr to *this
+      localrc = AttributeSet(attr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &localrc)) return localrc;
+    }
+  }
+
+  // copy base level Attribute packages by value
+  for (i=0; i<source.packList.size(); i++) {
+    attpack = source.packList.at(i);
+    string empty("");
+    attr = AttPackGet(attpack->attrConvention, attpack->attrPurpose,
+                      attpack->attrObject, empty);
+    if (!attr) {
+      attr = new Attribute(ESMF_FALSE);
+
+      // recurse through nested attribute packages
+      localrc = attr->AttributeCopyIgnore(*(source.packList.at(i)));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &localrc)) return localrc;
+
+      // add new attr to *this
+      localrc = AttPackSet(attr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &localrc)) return localrc;
+    }
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeCopyIgnore
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCopyReplace"
@@ -1974,83 +2056,6 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
  } // end AttributeCopyReplace
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeCopyValue"
-//BOPI
-// !IROUTINE:  AttributeCopyValue - copy {\tt Attributes} between ESMF objects
-//
-// !INTERFACE:
-      int Attribute::AttributeCopyValue(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-        const Attribute &source) {   // in - source
-//
-// !DESCRIPTION:
-//   Copy all {\tt Attribute} data and copy by value all {\tt Attributes} in 
-//   this base level.
-//
-//EOPI
-  int localrc;
-  unsigned int i;
-  Attribute *attr, *attpack;
-  
-  attr = NULL;
-  
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  // call local copy on source
-  localrc = AttributeCopy(source);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &localrc)) return localrc;
-
-  // copy base level Attributes by value
-  for (i=0; i<source.attrList.size(); i++) {
-    // look to see if source.attrList.at(i) already exists on *this
-    attr = AttributeGet(source.attrList.at(i)->attrName);
-    if (!attr) {
-      attr = new Attribute(ESMF_FALSE);
-
-      // recurse to set the attribute values
-      localrc = attr->AttributeCopyReplace(*(source.attrList.at(i)));
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &localrc)) return localrc;
-
-      // add new attr to *this
-      localrc = AttributeSet(attr);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
-    }
-  }
-
-  // copy base level Attribute packages by value
-  for (i=0; i<source.packList.size(); i++) {
-    attpack = source.packList.at(i);
-    string empty("");
-    attr = AttPackGet(attpack->attrConvention, attpack->attrPurpose,
-                      attpack->attrObject, empty);
-    if (!attr) {
-      attr = new Attribute(ESMF_FALSE);
-
-      // recurse through nested attribute packages
-      localrc = attr->AttributeCopyReplace(*(source.packList.at(i)));
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &localrc)) return localrc;
-
-      // add new attr to *this
-      localrc = AttPackSet(attr);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &localrc)) return localrc;
-    }
-  }
-
-  return ESMF_SUCCESS;
-
- } // end AttributeCopyValue
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeMove"
@@ -4258,7 +4263,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  localrc = AttributeCopyValue(source);
+  localrc = AttributeCopyIgnore(source);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &localrc)) delete this;
 

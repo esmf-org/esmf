@@ -193,10 +193,7 @@ class Attribute
     // copy and swap an attribute hierarchy
     int  AttributeCopy(const Attribute &source);
     int  AttributeCopyHybrid(const Attribute &source);
-//    int  AttributeCopyReference(const Attribute &source);
-//    int  AttributeCopyReferenceTree(const Attribute &source);
-    int  AttributeCopyValue(const Attribute &source);
-//    int  AttributeCopyValueTree(const Attribute &source);
+    int  AttributeCopyIgnore(const Attribute &source);
     int  AttributeCopyReplace(const Attribute &source);
     int  AttributeMove(Attribute *source);
     

@@ -1249,7 +1249,9 @@ contains
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Copy an Attribute hierarchy from <object1> to <object2>.
+!     Copy an Attribute hierarchy from <object1> to <object2>.  The
+!     default behavior is to ignore (instead of replace) values on
+!     pre-existing Attributes.
 !
 !     Supported values for <object1> are:
 !     \begin{description}
