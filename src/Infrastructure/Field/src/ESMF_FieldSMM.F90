@@ -107,9 +107,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Execute a precomputed Field sparse matrix multiplication from {\tt srcField} to
 !   {\tt dstField}. Both {\tt srcField} and {\tt dstField} must be
 !   congruent and typekind conform with the respective Fields used during 
-!   {\tt ESMF\_FieldSMMStore()}. Congruent Fields possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Fields for every DE. For weakly congruent
+!   {\tt ESMF\_FieldSMMStore()}. Congruent Fields possess matching DistGrids 
+!   and the shape of the local array tiles, i.e. the memory allocation, matches 
+!   between the Fields for every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -290,7 +290,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_FieldSMMStore() 
 ! subroutine ESMF_FieldSMMStore<type><kind>(srcField, dstField, & 
 !        routehandle, factorList, factorIndexList, keywordEnforcer, &
-!        ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, rc) 
+!        ignoreUnmatchedIndices, srcTermProcessing, pipelineDepth, &
+!        transposeRoutehandle, rc)
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(in)              :: srcField  
@@ -302,7 +303,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   logical,                  intent(in),    optional :: ignoreUnmatchedIndices
 !   integer,                  intent(inout), optional :: srcTermProcessing
 !   integer,                  intent(inout), optional :: pipeLineDepth
-!   integer,                  intent(out),   optional :: rc 
+!   type(ESMF_RouteHandle),   intent(inout), optional :: transposeRoutehandle
+!   integer,                  intent(out),   optional :: rc
 ! 
 !
 ! !STATUS:
@@ -314,7 +316,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. 
-! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support sparse 
+! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
+!              the transposed matrix operation to be returned.\newline
+!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
 ! \end{description}
@@ -353,7 +357,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
 !   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
 !   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Fields for 
+!   every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -488,7 +493,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     determined value on return. Auto-tuning is also used if the optional
 !     {\tt pipelineDepth} argument is omitted.
 !
-! \item [{[rc]}]  
+!   \item [{[transposeRoutehandle]}]
+!     If provided, a handle to the transposed matrix operation is returned. The
+!     transposed operation goes from {\tt dstArray} to {\tt srcArray}.
+!
+!   \item [{[rc]}]  
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! \end{description} 
@@ -505,19 +514,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI4(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, &
+        transposeRoutehandle, pipeLineDepth, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: dstField  
+        type(ESMF_RouteHandle), intent(inout)           :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)              :: factorList(:)
+        integer,                intent(in)              :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        logical,                intent(in),   optional:: ignoreUnmatchedIndices
-        integer,                intent(inout),optional:: srcTermProcessing
-        integer,                intent(inout),optional:: pipeLineDepth
-        integer,                intent(out), optional :: rc 
+        logical,                intent(in),    optional :: ignoreUnmatchedIndices
+        integer,                intent(inout), optional :: srcTermProcessing
+        integer,                intent(inout), optional :: pipeLineDepth
+        type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+        integer,                intent(out),   optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -553,7 +564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           factorIndexList=factorIndexList, &
           ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          rc=localrc) 
+          transposeRoutehandle=transposeRoutehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -571,19 +582,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI8(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, &
+        transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: dstField  
+        type(ESMF_RouteHandle), intent(inout)           :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)              :: factorList(:)
+        integer,                intent(in)              :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        logical,                intent(in),   optional:: ignoreUnmatchedIndices
-        integer,                intent(inout),optional:: srcTermProcessing
-        integer,                intent(inout),optional:: pipeLineDepth
-        integer,                intent(out), optional :: rc 
+        logical,                intent(in),    optional :: ignoreUnmatchedIndices
+        integer,                intent(inout), optional :: srcTermProcessing
+        integer,                intent(inout), optional :: pipeLineDepth
+        type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+        integer,                intent(out),   optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -619,7 +632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           factorIndexList=factorIndexList, &
           ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          rc=localrc) 
+          transposeRoutehandle=transposeRoutehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -637,19 +650,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR4(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, &
+        transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: dstField  
+        type(ESMF_RouteHandle), intent(inout)           :: routehandle
+        real(ESMF_KIND_R4),     intent(in)              :: factorList(:)
+        integer,                intent(in)              :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        logical,                intent(in),   optional:: ignoreUnmatchedIndices
-        integer,                intent(inout),optional:: srcTermProcessing
-        integer,                intent(inout),optional:: pipeLineDepth
-        integer,                intent(out), optional :: rc 
+        logical,                intent(in),    optional :: ignoreUnmatchedIndices
+        integer,                intent(inout), optional :: srcTermProcessing
+        integer,                intent(inout), optional :: pipeLineDepth
+        type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+        integer,                intent(out),   optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -685,7 +700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           factorIndexList=factorIndexList, &
           ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          rc=localrc) 
+          transposeRoutehandle=transposeRoutehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -703,19 +718,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR8(srcField, dstField, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, rc) 
+        ignoreUnmatchedIndices, srcTermProcessing, &
+        transposeRoutehandle, pipeLineDepth, rc)
 
         ! input arguments 
-        type(ESMF_Field),       intent(in)            :: srcField  
-        type(ESMF_Field),       intent(inout)         :: dstField  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: dstField  
+        type(ESMF_RouteHandle), intent(inout)           :: routehandle
+        real(ESMF_KIND_R8),     intent(in)              :: factorList(:)
+        integer,                intent(in)              :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        logical,                intent(in),   optional:: ignoreUnmatchedIndices
-        integer,                intent(inout),optional:: srcTermProcessing
-        integer,                intent(inout),optional:: pipeLineDepth
-        integer,                intent(out), optional :: rc 
+        logical,                intent(in),    optional :: ignoreUnmatchedIndices
+        integer,                intent(inout), optional :: srcTermProcessing
+        integer,                intent(inout), optional :: pipeLineDepth
+        type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+        integer,                intent(out),   optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -751,7 +768,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           factorIndexList=factorIndexList, &
           ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          rc=localrc) 
+          transposeRoutehandle=transposeRoutehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -770,17 +787,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_FieldSMMStore() 
     subroutine ESMF_FieldSMMStoreNF(srcField, dstField, &
         routehandle, keywordEnforcer, ignoreUnmatchedIndices, &
-        srcTermProcessing, pipelineDepth, rc) 
+        srcTermProcessing, pipelineDepth, transposeRoutehandle, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field),       intent(in)             :: srcField  
-        type(ESMF_Field),       intent(inout)          :: dstField  
-        type(ESMF_RouteHandle), intent(inout)          :: routehandle
+        type(ESMF_Field),       intent(in)              :: srcField  
+        type(ESMF_Field),       intent(inout)           :: dstField  
+        type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        logical,                intent(in),   optional :: ignoreUnmatchedIndices
-        integer,                intent(inout),optional :: srcTermProcessing
-        integer,                intent(inout),optional :: pipeLineDepth
-        integer,                intent(out),  optional :: rc 
+        logical,                intent(in),    optional :: ignoreUnmatchedIndices
+        integer,                intent(inout), optional :: srcTermProcessing
+        integer,                intent(inout), optional :: pipeLineDepth
+        type(ESMF_RouteHandle), intent(inout), optional :: transposeRoutehandle
+        integer,                intent(out),   optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -791,7 +809,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. 
-! \item[7.0.0] Added argument {\tt ignoreUnmatchedIndices} to support sparse 
+! \item[7.0.0] Added argument {\tt transposeRoutehandle} to allow a handle to
+!              the transposed matrix operation to be returned.\newline
+!              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
 ! \end{description}
@@ -829,8 +849,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
 !   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for
+!   every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -930,7 +951,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     determined value on return. Auto-tuning is also used if the optional
 !     {\tt pipelineDepth} argument is omitted.
 !
-! \item [{[rc]}]
+!   \item [{[transposeRoutehandle]}]
+!     If provided, a handle to the transposed matrix operation is returned. The
+!     transposed operation goes from {\tt dstArray} to {\tt srcArray}.
+!     
+!   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 ! \end{description} 
@@ -969,7 +994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           routehandle=routehandle, &
           ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
           srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-          rc=localrc) 
+          transposeRoutehandle=transposeRoutehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 

@@ -294,6 +294,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_ArrayCreateFromGrid
   public ESMF_GridGetArrayInfo
 
+  public ESMF_OutputScripGridFile
+
   public ESMF_DIM_ARB
 
 ! - ESMF-internal methods:
@@ -2715,6 +2717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
        type(ESMF_GRIDITEM_FLAG) :: gridItem
        type(ESMF_CoordSys_Flag) :: coordSys
+       integer                  :: localDeCount, localDe
     
        
        ! Initialize return code; assume failure until success is certain
@@ -2945,24 +2948,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Fill the replicated dimension Arrays from the 2D redist data
        do k=1, dimCount*nStaggers
         if (dstRepl(k)) then
-          call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, rc=localrc)
+          call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, &
+            localDeCount=localDeCount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA(k), farrayPtr=farrayPtr, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          do localDe=0, localDeCount-1
+            call ESMF_ArrayGet(dstA(k), localDe=localDe, &
+              farrayPtr=farrayPtr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            call ESMF_ArrayGet(dstA2D(k), localDe=localDe, &
+              farrayPtr=farrayPtr2D, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (atodMap(1)==1) then
-            do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
-              farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
-            enddo
-          else
-            do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
-              farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
-            enddo
-          endif
+            if (atodMap(1)==1) then
+              do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
+              enddo
+            else
+              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
+              enddo
+            endif
+          enddo
         endif
        enddo
             
@@ -25467,8 +25475,659 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
       end subroutine ESMF_GridItemAssignment
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_OutputScripGridFile"
+!BOPI
+! !ROUTINE: ESMF_OUtputScripGridFile
+!  Write out a SCRIP Grid File from a ESMF_Grid Object, it will be useful
+!  to write out a ESMF_Mesh object in the future
+!  A quick hidden subroutine for Fei
+subroutine ESMF_OutputScripGridFile(filename, grid, rc)
+
+    character(len=*), intent(in)   :: filename
+    type(ESMF_GRID),  intent(in)   :: grid
+    integer                       :: rc
+
+    integer :: ncid, dimid, varid, nodedimid
+    integer :: localrc, ncStatus
+    integer :: varsize
+    integer :: ndims, dims(ESMF_MAXDIM)
+    integer :: PetNo, PetCnt
+    integer, pointer :: Staggers(:)
+    integer :: staggercnt, decount, xdim, ydim
+    integer :: londim, londim1, latdim, latdim1, gridid
+    integer :: rankid, fourid, varid1, varid2, varid3, varid4
+    integer :: elmtsize, count, i, j, nextj
+    integer, pointer :: minindex(:,:), maxindex(:,:)
+    logical :: xperiod, yperiod
+    type(ESMF_VM) :: vm
+    type(ESMF_DistGrid) :: distgrid, distgrid1, distgrid2
+    type(ESMF_Array) :: array, centerarray, array1, array2
+    type(ESMF_Array) :: lonarray, latarray
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_RouteHandle) :: routehandle
+    type(ESMF_CoordSys_Flag) :: coordsys
+    real(ESMF_KIND_R8), pointer::lonArray1d(:), latArray1d(:)
+    real(ESMF_KIND_R8), pointer::lonArray2d(:,:), latArray2d(:,:)
+    real(ESMF_KIND_R8), pointer::scripArray(:)
+    real(ESMF_KIND_R8), pointer::scripArray2(:,:)
+    character(len=256) :: errmsg, units
+
+#ifdef ESMF_NETCDF
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    ! find out the grid size and other global information
+    call ESMF_GridGet(grid, dimCount=ndims, localDECount=decount, &
+    	 coordDimCount=dims, coordSys=coordsys, distgrid=distgrid, &
+	 staggerlocCount=staggercnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Get list and number of active staggers
+    allocate(Staggers(staggercnt))
+    call c_ESMC_gridgetactivestaggers(grid%this, &
+           staggercnt, Staggers, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(Staggers)
+    if (ndims /= 2) then
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg="- Grid dimension has to be 2 to write out to a SCRIP file", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif	
+    if (decount > 1) then
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg="- Only one localDE per PET is allowed to write a grid into a SCRIP file", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    allocate(minindex(ndims,1), maxindex(ndims,1))
+    call ESMF_DistGridGet(distgrid, minIndexPTile=minindex, maxIndexPTile=maxindex,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+    ! find the size of the grid
+    londim = maxindex(1,1)-minindex(1,1)+1
+    latdim = maxindex(2,1)-minindex(2,1)+1
+    !print *, 'Grid dimension ', londim, latdim
+    elmtsize=londim * latdim
+    if (coordsys == ESMF_COORDSYS_SPH_DEG) then
+       units="degrees"
+    elseif (coordsys == ESMF_COORDSYS_SPH_RAD) then
+       units="radians"
+    else
+       !ESMF_COORDSYS_CART not supported -- errors
+    endif
+    deallocate(minindex, maxindex)
+    if (PetNo==0) then 
+      ! Create the GRID file and define dimensions and variables
+      ncStatus=nf90_create(filename, NF90_CLOBBER, ncid)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        trim(filename),&
+        rc)) return
+      ncStatus=nf90_def_dim(ncid,"grid_size",elmtsize, nodedimid)
+      errmsg = "defining dimension grid_size in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ncStatus=nf90_def_dim(ncid,"grid_rank", 2, rankid)
+      errmsg = "defining dimension grid_rank in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      if (staggercnt > 1) then
+         ncStatus=nf90_def_dim(ncid,"grid_corners", 4, fourid)
+	 errmsg = "defining dimension grid_corner in "//trim(filename)
+         if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg,&
+            rc)) return
+      endif
+      ncStatus=nf90_def_var(ncid,"grid_dims",NF90_INT, (/rankid/), gridid)
+      errmsg = "defining variable grid_dims in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ncStatus=nf90_def_var(ncid,"grid_center_lon",NF90_DOUBLE, (/nodedimid/), varid1)
+      errmsg = "defining variable grid_center_lon in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ! add units attribute based on the COORDSYS
+      ncStatus=nf90_put_att(ncid,varid1,"units",trim(units))
+      errmsg = "Adding attribute units for grid_center_lon in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ncStatus=nf90_def_var(ncid,"grid_center_lat",NF90_DOUBLE, (/nodedimid/), varid2)
+      errmsg = "defining variable grid_center_lat in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ncStatus=nf90_put_att(ncid,varid2,"units",trim(units))
+      errmsg = "Adding attribute units for grid_center_lat in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      if (staggercnt > 1) then    
+        ncStatus=nf90_def_var(ncid,"grid_corner_lon",NF90_DOUBLE, (/fourid,nodedimid/), varid3)
+        errmsg = "defining variable grid_corner_lon in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+        ! add units attribute based on the COORDSYS
+        ncStatus=nf90_put_att(ncid,varid3,"units",trim(units))
+        errmsg = "Adding attribute units for grid_corner_lon in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+        ncStatus=nf90_def_var(ncid,"grid_corner_lat",NF90_DOUBLE, (/fourid, nodedimid/), varid4)
+        errmsg = "defining variable grid_corner_lat in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+        ncStatus=nf90_put_att(ncid,varid4,"units",trim(units))
+        errmsg = "Adding attribute units for grid_corner_lat in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+      endif
+      ncStatus=nf90_enddef(ncid)
+      errmsg = "nf90_enddef in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+      ! write the grid_dims value
+      ncStatus = nf90_put_var(ncid,gridid,(/londim, latdim/))
+      errmsg = "writing grid_dims in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg,&
+        rc)) return
+    endif
+    call ESMF_VMBarrier(vm)
+    ! Get Grid coordinates at center stagger
+    if (decount > 0) then
+      call ESMF_GridGetCoord(grid, 1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	   array=lonarray, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_GridGetCoord(grid, 2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	   array=latarray, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      if (dims(1)==2) then
+         !create a 2D array on PET0 only
+         distgrid1=ESMF_DistGridCreate((/1,1/),(/londim,latdim/),&
+	 regDecomp=(/1,1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         array1=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         array2=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      else      
+         !create a 2D array on PET0 only
+         distgrid1=ESMF_DistGridCreate((/1/),(/londim/),&
+	 regDecomp=(/1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         array1=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         distgrid2=ESMF_DistGridCreate((/1/),(/latdim/),&
+	 regDecomp=(/1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+         array2=ESMF_ArrayCreate(distgrid2,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      endif
+      call ESMF_ArrayRedistStore(lonarray, array1,routehandle, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedist(lonarray, array1, routehandle, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedist(latarray, array2,routehandle, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedistRelease(routehandle)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+
+      ! Extra the data from array and create 2D lat and lon array to write 
+      ! to the file
+      if (PetNo == 0) then
+         if (dims(1)==1) then
+	    call ESMF_ArrayGet(array1,farrayPtr=lonArray1d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    call ESMF_ArrayGet(array2,farrayPtr=latArray1d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    allocate(scripArray(elmtsize))
+	    do i=1,elmtsize,londim
+	       scripArray(i:i+londim)=lonArray1d
+            enddo
+   	    ncStatus=nf90_put_var(ncid, varid1, scripArray)
+            errmsg = "Writing variable grid_corner_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    j=1
+            do i=1,latdim
+               scripArray(j:j+londim)=latArray1d(i)
+	       j=j+londim
+            enddo
+   	    ncStatus=nf90_put_var(ncid, varid2, scripArray)
+            errmsg = "Writing variable grid_corner_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    deallocate(scripArray)
+         else
+	    call ESMF_ArrayGet(array1,farrayPtr=lonArray2d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    call ESMF_ArrayGet(array2,farrayPtr=latArray2d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    allocate(scripArray(elmtsize))
+            scripArray=reshape(lonArray2d,(/elmtsize/))
+   	    ncStatus=nf90_put_var(ncid, varid1, scripArray)
+            errmsg = "Writing variable grid_corner_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+            scripArray=reshape(latArray2d,(/elmtsize/))
+   	    ncStatus=nf90_put_var(ncid, varid2, scripArray)
+            errmsg = "Writing variable grid_corner_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    deallocate(scripArray)
+         endif
+      endif
+      !call ESMF_ArrayDestroy(lonArray)
+      !call ESMF_ArrayDestroy(latArray)
+      call ESMF_ArrayDestroy(array1) 	    
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayDestroy(array2) 	    
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      ! Get corner stagger if exist
+      if (staggercnt > 1) then
+	call ESMF_GridGetCoord(grid, 1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+	   	array=lonarray, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	call ESMF_GridGetCoord(grid, 2, staggerloc=ESMF_STAGGERLOC_CORNER, &
+	   	array=latarray, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+    
+	! Find the corner stagger array dimension, it may have one periodic dimension
+        if (dims(1)==1) then
+           allocate(minindex(1,1), maxindex(1,1))
+	   call ESMF_ArrayGet(lonarray, distgrid=distgrid, rc=localrc)
+           call ESMF_DistGridGet(distgrid, minIndexPTile=minindex, maxIndexPTile=maxindex,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           londim1 = maxindex(1,1)-minindex(1,1)+1
+	   call ESMF_ArrayGet(latarray, distgrid=distgrid, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           call ESMF_DistGridGet(distgrid, minIndexPTile=minindex, maxIndexPTile=maxindex,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           latdim1 = maxindex(1,1)-minindex(1,1)+1
+        else
+           allocate(minindex(2,1), maxindex(2,1))
+	   call ESMF_ArrayGet(lonarray, distgrid=distgrid, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	   call ESMF_DistGridGet(distgrid, minIndexPTile=minindex, maxIndexPTile=maxindex,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           londim1 = maxindex(1,1)-minindex(1,1)+1
+           latdim1 = maxindex(2,1)-minindex(2,1)+1
+        endif
+	deallocate(maxindex, minindex)
+        xperiod = .false.
+        yperiod = .false.
+        if (londim1 == londim) then 
+	      !This is periodic dimension, need to wrap around
+              xperiod = .true.
+        endif
+        if (latdim1 == latdim) then 
+	      !This is periodic dimension, need to wrap around
+             yperiod = .true.
+        endif
+        !print *, 'Corner stagger dimension ', londim1, latdim1
+	if (dims(1)==2) then
+           !create a 2D array on PET0 only
+           distgrid1=ESMF_DistGridCreate((/1,1/),(/londim1,latdim1/),&
+	   regDecomp=(/1,1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           array1=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           array2=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+        else      
+           !create a 2D array on PET0 only
+           distgrid1=ESMF_DistGridCreate((/1/),(/londim1/), &
+           regDecomp=(/1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           array1=ESMF_ArrayCreate(distgrid1,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           distgrid2=ESMF_DistGridCreate((/1/),(/latdim1/), &
+	   regDecomp=(/1/),rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+           array2=ESMF_ArrayCreate(distgrid2,arrayspec,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+        endif
+      call ESMF_ArrayRedistStore(lonarray, array1, routehandle, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedist(lonarray, array1, routehandle,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedist(latarray, array2, routehandle,rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+      call ESMF_ArrayRedistRelease(routehandle)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+
+      ! Extract the data from array and create 2D lat and lon array to write 
+      ! to the file
+      if (PetNo == 0) then
+         if (dims(1)==1) then
+	    call ESMF_ArrayGet(array1,farrayPtr=lonArray1d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    call ESMF_ArrayGet(array2,farrayPtr=latArray1d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    allocate(scripArray2(4,elmtsize))
+	    count = 1
+	    do j=1,latdim
+             do i=1,londim-1
+	       scripArray2(1,count)=lonArray1d(i)
+	       scripArray2(2,count)=lonArray1d(i+1)
+	       scripArray2(3,count)=lonArray1d(i+1)
+	       scripArray2(4,count)=lonArray1d(i)
+	       count = count+1
+             enddo
+	     if (xperiod) then
+	       scripArray2(1,count)=lonArray1d(i)
+	       scripArray2(2,count)=lonArray1d(1)
+	       scripArray2(3,count)=lonArray1d(1)
+	       scripArray2(4,count)=lonArray1d(i)
+	       count = count+1
+	     else
+	       scripArray2(1,count)=lonArray1d(i)
+	       scripArray2(2,count)=lonArray1d(i+1)
+	       scripArray2(3,count)=lonArray1d(i+1)
+	       scripArray2(4,count)=lonArray1d(i)
+	       count = count+1
+	     endif
+            enddo
+   	    ncStatus=nf90_put_var(ncid, varid3, scripArray2)
+            errmsg = "Writing variable grid_center_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    count = 1
+	    do j=1,latdim-1
+             do i=1,londim
+	       scripArray2(1,count)=latArray1d(j)
+	       scripArray2(2,count)=latArray1d(j)
+	       scripArray2(3,count)=latArray1d(j+1)
+	       scripArray2(4,count)=latArray1d(j+1)
+	       count = count+1
+             enddo
+            enddo
+	    if (yperiod) then
+              do i=1,londim
+	        scripArray2(1,count)=latArray1d(j)
+	        scripArray2(2,count)=latArray1d(j)
+	        scripArray2(3,count)=latArray1d(1)
+	        scripArray2(4,count)=latArray1d(1)
+	        count = count+1
+              enddo
+	    else
+              do i=1,londim
+	        scripArray2(1,count)=latArray1d(j)
+	        scripArray2(2,count)=latArray1d(j)
+	        scripArray2(3,count)=latArray1d(j+1)
+	        scripArray2(4,count)=latArray1d(j+1)
+	        count = count+1
+              enddo
+	    endif
+   	    ncStatus=nf90_put_var(ncid, varid4, scripArray2)
+            errmsg = "Writing variable grid_center_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    deallocate(scripArray2)
+         else  !dims==2
+	    call ESMF_ArrayGet(array1,farrayPtr=lonArray2d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    call ESMF_ArrayGet(array2,farrayPtr=latArray2d, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	    allocate(scripArray2(4,elmtsize))
+	    count = 1
+	    do j=1,latdim
+	     if (j==latdim .and. yperiod) then
+	     	nextj=1
+             else
+	        nextj=j+1
+             endif
+             do i=1,londim-1
+	       scripArray2(1,count)=lonArray2d(i,j)
+	       scripArray2(2,count)=lonArray2d(i+1,j)
+	       scripArray2(3,count)=lonArray2d(i+1,nextj)
+	       scripArray2(4,count)=lonArray2d(i,nextj)
+	       count = count+1
+             enddo
+	     if (xperiod) then
+	       scripArray2(1,count)=lonArray2d(i,j)
+	       scripArray2(2,count)=lonArray2d(1,j)
+	       scripArray2(3,count)=lonArray2d(1,nextj)
+	       scripArray2(4,count)=lonArray2d(i,nextj)
+	       count = count+1
+	     else
+	       scripArray2(1,count)=lonArray2d(i,j)
+	       scripArray2(2,count)=lonArray2d(i+1,j)
+	       scripArray2(3,count)=lonArray2d(i+1,nextj)
+	       scripArray2(4,count)=lonArray2d(i,nextj)
+	       count = count+1
+	     endif
+            enddo
+   	    ncStatus=nf90_put_var(ncid, varid3, scripArray2)
+            errmsg = "Writing variable grid_center_lon in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    count = 1
+	    do j=1,latdim
+	     if (j==latdim .and. yperiod) then
+	     	nextj=1
+             else
+	        nextj=j+1
+             endif
+             do i=1,londim-1
+	       scripArray2(1,count)=latArray2d(i,j)
+	       scripArray2(2,count)=latArray2d(i+1,j)
+	       scripArray2(3,count)=latArray2d(i+1,nextj)
+	       scripArray2(4,count)=latArray2d(i,nextj)
+	       count = count+1
+             enddo
+	     if (xperiod) then
+	       scripArray2(1,count)=latArray2d(i,j)
+	       scripArray2(2,count)=latArray2d(1,j)
+	       scripArray2(3,count)=latArray2d(1,nextj)
+	       scripArray2(4,count)=latArray2d(i,nextj)
+	       count = count+1
+	     else
+	       scripArray2(1,count)=latArray2d(i,j)
+	       scripArray2(2,count)=latArray2d(i+1,j)
+	       scripArray2(3,count)=latArray2d(i+1,nextj)
+	       scripArray2(4,count)=latArray2d(i,nextj)
+	       count = count+1
+	     endif
+	    enddo
+   	    ncStatus=nf90_put_var(ncid, varid4, scripArray2)
+            errmsg = "Writing variable grid_center_lat in "//trim(filename)
+            if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	    deallocate(scripArray2)
+         endif
+      endif !PetNo==0
+      !call ESMF_ArrayDestroy(lonArray)
+      !call ESMF_ArrayDestroy(latArray)
+      call ESMF_ArrayDestroy(array1) 	    
+      call ESMF_ArrayDestroy(array2) 	    
+     endif !staggerloc > 1
+     if (PetNo == 0) then
+       ncStatus = nf90_close(ncid)
+       if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              trim(filename),&
+              rc)) return
+     endif
+    endif !decount > 0 	 
+    
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+end subroutine ESMF_OutputScripGridFile 
+ 
+!-----------------------------------------------------------------------
+!
+!  check CDF file error code
+!
 #undef  ESMF_METHOD
+#define ESMF_METHOD "CDFCheckError"
+function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
+    logical                       :: CDFCheckError
 
+    integer,          intent(in)  :: ncStatus
+    character(len=*), intent(in)  :: module
+    character(len=*), intent(in)  :: fileName
+    integer,          intent(in)  :: lineNo
+    character(len=*), intent(in)  :: errmsg
+    integer, intent(out),optional :: rc
+
+    integer, parameter :: nf90_noerror = 0
+
+    CDFCheckError = .FALSE.
+
+#ifdef ESMF_NETCDF
+    if ( ncStatus .ne. nf90_noerror) then
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+            line=lineNo, file=fileName, method=module)
+        print '("NetCDF Error: ", A, " : ", A)', &
+	trim(errmsg),trim(nf90_strerror(ncStatus))
+        call ESMF_LogFlush()
+        if (present(rc)) rc = ESMF_FAILURE
+ 	CDFCheckError = .TRUE.
+    else
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    end if
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end function CDFCheckError
+
+#undef  ESMF_METHOD
 
 end module ESMF_GridMod

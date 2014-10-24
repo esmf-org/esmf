@@ -120,9 +120,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 ! !DESCRIPTION:
 !   Execute a precomputed Field halo operation for {\tt field}. The {\tt field}
 !   argument must be weakly congruent and typekind conform to the Field used
-!   during {\tt ESMF\_FieldHaloStore()}.
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   during {\tt ESMF\_FieldHaloStore()}. Congruent Fields possess matching
+!   DistGrids and the shape of the local array tiles, i.e. the memory allocation,
+!   matches between the Fields for every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -301,9 +301,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldHalo()} on any Field that is weakly congruent
-!   and typekind conform to {\tt field}.
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   field tiles matches between the Fieldss for every DE. For weakly congruent
+!   and typekind conform to {\tt field}. Congruent Fields possess matching
+!   DistGrids and the shape of the local field tiles, i.e. the memory allocation,
+!   matches between the Fieldss for every DE. For weakly congruent
 !   Fieldss the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class

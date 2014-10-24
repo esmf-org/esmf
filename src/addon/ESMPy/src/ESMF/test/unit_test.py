@@ -1181,11 +1181,12 @@ def field_switchedindices_mesh_test():
 
     field = Field(mesh, 'Field!',
                   TypeKind.R8,
-                  MeshLoc.NODE,
-                  grid_to_field_map=gridtofieldmap)
+                  MeshLoc.NODE)
     field2 = Field(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
-                   grid_to_field_map=np.array([1]))
+                   grid_to_field_map=np.array([1]),
+                   ungridded_lower_bound=np.array([1]),
+                   ungridded_upper_bound=np.array([5]))
 
     for i in range(field.shape[0]):
         field[i] = 10
@@ -1216,13 +1217,12 @@ def field_extraindices_mesh_test():
 
     field = Field(mesh, 'Field!',
                   TypeKind.R8,
-                  MeshLoc.NODE,
-                  grid_to_field_map=gridtofieldmap)
+                  MeshLoc.NODE)
     field2 = Field(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
-                   grid_to_field_map=np.array([2]),
-                   ungridded_lower_bound=np.array([0,0]),
-                   ungridded_upper_bound=np.array([1,1]))
+                   grid_to_field_map=np.array([1]),
+                   ungridded_lower_bound=np.array([1]),
+                   ungridded_upper_bound=np.array([5]))
 
     for i in range(field.shape[0]):
         field[i] = 10

@@ -1,0 +1,17 @@
+% CVS $Id$
+
+\section{Apps}
+\label{sec:Apps}
+
+The ESMF source distribution contains a few executables that are built on top
+of the ESMF library during installation. These executables are referred to as
+{\em apps}. Apps are command line tools intended to be used by the end user of
+ESMF. ESMF follows the GNU conventions for command line tools. There are 
+currently three mandatory command line options that every distributed app must
+implement:
+
+\begin{verbatim}
+--help      Print a help message, documenting all of the available command line arguments and their usage.
+--version   Print the version of ESMF in long format and the copyright message.
+-V          Print just the version string of ESMF.
+\end{verbatim}

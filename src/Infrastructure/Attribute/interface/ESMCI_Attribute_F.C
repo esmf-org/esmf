@@ -1817,7 +1817,7 @@ extern "C" {
   }
   
   if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
-      status = (**destination).root.AttributeCopyValue((**source).root);
+      status = (**destination).root.AttributeCopyIgnore((**source).root);
       ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }

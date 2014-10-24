@@ -990,18 +990,12 @@ program ESMF_StateReconcileUTest
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Verifying reconciled Base attributes test"
-    do, i=0, petCount-1
-      write (temppet_str, '(i4)') i
-      call ESMF_AttributeGet (state_attr,  &
-        name='Base PET ' // trim (adjustl (temppet_str)),  &
-        valueList=attr_val,  &
-        rc=rc)
-      if (rc /= ESMF_SUCCESS) exit
-      if (attr_val(1) /= i) then
-        rc = ESMF_FAILURE
-        exit
-      end if
-    end do
+    write (temppet_str, '(i4)') localPet
+    call ESMF_AttributeGet (state_attr,  &
+      name='Base PET ' // trim (adjustl (temppet_str)),  &
+      valueList=attr_val,  &
+      rc=rc)
+    if (attr_val(1) /= localPet) rc = ESMF_FAILURE
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------

@@ -48,7 +48,7 @@ extern "C" {
 
     ESMC_Field field;
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&grid, arrayspec,
       staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, 
       name, &localrc));
@@ -79,7 +79,7 @@ extern "C" {
 
     ESMC_Field field;
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&grid, typekind,
       staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, 
       name, &localrc));
@@ -109,7 +109,7 @@ extern "C" {
 
     ESMC_Field field;
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -138,7 +138,7 @@ extern "C" {
 
     ESMC_Field field;
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, typekind,
       meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -165,7 +165,7 @@ extern "C" {
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field->ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = ESMCI::Field::destroy(fieldp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -191,7 +191,7 @@ extern "C" {
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = fieldp->print();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -214,7 +214,7 @@ extern "C" {
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     ESMC_Mesh mesh = fieldp->getMesh(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return mesh;
@@ -237,7 +237,7 @@ extern "C" {
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     ESMC_Array array = fieldp->getArray(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return array;
@@ -274,6 +274,37 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldGetBounds()"
+int ESMC_FieldGetBounds(ESMC_Field field,
+                          int *localDe,
+                          ESMC_InterfaceInt *exclusiveLBound,
+                          ESMC_InterfaceInt *exclusiveUBound){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // typecase into ESMCI type
+  ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
+  ESMCI::InterfaceInt *exLB = reinterpret_cast<ESMCI::InterfaceInt *>
+                              (exclusiveLBound->shallowMem);
+  ESMCI::InterfaceInt *exUB = reinterpret_cast<ESMCI::InterfaceInt *>
+                              (exclusiveUBound->shallowMem);
+
+  // Invoke the C++ interface
+  localrc = ESMCI::Field::getbounds(fieldp, localDe, exLB, exUB);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegridGetArea()"
   int ESMC_FieldRegridGetArea(ESMC_Field field) {
 
@@ -284,7 +315,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = ESMCI::Field::regridgetarea(fieldp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
@@ -326,7 +357,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     ESMCI::RouteHandle *rhPtr;
     rhPtr=NULL;   
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
       polemethod, regridPoleNPnts, unmappedaction,
@@ -362,7 +393,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     ESMCI::RouteHandle *routehandlep = 
       reinterpret_cast<ESMCI::RouteHandle *>(routehandle.ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
                                    zeroregion);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -387,7 +418,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     // typecase into ESMCI type
     ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
 
-    // Invoque the C++ interface
+    // Invoke the C++ interface
     localrc = ESMCI::Field::regridrelease(routehandlep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out

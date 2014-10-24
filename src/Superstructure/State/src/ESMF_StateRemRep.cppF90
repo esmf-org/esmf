@@ -81,7 +81,7 @@ module ESMF_StateRemRepMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateReplace -- Replace items in a State
+! !IROUTINE: ESMF_StateRemove -- Remove items in a State
 
 ! !INTERFACE:
   interface ESMF_StateRemove
