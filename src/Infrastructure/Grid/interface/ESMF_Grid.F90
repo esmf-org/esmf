@@ -2717,6 +2717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
        type(ESMF_GRIDITEM_FLAG) :: gridItem
        type(ESMF_CoordSys_Flag) :: coordSys
+       integer                  :: localDeCount, localDe
     
        
        ! Initialize return code; assume failure until success is certain
@@ -2947,24 +2948,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Fill the replicated dimension Arrays from the 2D redist data
        do k=1, dimCount*nStaggers
         if (dstRepl(k)) then
-          call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, rc=localrc)
+          call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, &
+            localDeCount=localDeCount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA(k), farrayPtr=farrayPtr, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          do localDe=0, localDeCount-1
+            call ESMF_ArrayGet(dstA(k), localDe=localDe, &
+              farrayPtr=farrayPtr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            call ESMF_ArrayGet(dstA2D(k), localDe=localDe, &
+              farrayPtr=farrayPtr2D, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (atodMap(1)==1) then
-            do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
-              farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
-            enddo
-          else
-            do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
-              farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
-            enddo
-          endif
+            if (atodMap(1)==1) then
+              do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
+              enddo
+            else
+              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
+              enddo
+            endif
+          enddo
         endif
        enddo
             
