@@ -220,7 +220,7 @@ void GeomRend::build_src(const BBox &dstBound, ZoltanUD &zud) {
 
     MeshObj &elem = *ei;
 
-    BBox ebox(coord, elem, 0.25);
+    BBox ebox(coord, elem, 0.25, srcmesh.is_sph);
 
     if (BBoxIntersect(ebox, dstBound, dcfg.geom_tol)) 
       zud.srcObj.push_back(&elem);
@@ -249,7 +249,7 @@ void GeomRend::set_zolt_param(Zoltan_Struct *zz) {
 }
 
 static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist,
-        std::vector<CommRel::CommNode> &mignode, double geom_tol, UInt sdim) {
+                      std::vector<CommRel::CommNode> &mignode, double geom_tol, UInt sdim, bool is_sph=false) {
   Trace __trace("rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist, std::vector<CommRel::CommNode> &res)");
 
   UInt csize = Par::Size();
@@ -265,7 +265,7 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
 
     MeshObj &elem = **si;
 
-    BBox ebox(coord, elem, geom_tol);
+    BBox ebox(coord, elem, geom_tol, is_sph);
 
     // Insersect with the cuts
     Zoltan_LB_Box_Assign(zz, ebox.getMin()[0]-geom_tol,
@@ -346,7 +346,7 @@ void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
 
   std::vector<CommRel::CommNode> mignode;
 
-  rcb_isect(zz, coord, zud.srcObj, mignode, dcfg.geom_tol, sdim);
+  rcb_isect(zz, coord, zud.srcObj, mignode, dcfg.geom_tol, sdim, srcmesh.is_sph);
 
   // Add our result to the migspec
   CommRel &src_migration = srcComm.GetCommRel(MeshObj::ELEMENT);
@@ -391,7 +391,7 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
 
     std::vector<CommRel::CommNode> mignode;
 
-    rcb_isect(zz, coord, zud.dstObj, mignode, dcfg.geom_tol, sdim);
+    rcb_isect(zz, coord, zud.dstObj, mignode, dcfg.geom_tol, sdim, false);
 
     // Add results to the migspec
     CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type); 
@@ -949,6 +949,10 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   // Now migrate the meshes.
   migrate_meshes();
   
+  // Set is_sph
+  srcmesh_rend.is_sph=srcmesh.is_sph;
+  dstmesh_rend.is_sph=dstmesh.is_sph;
+
   //WriteMesh(srcmesh_rend, "srcrend");
 
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be

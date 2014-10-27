@@ -27,6 +27,8 @@ namespace ESMCI {
   enum MAP_TYPE {MAP_TYPE_CART_APPROX=0, MAP_TYPE_GREAT_CIRCLE};
   extern MAP_TYPE sph_map_type;
 
+  extern bool is_map_sph;
+
 /**
  * Mapping subsystem.  Provides the mapping from a parametric element
  * space to physical coordinates.  Provides jacobian based utilities.

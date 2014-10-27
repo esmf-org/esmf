@@ -24,6 +24,7 @@
 
 namespace ESMCI {
 
+  bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p);
 
   bool invert_matrix_3x3(double m[], double m_inv[]);
 
@@ -100,6 +101,21 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out[1]=a[1]+b[1]; \
   out[2]=a[2]+b[2];
 
+#define MU_SUB_VEC3D(out,a,b) \
+  out[0]=a[0]-b[0]; \
+  out[1]=a[1]-b[1]; \
+  out[2]=a[2]-b[2];
+
+// multiply 3x3 MAT BY 3D VEC
+#define MU_MAT_X_VEC3D(out_v, m, v) \
+  out_v[0]=m[0]*v[0]+m[1]*v[1]+m[2]*v[2]; \
+  out_v[1]=m[3]*v[0]+m[4]*v[1]+m[5]*v[2]; \
+  out_v[2]=m[6]*v[0]+m[7]*v[1]+m[8]*v[2];
+
+
+#define MU_EQUAL_PNT3D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
+                                  (std::abs(p1[1]-p2[1]) < tol) && \
+                                  (std::abs(p1[2]-p2[2]) < tol))
 
 #define MU_CROSS_PRODUCT_VEC3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
 

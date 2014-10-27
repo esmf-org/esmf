@@ -49,6 +49,7 @@ namespace ESMCI {
 
 
 //// These should eventually be moved elsewhere (perhaps into ESMCI_ShapeFunc.C??) 
+// INSTEAD OF THIS USE MACRO!
 void mult(double m[], double v[], double out_v[]) {
 
   out_v[0]=m[0]*v[0]+m[1]*v[1]+m[2]*v[2];
@@ -1629,6 +1630,329 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   // return success
   return 0;
 } 
+
+  //////// NEW STUFF /////
+ /* XMRKX */
+
+
+void sph_comb_pnts(const double *pnt0, const double *pnt1, double p, double *out_pnt) {
+
+  // Thought about doing a case here if the points are the same, but I think that 
+  // the below will just work in that case, and this way I don't have to come up 
+  // with an arbitrary tol for sameness. 
+
+  // lengths
+  double len0=MU_LEN_VEC3D(pnt0);
+  double len1=MU_LEN_VEC3D(pnt1);
+
+  // calc unit vec
+  double u_pnt0[3];
+  u_pnt0[0] = pnt0[0]/len0;
+  u_pnt0[1] = pnt0[1]/len0;
+  u_pnt0[2] = pnt0[2]/len0;
+
+  double u_pnt1[3];
+  u_pnt1[0] = pnt1[0]/len1;
+  u_pnt1[1] = pnt1[1]/len1;
+  u_pnt1[2] = pnt1[2]/len1;
+
+  // Compute angle between 0 and 1
+  double dot01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
+  if (dot01 < -1.0) dot01=-1.0;
+  else if (dot01 > 1.0) dot01=1.0;
+  double angle01=acos(dot01);
+
+  // printf("angle01=%f\n",angle01);
+ 
+  // Compute info to use to compute new point
+  double cosp=cos(p*angle01);  // cos contribution
+  double sinp=sin(p*angle01);  // sin contribution
+  double radp=(1.0-p)*len0+p*len1; // radius linear between pnt0 and pnt1
+
+  // printf("cosp=%f sinp=%f radp=%f\n",cosp,sinp,radp);
+ 
+  // Compute vec. perp to u_pnt0
+  double tmp[3];
+  MU_CROSS_PRODUCT_VEC3D(tmp,u_pnt1,u_pnt0);
+  double pntp[3];
+  MU_CROSS_PRODUCT_VEC3D(pntp,u_pnt0,tmp);
+  double lenp=MU_LEN_VEC3D(pntp);
+
+  // If lenp is 0.0, then the vectors are parallel or 180 degrees
+  // TODO: handle 180 case
+  // SHOULD I DO THIS ABOVE IF ANGLE01==0.0??
+  // A: MAYBE NOT SINCE NO HAVING lenp == 0.0 IS MORE IMPORTANT FOR AVOIDING NAN 
+  if (lenp == 0.0) {
+    out_pnt[0]=radp*u_pnt0[0];
+    out_pnt[1]=radp*u_pnt0[1];
+    out_pnt[2]=radp*u_pnt0[2];
+
+    return;
+  }
+
+  double u_pntp[3];
+  u_pntp[0]=pntp[0]/lenp;
+  u_pntp[1]=pntp[1]/lenp;
+  u_pntp[2]=pntp[2]/lenp;
+ 
+ 
+  // compute point
+#if 0
+  out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pnt1[0]);
+  out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pnt1[1]);
+  out_pnt[2]=radp*(cosp*u_pnt0[2]+sinp*u_pnt1[2]);
+#endif
+
+  out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pntp[0]);
+  out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pntp[1]);
+  out_pnt[2]=radp*(cosp*u_pnt0[2]+sinp*u_pntp[2]);
+
+}
+
+
+// QUESTION: SHOULD quad be a set of different input points (e.g. q1,...q4)?
+//        A: MAYBE NOT SINCE HAVING 8 entries for a HEX would be inconvienient. 
+// Take in a spherical quad represented in Cartesian 3D and 
+// 2 parameter (p) values. Calculate a new point that is at the 
+// position described by the parameters in the quad.
+// quad_xyz - should be of size 12 (4 Cartesian 3D points)
+// p        - should be of size 2  (2 parameters)
+// o_pnt    - should be of size 3  (1 Cartesian 3D point)
+void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, double *o_pnt) {
+  const double *q0, *q1, *q2, *q3;
+  double pnt01[3];
+  double pnt32[3];
+
+  // Grab points
+  q0=quad_xyz;
+  q1=quad_xyz+3;
+  q2=quad_xyz+6;
+  q3=quad_xyz+9;
+
+
+  // Side 0-1
+  sph_comb_pnts(q0, q1, p[0], pnt01);
+
+  // Side 3-2
+  sph_comb_pnts(q3, q2, p[0], pnt32);
+
+  // Merge sides 0-1 and 3-2
+  sph_comb_pnts(pnt01, pnt32, p[1], o_pnt);
+}
+
+
+// Take in a spherical hex represented in Cartesian 3D and 
+// 2 parameter (p) values. Calculate a new point that is at the 
+// position described by the parameters in the quad.
+// hex_xyz - should be of size 24 (8 Cartesian 3D points)
+// p        - should be of size 3  (3 parameters)
+// o_pnt    - should be of size 3  (1 Cartesian 3D point)
+void calc_pnt_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt) {
+  double pnt_btm[3];
+  double pnt_top[3];
+
+  // calc the bottom quad
+  calc_pnt_quad_sph3D_xyz(hex_xyz, p, pnt_btm);
+
+  // calc the top quad
+  calc_pnt_quad_sph3D_xyz(hex_xyz+12, p, pnt_top);
+
+  // printf("hex_xyz: pnt_btm=[%f %f %f] pnt_top=[%f %f %f] \n",pnt_btm[0],pnt_btm[1],pnt_btm[2],pnt_top[0],pnt_top[1],pnt_top[2]);
+
+  // Merge the points
+  sph_comb_pnts(pnt_btm, pnt_top, p[2], o_pnt);
+}
+
+
+
+// Take in a spherical quad represented in Cartesian 3D and 
+// 2 parameter (p) values. Calculate the jacobian for the 
+// position described by the parameters in the quad.
+void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
+  double delta=1.0E-10; // Small distance to use to estimate derivative
+   
+  // Calculate Function with given p's
+  double f[3];
+  calc_pnt_hex_sph3D_xyz(hex_xyz, p, f);
+
+  // Variable to hold info for computing derivatives
+  double tmp_p[3];
+  double tmp_f[3];
+
+
+  // Compute partial by p[0]
+  tmp_p[0]=p[0]+delta; 
+  tmp_p[1]=p[1];
+  tmp_p[2]=p[2];
+
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+
+  jac[0]=(tmp_f[0]-f[0])/delta;
+  jac[3]=(tmp_f[1]-f[1])/delta;
+  jac[6]=(tmp_f[2]-f[2])/delta;
+
+  // Compute partial by p[1]
+  tmp_p[0]=p[0]; 
+  tmp_p[1]=p[1]+delta;
+  tmp_p[2]=p[2];
+
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+
+  jac[1]=(tmp_f[0]-f[0])/delta;
+  jac[4]=(tmp_f[1]-f[1])/delta;
+  jac[7]=(tmp_f[2]-f[2])/delta;
+
+  // Compute partial by p[2]
+  tmp_p[0]=p[0]; 
+  tmp_p[1]=p[1];
+  tmp_p[2]=p[2]+delta;
+
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+
+  jac[2]=(tmp_f[0]-f[0])/delta;
+  jac[5]=(tmp_f[1]-f[1])/delta;
+  jac[8]=(tmp_f[2]-f[2])/delta;
+
+}
+
+
+// Take in a spherical hex represented in xyz and 
+// a point value. Calculate the parameters for where the 
+// point is in the hex
+// hex_xyz - should be of size 24 (8 llr points)
+// pnt_xyz  - should be of size 3  (1 llr point)
+// p        - should be of size 3  (3 parameters)
+
+// Returns: true - if converged and p is valid, false otherwise
+bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p) {
+
+  // List of optional guesses, and which we're using 
+  int guess=0;
+  double p_guess[8][3]={{0.0,0.0,0.0},
+                        {0.0,0.0,1.0},
+                        {0.0,1.0,0.0},
+                        {0.0,1.0,1.0},
+                        {1.0,0.0,0.0},
+                        {1.0,0.0,1.0},
+                        {1.0,1.0,0.0},
+                        {1.0,1.0,1.0}};
+
+  // Best set of p's so far
+  double best_dist_sq=std::numeric_limits<double>::max();
+  double best_p[3];
+
+
+  // Initial guess
+  p[0]=0.5;
+  p[1]=0.5;
+  p[2]=0.5;
+
+
+  // Do multiple interations exiting in loop if solution is close enough
+  bool stuck=false;
+  for (int i=0; i<1000; i++) {
+
+    // Calculate point at p
+    double tmp_pnt[3];
+    calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt);    
+    
+    // Calculate function we're trying to 0
+    // (point at p-pnt_xyz)
+    double f[3];
+    MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
+
+    // calc squared distance from solution
+    double dist_sq=f[0]*f[0]+f[1]*f[1]+f[2]*f[2];
+
+#if 0
+    if (mathutil_debug) {
+      printf("%d p=%f %f %f d=%f\n",i,p[0],p[1],p[2],dist_sq);
+    }
+#endif
+
+    // record the best point so far
+    if (dist_sq < best_dist_sq) {
+      best_dist_sq=dist_sq;
+      best_p[0]=p[0];
+      best_p[1]=p[1];
+      best_p[2]=p[2];
+    }
+
+    // If we're close enough then exit
+    if (best_dist_sq <1.0E-22) break;
+
+    // Construct Jacobian
+    double jac[3*3];
+    calc_jac_hex_sph3D_xyz(hex_xyz, p, jac);    
+
+    // Invert Jacobian
+    double inv_jac[3*3];
+    if (!invert_matrix_3x3(jac, inv_jac)) {
+      // Oops, couldn't invert, so try another guess
+      if (guess<8) {
+        p[0]=p_guess[guess][0];
+        p[1]=p_guess[guess][1];
+        p[2]=p_guess[guess][2];
+        guess++;
+      } else { //... if we've tried them all then continue with best so far.
+        //// If the best_p leads to an un-invertable matrix, then we could be stuck in a loop, 
+        //// if that happens then just stop, so we don't have to go through all 1000 iterations
+        if (stuck) break;
+        stuck=true;
+
+        // continue with best so far...
+        p[0]=best_p[0];
+        p[1]=best_p[1];
+        p[2]=best_p[2];
+      }
+      continue; // back to top of loop with new p
+    }
+
+    // We're not stuck
+    stuck=false;
+
+    // Calculate change in p
+    double delta_p[3];
+    MU_MAT_X_VEC3D(delta_p, inv_jac, f);
+  
+    // Move to next approximation of p
+    MU_SUB_VEC3D(p,p,delta_p);    
+
+    // If we're too far away then try something else
+    // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
+    // TODO: calculate beter limits for p from hex and use here
+    if (guess < 9){
+      if ((p[0]< -5.0) || (p[0]>4.0) ||
+          (p[1]< -5.0) || (p[1]>4.0) ||
+          (p[2]< -5.0) || (p[2]>4.0)) {
+        // Try another guess...
+        if (guess<8) {
+          p[0]=p_guess[guess][0];
+          p[1]=p_guess[guess][1];
+          p[2]=p_guess[guess][2];
+          guess++;
+        } else { //... if we've tried them all then continue with best so far.
+          p[0]=best_p[0];
+          p[1]=best_p[1];
+          p[2]=best_p[2];
+        }
+      }
+    }
+  }
+
+  // Use the best p
+  p[0]=best_p[0];
+  p[1]=best_p[1];
+  p[2]=best_p[2];
+
+  // If we're too far then return false
+  // This tolerence was chosen to be closer than the 1.0E-10 used 
+  // in the is_in_cell checking... 
+  if (best_dist_sq > 1.0E-21) return false;
+
+  // Return success
+  return true;
+}
 
 
 } // namespace
