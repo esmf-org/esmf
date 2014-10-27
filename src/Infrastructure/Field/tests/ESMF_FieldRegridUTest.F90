@@ -41,7 +41,7 @@
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
-
+ 
     ! individual test result code
     integer :: rc = 1
 
@@ -84,7 +84,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+ 
 
      !------------------------------------------------------------------------
       !EX_UTest
@@ -19805,6 +19805,7 @@ return
  	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
+          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
