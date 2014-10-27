@@ -118,6 +118,8 @@ class Field(ma.MaskedArray):
             else:
                 raise MeshLocationNotSupported
 
+            if local_ndbounds:
+                grid_to_field_map = np.array([1], dtype=np.int32)
             # call into ctypes layer
             struct = ESMP_FieldCreate(grid, name, typekind, meshloc,
                                       grid_to_field_map,
@@ -206,17 +208,13 @@ class Field(ma.MaskedArray):
         """
         string = ("Field:\n"
                   "    struct = %r\n"
-                  "    grid_to_field_map = %r\n"
-                  "    ungridded_lower_bound = %r\n"
-                  "    ungridded_upper_bound = %r\n"
+                  "    ndbounds = %r\n"
                   "    staggerloc = %r\n"
                   "    type = %r\n"
                   "    grid = \n%r\n)" 
                   %
                   (self.struct, 
-                   self.grid_to_field_map,
-                   self.ungridded_lower_bound,
-                   self.ungridded_upper_bound,
+                   self.ndbounds,
                    self.staggerloc,
                    self.type,
                    self.grid))
