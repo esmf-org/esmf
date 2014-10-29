@@ -136,7 +136,7 @@ int main(int    argc,
    if (argFlag)
    {
       ESMC_UtilVersionPrint(vFlag, versionFlag, &rc);
-		return 1;
+		return 0;
    }
 
 	if (argc < 4)
