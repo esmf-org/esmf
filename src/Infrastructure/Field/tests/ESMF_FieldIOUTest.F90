@@ -41,7 +41,7 @@ program ESMF_FieldIOUTest
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
   type(ESMF_Field) :: field_w_nohalo
-  type(ESMF_Field) :: field_gw, field_gr
+  type(ESMF_Field) :: field_gw, field_gr, field_gr2, field_gr3
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
@@ -716,6 +716,31 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc==ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 #endif
 !------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field with different name
+  field_gr2=ESMF_FieldCreate(grid_g, arrayspec=arrayspec, &
+           indexflag=ESMF_INDEX_GLOBAL,  &
+           name="temperature_g2",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a gloablly indexed field with different name"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Attempt to read array into Field with wrong field name.
+  call ESMF_FieldRead(field_gr2, file="field_globalindex.nc",        &
+       rc=rc)
+  write(failMsg, *) "Did not fail"
+  write(name, *) "Read globally indexed Field data"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 
 !------------------------------------------------------------------------
