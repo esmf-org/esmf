@@ -25498,6 +25498,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     integer :: staggercnt, decount, xdim, ydim
     integer :: londim, londim1, latdim, latdim1, gridid
     integer :: rankid, fourid, varid1, varid2, varid3, varid4
+    integer :: maskid, areaid
     integer :: elmtsize, count, i, j, n, nextj
     integer, pointer :: minindex(:), maxindex(:)
     logical :: xperiod, yperiod
@@ -25513,6 +25514,8 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     real(ESMF_KIND_R8), pointer::lonArray2d(:,:), latArray2d(:,:)
     real(ESMF_KIND_R8), pointer::scripArray(:)
     real(ESMF_KIND_R8), pointer::scripArray2(:,:)
+    integer(ESMF_KIND_I4), pointer :: fptrMask(:,:), scripArrayMask(:)
+    logical :: hasmask, hasarea
     character(len=256) :: errmsg, units
 
 #ifdef ESMF_NETCDF
@@ -25563,6 +25566,10 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
        units="radians"
     else
        !ESMF_COORDSYS_CART not supported -- errors
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg="- ESMF_ScripOuputGridFile does not support ESMF_COORDSYS_CART coordinates", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+        return
     endif
     if (PetNo==0) then 
       ! Create the GRID file and define dimensions and variables
@@ -25661,6 +25668,33 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
            ESMF_SRCLINE,&
            errmsg,&
            rc)) return
+      endif
+      hasmask = .false.
+      hasarea = .false.
+      ! If the grid has mask and area, output them too
+      call ESMF_GridGetItem(grid, ESMF_GRIDITEM_MASK, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         array=array, rc=localrc)
+      if (localrc == ESMF_SUCCESS) then
+         ncStatus=nf90_def_var(ncid, "grid_imask", NF90_INT, (/nodedimid/), maskid)
+        errmsg = "defining variable grid_imask in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+	hasmask = .true.
+      endif
+      call ESMF_GridGetItem(grid, ESMF_GRIDITEM_AREA, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         array=array, rc=localrc)
+      if (localrc == ESMF_SUCCESS) then
+         ncStatus=nf90_def_var(ncid, "grid_area", NF90_DOUBLE, (/nodedimid/), areaid)
+        errmsg = "defining variable grid_area in "//trim(filename)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+           errmsg,&
+           rc)) return
+	hasarea = .true.
       endif
       ncStatus=nf90_enddef(ncid)
       errmsg = "nf90_enddef in "//trim(filename)
@@ -25944,7 +25978,37 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
               errmsg,&
               rc)) return
 	    deallocate(scripArray2)
-         endif
+         endif !staggercnt > 1
+         if (hasmask) then
+	   call ESMF_GridGetItem(grid1, ESMF_GRIDITEM_MASK, farrayPtr=fptrMask, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	   allocate(scripArrayMask(elmtsize))
+           scripArrayMask=reshape(fptrMask,(/elmtsize/))
+     	   ncStatus=nf90_put_var(ncid, maskid, scripArrayMask)
+           errmsg = "Writing variable grid_imask in "//trim(filename)
+           if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	   deallocate(scripArrayMask)
+ 	 endif
+         if (hasarea) then
+	   call ESMF_GridGetItem(grid1, ESMF_GRIDITEM_AREA, farrayPtr=scripArray2, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              ESMF_CONTEXT, rcToReturn=rc)) return            
+	   allocate(scripArray(elmtsize))
+           scripArray=reshape(fptrMask,(/elmtsize/))
+     	   ncStatus=nf90_put_var(ncid, areaid, scripArray)
+           errmsg = "Writing variable grid_area in "//trim(filename)
+           if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg,&
+              rc)) return
+	   deallocate(scripArray)
+ 	 endif
       endif !PetNo==0
       !call ESMF_ArrayDestroy(lonArray)
       !call ESMF_ArrayDestroy(latArray)
