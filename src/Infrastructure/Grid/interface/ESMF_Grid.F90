@@ -5729,6 +5729,7 @@ end function ESMF_GridCreateFrmNCFileDG
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmNCFile"
 !BOP
+!\label{API:GridCreateFrmNCFile}
 ! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP or GRIDSPEC format grid file
 
 ! !INTERFACE:
