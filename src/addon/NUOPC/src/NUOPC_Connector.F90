@@ -28,8 +28,8 @@ module NUOPC_Connector
   private
   
   public routine_SetServices
-  public type_InternalState, type_InternalStateStruct
-  public label_InternalState
+!  public type_InternalState, type_InternalStateStruct
+!  public label_InternalState
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle
   
@@ -53,6 +53,9 @@ module NUOPC_Connector
   type type_InternalState
     type(type_InternalStateStruct), pointer :: wrap
   end type
+
+  ! Generic methods
+  public NUOPC_ConnectorGet, NUOPC_ConnectorSet
 
   !-----------------------------------------------------------------------------
   contains
@@ -2472,6 +2475,99 @@ print *, "found match:"// &
 
   end subroutine
 
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ConnectorGet - Get parameters from a Connector
+!
+! !INTERFACE:
+  subroutine NUOPC_ConnectorGet(cplcomp, srcFields, dstFields, rh, state, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_FieldBundle), intent(out), optional :: srcFields
+    type(ESMF_FieldBundle), intent(out), optional :: dstFields
+    type(ESMF_RouteHandle), intent(out), optional :: rh
+    type(ESMF_State),       intent(out), optional :: state
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Get parameters from a Connector.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Get the requested members
+    if (present(srcFields)) srcFields = is%wrap%srcFields
+    if (present(dstFields)) dstFields = is%wrap%dstFields
+    if (present(rh))        rh = is%wrap%rh
+    if (present(state))     state = is%wrap%state
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ConnectorSet - Set parameters in a Connector
+!
+! !INTERFACE:
+  subroutine NUOPC_ConnectorSet(cplcomp, srcFields, dstFields, rh, state, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_FieldBundle), intent(in),  optional :: srcFields
+    type(ESMF_FieldBundle), intent(in),  optional :: dstFields
+    type(ESMF_RouteHandle), intent(in),  optional :: rh
+    type(ESMF_State),       intent(in),  optional :: state
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set parameters in a Connector.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Set the requested members
+    if (present(srcFields)) is%wrap%srcFields = srcFields
+    if (present(dstFields)) is%wrap%dstFields = dstFields
+    if (present(rh))        is%wrap%rh = rh
+    if (present(state))     is%wrap%state = state
+    
+  end subroutine
   !-----------------------------------------------------------------------------
 
 end module

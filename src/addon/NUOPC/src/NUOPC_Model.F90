@@ -24,8 +24,8 @@ module NUOPC_Model
     ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-    type_InternalState              => type_InternalState, &
-    type_InternalStateStruct        => type_InternalStateStruct, &
+!    type_InternalState              => type_InternalState, &
+!    type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
@@ -41,9 +41,9 @@ module NUOPC_Model
     routine_Run, &
     routine_SetServices
     
-  public &
-    type_InternalState, &
-    type_InternalStateStruct
+!  public &
+!    type_InternalState, &
+!    type_InternalStateStruct
     
   public &
     label_InternalState, &
