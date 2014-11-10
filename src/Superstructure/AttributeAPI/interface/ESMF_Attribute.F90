@@ -292,7 +292,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -342,7 +342,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -393,7 +393,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -435,7 +435,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -482,7 +482,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -526,7 +526,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
@@ -576,7 +576,7 @@ module ESMF_AttributeMod
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_FieldBundle), intent(inout) :: bundle
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
