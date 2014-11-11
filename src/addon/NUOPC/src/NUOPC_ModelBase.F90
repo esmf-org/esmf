@@ -85,7 +85,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC GridComp Attribute Package to the Model
-    call NUOPC_GridCompAttributeAdd(gcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -449,7 +449,7 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check and set the model clock against the driver clock
-    call NUOPC_GridCompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
+    call NUOPC_CompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

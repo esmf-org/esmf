@@ -152,7 +152,7 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! set the internal clock to the parent clock
-    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    call NUOPC_CompSetClock(gcomp, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

@@ -162,7 +162,7 @@ module NUOPC_Model
       
     if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
-      call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+      call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif

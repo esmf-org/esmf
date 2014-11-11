@@ -40,9 +40,6 @@ module NUOPC
   public NUOPC_ClockPrintCurrTime
   public NUOPC_ClockPrintStartTime
   public NUOPC_ClockPrintStopTime
-  public NUOPC_CplCompAreServicesSet
-  public NUOPC_CplCompAttributeAdd
-  public NUOPC_CplCompAttributeGet
   public NUOPC_FieldAttributeAdd
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
@@ -54,11 +51,6 @@ module NUOPC
   public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
-  public NUOPC_GridCompAreServicesSet  
-  public NUOPC_GridCompAttributeAdd
-  public NUOPC_GridCompCheckSetClock
-  public NUOPC_GridCompSetClock
-  public NUOPC_GridCompSetServices
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
@@ -91,11 +83,17 @@ module NUOPC
   public NUOPC_RunSequenceIterate
   
   ! defined in NUOPC_Comp
+  public NUOPC_CompAreServicesSet  
+  public NUOPC_CompAttributeAdd
+  public NUOPC_CompAttributeGet
+  public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompSearchPhaseMap
+  public NUOPC_CompSetClock
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
+  public NUOPC_CompSetServices
   public NUOPC_CompSpecialize
 
 end module

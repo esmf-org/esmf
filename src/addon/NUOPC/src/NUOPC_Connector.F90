@@ -76,7 +76,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC CplComp Attribute Package to the Connector
-    call NUOPC_CplCompAttributeAdd(cplcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(cplcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
@@ -612,7 +612,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -621,7 +621,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -915,7 +915,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -924,7 +924,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1182,7 +1182,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1191,7 +1191,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1446,7 +1446,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1455,7 +1455,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif

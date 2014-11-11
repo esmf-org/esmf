@@ -155,7 +155,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC GridComp Attribute Package to the Model
-    call NUOPC_GridCompAttributeAdd(gcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -283,7 +283,7 @@ module NUOPC_Driver
       
     if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
-      call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+      call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -454,7 +454,7 @@ module NUOPC_Driver
           return  ! bail out
 
         ! add standard NUOPC GridComp Attribute Package to the modelComp
-        call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
+        call NUOPC_CompAttributeAdd(is%wrap%modelComp(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
@@ -562,7 +562,7 @@ module NUOPC_Driver
         endif
         
         ! add standard NUOPC CplComp Attribute Package to the connectorComp
-        call NUOPC_CplCompAttributeAdd(is%wrap%connectorComp(i,j), rc=rc)
+        call NUOPC_CompAttributeAdd(is%wrap%connectorComp(i,j), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
@@ -702,7 +702,7 @@ module NUOPC_Driver
 
     ! Ingest the InitializePhaseMap
     do i=0, is%wrap%modelCount
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+      if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
         ! setup modelPhaseMap
         call setupModelPhaseMap(i=i, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -710,7 +710,7 @@ module NUOPC_Driver
           return  ! bail out
       endif
       do j=0, is%wrap%modelCount
-        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+        if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
           ! setup modelPhaseMap
           call setupConnectorPhaseMap(i=i, j=j, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1008,7 +1008,7 @@ module NUOPC_Driver
         write (pString, *) phase
         do i=1, is%wrap%modelCount
           write (iString, *) i
-          if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+          if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
             call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1059,7 +1059,7 @@ module NUOPC_Driver
           write (iString, *) i
           do j=0, is%wrap%modelCount
             write (jString, *) j
-            if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+            if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
               if (i==0) then
                 ! connect to the drivers import State
                 imState=importState
@@ -1222,7 +1222,7 @@ module NUOPC_Driver
         ! loop through all the model components
         do i=0, is%wrap%modelCount
           write (iString, *) i
-          if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+          if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
             ! translate NUOPC logical phase to ESMF actual phase
             phase = 0 ! zero is reserved, use it here to see if need to skip
             do k=1, modelPhaseMap(i)%phaseCount
@@ -1272,7 +1272,7 @@ module NUOPC_Driver
           write (iString, *) i
           do j=0, is%wrap%modelCount
             write (jString, *) j
-            if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+            if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
               ! translate NUOPC logical phase to ESMF actual phase
               phase = 0 ! zero is reserved, use it here to see if need to skip
               do k=1, connectorPhaseMap(i,j)%phaseCount
@@ -1346,7 +1346,7 @@ module NUOPC_Driver
           ! loop through all the model components
           do i=0, is%wrap%modelCount
             write (iString, *) i
-            if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+            if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
               
               ! translate NUOPC logical phase to ESMF actual phase
               phase = 0 ! zero is reserved, use it here to see if need to skip
@@ -1396,7 +1396,7 @@ module NUOPC_Driver
               ! else try to Run() all of the Connectors to model i
               cphase = 1  ! for now assume Run() only does phase 1
               do j=0, is%wrap%modelCount
-                if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(j,i))) then
+                if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(j,i))) then
                   write (jString, *) j
                   write (cpString, *) cphase
                   if (j==0) then
@@ -1613,7 +1613,7 @@ module NUOPC_Driver
       if (runElement%j >= 0) then
         ! connector component
         j = runElement%j
-        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+        if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
           write (iString, *) i
           write (jString, *) j
           write (pString, *) phase
@@ -1647,7 +1647,7 @@ module NUOPC_Driver
         endif
       else
         ! model or mediator component
-        if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+        if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
           write (iString, *) i
           write (pString, *) phase
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
@@ -1713,7 +1713,7 @@ module NUOPC_Driver
     
     if (NUOPC_IsCreated(is%wrap%driverClock)) then
       ! check and set the model clock against the driver clock
-      call NUOPC_GridCompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
+      call NUOPC_CompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1772,7 +1772,7 @@ module NUOPC_Driver
       write (iString, *) i
       do j=0, is%wrap%modelCount
         write (jString, *) j
-        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+        if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
           call ESMF_CplCompFinalize(is%wrap%connectorComp(i,j), &
             importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
             clock=internalClock, phase=1, userRc=localrc, rc=rc)
@@ -1794,7 +1794,7 @@ module NUOPC_Driver
     ! Finalize: modelComps
     do i=1, is%wrap%modelCount
       write (iString, *) i
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+      if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
         call ESMF_GridCompFinalize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
           clock=internalClock, phase=1, userRc=localrc, rc=rc)
@@ -1886,7 +1886,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverAddGridComp - Add a GridComp child to a Driver
+! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
@@ -1976,7 +1976,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverAddCplComp - Add a CplComp child to a Driver
+! !IROUTINE: NUOPC_DriverAddComp - Add a CplComp child to a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
@@ -2543,7 +2543,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverGetGridComp - Get a GridComp child from a Driver
+! !IROUTINE: NUOPC_DriverGetComp - Get a GridComp child from a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
@@ -2609,7 +2609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverGetCplComp - Get a CplComp child from a Driver
+! !IROUTINE: NUOPC_DriverGetComp - Get a CplComp child from a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
@@ -2677,7 +2677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverGetAllGridComp - Get all the GridComp child components from a Driver
+! !IROUTINE: NUOPC_DriverGetComp - Get all the GridComp child components from a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
@@ -2753,7 +2753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverGetAllCplComp - Get all the CplComp child components from a Driver
+! !IROUTINE: NUOPC_DriverGetComp - Get all the CplComp child components from a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
