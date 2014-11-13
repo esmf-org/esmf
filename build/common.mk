@@ -1144,6 +1144,10 @@ endif
 ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
 ESMF_CPPFLAGS             += -DESMF_ACC_FRAMEWORK=1
 endif
+ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
+ESMF_CPPFLAGS             += -DESMF_ACC_FRAMEWORK=1
+ESMF_ARDEFAULT 						= xiar
+endif
 ifeq ($(ESMF_ACC_FRAMEWORK),none)
 ESMF_CPPFLAGS             += -DESMF_NO_ACC_FRAMEWORK=1
 endif
