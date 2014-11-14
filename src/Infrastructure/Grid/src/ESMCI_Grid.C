@@ -1309,8 +1309,8 @@ int Grid::commit(
   }
 
   // setup the grid's internal structures 
-  // if localArbIndexCount != 0, it is an arbitrary grid
-  if (proto->localArbIndexCount > 0) {
+  // if localArbIndexCount >= 0, it is an arbitrary grid
+  if (proto->localArbIndexCount >= 0) {
     localrc = construct(this, proto->nameLen, proto->name, proto->typekind, 
 			proto->distgrid, proto->minIndex, proto->maxIndex,
 			proto->localArbIndex, proto->localArbIndexCount,
