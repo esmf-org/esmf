@@ -137,14 +137,4 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
   typedef unsigned long long ESMC_POINTER;
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-  void FTN_X(f_esmf_utilversionprint) (ESMC_Logical *Flag, ESMC_Logical *versionFlag, int *rc);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
 #endif  // ESMC_UTIL_H
