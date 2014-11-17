@@ -75,14 +75,6 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
       gids[2*i + 1] = loc;  //udata.src_pointlist->get_id(loc);
       lids[i] = i;
 
-      //mvr vvvvv
-      int myid=udata.dst_pointlist->get_id(loc);
-      int num_procs_i_think=Par::Size();
-      int rank = Par::Rank(); 
-      printf("mvrs: num_procs= %d  rank= %d  lid= %d  gid= %d\n",num_procs_i_think,rank,lids[i],myid);
-      fflush(stdout);
-
-
       i++;
     }
   }
@@ -104,13 +96,6 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
       gids[2*i + 1] = loc;  //udata.dst_pointlist->get_id(loc);
 
       lids[i] = i;
-
-      //mvr vvvvv
-      int myid=udata.dst_pointlist->get_id(loc);
-      int num_procs_i_think=Par::Size();
-      int rank = Par::Rank(); 
-      printf("mvrd: num_procs= %d  rank= %d  lid= %d  gid= %d\n",num_procs_i_think,rank,lids[i],myid);
-      fflush(stdout);
 
       i++;
     }
@@ -642,19 +627,6 @@ void GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport,
   }
 
 
-  printf("mvrs: rank= %d  num_snd_procs= %d\n",myrank,num_snd_procs);
-  fflush(stdout);
-  for (int i=0; i<num_snd_procs; i++) {
-    printf("mvrs: rank= %d  snd_pets[%d]= %d  snd_sizes[%d]= %d  snd_counts[%d]= %d  ",myrank,i,snd_pets[i],i,snd_sizes[i],i,snd_counts[i]);
-    fflush(stdout);
-    for(int j=0; j<snd_counts[i]; j++) 
-      printf("mvr2[%d][%d]= %d  ",i,j,mvr2[i][j]);
-    printf("\n");
-    fflush(stdout);
-  }
-
-
-
   // Setup pattern and sizes
   if (num_snd_procs >0) {
     comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
@@ -682,17 +654,11 @@ void GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport,
       // pack buf
       double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
       buf[0]=pnt[0];
-      printf("mvrs: rank= %d  i= %d  j= %d  buf[0]= %8.8f\n",myrank,i,j,buf[0]);
-      fflush(stdout);
       buf[1]=pnt[1];
-      printf("mvrs: rank= %d  i= %d  j= %d  buf[1]= %8.8f\n",myrank,i,j,buf[1]);
-      fflush(stdout);
       if (sdim < 3)
 	buf[2]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
       else {
         buf[2]=pnt[2];
-	printf("mvrs: rank= %d  i= %d  j= %d  buf[2]= %8.8f\n",myrank,i,j,buf[2]);
-	fflush(stdout);
         buf[3]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
       }
 
@@ -713,8 +679,6 @@ void GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport,
   }
 
   int plist_rend_size=srcplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
-  printf("mvrs: rank= %d  plist_rend_size= %d\n",myrank,plist_rend_size);
-  fflush(stdout);
 
   if (plist_rend_size > 0) {
 
@@ -749,22 +713,12 @@ void GeomRend::build_src_mig_plist_try(ZoltanUD &zud, int numExport,
 	int mvr_id;
 	
 	pnt[0]=buf[0];
-	printf("mvrs: received?: rank= %d  pnt[0]= %8.8f\n",myrank,pnt[0]);
-	fflush(stdout);
 	pnt[1]=buf[1];
-	printf("mvrs: received?: rank= %d  pnt[1]= %8.8f\n",myrank,pnt[1]);
-	fflush(stdout);
 	if (sdim < 3) {
 	  mvr_id=(int)buf[2];
-	  printf("mvrs: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
-	  fflush(stdout);
 	} else {
 	  pnt[2]=buf[2];
-	  printf("mvrs: received?: rank= %d  pnt[2]= %8.8f\n",myrank,pnt[2]);
-	  fflush(stdout);
 	  mvr_id=(int)buf[3];
-	  printf("mvrs: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
-	  fflush(stdout);
 	}
 
 	srcplist_rend->add(mvr_id,pnt);
@@ -909,19 +863,6 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
   }
 
 
-  printf("mvrd: rank= %d  num_snd_procs= %d\n",myrank,num_snd_procs);
-  fflush(stdout);
-  for (int i=0; i<num_snd_procs; i++) {
-    printf("mvrd: rank= %d  snd_pets[%d]= %d  snd_sizes[%d]= %d  snd_counts[%d]= %d  ",myrank,i,snd_pets[i],i,snd_sizes[i],i,snd_counts[i]);
-    fflush(stdout);
-    for(int j=0; j<snd_counts[i]; j++) 
-      printf("mvr2[%d][%d]= %d  ",i,j,mvr2[i][j]);
-    printf("\n");
-    fflush(stdout);
-  }
-
-
-
   // Setup pattern and sizes
   if (num_snd_procs >0) {
     comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
@@ -949,17 +890,11 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
       // pack buf
       double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
       buf[0]=pnt[0];
-      printf("mvrd: rank= %d  i= %d  j= %d  buf[0]= %8.8f\n",myrank,i,j,buf[0]);
-      fflush(stdout);
       buf[1]=pnt[1];
-      printf("mvrd: rank= %d  i= %d  j= %d  buf[1]= %8.8f\n",myrank,i,j,buf[1]);
-      fflush(stdout);
       if (sdim < 3)
 	buf[2]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
       else {
         buf[2]=pnt[2];
-	printf("mvrd: rank= %d  i= %d  j= %d  buf[2]= %8.8f\n",myrank,i,j,buf[2]);
-	fflush(stdout);
         buf[3]=mvr_id;  //mvr passing an int through a double...inefficient but ok?
       }
 
@@ -980,8 +915,6 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
   }
 
   int plist_rend_size=dstplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
-  printf("mvrd: rank= %d  plist_rend_size= %d\n",myrank,plist_rend_size);
-  fflush(stdout);
 
   if (plist_rend_size > 0) {
 
@@ -1016,22 +949,12 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 	int mvr_id;
 	
 	pnt[0]=buf[0];
-	printf("mvrd: received?: rank= %d  pnt[0]= %8.8f\n",myrank,pnt[0]);
-	fflush(stdout);
 	pnt[1]=buf[1];
-	printf("mvrd: received?: rank= %d  pnt[1]= %8.8f\n",myrank,pnt[1]);
-	fflush(stdout);
 	if (sdim < 3) {
 	  mvr_id=(int)buf[2];
-	  printf("mvrd: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
-	  fflush(stdout);
 	} else {
 	  pnt[2]=buf[2];
-	  printf("mvrd: received?: rank= %d  pnt[2]= %8.8f\n",myrank,pnt[2]);
-	  fflush(stdout);
 	  mvr_id=(int)buf[3];
-	  printf("mvrd: received?: rank= %d  mvr_id= %d\n",myrank,mvr_id);
-	  fflush(stdout);
 	}
 
 	dstplist_rend->add(mvr_id,pnt);
@@ -1493,11 +1416,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   else
     build_dest(cmin, cmax, zud);
 
-  printf("mvr: sdim= %d\n",sdim);
-  printf("mvr: cmin= %8.8f  %8.8f  %8.8f\n",cmin[0],cmin[1],cmin[2]);
-  printf("mvr: cmax= %8.8f  %8.8f  %8.8f\n",cmax[0],cmax[1],cmax[2]);
-  fflush(stdout);
-
   BBox dstBound = BBoxParUnion(BBox(sdim, cmin, cmax));
 
   if (srcplist == NULL)
@@ -1543,18 +1461,15 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     &numImport, &importGlobalids, &importLocalids, &importProcs, &importToPart,
     &numExport, &exportGlobalids, &exportLocalids, &exportProcs, &exportToPart);
 
-  printf("mvr: after: rank= %d  numImport= %d\n",rank,numImport);
-  printf("mvr: after: rank= %d  numExport= %d\n",rank,numExport);
-  for (int xx=0; xx<numImport; xx++) {
-    printf("mvr: after: rank= %d  importGIDflag?= %d  importGID?= %d  importLocalids[]= %d  importProcs[]= %d\n",rank,importGlobalids[xx*2],importGlobalids[xx*2+1],importLocalids[xx],importProcs[xx]);
-  }
-  for (int xx=0; xx<numExport; xx++) {
-    printf("mvr: after: rank= %d  exportGIDflag?= %d  exportGID?= %d  exportLocalids[]= %d  exportProcs[]= %d\n",rank,exportGlobalids[xx*2],exportGlobalids[xx*2+1],exportLocalids[xx],exportProcs[xx]);
-  }
+  //  printf("mvr: after: rank= %d  numImport= %d\n",rank,numImport);
+  //printf("mvr: after: rank= %d  numExport= %d\n",rank,numExport);
+  //for (int xx=0; xx<numImport; xx++) {
+  //printf("mvr: after: rank= %d  importGIDflag?= %d  importGID?= %d  importLocalids[]= %d  importProcs[]= %d\n",rank,importGlobalids[xx*2],importGlobalids[xx*2+1],importLocalids[xx],importProcs[xx]);
+  //}
+  //for (int xx=0; xx<numExport; xx++) {
+  //printf("mvr: after: rank= %d  exportGIDflag?= %d  exportGID?= %d  exportLocalids[]= %d  exportProcs[]= %d\n",rank,exportGlobalids[xx*2],exportGlobalids[xx*2+1],exportLocalids[xx],exportProcs[xx]);
+  //}
 
-
-  printf("mvr: hello1\n");
-  fflush(stdout);
 
   // Build up the source migration comm using the RCB cuts
   if (zud.src_pointlist == NULL)
@@ -1563,27 +1478,19 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     build_src_mig_plist_try(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
   }
 
-  printf("mvr: hello2\n");
-  fflush(stdout);
   // Build the destination migration
   if (zud.dst_pointlist == NULL)
     build_dst_mig(zz, zud, numExport, exportLocalids, exportGlobalids, exportProcs);
   else
     build_dst_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
 
-  printf("mvr: hello3\n");
-  fflush(stdout);
   // Ok.  Done with zud lists, so free them in the intests of memory
   std::vector<MeshObj*>().swap(zud.srcObj);
   std::vector<MeshObj*>().swap(zud.dstObj);
   
-  printf("mvr: hello4\n");
-  fflush(stdout);
   // Set up the rendezvous mesh metadata
   prep_meshes();
   
-  printf("mvr: hello5\n");
-  fflush(stdout);
   // Register the necessary fields (could put this in a function, but passing the args
   // would be a pain)
   for (UInt i = 0; i < nsrcF; i++) {
@@ -1592,8 +1499,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
                    fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
   }
 
-  printf("mvr: hello6\n");
-  fflush(stdout);
   // Slightly different for destination; use interp field if not 'conserv'
   for (UInt i = 0; i < ndstF; i++) {
     MEField<> *fptr = dstF[i];
@@ -1607,39 +1512,25 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     }
   }
 
-  printf("mvr: hello7\n");
-  fflush(stdout);
   // Now migrate the meshes.
   migrate_meshes();
   
-  printf("mvr: hello8\n");
-  fflush(stdout);
   //WriteMesh(srcmesh_rend, "srcrend");
 
-  printf("mvr: hello9\n");
-  fflush(stdout);
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be
   // used until destruction.
   if (dstplist == NULL)    //mvr?
     dstComm.Transpose();
   
-  printf("mvr: hello10\n");
-  fflush(stdout);
   // Release zoltan memory
   Zoltan_LB_Free_Part(&importGlobalids, &importLocalids,
                       &importProcs, &importToPart);
-  printf("mvr: hello11\n");
-  fflush(stdout);
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
 
-  printf("mvr: hello12\n");
-  fflush(stdout);
   if(free_zz){
     Zoltan_Destroy(&zz);
   }
-  printf("mvr: hello13\n");
-  fflush(stdout);
 }
 
 } // namespace ESMCI

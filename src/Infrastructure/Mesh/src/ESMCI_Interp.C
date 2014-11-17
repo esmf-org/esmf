@@ -1520,19 +1520,12 @@ zz(0),
 mvr_interp(mvr_imethod)
 {
 
+  printf("mvr: hello\n");
+  fflush(stdout);
+
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
 
-  printf("mvr: search_obj_type= %d\n",search_obj_type);
-  if (search_obj_type == MeshObj::NODE)
-    printf("mvr: which equates to NODE\n");
-  else if (search_obj_type == MeshObj::ELEMENT)
-    printf("mvr: which equates to ELEMENT\n");
-  else
-    printf("mvr: which equates to ???\n");
-  fflush(stdout);
-  
-  
   //mvr dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
 
   if (srcmesh != NULL) 
@@ -1545,8 +1538,6 @@ mvr_interp(mvr_imethod)
   else if (mvr_interp == Interp::INTERP_CONSERVE) has_cnsrv = true;
   else if (mvr_interp == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
   else if (mvr_interp == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
-  if (dstpointlist == NULL && dstmesh == NULL) printf("mvr: oh dear, both dst are NULL\n");
-  if (srcpointlist == NULL && srcmesh == NULL) printf("mvr: oh dear, both src are NULL\n");
 
   if (dstmesh != NULL) {
     //must get dst info from mesh
@@ -1564,29 +1555,17 @@ mvr_interp(mvr_imethod)
        //std::cout << "Building rendezvous..." << std::endl;
 
 
-    printf("mvr: before grend.build\n");
-    fflush(stdout);
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
-    printf("mvr: after grend.build\n");
-    fflush(stdout);
 
     if (has_nearest_dst_to_src) {
       ParSearchNearestDstToSrc(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
     } else if (has_nearest_src_to_dst) {
-      printf("mvr: before parsearchnearestsrctodst\n");
-      fflush(stdout);
       //mvr ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
       ParSearchNearestSrcToDst_w_plist(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres);
-      printf("mvr: after parsearchnearestsrctodst\n");
-      fflush(stdout);
     } else {
       if (search_obj_type == MeshObj::NODE) {
 	//mvr        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
-	printf("mvr: before octsearch\n");
-	fflush(stdout);
 	OctSearch_w_dst_pl(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
-	printf("mvr: after octsearch\n");
-	fflush(stdout);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_)
@@ -1925,8 +1904,6 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
 
   //mvr try vvvv
   PointList &plist_rend = grend.GetDstPlistRend();
-  printf("mvr: rank= %d  rend(0)= %d\n",Par::Rank(),plist_rend.get_id(0));
-  fflush(stdout);
 
   if (mvr_interp == INTERP_STD) {
       mat_point_serial_transfer(*sFR, sres, iw, &plist_rend);

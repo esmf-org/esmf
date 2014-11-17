@@ -34,6 +34,8 @@
 
     implicit none
 
+    integer :: virtMemPet, physMemPet
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
@@ -64,11 +66,18 @@
       ! initialize 
       rc=ESMF_SUCCESS
       
+!      call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
+!      call ESMF_VMLogMemInfo("mvrbefore",rc)
+
       ! do test
       call test_regrid180vs360(rc)
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!      call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
+!      call ESMF_VMLogMemInfo("blahblahblah",rc)
+!      stop
 
 
      !------------------------------------------------------------------------
@@ -4217,7 +4226,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -4802,7 +4812,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -5359,7 +5370,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -6104,7 +6116,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -10261,7 +10274,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -13473,7 +13487,8 @@ write(*,*) "LOCALRC=",localrc
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -14728,7 +14743,8 @@ return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -16172,7 +16188,8 @@ return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -16979,7 +16996,8 @@ return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -18081,7 +18099,8 @@ return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 

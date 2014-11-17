@@ -240,6 +240,9 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
 
+
+
+
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
       if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, wts, &regridConserve, 
@@ -329,8 +332,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 	if (!all_mesh_node_ids_in_wmat(dstpointlist, wts, &missing_id)) {
           int localrc;
           char msg[1024];
-	  printf("mvr: yup, right here\n");
-	  fflush(stdout);
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
             "source cell",missing_id);
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
@@ -947,9 +948,6 @@ bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id)
   int id;
   int curr_num_pts = pointlist->get_curr_num_pts();
 
-  printf("mvr: all_mesh_node_ids_in_wmat:  rank= %d  curr_num_pts= %d\n",Par::Rank(),curr_num_pts);
-  fflush(stdout);
-
   for (int i=0; i<curr_num_pts; i++) {
 
     // Skip non local nodes
@@ -957,9 +955,6 @@ bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id)
 
     // get node id
     id = pointlist->get_id(i);
-
-    printf("mvr: all_mesh_node_ids_in_wmat:  rank= %d  id(%d)= %d\n",Par::Rank(),i,id);
-    fflush(stdout);
 
     // get weight id
     int wt_id=wi->first.id;

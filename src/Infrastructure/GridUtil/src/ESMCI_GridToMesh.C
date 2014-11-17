@@ -990,7 +990,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
   // #ifdef PNTLIST
 
   // Convert Grid To PointList
-  // TODO: pnt_list should only contain non-masked points.
   void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToPointList()" 
