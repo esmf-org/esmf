@@ -38,7 +38,7 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p, grid_tripole, grid_from_file;
+  ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_tripole, grid_from_file;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -206,26 +206,6 @@ int main(void){
   }
 
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridCreate1PeriDim
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Create a Grid
-  maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = 12;
-  maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
-
-  strcpy(name, "GridCreate");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, &coordsys, &typekind, NULL, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  // free memory
-  free(maxIndex);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -435,6 +415,42 @@ int main(void){
   //----------------------------------------------------------------------------
 
 #endif
+  //----------------------------------------------------------------------------
+  //  GridCreate1PeriDim (no periodicDim specified)
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create a Grid
+  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  maxIndex = (int *)malloc(dimcount*sizeof(int));
+  maxIndex[0] = 12;
+  maxIndex[1] = 20;
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+
+  strcpy(name, "GridCreate");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &coordsys, &typekind, NULL, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridCreate1PeriDim (periodicDim = 1)
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create a Grid
+  strcpy(name, "GridCreate_periodicDim_1");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int periodicDim = 1;
+  grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &coordsys,
+                                          &typekind, NULL, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  free(maxIndex);
+  //----------------------------------------------------------------------------
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create grid object from SCRIP file with both regDecomp and decompflag
