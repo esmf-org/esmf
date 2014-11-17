@@ -53,7 +53,7 @@ deg2rad = 3.14159/180
 
 for timestep in range(time):
     for level in range(levels):
-        srcfield.data[:,:,level,timestep]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
+        srcfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
                                  (gridXCoord*deg2rad)*(gridYCoord*deg2rad) + (gridYCoord*deg2rad)**2
 
 # get the coordinate pointers and set the coordinates
@@ -63,7 +63,7 @@ gridYCoord = xctfield.grid.get_coords(1, ESMF.StaggerLoc.CENTER)
 
 for timestep in range(time):
     for level in range(levels):
-        xctfield.data[:,:,level,timestep]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
+        xctfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
                                  (gridXCoord*deg2rad)*(gridYCoord*deg2rad) + (gridYCoord*deg2rad)**2
 
 dstfield[...] = 1e20
@@ -88,15 +88,15 @@ srcmass = 0
 dstmass = 0
 for timestep in range(time):
     for level in range(levels):
-        srcmass += numpy.sum(srcareafield.data*srcfracfield.data*srcfield[:,:,level,timestep].data)
-        dstmass += numpy.sum(dstareafield.data*dstfield[:,:,level,timestep].data)
+        srcmass += numpy.sum(srcareafield.data*srcfracfield.data*srcfield[level,timestep,:,:].data)
+        dstmass += numpy.sum(dstareafield.data*dstfield[level,timestep,:,:].data)
 
 relerr = 0
 for timestep in range(time):
     for level in range(levels):
-        relerr += numpy.sum(numpy.abs(dstfield[:,:,level, timestep].data / \
-                                      dstfracfield.data - xctfield[:,:,level,timestep].data) / \
-                                      numpy.abs(xctfield[:,:,level,timestep].data))
+        relerr += numpy.sum(numpy.abs(dstfield[level, timestep,:,:].data / \
+                                      dstfracfield.data - xctfield[level,timestep,:,:].data) / \
+                                      numpy.abs(xctfield[level,timestep,:,:].data))
 
 from operator import mul
 relerr = relerr / reduce(mul, xctfield.shape)

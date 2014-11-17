@@ -88,10 +88,11 @@ class Field(ma.MaskedArray):
             local_ndbounds = [ndbounds]
 
         if local_ndbounds:
+            xd = len(local_ndbounds)
             lb = [1 for a in range(len(local_ndbounds))]
             ungridded_lower_bound = np.array(lb, dtype=np.int32)
             ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
-            grid_to_field_map = np.array([1, 2], dtype=np.int32)
+            grid_to_field_map = np.array([xd+1, xd+2], dtype=np.int32)
             rank += len(local_ndbounds)
 
         data = None
@@ -196,9 +197,10 @@ class Field(ma.MaskedArray):
             None \n
         """
 
-        if self._finalized is False:
-            ESMP_FieldDestroy(self)
-            self._finalized = True
+        if hasattr(self, '_finalized'):
+            if self._finalized is False:
+                ESMP_FieldDestroy(self)
+                self._finalized = True
 
 
 
