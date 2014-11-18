@@ -84,6 +84,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcreate1peridim"
   subroutine f_esmf_gridcreate1peridim(gridp, maxIndex, len1, &
+                                        periodicDim, pdpresent, &
                                         coordSys, cspresent, &
                                         coordTypeKind, ctkpresent, &
                                         poleKind, pkpresent, len2, rc)
@@ -98,7 +99,9 @@
     type(ESMF_Pointer)             :: gridp
     integer, intent(in)            :: len1, len2
     integer                        :: maxIndex(1:len1)
-    integer                        :: cspresent, ctkpresent, pkpresent
+    integer                        :: periodicDim
+    integer                        :: pdpresent, cspresent
+    integer                        :: ctkpresent, pkpresent
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
     type(ESMF_PoleKind_Flag)       :: poleKind(1:len2)
@@ -110,7 +113,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     ! handle the optional arguments
-    if (pkpresent == 0) then
+    if ((pkpresent == 0) .and. (pdpresent == 0)) then
       if (cspresent == 0 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
@@ -128,8 +131,8 @@
                                         coordTypeKind=coordTypeKind, &
                                         indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
       endif
-    elseif (pkpresent == 1) then
-      if (cspresent == 0 .and. ctkpresent == 0) then
+    elseif ((pkpresent == 1) .and. (pdpresent == 0)) then
+      if (cspresent == 0 .and. ctkpresent == 0) then 
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         polekindflag=poleKind, &
                                         indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
@@ -145,6 +148,54 @@
                                         indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        polekindflag=poleKind, &
+                                        coordSys=coordSys, &
+                                        coordTypeKind=coordTypeKind, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      endif
+    elseif ((pkpresent == 0) .and. (pdpresent == 1)) then
+      if (cspresent == 0 .and. ctkpresent == 0) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 0 .and. ctkpresent == 1) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        coordTypeKind=coordTypeKind, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 1 .and. ctkpresent == 0) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        coordSys=coordSys, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 1 .and. ctkpresent == 1) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        coordSys=coordSys, &
+                                        coordTypeKind=coordTypeKind, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      endif
+    elseif ((pkpresent == 1) .and. (pdpresent == 1)) then
+      if (cspresent == 0 .and. ctkpresent == 0) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        polekindflag=poleKind, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 0 .and. ctkpresent == 1) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        polekindflag=poleKind, &
+                                        coordTypeKind=coordTypeKind, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 1 .and. ctkpresent == 0) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
+                                        polekindflag=poleKind, &
+                                        coordSys=coordSys, &
+                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+      elseif (cspresent == 1 .and. ctkpresent == 1) then
+        grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                        periodicDim=periodicDim, &
                                         polekindflag=poleKind, &
                                         coordSys=coordSys, &
                                         coordTypeKind=coordTypeKind, &

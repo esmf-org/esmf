@@ -247,6 +247,7 @@ template <class TYPE>
                                ESMC_TypeKind_Flag *coordTypeKind, 
                                int *rc);
   static Grid* create1peridim(ESMC_InterfaceInt *maxIndex, 
+                              int *periodicDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 
