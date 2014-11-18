@@ -21,6 +21,7 @@ class Grid(object):
     @initialize
     def __init__(self, max_index=None,
                  num_peri_dims=0,
+                 periodic_dim=None,
                  coord_sys=None,
                  coord_typekind=None,
                  staggerloc=None,
@@ -47,6 +48,7 @@ class Grid(object):
                     shape: [number of dimensions, 1] \n
             Optional arguments for creating a grid in memory: \n
                 num_peri_dims: the number of periodic dimensions (0 or 1). \n
+                periodic_dim: the periodic dimension (defaults to 1). \n
                 coord_sys: the coordinates system for the Grid. \n
                     Argument values are:\n
                         CoordSys.CART\n
@@ -173,6 +175,8 @@ class Grid(object):
                 warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
                 warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
+            if periodic_dim is not 0:
+                warnings.warn("periodic_dim is only used for grids created in memory, this argument will be ignored.")
             if coord_sys is not None:
                 warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
             if coord_typekind is not None:
@@ -188,6 +192,7 @@ class Grid(object):
         self.areatype = TypeKind.R8
         self.rank = None
         self.num_peri_dims = num_peri_dims
+        self.periodic_dim = periodic_dim
         self.coord_sys = coord_sys
         self.ndims = None # Applies to Gridspec only
 
@@ -260,6 +265,7 @@ class Grid(object):
                                                        coordTypeKind=coord_typekind)
             elif (self.num_peri_dims == 1):
                 self.struct = ESMP_GridCreate1PeriDim(self.max_index, 
+                                                      periodicDim=periodic_dim,
                                                       coordSys=coord_sys,
                                                       coordTypeKind=coord_typekind)
             else:
