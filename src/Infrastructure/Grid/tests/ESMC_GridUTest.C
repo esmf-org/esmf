@@ -141,8 +141,8 @@ int main(void){
   polekind[0] = ESMC_POLEKIND_MONOPOLE;
   polekind[1] = ESMC_POLEKIND_BIPOLE;
   ESMC_PoleKind_Flag *pkptr = polekind;
-  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, &coordsys, &typekind, 
-                                         pkptr, &rc);
+  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &coordsys, 
+                                         &typekind, pkptr, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);
