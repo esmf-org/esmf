@@ -92,7 +92,8 @@ class Field(ma.MaskedArray):
             lb = [1 for a in range(len(local_ndbounds))]
             ungridded_lower_bound = np.array(lb, dtype=np.int32)
             ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
-            grid_to_field_map = np.array([xd+1, xd+2], dtype=np.int32)
+            # set this to put gridded dimension in the last available dimensions of the field, dependent on grid rank
+            grid_to_field_map = np.array([i+xd+1 for i in range(grid.rank)], dtype=np.int32)
             rank += len(local_ndbounds)
 
         data = None
@@ -104,11 +105,28 @@ class Field(ma.MaskedArray):
                                           ungridded_lower_bound,
                                           ungridded_upper_bound)
 
-            # set the mask
+            # set the grid mask
             if (grid.item_done[staggerloc][GridItem.MASK]):
                 lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
-                if (list(grid.mask[staggerloc].shape) == list(ubounds-lbounds)):
-                    mask = grid.mask[staggerloc]
+                # if there are extra field dimensions, find out how many
+                if ungridded_lower_bound is not None:
+                    xd = len(ungridded_lower_bound)
+                else:
+                    xd = 0
+                # verify that grid mask is the same shape as the extra field dimensions
+                if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd+rank]-lbounds[xd:xd+rank])):
+                    # initialize the mask to all unmasked values
+                    mask = np.ones(ubounds-lbounds, dtype=np.int32)
+                    # reset the mask with integer values according to what is in the grid mask,
+                    # taking care to propagate masked values through the extra field dimensions
+                    if grid.rank == 2:
+                        mask[...,:,:] = grid.mask[staggerloc]
+                    elif grid.rank == 3:
+                        mask[...,:,:,:] = grid.mask[staggerloc]
+                    else:
+                        raise IndexError("Grid with rank less than 2 or greater than 3 is not allowed")
+                else:
+                    raise IndexError("grid mask bounds do not match field bounds")
 
         elif isinstance(grid, Mesh):
             # deal with the wacky ESMF node/element convention
@@ -132,7 +150,7 @@ class Field(ma.MaskedArray):
         else:
             raise FieldDOError
      
-        #  set field_mask based on the grid mask and the mask_values input argument
+        #  set field_mask to True or False values based on the integer valued grid mask
         field_mask = False
         if mask is not None and mask_values is not None:
             field_mask = [True if x in mask_values else False for x in mask.flatten().tolist()]

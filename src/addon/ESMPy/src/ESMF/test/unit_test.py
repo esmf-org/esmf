@@ -157,8 +157,6 @@ def grid_coords_test():
                 print "FAIL - gridYCoord[,"+str(i)+","+str(j)+"] = "+\
                       str(gridYCoord_check[i,j])
 
-    #grid._write("gridcoords2DCart")
-
     # return correct from unit test
     return correct
 
@@ -226,8 +224,6 @@ def grid_coords_3D_test():
                           str(j)+","+str(k)+"] = "+\
                           str(gridZCoord_check[i, j, k])
 
-    #grid._write("gridcoord3DCart")
-
     # return correct from unit test
     return correct
 
@@ -285,8 +281,24 @@ def field_mask_test():
      
     if(not field.mask[2][0]):
         correct = False
-        print field.mask
         raise ValueError("field mask is incorrect")
+
+    # return True from unit test
+    return correct
+
+def field_mask_with_xd_test():
+
+    correct = True
+
+    grid = Grid(np.array([10,10], dtype=np.int32), coord_sys=CoordSys.CART)
+
+    mask = grid.add_item(GridItem.MASK)
+    mask[:] = 1
+    mask[0, 1] = 0
+
+    field = Field(grid, "name", ndbounds=[2, 5], mask_values=[0])
+
+    assert (np.all(field.mask[:, :, 0, 1]))
 
     # return True from unit test
     return correct
@@ -302,16 +314,64 @@ def grid_mask_3D_test():
 
     # Add Mask
     mask = grid.add_item(GridItem.MASK)
+    mask[...] = 1
+    mask[:,2] = 0
 
-    [x, y, z] = [0, 1, 2]
-    for i in range(mask.shape[x]):
-        if (i == 2.0):
-            mask[i, :, :] = 1
-        else:
-            mask[i, :, :] = 0;
+    assert(not np.all(mask[:,2]))
 
     # return True from unit test
     return True
+
+def field_mask_3D_test():
+
+    correct = True
+
+    max_index = np.array([10,20,30])
+
+    grid = Grid(max_index)
+
+    # Add coordinates
+    grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+
+    # Add Mask
+    mask = grid.add_item(GridItem.MASK)
+
+    [x, y, z] = [0, 1, 2]
+    for i in xrange(mask.shape[x]):
+        for j in xrange(mask.shape[y]):
+            for k in xrange(mask.shape[z]):
+                if (i == 2.0):
+                    mask[i, j, k] = 2
+                elif (j == 3.0):
+                    mask[i, j, k] = 3
+                else:
+                    mask[i, j, k] = 0;
+
+    # create a Field on the Grid, should inherit the mask
+    field = Field(grid, "FIELD!", mask_values = [2, 3])
+
+    assert(np.all(field.mask[2,:,:]))
+    assert(np.all(field.mask[:,3,:]))
+
+    # return True from unit test
+    return correct
+
+def field_mask_3D_with_xd_test():
+
+    correct = True
+
+    grid = Grid(np.array([10,10,10], dtype=np.int32), coord_sys=CoordSys.CART)
+
+    mask = grid.add_item(GridItem.MASK)
+    mask[:] = 1
+    mask[0, 1, 0] = 0
+
+    field = Field(grid, "name", ndbounds=[2, 5], mask_values=[0])
+
+    assert (np.all(field.mask[:, :, 0, 1, 0]))
+
+    # return True from unit test
+    return correct
 
 def grid_area_test():
 
@@ -1557,7 +1617,10 @@ def main():
     (4.3,'Grid 3D coordinates') : grid_coords_3D_test,
     (4.4,'Grid masking') : grid_mask_test,
     (4.45,'Field masking') : field_mask_test,
+    (4.46,'Field masking with extra dimensions') : field_mask_with_xd_test,
     (4.5,'Grid 3D masking') : grid_mask_3D_test,
+    (4.55,'Field 3D masking') : field_mask_3D_test,
+    (4.56,'Field 3D masking with extra dimensions') : field_mask_3D_with_xd_test,
     (4.6,'Grid area') : grid_area_test,
     (4.7,'Grid 3D area') : grid_area_3D_test,
     (4.8,'Grid create from file - SCRIP') : grid_create_from_file_scrip_test,
