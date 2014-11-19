@@ -2835,7 +2835,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        
        ! construct temporary 2D Arrays and fill with data if necessary
        do k=1, dimCount*nStaggers
-          call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=dimCount, rc=localrc)          
+          call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=dimCount, &
+            localDeCount=localDeCount, rc=localrc)          
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (rank==dimCount) then
@@ -2856,24 +2857,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArrayGet(srcA(k), farrayPtr=farrayPtr, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (localDeCount/=0) then
+              call ESMF_ArrayGet(srcA(k), farrayPtr=farrayPtr, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArrayGet(srcA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+              call ESMF_ArrayGet(srcA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            if (atodMap(1)==1) then
-              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
-                do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
-                  farrayPtr2D(i,j) = farrayPtr(i)
+              if (atodMap(1)==1) then
+                do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                    farrayPtr2D(i,j) = farrayPtr(i)
+                  enddo
                 enddo
-              enddo
-            else
-              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
-                do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
-                  farrayPtr2D(i,j) = farrayPtr(j)
+              else
+                do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                    farrayPtr2D(i,j) = farrayPtr(j)
+                  enddo
                 enddo
-              enddo
+              endif
             endif
           endif
        enddo
