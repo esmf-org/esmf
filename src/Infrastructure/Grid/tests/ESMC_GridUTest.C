@@ -96,6 +96,10 @@ int main(void){
   grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &coordsys,
                                           &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_1p_pdim1);
+  }
   free(maxIndex);
   //----------------------------------------------------------------------------
 
