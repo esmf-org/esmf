@@ -514,6 +514,14 @@ int main(void){
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_from_file);
+  }
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+  //----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
@@ -865,15 +873,6 @@ int main(void){
   //----------------------------------------------------------------------------
 
 #endif
-
-  if (rc == ESMF_SUCCESS) {
-    rc = ESMC_GridDestroy(&grid_from_file);
-  }
-#else
-  // No NetCDF, so just PASS this test.
-  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
-#endif
-  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
