@@ -40,16 +40,16 @@ if ESMF.local_pet() == 0:
 # create a grid
 srcgrid = grid_create_3d([0,0,0,21,21,21], [0,0,0,21,21,21])
 dstgrid = grid_create_3d([0.5,0.5,0.5,19.5,19.5,19.5], \
-                         [0.5,0.5,0.5,19.5,19.5,19.5], domask=True)
+                         [0.5,0.5,0.5,19.5,19.5,19.5])
 
 # create Field objects on the Meshes
-srcfield = ESMF.Field(srcgrid, 'srcfield')
-srcareafield = ESMF.Field(srcgrid, 'srcareafield')
-srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
-dstfield = ESMF.Field(dstgrid, 'dstfield', mask_values=[0])
-dstareafield = ESMF.Field(dstgrid, 'dstareafield')
-dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
-exactfield = ESMF.Field(dstgrid, 'exactfield', mask_values=[0])
+srcfield = ESMF.NewField(srcgrid, 'srcfield')
+srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
+srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
+dstfield = ESMF.NewField(dstgrid, 'dstfield')
+dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
+dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
+exactfield = ESMF.NewField(dstgrid, 'exactfield')
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_grid_3d(srcfield)
@@ -57,7 +57,6 @@ exactfield = initialize_field_grid_3d(exactfield)
 
 # run the ESMF regridding
 regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                            dst_mask_values=np.array([0]), \
                             regrid_method=ESMF.RegridMethod.CONSERVE, \
                             unmapped_action=ESMF.UnmappedAction.ERROR, \
                             src_frac_field=srcfracfield, \

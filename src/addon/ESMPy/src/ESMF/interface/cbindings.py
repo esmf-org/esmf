@@ -308,7 +308,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, coordSys=None, coordType
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), 
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
                                                periodicDim, coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))

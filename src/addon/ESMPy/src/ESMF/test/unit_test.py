@@ -282,7 +282,7 @@ def field_mask_test():
                 mask[i, j] = 0;
 
     # create a Field on the Grid, should inherit the mask
-    field = Field(grid, "FIELD!", mask_values = [2])
+    field = NewField(grid, "FIELD!", mask_values = [2])
      
     if(not field.mask[2][0]):
         correct = False
@@ -350,7 +350,7 @@ def field_mask_3D_test():
                 elif (j == 3.0):
                     mask[i, j, k] = 3
                 else:
-                    mask[i, j, k] = 0;
+                    mask[i, j, k] = 0
 
     # create a Field on the Grid, should inherit the mask
     field = Field(grid, "FIELD!", mask_values = [2, 3])
@@ -632,11 +632,11 @@ def grid_field_test():
     grid = Grid(max_index, staggerloc=[StaggerLoc.CENTER])
 
     # create a Field on the Grid
-    field = Field(grid, "FIELD!")
+    field = NewField(grid, "FIELD!")
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -648,11 +648,11 @@ def grid_field_edge1_test():
     grid = Grid(max_index, staggerloc=[StaggerLoc.EDGE1])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -664,11 +664,11 @@ def grid_field_edge2_test():
     grid = Grid(max_index, staggerloc=[StaggerLoc.EDGE2])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -680,11 +680,11 @@ def grid_field_corner_test():
     grid = Grid(max_index, staggerloc=[StaggerLoc.CORNER])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -697,11 +697,11 @@ def grid_field_3D_test():
                             staggerloc=[StaggerLoc.CENTER])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!")
+    field = NewField(grid, "GRIDFIELD!")
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -716,11 +716,11 @@ def grid_field_3D_edge1vcenter_test():
     # grid does not need coordinates to be ready for a field
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VCENTER)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VCENTER)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -734,11 +734,11 @@ def grid_field_3D_edge2vcenter_test():
 
     # grid does not need coordinates to be ready for a field
 
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VCENTER)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VCENTER)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -753,11 +753,11 @@ def grid_field_3D_cornervcenter_test():
     # grid does not need coordinates to be ready for a field
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VCENTER)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VCENTER)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -770,11 +770,11 @@ def grid_field_3D_centervface_test():
                 staggerloc=[StaggerLoc.CENTER_VFACE])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CENTER_VFACE)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CENTER_VFACE)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -787,11 +787,11 @@ def grid_field_3D_edge1vface_test():
                 staggerloc=[StaggerLoc.EDGE1_VFACE])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VFACE)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VFACE)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -804,11 +804,11 @@ def grid_field_3D_edge2vface_test():
                 staggerloc=[StaggerLoc.EDGE2_VFACE])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VFACE)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VFACE)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -821,11 +821,11 @@ def grid_field_3D_cornervface_test():
                 staggerloc=[StaggerLoc.CORNER_VFACE])
 
     # create a Field on the Grid
-    field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VFACE)
+    field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VFACE)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -951,17 +951,17 @@ def field_r8_grid_test():
     grid = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_RAD, \
                 staggerloc=[StaggerLoc.CENTER])
 
-    field = Field(grid, 'Field!', TypeKind.R8)
-    field2 = Field(grid, 'Field!')
+    field = NewField(grid, 'Field!', TypeKind.R8)
+    field2 = NewField(grid, 'Field!')
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
 
     for i in range(field2.shape[0]):
         for j in range(field2.shape[1]):
-            field2[i, j] = 10
+            field2.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -974,17 +974,17 @@ def field_r4_grid_test():
                 coord_typekind=TypeKind.R4, \
                 staggerloc=[StaggerLoc.CENTER])
 
-    field = Field(grid, 'Field!', typekind=TypeKind.R4)
+    field = NewField(grid, 'Field!', typekind=TypeKind.R4)
 
-    field2 = Field(grid, 'Field!', typekind=TypeKind.R4)
+    field2 = NewField(grid, 'Field!', typekind=TypeKind.R4)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     for i in range(field2.shape[0]):
         for j in range(field2.shape[1]):
-            field2[i, j] = 10
+            field2.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -997,17 +997,17 @@ def field_i8_grid_test():
                 coord_typekind=TypeKind.R4, \
                 staggerloc=[StaggerLoc.CENTER])
 
-    field = Field(grid, 'Field!', TypeKind.I8)
+    field = NewField(grid, 'Field!', TypeKind.I8)
 
-    field2 = Field(grid, 'Field!', typekind=TypeKind.I8)
+    field2 = NewField(grid, 'Field!', typekind=TypeKind.I8)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     for i in range(field2.shape[0]):
         for j in range(field2.shape[1]):
-            field2[i, j] = 10
+            field2.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -1020,17 +1020,17 @@ def field_i4_grid_test():
                 coord_typekind=TypeKind.R4, \
                 staggerloc=[StaggerLoc.CENTER])
 
-    field = Field(grid, 'Field!', TypeKind.I4)
+    field = NewField(grid, 'Field!', TypeKind.I4)
 
-    field2 = Field(grid, 'Field!', typekind=TypeKind.I4)
+    field2 = NewField(grid, 'Field!', typekind=TypeKind.I4)
 
     for i in range(field.shape[0]):
         for j in range(field.shape[1]):
-            field[i, j] = 10
+            field.data[i, j] = 10
 
     for i in range(field2.shape[0]):
         for j in range(field2.shape[1]):
-            field2[i, j] = 10
+            field2.data[i, j] = 10
 
     # return True from unit test
     return True
@@ -1051,19 +1051,19 @@ def field_r8_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!', \
+    field = NewField(mesh, 'Field!', \
                   TypeKind.R8, \
                   MeshLoc.NODE)
     print "field1 created"
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT)
     print "field2 created"
 
     for i in range(field.shape[0]):
-        field[i] = 10
+        field.data[i] = 10
 
     for i in range(field2.shape[0]):
-        field2[i] = 10
+        field2.data[i] = 10
 
     # return True from unit test
     return True
@@ -1084,18 +1084,18 @@ def field_r4_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   typekind=TypeKind.R4)
 
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    typekind=TypeKind.R4,
                    meshloc=MeshLoc.ELEMENT)
 
     for i in range(field.shape[0]):
-        field[i] = 10
+        field.data[i] = 10
 
     for i in range(field2.shape[0]):
-        field2[i] = 10
+        field2.data[i] = 10
 
     # return True from unit test
     return True
@@ -1116,19 +1116,19 @@ def field_i8_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   TypeKind.I8,
                   MeshLoc.NODE)
 
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    typekind=TypeKind.I8,
                    meshloc=MeshLoc.ELEMENT)
 
     for i in range(field.shape[0]):
-        field[i] = 10
+        field.data[i] = 10
 
     for i in range(field2.shape[0]):
-        field2[i] = 10
+        field2.data[i] = 10
 
     # return True from unit test
     return True
@@ -1149,19 +1149,19 @@ def field_i4_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   TypeKind.I4,
                   MeshLoc.NODE)
 
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    typekind=TypeKind.I4,
                    meshloc=MeshLoc.ELEMENT)
 
     for i in range(field.shape[0]):
-        field[i] = 10
+        field.data[i] = 10
 
     for i in range(field2.shape[0]):
-        field2[i] = 10
+        field2.data[i] = 10
 
     # return True from unit test
     return True
@@ -1182,19 +1182,19 @@ def field_uniqueness_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   TypeKind.I4,
                   MeshLoc.NODE)
 
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    typekind=TypeKind.I4,
                    meshloc=MeshLoc.ELEMENT)
 
     for i in range(field.shape[0]):
-        field[i] = 10
+        field.data[i] = 10
 
     for i in range(field2.shape[0]):
-        field2[i] = 10
+        field2.data[i] = 10
 
     assert(field.struct.ptr != field2.struct.ptr)
 
@@ -1210,14 +1210,14 @@ def field_switchedindices_grid_test():
 
     gridtofieldmap = np.array([2,1])
 
-    field = Field(grid, 'Field!', TypeKind.R8,
+    field = NewField(grid, 'Field!', TypeKind.R8,
                   ndbounds=gridtofieldmap)
-    field2 = Field(grid, 'Field!',
+    field2 = NewField(grid, 'Field!',
                    ndbounds=np.array([2,1]))
 
-    field[...] = 10
+    field.data[...] = 10
 
-    field2[...] = 10
+    field2.data[...] = 10
 
     # return True from unit test
     return True
@@ -1238,16 +1238,16 @@ def field_switchedindices_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   TypeKind.R8,
                   MeshLoc.NODE)
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
                    ndbounds=np.array([2,5]))
 
-    field[...] = 10
+    field.data[...] = 10
 
-    field2[...] = 10
+    field2.data[...] = 10
 
     # return True from unit test
     return True
@@ -1268,16 +1268,16 @@ def field_extraindices_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    field = Field(mesh, 'Field!',
+    field = NewField(mesh, 'Field!',
                   TypeKind.R8,
                   MeshLoc.NODE)
-    field2 = Field(mesh, 'Field!',
+    field2 = NewField(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
                    ndbounds=np.array([2, 5]))
 
-    field[...] = 10
+    field.data[...] = 10
 
-    field2[...] = 10
+    field2.data[...] = 10
 
     # return True from unit test
     return True
@@ -1313,10 +1313,10 @@ def field_regrid_test():
         gridYCorner[:, j] = float(j)/4.
 
     # create a Field on the Grid
-    srcfield = Field(srcgrid, "GRIDFIELD!")
-    srcfield[:, :] = 10.
-    dstfield = Field(srcgrid, "GRIDFIELD!")
-    dstfield[:, :] = 10.
+    srcfield = NewField(srcgrid, "GRIDFIELD!")
+    srcfield.data[:, :] = 10.
+    dstfield = NewField(srcgrid, "GRIDFIELD!")
+    dstfield.data[:, :] = 10.
 
     # regridding
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR)
@@ -1347,7 +1347,7 @@ def field_regrid_gridmesh_test():
     else:
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
-    dstfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
+    dstfield = NewField(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
 
     # create grid
     max_index = np.array([16,16])
@@ -1367,9 +1367,9 @@ def field_regrid_gridmesh_test():
         gridYCorner[:, j] = float(j)
 
     # create a Field on the Grid
-    srcfield = Field(grid, "GRIDFIELD!")
+    srcfield = NewField(grid, "GRIDFIELD!")
 
-    srcfield[:, :] = 10.
+    srcfield.data[:, :] = 10.
 
     # regridding
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
@@ -1404,11 +1404,11 @@ def field_regrid_zeroregion_test():
             mesh_create_50()
 
     # create a field on the mesh
-    srcfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
+    srcfield = NewField(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
 
     # initialize the source field
     for i in range(srcfield.shape[0]):
-        srcfield[i] = 20.0
+        srcfield.data[i] = 20.0
 
     # create grid
     grid = grid_create([0,0,8,8], [0,0,4,4], domask=True)
@@ -1416,10 +1416,10 @@ def field_regrid_zeroregion_test():
     [x,y] = [0, 1]
 
     # create a Field on the Grid
-    dstfield = Field(grid, "GRIDFIELD!", mask_values=[0])
+    dstfield = NewField(grid, "GRIDFIELD!", mask_values=[0])
 
     # initialize the destination field according to the mask
-    dstfield[:, :] = -100
+    dstfield.data[:, :] = -100
 
     # regridding
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE,
@@ -1459,12 +1459,12 @@ def field_regrid_area_test():
     [x,y] = [0, 1]
 
     # create area field
-    dstarea = Field(mesh, 'DESTINATION AREAS!',
+    dstarea = NewField(mesh, 'DESTINATION AREAS!',
                     meshloc=MeshLoc.ELEMENT)
     dstarea.get_area()
 
     # create a Field on the Grid
-    srcarea = Field(grid, "SOURCE AREAS!")
+    srcarea = NewField(grid, "SOURCE AREAS!")
     srcarea.get_area()
 
     correct = True
@@ -1566,7 +1566,7 @@ def create_field(grid_or_mesh, name):
     POSTCONDITIONS: A Field has been created.\n
     RETURN VALUES: \n Field :: field \n
     '''
-    field = ESMF.Field(grid_or_mesh, name)
+    field = ESMF.NewField(grid_or_mesh, name)
 
     return field
 

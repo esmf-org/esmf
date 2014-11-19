@@ -47,13 +47,13 @@ else:
         mesh_create_10()
 
 # create ESMP_Field objects on the Meshes
-srcfield = ESMF.Field(srcmesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-srcareafield = ESMF.Field(srcmesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-srcfracfield = ESMF.Field(srcmesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-dstfield = ESMF.Field(dstmesh, 'dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
-dstareafield = ESMF.Field(dstmesh, 'dstareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-dstfracfield = ESMF.Field(dstmesh, 'dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-exactfield = ESMF.Field(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcfield = ESMF.NewField(srcmesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcareafield = ESMF.NewField(srcmesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcfracfield = ESMF.NewField(srcmesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+dstfield = ESMF.NewField(dstmesh, 'dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
+dstareafield = ESMF.NewField(dstmesh, 'dstareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+dstfracfield = ESMF.NewField(dstmesh, 'dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+exactfield = ESMF.NewField(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc, \

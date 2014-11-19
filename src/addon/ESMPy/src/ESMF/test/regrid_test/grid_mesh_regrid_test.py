@@ -47,9 +47,9 @@ else:
 				mesh_create_50()
 
 # create Field objects
-srcfield = ESMF.Field(mesh, 'srcfield')
-dstfield = ESMF.Field(grid, 'dstfield')
-exactfield = ESMF.Field(grid, 'exactfield')
+srcfield = ESMF.NewField(mesh, 'srcfield')
+dstfield = ESMF.NewField(grid, 'dstfield')
+exactfield = ESMF.NewField(grid, 'exactfield')
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)

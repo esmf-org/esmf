@@ -40,13 +40,13 @@ srcgrid = grid_create([0,0,21,21], [0,0,21,21], domask=True)
 dstgrid = grid_create([0.5,0.5,19.5,19.5], [0.5,0.5,19.5,19.5])
 
 # create Field objects on the Meshes
-srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
-srcareafield = ESMF.Field(srcgrid, 'srcareafield')
-srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
-dstfield = ESMF.Field(dstgrid, 'dstfield')
-dstareafield = ESMF.Field(dstgrid, 'dstareafield')
-dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
-exactfield = ESMF.Field(dstgrid, 'exactfield')
+srcfield = ESMF.NewField(srcgrid, 'srcfield', mask_values=[0])
+srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
+srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
+dstfield = ESMF.NewField(dstgrid, 'dstfield')
+dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
+dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
+exactfield = ESMF.NewField(dstgrid, 'exactfield')
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_grid(srcfield)

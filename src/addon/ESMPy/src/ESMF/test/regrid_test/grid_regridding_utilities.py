@@ -38,9 +38,6 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
     cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
     
-    cellcenter_x = cellwidth_x/2
-    cellcenter_y = cellwidth_y/2
-    
     max_index = np.array([ub_x,ub_y])
 
     grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART)
@@ -198,10 +195,6 @@ def grid_create_3d(bounds, coords, domask=False, doarea=False):
     cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
     cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
     cellwidth_z = (max_z-min_z)/(ub_z-lb_z)
-    
-    cellcenter_x = cellwidth_x/2
-    cellcenter_y = cellwidth_y/2
-    cellcenter_z = cellwidth_z/2
     
     max_index = np.array([ub_x,ub_y,ub_z])
 

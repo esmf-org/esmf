@@ -51,15 +51,15 @@ else:
 grid = grid_create([0,0,8,8], [0,0,4,4], doarea=True)
 
 # create Field objects on the Meshes
-srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcfield = ESMF.NewField(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcfracfield = ESMF.NewField(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+srcareafield = ESMF.NewField(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # make gridded fields
-exactfield = ESMF.Field(grid, 'exactfield')
-dstfield = ESMF.Field(grid, 'dstfield')
-dstfracfield = ESMF.Field(grid, 'dstfracfield')
-dstareafield = ESMF.Field(grid, 'dstareafield')
+exactfield = ESMF.NewField(grid, 'exactfield')
+dstfield = ESMF.NewField(grid, 'dstfield')
+dstfracfield = ESMF.NewField(grid, 'dstfracfield')
+dstareafield = ESMF.NewField(grid, 'dstareafield')
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn,

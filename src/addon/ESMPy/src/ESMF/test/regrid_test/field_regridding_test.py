@@ -46,17 +46,17 @@ srcgrid = grid_create_periodic([60,30], domask=True)
 dstgrid = grid_create_periodic([55,28])
 
 # create the Fields
-srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
-dstfield = ESMF.Field(dstgrid, 'dstfield')
-exactfield = ESMF.Field(dstgrid, 'exactfield')
+srcfield = ESMF.NewField(srcgrid, 'srcfield', mask_values=[0])
+dstfield = ESMF.NewField(dstgrid, 'dstfield')
+exactfield = ESMF.NewField(dstgrid, 'exactfield')
 
 # create the area fields
-srcareafield = ESMF.Field(srcgrid, 'srcareafield')
-dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
+dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
 
 # create the fraction fields
-srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
-dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
+srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
+dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
 
 # initialize the Fields to an analytic function
 srcfield = initialize_field_grid_periodic(srcfield)
@@ -77,5 +77,5 @@ srcmass = compute_mass_grid(srcfield, srcareafield,
 dstmass = compute_mass_grid(dstfield, dstareafield)
 
 # compare results and output PASS or FAIL
-compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel, 
+compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel,
                     dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
