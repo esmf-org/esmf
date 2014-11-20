@@ -196,7 +196,7 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(9)
+    character(ESMF_MAXSTR)            :: attrList(10)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -210,6 +210,7 @@ module NUOPC_Comp
     attrList(7) = "Nestling"  ! values: integer starting 0 for first nestling
     attrList(8) = "InitializeDataComplete"  ! values: strings "false"/"true"
     attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(10)= "CompLabel"   ! label by which this component was added
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
@@ -286,7 +287,7 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(5)
+    character(ESMF_MAXSTR)  :: attrList(6)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -296,6 +297,7 @@ module NUOPC_Comp
     attrList(3) = "RunPhaseMap"         ! list of strings to map str to phase #
     attrList(4) = "FinalizePhaseMap"    ! list of strings to map str to phase #
     attrList(5) = "CplList"
+    attrList(6) = "CompLabel"  ! label by which this component was added
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)

@@ -1968,6 +1968,13 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Set the CompLabel attribute
+    call NUOPC_CompAttributeSet(cmEntry%wrap%component, &
+      name="CompLabel", value=trim(cmEntry%wrap%label), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
     ! Optionally return the added component
     if (present(comp)) comp = cmEntry%wrap%component
     
@@ -2565,6 +2572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
     logical                         :: getFlag, foundFlag
+    character(ESMF_MAXSTR)          :: driverCompLabel
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2589,9 +2597,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! alternative exit condition if driver itself matches compLabel
     if (.not.foundFlag) then
-      !todo: for now just use the driver name, but in the long run need 
-      !todo: the actual compLable, maybe stored as a Component attribute
-      if (trim(compLabel) == trim(name)) then
+      call NUOPC_CompAttributeGet(driver, name="CompLabel", &
+        value=driverCompLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (trim(compLabel) == trim(driverCompLabel)) then
         comp = driver ! the driver itself is the searched for component
         return
       endif
