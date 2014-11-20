@@ -2039,10 +2039,10 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    do src=1, is%wrap%modelCount
+    do src=0, is%wrap%modelCount
       if (is%wrap%modelComp(src)==srcComp) exit ! found the match
     enddo
-    do dst=1, is%wrap%modelCount
+    do dst=0, is%wrap%modelCount
       if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
     
@@ -2323,10 +2323,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    do src=1, is%wrap%modelCount
+    do src=0, is%wrap%modelCount
       if (is%wrap%modelComp(src)==srcComp) exit ! found the match
     enddo
-    do dst=1, is%wrap%modelCount
+    do dst=0, is%wrap%modelCount
       if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
     if (src > is%wrap%modelCount) then
@@ -2426,10 +2426,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    do src=1, is%wrap%modelCount
+    do src=0, is%wrap%modelCount
       if (is%wrap%modelComp(src)==srcComp) exit ! found the match
     enddo
-    do dst=1, is%wrap%modelCount
+    do dst=0, is%wrap%modelCount
       if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
     if (src > is%wrap%modelCount) then
@@ -2564,7 +2564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    logical                         :: getFlag
+    logical                         :: getFlag, foundFlag
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2579,16 +2579,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    ! determine whether compLabel exists in the drivers map    
+    call ESMF_ContainerGet(is%wrap%componentMap, trim(compLabel), &
+      isPresent=foundFlag, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! alternative exit condition if driver itself matches compLabel
+    if (.not.foundFlag) then
+      !todo: for now just use the driver name, but in the long run need 
+      !todo: the actual compLable, maybe stored as a Component attribute
+      if (trim(compLabel) == trim(name)) then
+        comp = driver ! the driver itself is the searched for component
+        return
+      endif
+    endif
+
     ! consider relaxed mode
     getFlag = .true.
-    if (present(relaxedflag)) then
-      call ESMF_ContainerGet(is%wrap%componentMap, trim(compLabel), &
-        isPresent=getFlag, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
+    if (present(relaxedflag)) getFlag = foundFlag
     
     ! Conditionally access the entry in componentMap
     if (getFlag) then
