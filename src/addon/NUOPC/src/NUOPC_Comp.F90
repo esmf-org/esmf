@@ -212,7 +212,6 @@ module NUOPC_Comp
     attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
     
     ! add Attribute packages
-if (ESMF_VERSION_MAJOR >= 6) then
     call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
       purpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -222,20 +221,6 @@ if (ESMF_VERSION_MAJOR >= 6) then
       nestPurpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-else
-! gjt: keep this branch for now because I have an old sandbox where most of
-! the ESMF is back in the MAJOR 5 because of I/O issues in MAJOR 6.
-! TODO: remove this else branch once the I/O issues in MAJOR 6 are fixed.
-    call ESMF_AttributeAdd(comp, convention="CIM", &
-      purpose="Model Component Simulation Description", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="CIM", &
-      nestPurpose="Model Component Simulation Description", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-endif
 
     ! set Attributes to defaults
     call ESMF_AttributeSet(comp, &
