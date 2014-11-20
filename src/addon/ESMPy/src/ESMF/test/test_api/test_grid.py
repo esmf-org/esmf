@@ -3,13 +3,17 @@
 grid unit test file
 """
 
+import ESMF
 from ESMF import *
 from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase
 
 import numpy as np
+import os
+import inspect
 
-class TestMaskedArray(TestBase):
+class TestGrid(TestBase):
+
     class ctypesgrid(object):
         def __init__(self, maxindex):
             '''
@@ -18,11 +22,11 @@ class TestMaskedArray(TestBase):
             :type maxindex: np array with dtype = int32
             :return:
             '''
-            self.struct = ESMP_GridStruct()
+            self.struct = ESMP_GridStruct(self)
             self.maxindex = maxindex
             self.rank = len(maxindex)
 
-    def get_maskedarray_info(self, dim=0):
+    def make_grid(self, dim=0):
         typekind = TypeKind.R8
         grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
                     coord_typekind=typekind, staggerloc=[StaggerLoc.CENTER])
@@ -43,174 +47,425 @@ class TestMaskedArray(TestBase):
 
         return data, mask, typekind, lbounds, ubounds, grid
 
-    def get_array(self):
-        data, mask, tk, lb, ub, grid = self.get_maskedarray_info()
-        esmpyarray = MaskedArray(data, mask, tk, ub-lb)
-        return esmpyarray
 
-    def make_maskedarray(self, array, type=TypeKind.R8):
-        '''
-        :param self: TestMaskedArray class type
-        :param array: maxindices of a 2- or 3d array
-        :type array: np.array of dtype=np.int32
-        :param type: the type of the esmf buffer
-        :type type: ESMF.TypeKind
-        '''
-        # turn on debuggin and initialize the cbindings calls
-        Manager(logkind=LogKind.MULTI, debug=True)
+    def test_grid_create(self):
 
-        # create a ctypes grid object to hold pointer and other info for ctypes layer
-        if array.dtype is not np.int32:
-            array = np.array(array, dtype=np.int32)
-        esmfalloc = self.ctypesgrid(array)
+        max_index = np.array([12, 20])
 
-        # create an esmf data allocation to test numpy array with
-        esmfalloc.struct = ESMP_GridCreateNoPeriDim(esmfalloc.maxindex,
-                                                    coordSys=CoordSys.CART,
-                                                    coordTypeKind=type)
-        ESMP_GridAddCoord(esmfalloc)
-        dataptr = ESMP_GridGetCoordPtr(esmfalloc, 0)
-        lb, ub = ESMP_GridGetCoordBounds(esmfalloc)
+        print "GridCreate 1"
+        grid = Grid(max_index)
 
-        return dataptr, lb, ub
+        print "GridCreate 2"
+        grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
+                     coord_typekind=TypeKind.R4)
+        print "GridCreate 3"
+        grid3 = Grid(max_index, num_peri_dims=1)
 
-    def test_del(self):
-        self.esmpyarray = self.get_array()
-        del(self.esmpyarray)
-        assert(not hasattr(self, 'esmpyarray'))
+        print "GridCreate 4"
+        grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
+                     coord_typekind=TypeKind.R4)
 
-    def test_copy(self):
-        esmpyarray = self.get_array()
-        esmpyarray2 = esmpyarray
-        self.assertNumpyAll(esmpyarray, esmpyarray2)
-        assert(np.may_share_memory(esmpyarray, esmpyarray2))
+        print "GridCreate 5"
+        grid5 = Grid(max_index, num_peri_dims=1, periodic_dim=1,
+                     coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
 
-    def test_reshape(self):
-        data, mask, tk, lb, ub, grid = self.get_maskedarray_info()
-        esmpyarray = MaskedArray(data, mask, tk, ub-lb)
+        del grid
+        del grid2
+        del grid3
+        del grid4
+        del grid5
 
-        # test reshape
-        self.assertNumpyAll(np.array(esmpyarray.shape, dtype=np.int32),
-                            np.array(ub - lb, dtype=np.int32))
+    def test_grid_create_3D(self):
 
-    def test_slice(self):
-        data, mask, tk, lb, ub, grid = self.get_maskedarray_info()
-        esmpyarray = MaskedArray(data, mask, tk, ub-lb)
+        max_index = np.array([12, 20, 37])
 
-        # slice
-        esmpyarrayslice = esmpyarray[:, 0]
+        print "GridCreate 1"
+        grid = Grid(max_index)
 
-        # test slice
-        assert (esmpyarrayslice.shape == (ub[0] - lb[0]))
+        print "GridCreate 2"
+        grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
+                     coord_typekind=TypeKind.R4)
 
-    def test_slice2(self):
+        print "GridCreate 3"
+        grid3 = Grid(max_index, num_peri_dims=1)
 
-        dataptr, lb, ub = self.make_maskedarray(np.array([10, 10], dtype=np.int32))
+        print "GridCreate 4"
+        grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
+                     coord_typekind=TypeKind.R4)
 
-        array0 = MaskedArray(dataptr, None, TypeKind.R8, ub-lb)
-        vals = np.random.rand(10, 10)
-        array0.data[:] = vals
+        del grid
+        del grid2
+        del grid3
+        del grid4
 
-        self.assertEqual(array0.shape, (10,10))
-        self.assertEqual(array0[1,1], vals[1,1])
+    def test_grid_coords(self):
 
-        res = array0 * 2
-        self.assertTrue(np.all(vals * 2 == res))
+        max_index = np.array([12, 20])
 
+        grid = Grid(max_index)
 
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
 
+        exLB = grid.lower_bounds[StaggerLoc.CENTER]
+        exUB = grid.upper_bounds[StaggerLoc.CENTER]
 
-    def test_mul(self):
-        esmpyarray1 = self.get_array()
-        esmpyarray2 = self.get_array()
-        esmpyarray3 = self.get_array()
+        print "Grid Bounds:"
+        print "    exclusiveLBounds = " + str(exLB)
+        print type(exLB)
+        print "    exclusiveUBounds = " + str(exUB)
+        print exUB.dtype
 
-        self.assertNumpyAll(esmpyarray1*5, 5*esmpyarray1)
-        self.assertNumpyAll(esmpyarray1*esmpyarray2, esmpyarray2*esmpyarray1)
-        # todo: associate and distributive properties have floating point errors?
-        self.assertNumpyAllClose((esmpyarray1*(esmpyarray2*esmpyarray3)),
-                                 ((esmpyarray1*esmpyarray2) * esmpyarray3))
-        self.assertNumpyAllClose((esmpyarray1*(esmpyarray2+esmpyarray3)),
-                                 ((esmpyarray1*esmpyarray2)+
-                                  (esmpyarray1*esmpyarray3)))
+        # get and set the coordinates
+        [x, y] = [0, 1]
+        gridCoord = grid.coords[StaggerLoc.CENTER]
 
-    def test_stress(self):
-        for _ in range(100):
-            grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
-                        coord_typekind=TypeKind.R8, staggerloc=[StaggerLoc.CENTER])
+        for i in xrange(gridCoord[x].shape[x]):
+            gridCoord[x][i, :] = float(i)
 
-            # get the coordinate pointers and set the coordinates
-            grid_row = grid.get_coords(0, staggerloc=StaggerLoc.CENTER)
-            grid_col = grid.get_coords(1, staggerloc=StaggerLoc.CENTER)
+        for j in xrange(gridCoord[y].shape[y]):
+            gridCoord[y][:, j] = float(j)
 
-            row = np.random.rand(100, 100)
-            col = np.random.rand(100, 100)
+        # validate the coordinates using an easily understood double loop
+        gridXCoord_check = grid.get_coords(x)
+        gridYCoord_check = grid.get_coords(y)
 
-            grid_row[:] = row
-            grid_col[:] = col
+        correct = True
+        for i in xrange(gridXCoord_check.shape[x]):
+            for j in xrange(gridXCoord_check.shape[y]):
+                assert(gridXCoord_check[i, j] == float(i))
 
-            data0 = ESMP_GridGetCoordPtr(grid, 0)
-            data1 = ESMP_GridGetCoordPtr(grid, 1)
-            lb, ub = ESMP_GridGetCoordBounds(grid)
+        for i in xrange(gridYCoord_check.shape[x]):
+            for j in xrange(gridYCoord_check.shape[y]):
+                assert(gridYCoord_check[i, j] == float(j))
 
-            mask = [False] * reduce(mul, ub - lb)
+    def test_grid_coords_3D(self):
 
-            esmpy_row = MaskedArray(data0, mask, TypeKind.R8, ub - lb)
-            esmpy_col = MaskedArray(data1, mask, TypeKind.R8, ub - lb)
+        max_index = np.array([10, 20, 30])
 
-            self.assertNumpyAll(row, np.array(esmpy_row))
-            self.assertNumpyAll(col, np.array(esmpy_col))
+        grid = Grid(max_index, coord_sys=CoordSys.CART)
 
-    def test_doublebuffer(self):
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
 
-        typekind = TypeKind.R8
-        dataptr, lb, ub = self.make_maskedarray(np.array([100,100], dtype=np.int32))
+        exLB = grid.lower_bounds[StaggerLoc.CENTER]
+        exUB = grid.upper_bounds[StaggerLoc.CENTER]
 
-        # create ESMPy Arrays using ESMF data allocations
-        array0 = MaskedArray(dataptr, None, typekind, ub-lb)
+        print "Grid Bounds:"
+        print "    exclusiveLBounds = " + str(exLB)
+        print type(exLB)
+        print "    exclusiveUBounds = " + str(exUB)
+        print exUB.dtype
 
-        vals = np.random.rand(100, 100)
-        array0.data[:] = vals
+        # get and set the coordinates
+        [x, y, z] = [0, 1, 2]
+        gridCoord = grid.coords[StaggerLoc.CENTER]
 
-        array1 = MaskedArray(dataptr, None, typekind, ub-lb)
-        array2 = MaskedArray(dataptr, None, typekind, ub-lb)
+        for i in xrange(gridCoord[x].shape[x]):
+            gridCoord[x][i, :, :] = float(i)
 
-        # assert that these numpy mangled esmf allocations are transposed
-        self.assertNumpyAll(array0, array1)
-        self.assertNumpyAll(array0, array2)
-        self.assertNumpyAll(array1, array2)
+        for j in xrange(gridCoord[y].shape[y]):
+            gridCoord[y][:, j, :] = float(j)
 
+        for k in xrange(gridCoord[z].shape[z]):
+            gridCoord[z][:, :, k] = float(k)
 
-    def test_new(self):
-        data0, mask, tk, lb1, ub1, grid = self.get_maskedarray_info()
-        esmpyarray0 = MaskedArray(data0, mask, tk, ub1 - lb1)
-        data1 = ESMP_GridGetCoordPtr(grid, 1)
-        lb1, ub1 = ESMP_GridGetCoordBounds(grid)
-        esmpyarray1 = MaskedArray(data1, mask, tk, ub1 - lb1)
-        self.assertNumpyAllClose(np.array(esmpyarray0),
-                                 np.array(grid.coords[StaggerLoc.CENTER][0]))
-        self.assertNumpyAllClose(np.array(esmpyarray1),
-                                 np.array(grid.coords[StaggerLoc.CENTER][1]))
+        # get the coordinate pointers and validate the coordinates
+        gridXCoord_check = grid.get_coords(x)
+        gridYCoord_check = grid.get_coords(y)
+        gridZCoord_check = grid.get_coords(z)
 
-    def test_ownership(self):
-        data0, mask, tk, lb0, ub0, grid = self.get_maskedarray_info(dim=0)
+        for i in xrange(gridXCoord_check.shape[x]):
+            for j in xrange(gridXCoord_check.shape[y]):
+                for k in xrange(gridXCoord_check.shape[z]):
+                    assert(gridXCoord_check[i, j, k] == float(i))
 
-        esmpyarray0 = MaskedArray(data0, mask, tk, ub0 - lb0)
+        for i in xrange(gridYCoord_check.shape[x]):
+            for j in xrange(gridYCoord_check.shape[y]):
+                for k in xrange(gridYCoord_check.shape[z]):
+                    assert(gridYCoord_check[i, j, k] == float(j))
 
-        # don't call get_array_info again or it will reset the grid!!
-        data1 = ESMP_GridGetCoordPtr(grid, 1)
-        lb1, ub1 = ESMP_GridGetCoordBounds(grid)
+        for i in xrange(gridZCoord_check.shape[x]):
+            for j in xrange(gridZCoord_check.shape[y]):
+                for k in xrange(gridZCoord_check.shape[z]):
+                    assert (gridZCoord_check[i, j, k] == float(k))
 
-        esmpyarray1 = MaskedArray(data1, mask, tk, ub1 - lb1)
+    def test_grid_mask(self):
 
-        coords0 = grid.get_coords(0, staggerloc=StaggerLoc.CENTER)
-        coords1 = grid.get_coords(1, staggerloc=StaggerLoc.CENTER)
+        max_index = np.array([12, 20])
 
-        # test that the data has the same values and sizes for each grid dimension
-        self.assertNumpyAll(np.array(esmpyarray0), np.array(coords0))
-        self.assertNumpyAll(np.array(esmpyarray1), np.array(coords1))
+        grid = Grid(max_index)
 
-        # test ownership
-        assert (np.may_share_memory(esmpyarray0, coords0))
-        assert (np.may_share_memory(esmpyarray1, coords1))
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+
+        # Add Mask
+        mask = grid.add_item(GridItem.MASK)
+
+        [x, y] = [0, 1]
+        for i in xrange(mask.shape[x]):
+            for j in xrange(mask.shape[y]):
+                if (i == 2.0):
+                    mask[i, j] = 1
+                else:
+                    mask[i, j] = 0;
+
+    def test_grid_mask_3D(self):
+
+        max_index = np.array([10, 20, 30])
+
+        grid = Grid(max_index, coord_sys=CoordSys.CART)
+
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+
+        # Add Mask
+        mask = grid.add_item(GridItem.MASK)
+        mask[...] = 1
+        mask[:, 2] = 0
+
+        assert (not np.all(mask[:, 2]))
+
+    def test_grid_area(self):
+
+        max_index = np.array([12, 20])
+
+        grid = Grid(max_index)
+
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+        exLB = grid.lower_bounds[StaggerLoc.CENTER]
+        exUB = grid.upper_bounds[StaggerLoc.CENTER]
+
+        # Add Areas
+        area = grid.add_item(GridItem.AREA)
+
+        area[:] = 1.0
+        assert(False)
+
+    def test_grid_area_3D(self):
+
+        max_index = np.array([10, 20, 30])
+
+        grid = Grid(max_index, coord_sys=CoordSys.CART)
+
+        # Add coordinates
+        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+        exLB = grid.lower_bounds[StaggerLoc.CENTER]
+        exUB = grid.upper_bounds[StaggerLoc.CENTER]
+
+        # Add Areas
+        area = grid.add_item(GridItem.AREA)
+
+        area[:] = 1.0
+        assert(False)
+
+    def test_grid_create_from_file_scrip(self):
+        reg_decomp = [pet_count(), 1]
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp)
+        except:
+            raise NameError('grid_create_from_file_scrip failed!')
+
+    def test_grid_create_from_file_scrip_decomp_balanced_balanced(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.BALANCED, DecompFlag.BALANCED],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_balanced_balanced failed!')
+
+    def test_grid_create_from_file_scrip_decomp_balanced_restfirst(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTFIRST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_balanced_restfirst failed!')
+
+    def test_grid_create_from_file_scrip_decomp_balanced_restlast(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTLAST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_balanced_restlast failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_balanced_cyclic(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.BALANCED, DecompFlag.CYCLIC],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_balanced_cyclic failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restfirst_balanced(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.BALANCED],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restfirst_balanced failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restfirst_restfirst(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTFIRST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restfirst_restfirst failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restfirst_restlast(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTLAST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restfirst_restlast failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_restfirst_cyclic(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.CYCLIC],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restfirst_cyclic failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restlast_balanced(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.BALANCED],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restlast_balanced failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restlast_restfirst(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTFIRST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restlast_restfirst failed!')
+
+    def test_grid_create_from_file_scrip_decomp_restlast_restlast(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTLAST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restlast_restlast failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_restlast_cyclic(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.CYCLIC],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_restlast_cyclic failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_cyclic_balanced(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.BALANCED],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_cyclic_balanced failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_cyclic_restfirst(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTFIRST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_cyclic_restfirst failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_cyclic_restlast(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTLAST],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_cyclic_restlast failed!')
+
+    @expected_failure
+    def test_grid_create_from_file_scrip_decomp_cyclic_cyclic(self):
+        reg_decomp = [pet_count(), 1]
+        decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.CYCLIC],
+                              dtype=np.int32)
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                                  filetype=FileFormat.SCRIP,
+                                  reg_decomp=reg_decomp, decompflag=decompflag)
+        except:
+            raise NameError('grid_create_from_file_scrip_cyclic_cyclic failed!')
 

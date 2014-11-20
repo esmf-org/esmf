@@ -6,17 +6,13 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-import numpy.ma as ma
+from operator import mul
 
-from ESMF.interface.cbindings import *
-from ESMF.util.decorators import initialize
-from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
-from ESMF.util.array import *
-
+from ESMF.api.array import *
 import ESMF.api.constants as constants
-from operator import mul
+
 
 
 #### Field class ##############################################################

@@ -6,14 +6,12 @@ The Grid API
 
 #### IMPORT LIBRARIES #########################################################
 
-from ESMF.interface.cbindings import *
-from ESMF.util.decorators import initialize
-from ESMF.api.esmpymanager import *
-from ESMF.util.array import *
+import warnings
 
+from ESMF.api.esmpymanager import *
+from ESMF.api.array import *
 import ESMF.api.constants as constants
 
-import warnings
 
 #### Grid class #########################################################
 
@@ -176,7 +174,7 @@ class Grid(object):
                 warnings.warn("max_index is only used for grids created in memory, this argument will be ignored.")
             if num_peri_dims is not 0:
                 warnings.warn("num_peri_dims is only used for grids created in memory, this argument will be ignored.")
-            if periodic_dim is not 0:
+            if periodic_dim is not None:
                 warnings.warn("periodic_dim is only used for grids created in memory, this argument will be ignored.")
             if coord_sys is not None:
                 warnings.warn("coord_sys is only used for grids created in memory, this argument will be ignored.")
@@ -783,7 +781,6 @@ class Grid(object):
 
 
     def link_item_buffer(self, item, stagger):
-        from operator import mul
 
         # mask is 0, area is 1
         if self.item_done[stagger][item]:

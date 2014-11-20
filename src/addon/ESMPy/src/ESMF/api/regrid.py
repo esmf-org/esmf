@@ -165,9 +165,10 @@ class Regrid(object):
         Returns: \n
             None \n
         """
-        if not self._finalized:
-            ESMP_FieldRegridRelease(self.routehandle)
-            self._finalized = True
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_FieldRegridRelease(self.routehandle)
+                self._finalized = True
 
 
     def __repr__(self):

@@ -8,10 +8,6 @@ the destination Field.    After the regridding is completed, the
 destination Field is compared to the exact solution over that domain.
 """
 
-import sys
-
-import ctypes
-
 from getopt import getopt
 
 try:
@@ -24,9 +20,8 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL, EPSILON
-from ESMF.test.regrid_test.grid_regridding_utilities import compare_fields_grid as compare_fields2
-from ESMF.test.regrid_test.grid_regridding_utilities import compute_mass_grid as compute_mass
+from ESMF.test.test_regrid_from_file.regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL
+from ESMF.test.test_api.grid_regridding_utilities import compute_mass_grid as compute_mass
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False

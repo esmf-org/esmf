@@ -9,14 +9,8 @@ from ESMF.test.base import TestBase
 
 import numpy as np
 
-# TODO:
-#   1) MaskedArray is transposed when built on esmf allocation of Grid coord buffer using Array
-#      ** cannot replicate this with generic esmf allocated buffers
-#   2) regridding fails when using Array for Grid coords
-
-# TODO: fix the regrid testing
 # TODO: test view casting
-# TODO: understand the implications of Fortran ordering in reshape call
+# TODO: demonstrate Fortran reordering in reshape call
 
 class TestMaskedArray(TestBase):
     class ctypesgrid(object):

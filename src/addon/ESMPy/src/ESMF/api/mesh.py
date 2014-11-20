@@ -179,9 +179,10 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if not self._finalized:
-            ESMP_MeshDestroy(self)
-            self._finalized = True
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_MeshDestroy(self)
+                self._finalized = True
 
 
     def __repr__(self):
