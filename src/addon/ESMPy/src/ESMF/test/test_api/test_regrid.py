@@ -4,8 +4,8 @@ regrid unit test file
 
 from ESMF import *
 from ESMF.test.base import TestBase
-from ESMF.test.test_api.mesh_regridding_utilities import *
-from ESMF.test.test_api.grid_regridding_utilities import *
+from ESMF.test.test_api.mesh_utilities import *
+from ESMF.test.test_api.grid_utilities import *
 
 class TestRegrid(TestBase):
     def test_field_regrid(self):

@@ -11,7 +11,7 @@ the regridding.
 import sys
 import os
 
-from ESMF.test.test_regrid_from_file.regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
+from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
 from read_test_cases_from_control_file import read_test_cases_from_control_file
 
 

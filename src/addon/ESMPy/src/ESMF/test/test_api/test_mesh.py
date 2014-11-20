@@ -9,7 +9,7 @@ import inspect
 import ESMF
 from ESMF import *
 from ESMF.test.base import TestBase
-from ESMF.test.test_api.mesh_regridding_utilities import mesh_create_50, mesh_create_50_parallel
+from ESMF.test.test_api.mesh_utilities import mesh_create_50, mesh_create_50_parallel
 
 
 class TestMesh(TestBase):

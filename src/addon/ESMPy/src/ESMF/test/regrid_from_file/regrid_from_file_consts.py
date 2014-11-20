@@ -7,7 +7,7 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 #
-TEST_REGRID_DIR = 'src/ESMF/test/test_regrid_from_file/'
+TEST_REGRID_DIR = 'src/ESMF/test/regrid_from_file/'
 CONTROL_FNAME = 'regrid_test_data.txt'
 DATA_SUBDIR = os.path.join(TEST_REGRID_DIR,'data/')
 DATA_URL_ROOT = 'http://www.earthsystemmodeling.org/download/data'

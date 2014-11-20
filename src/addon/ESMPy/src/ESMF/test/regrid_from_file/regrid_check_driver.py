@@ -17,10 +17,10 @@ try:
     import ESMF
 except:
     raise ImportError('The ESMF library cannot be found!')
-from ESMF.test.test_regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
-from ESMF.test.test_regrid_from_file.run_regrid_from_file_dryrun import cache_data_files_for_test_cases
-from ESMF.test.test_regrid_from_file import regrid_check
-from ESMF.test.test_regrid_from_file.read_test_cases_from_control_file import read_test_cases_from_control_file
+from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
+from ESMF.test.regrid_from_file.run_regrid_from_file_dryrun import cache_data_files_for_test_cases
+from ESMF.test.regrid_from_file.regrid_check import regrid_check
+from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_test_cases_from_control_file
 
 # Start up ESMF and run regrid test for each line of options
 # read from a control file.    Retrieve data files for each test from a remote

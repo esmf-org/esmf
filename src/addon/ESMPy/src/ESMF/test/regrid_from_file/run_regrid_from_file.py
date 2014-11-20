@@ -5,7 +5,7 @@ import sys
 
 import ESMF
 import ESMF.api.constants as constants
-from ESMF.test.test_regrid_from_file.regrid_from_file_consts import TEST_REGRID_DIR
+from ESMF.test.regrid_from_file.regrid_from_file_consts import TEST_REGRID_DIR
 
 
 parallel = False

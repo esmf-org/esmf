@@ -20,8 +20,8 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-from ESMF.test.test_regrid_from_file.regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL
-from ESMF.test.test_api.grid_regridding_utilities import compute_mass_grid as compute_mass
+from ESMF.test.regrid_from_file.regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL
+from ESMF.test.test_api.grid_utilities import compute_mass_grid as compute_mass
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
