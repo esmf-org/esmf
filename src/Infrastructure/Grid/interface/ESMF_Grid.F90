@@ -18638,10 +18638,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                   intent(out), optional :: isPresent
       integer,                   intent(out), optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !    This method allows the user to get information about a given item on a given
