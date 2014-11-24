@@ -200,10 +200,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\nfield_regridding"
-
         # create a grid
         srcgrid = grid_create_periodic([60, 30], domask=True)
         dstgrid = grid_create_periodic([55, 28])
@@ -252,10 +248,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_grid_regrid_csrv_mask_3D"
-
         # create a grid
         srcgrid = grid_create_3d([0, 0, 0, 21, 21, 21], [0, 0, 0, 21, 21, 21])
         dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5], \
@@ -300,10 +292,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_grid_regrid_csrv_mask"
-
         # create two unique Grid objects
         srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True)
         dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
@@ -347,10 +335,6 @@ class TestRegrid(TestBase):
             if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
-
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_mesh_regrid_csrv_mask"
 
         # create a Mesh
         if parallel:
@@ -406,10 +390,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_mesh_regrid_csrv"
-
         # create a Mesh
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -460,10 +440,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_mesh_regrid_mask"
-
         # create a grid
         grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], domask=True)
 
@@ -504,10 +480,6 @@ class TestRegrid(TestBase):
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
 
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\ngrid_mesh_regrid"
-
         # create a grid
         grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4])
 
@@ -546,10 +518,6 @@ class TestRegrid(TestBase):
             if ESMF.pet_count() > 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
-
-        # opening remarks
-        if ESMF.local_pet() == 0:
-            print "\nmesh_mesh_regrid"
 
         # create two unique Mesh objects
         if parallel:

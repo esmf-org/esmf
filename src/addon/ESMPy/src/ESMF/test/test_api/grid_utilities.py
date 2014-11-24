@@ -463,6 +463,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
 
     # print pass or fail
+    assert (itrp and csrv)
     if (itrp and csrv):
         print "PET{0} - PASS".format(ESMF.local_pet())
         correct = True

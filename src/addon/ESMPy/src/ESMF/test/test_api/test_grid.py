@@ -241,7 +241,6 @@ class TestGrid(TestBase):
         area = grid.add_item(GridItem.AREA)
 
         area[:] = 1.0
-        assert(False)
 
     def test_grid_area_3D(self):
 
@@ -258,7 +257,6 @@ class TestGrid(TestBase):
         area = grid.add_item(GridItem.AREA)
 
         area[:] = 1.0
-        assert(False)
 
     def test_grid_create_from_file_scrip(self):
         reg_decomp = [pet_count(), 1]
