@@ -127,9 +127,9 @@ class TestField(TestBase):
         for i in xrange(mask.shape[x]):
             for j in xrange(mask.shape[y]):
                 for k in xrange(mask.shape[z]):
-                    if (i == 2.0):
+                    if (i == 1.0):
                         mask[i, j, k] = 2
-                    elif (j == 3.0):
+                    elif (j == 2.0):
                         mask[i, j, k] = 3
                     else:
                         mask[i, j, k] = 0
@@ -137,8 +137,8 @@ class TestField(TestBase):
         # create a Field on the Grid, should inherit the mask
         field = Field(grid, "FIELD!", mask_values=[2, 3])
 
-        assert (np.all(field.mask[2, :, :]))
-        assert (np.all(field.mask[:, 3, :]))
+        assert (np.all(field.mask[1, :, :]))
+        assert (np.all(field.mask[:, 2, :]))
 
     def test_field_mask_3D_with_xd(self):
 

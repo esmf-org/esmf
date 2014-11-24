@@ -48,13 +48,6 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR)
         dstfield = rh(srcfield, dstfield)
 
-        # test the __repr__ functions
-        print srcgrid
-        print dstgrid
-        print repr(srcfield)
-        print "%r" % dstfield
-        print rh
-
     def test_field_regrid_gridmesh(self):
         # create mesh
         parallel = False
@@ -97,13 +90,6 @@ class TestRegrid(TestBase):
         # regridding
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
         dstfield = rh(srcfield, dstfield)
-
-        # test the __repr__ functions
-        print mesh
-        print grid
-        print repr(srcfield)
-        print "%r" % dstfield
-        print rh
 
     def test_field_regrid_zeroregion(self):
         # create mesh
@@ -184,7 +170,6 @@ class TestRegrid(TestBase):
             for j in range(srcarea.shape[y]):
                 if (srcarea[i, j] != 5):
                     print "Cell area is {0}, but expected 5".format(srcarea[i, j])
-                    correct = False
 
         # subtract two because the last two cells of mesh are triangles with half area
         for i in range(dstarea.shape[0]):

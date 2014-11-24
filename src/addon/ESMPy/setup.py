@@ -83,7 +83,7 @@ class TestCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('nosetests -v src/ESMF/test')
+        os.system('python src/ESMF/test/run_alltest.py')
 
 class TestRegridCommand(Command):
     description = "test regrid"
@@ -94,7 +94,7 @@ class TestRegridCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('nosetests -v src/ESMF/test/test_api/test_regrid.py')
+        os.system('nosetests -vs src/ESMF/test/test_api/test_regrid.py')
 
 class TestRegridFromFileCommand(Command):
     description = "test regrid from file"
@@ -132,7 +132,7 @@ class TestParallelCommand(Command):
             import mpi4py
         except:
             raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('nosetests -v src/ESMF/test')
+        os.system('python src/ESMF/test/run_alltest.py --parallel')
 
 # test regridding in parallel
 class TestRegridParallelCommand(Command):
@@ -148,7 +148,7 @@ class TestRegridParallelCommand(Command):
             import mpi4py
         except:
             raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('nosetests -v src/ESMF/test/test_api/test_regrid.py')
+        os.system('nosetests -vs  src/ESMF/test/test_api/test_regrid.py')
 
 # test regridding from file in parallel
 class TestRegridFromFileParallelCommand(Command):
