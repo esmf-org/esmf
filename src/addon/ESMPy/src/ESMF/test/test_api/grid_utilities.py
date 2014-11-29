@@ -387,16 +387,15 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     field2mask_flat = np.ravel(field2.mask)
     dstfracfield_flat = np.ravel(dstfracfield.data)
 
+    # TODO: would be nice to add a condition to ignore where original value is unchanged
     for i in range(field2_flat.size):     
         if ((not field2mask_flat[i]) and 
             (regrid_method != ESMF.RegridMethod.CONSERVE or
-            dstfracfield_flat[i] >= 0.999)):
-            if (field2_flat.data[i] != 0.0):
-                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
-                            field2_flat[i])/abs(field2_flat[i])
-            else:
-                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
-                            field2_flat[i])
+            dstfracfield_flat[i] >= 0.999) and
+            field2_flat[i] != 0.0):
+
+            err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                        field2_flat[i])/abs(field2_flat[i])
 
             if err > 1:
                 print field1_flat[i], field2_flat[i], dstfracfield_flat[i]

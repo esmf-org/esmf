@@ -9,11 +9,10 @@ import ESMF
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # Create a uniform global latlon grid from a SCRIP formatted file
-grid = ESMF.Grid(filename="ll2.5deg_grid.nc", filetype=ESMF.FileFormat.SCRIP)
+grid = ESMF.Grid(filename="examples/data/ll2.5deg_grid.nc", filetype=ESMF.FileFormat.SCRIP)
 
 # Create a field on the centers of the grid
 field = ESMF.Field(grid, "field", staggerloc=ESMF.StaggerLoc.CENTER)
 
-print "Successfully read a grid and created a field!"
-print "The field values on PET (processor) # {0} are:".format(ESMF.local_pet())
-print field
+if ESMF.local_pet() == 0:
+    print "Successfully read a grid and created a field!"
