@@ -99,7 +99,7 @@ class TestField(TestBase):
                     mask[i, j] = 0;
 
         # create a Field on the Grid, should inherit the mask
-        field = NewField(grid, "FIELD!", mask_values=[2])
+        field = Field(grid, "FIELD!", mask_values=[2])
 
         if (not field.mask[2][0]):
             raise ValueError("field mask is incorrect")
@@ -150,7 +150,7 @@ class TestField(TestBase):
         grid = Grid(np.array([10, 10, 10], dtype=np.int32), coord_sys=CoordSys.CART)
 
         mask = grid.add_item(GridItem.MASK)
-        mask[:] = 1
+        mask[...] = 1
         mask[0, 1, 0] = 0
 
         field = Field(grid, "name", ndbounds=[2, 5], mask_values=[0])
@@ -164,7 +164,7 @@ class TestField(TestBase):
         grid = Grid(max_index, staggerloc=[StaggerLoc.CENTER])
 
         # create a Field on the Grid
-        field = NewField(grid, "FIELD!")
+        field = Field(grid, "FIELD!")
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -177,7 +177,7 @@ class TestField(TestBase):
         grid = Grid(max_index, staggerloc=[StaggerLoc.EDGE1])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -190,7 +190,7 @@ class TestField(TestBase):
         grid = Grid(max_index, staggerloc=[StaggerLoc.EDGE2])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -203,7 +203,7 @@ class TestField(TestBase):
         grid = Grid(max_index, staggerloc=[StaggerLoc.CORNER])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -217,7 +217,7 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.CENTER])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!")
+        field = Field(grid, "GRIDFIELD!")
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -233,7 +233,7 @@ class TestField(TestBase):
         # grid does not need coordinates to be ready for a field
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VCENTER)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VCENTER)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -248,7 +248,7 @@ class TestField(TestBase):
 
         # grid does not need coordinates to be ready for a field
 
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VCENTER)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VCENTER)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -264,7 +264,7 @@ class TestField(TestBase):
         # grid does not need coordinates to be ready for a field
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VCENTER)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VCENTER)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -278,7 +278,7 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.CENTER_VFACE])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CENTER_VFACE)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CENTER_VFACE)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -292,7 +292,7 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.EDGE1_VFACE])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VFACE)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE1_VFACE)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -306,7 +306,7 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.EDGE2_VFACE])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VFACE)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.EDGE2_VFACE)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -320,7 +320,7 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.CORNER_VFACE])
 
         # create a Field on the Grid
-        field = NewField(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VFACE)
+        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CORNER_VFACE)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -332,8 +332,8 @@ class TestField(TestBase):
         grid = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_RAD, \
                     staggerloc=[StaggerLoc.CENTER])
 
-        field = NewField(grid, 'Field!', TypeKind.R8)
-        field2 = NewField(grid, 'Field!')
+        field = Field(grid, 'Field!', TypeKind.R8)
+        field2 = Field(grid, 'Field!')
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -351,9 +351,9 @@ class TestField(TestBase):
                     coord_typekind=TypeKind.R4, \
                     staggerloc=[StaggerLoc.CENTER])
 
-        field = NewField(grid, 'Field!', typekind=TypeKind.R4)
+        field = Field(grid, 'Field!', typekind=TypeKind.R4)
 
-        field2 = NewField(grid, 'Field!', typekind=TypeKind.R4)
+        field2 = Field(grid, 'Field!', typekind=TypeKind.R4)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -371,9 +371,9 @@ class TestField(TestBase):
                     coord_typekind=TypeKind.R4, \
                     staggerloc=[StaggerLoc.CENTER])
 
-        field = NewField(grid, 'Field!', TypeKind.I8)
+        field = Field(grid, 'Field!', TypeKind.I8)
 
-        field2 = NewField(grid, 'Field!', typekind=TypeKind.I8)
+        field2 = Field(grid, 'Field!', typekind=TypeKind.I8)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -391,9 +391,9 @@ class TestField(TestBase):
                     coord_typekind=TypeKind.R4, \
                     staggerloc=[StaggerLoc.CENTER])
 
-        field = NewField(grid, 'Field!', TypeKind.I4)
+        field = Field(grid, 'Field!', TypeKind.I4)
 
-        field2 = NewField(grid, 'Field!', typekind=TypeKind.I4)
+        field2 = Field(grid, 'Field!', typekind=TypeKind.I4)
 
         for i in range(field.shape[0]):
             for j in range(field.shape[1]):
@@ -419,11 +419,11 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!', \
+        field = Field(mesh, 'Field!', \
                          TypeKind.R8, \
                          MeshLoc.NODE)
         print "field1 created"
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           meshloc=MeshLoc.ELEMENT)
         print "field2 created"
 
@@ -449,10 +449,10 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          typekind=TypeKind.R4)
 
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           typekind=TypeKind.R4,
                           meshloc=MeshLoc.ELEMENT)
 
@@ -478,11 +478,11 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          TypeKind.I8,
                          MeshLoc.NODE)
 
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           typekind=TypeKind.I8,
                           meshloc=MeshLoc.ELEMENT)
 
@@ -508,11 +508,11 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          TypeKind.I4,
                          MeshLoc.NODE)
 
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           typekind=TypeKind.I4,
                           meshloc=MeshLoc.ELEMENT)
 
@@ -538,11 +538,11 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          TypeKind.I4,
                          MeshLoc.NODE)
 
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           typekind=TypeKind.I4,
                           meshloc=MeshLoc.ELEMENT)
 
@@ -563,9 +563,9 @@ class TestField(TestBase):
 
         gridtofieldmap = np.array([2, 1])
 
-        field = NewField(grid, 'Field!', TypeKind.R8,
+        field = Field(grid, 'Field!', TypeKind.R8,
                          ndbounds=gridtofieldmap)
-        field2 = NewField(grid, 'Field!',
+        field2 = Field(grid, 'Field!',
                           ndbounds=np.array([2, 1]))
 
         field.data[...] = 10
@@ -588,10 +588,10 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          TypeKind.R8,
                          MeshLoc.NODE)
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           meshloc=MeshLoc.ELEMENT,
                           ndbounds=np.array([2, 5]))
 
@@ -615,10 +615,10 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = NewField(mesh, 'Field!',
+        field = Field(mesh, 'Field!',
                          TypeKind.R8,
                          MeshLoc.NODE)
-        field2 = NewField(mesh, 'Field!',
+        field2 = Field(mesh, 'Field!',
                           meshloc=MeshLoc.ELEMENT,
                           ndbounds=np.array([2, 5]))
 

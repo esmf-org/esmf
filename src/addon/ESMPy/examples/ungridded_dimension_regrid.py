@@ -67,7 +67,7 @@ for timestep in range(time):
         xctfield.data[level,timestep,:,:]=10.0*(level+timestep+1) + (gridXCoord*deg2rad)**2 + \
                                  (gridXCoord*deg2rad)*(gridYCoord*deg2rad) + (gridYCoord*deg2rad)**2
 
-dstfield[...] = 1e20
+dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 regrid = ESMF.Regrid(srcfield, dstfield,

@@ -13,7 +13,7 @@ if len(sys.argv) > 1:
         parallel = True
 
 # data files
-datafilelist = ["ll2.5deg_grid.nc", "mpas_uniform_10242_dual_counterclockwise.nc",
+datafilelist = ["ll1deg_grid.nc", "ll2.5deg_grid.nc", "mpas_uniform_10242_dual_counterclockwise.nc",
                 "GRIDSPEC_ACCESS1.nc", "tx0.1v2_070911.nc", "T42_grid.nc"]
 
 # Create data subdirectory if it doesn't exist.

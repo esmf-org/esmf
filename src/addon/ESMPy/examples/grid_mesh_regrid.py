@@ -1,6 +1,6 @@
 # This example demonstrates how to regrid between a grid and a mesh.
 # The grid and mesh files are required, they can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
+#   wget http://www.earthsystemmodeling.org/download/data/ll1deg_grid.nc
 #   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
 
 import ESMF
@@ -37,13 +37,13 @@ deg2rad = 3.14159/180
 
 gridXCoord = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridYCoord = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
-srcfield[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
+srcfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
 
 gridXCoord = xctfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
 gridYCoord = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
-xctfield[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
+xctfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
 
-dstfield[...] = 1e20
+dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 regrid = ESMF.Regrid(srcfield, dstfield,

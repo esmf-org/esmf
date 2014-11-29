@@ -54,7 +54,6 @@ from api.esmpymanager import *
 from api.grid import *
 from api.mesh import *
 from api.field import *
-from api.newfield import *
 from api.regrid import *
 from api.constants import _ESMF_VERSION
 

@@ -6,24 +6,22 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-import numpy.ma as ma
+from operator import mul
 
-from ESMF.interface.cbindings import *
-from ESMF.util.decorators import initialize
-from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
-
+from ESMF.api.array import *
 import ESMF.api.constants as constants
+
 
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
 
-class Field(ma.MaskedArray):
+class Field(MaskedArray):
 
     @initialize
-    def __new__(cls, grid, name, 
+    def __new__(cls, grid, name,
                 typekind=TypeKind.R8, 
                 staggerloc=StaggerLoc.CENTER,
                 meshloc=MeshLoc.NODE,
@@ -114,15 +112,15 @@ class Field(ma.MaskedArray):
                 else:
                     xd = 0
                 # verify that grid mask is the same shape as the extra field dimensions
-                if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd+rank]-lbounds[xd:xd+rank])):
+                if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd + rank] - lbounds[xd:xd + rank])):
                     # initialize the mask to all unmasked values
-                    mask = np.ones(ubounds-lbounds, dtype=np.int32)
+                    mask = np.ones(ubounds - lbounds, dtype=np.int32)
                     # reset the mask with integer values according to what is in the grid mask,
                     # taking care to propagate masked values through the extra field dimensions
                     if grid.rank == 2:
-                        mask[...,:,:] = grid.mask[staggerloc]
+                        mask[..., :, :] = grid.mask[staggerloc]
                     elif grid.rank == 3:
-                        mask[...,:,:,:] = grid.mask[staggerloc]
+                        mask[..., :, :, :] = grid.mask[staggerloc]
                     else:
                         raise IndexError("Grid with rank less than 2 or greater than 3 is not allowed")
                 else:
@@ -149,28 +147,34 @@ class Field(ma.MaskedArray):
             mask = None
         else:
             raise FieldDOError
-     
-        #  set field_mask to True or False values based on the integer valued grid mask
-        field_mask = False
-        if mask is not None and mask_values is not None:
-            field_mask = [True if x in mask_values else False for x in mask.flatten().tolist()]
 
-        # link the field data
-        data = cls.link_field_data(struct, grid, staggerloc, typekind, rank)
+        # get data and bounds to create a new instance of this object
+        data = ESMP_FieldGetPtr(struct)
+        lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
 
-        # create the new Field instance
-        obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
+        # set field_mask based on the grid mask and the mask_values input argument
+        if mask is None:
+            size = reduce(mul, ubounds - lbounds)
+            mask = [False] * size
+        else:
+            # handle mask values
+            if mask_values is None:
+                maskvals = np.array([])
+            else:
+                maskvals = mask_values
+            # set mask
+            mask = [True if x in maskvals else False for x in mask.flatten().tolist()]
 
-        # register function with atexit
-        import atexit; atexit.register(obj.__del__)
-        obj._finalized = False
+        obj = super(Field, cls).__new__(cls, data, mask=mask,
+                                           dtype=typekind, shape=ubounds-lbounds)
 
         # initialize field data
         obj.struct = struct
         obj.rank = rank
         obj.type = typekind
         obj.staggerloc = staggerloc
-        obj.lower_bounds, obj.upper_bounds = ESMP_FieldGetBounds(struct, rank)
+        obj.lower_bounds = lbounds
+        obj.upper_bounds = ubounds
         obj.ndbounds = local_ndbounds
         obj.grid = grid
         obj.name = name
@@ -178,33 +182,12 @@ class Field(ma.MaskedArray):
         # for ocgis compatibility
         obj._ocgis = {}
 
+        # register function with atexit
+        import atexit;
+        atexit.register(obj.__del__)
+        obj._finalized = False
+
         return obj
-
-    @staticmethod
-    def link_field_data(struct, grid, staggerloc, typekind, rank):
-        from operator import mul
-        
-        # get a pointer to the field data
-        data_out = ESMP_FieldGetPtr(struct)
-
-        # get the field bounds
-        lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
-
-        # find the size of the local coordinates
-        size = reduce(mul,ubounds-lbounds)
-
-        # create a numpy array to point to the ESMF allocation of field data
-        fieldbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(data_out.contents),
-            np.dtype(constants._ESMF2PythonType[typekind]).itemsize*size)
-        fieldDataP = np.frombuffer(fieldbuffer, constants._ESMF2PythonType[typekind])
-
-        # reshape the numpy array of coordinates, account for Fortran
-        fieldDataP = np.reshape(fieldDataP,
-                                 newshape = ubounds-lbounds,
-                                 order='F')
-
-        return fieldDataP
 
     # destructor
     def __del__(self):
@@ -218,7 +201,7 @@ class Field(ma.MaskedArray):
             None \n
         """
 
-        if hasattr(self, '_finalized'):
+        if hasattr(self,'_finalized'):
             if self._finalized is False:
                 ESMP_FieldDestroy(self)
                 self._finalized = True
@@ -230,20 +213,30 @@ class Field(ma.MaskedArray):
         Return a string containing a printable representation of the object
         """
         string = ("Field:\n"
+                  "    name = %r\n"
                   "    struct = %r\n"
-                  "    ndbounds = %r\n"
-                  "    staggerloc = %r\n"
+                  "    rank = %r\n"
                   "    type = %r\n"
-                  "    grid = \n%r\n)" 
+                  "    staggerloc = %r\n"
+                  "    lower_bounds = %r\n"
+                  "    upper_bounds = %r\n"
+                  "    ndbounds = %r\n"
+                  "    mask = %r\n"
+                  "    grid = \n%r\n)"
                   %
-                  (self.struct, 
-                   self.ndbounds,
-                   self.staggerloc,
+                  (self.name,
+                   self.struct,
+                   self.rank,
                    self.type,
+                   self.staggerloc,
+                   self.lower_bounds,
+                   self.upper_bounds,
+                   self.ndbounds,
+                   self.mask,
                    self.grid))
 
         return string
-    
+
     def get_area(self):
         """
         Initialize a Field with the areas of the cells of the 
@@ -258,9 +251,6 @@ class Field(ma.MaskedArray):
 
         # call into the ctypes layer
         ESMP_FieldRegridGetArea(self)
-
-    #def write(self, filename):
-    #    ESMP_FieldWrite(self, filename)
 
     def dump_ESMF_coords(self):
         from operator import mul

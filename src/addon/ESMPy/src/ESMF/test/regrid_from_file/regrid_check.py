@@ -91,13 +91,13 @@ def create_field(grid, name, regrid_method=None, domask=False):
 
     if isinstance(grid,ESMF.Mesh):
         if regrid_method == ESMF.RegridMethod.CONSERVE:
-            field = ESMF.NewField(grid, name, meshloc=ESMF.MeshLoc.ELEMENT,
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT,
                                 mask_values=mask_values)
         else:
-            field = ESMF.NewField(grid, name, meshloc=ESMF.MeshLoc.NODE,
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE,
                                 mask_values=mask_values)
     else:
-        field = ESMF.NewField(grid, name, mask_values=mask_values)
+        field = ESMF.Field(grid, name, mask_values=mask_values)
 
     return field
 

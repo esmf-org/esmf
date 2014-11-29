@@ -39,9 +39,9 @@ class TestRegrid(TestBase):
             gridYCorner[:, j] = float(j) / 4.
 
         # create a Field on the Grid
-        srcfield = NewField(srcgrid, "GRIDFIELD!")
+        srcfield = Field(srcgrid, "GRIDFIELD!")
         srcfield.data[:, :] = 10.
-        dstfield = NewField(srcgrid, "GRIDFIELD!")
+        dstfield = Field(srcgrid, "GRIDFIELD!")
         dstfield.data[:, :] = 10.
 
         # regridding
@@ -63,7 +63,7 @@ class TestRegrid(TestBase):
         else:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
-        dstfield = NewField(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
+        dstfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
 
         # create grid
         max_index = np.array([16, 16])
@@ -83,7 +83,7 @@ class TestRegrid(TestBase):
             gridYCorner[:, j] = float(j)
 
         # create a Field on the Grid
-        srcfield = NewField(grid, "GRIDFIELD!")
+        srcfield = Field(grid, "GRIDFIELD!")
 
         srcfield.data[:, :] = 10.
 
@@ -108,7 +108,7 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create a field on the mesh
-        srcfield = NewField(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
+        srcfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
 
         # initialize the source field
         for i in range(srcfield.shape[0]):
@@ -120,7 +120,7 @@ class TestRegrid(TestBase):
         [x, y] = [0, 1]
 
         # create a Field on the Grid
-        dstfield = NewField(grid, "GRIDFIELD!", mask_values=[0])
+        dstfield = Field(grid, "GRIDFIELD!", mask_values=[0])
 
         # initialize the destination field according to the mask
         dstfield.data[:, :] = -100
@@ -158,12 +158,12 @@ class TestRegrid(TestBase):
         [x, y] = [0, 1]
 
         # create area field
-        dstarea = NewField(mesh, 'DESTINATION AREAS!',
+        dstarea = Field(mesh, 'DESTINATION AREAS!',
                            meshloc=MeshLoc.ELEMENT)
         dstarea.get_area()
 
         # create a Field on the Grid
-        srcarea = NewField(grid, "SOURCE AREAS!")
+        srcarea = Field(grid, "SOURCE AREAS!")
         srcarea.get_area()
 
         for i in range(srcarea.shape[x]):
@@ -190,17 +190,17 @@ class TestRegrid(TestBase):
         dstgrid = grid_create_periodic([55, 28])
 
         # create the Fields
-        srcfield = ESMF.NewField(srcgrid, 'srcfield', mask_values=[0])
-        dstfield = ESMF.NewField(dstgrid, 'dstfield')
-        exactfield = ESMF.NewField(dstgrid, 'exactfield')
+        srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
+        dstfield = ESMF.Field(dstgrid, 'dstfield')
+        exactfield = ESMF.Field(dstgrid, 'exactfield')
 
         # create the area fields
-        srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
-        dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
+        srcareafield = ESMF.Field(srcgrid, 'srcareafield')
+        dstareafield = ESMF.Field(dstgrid, 'dstareafield')
 
         # create the fraction fields
-        srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
-        dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
+        srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
+        dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_grid_periodic(srcfield)
@@ -239,13 +239,13 @@ class TestRegrid(TestBase):
                                  [0.5, 0.5, 0.5, 19.5, 19.5, 19.5])
 
         # create Field objects on the Meshes
-        srcfield = ESMF.NewField(srcgrid, 'srcfield')
-        srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
-        srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
-        dstfield = ESMF.NewField(dstgrid, 'dstfield')
-        dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
-        dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
-        exactfield = ESMF.NewField(dstgrid, 'exactfield')
+        srcfield = ESMF.Field(srcgrid, 'srcfield')
+        srcareafield = ESMF.Field(srcgrid, 'srcareafield')
+        srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
+        dstfield = ESMF.Field(dstgrid, 'dstfield')
+        dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+        dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
+        exactfield = ESMF.Field(dstgrid, 'exactfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_grid_3d(srcfield)
@@ -282,13 +282,13 @@ class TestRegrid(TestBase):
         dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
 
         # create Field objects on the Meshes
-        srcfield = ESMF.NewField(srcgrid, 'srcfield', mask_values=[0])
-        srcareafield = ESMF.NewField(srcgrid, 'srcareafield')
-        srcfracfield = ESMF.NewField(srcgrid, 'srcfracfield')
-        dstfield = ESMF.NewField(dstgrid, 'dstfield')
-        dstareafield = ESMF.NewField(dstgrid, 'dstareafield')
-        dstfracfield = ESMF.NewField(dstgrid, 'dstfracfield')
-        exactfield = ESMF.NewField(dstgrid, 'exactfield')
+        srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
+        srcareafield = ESMF.Field(srcgrid, 'srcareafield')
+        srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
+        dstfield = ESMF.Field(dstgrid, 'dstfield')
+        dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+        dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
+        exactfield = ESMF.Field(dstgrid, 'exactfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_grid(srcfield)
@@ -333,15 +333,15 @@ class TestRegrid(TestBase):
         grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
 
         # create Field objects on the Meshes
-        srcfield = ESMF.NewField(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcfracfield = ESMF.NewField(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.NewField(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # make gridded fields
-        exactfield = ESMF.NewField(grid, 'exactfield')
-        dstfield = ESMF.NewField(grid, 'dstfield')
-        dstfracfield = ESMF.NewField(grid, 'dstfracfield')
-        dstareafield = ESMF.NewField(grid, 'dstareafield')
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn,
@@ -387,13 +387,13 @@ class TestRegrid(TestBase):
         grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4])
 
         # create Fields
-        srcfield = ESMF.NewField(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.NewField(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcfracfield = ESMF.NewField(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        dstfield = ESMF.NewField(grid, 'dstfield')
-        dstareafield = ESMF.NewField(grid, 'dstareafield')
-        dstfracfield = ESMF.NewField(grid, 'dstfracfield')
-        exactfield = ESMF.NewField(grid, 'exactfield')
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        exactfield = ESMF.Field(grid, 'exactfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -437,9 +437,9 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create Field objects
-        srcfield = ESMF.NewField(mesh, 'srcfield')
-        dstfield = ESMF.NewField(grid, 'dstfield', mask_values=[0])
-        exactfield = ESMF.NewField(grid, 'exactfield', mask_values=[0])
+        srcfield = ESMF.Field(mesh, 'srcfield')
+        dstfield = ESMF.Field(grid, 'dstfield', mask_values=[0])
+        exactfield = ESMF.Field(grid, 'exactfield', mask_values=[0])
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -477,9 +477,9 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create Field objects
-        srcfield = ESMF.NewField(mesh, 'srcfield')
-        dstfield = ESMF.NewField(grid, 'dstfield')
-        exactfield = ESMF.NewField(grid, 'exactfield')
+        srcfield = ESMF.Field(mesh, 'srcfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        exactfield = ESMF.Field(grid, 'exactfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -517,13 +517,13 @@ class TestRegrid(TestBase):
                 mesh_create_10()
 
         # create ESMP_Field objects on the Meshes
-        srcfield = ESMF.NewField(srcmesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.NewField(srcmesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcfracfield = ESMF.NewField(srcmesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        dstfield = ESMF.NewField(dstmesh, 'dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        dstareafield = ESMF.NewField(dstmesh, 'dstareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-        dstfracfield = ESMF.NewField(dstmesh, 'dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        exactfield = ESMF.NewField(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfield = ESMF.Field(srcmesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(srcmesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(srcmesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        dstfield = ESMF.Field(dstmesh, 'dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        dstareafield = ESMF.Field(dstmesh, 'dstareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+        dstfracfield = ESMF.Field(dstmesh, 'dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        exactfield = ESMF.Field(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc, \

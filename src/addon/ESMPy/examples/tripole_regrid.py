@@ -49,7 +49,7 @@ gridYCoord = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
 
 xctfield.data[...] = 10.0 + (gridXCoord*deg2rad)**2 + (gridYCoord*deg2rad)**2
 
-dstfield[...] = 1e20
+dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # NOTE: this example requires the unmapped_action flag to be set to IGNORE missing values due to masking
