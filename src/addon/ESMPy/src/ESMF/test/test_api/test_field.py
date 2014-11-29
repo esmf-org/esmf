@@ -66,6 +66,11 @@ class TestField(TestBase):
 
         return field
 
+    def test_ocgismeta(self):
+        self.maskedfield = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        self.maskedfield._ocgis["test"] = "testmetaobject"
+        assert (self.maskedfield._ocgis["test"] ==  "testmetaobject")
+
     def test_del(self):
         self.maskedfield = self.make_maskedfield(np.array([10,10], dtype=np.int32))
         del(self.maskedfield)

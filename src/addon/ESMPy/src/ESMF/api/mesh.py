@@ -129,7 +129,9 @@ class Mesh(object):
         self.spatial_dim = None
         self.rank = 1
 
-        
+        # for ocgis compatibility
+        self._ocgis = {}
+
         if not fromfile:
             # initialize not fromfile variables
             self.element_count = None

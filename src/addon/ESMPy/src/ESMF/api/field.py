@@ -174,7 +174,10 @@ class Field(ma.MaskedArray):
         obj.ndbounds = local_ndbounds
         obj.grid = grid
         obj.name = name
- 
+
+        # for ocgis compatibility
+        obj._ocgis = {}
+
         return obj
 
     @staticmethod

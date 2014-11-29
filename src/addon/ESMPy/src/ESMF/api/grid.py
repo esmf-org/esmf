@@ -195,6 +195,9 @@ class Grid(object):
         self.coord_sys = coord_sys
         self.ndims = None # Applies to Gridspec only
 
+        # for ocgis compatibility
+        self._ocgis = {}
+
         # size, type and rank of the grid for bookeeping of coordinates 
         self.size = [None]
         # size_local holds the sizes according to the parallel distribution
