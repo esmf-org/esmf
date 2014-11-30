@@ -7,6 +7,11 @@ from ESMF.test.base import TestBase
 from ESMF.test.test_api.mesh_utilities import *
 from ESMF.test.test_api.grid_utilities import *
 
+# TODO: combinatorial expansions in regrid tests are complex
+  #  1. argument values of the regrid methods
+  #  2. types of field that go into the regrid methods
+  #  3. types of the grids underneath the field
+
 class TestRegrid(TestBase):
     def test_field_regrid(self):
         # create grids

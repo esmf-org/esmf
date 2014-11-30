@@ -52,20 +52,14 @@ class TestGrid(TestBase):
 
         max_index = np.array([12, 20])
 
-        print "GridCreate 1"
         grid = Grid(max_index)
 
-        print "GridCreate 2"
         grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
                      coord_typekind=TypeKind.R4)
-        print "GridCreate 3"
         grid3 = Grid(max_index, num_peri_dims=1)
 
-        print "GridCreate 4"
         grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
                      coord_typekind=TypeKind.R4)
-
-        print "GridCreate 5"
         grid5 = Grid(max_index, num_peri_dims=1, periodic_dim=1,
                      coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
 
@@ -79,17 +73,11 @@ class TestGrid(TestBase):
 
         max_index = np.array([12, 20, 37])
 
-        print "GridCreate 1"
         grid = Grid(max_index)
 
-        print "GridCreate 2"
         grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
                      coord_typekind=TypeKind.R4)
-
-        print "GridCreate 3"
         grid3 = Grid(max_index, num_peri_dims=1)
-
-        print "GridCreate 4"
         grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
                      coord_typekind=TypeKind.R4)
 
@@ -208,7 +196,9 @@ class TestGrid(TestBase):
                 if (i == 2.0):
                     mask[i, j] = 1
                 else:
-                    mask[i, j] = 0;
+                    mask[i, j] = 0
+
+        assert(all(mask[2, :] == [1]*mask.shape[y]))
 
     def test_grid_mask_3D(self):
 
@@ -222,9 +212,9 @@ class TestGrid(TestBase):
         # Add Mask
         mask = grid.add_item(GridItem.MASK)
         mask[...] = 1
-        mask[:, 2] = 0
+        mask[:, 2, 4] = 0
 
-        assert (not np.all(mask[:, 2]))
+        assert (np.all(mask[:, 2, 4] == [0]*mask.shape[0]))
 
     def test_grid_area(self):
 
@@ -240,7 +230,10 @@ class TestGrid(TestBase):
         # Add Areas
         area = grid.add_item(GridItem.AREA)
 
-        area[:] = 1.0
+        area[...] = 1.0
+
+        if pet_count() == 0:
+            assert(np.all(area[...] == np.ones([12,20])))
 
     def test_grid_area_3D(self):
 
@@ -256,7 +249,11 @@ class TestGrid(TestBase):
         # Add Areas
         area = grid.add_item(GridItem.AREA)
 
-        area[:] = 1.0
+        if pet_count() == 0:
+            areavals = np.ones([10, 20, 30])*12
+            area[:] = areavals
+            assert(np.all(area[...] == 12*np.ones([10, 20, 30])))
+
 
     def test_grid_create_from_file_scrip(self):
         reg_decomp = [pet_count(), 1]

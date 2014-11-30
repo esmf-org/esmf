@@ -96,13 +96,14 @@ class TestField(TestBase):
                 elif (i == 3.0):
                     mask[i, j] = 3
                 else:
-                    mask[i, j] = 0;
+                    mask[i, j] = 0
 
         # create a Field on the Grid, should inherit the mask
-        field = Field(grid, "FIELD!", mask_values=[2])
+        field = Field(grid, "FIELD!", mask_values=[2, 3])
 
-        if (not field.mask[2][0]):
-            raise ValueError("field mask is incorrect")
+        if pet_count() == 0:
+            assert (all(field.mask[2, :]))
+            assert (all(field.mask[3, :]))
 
     def test_field_mask_with_xd(self):
 
@@ -213,7 +214,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.CENTER])
 
         # create a Field on the Grid
@@ -227,7 +228,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.EDGE1_VCENTER])
 
         # grid does not need coordinates to be ready for a field
@@ -243,7 +244,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.EDGE2_VCENTER])
 
         # grid does not need coordinates to be ready for a field
@@ -258,7 +259,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.CORNER_VCENTER])
 
         # grid does not need coordinates to be ready for a field
@@ -274,7 +275,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.CENTER_VFACE])
 
         # create a Field on the Grid
@@ -288,7 +289,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.EDGE1_VFACE])
 
         # create a Field on the Grid
@@ -302,7 +303,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.EDGE2_VFACE])
 
         # create a Field on the Grid
@@ -316,7 +317,7 @@ class TestField(TestBase):
 
         # create a Grid with center staggers
         max_index = np.array([10, 20, 30])
-        grid = Grid(max_index, coord_sys=CoordSys.CART, \
+        grid = Grid(max_index, coord_sys=CoordSys.CART,
                     staggerloc=[StaggerLoc.CORNER_VFACE])
 
         # create a Field on the Grid
@@ -329,7 +330,7 @@ class TestField(TestBase):
     def test_field_r8_grid(self):
         # create grid
         max_index = np.array([12, 20])
-        grid = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_RAD, \
+        grid = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_RAD,
                     staggerloc=[StaggerLoc.CENTER])
 
         field = Field(grid, 'Field!', TypeKind.R8)
@@ -346,9 +347,9 @@ class TestField(TestBase):
     def test_field_r4_grid(self):
         # create grid
         max_index = np.array([12, 20])
-        grid = Grid(max_index, num_peri_dims=1, \
-                    coord_sys=CoordSys.SPH_RAD, \
-                    coord_typekind=TypeKind.R4, \
+        grid = Grid(max_index, num_peri_dims=1,
+                    coord_sys=CoordSys.SPH_RAD,
+                    coord_typekind=TypeKind.R4,
                     staggerloc=[StaggerLoc.CENTER])
 
         field = Field(grid, 'Field!', typekind=TypeKind.R4)
@@ -366,9 +367,9 @@ class TestField(TestBase):
     def test_field_i8_grid(self):
         # create grid
         max_index = np.array([12, 20])
-        grid = Grid(max_index, num_peri_dims=1, \
-                    coord_sys=CoordSys.SPH_RAD, \
-                    coord_typekind=TypeKind.R4, \
+        grid = Grid(max_index, num_peri_dims=1,
+                    coord_sys=CoordSys.SPH_RAD,
+                    coord_typekind=TypeKind.R4,
                     staggerloc=[StaggerLoc.CENTER])
 
         field = Field(grid, 'Field!', TypeKind.I8)
@@ -386,9 +387,9 @@ class TestField(TestBase):
     def test_field_i4_grid(self):
         # create grid
         max_index = np.array([12, 20])
-        grid = Grid(max_index, num_peri_dims=1, \
-                    coord_sys=CoordSys.SPH_RAD, \
-                    coord_typekind=TypeKind.R4, \
+        grid = Grid(max_index, num_peri_dims=1,
+                    coord_sys=CoordSys.SPH_RAD,
+                    coord_typekind=TypeKind.R4,
                     staggerloc=[StaggerLoc.CENTER])
 
         field = Field(grid, 'Field!', TypeKind.I4)
@@ -419,13 +420,11 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = Field(mesh, 'Field!', \
-                         TypeKind.R8, \
+        field = Field(mesh, 'Field!',
+                         TypeKind.R8,
                          MeshLoc.NODE)
-        print "field1 created"
         field2 = Field(mesh, 'Field!',
                           meshloc=MeshLoc.ELEMENT)
-        print "field2 created"
 
         for i in range(field.shape[0]):
             field.data[i] = 10
@@ -557,8 +556,8 @@ class TestField(TestBase):
     def test_field_switchedindices_grid(self):
         # create grid
         max_index = np.array([12, 20])
-        grid = Grid(max_index, num_peri_dims=1, \
-                    coord_sys=CoordSys.SPH_RAD, \
+        grid = Grid(max_index, num_peri_dims=1,
+                    coord_sys=CoordSys.SPH_RAD,
                     staggerloc=[StaggerLoc.CENTER])
 
         gridtofieldmap = np.array([2, 1])
