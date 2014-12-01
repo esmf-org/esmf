@@ -8,10 +8,6 @@ the destination Field.    After the regridding is completed, the
 destination Field is compared to the exact solution over that domain.
 """
 
-import sys
-
-import ctypes
-
 from getopt import getopt
 
 try:
@@ -24,9 +20,8 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL, EPSILON
-from ESMF.test.regrid_test.grid_regridding_utilities import compare_fields_grid as compare_fields2
-from ESMF.test.regrid_test.grid_regridding_utilities import compute_mass_grid as compute_mass
+from ESMF.test.regrid_from_file.regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL
+from ESMF.test.test_api.grid_utilities import compute_mass_grid as compute_mass
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
@@ -65,15 +60,21 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
         lons = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
         lats = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
     else:
-        lons = grid_or_mesh.get_grid_coords_from_esmc(0, ESMF.StaggerLoc.CENTER,
-                                                      ndims=grid_or_mesh.ndims)
-        lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER,
-                                                      ndims=grid_or_mesh.ndims)
+        # get the data pointer and bounds of the ESMF allocation
+        lonptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 0, staggerloc=ESMF.StaggerLoc.CENTER)
+        latptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 1, staggerloc=ESMF.StaggerLoc.CENTER)
+        lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
+
         if grid_or_mesh.ndims == 1:
-            lons_1d = lons
-            lats_1d = lats
+            lons_1d = ESMF.esmf_array1d(lonptr, grid_or_mesh.type, grid_or_mesh.size_local[ESMF.StaggerLoc.CENTER][0])
+            lats_1d = ESMF.esmf_array1d(latptr, grid_or_mesh.type, grid_or_mesh.size_local[ESMF.StaggerLoc.CENTER][1])
+
             lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
             lats = np.array([lats_1d for lon in lons_1d])
+        else:
+            lons = ESMF.esmf_array(lonptr, grid_or_mesh.type, ub - lb)
+            lats = ESMF.esmf_array(latptr, grid_or_mesh.type, ub - lb)
+
     lons = np.radians(lons)
     lats = np.radians(lats)
     return lons,lats
@@ -90,10 +91,10 @@ def create_field(grid, name, regrid_method=None, domask=False):
 
     if isinstance(grid,ESMF.Mesh):
         if regrid_method == ESMF.RegridMethod.CONSERVE:
-            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT, 
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT,
                                 mask_values=mask_values)
         else:
-            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE, 
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE,
                                 mask_values=mask_values)
     else:
         field = ESMF.Field(grid, name, mask_values=mask_values)
@@ -193,7 +194,6 @@ def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False,
                 max_error = err
             if (err < min_error):
                 min_error = err
-
 
     # gather error on processor 0 or set global variables in serial case
     mass1_global = 0

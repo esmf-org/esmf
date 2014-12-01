@@ -129,7 +129,9 @@ class Mesh(object):
         self.spatial_dim = None
         self.rank = 1
 
-        
+        # for ocgis compatibility
+        self._ocgis = {}
+
         if not fromfile:
             # initialize not fromfile variables
             self.element_count = None
@@ -179,9 +181,10 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if not self._finalized:
-            ESMP_MeshDestroy(self)
-            self._finalized = True
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_MeshDestroy(self)
+                self._finalized = True
 
 
     def __repr__(self):

@@ -101,61 +101,49 @@ The ESMPy package should include the following files:
 -- doc directory - contains all Sphinx documentation files
 
 -- examples directory - iPython script examples
-
-  -- grid_create_from_file.py - grid creation from file
-  -- grid_mesh_regrid.py - grid to mesh conservative regridding
+  -- __init__.py - package init file
   -- hello_world.py - simple hello world example
+  -- grid_create_from_file.py - grid creation from file
   -- mesh_create_from_file.py - mesh creation from file
+  -- grid_mesh_regrid.py - grid to mesh bilinear regridding
+  -- tripole_regrid.py - conservative regridding between a GRIDSPEC and a tripole grid using masking
+  -- ungridded_dimension_regrid.py - conservative regridding with extra field dimesions for time and vertical levels
+  -- exampletest.py - examples test class
+  -- run_examples.py - script to run all examples
+  -- run_examples_dryrun.py - script to download files required for examples
+
 
 -- src directory
-
   -- ESMF directory
-
     -- __init__.py - package init file
-
     -- api directory
-
+      -- __init__.py - package init file
+      -- array.py - MaskedArray base class for Field
       -- constants.py - global constants
+      -- esmpymanager.py - Manager class
       -- field.py - Field class
       -- grid.py - Grid class
-      -- manager.py - Manager class
       -- mesh.py - Mesh class
       -- regrid.py - Regrid class
 
     -- fragments directory
-      -- extras.py - ESMPy routines that are not part of the library because
+      -- extras.py - ESMPy routines that are not currently part of the ESMPy package
       -- remap.py - interface to ESMF_RegridWeightGen application
 
     -- interface directory
-
       -- cbindings.py - ctypes bindings to ESMF C interface
       -- loadESMF.py - script to load the ESMF shared library
 
 
     -- test directory
+      -- __init__.py - package init file
+      -- base.py - base class to hold utility test functions
+      -- base_test.py - testing of the base class
+      -- run_alltest.py - unit test run utility
+      -- test_cbindings.py - tests of the "glue" layer to the ESMF c interface
 
-      -- run_unit_test.py - unit test run utility
-      -- unit_test.py - unit tests
-
-      -- regrid_test directory
-
-        -- field_regridding_test.py - Field regridding tutorial
-        -- grid_grid_regrid_csrv_mask_3D_test.py - first-order conservative regridding
-                                                   between two 3D Grids with masking
-        -- grid_grid_regrid_csrv_mask_test.py - first-order conservative regridding
-                                                between two Grids with masking
-        -- grid_mesh_regrid_csrv_mask_test.py - first-order conservative regridding
-                                                between a Grid and a Mesh with masking
-        -- grid_mesh_regrid_csrv_test.py - first-order conservative regridding
-                                           between a Grid and a Mesh
-        -- grid_mesh_regrid_mask_test.py - bilinear regridding between
-                                          a Grid and a Mesh with masking
-        -- grid_mesh_regrid_test.py - bilinear regridding between a Grid and a Mesh
-        -- mesh_mesh_regrid_test.py - first-order conservative regridding between
-                                      two Meshes
-
-        -- regrid_from_file_test directory
-  
+        -- regrid_from_file directory
+          -- __init__.py - package init file
           -- read_test_cases_from_control_file.py - utility to read test cases from file
           -- regrid_check.py - Regrid testing program
           -- regrid_check_driver.py - Driver program for regrid testing
@@ -164,8 +152,18 @@ The ESMPy package should include the following files:
           -- run_regrid_from_file.py - regrid test run utility
           -- run_regrid_from_file_dryrun.py - regrid test dryrun utility
 
-    -- util directory
+        -- test_api
+          -- __init__.py - package init file
+          -- grid_utilities.py - utility functions for grids
+          -- mesh_utilities.py - utility functions for meshes
+          -- test_array.py - array tests
+          -- test_field.py - field tests
+          -- test_grid.py - grid tests
+          -- test_mesh.py - mesh tests
+          -- test_regrid.py - regrid tests
 
+    -- util directory
+      -- __init__.py - package init file
       -- decorators.py - decorators for special functions
       -- exceptions.py - warning and exception classes
 
@@ -243,24 +241,17 @@ To use this package in an external program, import it with:
 VALIDATION:
 -----------
 
-The setup.py file can be used to run all of the ESMPy tests (in serial or 
-parallel), like this:
-
-    python setup.py test_all
-
-    python setup.py test_all_parallel
-
-or subsets of the tests individually, like this:
+The setup.py file can be used to run subsets of the tests individually, like this:
 
     python setup.py test
 
-    python setup.py test_regrid
+    python setup.py test_examples
 
     python setup.py test_regrid_from_file
 
     python setup.py test_parallel
 
-    python setup.py test_regrid_parallel
+    python setup.py test_examples_parallel
 
     python setup.py test_regrid_from_file_parallel
 
@@ -279,7 +270,7 @@ Individual tests can be run with nose using the following format:
 
 e.g.  
 
-    nosetests src/ESMF/test/unit_test.py:field_regrid_test
+    nosetests src/ESMF/test/test_api/test_regrid.py:test_grid_mesh_regrid
 
 
 ================================================================================
@@ -292,14 +283,15 @@ interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
 - There is no FieldBundle class, only single Fields.
-- There is no support for tripole or multi-tile Grids.
+- There is no support for multi-tile Grids.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK 
   support.
-- Conservative regridding with a source Mesh created from file is not supported, because the Mesh cannot retrieve
-  coordinates from the elements.
+- Conservative regridding with a source Mesh created from file is not supported,
+  because the Mesh cannot retrieve coordinates from the elements.
 
 Testing related:
-- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI.
+- Nightly regression testing is limited to a small subset of the ESMF test
+  platforms, including Darwin and Linux running gfortran with openMPI.
 
 ================================================================================
 

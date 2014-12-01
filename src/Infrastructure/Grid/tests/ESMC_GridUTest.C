@@ -63,358 +63,6 @@ int main(void){
 
   rc=ESMC_LogSet(true);
 
-#ifdef ESMF_TESTEXHAUSTIVE
-  //----------------------------------------------------------------------------
-  //  GridCreateNoPeriDim
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Create a Grid
-  maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = 20;
-  maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
-
-  strcpy(name, "GridCreate");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  grid_np = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-
-  // free memory
-  free(maxIndex);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddCoord to grid_np
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddCoord");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CORNER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridGetCoordBounds");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc=ESMC_GridGetCoordBounds(grid_np, 
-                             ESMC_STAGGERLOC_CORNER, 
-                             elbnd,
-                             eubnd,NULL);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddItem to grid_np
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddItem");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddItem(grid_np, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CORNER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridCreate1PeriDim for a tripole grid
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Create a Grid
-  maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = 12;
-  maxIndex[1] = 20;
-  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
-
-  strcpy(name, "GridCreate");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_PoleKind_Flag polekind[2];
-  polekind[0] = ESMC_POLEKIND_MONOPOLE;
-  polekind[1] = ESMC_POLEKIND_BIPOLE;
-  ESMC_PoleKind_Flag *pkptr = polekind;
-  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, &coordsys, &typekind, 
-                                         pkptr, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  // free memory
-  free(maxIndex);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddCoord and GetCoord on grid_tripole
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddCoord");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(grid_tripole, ESMC_STAGGERLOC_CENTER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill first coord array and computational bounds
-  int *exLBound_tripole = (int *)malloc(dimcount*sizeof(int));
-  int *exUBound_tripole = (int *)malloc(dimcount*sizeof(int));
-
-  strcpy(name, "GridGetCoord - X");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridXCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   exLBound_tripole, 
-                                                   exUBound_tripole, &rc);
-
-  p = 0;
-  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
-    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
-      gridXCoord_tripole[p]=(double)(i0);
-      //printf("PET%d - set gridXCoord_tripole[%d] = %f (%f)\n", localPet, p, 
-      //  (double)(i0), gridXCoord_tripole[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill second coord array
-  strcpy(name, "GridGetCoord - Y");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridYCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 2, 
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   NULL, NULL, &rc);
-
-  p = 0;
-  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
-    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
-      gridYCoord_tripole[p]=(double)(i1);
-      //printf("PET%d - set gridYCoord_tripole[%d] = %f (%f)\n", localPet, p, 
-      //  (double)(i1), gridYCoord_tripole[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddCoord and GetCoord on grid_1p
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddCoord");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(grid_1p, ESMC_STAGGERLOC_CENTER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill first coord array and computational bounds
-  int *exLBound = (int *)malloc(dimcount*sizeof(int));
-  int *exUBound = (int *)malloc(dimcount*sizeof(int));
-
-  strcpy(name, "GridGetCoord - X");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridXCoord = (double *)ESMC_GridGetCoord(grid_1p, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   exLBound, exUBound, &rc);
-
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridXCoord[p]=(double)(i0);
-      //printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
-      //  (double)(i0), gridXCoord[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill second coord array
-  strcpy(name, "GridGetCoord - Y");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridYCoord = (double *)ESMC_GridGetCoord(grid_1p, 2, 
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   NULL, NULL, &rc);
-
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridYCoord[p]=(double)(i1);
-      //printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
-      //  (double)(i1), gridYCoord[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "Validate Grid coordinates - X");
-  strcpy(failMsg, "Grid X coordinates not set correctly");
-  double *gridXCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 1,
-                                                         ESMC_STAGGERLOC_CENTER, 
-                                                         NULL, NULL, &rc);
-  pass = true;
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      if (gridXCoord_check[p] != (double)(i0)) {
-        printf("FAIL - PET%d - gridXCoord[%d] = %f\n",localPet, p, gridXCoord_check[p]);
-        pass = false;
-      }
-      ++p;
-    }
-  }
-
-  ESMC_Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "Validate Grid coordinates - Y");
-  strcpy(failMsg, "Grid Y coordinates not set correctly");
-  double *gridYCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 2, 
-                                                         ESMC_STAGGERLOC_CENTER, 
-                                                         NULL, NULL, &rc);
-  pass = true;
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      if (gridYCoord_check[p] != (double)(i1)) {
-        printf("FAIL - PET%d - gridYCoord[%d] = %f\n",localPet, p, gridYCoord_check[p]);
-        pass = false;
-      }
-      ++p;
-    }
-  }
-
-  ESMC_Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddItem mask to grid_1p
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddItem");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddItem(grid_1p, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill item array
-  strcpy(name, "GridGetItem");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  int *gridMask = (int *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_MASK,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   &rc);
-
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridMask[p]=i0;
-      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
-        //i0, gridMask[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridAddItem area to grid_1p
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "GridAddItem");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddItem(grid_1p, ESMC_GRIDITEM_AREA, ESMC_STAGGERLOC_CENTER);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill item array
-  strcpy(name, "GridGetItem");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridArea = (double *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_AREA,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   &rc);
-
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridArea[p]=1;
-      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p,
-        //i0, gridMask[p]);
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //  GridWrite
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Write a Grid
-  strcpy(name, "GridWrite");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridWrite(grid_1p, ESMC_STAGGERLOC_CENTER, "gridfile");
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-
-  //----------------------------------------------------------------------------
-  //----------------------------------------------------------------------------
-  //  GridDestroy
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Destroy a Grid
-  strcpy(name, "GridDestroy");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridDestroy(&grid_np);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // Destroy a Grid
-  strcpy(name, "GridDestroy");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridDestroy(&grid_1p);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-#endif
   //----------------------------------------------------------------------------
   //  GridCreate1PeriDim (no periodicDim specified)
   //----------------------------------------------------------------------------
@@ -448,6 +96,10 @@ int main(void){
   grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &coordsys,
                                           &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_1p_pdim1);
+  }
   free(maxIndex);
   //----------------------------------------------------------------------------
 
@@ -874,6 +526,357 @@ int main(void){
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
   //----------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+  //----------------------------------------------------------------------------
+  //  GridCreateNoPeriDim
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Create a Grid
+  maxIndex = (int *)malloc(dimcount*sizeof(int));
+  maxIndex[0] = 20;
+  maxIndex[1] = 20;
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+
+  strcpy(name, "GridCreate");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_np = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // free memory
+  free(maxIndex);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddCoord to grid_np
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CORNER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetCoordBounds");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc=ESMC_GridGetCoordBounds(grid_np, 
+                             ESMC_STAGGERLOC_CORNER, 
+                             elbnd,
+                             eubnd,NULL);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddItem to grid_np
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddItem(grid_np, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CORNER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridCreate1PeriDim for a tripole grid
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Create a Grid
+  maxIndex = (int *)malloc(dimcount*sizeof(int));
+  maxIndex[0] = 12;
+  maxIndex[1] = 20;
+  rc = ESMC_InterfaceIntSet(&i_maxIndex, maxIndex, dimcount);
+
+  strcpy(name, "GridCreate");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_PoleKind_Flag polekind[2];
+  polekind[0] = ESMC_POLEKIND_MONOPOLE;
+  polekind[1] = ESMC_POLEKIND_BIPOLE;
+  ESMC_PoleKind_Flag *pkptr = polekind;
+  grid_tripole = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &coordsys, 
+                                         &typekind, pkptr, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  // free memory
+  free(maxIndex);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddCoord and GetCoord on grid_tripole
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddCoord(grid_tripole, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill first coord array and computational bounds
+  int *exLBound_tripole = (int *)malloc(dimcount*sizeof(int));
+  int *exUBound_tripole = (int *)malloc(dimcount*sizeof(int));
+
+  strcpy(name, "GridGetCoord - X");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridXCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 1,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   exLBound_tripole, 
+                                                   exUBound_tripole, &rc);
+
+  p = 0;
+  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
+    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
+      gridXCoord_tripole[p]=(double)(i0);
+      //printf("PET%d - set gridXCoord_tripole[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i0), gridXCoord_tripole[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill second coord array
+  strcpy(name, "GridGetCoord - Y");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridYCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 2, 
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   NULL, NULL, &rc);
+
+  p = 0;
+  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
+    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
+      gridYCoord_tripole[p]=(double)(i1);
+      //printf("PET%d - set gridYCoord_tripole[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i1), gridYCoord_tripole[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddCoord and GetCoord on grid_1p
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddCoord(grid_1p, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill first coord array and computational bounds
+  int *exLBound = (int *)malloc(dimcount*sizeof(int));
+  int *exUBound = (int *)malloc(dimcount*sizeof(int));
+
+  strcpy(name, "GridGetCoord - X");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridXCoord = (double *)ESMC_GridGetCoord(grid_1p, 1,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   exLBound, exUBound, &rc);
+
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      gridXCoord[p]=(double)(i0);
+      //printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i0), gridXCoord[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill second coord array
+  strcpy(name, "GridGetCoord - Y");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridYCoord = (double *)ESMC_GridGetCoord(grid_1p, 2, 
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   NULL, NULL, &rc);
+
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      gridYCoord[p]=(double)(i1);
+      //printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i1), gridYCoord[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Validate Grid coordinates - X");
+  strcpy(failMsg, "Grid X coordinates not set correctly");
+  double *gridXCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 1,
+                                                         ESMC_STAGGERLOC_CENTER, 
+                                                         NULL, NULL, &rc);
+  pass = true;
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      if (gridXCoord_check[p] != (double)(i0)) {
+        printf("FAIL - PET%d - gridXCoord[%d] = %f\n",localPet, p, gridXCoord_check[p]);
+        pass = false;
+      }
+      ++p;
+    }
+  }
+
+  ESMC_Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Validate Grid coordinates - Y");
+  strcpy(failMsg, "Grid Y coordinates not set correctly");
+  double *gridYCoord_check = (double *)ESMC_GridGetCoord(grid_1p, 2, 
+                                                         ESMC_STAGGERLOC_CENTER, 
+                                                         NULL, NULL, &rc);
+  pass = true;
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      if (gridYCoord_check[p] != (double)(i1)) {
+        printf("FAIL - PET%d - gridYCoord[%d] = %f\n",localPet, p, gridYCoord_check[p]);
+        pass = false;
+      }
+      ++p;
+    }
+  }
+
+  ESMC_Test((pass==true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddItem mask to grid_1p
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddItem(grid_1p, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill item array
+  strcpy(name, "GridGetItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int *gridMask = (int *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_MASK,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   &rc);
+
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      gridMask[p]=i0;
+      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
+        //i0, gridMask[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddItem area to grid_1p
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddItem(grid_1p, ESMC_GRIDITEM_AREA, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill item array
+  strcpy(name, "GridGetItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridArea = (double *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_AREA,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   &rc);
+
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      gridArea[p]=1;
+      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p,
+        //i0, gridMask[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridWrite
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Write a Grid
+  strcpy(name, "GridWrite");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridWrite(grid_1p, ESMC_STAGGERLOC_CENTER, "gridfile");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
+  //  GridDestroy
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Destroy a Grid
+  strcpy(name, "GridDestroy");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridDestroy(&grid_np);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Destroy a Grid
+  strcpy(name, "GridDestroy");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridDestroy(&grid_1p);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

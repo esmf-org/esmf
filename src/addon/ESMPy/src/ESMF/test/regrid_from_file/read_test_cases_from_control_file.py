@@ -9,7 +9,9 @@ regrid error threshold.
 
 import os
 import re
-from regrid_from_file_consts import TEST_REGRID_DIR, CONTROL_FNAME
+
+from ESMF.test.regrid_from_file.regrid_from_file_consts import TEST_REGRID_DIR, CONTROL_FNAME
+
 
 def read_test_cases_from_control_file():
 

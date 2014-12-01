@@ -278,7 +278,7 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridCreate1PeriDim(maxIndex, periodicDim, coordSys=None, coordTypeKind=None):
+def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
@@ -308,7 +308,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim, coordSys=None, coordTypeKind=
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), 
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
                                                periodicDim, coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))
