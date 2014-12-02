@@ -26,20 +26,13 @@ module NUOPC_Driver
   private
   
   public routine_SetServices
-  public type_InternalState, type_InternalStateStruct
   public type_PetList
-  public label_InternalState
-  public label_SetModelCount, label_SetModelPetLists
   public label_ModifyInitializePhaseMap
   public label_SetModelServices, label_SetRunSequence, label_Finalize
   public label_SetRunClock
   
   character(*), parameter :: &
     label_InternalState = "Driver_InternalState"
-  character(*), parameter :: &
-    label_SetModelCount = "Driver_SetModelCount"
-  character(*), parameter :: &
-    label_SetModelPetLists = "Driver_SetModelPetLists"
   character(*), parameter :: &
     label_SetModelServices = "Driver_SetModelServices"
   character(*), parameter :: &
@@ -94,12 +87,12 @@ module NUOPC_Driver
   public NUOPC_DriverPrint
   public NUOPC_DriverSetRunSequence
   public NUOPC_DriverSet
-  public NUOPC_DriverSetModel
   
   ! interface blocks
   !---------------------------------------------
   interface NUOPC_DriverAddComp
     module procedure NUOPC_DriverAddGridComp
+    module procedure NUOPC_DriverAddGridCompSO
     module procedure NUOPC_DriverAddCplComp
   end interface
   !---------------------------------------------
@@ -123,6 +116,7 @@ module NUOPC_Driver
   type ComponentMapEntryT
     character(len=160)              :: label
     type(ESMF_GridComp)             :: component
+    integer, pointer                :: petList(:)
   end type
   type ComponentMapEntry
     type(ComponentMapEntryT), pointer :: wrap
@@ -131,6 +125,7 @@ module NUOPC_Driver
   type ConnectorMapEntryT
     character(len=330)              :: label
     type(ESMF_CplComp)              :: connector
+    integer, pointer                :: petList(:)
   end type
   type ConnectorMapEntry
     type(ConnectorMapEntryT), pointer :: wrap
@@ -260,6 +255,8 @@ module NUOPC_Driver
     type(ESMF_CplComp)        :: connector
     character(len=80)         :: srcCompLabel
     character(len=80)         :: dstCompLabel
+    type(type_PetList), pointer :: petLists(:)
+    integer, pointer          :: petList(:)
 
     rc = ESMF_SUCCESS
 
@@ -291,58 +288,6 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-
-#ifdef V6
-    ! SPECIALIZE by calling into attached method to set modelCount
-    call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &
-      userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-      
-    ! allocate lists inside the internal state according to modelCount
-    allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
-      is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
-      is%wrap%modelComp(0:is%wrap%modelCount), &
-      is%wrap%modelIS(0:is%wrap%modelCount), &
-      is%wrap%modelES(0:is%wrap%modelCount), &
-      is%wrap%connectorComp(0:is%wrap%modelCount,0:is%wrap%modelCount), &
-      stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-      
-    ! nullify all of the petLists
-    do i=0, is%wrap%modelCount
-      nullify(is%wrap%modelPetLists(i)%petList)
-      do j=0, is%wrap%modelCount
-        nullify(is%wrap%connectorPetLists(i,j)%petList)
-      enddo
-    enddo
-    
-    ! allocate PhaseMaps
-    allocate(modelPhaseMap(0:is%wrap%modelCount), &
-      connectorPhaseMap(0:is%wrap%modelCount, 0:is%wrap%modelCount), &
-      stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of temporary data structure.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
-    ! SPECIALIZE by calling into optional attached method to set petLists
-    call ESMF_MethodExecute(gcomp, label=label_SetModelPetLists, &
-      existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-#endif
 
     ! prepare the new style members in the internal state
     is%wrap%newStyleFlag = .false.  ! old style by default
@@ -667,17 +612,13 @@ module NUOPC_Driver
       return  ! bail out
 
     ! associated modelComps and create their import and export States + connectorComps
-    nullify(compList)
-    call NUOPC_DriverGetComp(gcomp, compList, rc)    
+    nullify(compList, petLists)
+    call NUOPC_DriverGetComp(gcomp, compList, petLists, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-print *, size(compList)
-    
     do i=0, is%wrap%modelCount
       write (iString, *) i
-      
-      i_petList => is%wrap%modelPetLists(i)%petList
       
       if (i==0) then
       
@@ -687,6 +628,9 @@ print *, size(compList)
         
       else if (i>0) then
       
+        is%wrap%modelPetLists(i)%petList => petLists(i)%petList
+        i_petList => is%wrap%modelPetLists(i)%petList
+
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
         is%wrap%modelComp(i) = compList(i) ! set the alias
@@ -744,6 +688,7 @@ print *, size(compList)
         
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
+        !TODO:
         ! -> for now assume that name is the actual compLabel (not really ok)
         if (i==0) then
           ! driver itself
@@ -768,13 +713,12 @@ print *, size(compList)
         ! now look up the associated connector, okay if it is not a valid object
         ! invalid components are detectable by the CompAreServicesSet() method
         call NUOPC_DriverGetComp(gcomp, srcCompLabel, dstCompLabel, &
-          comp=connector, relaxedflag=.true., rc=rc)
+          comp=connector, petList=petList, relaxedflag=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-          
-print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
         is%wrap%connectorComp(i,j) = connector ! set the alias
+        is%wrap%connectorPetLists(i,j)%petList => petList
         
         ! initialize the connectorPhaseMap pointer members
         nullify(connectorPhaseMap(i,j)%phaseValue)
@@ -783,7 +727,7 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
       enddo
     enddo
 
-    deallocate(compList)
+    deallocate(compList, petLists)
 
     ! initialize the default Run Sequence...
     nullify(is%wrap%runSeq) ! initialize
@@ -2019,7 +1963,7 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
     ! destroy components in the componentMap and their import and export States + connectorComps
     ! and also petLists that were set by the user (and ownership transferred)
     nullify(compList)
-    call NUOPC_DriverGetComp(gcomp, compList, rc)    
+    call NUOPC_DriverGetComp(gcomp, compList, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(compList)
@@ -2102,7 +2046,7 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
-    compSetServicesRoutine, comp, rc)
+    compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
@@ -2114,13 +2058,17 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    integer,             intent(in),  optional :: petList(:)
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Add a GridComp (i.e. Model, Mediator, or Driver) as a child component to a 
-! Driver. The {\tt compLabel} must uniquely identify the child component within 
-! the context of the Driver component.
+! Driver. The GridComp is created on the provided {\tt petList}, or by default
+! across all of the Driver PETs. The {\tt compLabel} must uniquely identify the
+! child component within the context of the Driver component. If the {\tt comp}
+! argument is specified, it will reference the newly created component on 
+! return.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2128,7 +2076,9 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     type(ComponentMapEntry)         :: cmEntry
-    integer                         :: stat, i
+    integer                         :: stat, i, k, lineCount
+    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    character(ESMF_MAXSTR)          :: msgString, lString
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2158,10 +2108,51 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
 #ifdef V6
     cmEntry%wrap%component = is%wrap%modelComp(i)
 #else
-    cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), rc=rc)
-    if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
+    cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
+      petList=petList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    
+    if (present(petList)) then
+      allocate(cmEntry%wrap%petList(size(petList)))
+      cmEntry%wrap%petList = petList  ! copy the petList elements
+    else
+      nullify(cmEntry%wrap%petList) ! invalidate the petList
+    endif
+  
+    if (associated(cmEntry%wrap%petList)) then
+      write (lString, *) size(cmEntry%wrap%petList)
+      write (msgString,"(A)") trim(name)//&
+        " - Creating model component "//trim(cmEntry%wrap%label)//&
+        " with petList of size "//trim(adjustl(lString))//" :"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      if (size(cmEntry%wrap%petList) <= 1000) then
+        ! have the resources to print the entire petList
+        write (petListBuffer, "(10I7)") cmEntry%wrap%petList
+        lineCount = size(cmEntry%wrap%petList)/10
+        if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList)) &
+          lineCount = lineCount + 1
+        do k=1, lineCount
+          call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        enddo
+      endif
+    else
+      write (msgString,"(A)") trim(name)//" - Creating model component "//&
+        trim(cmEntry%wrap%label)//" without petList."
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
 #endif
     call ESMF_ContainerAddUDT(is%wrap%componentMap, trim(compLabel), &
       cmEntry, rc)
@@ -2209,12 +2200,164 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child from shared obnject to a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddComp()
+  subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
+    sharedObj, petList, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    character(len=*),    intent(in)            :: compLabel
+    character(len=*),    intent(in),  optional :: sharedObj
+    integer,             intent(in),  optional :: petList(:)
+    type(ESMF_GridComp), intent(out), optional :: comp
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Add a GridComp (i.e. Model, Mediator, or Driver) as a child component to a 
+! Driver. The GridComp is created on the provided {\tt petList}, or by default
+! across all of the Driver PETs. The {\tt compLabel} must uniquely identify the
+! child component within the context of the Driver component. If the {\tt comp}
+! argument is specified, it will reference the newly created component on 
+! return.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: stat, i, k, lineCount
+    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    character(ESMF_MAXSTR)          :: msgString, lString
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Entering this call means that the new style members are being used
+    is%wrap%newStyleFlag = .true.
+    
+    ! Add another component to the componentMap with associated compLabel
+    allocate(cmEntry%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    is%wrap%componentMapCount = is%wrap%componentMapCount + 1
+    i = is%wrap%componentMapCount
+    cmEntry%wrap%label = trim(compLabel)
+#ifdef V6
+    cmEntry%wrap%component = is%wrap%modelComp(i)
+#else
+    cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
+      petList=petList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    if (present(petList)) then
+      allocate(cmEntry%wrap%petList(size(petList)))
+      cmEntry%wrap%petList = petList  ! copy the petList elements
+    else
+      nullify(cmEntry%wrap%petList) ! invalidate the petList
+    endif
+  
+    if (associated(cmEntry%wrap%petList)) then
+      write (lString, *) size(cmEntry%wrap%petList)
+      write (msgString,"(A)") trim(name)//&
+        " - Creating model component "//trim(cmEntry%wrap%label)//&
+        " with petList of size "//trim(adjustl(lString))//" :"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      if (size(cmEntry%wrap%petList) <= 1000) then
+        ! have the resources to print the entire petList
+        write (petListBuffer, "(10I7)") cmEntry%wrap%petList
+        lineCount = size(cmEntry%wrap%petList)/10
+        if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList)) &
+          lineCount = lineCount + 1
+        do k=1, lineCount
+          call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        enddo
+      endif
+    else
+      write (msgString,"(A)") trim(name)//" - Creating model component "//&
+        trim(cmEntry%wrap%label)//" without petList."
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+#endif
+    call ESMF_ContainerAddUDT(is%wrap%componentMap, trim(compLabel), &
+      cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+#ifndef V6
+    ! add standard NUOPC GridComp Attribute Package to the modelComp
+    call NUOPC_CompAttributeAdd(cmEntry%wrap%component, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+#endif
+
+    ! Call the SetServices on the added component
+    call NUOPC_CompSetServices(cmEntry%wrap%component, &
+      sharedObj=sharedObj, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+      
+    ! Set the default name of the component to be the label (may be overwr.)
+    call ESMF_GridCompSet(cmEntry%wrap%component, &
+      name=trim(cmEntry%wrap%label), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Set the CompLabel attribute
+    call NUOPC_CompAttributeSet(cmEntry%wrap%component, &
+      name="CompLabel", value=trim(cmEntry%wrap%label), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Optionally return the added component
+    if (present(comp)) comp = cmEntry%wrap%component
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_DriverAddComp - Add a CplComp child to a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, dstCompLabel, &
-    compSetServicesRoutine, comp, rc)
+    compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -2227,12 +2370,18 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    integer, target,     intent(in),  optional :: petList(:)
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a CplComp (i.e. Model, Mediator, or Driver) as a child component to a 
-! Driver.
+! Add a CplComp (i.e. Connector) as a child component to a 
+! Driver. The CplComp is created on the provided {\tt petList}, or by defualt
+! across the union of PETs of the components indicated by {\tt srcCompLabel}
+! and {\tt dstCompLabel}. The {\tt compLabel} must uniquely identify the child
+! component within the context of the Driver component. If the {\tt comp}
+! argument is specified, it will reference the newly created component on 
+! return.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2242,6 +2391,12 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
     type(ConnectorMapEntry)         :: cmEntry
     integer                         :: stat, src, dst
     type(ESMF_GridComp)             :: srcComp, dstComp
+    integer, pointer                :: connectorPetList(:)
+    integer, pointer                :: connectorPetListTemp(:)
+    integer, pointer                :: srcPetList(:), dstPetList(:)
+    integer                         :: k, l, cIndex, lineCount
+    character(ESMF_MAXSTR)          :: petListBuffer(100)
+    character(ESMF_MAXSTR)          :: msgString, lString
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2280,6 +2435,62 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
       if (is%wrap%modelComp(dst)==dstComp) exit ! found the match
     enddo
 #endif
+
+    if (present(petList)) then
+      allocate(connectorPetList(size(petList)))
+      connectorPetList = petList  ! copy elements
+    else
+      ! figure out the default union petList....
+      call NUOPC_DriverGetComp(driver, srcCompLabel, petList=srcPetList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call NUOPC_DriverGetComp(driver, dstCompLabel, petList=dstPetList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (associated(srcPetList).and.associated(dstPetList)) then
+        ! construct the union petList
+        allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation #1 of connector petList failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        connectorPetListTemp = srcPetList ! copy contents i_petList start of connectorPetList
+        ! there is no guarantee of order, no way to optimize construction
+        cIndex = size(srcPetList) + 1
+        do k=1, size(dstPetList)
+          ! append element k in j_petList to c_petList if not yet present
+          do l=1, size(srcPetList)
+            if (connectorPetListTemp(l) == dstPetList(k)) exit
+          enddo
+          if (l == size(srcPetList) + 1) then
+            ! append element
+            connectorPetListTemp(cIndex) = dstPetList(k)
+            cIndex = cIndex + 1
+          endif
+        enddo
+        if (cIndex-1 < size(connectorPetListTemp)) then
+          ! shrink the size of connectorPetList to just what it needs to be
+          allocate(connectorPetList(cIndex-1), stat=stat)
+          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation #2 of connector petList failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          connectorPetList = connectorPetListTemp(1:cIndex-1)
+          deallocate(connectorPetListTemp, stat=stat)
+          if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+            msg="Deallocation of connector petList failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        else
+          ! c_petList is already the right size
+          connectorPetList => connectorPetListTemp
+        endif
+      
+      endif
+      
+    endif
     
     ! Add another connector to the connectorMap with associated compLabel
     allocate(cmEntry%wrap, stat=stat)
@@ -2290,10 +2501,49 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
 #ifdef V6
     cmEntry%wrap%connector = is%wrap%connectorComp(src,dst)
 #else
-    cmEntry%wrap%connector = ESMF_CplCompCreate(&
-      name=trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (associated(connectorPetList)) then
+      write (lString, *) size(connectorPetList)
+      write (msgString,"(A)") trim(name)//&
+        " - Creating connector component "//trim(cmEntry%wrap%label)//&
+        " with petList of size "//trim(adjustl(lString))//" :"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      if (size(connectorPetList) <= 1000) then
+        ! have the resources to print the entire petList
+        write (petListBuffer, "(10I7)") connectorPetList
+        lineCount = size(connectorPetList)/10
+        if ((size(connectorPetList)/10)*10 /= size(connectorPetList)) &
+          lineCount = lineCount + 1
+        do k=1, lineCount
+          call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        enddo
+      endif
+      cmEntry%wrap%connector = ESMF_CplCompCreate(&
+        name=trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), &
+        petList=connectorPetList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    else
+      write (msgString,"(A)") trim(name)//" - Creating connector component "//&
+        trim(cmEntry%wrap%label)//" without petList."
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      cmEntry%wrap%connector = ESMF_CplCompCreate(&
+        name=trim(srcCompLabel)//"-TO-"//trim(dstCompLabel), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
+    cmEntry%wrap%petList => connectorPetList
 #endif
     call ESMF_ContainerAddUDT(is%wrap%connectorMap, trim(cmEntry%wrap%label), &
       cmEntry, rc)
@@ -2379,7 +2629,8 @@ print *, "set connector alias: ", srcCompLabel, dstCompLabel, i, j
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static array modelComp,
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2462,7 +2713,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static array modelComp,
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, trim(compLabel), comp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2563,11 +2815,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static arrays modelComp and connectorComp, 
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2666,11 +2920,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static arrays modelComp and connectorComp, 
     !TODO: removing the need to do this look-up here.
-    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, srcCompLabel, srcComp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, relaxedflag, rc=rc)
+    call NUOPC_DriverGetComp(driver, dstCompLabel, dstComp, &
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2709,7 +2965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Need the actual Connector component
     call NUOPC_DriverGetComp(driver, srcCompLabel, dstCompLabel, comp, &
-      relaxedflag, rc=rc)
+      relaxedflag=relaxedflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2795,11 +3051,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, relaxedflag, rc)
+  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
+    relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
-    type(ESMF_GridComp), intent(out)           :: comp
+    type(ESMF_GridComp), intent(out), optional :: comp
+    integer,             pointer,     optional :: petList(:)
     logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
@@ -2847,7 +3105,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (trim(compLabel) == trim(driverCompLabel)) then
-        comp = driver ! the driver itself is the searched for component
+        ! the driver itself is the searched for component
+        if (present(comp)) comp = driver
+        if (present(petList)) petList => null()
         return
       endif
     endif
@@ -2863,11 +3123,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      ! return the identified component
-      comp = cmEntry%wrap%component
+      if (present(comp)) comp = cmEntry%wrap%component
+      if (present(petList)) petList => cmEntry%wrap%petList
     else
-      ! return a nullified component
-      comp%compp => null()
+      ! return nullified arguments
+      if (present(comp)) comp%compp => null()
+      if (present(petList)) petList => null()
     endif
     
   end subroutine
@@ -2880,12 +3141,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
   subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, dstCompLabel, &
-    comp, relaxedflag, rc)
+    comp, petList, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
     character(len=*),    intent(in)            :: dstCompLabel
-    type(ESMF_CplComp),  intent(out)           :: comp
+    type(ESMF_CplComp),  intent(out), optional :: comp
+    integer,             pointer    , optional :: petList(:)
     logical,             intent(in),  optional :: relaxedflag
     integer,             intent(out), optional :: rc 
 !
@@ -2934,11 +3196,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      ! return the identified component
-      comp = cmEntry%wrap%connector
+      if (present(comp)) comp = cmEntry%wrap%connector
+      if (present(petList)) petList => cmEntry%wrap%petList
     else
-      ! return a nullified component
-      comp%compp => null()
+      ! return nullified arguments
+      if (present(comp)) comp%compp => null()
+      if (present(petList)) petList => null()
     endif
     
   end subroutine
@@ -2950,10 +3213,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetAllGridComp(driver, compList, rc)
+  subroutine NUOPC_DriverGetAllGridComp(driver, compList, petLists, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
-    type(ESMF_GridComp), pointer               :: compList(:)
+    type(ESMF_GridComp), pointer, optional     :: compList(:)
+    type(type_petList),  pointer, optional     :: petLists(:)
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3001,21 +3265,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
       
     ! allocate memory for the compList
-    allocate(compList(mapCount), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of compList failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
-    ! fill the compList
-    do i=1, mapCount
-      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
-        cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (present(compList)) then
+      allocate(compList(mapCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of compList failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      compList(i) = cmEntry%wrap%component
-    enddo
+    endif
+    
+    ! allocate memory for the petLists
+    if (present(petLists)) then
+      allocate(petLists(mapCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of petLists failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! fill the compList and/of petLists
+    if (present(compList) .or. present(petLists)) then
+      do i=1, mapCount
+        call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
+          cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        if (present(compList)) compList(i) = cmEntry%wrap%component
+        if (present(petLists)) petLists(i)%petList => cmEntry%wrap%petList
+      enddo
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -3336,55 +3614,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(modelCount)) then
       is%wrap%modelCount = modelCount
     endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_DriverSetModel - Set Driver internals model specific
-!
-! !INTERFACE:
-  subroutine NUOPC_DriverSetModel(driver, compIndex, petList, rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp)                        :: driver
-    integer,             intent(in)            :: compIndex
-    integer,             intent(in)            :: petList(:)
-    integer,             intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-! Set the petList for a specific Model, Mediator, or Driver child component.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)          :: name
-    type(type_InternalState)        :: is
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    ! query the Component for info
-    call ESMF_GridCompGet(driver, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! query Component for the internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
-    ! sanity checking of compIndex
-    if ((compIndex<1) .or. (compIndex>is%wrap%modelCount)) then
-      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
-        msg="compIndex is out of bounds.", &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! Set up the associated petList member in the internal state and transfer
-    allocate(is%wrap%modelPetLists(compIndex)%petList(size(petList)))
-    is%wrap%modelPetLists(compIndex)%petList(:) = petList(:)  ! transfer entries
     
   end subroutine
   !-----------------------------------------------------------------------------
