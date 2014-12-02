@@ -127,7 +127,13 @@ module NUOPC_Comp
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! make a copy of the external externalClock
+    ! early bail out condition if incoming component is not valid
+    if (.not.associated(comp%compp)) then
+      NUOPC_GridCompAreServicesSet = .false.
+      return
+    endif
+    
+    ! get the vm_info
     call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -164,7 +170,13 @@ module NUOPC_Comp
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! make a copy of the external externalClock
+    ! early bail out condition if incoming component is not valid
+    if (.not.associated(comp%compp)) then
+      NUOPC_CplCompAreServicesSet = .false.
+      return
+    endif
+
+    ! get the vm_info
     call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
