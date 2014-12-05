@@ -27,7 +27,7 @@ module NUOPC_Connector
   
   private
   
-  public routine_SetServices
+  public SetServices
 #ifndef MAKE_PRIVATE
   public type_InternalState, type_InternalStateStruct
   public label_InternalState
@@ -65,7 +65,7 @@ module NUOPC_Connector
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(cplcomp, rc)
+  subroutine SetServices(cplcomp, rc)
     type(ESMF_CplComp)   :: cplcomp
     integer, intent(out) :: rc
     
