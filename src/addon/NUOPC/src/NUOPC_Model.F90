@@ -21,11 +21,9 @@ module NUOPC_Model
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
-    ModelBase_routine_SS            => routine_SetServices, &
+    ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-!    type_InternalState              => type_InternalState, &
-!    type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
@@ -38,12 +36,8 @@ module NUOPC_Model
   private
   
   public &
-    routine_Run, &
-    routine_SetServices
-    
-!  public &
-!    type_InternalState, &
-!    type_InternalStateStruct
+    SetServices, &
+    routine_Run
     
   public &
     label_InternalState, &
@@ -63,7 +57,7 @@ module NUOPC_Model
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(gcomp, rc)
+  subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)   :: gcomp
     integer, intent(out)  :: rc
     

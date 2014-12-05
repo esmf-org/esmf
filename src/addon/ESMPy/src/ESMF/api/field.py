@@ -135,8 +135,6 @@ class Field(MaskedArray):
             else:
                 raise MeshLocationNotSupported
 
-            if local_ndbounds:
-                grid_to_field_map = np.array([1], dtype=np.int32)
             # call into ctypes layer
             struct = ESMP_FieldCreate(grid, name, typekind, meshloc,
                                       grid_to_field_map,

@@ -26,8 +26,8 @@ module NUOPC_ModelBase
   private
   
   public &
+    SetServices, &
     routine_Run, &
-    routine_SetServices, &
     routine_Nop
     
 !  public &
@@ -70,7 +70,7 @@ module NUOPC_ModelBase
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(gcomp, rc)
+  subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
     

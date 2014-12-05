@@ -182,20 +182,6 @@
 \input{../addon/NUOPC/doc/NUOPC_Driver_fapi}
 #endif
 
-\subsection{Generic Component: NUOPC\_DriverAtmOcn}
-#ifdef STANDALONE
-\input{NUOPC_DriverAtmOcn_manual_fapi}
-#elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcn_manual_fapi}
-#endif
-
-\subsection{Generic Component: NUOPC\_DriverAtmOcnMed}
-#ifdef STANDALONE
-\input{NUOPC_DriverAtmOcnMed_manual_fapi}
-#elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcnMed_manual_fapi}
-#endif
-
 \subsection{Generic Component: NUOPC\_ModelBase}
 #ifdef STANDALONE
 \input{NUOPC_ModelBase_manual_fapi}

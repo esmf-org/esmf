@@ -27,14 +27,18 @@ module NUOPC_Connector
   
   private
   
-  public routine_SetServices
-!  public type_InternalState, type_InternalStateStruct
-!  public label_InternalState
+  public SetServices
+#ifndef MAKE_PRIVATE
+  public type_InternalState, type_InternalStateStruct
+  public label_InternalState
+#endif
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle
   
+#ifndef MAKE_PRIVATE
   character(*), parameter :: &
     label_InternalState = "Connector_InternalState"
+#endif
   character(*), parameter :: &
     label_ComputeRouteHandle = "Connector_ComputeRH"
   character(*), parameter :: &
@@ -61,7 +65,7 @@ module NUOPC_Connector
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(cplcomp, rc)
+  subroutine SetServices(cplcomp, rc)
     type(ESMF_CplComp)   :: cplcomp
     integer, intent(out) :: rc
     
