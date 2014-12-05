@@ -139,6 +139,30 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 } // MeshCXX::create
 
 
+  // Calculate the number of local elements disregarding split elements
+  int calc_num_local_elems(Mesh &mesh) {
+
+    int num;
+    if (mesh.is_split) {
+      num=0;
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        
+        MeshObj &elem = *ei;
+        
+        // Don't do split elements
+        if (elem.get_id() > mesh.max_non_split_id) continue; 
+        
+        num++;
+      }
+    } else {
+      num=mesh.num_elems();
+    }
+
+    return num;
+}
+
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::createFromFile()"
 MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag, 
@@ -167,12 +191,6 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
-    // Currently don't support meshes with more than 4 sides
-    //    if (meshp->is_split) {
-    //  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-    //    "- Meshes containing cells with >4 sides aren't supported in C or python",
-    //                                   ESMC_CONTEXT, &localrc)) throw localrc;
-    // }
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -199,7 +217,8 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
    (meshCXXp)->meshPointer = meshp;
 
    // Set the number of nodes and elements
-   meshCXXp->numLElements = meshp->num_elems();
+   meshCXXp->numLElements = calc_num_local_elems(*meshp);
+
    meshCXXp->numLNodes = meshp->num_nodes();
 
    meshCXXp->meshFreed = 0;
@@ -207,6 +226,24 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
    // Mark Mesh as finshed
    meshCXXp->level=MeshCXXLevel_Finished;
 
+
+   // Create distgrids and number of owned nodes
+   // TODO: I THINK THAT HOW THE DISTGRIDS ARE
+   //       CREATED AND PASSED AROUND IS WRONG, 
+   //       BUT I DON'T THINK THEY ARE ACTUALLY USED 
+   //       THROUGH C/PYTHON RIGHT NOW, SO I'll WAIT
+   //       AND FIX THE WHOLE THING WHEN I UNIFY THE MESH
+   // (THE PREVIOUS VERSION DIDN'T SET DISTGRIDS EITHER)
+   int tmpNDistgrid;
+   int tmpEDistgrid;
+   meshCXXp->createDistGrids(&tmpNDistgrid,
+                             &tmpEDistgrid,
+                             &meshCXXp->numOwnedNodes,
+                             &meshCXXp->numOwnedElements);
+
+
+   // NOW DONE ABOVE
+#if 0
    // Calc and set the number of owned nodes
    int num_owned_nodes=0;
    Mesh::iterator ni2 = meshp->node_begin(), ne2 = meshp->node_end();
@@ -226,6 +263,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
      num_owned_elems++;
    }   
    meshCXXp->numOwnedElements=num_owned_elems;
+#endif
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -777,6 +815,7 @@ extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
  * (which is stored by get_data_index)
  */
 
+
 std::vector<int> MeshCXX::getNodeGIDS(){
 
   std::vector<int> ngid;
@@ -811,6 +850,43 @@ std::vector<int> MeshCXX::getNodeGIDS(){
 
 
 
+/**
+ * Sort elements by the order in which they were originally declared
+ * (which is stored by get_data_index)
+ * Don't include split elements
+ */
+void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
+
+  UInt nelems = mesh.num_elems();
+
+  Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+
+  std::vector<std::pair<int,int> > gids;
+
+  for (; ei != ee; ++ei) {
+
+    MeshObj &elem = *ei;
+
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Don't do split elements
+    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
+
+    int idx = elem.get_data_index();
+
+    gids.push_back(std::make_pair(idx, elem.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  egid.clear();
+  for (UInt i = 0; i < gids.size(); ++i) egid.push_back(gids[i].second);
+
+}
+
+
+
 int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes, 
      int *numLElems){
 #undef ESMC_METHOD
@@ -840,13 +916,12 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      std::vector<int> ngids;
      std::vector<int> egids;
      {
-       Context c; c.set(Attr::OWNED_ID);
-       Attr ae(MeshObj::ELEMENT, c);
        
        ngids = getNodeGIDS();
        
-       //  getMeshGIDS(*this, ae, egids);
-       getMeshGIDS(*meshPointer, ae, egids);
+       // getMeshGIDS(*this, ae, egids);
+       // getMeshGIDS(*meshPointer, ae, egids);
+       getElemGIDS(*meshPointer, egids);
      }
      
      
