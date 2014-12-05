@@ -14,6 +14,72 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
+
+
+def mesh_create_5_pentahexa():
+    '''
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 5 element Mesh has been created.
+    RETURN VALUES: \n Mesh :: mesh \n
+
+
+  2.5        8        10 --------11
+          /     \   /            |
+  2.1   7         9              12
+        |         |      5       /
+        |    4    |            /
+        |         |          /
+  1.0   4 ------- 5 ------- 6
+        |         |  \   3  |
+        |    1    |    \    |
+        |         |  2   \  |
+ -0.1   1 ------- 2 ------- 3
+
+      -0.1       1.0       2.1   2.5
+
+          Node Ids at corners
+          Element Ids in centers
+
+    Note: This mesh is not parallel, it can only be used in serial
+    '''
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+
+    num_node = 12
+    num_elem = 5
+    nodeId = np.array([1,2,3,4,5,6,7,8,9,10,11,12])
+    nodeCoord = np.array([-0.1,-0.1,  #node id 1
+                          1.0,-0.1,  #node id 2
+                          2.1,-0.1,  #node id 3
+                          0.1, 1.0,  #node id 4
+                          1.0, 1.0,  #node id 5
+                          2.1, 1.0,  #node id 6
+                          0.1, 2.1,  #node id 7
+                          0.5, 2.5,  #node id 8
+                          1.0, 2.1,  #node id 9
+                          1.5, 2.5,  #node id 10
+                          2.5, 2.5,  #node id 11
+                          2.5, 2.1]) #node id 12
+
+
+    nodeOwner = np.zeros(num_node)
+
+    elemId = np.array([1,2,3,4,5])
+    elemType=np.array([ESMF.MeshElemType.QUAD,
+                       ESMF.MeshElemType.TRI,
+                       ESMF.MeshElemType.TRI, 5, 6])
+    elemConn=np.array([1,2,5,4,         # elem id 1
+                       2,3,5,           # elem id 2
+                       3,6,5,           # elem id 3
+                       4,5,9,8,7,       # elem id 4
+                       5,6,12,11,10,9]) # elem id 5
+
+    mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+
+    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
+
 def mesh_create_5():
     '''
     PRECONDITIONS: None
@@ -348,6 +414,129 @@ def mesh_create_5_parallel ():
                            ESMF.MeshElemType.TRI])
         elemConn=np.array([0,3,2,
                            0,1,3])
+
+    # Add nodes and elements to the Mesh
+    mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn
+
+def mesh_create_5_pentahexa_parallel ():
+    '''
+    PRECONDITIONS: None
+    POSTCONDITIONS: A 5 element Mesh has been created in parallel.
+    RETURN VALUES: \n Mesh :: mesh \n
+
+
+    #  2.1        8               10 --------11
+    #          /     \          /            |
+    #        7         9     [9]             12
+    #        |         |      |      5       /
+    #        |    4    |      |            /
+    #        |         |      |          /
+    #  1.0  [4] ----- [5]    [5] ----- [6]
+    #
+    #       -0.1      1.0     1.0        2.1  2.5
+    #
+    #           PET 2               PET 3
+    #
+    #
+    #  1.0   4 ------- 5      [5] ------- 6
+    #        |         |       |  \   3  |
+    #        |    1    |       |    \    |
+    #        |         |       |  2   \  |
+    #  -0.1  1 ------- 2      [2] ------- 3
+    #
+    #       -0.1      1.0     1.0        2.1  2.5
+    #
+    #           PET 0               PET 1
+    #
+    #               Node Id labels at corners
+    #              Element Id labels in centers
+    '''
+
+    # Two parametric dimensions, and two spatial dimensions
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+
+    if ESMF.pet_count() > 1:
+        if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 to build this mesh!')
+
+    if (ESMF.local_pet() == 0):
+        num_node=4
+        num_elem=1
+
+        nodeId=np.array([1, 2, 4, 5])
+        nodeCoord=np.array([-0.1, -0.1,
+                            1.0, -0.1,
+                            - 0.1, 1.0,
+                            1.0, 1.0 ])
+        nodeOwner=np.zeros(num_node)
+        elemId=np.array([1])
+        elemMask = np.array([0])
+        elemType=np.array([ESMF.MeshElemType.QUAD])
+        elemConn=np.array([1, 2, 4, 3 ])
+
+    elif (ESMF.local_pet() == 1):
+        num_node=4
+        num_elem=2
+
+        nodeId=np.array([2, 3, 5, 6])
+        nodeCoord=np.array([1.0, -0.1,
+                            2.1, -0.1,
+                            1.0, 1.0,
+                            2.1, 1.0 ])
+        nodeOwner=np.array([0,
+                            1,
+                            0,
+                            1])
+        elemId=np.array([2, 3])
+        elemMask = np.array([1, 0])
+        elemType=np.array([ESMF.MeshElemType.TRI, ESMF.MeshElemType.TRI])
+        elemConn=np.array([1, 2, 3,
+                           2, 4, 3])
+
+    elif (ESMF.local_pet() == 2):
+        num_node=5
+        num_elem=1
+
+        nodeId=np.array([4, 5, 7, 8, 9])
+        nodeCoord=np.array([-0.1, 1.0,
+                            1.0, 1.0,
+                            - 0.1, 2.1,
+                            0.5, 2.5,
+                            1.0, 2.1 ])
+        nodeOwner=np.array([0,
+                            0,
+                            2,
+                            2,
+                            2])
+        elemId=np.array([4])
+        elemMask = np.array([0])
+        elemType=np.array([5])
+        elemConn=np.array([1, 2, 5, 4, 3])
+
+    elif (ESMF.local_pet() == 3):
+        num_node=6
+        num_elem=1
+
+        nodeId=np.array([5, 6, 9, 10, 11, 12])
+        nodeCoord=np.array([1.0, 1.0,
+                            2.1, 1.0,
+                            1.0, 2.1,
+                            1.5, 2.5,
+                            2.5, 2.5,
+                            2.5, 2.1 ])
+        nodeOwner=np.array([0,
+                            1,
+                            2,
+                            3,
+                            3,
+                            3])
+        elemId=np.array([5])
+        elemMask = np.array([0])
+        elemType=np.array([6])
+        elemConn=np.array([1, 2, 6, 5, 4, 3])
 
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)

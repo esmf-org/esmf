@@ -99,15 +99,6 @@ class MaskedArray(ma.MaskedArray):
         self.contents = getattr(obj, 'contents', None)
         super(MaskedArray, self).__array_finalize__(obj)
 
-    def __array_wrap__(self, out_arr):
-        return super(MaskedArray, self).__array_wrap__(out_arr)
-
-    def __getitem__(self, item):
-        return super(MaskedArray, self).__getitem__(item)
-
-    def __setitem__(self, item):
-        return super(MaskedArray, self).__setitem__(item)
-
 # class Array(np.ndarray):
 #
 #     def __new__(cls, data, dtype, shape):
