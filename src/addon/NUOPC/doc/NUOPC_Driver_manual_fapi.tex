@@ -51,8 +51,8 @@ Driver component that drives Model, Mediator, and Connector components. The defa
 \end{verbatim}
 
 \bigskip{\sf SETSERVICES:}
-\begin{verbatim}  subroutine routine_SetServices(gcomp, rc)
-    type(ESMF_GridComp)   :: gcomp
+\begin{verbatim}  subroutine SetServices(driver, rc)
+    type(ESMF_GridComp)   :: driver
     integer, intent(out)  :: rc
 \end{verbatim}
 
@@ -60,29 +60,22 @@ Driver component that drives Model, Mediator, and Connector components. The defa
 \begin{itemize}
 \item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition), with the following mapping:
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: ({\sc Required, NUOPC Provided})
+    \item IPDv00p1 = 1: ({\sc Required, NUOPC Provided})
     \end{itemize}  
   \end{itemize}  
-\item phase 1: ({\sc NUOPC Provided}, suitable for: IPDv00p1)
+\item IPDv00p1 ({\sc NUOPC Provided})
   \begin{itemize}
-  \item Allocate and initialize the internal state.
+  \item Allocate and initialize internal data structures.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
-  \item {\it Required specialization} to set number of Model+Mediator components, {\tt modelCount}, in the internal state: {\tt label\_SetModelCount}.
-  \item Allocate internal storage according to {\tt modelCount}.
-  \item {\it Optional specialization} to provide Model, Mediator, and Connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
-  \item Create Model and Mediator components with their import and export States.
-  \item Attach standard NUOPC Model Component metadata.
-  \item Create Connector components.
-  \item Attach standard NUOPC Connector Component metadata.
-  \item Initialize the default run sequence.
-  \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}. 
+  \item {\it Required specialization} to set component services: {\tt label\_SetComponentServices}.
   \begin{itemize}
-    \item Call into SetServices() for all Model, Mediator, and Connector components.
+    \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
     \item Optionally replace the default clock. 
-    \item Optionally replace the default run sequence.
   \end{itemize}
+  \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
+
   \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
   \item {\it Optional specialization} to analyze and modify components' {\tt InitializePhaseMap} Attribute before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
   \item Implement the initialize sequence for the child components, compatible with up to IPD version 02, as documented in section \ref{IPD}.
@@ -113,30 +106,5 @@ Driver component that drives Model, Mediator, and Connector components. The defa
   \end{itemize}      
 \end{itemize}
 
-\bigskip{\sf INTERNALSTATE:}
-\begin{verbatim}  label_InternalState
-
-  type type_InternalState
-    type(type_InternalStateStruct), pointer :: wrap
-  end type
-
-  type type_InternalStateStruct
-    integer                          :: modelCount
-    type(type_PetList),  pointer     :: modelPetLists(:)
-    type(type_PetList),  pointer     :: connectorPetLists(:,:)
-    !--- private members ----------------------------------------
-    type(ESMF_GridComp), pointer     :: modelComp(:)
-    type(ESMF_State),    pointer     :: modelIS(:), modelES(:)
-    type(ESMF_CplComp),  pointer     :: connectorComp(:,:)
-    type(NUOPC_RunSequence), pointer :: runSeq(:)! size may increase dynamic.
-    integer                          :: runPhaseToRunSeqMap(10)
-    type(ESMF_Clock)                 :: driverClock  ! clock of the parent
-  end type
-
-  type type_PetList
-    integer, pointer :: petList(:) !lists that are set here transfer ownership
-  end type
-  
-\end{verbatim}
 %...............................................................
 
