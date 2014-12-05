@@ -9,27 +9,13 @@ import inspect
 import ESMF
 from ESMF import *
 from ESMF.test.base import TestBase
-from ESMF.test.test_api.mesh_utilities import mesh_create_50, mesh_create_50_parallel
+from ESMF.test.test_api.mesh_utilities import *
 
 class TestMesh(TestBase):
-    def test_mesh(self):
-        parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
-
-        mesh = None
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_50_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_50()
-
+    def check_mesh(self, mesh, nodeCoord, nodeOwner):
         if pet_count() == 0:
-            assert(mesh.size[element] == 50)
-            assert(mesh.size[node] == 64)
+            assert (mesh.size[element] == 50)
+            assert (mesh.size[node] == 64)
 
         xcoords = mesh.get_coords(0)
         ycoords = mesh.get_coords(1)
@@ -42,11 +28,75 @@ class TestMesh(TestBase):
         xcoords3 = xcoords2[np.where(nodeOwner == local_pet())]
         ycoords3 = ycoords2[np.where(nodeOwner == local_pet())]
 
-        assert(all(xcoords == xcoords3))
-        assert(all(ycoords == ycoords3))
+        assert (all(xcoords == xcoords3))
+        assert (all(ycoords == ycoords3))
 
         # this call fails if nodes and elements have not been added first
         # mesh.free_memory()
+
+    def test_mesh_5(self):
+        parallel = False
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner)
+
+    def test_mesh_5_pentahexa(self):
+        parallel = False
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5_pentahexa_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5_pentahexa()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner)
+
+    def test_mesh_10(self):
+        parallel = False
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_10_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_10()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner)
+
+    def test_mesh_50(self):
+        parallel = False
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner)
 
     def test_mesh_create_from_file_scrip(self):
         try:
