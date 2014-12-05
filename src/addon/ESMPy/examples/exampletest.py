@@ -25,3 +25,6 @@ class TestExamples(TestBase):
 
     def test_ungriddedrg(self):
         import ungridded_dimension_regrid
+
+    def test_gridcreateperimask(self):
+        import grid_create_peridim_mask
