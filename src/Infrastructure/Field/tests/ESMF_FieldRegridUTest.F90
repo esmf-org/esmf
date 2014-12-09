@@ -19897,7 +19897,9 @@ return
 
   enddo    ! lDE
 
-!  write(*,*) "Max Rel. Error= ",maxRelErr
+  if (.not. correct) then
+     write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
+  endif
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
