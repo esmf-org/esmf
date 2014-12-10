@@ -89,6 +89,7 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ConfigGetString
+        module procedure ESMF_ConfigGetStrings
         module procedure ESMF_ConfigGetFloatR4
         module procedure ESMF_ConfigGetFloatR8
         module procedure ESMF_ConfigGetFloatsR4
@@ -881,6 +882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !      Supported values for <value list argument> are:
 !      \begin{description}
+!      \item character(len=*), intent(out)            :: valueList(:)
 !      \item real(ESMF\_KIND\_R4), intent(inout)      :: valueList(:)
 !      \item real(ESMF\_KIND\_R8), intent(inout)      :: valueList(:)
 !      \item integer(ESMF\_KIND\_I4), intent(inout)   :: valueList(:)
@@ -1032,6 +1034,109 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_ConfigGetString
     
     
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetStrings"
+!BOPI
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of strings
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetStrings(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config),  intent(inout)         :: config    
+      character(len=*),   intent(out)           :: valueList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,            intent(in),  optional :: count 
+      character(len=*),   intent(in),  optional :: label 
+      character(len=*),   intent(in),  optional :: default
+      integer,            intent(out), optional :: rc    
+!
+! !DESCRIPTION: 
+!  Gets a string {\tt valueList} of a given {\tt count} from
+!  the {\tt config} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [valueList]
+!     Returned string values. 
+!   \item [count]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI -------------------------------------------------------------------
+!
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
+      logical :: found
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      localrc = ESMF_RC_NOT_IMPL
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+           localcount = count
+        end if
+      endif
+
+! Default setting
+      if( present( default ) ) then 
+         valueList(1:localcount) = default
+
+      else
+         valueList(1:localcount) = ""
+      endif
+! Processing
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             isPresent=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
+      end if
+
+      do i = 1, localcount
+         
+         if(present( default )) then
+            call ESMF_ConfigGetString( config, valueList(i), default=default, rc=localrc )
+         else
+            call ESMF_ConfigGetString( config, valueList(i), rc = localrc)
+         endif
+      enddo
+
+      if(present( rc )) then
+        rc = localrc
+      endif
+
+    end subroutine ESMF_ConfigGetStrings
+
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatR4"
