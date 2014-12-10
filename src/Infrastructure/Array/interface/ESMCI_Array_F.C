@@ -664,7 +664,7 @@ extern "C" {
 
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName.c_str(), varName.c_str(),
+    localrc = (*array)->write(fileName, varName,
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -695,7 +695,7 @@ extern "C" {
         ESMC_F90lentrim (variableName, *len_variableName));
 
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->read(fileName.c_str(), varName.c_str(), timeslice, iofmt);
+    localrc = (*array)->read(fileName, varName, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }

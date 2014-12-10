@@ -41,6 +41,7 @@
 
 #include <cstdio>
 #include <stdint.h>
+#include <string>
 
 //-------------------------------------------------------------------------
 
@@ -311,9 +312,9 @@ namespace ESMCI {
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
     static bool match(Array const *array1, Array const *array2, int *rc=NULL);
-    int read(const char *file, const char *variableName,
+    int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
-    int write(const char *file, const char *variableName,
+    int write(const std::string &file, const std::string &variableName,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;
