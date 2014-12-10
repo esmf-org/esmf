@@ -421,31 +421,31 @@ module NUOPC_Driver
       ! associate connectorComps
       do j=0, is%wrap%modelCount
         write (jString, *) j
-        
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
-        !TODO:
-        ! -> for now assume that name is the actual compLabel (not really ok)
         if (i==0) then
-          ! driver itself
-          call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+          ! driver itself: for now use the name as the compLabel
+         call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
-          call ESMF_GridCompGet(compList(i), name=srcCompLabel, rc=rc)
+          call NUOPC_CompAttributeGet(compList(i), name="CompLabel", &
+            value=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
         if (j==0) then
-          ! driver itself
+          ! driver itself: for now use the name as the compLabel
           call ESMF_GridCompGet(gcomp, name=dstCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
-          call ESMF_GridCompGet(compList(j), name=dstCompLabel, rc=rc)
+          call NUOPC_CompAttributeGet(compList(j), name="CompLabel", &
+            value=dstCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
+
         ! now look up the associated connector, okay if it is not a valid object
         ! invalid components are detectable by the CompAreServicesSet() method
         call NUOPC_DriverGetComp(gcomp, srcCompLabel, dstCompLabel, &
