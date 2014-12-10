@@ -69,7 +69,7 @@ Driver component that drives Model, Mediator, and Connector components. The defa
   \begin{itemize}
   \item Allocate and initialize internal data structures.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
-  \item {\it Required specialization} to set component services: {\tt label\_SetComponentServices}.
+  \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}.
   \begin{itemize}
     \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
     \item Optionally replace the default clock. 
@@ -105,6 +105,8 @@ Driver component that drives Model, Mediator, and Connector components. The defa
   \item Deallocate the internal state.
   \end{itemize}      
 \end{itemize}
+
+\mbox{}\hrulefill\ 
 
 %...............................................................
 
