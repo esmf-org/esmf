@@ -29,13 +29,8 @@ module NUOPC_ModelBase
     SetServices, &
     routine_Run, &
     routine_Nop
-    
-!  public &
-!    type_InternalState, &
-!    type_InternalStateStruct
-    
+ 
   public &
-    label_InternalState, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
