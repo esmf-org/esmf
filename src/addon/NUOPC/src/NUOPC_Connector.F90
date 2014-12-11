@@ -28,6 +28,7 @@ module NUOPC_Connector
   private
   
   public SetServices
+#define MAKE_PRIVATE
 #ifndef MAKE_PRIVATE
   public type_InternalState, type_InternalStateStruct
   public label_InternalState
@@ -35,10 +36,8 @@ module NUOPC_Connector
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle
   
-#ifndef MAKE_PRIVATE
   character(*), parameter :: &
     label_InternalState = "Connector_InternalState"
-#endif
   character(*), parameter :: &
     label_ComputeRouteHandle = "Connector_ComputeRH"
   character(*), parameter :: &
@@ -65,8 +64,8 @@ module NUOPC_Connector
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(cplcomp, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine SetServices(connector, rc)
+    type(ESMF_CplComp)   :: connector
     integer, intent(out) :: rc
     
     ! local variables
@@ -75,19 +74,19 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC CplComp Attribute Package to the Connector
-    call NUOPC_CompAttributeAdd(cplcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call ESMF_CplCompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -96,66 +95,66 @@ module NUOPC_Connector
     ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
     ! InitializePhaseMap.
 
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
       userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p4", "IPDv04p4"/), &
       userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
       userRoutine=InitializeP5a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
       userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1a"/), &
       userRoutine=InitializeP1a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1b"/), &
       userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2a"/), &
       userRoutine=Initialize00P2a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2b"/), &
       userRoutine=Initialize00P2b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Run phases
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_RUN, &
       phaseLabelList=(/"RunPhase1"/), userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! Finalize phases
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_FINALIZE, &
       phaseLabelList=(/"FinalizePhase1"/), userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2489,9 +2488,9 @@ print *, "found match:"// &
 ! !IROUTINE: NUOPC_ConnectorGet - Get parameters from a Connector
 !
 ! !INTERFACE:
-  subroutine NUOPC_ConnectorGet(cplcomp, srcFields, dstFields, rh, state, rc)
+  subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
     type(ESMF_FieldBundle), intent(out), optional :: dstFields
     type(ESMF_RouteHandle), intent(out), optional :: rh
@@ -2509,13 +2508,13 @@ print *, "found match:"// &
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2534,9 +2533,9 @@ print *, "found match:"// &
 ! !IROUTINE: NUOPC_ConnectorSet - Set parameters in a Connector
 !
 ! !INTERFACE:
-  subroutine NUOPC_ConnectorSet(cplcomp, srcFields, dstFields, rh, state, rc)
+  subroutine NUOPC_ConnectorSet(connector, srcFields, dstFields, rh, state, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(in),  optional :: srcFields
     type(ESMF_FieldBundle), intent(in),  optional :: dstFields
     type(ESMF_RouteHandle), intent(in),  optional :: rh
@@ -2554,13 +2553,13 @@ print *, "found match:"// &
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
