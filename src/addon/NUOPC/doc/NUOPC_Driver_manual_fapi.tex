@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Driver component that drives Model, Mediator, and Connector components. The default is to use explicit time stepping. For every Driver time step the same sequence of Model, Mediator, and Connector {\tt Run} methods are called. The run sequence is fully customizable.
+Component that drives Model, Mediator, and Connector components. For every Driver time step the same run sequence, i.e. sequence of Model, Mediator, and Connector {\tt Run} methods is called. The run sequence is fully customizable. The default run sequence implements explicit time stepping.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -68,7 +68,7 @@ Driver component that drives Model, Mediator, and Connector components. The defa
 \item IPDv00p1 ({\sc NUOPC Provided})
   \begin{itemize}
   \item Allocate and initialize internal data structures.
-  \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
+  \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, but only if the incoming clock is valid.
   \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}.
   \begin{itemize}
     \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
@@ -77,8 +77,8 @@ Driver component that drives Model, Mediator, and Connector components. The defa
   \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
 
   \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
-  \item {\it Optional specialization} to analyze and modify components' {\tt InitializePhaseMap} Attribute before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
-  \item Implement the initialize sequence for the child components, compatible with up to IPD version 02, as documented in section \ref{IPD}.
+  \item {\it Optional specialization} to analyze and modify the {\tt InitializePhaseMap} Attribute of the child components before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
+  \item Drive the initialize sequence for the child components, compatible with up to IPDv04, as documented in section \ref{IPD}.
   \end{itemize}  
 \end{itemize}
 
@@ -87,8 +87,10 @@ Driver component that drives Model, Mediator, and Connector components. The defa
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
-  \item Time stepping loop, from current time to stop time, incrementing by time step.
-  \item For each time step iteration, the Model and Connector components Run() methods are being called according to the run sequence.
+  \item Drive the time stepping loop, from current time to stop time, incrementing by time step.
+  \begin{itemize}
+    \item For each time step iteration the Model and Connector components Run() methods are being called according to the run sequence.
+  \end{itemize}  
   \end{itemize}    
 \end{itemize}
 
@@ -97,12 +99,11 @@ Driver component that drives Model, Mediator, and Connector components. The defa
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
-  \item Execute all Connector components' Finalize() methods in order.
-  \item Execute all Model components' Finalize() methods in order.
+  \item Execute the Finalize() methods of all Connector components in order.
+  \item Execute the Finalize() methods of all Model components in order.
   \item Destroy all Model components and their import and export states.
   \item Destroy all Connector components.
-  \item Deallocate the run sequence.
-  \item Deallocate the internal state.
+  \item Internal clean-up.
   \end{itemize}      
 \end{itemize}
 
