@@ -1797,12 +1797,15 @@ module NUOPC_Driver
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a GridComp (i.e. Model, Mediator, or Driver) as a child component to a 
-! Driver. The GridComp is created on the provided {\tt petList}, or by default
-! across all of the Driver PETs. The {\tt compLabel} must uniquely identify the
-! child component within the context of the Driver component. If the {\tt comp}
-! argument is specified, it will reference the newly created component on 
-! return.
+! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
+! component to a Driver. The GridComp is created on the provided {\tt petList},
+! or by default across all of the Driver PETs. 
+!
+! The {\tt compLabel} must uniquely identify the child component within the
+! context of the Driver component.
+!
+! If the {\tt comp} argument is specified, it will reference the newly created
+! component on return.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1928,7 +1931,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child from shared obnject to a Driver
+! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child from shared object to a Driver
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
@@ -1940,15 +1943,18 @@ module NUOPC_Driver
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(in),  optional :: petList(:)
     type(ESMF_GridComp), intent(out), optional :: comp
-    integer,             intent(out), optional :: rc 
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a GridComp (i.e. Model, Mediator, or Driver) as a child component to a 
-! Driver. The GridComp is created on the provided {\tt petList}, or by default
-! across all of the Driver PETs. The {\tt compLabel} must uniquely identify the
-! child component within the context of the Driver component. If the {\tt comp}
-! argument is specified, it will reference the newly created component on 
-! return.
+! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
+! component to a Driver. The GridComp is created on the provided {\tt petList},
+! or by default across all of the Driver PETs. 
+!
+! The {\tt compLabel} must uniquely identify the child component within the
+! context of the Driver component.
+!
+! If the {\tt comp} argument is specified, it will reference the newly created
+! component on return.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2097,13 +2103,16 @@ module NUOPC_Driver
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a CplComp (i.e. Connector) as a child component to a 
-! Driver. The CplComp is created on the provided {\tt petList}, or by defualt
-! across the union of PETs of the components indicated by {\tt srcCompLabel}
-! and {\tt dstCompLabel}. The {\tt compLabel} must uniquely identify the child
-! component within the context of the Driver component. If the {\tt comp}
-! argument is specified, it will reference the newly created component on 
-! return.
+! Create and add a CplComp (i.e. Connector) as a child component to a Driver.
+! The CplComp is created on the provided {\tt petList}, or by default across 
+! the union of PETs of the components indicated by {\tt srcCompLabel}
+! and {\tt dstCompLabel}.
+!
+! The {\tt compLabel} must uniquely identify the child component within the 
+! context of the Driver component.
+!
+! If the {\tt comp} argument is specified, it will reference the newly created
+! component on return.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2295,9 +2304,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a RunElement for a Model, Mediator, or Driver to the RunSequence of the 
-! Driver. If {\tt phaseLabel} was not specified, the first entry in the 
-! {\tt RunPhaseMap} attribute will be used to determine the phase.
+! Add an element associated with a Model, Mediator, or Driver component to the
+! run sequence of the Driver. The component must have been added to the Driver,
+! and associated with {\tt compLabel} prior to this call.
+!
+! If {\tt phaseLabel} was not specified, the first entry in the
+! {\tt RunPhaseMap} attribute of the referenced component will be used to 
+! determine the run phase of the added element.
+!
+! By default an error is returned if no component is associated with the 
+! specified {\tt compLabel}. This error can be suppressed by setting
+! {\tt relaxedflag=.true.}, and no entry will be added to the run sequence.
+!
+! The {\tt slot} number identifies the run sequence time slot in case multiple
+! sequences are available. Slots start counting from 1.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2401,7 +2421,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a RunElement for a Connector to the RunSequence of the Driver.
+! Add an element associated with a Connector component to the
+! run sequence of the Driver. The component must have been added to the Driver,
+! and associated with {\tt srcCompLabel} and {\tt dstCompLabel} prior to this
+! call.
+!
+! If {\tt phaseLabel} was not specified, the first entry in the
+! {\tt RunPhaseMap} attribute of the referenced component will be used to 
+! determine the run phase of the added element.
+!
+! By default an error is returned if no component is associated with the 
+! specified {\tt compLabel}. This error can be suppressed by setting
+! {\tt relaxedflag=.true.}, and no entry will be added to the run sequence.
+!
+! The {\tt slot} number identifies the run sequence time slot in case multiple
+! sequences are available. Slots start counting from 1.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2529,7 +2563,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Add a RunElement that links to another RunSequence slot.
+! Add an element to the run sequence of the Driver that links to the time slot
+! indicated by {\tt linkSlot}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2576,8 +2611,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Query the GridComp (i.e. Model, Mediator, or Driver) child component from a
-! Driver that was added with the {\tt compLabel}.
+! Query the Driver for a GridComp (i.e. Model, Mediator, or Driver) child 
+! component that was added under {\tt compLabel}.
+!
+! If provided, the {\tt petList} argument will be associated with the petList
+! that was used to create the referenced component.
+!
+! By default an error is returned if no component is associated with the 
+! specified {\tt compLabel}. This error can be suppressed by setting
+! {\tt relaxedflag=.true.}, and unassociated arguments will be returned.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2666,8 +2708,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Query the CplComp (i.e. Connector) child component from a Driver
-! that was added with the {\tt compLabel}.
+! Query the Driver for a CplComp (i.e. Connector) child 
+! component that was added under {\tt compLabel}.
+!
+! If provided, the {\tt petList} argument will be associated with the petList
+! that was used to create the referenced component.
+!
+! By default an error is returned if no component is associated with the 
+! specified {\tt compLabel}. This error can be suppressed by setting
+! {\tt relaxedflag=.true.}, and unassociated arguments will be returned.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2737,10 +2786,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Get all the GridComp (i.e. Model, Mediator, or Driver) child components from a
-! Driver. The incoming {\tt compList} argument must be unassociated. On return
-! it becomes the responsibility of the caller to deallocate the associated
-! {\tt compList} argument.
-! 
+! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be 
+! unassociated. On return it becomes the responsibility of the caller to 
+! deallocate the associated {\tt compList} and {\tt petLists} arguments
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2827,10 +2875,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Get all the CplComp (i.e. Connector) child components from a
-! Driver. The incoming {\tt compList} argument must be unassociated. On return
-! it becomes the responsibility of the caller to deallocate the associated
-! {\tt compList} argument.
-! 
+! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be 
+! unassociated. On return it becomes the responsibility of the caller to 
+! deallocate the associated {\tt compList} and {\tt petLists} arguments
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2891,7 +2938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_DriverNewRunSequence - Replace current RunSequence with a new one
+! !IROUTINE: NUOPC_DriverNewRunSequence - Replace the run sequence in a Driver
 !
 ! !INTERFACE:
   subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
@@ -2901,8 +2948,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Replace the current RunSequence of the Driver with a new one that has 
-! {\tt slotCount} slots. Each slot uses its own Clock for time keeping.
+! Replace the current run sequence of the Driver with a new one that has 
+! {\tt slotCount} slots. Each slot uses its own clock for time keeping.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3061,7 +3108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Set internals of RunSequence slot.
+! Set the {\tt clock} in the run sequence under {\tt slot} of the Driver.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
