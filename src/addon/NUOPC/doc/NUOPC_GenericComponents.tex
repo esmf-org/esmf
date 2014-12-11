@@ -14,36 +14,54 @@ The NUOPC generic components are implemented as a {\em collection} of Fortran mo
 
 \end{itemize}
 
-The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some generic components also define a public internal state type by the standard name {\tt InternalState}. It is recommended that the following syntax is used when accessing a generic component (here with internal state):
+The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some of the generic components define additional public routines and labels as part of their user interface. It is recommended to rename the entries of an imported generic component module in the local scope as part of the {\tt use} association. This prevents name clashes.
 
 \begin{verbatim}
-  use NUOPC_DriverXYZ, only: &
-    DriverXYZ_SS => SetServices, &
-    DriverXYZ_IS => InternalState
+  use NUOPC_<GenericComp>, only: &
+    <GenericComp>_SS      => SetServices, &
+    <GenericComp>_labelA  => labelA
 \end{verbatim}
 
-A generic component is used by user code to implement a specialized version of the component. The user code therefore also must implement a public {\tt SetServices} routine. The first thing this routine must do is call into the {\tt SetServices} routine provided by the generic component. It is through this step that the specialized component {\em inherits} from the generic component.
+A generic component is used by user code to implement a specialized version of the generic component. The user component derives from the generic component code by implementing its own public {\tt SetServices} routine that calls into the generic {\tt SetServices} routine before doing anything else. It is through this mechanism that the deriving component {\em inherits} from the generic component. The example shows how a specific model component is implemented to derive from the generic {\tt NUOPC\_Model}:
 
-There are three mechanisms through which user code specializes generic components.
+\begin{verbatim}
+  use NUOPC_Model, only: &
+    model_SS => SetServices
+
+  subroutine SetServices(model, rc)
+    type(ESMF_GridComp)  :: model
+    integer, intent(out) :: rc
+
+    ! derive this specific "model" component from generic NUOPC_Model
+    call NUOPC_CompDerive(model, model_SS, rc=rc)
+
+    ! specializing code for "model" to follow
+    
+  end subroutine
+\end{verbatim}
+
+There are three mechanisms through which user code specializes generic components. The first two methods specialize through call-back mechanisms into user implemented routines. The third method specializes by setting the values of parameters implemented by the generic component.
 
 \begin{enumerate}
 
-\item The specializing user code must set entry points for standard component methods not implemented by the generic component. Methods (and phases) that need to be implemented are clearly documented in the generic component description. The user code may further overwrite standard methods already implemented by the generic component code. However, this should rarely be necessary, and may indicate that there is a better fitting generic component available. Finally, some generic components come with generic routines that are suitable candidates for the standard component methods, yet require that the specializing code registers them as appropriate. Setting entry points for standard component methods is done in the {\tt SetServices} routine right after calling into the generic {\tt SetServices} method.
+\item The specializing user code sets entry points for standard component methods not implemented by the generic component. Methods (and phases) that need to be implemented are clearly documented in the generic component description. The user code may further overwrite standard methods already implemented by the generic component code. However, this should rarely be necessary, and may indicate that there is a better fitting generic component available. Finally, some generic components come with generic routines that are suitable candidates for the standard component methods, yet require that the specializing code registers them as appropriate. Setting entry points for standard component methods is done in the {\tt SetServices} routine right after calling into the generic {\tt SetServices} method.
 
 \item Some generic components require that specific methods are attached to the component. If a generic component uses specialization through attachable methods, the specific method labels (i.e. the names by which these methods are registered) and the purpose of the method are clearly documented. In some cases attachable methods are optional. This is clearly documented. Further, some generic components attach a default method to a label, which then is used for all phases. This default can be overwritten with a phase specific attachable method. Attaching methods to the component should be done in the {\tt SetServices} routine right after setting entry points for the standard component methods.
 
-\item Some generic components provide access to an internal state type. The documentation of a generic component indicates which internal state members are used for specialization, and how they are expected to be set. Setting internal state members often requires the availability of other pieces of information. It may happend in the {\tt SetServices} routine, but more often inside a specialized standard entry point or an attachable method.
+\item Some generic components offer methods that allow parameter specialization. The options of this specialization type are documentated as part of the {\tt Set()} methods.
 
 \end{enumerate}
 
-\begin{figure}
+Components that inherit from a generic component may choose to only specialize certain aspects, leaving other aspects unspecified. This allows a hierarchy of generic components to be implemented with a high degree of code re-use. The variable level of specialization supports the very differing user needs. Figure \ref{fig:NUOPCGenericComp} depicts the inheritance structure of the standard generic components implemented by the NUOPC Layer. There are two trees, one is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.
+
+\begin{figure}[h]
 \begin{center}
+\vspace{.5in}
 \scalebox{0.6}{\includegraphics{NUOPC_GC}}
 \end{center}
-\caption{The NUOPC Generic Component inheritance structure. The upper tree is rooted in {\tt ESMF\_GridComp}, while the lower tree is rooted in {\tt ESMF\_CplComp}. The ESMF data types are shown in green. The four main NUOPC Generic Component flavors are shown in dark blue boxes. Light blue boxes contain generic components that specialize for common cases, while the yellow box shows a parent class in the inheritance tree.}
+\caption{The NUOPC Generic Component inheritance structure. The tree on the left is rooted in {\tt ESMF\_GridComp}, while the tree on the right is rooted in {\tt ESMF\_CplComp}. The ESMF data types are shown in green. The four main NUOPC Generic Component flavors are shown in dark blue boxes. The yellow box shows a partial specialization in the inheritance tree.}
 \label{fig:NUOPCGenericComp}
 \end{figure}
 
-Components that inherit from a generic component may choose to only specialize certain aspects, leaving other aspects unspecified. This allows a hierarchy of generic components to be implemented with a high degree of code re-use. The variable level of specialization supports the very differing user needs. Figure \ref{fig:NUOPCGenericComp} depicts the inheritance structure of the NUOPC Generic Components. There are two trees, one is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.
 
 
