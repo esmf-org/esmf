@@ -24,12 +24,12 @@ module NUOPC_Model
     ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-    label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
-    ModelBase_label_TimestampExport => label_TimestampExport
+    ModelBase_label_TimestampExport => label_TimestampExport, &
+    NUOPC_ModelBaseGet
 
   implicit none
   
@@ -40,7 +40,6 @@ module NUOPC_Model
     routine_Run
     
   public &
-    label_InternalState, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
@@ -53,6 +52,9 @@ module NUOPC_Model
   character(*), parameter :: &
     label_SetClock = "Model_SetClock"
     
+  ! Generic methods
+  public NUOPC_ModelGet
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -398,4 +400,41 @@ module NUOPC_Model
     
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ModelGet - Get info from a Model
+!
+! !INTERFACE:
+  subroutine NUOPC_ModelGet(model, driverClock, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: model
+    type(ESMF_Clock),    intent(out)           :: driverClock
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access the clock of the parent driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(model, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    call NUOPC_ModelBaseGet(model, driverClock=driverClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module

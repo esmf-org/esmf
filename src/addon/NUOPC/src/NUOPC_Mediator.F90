@@ -364,7 +364,7 @@ module NUOPC_Mediator
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get a the Clock of the parent driver.
+! Access the clock of the parent driver.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables

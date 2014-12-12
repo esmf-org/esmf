@@ -192,8 +192,10 @@
 \subsection{Generic Component: NUOPC\_Model}
 #ifdef STANDALONE
 \input{NUOPC_Model_manual_fapi}
+\input{NUOPC_Model_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Model_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Model_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_Mediator}
@@ -208,8 +210,10 @@
 \subsection{Generic Component: NUOPC\_Connector}
 #ifdef STANDALONE
 \input{NUOPC_Connector_manual_fapi}
+\input{NUOPC_Connector_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Connector_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Connector_fapi}
 #endif
 
 \newpage
