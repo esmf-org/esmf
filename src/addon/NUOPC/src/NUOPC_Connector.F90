@@ -29,7 +29,7 @@ module NUOPC_Connector
   
   public SetServices
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
-    label_ReleaseRouteHandle
+    label_ReleaseRouteHandle, label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "Connector_InternalState"
@@ -39,6 +39,8 @@ module NUOPC_Connector
     label_ExecuteRouteHandle = "Connector_ExecuteRH"
   character(*), parameter :: &
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
+  character(*), parameter :: &
+    label_Finalize = "Connector_Finalize"
 
   type type_InternalStateStruct
     type(ESMF_FieldBundle)              :: srcFields
@@ -1798,6 +1800,16 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(cplcomp, label=label_Finalize, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)

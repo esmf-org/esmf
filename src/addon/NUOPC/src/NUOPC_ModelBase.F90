@@ -35,7 +35,8 @@ module NUOPC_ModelBase
     label_AdvanceClock, &
     label_CheckImport, &
     label_SetRunClock, &
-    label_TimestampExport
+    label_TimestampExport, &
+    label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "ModelBase_InternalState"
@@ -49,6 +50,8 @@ module NUOPC_ModelBase
     label_SetRunClock = "ModelBase_SetRunClock"
   character(*), parameter :: &
     label_TimestampExport = "ModelBase_TimestampExport"
+  character(*), parameter :: &
+    label_Finalize = "ModelBase_Finalize"
 
   type type_InternalStateStruct
     type(ESMF_Clock)      :: driverClock
@@ -115,7 +118,7 @@ module NUOPC_ModelBase
 
     ! Finalize phases
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      phaseLabelList=(/"FinalizePhase1"/), userRoutine=routine_nop, rc=rc)
+      phaseLabelList=(/"FinalizePhase1"/), userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -509,6 +512,37 @@ module NUOPC_ModelBase
     
   !-----------------------------------------------------------------------------
   
+  recursive subroutine Finalize(gcomp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    ! local variables
+    integer                   :: localrc
+    logical                   :: existflag
+    character(ESMF_MAXSTR)    :: name
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
+      userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   

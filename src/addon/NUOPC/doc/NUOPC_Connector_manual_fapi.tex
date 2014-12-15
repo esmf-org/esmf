@@ -105,8 +105,8 @@ Component that makes a unidirectional connection between model, mediator, and or
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item {\it Optional specialization} to release a Connector operation: {\tt label\_ReleaseRouteHandle}.
-  \item By default (if {\tt label\_ReleaseRouteHandle} was {\em not} provided) release the precomputed Connector RouteHandle.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \item {\it Optional specialization} to release the custom Connector operation: {\tt label\_ReleaseRouteHandle}; or by default, if {\tt label\_ReleaseRouteHandle} was {\em not} provided, release the default Connector RouteHandle.
   \item Internal clean-up.
   \end{itemize}      
 \end{itemize}
