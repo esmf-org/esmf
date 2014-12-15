@@ -28,11 +28,6 @@ module NUOPC_Connector
   private
   
   public SetServices
-#define MAKE_PRIVATE
-#ifndef MAKE_PRIVATE
-  public type_InternalState, type_InternalStateStruct
-  public label_InternalState
-#endif
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle
   
