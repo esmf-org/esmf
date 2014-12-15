@@ -1621,6 +1621,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)    :: name
     type(ESMF_GridComp), pointer  :: compList(:)
     type(ESMF_CplComp), pointer   :: connectorList(:)
+    
     rc = ESMF_SUCCESS
 
     ! query the Component for info
