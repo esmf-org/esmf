@@ -28,6 +28,7 @@ module NUOPC_Model
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
+    label_Finalize                  => label_Finalize, &
     ModelBase_label_TimestampExport => label_TimestampExport, &
     NUOPC_ModelBaseGet
 
@@ -45,7 +46,8 @@ module NUOPC_Model
     label_CheckImport, &
     label_DataInitialize, &
     label_SetClock, &
-    label_SetRunClock
+    label_SetRunClock, &
+    label_Finalize
   
   character(*), parameter :: &
     label_DataInitialize = "Model_DataInitialize"

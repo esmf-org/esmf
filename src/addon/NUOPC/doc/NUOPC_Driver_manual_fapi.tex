@@ -98,9 +98,9 @@ Component that drives Model, Mediator, and Connector components. For every Drive
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
   \item Execute the Finalize() methods of all Connector components in order.
   \item Execute the Finalize() methods of all Model components in order.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
   \item Destroy all Model components and their import and export states.
   \item Destroy all Connector components.
   \item Internal clean-up.
