@@ -639,6 +639,29 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
+  void FTN_X(c_esmc_gridgetcoordpresent)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *isPresent,
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetcoordpresent()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // If present then set as true
+    *isPresent=0;
+    if ((*grid)->hasCoordStaggerLoc(*staggerloc)) {
+      *isPresent=1;
+    }
+
+    // Set SUCCESS
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
   void FTN_X(c_esmc_gridgetitempresent)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item, 

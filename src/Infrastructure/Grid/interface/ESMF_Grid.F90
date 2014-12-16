@@ -497,6 +497,7 @@ end interface
       module procedure ESMF_GridGetPSloc
       module procedure ESMF_GridGetPLocalDe
       module procedure ESMF_GridGetPSlocPTile
+
        
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -522,6 +523,7 @@ interface ESMF_GridGetCoord
       module procedure ESMF_GridGetCoordIntoArray
       module procedure ESMF_GridGetCoordR8
       module procedure ESMF_GridGetCoordR4
+      module procedure ESMF_GridGetCoordInfo
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -15858,6 +15860,85 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_GridGetCoordR8
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordInfo"
+!BOP
+!\label{API:GridGetCoordInfo}
+! !IROUTINE: ESMF_GridGetCoord - Get information about a Grid Coordinates
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
+      subroutine ESMF_GridGetCoordInfo(grid, staggerloc, &
+        keywordEnforcer, isPresent, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),           intent(in)            :: grid
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical,                   intent(out), optional :: isPresent
+      integer,                   intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!    This method allows the user to get information about the coordinates on a given
+!    stagger. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Grid to get the information from.
+!     \item[{[staggerloc]}]
+!          The stagger location from which to get information. 
+!          Please see Section~\ref{const:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[isPresent]}]
+!          If .true. then coordinates have been added on this staggerloc.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    integer :: isPresentInt
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+ ! XMRKX
+
+    ! Call C++ Subroutine   
+    if (present(isPresent)) then
+       isPresent=.false. 
+       call c_ESMC_gridgetcoordpresent(grid%this,tmp_staggerloc,  &
+            isPresentInt, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Interpret isPresentInt
+       if (isPresentInt==1) then
+          isPresent=.true.
+       else 
+          isPresent=.false.
+       endif
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCoordInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -16069,6 +16150,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_GridGetCoordBounds
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -18648,14 +18730,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[grid]
 !          Grid to get the information from.
 !     \item[itemflag]
-!          The item from which to get the arrays. Please see Section~\ref{const:griditem} for a 
+!          The item for which to get information. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{[staggerloc]}]
-!          The stagger location from which to get the arrays. 
+!          The stagger location for which to get information. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[isPresent]}]
-!          If .true. then an item of type itemflag exists on this staggerloc.
+!          If .true. then an item of type itemflag has been added to this staggerloc.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
