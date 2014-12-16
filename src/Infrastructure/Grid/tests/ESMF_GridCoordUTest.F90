@@ -71,7 +71,7 @@ program ESMF_GridCoordUTest
   REAL(ESMF_KIND_R8) :: cornerX(globalXcount+1)
   REAL(ESMF_KIND_R8) :: cornerY(globalYcount+1)
   REAL(ESMF_KIND_R8),pointer :: farrayPtr1D(:)
-
+  logical :: isPresent
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -106,6 +106,45 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Grid Coord isPresent"
+  write(failMsg, *) "Incorrect result"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Grid 
+  gridA=ESMF_GridCreateNoPeriDim(maxIndex=(/20,20/), regDecomp=(/2,2/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Add coords on the center
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get isPresent, for coord that is present
+  call ESMF_GridGetCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         isPresent=isPresent, rc=localrc)
+
+  ! Check answer
+  if (.not. isPresent) correct=.false.
+
+  ! Get isPresent, for coord that is NOT present
+  call ESMF_GridGetCoord(gridA, staggerloc=ESMF_STAGGERLOC_CORNER, &
+         isPresent=isPresent, rc=localrc)
+
+  ! Check answer
+  if (isPresent) correct=.false.
+
+  ! get rid of first grid
+  call ESMF_GridDestroy(gridA,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
 
   !-----------------------------------------------------------------------------
