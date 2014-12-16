@@ -1289,8 +1289,13 @@ namespace ESMCI {
       localrc = io_xml->writeElement("documentID", gridGUID, 
         local_indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-      localrc = io_xml->writeElement("documentVersion", 
-        "1.0.0", local_indent, 0);
+      // TODO: do something different here..
+      // required by ES-DOC to properly index this fiel in the esmf test project
+      localrc = io_xml->writeElement("documentProject", "ESMF test project",
+        local_indent, 0);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
+      localrc = io_xml->writeElement("documentVersion",
+        "1", local_indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("documentCreationDate", 
         getTime().c_str(), local_indent, 0);
