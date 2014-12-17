@@ -73,12 +73,6 @@ enum ESMC_Pin_Flag { ESMF_PIN_DE_TO_PET=1,
 enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,
                       ESMF_DIRECTION_REVERSE};
 
-// io format type
-enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
-                       ESMF_IOFMT_NETCDF,
-                       ESMF_IOFMT_NETCDF4P,
-                       ESMF_IOFMT_NETCDF4C};
-
 // indexflag type
 enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
                       ESMF_INDEX_GLOBAL,
@@ -124,12 +118,6 @@ enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
                          ESMC_ATTWRITE_XML};
-
-// File status flag (for IO write functions)
-enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
-                            ESMC_FILESTATUS_OLD = 1,
-                            ESMC_FILESTATUS_NEW = 2,
-                            ESMC_FILESTATUS_REPLACE = 3};
 
 // Item order when retrieving item lists from a Container object
 enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,
