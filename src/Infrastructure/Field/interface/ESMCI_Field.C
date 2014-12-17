@@ -1224,7 +1224,6 @@ namespace ESMCI {
     // Invoke the fortran interface through the F90-C++ "glue" code
     std::string file_local = file;
     ESMC_Logical overwrite_local = (overwrite != 0) ? ESMF_TRUE:ESMF_FALSE;
-    std::cout << ESMC_METHOD << ": status = " << status << std::endl;
     if (variableName) {
       std::string variableName_local = variableName;
       FTN_X(f_esmf_fieldwrite)(this, file, variableName,
