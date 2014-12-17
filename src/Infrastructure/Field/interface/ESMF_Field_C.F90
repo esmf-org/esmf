@@ -591,6 +591,81 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
   end subroutine f_esmf_fieldcollectgarbage
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldread"
+  subroutine f_esmf_fieldread (field,  &
+      file, variableName, timeSlice, iofmt, rc)
+    use ESMF_FieldMod
+    use ESMF_FieldPrMod
+    use ESMF_LogErrMod
+    use ESMF_UtilTypesMod
+
+    implicit none
+
+    type(ESMF_Field), intent(inout)   :: field
+    character(*),     intent(in)      :: file
+    character(*),     intent(in)      :: variableName
+    integer,          intent(in)      :: timeSlice
+    type(ESMF_IOFmt_Flag), intent(in) :: iofmt
+    integer,          intent(out)     :: rc
+
+    integer :: localrc
+
+! if (present (variableName)) then
+! print *, ESMF_METHOD, ': file = ', file, ', variableName = ', variableName
+! else
+! print *, ESMF_METHOD, ': file = ', file, ', variableName not present'
+! end if
+! print *, ESMF_METHOD, ': timeSlice =', timeSlice
+    call ESMF_FieldRead (field, file,  &
+        variableName=variablename, timeSlice=timeSlice, iofmt=iofmt,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_fieldread
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldwrite"
+  subroutine f_esmf_fieldwrite (field,  &
+      file, variableName, overwrite, status, timeSlice, iofmt, rc)
+    use ESMF_FieldMod
+    use ESMF_FieldWrMod
+    use ESMF_LogErrMod
+    use ESMF_UtilTypesMod
+
+    implicit none
+
+    type(ESMF_Field), intent(inout)   :: field
+    character(*),     intent(in)      :: file
+    character(*),     intent(in), optional :: variableName
+    logical,          intent(in)      :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in) :: status
+    integer,          intent(in)      :: timeSlice
+    type(ESMF_IOFmt_Flag), intent(in) :: iofmt
+    integer,          intent(out)     :: rc
+
+    integer :: localrc
+
+! if (present (variableName)) then
+! print *, ESMF_METHOD, ': file = ', file, ', variableName = ', variableName
+! else
+! print *, ESMF_METHOD, ': file = ', file, ', variableName not present'
+! end if
+! print *, ESMF_METHOD, ': overwrite = ', overwrite, ', timeSlice =', timeSlice
+    call ESMF_FieldWrite (field, file=file,  &
+        variableName=variablename,  &
+        overwrite=overwrite, status=status, timeSlice=timeSlice, iofmt=iofmt,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_fieldwrite
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regridgetarea"
   subroutine f_esmf_regridgetarea(field, rc)
 

@@ -27,7 +27,7 @@
 #include "ESMCI_Field.h"
 
 //insert any higher level, 3rd party or system includes here
-#include <string.h>         // strlen()
+#include <string>         // strlen()
 
 // ESMF headers
 #include "ESMCI_LogErr.h"
@@ -106,6 +106,12 @@ void FTN_X(f_esmf_fieldgetbounds)(ESMCI::Field *fieldp, int *localDe,
 
 void FTN_X(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
+void FTN_X(f_esmf_fieldread)(ESMCI::Field *fieldp, const char *file,
+  const char *variablename, int *timeslice, ESMC_IOFmt_Flag *iofmt,
+  int *rc,
+  ESMCI_FortranStrLenArg file_len,
+  ESMCI_FortranStrLenArg variablename_len);
+
 void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
@@ -127,6 +133,14 @@ void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
+
+void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
+  const char *variablename,
+  ESMC_Logical *overwrite, ESMC_FileStatus_Flag *status,
+  int *timeslice, ESMC_IOFmt_Flag *iofmt,
+  int *rc,
+  ESMCI_FortranStrLenArg file_len,
+  ESMCI_FortranStrLenArg variablename_len);
 
 }
 
@@ -831,6 +845,7 @@ namespace ESMCI {
 
 //  !DESCRIPTION
 //    Prints information about the {\tt field} to {\tt stdout}.
+//EOP
 
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
@@ -838,6 +853,46 @@ namespace ESMCI {
 
     // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_fieldprint)(this, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::read()"
+//BOPI
+// !IROUTINE:  ESMCI::Field::read - read external data into a field
+
+// !INTERFACE:
+  int Field::read(const char *file,
+      const char* variableName,
+      int timeslice, ESMC_IOFmt_Flag iofmt){
+
+// !RETURN VALUE:
+//    int error return code
+  
+// !ARGUMENTS:
+//   none
+
+//  !DESCRIPTION
+//    Reads external data into a {\tt field}.
+//EOPI
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc=ESMC_RC_NOT_IMPL;
+
+    // Invoke the fortran interface through the F90-C++ "glue" code
+    std::string file_local = file;
+    std::string variableName_local = variableName;
+    FTN_X(f_esmf_fieldread)(this, file, variableName,
+        &timeslice, &iofmt, &localrc,
+        file_local.size(), variableName_local.size());
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
@@ -1134,6 +1189,58 @@ namespace ESMCI {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::write()"
+//BOPI
+// !IROUTINE:  ESMCI::Field::write - write Field data to an external file
+
+// !INTERFACE:
+  int Field::write(const char *file,
+      const char* variableName,
+      int overwrite,
+      ESMC_FileStatus_Flag status,
+      int timeslice, ESMC_IOFmt_Flag iofmt){
+
+// !RETURN VALUE:
+//    int error return code
+  
+// !ARGUMENTS:
+//   none
+
+//  !DESCRIPTION
+//    Writes {\tt field} data into an external file.
+//EOPI
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc=ESMC_RC_NOT_IMPL;
+
+    // Invoke the fortran interface through the F90-C++ "glue" code
+    std::string file_local = file;
+    ESMC_Logical overwrite_local = (overwrite != 0) ? ESMF_TRUE:ESMF_FALSE;
+    std::cout << ESMC_METHOD << ": status = " << status << std::endl;
+    if (variableName) {
+      std::string variableName_local = variableName;
+      FTN_X(f_esmf_fieldwrite)(this, file, variableName,
+          &overwrite_local, &status,
+          &timeslice, &iofmt, &localrc,
+          file_local.size(), variableName_local.size());
+    } else {
+      FTN_X(f_esmf_fieldwrite)(this, file, NULL,
+          &overwrite_local, &status,
+          &timeslice, &iofmt, &localrc,
+          file_local.size(), 0);
+    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+
+    // return successfully
     rc = ESMF_SUCCESS;
     return rc;
   }
