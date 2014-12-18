@@ -50,6 +50,7 @@ module NUOPC_Comp
   interface NUOPC_CompAttributeGet
     module procedure NUOPC_GridCompAttributeGet
     module procedure NUOPC_CplCompAttributeGet
+    module procedure NUOPC_CplCompAttributeCplLGet
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeSet
@@ -340,7 +341,7 @@ module NUOPC_Comp
     character(*),        intent(out)           :: value
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Accesses the Attribute {\tt name} inside of {\tt comp} using the
+!   Access the Attribute {\tt name} inside of {\tt comp} using the
 !   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
@@ -383,14 +384,64 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
+  subroutine NUOPC_CplCompAttributeGet(comp, name, value, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(in)            :: comp
+    character(*),        intent(in)            :: name
+    character(*),        intent(out)           :: value
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Access the Attribute {\tt name} inside of {\tt comp} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   the Attribute is not present or not set.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: defaultvalue
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    defaultvalue = "CheckThisDefaultValue"
+
+    call ESMF_AttributeGet(comp, name=name, value=value, &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (trim(value) == trim(defaultvalue)) then
+      ! attribute not present
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    else if (len_trim(value) == 0) then
+      ! attribute present but not set
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeGet() 
+  subroutine NUOPC_CplCompAttributeCplLGet(comp, cplList, cplListSize, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(in)            :: comp
     character(*),       intent(out), optional :: cplList(:)
     integer,            intent(out), optional :: cplListSize
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Accesses the "CplList" Attribute inside of {\tt comp} using the
+!   Access the "CplList" Attribute inside of {\tt comp} using the
 !   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
