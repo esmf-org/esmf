@@ -15,6 +15,9 @@ endif
 ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
 SOURCEC += ESMCI_IntelMICInfo.C
 endif
+ifeq ($(ESMF_ACC_FRAMEWORK),openmp4)
+SOURCEC += ESMCI_OpenMP4Info.C
+endif
 
 # List all .h files which should be copied to common include dir
 STOREH	  = ESMCI_VM.h ESMCI_VMKernel.h
@@ -39,6 +42,11 @@ endif
 
 ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
 #ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
+endif
+
+ifeq ($(ESMF_ACC_FRAMEWORK),openmp4)
+ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
+ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
 endif
 
 CLEANDIRS  =
