@@ -13,7 +13,7 @@ ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
 SOURCEF += ESMF_OpenACCInfo.F90
 endif
 ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
-SOURCEF += ESMF_IntelMICInfo.F90
+SOURCEC += ESMCI_IntelMICInfo.C
 endif
 
 # List all .h files which should be copied to common include dir
@@ -38,7 +38,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
 endif
 
 ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
+#ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
 endif
 
 CLEANDIRS  =
