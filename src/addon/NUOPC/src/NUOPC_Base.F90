@@ -380,7 +380,7 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Adds standard NUOPC Attributes to a Field object. Checks the provided
 !   arguments against the NUOPC Field Dictionary. Omitted optional
-!   information is filled in using defaults out of the NUOPC Field Dictionary.
+!   information is filled in using defaults.
 !
 !   This adds the standard NUOPC Field Attribute package: convention="NUOPC", 
 !   purpose="General" to the Field. The NUOPC Field Attribute package extends
@@ -402,13 +402,11 @@ module NUOPC_Base
 !   \item[{[LongName]}]
 !     The LongName of the Field. NUOPC does not restrict the value
 !     of this variable.
-!     If omitted, the default is to use the LongName associated with 
-!     the StandardName in the NUOPC Field Dictionary.
+!     If omitted, the default is to use the StandardName.
 !   \item[{[ShortName]}]
 !     The ShortName of the Field. NUOPC does not restrict the value
 !     of this variable.
-!     If omitted, the default is to use the ShortName associated with 
-!     the StandardName in the NUOPC Field Dictionary.
+!     If omitted, the default is to use the StandardName.
 !   \item[{[Connected]}]
 !     The connection status of the Field. Must be one of the NUOPC supported
 !     values: {\tt false} or {\tt true}.
@@ -512,9 +510,9 @@ module NUOPC_Base
       
     ! set LongName
     if (present(LongName)) then
-      tempString = LongName
+      tempString = trim(LongName)
     else
-      tempString = fdEntry%wrap%defaultLongName   ! default
+      tempString = trim(StandardName)   ! default
     endif
     call ESMF_AttributeSet(field, &
       name="LongName", value=trim(tempString), &
@@ -525,9 +523,9 @@ module NUOPC_Base
       
     ! set ShortName
     if (present(ShortName)) then
-      tempString = ShortName
+      tempString = trim(ShortName)
     else
-      tempString = fdEntry%wrap%defaultShortName  ! default
+      tempString = trim(StandardName)   ! default
     endif
     call ESMF_AttributeSet(field, &
       name="ShortName", value=trim(tempString), &
@@ -783,13 +781,10 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, &
-    defaultLongName, defaultShortName, rc)
+  subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, rc)
 ! !ARGUMENTS:
     character(*),                 intent(in)            :: standardName
     character(*),                 intent(in)            :: canonicalUnits
-    character(*),                 intent(in),  optional :: defaultLongName
-    character(*),                 intent(in),  optional :: defaultShortName
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Adds an entry to the NUOPC Field dictionary. If necessary the dictionary is
@@ -806,7 +801,6 @@ module NUOPC_Base
 
     call NUOPC_FieldDictionaryAddEntryI(NUOPC_FieldDictionary, &
       standardName = standardName, canonicalUnits = canonicalUnits, &
-      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
       rc = rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -820,13 +814,10 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntry - Get information about a NUOPC Field dictionary entry
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryGetEntry(standardName, canonicalUnits, &
-    defaultLongName, defaultShortName, rc)
+  subroutine NUOPC_FieldDictionaryGetEntry(standardName, canonicalUnits, rc)
 ! !ARGUMENTS:
     character(*),                 intent(in)            :: standardName
     character(*),                 intent(out), optional :: canonicalUnits
-    character(*),                 intent(out), optional :: defaultLongName
-    character(*),                 intent(out), optional :: defaultShortName
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns the canonical units, the default LongName and the default ShortName
@@ -843,7 +834,6 @@ module NUOPC_Base
 
     call NUOPC_FieldDictionaryGetEntryI(NUOPC_FieldDictionary, &
       standardName = standardName, canonicalUnits = canonicalUnits, &
-      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
       rc = rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1514,13 +1504,11 @@ module NUOPC_Base
 !   \item[{[LongName]}]
 !     The LongName of the advertised Field. NUOPC does not restrict the value
 !     of this variable.
-!     If omitted, the default is to use the LongName associated with 
-!     the StandardName in the NUOPC Field Dictionary.
+!     If omitted, the default is to use the StandardName.
 !   \item[{[ShortName]}]
 !     The ShortName of the advertised Field. NUOPC does not restrict the value
 !     of this variable.
-!     If omitted, the default is to use the ShortName associated with 
-!     the StandardName in the NUOPC Field Dictionary.
+!     If omitted, the default is to use the StandardName.
 !   \item[{[name]}]
 !     The actual name of the advertised Field by which it is accessed in the
 !     State object. NUOPC does not restrict the value of this variable.

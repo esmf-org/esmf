@@ -117,7 +117,7 @@ program ESMF_NUOPC_UTest
   stateB = ESMF_StateCreate(name="TestState B", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
-  field = ESMF_FieldEmptyCreate(name="sst", rc=rc)
+  field = ESMF_FieldEmptyCreate(name="sea_surface_temperature", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   fieldBundleA = ESMF_FieldBundleCreate(name="TestFieldBundle A", rc=rc)
@@ -459,7 +459,7 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_StateIsFieldConnected() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsFieldConnected(stateA, "sst", rc=rc)
+  flag = NUOPC_StateIsFieldConnected(stateA, "sea_surface_temperature", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -499,7 +499,7 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_StateWrite() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateWrite(stateA, fieldNameList=(/"sst"/), &
+  call NUOPC_StateWrite(stateA, fieldNameList=(/"sea_surface_temperature"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
