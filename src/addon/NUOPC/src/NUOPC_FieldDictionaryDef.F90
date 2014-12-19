@@ -163,11 +163,9 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-!BOLT l l l l
+!BOLT l l
 ! "{\bf StandardName}"
-! "{\bf Units} \\"
-! ""
-! "(canonical)"
+! "{\bf CanonicalUnits}"
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "air_pressure_at_sea_level", &
