@@ -1800,16 +1800,6 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(cplcomp, label=label_Finalize, &
-      existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
@@ -1832,6 +1822,16 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(cplcomp, label=label_Finalize, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! deallocate and destroy remaining internal state members
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
