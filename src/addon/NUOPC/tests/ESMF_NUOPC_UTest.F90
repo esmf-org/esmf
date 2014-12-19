@@ -191,7 +191,7 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_CompAttributeGet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CompAttributeGet(cplComp, rc=rc)
+  call NUOPC_CompAttributeGet(cplComp, name="CplList", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
