@@ -50,10 +50,7 @@ module NUOPC_Comp
   interface NUOPC_CompAttributeGet
     module procedure NUOPC_GridCompAttributeGet
     module procedure NUOPC_CplCompAttributeGet
-    module procedure NUOPC_GridCompAttributeGetI
-    module procedure NUOPC_CplCompAttributeGetI
-    module procedure NUOPC_GridCompAttributeGetSL
-    module procedure NUOPC_CplCompAttributeGetSL
+    module procedure NUOPC_CplCompAttributeCplLGet
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeSet
@@ -122,8 +119,8 @@ module NUOPC_Comp
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if SetServices has been called for {\tt comp}. 
-!   Otherwise return {\tt .false.}.
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}. 
+!   Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -165,8 +162,8 @@ module NUOPC_Comp
     type(ESMF_CplComp), intent(in)            :: comp
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if SetServices has been called for {\tt comp}.
-!   Otherwise return {\tt .false.}.
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}.
+!   Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -206,7 +203,9 @@ module NUOPC_Comp
     type(ESMF_GridComp)                   :: comp
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Add the standard NUOPC GridComp Attribute package: convention="NUOPC",
+!   Adds standard NUOPC Attributes to a Gridded Component.
+!
+!   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
 !   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
 !   package extends the CIM Component Attribute package: convention="CIM 1.5",
 !   purpose="ModelComp".
@@ -280,9 +279,21 @@ module NUOPC_Comp
     type(ESMF_CplComp), intent(inout)         :: comp
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add the standard NUOPC CplComp Attribute package: convention="NUOPC", 
-!   purpose="General" to the Field. The NUOPC CplComp Attribute package extends
+!   Adds standard NUOPC Attributes to a Coupler Component. Checks the provided
+!   importState and exportState arguments for matching Fields and adds the list
+!   as "CplList" Attribute.
+!
+!   This adds the standard NUOPC Coupler Attribute package: convention="NUOPC", 
+!   purpose="General" to the Field. The NUOPC Coupler Attribute package extends
 !   the ESG Component Attribute package: convention="ESG", purpose="General".
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are added.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------
@@ -331,7 +342,7 @@ module NUOPC_Comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
@@ -381,7 +392,7 @@ module NUOPC_Comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
@@ -420,137 +431,33 @@ module NUOPC_Comp
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGetI(comp, name, value, rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: comp
-    character(*),        intent(in)            :: name
-    integer,             intent(out)           :: value
-    integer,             intent(out), optional :: rc
-! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    call ESMF_AttributeGet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGetI(comp, name, value, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(in)            :: comp
-    character(*),        intent(in)            :: name
-    integer,             intent(out)           :: value
-    integer,             intent(out), optional :: rc
-! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    call ESMF_AttributeGet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGetSL(comp, name, valueList, itemCount, &
-    rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: comp
-    character(*),        intent(in)            :: name
-    character(*),        intent(out), optional :: valueList(:)
-    integer,             intent(out), optional :: itemCount
-    integer,             intent(out), optional :: rc
-! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    if (present(valueList)) then
-      call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else
-      call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGetSL(comp, name, valueList, itemCount, &
-    rc)
+  subroutine NUOPC_CplCompAttributeCplLGet(comp, cplList, cplListSize, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(in)            :: comp
-    character(*),       intent(in)            :: name
-    character(*),       intent(out), optional :: valueList(:)
-    integer,            intent(out), optional :: itemCount
+    character(*),       intent(out), optional :: cplList(:)
+    integer,            intent(out), optional :: cplListSize
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   Access the "CplList" Attribute inside of {\tt comp} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-    if (present(valueList)) then
-      call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+    if (present(cplList)) then
+      call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
-      call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+      call ESMF_AttributeGet(comp, name="CplList", &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -621,6 +528,7 @@ module NUOPC_Comp
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
+!BOP  !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompAttributeSet - Set a NUOPC GridComp Attribute
 ! !INTERFACE:
@@ -681,8 +589,6 @@ module NUOPC_Comp
   !-----------------------------------------------------------------------------
 
 
-  !-----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: NUOPC_CompAttributeSet - Set a NUOPC GridComp List Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeSet() 

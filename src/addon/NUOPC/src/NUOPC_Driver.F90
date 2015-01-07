@@ -1008,8 +1008,10 @@ module NUOPC_Driver
           attributeName = "InitializePhaseMap"
         endif
         ! obtain number of initPhases from the Model Attributes
-        call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
-          name=trim(attributeName), itemCount=phaseCount, rc=rc)
+        call ESMF_AttributeGet(is%wrap%modelComp(i), &
+          name=trim(attributeName), &
+          itemCount=phaseCount, &
+          convention="NUOPC", purpose="General", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1025,8 +1027,10 @@ module NUOPC_Driver
           return  ! bail out
         ! conditionally obtain initPhases list from the Model Attributes
         if (phaseCount > 0) then
-          call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
-            name=trim(attributeName), valueList=modelPhaseMap(i)%phases, rc=rc)
+          call ESMF_AttributeGet(is%wrap%modelComp(i), &
+            name=trim(attributeName), &
+            valueList=modelPhaseMap(i)%phases, &
+            convention="NUOPC", purpose="General", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
@@ -1051,8 +1055,10 @@ module NUOPC_Driver
         character(len=NUOPC_PhaseMapStringLength) :: tempString
         rc = ESMF_SUCCESS
         ! obtain number of initPhases from the Model Attributes
-        call NUOPC_CompAttributeGet(is%wrap%connectorComp(i,j), &
-          name="InitializePhaseMap", itemCount=phaseCount, rc=rc)
+        call ESMF_AttributeGet(is%wrap%connectorComp(i,j), &
+          name="InitializePhaseMap", &
+          itemCount=phaseCount, &
+          convention="NUOPC", purpose="General", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -1067,9 +1073,10 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         ! obtain initPhases list from the Model Attributes
-        call NUOPC_CompAttributeGet(is%wrap%connectorComp(i,j), &
-          name="InitializePhaseMap", valueList=connectorPhaseMap(i,j)%phases, &
-          rc=rc)
+        call ESMF_AttributeGet(is%wrap%connectorComp(i,j), &
+          name="InitializePhaseMap", &
+          valueList=connectorPhaseMap(i,j)%phases, &
+          convention="NUOPC", purpose="General", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
