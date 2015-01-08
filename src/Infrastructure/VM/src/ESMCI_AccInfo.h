@@ -10,7 +10,7 @@
 //
 //-----------------------------------------------------------------------------
 // The ESMF Accelerator framework interface
-#ifdef ESMF_ACC_FRAMEWORK
+#ifdef ESMF_ACC_SOFTWARE_STACK
 int fw_get_num_devices(void );
 #endif
 

@@ -6,16 +6,16 @@ SOURCEC	  = ESMCI_VM.C ESMCI_VMKernel.C
 SOURCEF	  = 
 SOURCEH	  = 
 
-ifeq ($(ESMF_ACC_FRAMEWORK),opencl)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),opencl)
 SOURCEC += ESMCI_OpenCLInfo.C
 endif
-ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),openacc)
 SOURCEC += ESMCI_OpenACCInfo.C
 endif
-ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),intelmic)
 SOURCEC += ESMCI_IntelMICInfo.C
 endif
-ifeq ($(ESMF_ACC_FRAMEWORK),openmp4)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),openmp4)
 SOURCEC += ESMCI_OpenMP4Info.C
 endif
 
@@ -32,7 +32,7 @@ include ${ESMF_DIR}/makefile
 
 # FIXME: Since we are modifying the compile/link flags the
 # acc framework code needs to move to a separate directory
-ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),openacc)
 #ESMF_F90COMPILEOPTS += $(ESMF_OPENACC_F90COMPILEOPTS)
 #ESMF_F90LINKOPTS    += $(ESMF_OPENACC_F90LINKOPTS)
 #ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
@@ -40,11 +40,11 @@ ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
 #ESMF_CXXLINKOPTS    += $(ESMF_OPENACC_CXXLINKOPTS)
 endif
 
-ifeq ($(ESMF_ACC_FRAMEWORK),intelmic)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),intelmic)
 #ESMF_CXXCOMPILECPPFLAGS += -DESMF_ACC_FW_HAS_FTN_INTERFACE
 endif
 
-ifeq ($(ESMF_ACC_FRAMEWORK),openmp4)
+ifeq ($(ESMF_ACC_SOFTWARE_STACK),openmp4)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
 ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
 endif

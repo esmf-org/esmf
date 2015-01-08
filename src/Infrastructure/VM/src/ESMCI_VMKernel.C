@@ -460,7 +460,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
     cid[i] = new int[ncpet[i]];
     cid[i][0]=i;
   }
-#ifdef ESMF_ACC_FRAMEWORK
+#ifdef ESMF_ACC_SOFTWARE_STACK
   int num_adevices = 0;
   num_adevices = fw_get_num_devices();
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
