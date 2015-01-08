@@ -7,7 +7,7 @@ SOURCEF	  =
 SOURCEH	  = 
 
 ifeq ($(ESMF_ACC_FRAMEWORK),opencl)
-SOURCEC += ESMC_OpenCLInfo.C
+SOURCEC += ESMCI_OpenCLInfo.C
 endif
 ifeq ($(ESMF_ACC_FRAMEWORK),openacc)
 SOURCEC += ESMCI_OpenACCInfo.C
