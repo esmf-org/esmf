@@ -60,7 +60,7 @@ def mesh_create_5_pentahexa():
                           1.5, 2.5,  #node id 10
                           2.5, 2.5,  #node id 11
                           2.5, 2.1]) #node id 12
-
+ 
 
     nodeOwner = np.zeros(num_node)
 
@@ -68,11 +68,19 @@ def mesh_create_5_pentahexa():
     elemType=np.array([ESMF.MeshElemType.QUAD,
                        ESMF.MeshElemType.TRI,
                        ESMF.MeshElemType.TRI, 5, 6])
-    elemConn=np.array([1,2,5,4,         # elem id 1
-                       2,3,5,           # elem id 2
-                       3,6,5,           # elem id 3
-                       4,5,9,8,7,       # elem id 4
-                       5,6,12,11,10,9]) # elem id 5
+ 
+
+# I believe python connections are 0-based
+#    elemConn=np.array([1,2,5,4,         # elem id 1
+#                       2,3,5,           # elem id 2
+#                       3,6,5,           # elem id 3
+#                       4,5,9,8,7,       # elem id 4
+#                       5,6,12,11,10,9]) # elem id 5
+    elemConn=np.array([0,1,4,3,         # elem id 1
+                       1,2,4,           # elem id 2
+                       2,5,4,           # elem id 3
+                       3,4,8,7,6,       # elem id 4
+                       4,5,11,10,9,8]) # elem id 5
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
@@ -475,7 +483,8 @@ def mesh_create_5_pentahexa_parallel ():
         elemId=np.array([1])
         elemMask = np.array([0])
         elemType=np.array([ESMF.MeshElemType.QUAD])
-        elemConn=np.array([1, 2, 4, 3 ])
+#        elemConn=np.array([1, 2, 4, 3 ])
+        elemConn=np.array([0, 1, 3, 2 ])
 
     elif (ESMF.local_pet() == 1):
         num_node=4
@@ -493,8 +502,10 @@ def mesh_create_5_pentahexa_parallel ():
         elemId=np.array([2, 3])
         elemMask = np.array([1, 0])
         elemType=np.array([ESMF.MeshElemType.TRI, ESMF.MeshElemType.TRI])
-        elemConn=np.array([1, 2, 3,
-                           2, 4, 3])
+#        elemConn=np.array([1, 2, 3,
+#                           2, 4, 3])
+        elemConn=np.array([0, 1, 2,
+                           1, 3, 2])
 
     elif (ESMF.local_pet() == 2):
         num_node=5
@@ -514,7 +525,8 @@ def mesh_create_5_pentahexa_parallel ():
         elemId=np.array([4])
         elemMask = np.array([0])
         elemType=np.array([5])
-        elemConn=np.array([1, 2, 5, 4, 3])
+#        elemConn=np.array([1, 2, 5, 4, 3])
+        elemConn=np.array([0, 1, 4, 3, 1])
 
     elif (ESMF.local_pet() == 3):
         num_node=6
@@ -536,7 +548,8 @@ def mesh_create_5_pentahexa_parallel ():
         elemId=np.array([5])
         elemMask = np.array([0])
         elemType=np.array([6])
-        elemConn=np.array([1, 2, 6, 5, 4, 3])
+#        elemConn=np.array([1, 2, 6, 5, 4, 3])
+        elemConn=np.array([0, 1, 5, 4, 3, 2])
 
     # Add nodes and elements to the Mesh
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
