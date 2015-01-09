@@ -1792,8 +1792,15 @@ module NUOPC_Driver
 !
 ! !DESCRIPTION:
 ! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
-! component to a Driver. The GridComp is created on the provided {\tt petList},
-! or by default across all of the Driver PETs. 
+! component to a Driver. The component is created on the provided {\tt petList},
+! or by default across all of the Driver PETs.
+!
+! The specified {\tt SetServices()} routine is called back immediately after the
+! new child component has been created internally. Very little around the
+! component is set up at that time (e.g. component attributes are not 
+! available). The routine should therefore be very light weight, with the sole
+! purpose of setting the entry points of the component -- typically by deriving 
+! from a generic component followed by the appropriate specilizations.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -1941,8 +1948,16 @@ module NUOPC_Driver
 !
 ! !DESCRIPTION:
 ! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
-! component to a Driver. The GridComp is created on the provided {\tt petList},
+! component to a Driver. The component is created on the provided {\tt petList},
 ! or by default across all of the Driver PETs. 
+!
+! The {\tt SetServices()} routine in the {\tt sharedObj} is called back
+! immediately after the
+! new child component has been created internally. Very little around the
+! component is set up at that time (e.g. component attributes are not 
+! available). The routine should therefore be very light weight, with the sole
+! purpose of setting the entry points of the component -- typically by deriving 
+! from a generic component followed by the appropriate specilizations.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -2098,9 +2113,16 @@ module NUOPC_Driver
 !
 ! !DESCRIPTION:
 ! Create and add a CplComp (i.e. Connector) as a child component to a Driver.
-! The CplComp is created on the provided {\tt petList}, or by default across 
+! The component is created on the provided {\tt petList}, or by default across 
 ! the union of PETs of the components indicated by {\tt srcCompLabel}
 ! and {\tt dstCompLabel}.
+!
+! The specified {\tt SetServices()} routine is called back immediately after the
+! new child component has been created internally. Very little around the
+! component is set up at that time (e.g. component attributes are not 
+! available). The routine should therefore be very light weight, with the sole
+! purpose of setting the entry points of the component -- typically by deriving 
+! from a generic component followed by the appropriate specilizations.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the 
 ! context of the Driver component.

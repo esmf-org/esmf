@@ -752,12 +752,13 @@ module NUOPC_Comp
     type(ESMF_Clock),        intent(in)            :: externalClock
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Compares {\tt externalClock} to the Component internal Clock to make sure
-!   they match in their current Time. Further ensures that the external Clock's
-!   timeStep is a multiple of the internal Clock's timeStep. If both
-!   these condition are satisfied then the stopTime of the internal Clock is
-!   set to be reachable in one timeStep of the external Clock, taking into
-!   account the direction of the Clock.
+!   Compare {\tt externalClock} to the internal clock of {\tt comp} to make sure
+!   they match in their current time. Also ensure that the time step of the 
+!   external clock is a multiple of the time step of the internal clock. If 
+!   both conditions are satisfied then set the stop time of the internal clock
+!   so it is reached in one time step of the external clock. Otherwise leave the
+!   internal clock unchanged and return with error. The direction of
+!   the involved clocks is taking into account.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -799,7 +800,11 @@ module NUOPC_Comp
     end interface
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Derive a GridComp (i.e. Model, Mediator, or Driver) from a generic component.
+!   Derive a GridComp (i.e. Model, Mediator, or Driver) from a generic 
+!   component by calling into the specified {\tt SetServices()} routine of the
+!   generic component. This is typically the first call in the
+!   {\tt SetServices()} routine of the specializing component, and is followed
+!   by {\tt NUOPC\_CompSpecialize()} calls.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -838,7 +843,11 @@ module NUOPC_Comp
     end interface
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Derive a CplComp (i.e. Connector) from a generic component.
+!   Derive a CplComp (i.e. Connector) from a generic
+!   component by calling into the specified {\tt SetServices()} routine of the
+!   generic component. This is typically the first call in the
+!   {\tt SetServices()} routine of the specializing component, and is followed
+!   by {\tt NUOPC\_CompSpecialize()} calls.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1253,12 +1262,12 @@ module NUOPC_Comp
     type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Sets the Component internal Clock as a copy of {\tt externalClock}, but
+!   Set the component internal clock as a copy of {\tt externalClock}, but
 !   with a timeStep that is less than or equal to the stabilityTimeStep.
-!   At the same time ensures that the timeStep of the external Clock is
-!   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
-!   argument is not provided then the internal Clock will simply be set
-!   as a copy of the externalClock.
+!   At the same time ensure that the timeStep of the external clock is
+!   a multiple of the timeStep of the internal clock. If the stabilityTimeStep
+!   argument is not provided then the internal clock will simply be set
+!   as a copy of the external clock.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1563,8 +1572,9 @@ module NUOPC_Comp
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Set the internal entry point for a GridComp (i.e. Driver). Only Drivers 
-! utilize internal entry points.
+! Set an {\em internal} entry point for a GridComp (i.e. Driver). Only Drivers 
+! currently utilize internal entry points. Internal entry points allow user
+! specialization on the driver level during initialization and run sequencing.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1674,10 +1684,10 @@ module NUOPC_Comp
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Try to find a routine called "SetServices" in the sharedObj and execute it
-!   to set the component's services. An attempt is made to find a routine that
-!   is close in name to "SetServices", allowing compiler name mangeling, i.e.
-!   upper and lower case, as well as trailing underscores.
+!   Try to find a routine called "{\tt SetServices}" in the {\tt sharedObj} file
+!   and execute the routine. An attempt is made to find a routine that
+!   is close in name to "{\tt SetServices}", allowing for compiler name
+!   mangeling, i.e. upper and lower case, as well as trailing underscores.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
