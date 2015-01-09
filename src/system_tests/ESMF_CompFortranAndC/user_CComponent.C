@@ -102,6 +102,12 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
     elemConn[i] = elemConn[i]+1;
   }
   
+  // We no longer use VTK 2D element types, so translate
+  for (int i = 0; i < num_elem; i++){
+    if (elemType[i]==5) elemType[i]=ESMC_MESHELEMTYPE_TRI;
+    else if (elemType[i]==9) elemType[i]=ESMC_MESHELEMTYPE_QUAD;
+  }
+
   // Add node information to the mesh
   *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
   if (*rc!=ESMF_SUCCESS) return;  // bail out

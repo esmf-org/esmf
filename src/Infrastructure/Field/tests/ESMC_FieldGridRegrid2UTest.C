@@ -267,8 +267,16 @@ int main(void){
                0.0,4.0, 1.5,4.0, 2.5,4.0, 4.0,4.0};
   int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   int elemId [] ={1,2,3,4,5,6,7,8,9};
-  // ESMF_MESHELEMTYPE_QUAD=9
-  int elemType [] = {9,9,9,9,9,9,9,9,9};
+  // ESMF_MESHELEMTYPE_QUAD
+  int elemType [] = {ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD};
   int elemConn [] ={1,2,6,5,
               2,3,7,6,
               3,4,8,7,

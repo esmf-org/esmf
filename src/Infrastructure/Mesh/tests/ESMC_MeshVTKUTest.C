@@ -133,6 +133,12 @@ int main(void){
     elemConn[i] = elemConn[i]+1;
   }
 
+  // We no longer use VTK 2D element types, so translate
+  for (int i = 0; i < num_elem; i++){
+    if (elemType[i]==5) elemType[i]=ESMC_MESHELEMTYPE_TRI;
+    else if (elemType[i]==9) elemType[i]=ESMC_MESHELEMTYPE_QUAD;
+  }
+
   // Calculate the number of owned nodes 
   numOwnedNodes=0;
   for (int i = 0; i < num_node; i++){

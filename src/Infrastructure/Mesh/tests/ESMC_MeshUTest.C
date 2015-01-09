@@ -96,8 +96,11 @@ int main(void){
                0.0,2.0, 1.0,2.0, 2.0,2.0};
   int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
   int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD=4  could not get ESMC version
-  int elemType_s [] ={4,4,4,4};
+  // ESMF_MESHELEMTYPE_QUAD 
+  int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD};
   double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
   int elemConn_s [] ={1,2,5,4,
               2,3,6,5,
