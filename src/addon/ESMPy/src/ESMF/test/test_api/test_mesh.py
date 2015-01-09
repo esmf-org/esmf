@@ -50,9 +50,7 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
-    # TODO: add this test back after issue with hopper is resolved (segfault)
-    #def test_mesh_5_pentahexa(self):
-    def removed(self):
+    def test_mesh_5_pentahexa(self):
 
         parallel = False
         if pet_count() > 1:

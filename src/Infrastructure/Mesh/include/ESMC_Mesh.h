@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -49,8 +49,8 @@ typedef struct{
 
 
 // MESH ELEMENT TYPES
-#define ESMC_MESHELEMTYPE_TRI  5
-#define ESMC_MESHELEMTYPE_QUAD 9
+#define ESMC_MESHELEMTYPE_TRI  3
+#define ESMC_MESHELEMTYPE_QUAD 4
 #define ESMC_MESHELEMTYPE_TETRA 10
 #define ESMC_MESHELEMTYPE_HEX  12
 
