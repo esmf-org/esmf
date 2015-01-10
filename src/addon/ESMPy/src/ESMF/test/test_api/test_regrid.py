@@ -181,6 +181,61 @@ class TestRegrid(TestBase):
             if (dstarea[i] != 0.25):
                 assert (dstarea[i] == 0.125)
 
+    def test_grid_mesh_pentahexa_regrid_csrv(self):
+        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5_pentahexa_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_5_pentahexa()
+
+        # create a grid
+        grid = grid_create([0, 0, 4, 4], [-0.1, -0.1, 2.5, 2.5], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+
+        # initialize the Fields to an analytic function
+        #srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        #exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
+                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
+                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
+                                    src_frac_field=srcfracfield, \
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+                                    fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
+                            dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
     def test_field_regrid_periodic(self):
         esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
