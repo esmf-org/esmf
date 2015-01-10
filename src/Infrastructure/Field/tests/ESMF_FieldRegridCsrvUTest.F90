@@ -10008,7 +10008,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    deallocate(elemConn)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
 
    call ESMF_MeshWrite(dstMesh,"dstMesh")
@@ -11001,7 +11001,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    deallocate(elemConn)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
 
    call ESMF_MeshWrite(dstMesh,"dstMesh")

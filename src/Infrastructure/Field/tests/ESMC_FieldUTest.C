@@ -106,6 +106,12 @@ int main(void){
     elemConn[i] = elemConn[i]+1;
   }
 
+  // We no longer use VTK 2D element types, so translate
+  for (int i = 0; i < num_elem; i++){
+    if (elemType[i]==5) elemType[i]=ESMC_MESHELEMTYPE_TRI;
+    else if (elemType[i]==9) elemType[i]=ESMC_MESHELEMTYPE_QUAD;
+  }
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Add node information to the mesh

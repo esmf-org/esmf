@@ -715,11 +715,9 @@ int MeshCXX::addElements(int num_elems, int *elemId,
                                      elemType[e]);
 
       for (int n = 0; n < nnodes; ++n) {
-      
+
         // Get 0-based node index
         int node_index=elemConn[c]-1;
-
-        // printf("%d node_index=%d\n",n,node_index);
 
         // Check elemConn
         if (node_index < 0) {
