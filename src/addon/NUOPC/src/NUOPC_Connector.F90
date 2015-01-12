@@ -260,7 +260,8 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (importStandardNameList(i) == exportStandardNameList(j)) then
+          if (NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j))) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -413,16 +414,18 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (importStandardNameList(i) == exportStandardNameList(j)) then
+          if (NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j))) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) cycle  ! break out and look for next match
-
+              
 #if 0
 print *, "current bondLevel=", bondLevel
 #endif
+
+            if (bondLevel == -1) cycle  ! break out and look for next match
                        
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -653,8 +656,9 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -958,8 +962,9 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1227,8 +1232,9 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1501,8 +1507,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1929,14 +1936,14 @@ print *, "found match:"// &
               
     ! check for key1 x key2 cross match
     if (imKey2 /= "") then
-      if (imKey2 /= exKey1) then
+      if (.not.NUOPC_FieldDictionaryMatchSyno(imKey2,exKey1)) then
         getBondLevel = -1  ! mark abort
         return          ! break out
       endif
       getBondLevel = getBondLevel + 1
     endif
     if (exKey2 /= "") then
-      if (exKey2 /= imKey1) then
+      if (.not.NUOPC_FieldDictionaryMatchSyno(exKey2,imKey1)) then
         getBondLevel = -1  ! mark abort
         return          ! break out
       endif

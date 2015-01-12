@@ -275,6 +275,24 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionarySetSyno() (existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level"/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionarySetSyno() (non existing entry) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level", &
+    "abcd_adoption_level"/), rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FieldDictionarySetup() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldDictionarySetup(rc=rc)

@@ -48,9 +48,11 @@ module NUOPC_Base
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
-  public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldDictionaryGetEntry  
-  public NUOPC_FieldDictionaryHasEntry  
+  public NUOPC_FieldDictionaryAddEntry
+  public NUOPC_FieldDictionaryGetEntry
+  public NUOPC_FieldDictionaryHasEntry
+  public NUOPC_FieldDictionaryMatchSyno  
+  public NUOPC_FieldDictionarySetSyno  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
@@ -787,7 +789,7 @@ module NUOPC_Base
     character(*),                 intent(in)            :: canonicalUnits
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Adds an entry to the NUOPC Field dictionary. If necessary the dictionary is
+!   Add an entry to the NUOPC Field dictionary. If necessary the dictionary is
 !   first set up.
 !EOP
   !-----------------------------------------------------------------------------
@@ -820,8 +822,8 @@ module NUOPC_Base
     character(*),                 intent(out), optional :: canonicalUnits
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns the canonical units, the default LongName and the default ShortName
-!   that the NUOPC Field dictionary associates with a StandardName.
+!   Return the canonical units that the NUOPC Field dictionary associates with
+!   the {\tt standardName}.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -854,8 +856,8 @@ module NUOPC_Base
     character(*),                 intent(in)            :: standardName
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if the NUOPC Field dictionary has an entry with the
-!   specified StandardName, {\tt .false.} otherwise.
+!   Return {\tt .true.} if the NUOPC Field dictionary has an entry with the
+!   specified {\tt standardName}, {\tt .false.} otherwise.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -875,6 +877,72 @@ module NUOPC_Base
       return  ! bail out
 
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionaryMatchSyno - Check whether the NUOPC Field dictionary considers the standard names synonyms
+! !INTERFACE:
+  function NUOPC_FieldDictionaryMatchSyno(standardName1, standardName2, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryMatchSyno
+! !ARGUMENTS:
+    character(*),                 intent(in)            :: standardName1
+    character(*),                 intent(in)            :: standardName2
+    integer,                      intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the NUOPC Field dictionary considers
+!   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
+!   otherwise.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    NUOPC_FieldDictionaryMatchSyno = &
+      NUOPC_FieldDictionaryMatchSynoI(NUOPC_FieldDictionary, &
+      standardName1 = standardName1, standardName2 = standardName2, rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionarySetSyno - Set synonyms in the NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionarySetSyno(standardNames, rc)
+! !ARGUMENTS:
+    character(*),                 intent(in)            :: standardNames(:)
+    integer,                      intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the entries in the {\tt standardNames} argument as synonyms.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldDictionarySetSynoI(NUOPC_FieldDictionary, &
+      standardNames = standardNames, rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

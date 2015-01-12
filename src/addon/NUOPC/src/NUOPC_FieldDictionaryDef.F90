@@ -24,6 +24,7 @@ module NUOPC_FieldDictionaryDef
     character(ESMF_MAXSTR)          :: standardName
     character(ESMF_MAXSTR)          :: canonicalUnits
     character(ESMF_MAXSTR), pointer :: connectedOptions(:)
+    character(ESMF_MAXSTR), pointer :: synonyms(:)
   end type
   
   type NUOPC_FieldDictionaryEntry
@@ -37,6 +38,8 @@ module NUOPC_FieldDictionaryDef
   public NUOPC_FieldDictionaryAddEntryI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
+  public NUOPC_FieldDictionaryMatchSynoI
+  public NUOPC_FieldDictionarySetSynoI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -77,6 +80,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
     fdEntry%wrap%connectedOptions(1)     = "false" ! default
     fdEntry%wrap%connectedOptions(2)     = "true"
+    allocate(fdEntry%wrap%synonyms(0), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms member", &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
     ! add fdEntry to the FieldDictionary
     call ESMF_ContainerAddUDT(fieldDictionary, &
@@ -107,7 +113,7 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_ContainerGetUDT(fieldDictionary, trim(StandardName), &
+    call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName), &
       fdEntry, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -147,6 +153,99 @@ module NUOPC_FieldDictionaryDef
     NUOPC_FieldDictionaryHasEntryI = isPres
     
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryMatchSynoI - Check whether the NUOPC Field dictionary considers the standard names synonyms
+! !INTERFACE:
+  function NUOPC_FieldDictionaryMatchSynoI(fieldDictionary, standardName1, &
+    standardName2, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryMatchSynoI
+! !ARGUMENTS:
+    type(ESMF_Container),         intent(inout)         :: fieldDictionary
+    character(*),                 intent(in)            :: standardName1
+    character(*),                 intent(in)            :: standardName2
+    integer,                      intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the NUOPC Field dictionary considers
+!   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
+!   otherwise.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                           :: i
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    NUOPC_FieldDictionaryMatchSynoI = .true. ! initialize
+    
+    if (trim(standardName2) == trim(standardName1)) return  ! early bail out
+    
+    call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName1), &
+      fdEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    NUOPC_FieldDictionaryMatchSynoI = .false. ! initialize
+    do i=1, size(fdEntry%wrap%synonyms)
+      if (trim(standardName2) == trim(fdEntry%wrap%synonyms(i))) then
+        NUOPC_FieldDictionaryMatchSynoI = .true.
+        exit  ! bail out on finding synonym
+      endif
+    enddo
+    
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionarySetSynoI - Set synonyms in the NUOPC Field dictionary entry
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionarySetSynoI(fieldDictionary, &
+    standardNames, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),             intent(inout)         :: fieldDictionary
+    character(*),                     intent(in)            :: standardNames(:)
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set synonyms in the NUOPC Field dictionary.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                           :: i, k, j, stat
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    character(ESMF_MAXSTR), pointer   :: synonyms(:)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    do i=1, size(standardNames)
+    
+      call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &
+        fdEntry, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      j = size(fdEntry%wrap%synonyms)
+      allocate(synonyms(j+size(standardNames)-1), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms array", &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      synonyms = fdEntry%wrap%synonyms  ! fill in the existing entries
+      
+      do k=1, size(standardNames)
+        if (k==i) cycle
+        j = j+1
+        synonyms(j) = trim(standardNames(k))
+      enddo
+      
+      deallocate(fdEntry%wrap%synonyms)
+      fdEntry%wrap%synonyms => synonyms
+
+    enddo
+
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

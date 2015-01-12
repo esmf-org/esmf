@@ -44,9 +44,11 @@ module NUOPC
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
-  public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldDictionaryGetEntry  
-  public NUOPC_FieldDictionaryHasEntry  
+  public NUOPC_FieldDictionaryAddEntry
+  public NUOPC_FieldDictionaryGetEntry
+  public NUOPC_FieldDictionaryHasEntry
+  public NUOPC_FieldDictionaryMatchSyno  
+  public NUOPC_FieldDictionarySetSyno  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
