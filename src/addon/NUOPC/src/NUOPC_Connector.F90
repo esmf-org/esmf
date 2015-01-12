@@ -1936,14 +1936,14 @@ print *, "found match:"// &
               
     ! check for key1 x key2 cross match
     if (imKey2 /= "") then
-      if (.not.NUOPC_FieldDictionaryMatchSyno(imKey2,exKey1)) then
+      if (imKey2 /= exKey1) then
         getBondLevel = -1  ! mark abort
         return          ! break out
       endif
       getBondLevel = getBondLevel + 1
     endif
     if (exKey2 /= "") then
-      if (.not.NUOPC_FieldDictionaryMatchSyno(exKey2,imKey1)) then
+      if (exKey2 /= imKey1) then
         getBondLevel = -1  ! mark abort
         return          ! break out
       endif
