@@ -232,7 +232,9 @@ module NUOPC_FieldDictionaryDef
       if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms array", &
         line=__LINE__, file=FILENAME)) return  ! bail out
       
-      synonyms = fdEntry%wrap%synonyms  ! fill in the existing entries
+      do k=1, j
+        synonyms(k) = fdEntry%wrap%synonyms(k)  ! fill in the existing entries
+      enddo
       
       do k=1, size(standardNames)
         if (k==i) cycle
