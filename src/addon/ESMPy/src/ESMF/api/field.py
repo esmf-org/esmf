@@ -237,12 +237,15 @@ class Field(MaskedArray):
 
     def read(self, filename, variable, timeslice, format=1):
         """
-
-        :param filename:
-        :param variable:
-        :param timeslice:
-        :param format:
-        :return:
+        Read data into a Field from a NetCDF file. \n
+        Required Arguments: \n
+            filename: the name of the NetCDF file. \n
+            variable: the name of the data variable to read. \n
+            timeslice: the number of time slices to read. \n
+        Optional Arguments: \n
+            format: unimplemented (defaults to NetCDF)
+        Returns: \n
+            Field \n
         """
         assert(type(filename) is str)
         assert(type(variable) is str)
