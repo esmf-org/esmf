@@ -235,6 +235,25 @@ class Field(MaskedArray):
 
         return string
 
+    def read(self, filename, variable, timeslice, format=1):
+        """
+
+        :param filename:
+        :param variable:
+        :param timeslice:
+        :param format:
+        :return:
+        """
+        assert(type(filename) is str)
+        assert(type(variable) is str)
+        assert(type(timeslice) is int)
+
+        ESMP_FieldRead(self, filename=filename,
+                       variablename=variable,
+                       timeslice=timeslice,
+                       iofmt=format)
+
+
     def get_area(self):
         """
         Initialize a Field with the areas of the cells of the 

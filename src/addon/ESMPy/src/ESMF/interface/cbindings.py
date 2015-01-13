@@ -1202,22 +1202,6 @@ def ESMP_FieldDestroy(field):
         raise ValueError('ESMC_FieldDestroy() failed with rc = ' + \
                                         str(rc) + '.    ' + constants._errmsg)
 
-_ESMF.ESMC_FieldPrint.restype = ct.c_int
-_ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
-@deprecated
-def ESMP_FieldPrint(field):
-    """
-    Preconditions: An ESMP_Field has been created.\n
-    Postconditions: The contents of 'field' have been printed to 
-                    standard out.\n
-    Arguments:\n
-        ESMP_Field :: field\n
-    """
-    rc = _ESMF.ESMC_FieldPrint(field.ptr)
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_FieldPrint() failed with rc = '+str(rc)+'.    '+
-                        constants._errmsg)
-
 _ESMF.ESMC_FieldGetPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_FieldGetPtr.argtypes = [ct.c_void_p, ct.c_int, ct.POINTER(ct.c_int)]
 @deprecated
@@ -1283,6 +1267,47 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
     lbounds = lbounds - 1
 
     return lbounds.copy(), ubounds.copy()
+
+_ESMF.ESMC_FieldPrint.restype = ct.c_int
+_ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
+@deprecated
+def ESMP_FieldPrint(field):
+    """
+    Preconditions: An ESMP_Field has been created.\n
+    Postconditions: The contents of 'field' have been printed to
+                    standard out.\n
+    Arguments:\n
+        ESMP_Field :: field\n
+    """
+    rc = _ESMF.ESMC_FieldPrint(field.ptr)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldPrint() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+_ESMF.ESMC_FieldRead.restype = ct.c_int
+_ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
+                                 ct.c_char_p,
+                                 ct.c_char_p,
+                                 ct.c_uint,
+                                 ct.c_uint]
+def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
+    #TODO: C doc says it defaults to NETCDF(1), but actually defaults to BIN(0)
+    """
+    Preconditions: An ESMP_Field has been created.\n
+    Postconditions: The contents of 'field' have been read from file.\n
+    Arguments:\n
+        ESMP_Field :: field\n
+        string     :: filename\n
+        string     :: variablename\n
+        integer    :: timeslice\n
+        IOFmt      :: iofmt\n
+    """
+    rc = _ESMF.ESMC_FieldRead(field.struct.ptr, filename, variablename, timeslice, iofmt)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldRead() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+
 
 _ESMF.ESMC_FieldRegridGetArea.restype = ct.c_int
 _ESMF.ESMC_FieldRegridGetArea.argtypes = [ct.c_void_p]
