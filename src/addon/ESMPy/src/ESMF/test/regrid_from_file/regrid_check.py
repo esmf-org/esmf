@@ -44,7 +44,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
                          meshname=meshname,
                          convert_to_dual=convert_to_dual)
         is_mesh = True
-        add_mask = False
+        add_mask = None
     else:
         print "Creating ESMF.Grid object"
         add_mask = len(missingvalue) > 0
