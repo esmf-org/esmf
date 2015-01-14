@@ -97,6 +97,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 ESMC_Grid ESMC_GridCreate1PeriDim(
   ESMC_InterfaceInt *maxIndex,  // in
   int *periodicDim, // in
+  int *poleDim, // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   enum ESMC_PoleKind_Flag *poleKind, // in
@@ -115,6 +116,9 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  The upper extent of the grid array.
 //  \item[periodicDim]
 //  The periodic dimension.  If not specified, defaults to 1.
+//  \item[poleDim]
+//  The dimension at which the poles are located at the ends.  If not
+//  specified, defaults to 2.
 //  \item[coordSys]
 //  The coordinated system of the grid coordinate data. If not specified then
 //  defaults to ESMF\_COORDSYS\_SPH\_DEG.
