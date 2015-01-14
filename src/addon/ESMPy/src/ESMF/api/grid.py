@@ -277,7 +277,7 @@ class Grid(object):
                                                       coordSys=coord_sys,
                                                       coordTypeKind=coord_typekind)
             else:
-                raise TypeError("Number of periodic dimension should be 2 or 3")
+                raise TypeError("Number of periodic dimensions should be 0 or 1")
 
             # grid rank
             self.rank = self.max_index.size
