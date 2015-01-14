@@ -62,12 +62,15 @@ class TestGrid(TestBase):
                      coord_typekind=TypeKind.R4)
         grid5 = Grid(max_index, num_peri_dims=1, periodic_dim=1,
                      coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
+        grid6 = Grid(max_index, num_peri_dims=1, periodic_dim=2, pole_dim=1,
+                     coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
 
         del grid
         del grid2
         del grid3
         del grid4
         del grid5
+        del grid6
 
     def test_grid_create_3D(self):
 
