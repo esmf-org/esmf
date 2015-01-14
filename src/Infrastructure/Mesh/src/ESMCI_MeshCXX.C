@@ -194,7 +194,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 				 int *convertToDual,
 				 int *addUserArea,
 				 const char *meshname,
-				 int *addMask,
+				 int *maskFlag,
 				 const char *varname,
 				 int *rc) {
    MeshCXX* meshCXXp;
@@ -212,7 +212,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     int localrc;
     meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
 					convertToDual, addUserArea, meshname, 
-					addMask, varname, &localrc);
+					maskFlag, varname, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
