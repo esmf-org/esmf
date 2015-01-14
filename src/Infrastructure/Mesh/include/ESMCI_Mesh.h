@@ -45,7 +45,7 @@ Mesh();
 ~Mesh();
 static Mesh *createfromfile(const char *filename, int fileTypeFlag,
 			    int *convertToDual, int *addUserArea, 
-			    const char *meshname, int *addMask, const char *varname, 
+			    const char *meshname, int *maskFlag, const char *varname, 
 			    int *rc);
 
 /**
