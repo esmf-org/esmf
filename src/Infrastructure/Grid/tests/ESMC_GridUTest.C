@@ -38,7 +38,7 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_tripole, grid_from_file;
+  ESMC_Grid grid_np, grid_1p, grid_1p_pdim1, grid_1p_pdim2, grid_tripole, grid_from_file;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -64,7 +64,7 @@ int main(void){
   rc=ESMC_LogSet(true);
 
   //----------------------------------------------------------------------------
-  //  GridCreate1PeriDim (no periodicDim specified)
+  //  GridCreate1PeriDim (no periodicDim or poleDim specified)
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -79,12 +79,12 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, &coordsys, &typekind, NULL, &rc);
+  grid_1p = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //  GridCreate1PeriDim (periodicDim = 1)
+  //  GridCreate1PeriDim (periodicDim = 1, no poleDim specified)
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -93,12 +93,34 @@ int main(void){
   strcpy(name, "GridCreate_periodicDim_1");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int periodicDim = 1;
-  grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &coordsys,
-                                          &typekind, NULL, &rc);
+  grid_1p_pdim1 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, NULL, 
+                                          &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
     rc = ESMC_GridDestroy(&grid_1p_pdim1);
+  }
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridCreate1PeriDim (periodicDim = 2, poleDim = 1)
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create a Grid
+  strcpy(name, "GridCreate_periodicDim_2");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  // The periodicDim cannot be the same as poledim, so need to change
+  // both parameters.
+  periodicDim = 2;
+  int poleDim = 1;
+  grid_1p_pdim2 = ESMC_GridCreate1PeriDim(&i_maxIndex, &periodicDim, &poleDim,
+                                          &coordsys, &typekind, NULL, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  if (rc == ESMF_SUCCESS) {
+    rc = ESMC_GridDestroy(&grid_1p_pdim2);
   }
   free(maxIndex);
   //----------------------------------------------------------------------------
