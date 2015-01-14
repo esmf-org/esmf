@@ -822,7 +822,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
-                            meshname="", addMask=None, varname=""):
+                            meshname="", maskFlag=None, varname=""):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Mesh has been created.\n
@@ -837,13 +837,16 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
         bool (optional)    :: convertToDual\n
         bool (optional)    :: addUserArea\n
         string (optional)  :: meshname\n
-        bool (optional)    :: addMask\n
+        MeshLoc (optional) :: maskFlag\n
+            Argument Values:\n
+                MeshLoc.NODE\n
+                MeshLoc.ELEMENT\n
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
-                                         meshname, addMask, varname,
+                                         meshname, maskFlag, varname,
                                          ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
