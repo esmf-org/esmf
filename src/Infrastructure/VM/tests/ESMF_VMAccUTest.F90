@@ -41,7 +41,7 @@ program ESMF_VMAccUTest
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: name
-  character(ESMF_MAXSTR) :: failMsg
+  character(ESMF_MAXSTR) :: logMsg
 
   ! local variables
   integer::  rc
@@ -62,10 +62,12 @@ program ESMF_VMAccUTest
   !===========================================
   !------------------------------------------------------------------------
   write(name, *) "Test getting the number of accelerator devices"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGet(vm, localPet, accDeviceCount=accDeviceCount, ssiId=ssiId, rc=rc)
-  ! FIXME: Print number of devices found
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  write(logMsg, *) "Number of accelerator devices =", accDeviceCount
+  call ESMF_LogWrite(trim(logMsg), ESMF_LOGMSG_INFO)
+
+  write(logMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, logMsg, result, ESMF_SRCLINE)
 
 
   !------------------------------------------------------------------------
