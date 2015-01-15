@@ -276,9 +276,11 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
+                                          OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, coordSys=None, coordTypeKind=None):
+def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None, 
+                            coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
@@ -286,6 +288,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, coordSys=None, coordType
         :RETURN: ESMP_Grid    :: grid\n
         Numpy.array(dtype=int32) :: maxIndex\n
         integer (optional) :: periodicDim\n
+        integer (optional) :: poleDim\n
         CoordSys (optional)   :: coordSys\n
             Argument Values:\n
                 CoordSys.CART\n
@@ -309,7 +312,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, coordSys=None, coordType
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
     gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
-                                               periodicDim, coordSys,
+                                               periodicDim, poleDim, coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))
 
@@ -822,7 +825,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
-                            meshname="", addMask=None, varname=""):
+                            meshname="", maskFlag=None, varname=""):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Mesh has been created.\n
@@ -837,13 +840,16 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
         bool (optional)    :: convertToDual\n
         bool (optional)    :: addUserArea\n
         string (optional)  :: meshname\n
-        bool (optional)    :: addMask\n
+        MeshLoc (optional) :: maskFlag\n
+            Argument Values:\n
+                MeshLoc.NODE\n
+                MeshLoc.ELEMENT\n
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
-                                         meshname, addMask, varname,
+                                         meshname, maskFlag, varname,
                                          ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:

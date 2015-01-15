@@ -70,6 +70,7 @@ void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, int *periodicDim, int *pd_present,
+    int *poleDim, int *pld_present,
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
     ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
@@ -257,6 +258,7 @@ int setDefaultsLUA(int dimCount,
 // !ARGUMENTS:
     ESMC_InterfaceInt *maxIndex, 
     int *periodicDim,
+    int *poleDim,
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_PoleKind_Flag *poleKind,
@@ -273,11 +275,12 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int cs_present, ctk_present, pk_present, pd_present;
+    int cs_present, ctk_present, pk_present, pd_present, pld_present;
     cs_present = 0;
     ctk_present = 0;
     pk_present = 0;
     pd_present = 0;
+    pld_present = 0;
 
     int pksize = 2;
 
@@ -298,6 +301,8 @@ int setDefaultsLUA(int dimCount,
       pk_present = 1; 
     if (periodicDim != NULL)
       pd_present = 1;
+    if (poleDim != NULL)
+      pld_present = 1;
 
     // allocate the grid object
     Grid *grid;
@@ -305,6 +310,7 @@ int setDefaultsLUA(int dimCount,
     FTN_X(f_esmf_gridcreate1peridim)(&grid, 
                                      mi->array, &mi->extent[0], 
                                      periodicDim, &pd_present,
+                                     poleDim, &pld_present,
                                      coordSys, &cs_present,
                                      coordTypeKind, &ctk_present,
                                      poleKind, &pk_present, &pksize,

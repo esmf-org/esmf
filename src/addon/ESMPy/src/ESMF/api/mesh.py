@@ -27,7 +27,7 @@ class Mesh(object):
                  convert_to_dual=None,
                  add_user_area=None,
                  meshname="",
-                 add_mask=None,
+                 mask_flag=None,
                  varname=""):
         """
         Create an unstructured Mesh. This can be done two different ways, 
@@ -73,14 +73,16 @@ class Mesh(object):
                           Mesh metadata variable in a UGRID file.  This 
                           argument is only supported with filetype 
                           FileFormat.UGRID.  Defaults to the empty string. \n
-                add_mask: a boolean value to specify if a mask in a UGRID file
-                          should be added to the Mesh.  This 
+                mask_flag: an enumerated integer that, if specified, tells
+                           whether a mask in a UGRID file should be defined
+                           on the nodes (MeshLoc.NODE) or the elements 
+                           (MeshLoc.ELEMENT) of the Mesh.  This 
                           argument is only supported with filetype 
-                          FileFormat.UGRID.  Defaults to False. \n
+                          FileFormat.UGRID.  Defaults to no masking. \n
                 varname: a string to specify a variable name for the mask in a
-                         UGRID file if add_mask is True.  This argument is only
-                         supported for filetype FileFormat.UGRID.  Defaults to 
-                         the empty string. \n
+                         UGRID file if mask_flag is specified.  This argument
+                         is only supported for filetype FileFormat.UGRID.
+                         Defaults to the empty string. \n
         Returns: \n
             Mesh \n
         """
@@ -103,8 +105,8 @@ class Mesh(object):
                 warning.warn("add_user_area is only used for meshes created from file, this argument will be ignored.")
             if meshname is not "":
                 warning.warn("meshname is only used for meshes created from file, this argument will be ignored.")
-            if add_mask is not None:
-                warning.warn("add_mask is only used for meshes created from file, this argument will be ignored.")
+            if mask_flag is not None:
+                warning.warn("mask_flag is only used for meshes created from file, this argument will be ignored.")
             if varname is not "":
                 warning.warn("varname is only used for meshes created from file, this argument will be ignored.")
         # filename and filetype are required for from-file mesh creation
@@ -155,7 +157,7 @@ class Mesh(object):
             self.struct = ESMP_MeshCreateFromFile(filename, filetype,
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 
-                                                  add_mask, varname)
+                                                  mask_flag, varname)
             # get the sizes
             self.size[node] = ESMP_MeshGetLocalNodeCount(self)
             self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)

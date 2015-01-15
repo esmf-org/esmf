@@ -893,7 +893,9 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the NUOPC Field dictionary considers
 !   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
-!   otherwise.
+!   otherwise. An entry with standard name of {\tt standardName1} must
+!   exist in the field dictionary, or else an error will be returned. 
+!   However, {\tt standardName2} need not correspond to an existing entry.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -924,7 +926,10 @@ module NUOPC_Base
     character(*),                 intent(in)            :: standardNames(:)
     integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Set the entries in the {\tt standardNames} argument as synonyms.
+!   Set all of the elements of the {\tt standardNames} argument to be considered
+!   synonyms by the field dictionary. Every element in {\tt standardNames} must
+!   correspond to the standard name of already existing entries in the field 
+!   dictionary, or else an error will be returned.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS

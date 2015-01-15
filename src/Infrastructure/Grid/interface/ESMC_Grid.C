@@ -93,7 +93,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
-                                  int *periodicDim,
+                                  int *periodicDim, int *poleDim,
                                   enum ESMC_CoordSys_Flag *coordSys,
                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
                                   enum ESMC_PoleKind_Flag *poleKind, 
@@ -107,6 +107,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
   
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::create1peridim(maxIndex,
                                                                   periodicDim, 
+                                                                  poleDim,
                                                                   coordSys, 
                                                                   coordTypeKind, 
                                                                   poleKind, 
