@@ -20,7 +20,7 @@
 
 #define MAX_PLATFORMS 10
 #define MAX_DEVICES 100
-#define VERBOSITY 10
+#define VERBOSITY 0
 
 static int get_num_devices(cl_platform_id *platforms, cl_uint platformCount)
 {
