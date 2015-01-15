@@ -16,6 +16,7 @@ LOCDIR	  = src/Infrastructure/VM/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUTest \
+		$(ESMF_TESTDIR)/ESMF_VMAccUTest \
 		$(ESMF_TESTDIR)/ESMF_VMOpenMPUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUserMpiInitUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest \
@@ -34,6 +35,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 
 TESTS_RUN     = RUN_ESMC_VMUTest \
 		RUN_ESMF_VMUTest \
+		RUN_ESMF_VMAccUTest \
                 RUN_ESMF_VMOpenMPUTest \
                 RUN_ESMF_VMUserMpiInitUTest \
                 RUN_ESMF_VMSendVMRecvUTest \
@@ -52,6 +54,7 @@ TESTS_RUN     = RUN_ESMC_VMUTest \
 
 TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
 		RUN_ESMF_VMUTestUNI \
+		RUN_ESMF_VMAccUTestUNI \
                 RUN_ESMF_VMOpenMPUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
                 RUN_ESMF_VMSendNbVMRecvNbUTestUNI \
