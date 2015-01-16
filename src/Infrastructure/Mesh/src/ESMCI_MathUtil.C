@@ -533,12 +533,17 @@ double great_circle_area(int n, double *pnts) {
 
 
 
-void remove_0len_edges3D(int *num_p, double *p) {
+  // first_remove_ind is the index of the first point that was removed.
+  // if nothing was removed then it'll be equal to -1
+  void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind) {
 
 #define EQUAL_TOL 1E-15
 #define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
                            (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
                            (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
+
+  // Init first remove ind    
+  int first_remove_ind=-1;
     
   // Get old value of num_p
   int old_num_p=*num_p;
@@ -560,6 +565,9 @@ void remove_0len_edges3D(int *num_p, double *p) {
 
   // We found an equal point so start trimming them out
   if (j>-1) {
+    // Set first trimmed ind
+    first_remove_ind=j;
+
     for (int i=j; i<old_num_p; i++) {
       double *pnti=p+3*i;
       if (!PNTS_EQUAL(pnti,last_pnt)) {
@@ -584,10 +592,12 @@ void remove_0len_edges3D(int *num_p, double *p) {
     // Leave num_p as it is
   }
 
+  // if output var exists then output first removed point
+  if (_first_remove_ind !=NULL) *_first_remove_ind=first_remove_ind;
+
 #undef EQUAL_TOL
 #undef PNTS_EQUAL
 }
-
 
 
 void remove_0len_edges2D(int *num_p, double *p) {
