@@ -66,7 +66,7 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
                      +m[2] * (m[3]*m[7] - m[4]*m[6]);
   
   // If det == 0.0 we can't invert
-  if (det == 0.0) return false;
+  if (det == 0.0 || !std::isfinite(det)) return false;
 
   const double deti = 1.0/det;
 
@@ -121,7 +121,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   D[0]=l1[0]-l2[0];
   D[1]=l1[1]-l2[1];
   D[2]=l1[2]-l2[2];
-
+ 
   E[0]=q0[0]-l1[0];
   E[1]=q0[1]-l1[1];
   E[2]=q0[2]-l1[2];
@@ -154,15 +154,24 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     mult(inv_J, F, delta_X);
     
     // Move to next approximation of X
-    X[0] = X[0] - delta_X[0];
+     X[0] = X[0] - delta_X[0];
     X[1] = X[1] - delta_X[1];
     X[2] = X[2] - delta_X[2];
   }
+
+ // If not finite then return as not mapped
+ if (!std::isfinite(X[0]) ||  
+     !std::isfinite(X[1]) ||  
+     !std::isfinite(X[2])) return false;
 
   // Get answer out
   p[0]=X[0];
   p[1]=X[1];
   *t=X[2];
+
+  //  if (mathutil_debug) {
+  //  printf("Q: p=[%f %f] \n",p[0],p[1]);
+  //}
 
   return true;
 }
@@ -202,6 +211,11 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
   // Calculate solution
   mult(inv_M, V, X);
+
+ // If not finite then return as not mapped
+ if (!std::isfinite(X[0]) ||  
+     !std::isfinite(X[1]) ||  
+     !std::isfinite(X[2])) return false;
 
   // Get answer out
   *t=X[0];
@@ -1253,7 +1267,7 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 
   // Compute vector lengths
   double parallel_len=MU_LEN_VEC3D(parallel);
-  double normal_12_len=MU_LEN_VEC3D(normal_12);
+   double normal_12_len=MU_LEN_VEC3D(normal_12);
   double normal_34_len=MU_LEN_VEC3D(normal_34);
 
   // Error Check bottom
@@ -1286,7 +1300,7 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
   double cross_1_to_pnt[3];
   MU_CROSS_PRODUCT_VEC3D(cross_1_to_pnt,pnt_in_plane,q1_in_plane);
 
-  // Compute vector lengths
+   // Compute vector lengths
   double cross_1_to_pnt_len=MU_LEN_VEC3D(cross_1_to_pnt);
   double pnt_in_plane_len=MU_LEN_VEC3D(pnt_in_plane);
   double q1_in_plane_len=MU_LEN_VEC3D(q1_in_plane);
@@ -1319,7 +1333,7 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 
 
   // Compute angle
-  //double angle_12pnt=std::asin(sin_12pnt);
+   //double angle_12pnt=std::asin(sin_12pnt);
 
 #if 0
   if (mathutil_debug) {
@@ -1351,7 +1365,7 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q3, double *q4, 
                             double *p1, double *p2) {
 
-
+ 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (mathutil_debug) {
     double lon,lat,r;
@@ -1384,7 +1398,7 @@ int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q
                         &lon, &lat, &r);
     printf("   q4=%f %f\n",lon,lat);
   }
-#endif
+ #endif
 
 
   // Calc parameter p1
@@ -1417,7 +1431,7 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
 
   // Error Check
   if ((t1_len==0.0) || (t2_len==0.0)) return 1;
-
+ 
   // Compute angle between t1 and t2
   double angle_12=std::asin(normal_len/(t1_len*t2_len));
 
@@ -1450,7 +1464,7 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
   
   // Calc. output
   *p=angle_1pnt/angle_12;
-
+ 
   // return success
   return 0;
 } 

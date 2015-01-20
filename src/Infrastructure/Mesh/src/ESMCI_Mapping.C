@@ -152,17 +152,16 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
         return false;
       }
       
+      // do is in
+      double sdist;
+      bool in_tri = tri_shape_func::is_in(p, &sdist);
+
       // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
       // put into pcoord 
       pcoord[0]=p[0];
       pcoord[1]=p[1];
       
-      // do is in
-      double sdist;
-      bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
-
-      
-      // Distance to tri
+       // Distance to tri
       if (dist) *dist=2.0*sdist;
     
       return in_tri;
@@ -194,8 +193,8 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       double p[2];
       double t;
 
-      // This is a collapsed quad, so arrange points, so the
-      // parameters calculated for the tri can be converted back to the quad
+       // This is a collapsed quad, so arrange points, so the
+       // parameters calculated for the tri can be converted back to the quad
       // Convert based on the removed/collapsed point
       if (first_removed_ind == 0) {
         pnts[0]=mdata[6]; pnts[1]=mdata[7];  pnts[2]=mdata[8];
@@ -220,14 +219,14 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       
       // do is in
       double sdist;
-      bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
+      bool in_tri = tri_shape_func::is_in(p, &sdist);
 
       // Convert to [-1,1] to be the same as quad
       p[0]=2*p[0]-1.0;
       p[1]=2*p[1]-1.0;    
       
       // Collaped quad, so map tri parameters back to quad pcoords
-      // based on removed/collapsed point
+        // based on removed/collapsed point
       if (first_removed_ind == 0) {
         pcoord[0]=-p[0];
         pcoord[1]=-p[1];
