@@ -24,12 +24,12 @@
 #include <iostream>
 #include <iterator>
 #include <iomanip>
-#include <cmath>
+ #include <cmath>
 #include <math.h>
 #include <vector>
 
 // For some reason PGI doesn't like the std::isfinite in the code below. 
-using std::isfinite;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
