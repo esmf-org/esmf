@@ -25,9 +25,10 @@
 #include <iterator>
 #include <iomanip>
 #include <cmath>
+#include <math.h>
 #include <vector>
 
-
+using std::isfinite;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -66,7 +67,7 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
                      +m[2] * (m[3]*m[7] - m[4]*m[6]);
   
   // If det == 0.0 we can't invert
-  if (det == 0.0 || !std::isfinite(det)) return false;
+  if (det == 0.0 || !isfinite(det)) return false;
 
   const double deti = 1.0/det;
 
@@ -160,9 +161,9 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   }
 
  // If not finite then return as not mapped
- if (!std::isfinite(X[0]) ||  
-     !std::isfinite(X[1]) ||  
-     !std::isfinite(X[2])) return false;
+ if (!isfinite(X[0]) ||  
+     !isfinite(X[1]) ||  
+     !isfinite(X[2])) return false;
 
   // Get answer out
   p[0]=X[0];
@@ -213,9 +214,9 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   mult(inv_M, V, X);
 
  // If not finite then return as not mapped
- if (!std::isfinite(X[0]) ||  
-     !std::isfinite(X[1]) ||  
-     !std::isfinite(X[2])) return false;
+ if (!isfinite(X[0]) ||  
+     !isfinite(X[1]) ||  
+     !isfinite(X[2])) return false;
 
   // Get answer out
   *t=X[0];
