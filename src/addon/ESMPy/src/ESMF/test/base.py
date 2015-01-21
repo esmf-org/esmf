@@ -6,6 +6,9 @@ class TestBase(unittest.TestCase):
     def __init__(self, *args, **kwds):
         super(TestBase, self).__init__(*args, **kwds)
 
+        import ESMF
+        ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=False)
+
     def assertNumpyAll(self, arr1, arr2, check_fill_value_dtype=True, check_arr_dtype=True):
         """
         :type arr1: :class:`numpy.ndarray`
