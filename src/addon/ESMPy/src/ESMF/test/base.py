@@ -7,7 +7,7 @@ class TestBase(unittest.TestCase):
         super(TestBase, self).__init__(*args, **kwds)
 
         import ESMF
-        ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=False)
+        ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
     def assertNumpyAll(self, arr1, arr2, check_fill_value_dtype=True, check_arr_dtype=True):
         """
