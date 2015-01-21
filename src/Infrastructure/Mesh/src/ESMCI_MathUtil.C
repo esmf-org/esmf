@@ -28,6 +28,7 @@
 #include <math.h>
 #include <vector>
 
+// For some reason PGI doesn't like the std::isfinite in the code below. 
 using std::isfinite;
 
 //-----------------------------------------------------------------------------
