@@ -113,6 +113,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
   // by Ryan).
 
   // translate into polygon
+  // Copy into new memory, so it can be changed without altering orig. 
   int num_pnts;
   double pnts[3*PM_MAX_PNTS_IN_POLY];
   if (SFUNC_TYPE::ndofs==3) {
@@ -131,20 +132,19 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
   }
 
   // Get rid of degenerate edges
-  remove_0len_edges3D(&num_pnts, pnts);
+  int first_removed_ind=-1;
+  remove_0len_edges3D(&num_pnts, pnts, &first_removed_ind);
 
   // Map point depending on map type and shape
   if (sph_map_type==MAP_TYPE_CART_APPROX) {
 
-    //printf("CART \n");
-
-
-    // Get the parameters particular to what it looks like
-     if (num_pnts==3) {
+    // Handle depending on what kind of shape it is
+    if ((SFUNC_TYPE::ndofs==3) && (num_pnts==3)){  // Triangle
       double center[3]={0.0,0.0,0.0}; // center of sphere
       double p[2];
       double t;
-      
+
+
       // Intersect tri with line from point to center of sphere
       if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
         if (dist) *dist = std::numeric_limits<double>::max();
@@ -152,20 +152,20 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
         return false;
       }
       
+      // do is in
+      double sdist;
+      bool in_tri = tri_shape_func::is_in(p, &sdist);
+
       // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
       // put into pcoord 
       pcoord[0]=p[0];
       pcoord[1]=p[1];
       
-      // do is in
-      double sdist;
-      bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
-      
-      // Distance to tri
+       // Distance to tri
       if (dist) *dist=2.0*sdist;
     
       return in_tri;
-    } else if (num_pnts==4) {
+    } else if ((SFUNC_TYPE::ndofs==4) && (num_pnts==4)){  // Quad
       double center[3]={0.0,0.0,0.0}; // center of sphere
       double p[2];
       double t;
@@ -188,6 +188,64 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       if (dist) *dist=sdist;
       return in_quad;
 
+    } else if ((SFUNC_TYPE::ndofs==4) && (num_pnts==3)){  // Collapsed Quad
+      double center[3]={0.0,0.0,0.0}; // center of sphere
+      double p[2];
+      double t;
+
+       // This is a collapsed quad, so arrange points, so the
+       // parameters calculated for the tri can be converted back to the quad
+      // Convert based on the removed/collapsed point
+      if (first_removed_ind == 0) {
+        pnts[0]=mdata[6]; pnts[1]=mdata[7];  pnts[2]=mdata[8];
+        pnts[3]=mdata[9]; pnts[4]=mdata[10]; pnts[5]=mdata[11];
+        pnts[6]=mdata[3]; pnts[7]=mdata[4];  pnts[8]=mdata[5];
+      } else if (first_removed_ind == 1) {
+        pnts[0]=mdata[6]; pnts[1]=mdata[7];  pnts[2]=mdata[8];
+        pnts[3]=mdata[9]; pnts[4]=mdata[10]; pnts[5]=mdata[11];
+        pnts[6]=mdata[3]; pnts[7]=mdata[4];  pnts[8]=mdata[5];
+      } else if (first_removed_ind == 3) {
+        pnts[0]=mdata[3]; pnts[1]=mdata[4];  pnts[2]=mdata[5];
+        pnts[3]=mdata[6]; pnts[4]=mdata[7];  pnts[5]=mdata[8];
+        pnts[6]=mdata[0]; pnts[7]=mdata[1];  pnts[8]=mdata[2];
+      }      
+
+      // Intersect tri with line from point to center of sphere
+      if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
+      
+      // do is in
+      double sdist;
+      bool in_tri = tri_shape_func::is_in(p, &sdist);
+
+      // Convert to [-1,1] to be the same as quad
+      p[0]=2*p[0]-1.0;
+      p[1]=2*p[1]-1.0;    
+      
+      // Collaped quad, so map tri parameters back to quad pcoords
+        // based on removed/collapsed point
+      if (first_removed_ind == 0) {
+        pcoord[0]=-p[0];
+        pcoord[1]=-p[1];
+      } else if (first_removed_ind == 1) {
+        pcoord[0]=-p[0];
+        pcoord[1]=-p[1];
+      } else if (first_removed_ind == 2) {
+        pcoord[0]=p[0];
+        pcoord[1]=p[1];
+      } else if (first_removed_ind == 3) {
+        pcoord[0]=-p[1];
+        pcoord[1]= p[0];
+      }
+      // printf("orig p=[%f %f] pcoord=[%f %f] fri=%d\n",p[0],p[1],pcoord[0],pcoord[1],first_removed_ind);      
+      
+      // Distance to tri
+      if (dist) *dist=2.0*sdist;
+    
+      return in_tri;
     } else {
        // This is a degenerate cell so we can't map to it. 
        // Could throw an error here, but for flexiblity allow

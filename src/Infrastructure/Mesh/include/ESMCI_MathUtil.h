@@ -50,7 +50,8 @@ namespace ESMCI {
 
   void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids);
 
-  void remove_0len_edges3D(int *num_p, double *p);
+
+  void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind=NULL);
 
   void remove_0len_edges2D(int *num_p, double *p);
 
