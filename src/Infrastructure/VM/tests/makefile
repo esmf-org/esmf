@@ -90,10 +90,10 @@ RUN_ESMF_VMUTestUNI:
 # VM Accelerator Interface test
 #
 RUN_ESMF_VMAccUTest:
-	$(MAKE) TNAME=VM NP=4 ftest
+	$(MAKE) TNAME=VMAcc NP=4 ftest
 
 RUN_ESMF_VMUAccTestUNI:
-	$(MAKE) TNAME=VM NP=1 ftest
+	$(MAKE) TNAME=VMAcc NP=1 ftest
 
 #
 # VM -- C interface
