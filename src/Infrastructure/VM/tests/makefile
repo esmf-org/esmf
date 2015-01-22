@@ -87,6 +87,15 @@ RUN_ESMF_VMUTestUNI:
 	$(MAKE) TNAME=VM NP=1 ftest
 
 #
+# VM Accelerator Interface test
+#
+RUN_ESMF_VMAccUTest:
+	$(MAKE) TNAME=VM NP=4 ftest
+
+RUN_ESMF_VMUAccTestUNI:
+	$(MAKE) TNAME=VM NP=1 ftest
+
+#
 # VM -- C interface
 #
 RUN_ESMC_VMUTest:
