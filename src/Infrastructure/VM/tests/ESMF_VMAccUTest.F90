@@ -61,6 +61,8 @@ program ESMF_VMAccUTest
   !Try getting number of accelerator devices
   !===========================================
   !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Get number of accelerator devices test
   write(name, *) "Test getting the number of accelerator devices"
   call ESMF_VMGet(vm, localPet, accDeviceCount=accDeviceCount, ssiId=ssiId, rc=rc)
   write(logMsg, *) "Number of accelerator devices =", accDeviceCount
