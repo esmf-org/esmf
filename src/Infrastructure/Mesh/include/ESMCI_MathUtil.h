@@ -21,6 +21,7 @@
 #include <Mesh/include/ESMCI_MCoord.h>
 
 #include <vector>
+#include <limits>
 
 namespace ESMCI {
 
@@ -82,11 +83,12 @@ int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, doubl
 int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
                            double *p1, double *p2);
 
+//// Handy macros ////
 
-
-
+// Do it this way because some compilers don't support isfinite (e.g. pgi)
+#define MU_IS_FINITE(n) ((n) <= std::numeric_limits<double>::max() && (n) >= -std::numeric_limits<double>::max())
   
-  // Handy macros
+
 #define MU_SET_MIN_VEC3D(min,vec)       \
   if (vec[0]<min[0]) min[0]=vec[0];\
   if (vec[1]<min[1]) min[1]=vec[1];\
