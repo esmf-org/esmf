@@ -2767,7 +2767,8 @@ module NUOPC_Base
         endif
         call NUOPC_FieldWrite(field, file=trim(fileName), overwrite=overwrite, &
           status=status, timeslice=timeslice, relaxedflag=relaxedflag, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed writing file: "// &
+          trim(fileName), &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out

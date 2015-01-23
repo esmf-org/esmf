@@ -25,11 +25,7 @@
 #include <iterator>
 #include <iomanip>
 #include <cmath>
-#include <math.h>
 #include <vector>
-
-// For some reason PGI doesn't like the std::isfinite in the code below. 
-using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -68,7 +64,8 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
                      +m[2] * (m[3]*m[7] - m[4]*m[6]);
   
   // If det == 0.0 we can't invert
-  if (det == 0.0 || !isfinite(det)) return false;
+  if (!MU_IS_FINITE(det)) return false;
+  if (det == 0.0) return false;
 
   const double deti = 1.0/det;
 
@@ -156,15 +153,15 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     mult(inv_J, F, delta_X);
     
     // Move to next approximation of X
-     X[0] = X[0] - delta_X[0];
+    X[0] = X[0] - delta_X[0];
     X[1] = X[1] - delta_X[1];
     X[2] = X[2] - delta_X[2];
   }
 
  // If not finite then return as not mapped
- if (!isfinite(X[0]) ||  
-     !isfinite(X[1]) ||  
-     !isfinite(X[2])) return false;
+ if (!MU_IS_FINITE(X[0]) ||  
+     !MU_IS_FINITE(X[1]) ||  
+     !MU_IS_FINITE(X[2])) return false;
 
   // Get answer out
   p[0]=X[0];
@@ -215,9 +212,9 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   mult(inv_M, V, X);
 
  // If not finite then return as not mapped
- if (!isfinite(X[0]) ||  
-     !isfinite(X[1]) ||  
-     !isfinite(X[2])) return false;
+ if (!MU_IS_FINITE(X[0]) ||  
+     !MU_IS_FINITE(X[1]) ||  
+     !MU_IS_FINITE(X[2])) return false;
 
   // Get answer out
   *t=X[0];
