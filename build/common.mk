@@ -1150,6 +1150,9 @@ ESMF_ARDEFAULT 						= xiar
 endif
 ifeq ($(ESMF_ACC_SOFTWARE_STACK),openmp4)
 ESMF_CPPFLAGS             += -DESMF_ACC_SOFTWARE_STACK=1
+ifeq ($(ESMF_COMPILER),intel)
+ESMF_ARDEFAULT 						= xiar
+endif
 endif
 ifeq ($(ESMF_ACC_SOFTWARE_STACK),none)
 ESMF_CPPFLAGS             += -DESMF_NO_ACC_SOFTWARE_STACK=1
