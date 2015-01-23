@@ -551,14 +551,18 @@ module NUOPC_ModelBase
 ! !IROUTINE: NUOPC_ModelBaseGet - Get info from a ModelBase
 !
 ! !INTERFACE:
-  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, rc)
+  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, clock, importState, &
+    exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: gcomp
-    type(ESMF_Clock),    intent(out)           :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: clock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get a the Clock of the parent driver.
+!   Access ModelBase information.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -579,8 +583,14 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Return the driverClock member
-    driverClock = is%wrap%driverClock
+    ! driverClock
+    if (present(driverClock)) driverClock = is%wrap%driverClock
+    
+    ! remaining arguments
+    call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------

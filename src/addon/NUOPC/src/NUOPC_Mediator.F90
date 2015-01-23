@@ -359,14 +359,18 @@ module NUOPC_Mediator
 ! !IROUTINE: NUOPC_MediatorGet - Get info from a Mediator
 !
 ! !INTERFACE:
-  subroutine NUOPC_MediatorGet(mediator, driverClock, rc)
+  subroutine NUOPC_MediatorGet(mediator, driverClock, mediatorClock, &
+    importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: mediator
-    type(ESMF_Clock),    intent(out)           :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: mediatorClock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Access the clock of the parent driver.
+!   Access Mediator information.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -379,8 +383,10 @@ module NUOPC_Mediator
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query Component for the internal State
-    call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, rc=rc)
+    ! query ModeBase
+    call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, &
+      clock=mediatorClock, importState=importState, exportState=exportState, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
