@@ -299,18 +299,23 @@ int setDefaultsLUA(int dimCount,
       ctk_present = 1; 
     if (poleKind != NULL)
       pk_present = 1; 
-    if (periodicDim != NULL)
+    int periodicDimLoc = 1;
+    if (periodicDim != NULL) {
       pd_present = 1;
-    if (poleDim != NULL)
+      periodicDimLoc = *periodicDim;
+    }
+    int poleDimLoc = 1;
+    if (poleDim != NULL) {
       pld_present = 1;
-
+      poleDimLoc = *poleDim;
+    }
     // allocate the grid object
     Grid *grid;
   
     FTN_X(f_esmf_gridcreate1peridim)(&grid, 
                                      mi->array, &mi->extent[0], 
-                                     periodicDim, &pd_present,
-                                     poleDim, &pld_present,
+                                     &periodicDimLoc, &pd_present,
+                                     &poleDimLoc, &pld_present,
                                      coordSys, &cs_present,
                                      coordTypeKind, &ctk_present,
                                      poleKind, &pk_present, &pksize,
