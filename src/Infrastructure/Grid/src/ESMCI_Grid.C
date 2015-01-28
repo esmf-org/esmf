@@ -304,7 +304,7 @@ int setDefaultsLUA(int dimCount,
       pd_present = 1;
       periodicDimLoc = *periodicDim;
     }
-    int poleDimLoc = 1;
+    int poleDimLoc = 2;
     if (poleDim != NULL) {
       pld_present = 1;
       poleDimLoc = *poleDim;
