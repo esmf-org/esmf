@@ -2179,6 +2179,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           do, i=1, size (alog%logmsgAbort)
             if (local_logmsgflag%mtype == alog%logmsgAbort(i)%mtype) then
               alog%stopprogram=.true.
+              alog%fIndex = alog%fIndex + 1
+              call ESMF_LogFlush(log,rc=rc2) 
               call ESMF_LogClose(ESMF_LogDefault, rc=rc2)
               exit
             end if
