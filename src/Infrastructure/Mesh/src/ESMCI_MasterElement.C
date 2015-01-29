@@ -321,7 +321,7 @@ MasterElement<METRAITS> *Topo2ME<METRAITS>::operator()(const std::string &name) 
   }
   if (name == "QUAD9") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad9_shape_func>::instance());
-  } else if (name == "TRI" || name == "TRI3" || name == "TRI_L" || name == "TRI3_3D") {
+  } else if (name == "TRI" || name == "TRI3" || name == "TRI_L" || name == "TRI3_3D" || name == "TRI3_L") { // Added missing "TRI3_L" 
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<tri_shape_func>::instance());
   }
   else if (name == "SHELL3" || name == "SHELL3_L") {
