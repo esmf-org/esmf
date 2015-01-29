@@ -72,7 +72,9 @@ static int get_num_devices(cl_platform_id *platforms, cl_uint platformCount)
   return 0;
 }
 
-int fw_get_num_devices(void )
+namespace ESMCI{
+
+int VMAccFwGetNumDevices(void )
 {
   int i, j;
   cl_int ret;
@@ -115,4 +117,6 @@ int fw_get_num_devices(void )
 
   free(platforms);
   return ndevices;
+}
+
 }

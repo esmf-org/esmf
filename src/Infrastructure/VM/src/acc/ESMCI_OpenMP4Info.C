@@ -11,10 +11,13 @@
 //==============================================================================
 #include "omp.h"
 
-int fw_get_num_devices(void )
+namespace ESMCI{
+
+int VMAccFwGetNumDevices(void )
 {
     int ndevs = 0;
     ndevs = omp_get_num_devices();
     return ndevs;
 }
 
+}

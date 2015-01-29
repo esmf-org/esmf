@@ -11,9 +11,13 @@
 //==============================================================================
 #include "openacc.h"
 
-int fw_get_num_devices(void )
+namespace ESMCI{
+
+int VMAccFwGetNumDevices(void )
 {
   int ndevs = 0;
   ndevs = acc_get_num_devices(acc_device_not_host);
   return ndevs;
+}
+
 }

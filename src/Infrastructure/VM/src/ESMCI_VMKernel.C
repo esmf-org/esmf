@@ -462,7 +462,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   }
 #ifdef ESMF_ACC_SOFTWARE_STACK
   int num_adevices = 0;
-  num_adevices = fw_get_num_devices();
+  num_adevices = VMAccFwGetNumDevices();
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
                 nadevs, 1, MPI_INTEGER, mpi_c);              
 #endif
