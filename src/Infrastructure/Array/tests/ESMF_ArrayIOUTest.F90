@@ -39,16 +39,21 @@ program ESMF_ArrayIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) ::  Farray3D_withhalo, &
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: Farray3D_withhalo, &
                Farray3D_wouthalo, Farray3D_withhalo2, &
                Farray3D_wouthalo2, Farray3D_withhalo3
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: Farray3D_DE0, Farray3D_DE1
+  integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: Farray3D_DE0_r, Farray3D_DE1_r
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_withhalo, Farray2D_wouthalo
   real(ESMF_KIND_R8), dimension(5,5) :: FarrayGr_1 , FarrayGr_2
   type(ESMF_DistGrid)                     :: distgrid, distgrid_diff
+  type(ESMF_DistGrid)                     :: distgrid_2DE
   type(ESMF_Array)                        :: array_withhalo, array_wouthalo
   type(ESMF_Array)                        :: array_withhalo2, array_wouthalo2
   type(ESMF_Array)                        :: array_withhalo3
   type(ESMF_Array)                        :: array_diff
+  type(ESMF_Array)                        :: array_2DE, array_2DE_r
+  type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
@@ -187,7 +192,6 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LogSet (trace = .true.)
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -239,7 +243,6 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -286,7 +289,6 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
-  call ESMF_LogSet (trace = .true.)
   write(name, *) "Read ESMF_Array without Halo from NetCDF file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_wouthalo2, file='file3D_wouthalo.nc',  &
@@ -297,7 +299,6 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -339,7 +340,6 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Read in a netCDF file to an ESMF array.
-  call ESMF_LogSet (trace = .true.)
   write(name, *) "Read ESMF_Array with Halo from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
@@ -363,7 +363,6 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-  call ESMF_LogSet (trace = .false.)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -412,6 +411,16 @@ program ESMF_ArrayIOUTest
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
   deallocate (exclusiveLBound, exclusiveUBound)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Read in a binary file to an ESMF array specifying a variable.
+  write(name, *) "Read ESMF_Array variable with Halo from binary Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
+       iofmt=ESMF_IOFMT_BIN, variableName='dummyname', rc=rc)
+! ! Should fail since varname not supported in binary mode
+  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -653,6 +662,147 @@ program ESMF_ArrayIOUTest
   call ESMF_DistGridDestroy(distgrid_diff, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!------------------------------------------------------------------------
+! Multiple DEs per PET tests
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create 2 DE/Pet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid_2DE = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
+              maxIndex=(/10,5,5/), regDecomp=(/4,3,1/),  rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Spec Set 2 DE/Pet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4,   &
+                         rank=3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE Array without Halo Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_2DE = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid_2DE, &
+          computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
+          totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
+          indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE Array access and fill DE0 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array_2DE, localDe=0, farrayPtr=Farray3D_DE0, rc=rc)
+  Farray3D_DE0 = localPet*100
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE Array access and fill DE1 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array_2DE, localDe=1, farrayPtr=Farray3D_DE1, rc=rc)
+  Farray3D_DE1 = localPet*100 + 1
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+! call ESMF_ArrayPrint (array_2DE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file.
+  write(name, *) "Write 2DE ESMF_Array to NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LogSet (trace = .true.)
+  call ESMF_ArrayWrite(array_2DE, file='Array_2DE.nc',         &
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  call ESMF_LogSet (trace = .false.)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE read Array without Halo Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array_2DE_r = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid_2DE, &
+          computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
+          totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
+          indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE read Array access and zero fill DE0 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array_2DE_r, localDe=0, farrayPtr=Farray3D_DE0_r, rc=rc)
+  Farray3D_DE0 = 0
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE read Array access and zero fill DE1 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array_2DE_r, localDe=1, farrayPtr=Farray3D_DE1_r, rc=rc)
+  Farray3D_DE1 = 0
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, read the netCDF file.
+  write(name, *) "Read 2DE ESMF_Array from NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LogSet (trace = .true.)
+  call ESMF_ArrayRead (array_2DE_r, file='Array_2DE.nc',         &
+      iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  call ESMF_LogSet (trace = .false.)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE read Array - DE 0 comparison Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "2 DE read Array DE 1 comparison Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE1_r == localPet*100 + 1))
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy 2 DE Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_2DE, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy 2 DE read Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array_2DE_r, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy 2 DE DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid_2DE, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -660,7 +810,6 @@ program ESMF_ArrayIOUTest
 10 continue
 
   !-----------------------------------------------------------------------------
-  call ESMF_LogSet (trace = .true.)
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
 
