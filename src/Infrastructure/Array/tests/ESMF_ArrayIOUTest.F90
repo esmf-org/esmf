@@ -672,7 +672,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid_2DE = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
               maxIndex=(/10,5,5/), regDecomp=(/4,3,1/),  rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -680,7 +680,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4,   &
                          rank=3, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -690,7 +690,7 @@ program ESMF_ArrayIOUTest
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
           indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -698,7 +698,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array_2DE, localDe=0, farrayPtr=Farray3D_DE0, rc=rc)
   Farray3D_DE0 = localPet*100
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -706,7 +706,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array_2DE, localDe=1, farrayPtr=Farray3D_DE1, rc=rc)
   Farray3D_DE1 = localPet*100 + 1
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 ! call ESMF_ArrayPrint (array_2DE)
 
@@ -734,7 +734,7 @@ program ESMF_ArrayIOUTest
           computationalLWidth=(/0,0,0/), computationalUWidth=(/0,0,0/), &
           totalLWidth=(/0,0,0/), totalUWidth=(/0,0,0/), &
           indexflag=ESMF_INDEX_GLOBAL, name='velocity', rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -742,7 +742,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array_2DE_r, localDe=0, farrayPtr=Farray3D_DE0_r, rc=rc)
   Farray3D_DE0 = 0
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -750,7 +750,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array_2DE_r, localDe=1, farrayPtr=Farray3D_DE1_r, rc=rc)
   Farray3D_DE1 = 0
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -761,7 +761,7 @@ program ESMF_ArrayIOUTest
   call ESMF_ArrayRead (array_2DE_r, file='Array_2DE.nc',         &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
@@ -773,21 +773,29 @@ program ESMF_ArrayIOUTest
   write(name, *) "2 DE read Array - DE 0 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "2 DE read Array DE 1 comparison Test"
+  write(name, *) "2 DE read Array - DE 1 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE1_r == localPet*100 + 1))
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy 2 DE Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_2DE, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -795,14 +803,14 @@ program ESMF_ArrayIOUTest
   write(name, *) "Destroy 2 DE read Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array_2DE_r, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy 2 DE DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid_2DE, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
