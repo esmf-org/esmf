@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -637,6 +637,52 @@ extern "C" {
 }
 
 
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN_X(c_esmc_gridgetcoordpresent)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *isPresent,
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetcoordpresent()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // If present then set as true
+    *isPresent=0;
+    if ((*grid)->hasCoordStaggerLoc(*staggerloc)) {
+      *isPresent=1;
+    }
+
+    // Set SUCCESS
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN_X(c_esmc_gridgetitempresent)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *item, 
+                                         int *isPresent,
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetitempresent()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // If present then set as true
+    *isPresent=0;
+    if ((*grid)->hasItemStaggerLoc(*staggerloc, *item)) {
+      *isPresent=1;
+    }
+
+    // Set SUCCESS
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////
 

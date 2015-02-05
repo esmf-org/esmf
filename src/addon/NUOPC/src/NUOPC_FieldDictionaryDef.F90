@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -24,8 +24,7 @@ module NUOPC_FieldDictionaryDef
     character(ESMF_MAXSTR)          :: standardName
     character(ESMF_MAXSTR)          :: canonicalUnits
     character(ESMF_MAXSTR), pointer :: connectedOptions(:)
-    character(ESMF_MAXSTR)          :: defaultLongName
-    character(ESMF_MAXSTR)          :: defaultShortName
+    character(ESMF_MAXSTR), pointer :: synonyms(:)
   end type
   
   type NUOPC_FieldDictionaryEntry
@@ -39,6 +38,8 @@ module NUOPC_FieldDictionaryDef
   public NUOPC_FieldDictionaryAddEntryI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
+  public NUOPC_FieldDictionaryMatchSynoI
+  public NUOPC_FieldDictionarySetSynoI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -50,13 +51,11 @@ module NUOPC_FieldDictionaryDef
 ! !IROUTINE: NUOPC_FieldDictionaryAddEntryI - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-    standardName, canonicalUnits, defaultLongName, defaultShortName, rc)
+    standardName, canonicalUnits, rc)
 ! !ARGUMENTS:
     type(ESMF_Container),             intent(inout)         :: fieldDictionary
     character(*),                     intent(in)            :: standardName
     character(*),                     intent(in)            :: canonicalUnits
-    character(*),                     intent(in),  optional :: defaultLongName
-    character(*),                     intent(in),  optional :: defaultShortName
     integer,                          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Add an entry to the NUOPC Field dictionary.
@@ -81,16 +80,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
     fdEntry%wrap%connectedOptions(1)     = "false" ! default
     fdEntry%wrap%connectedOptions(2)     = "true"
-    if (present(defaultLongName)) then
-      fdEntry%wrap%defaultLongName  = defaultLongName
-    else
-      fdEntry%wrap%defaultLongName  = standardName
-    endif
-    if (present(defaultShortName)) then
-      fdEntry%wrap%defaultShortName = defaultShortName
-    else
-      fdEntry%wrap%defaultShortName = standardName
-    endif
+    allocate(fdEntry%wrap%synonyms(0), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms member", &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
     ! add fdEntry to the FieldDictionary
     call ESMF_ContainerAddUDT(fieldDictionary, &
@@ -106,13 +98,11 @@ module NUOPC_FieldDictionaryDef
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntryI - Get information about a NUOPC Field dictionary entry
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryGetEntryI(fieldDictionary, &
-    standardName, canonicalUnits, defaultLongName, defaultShortName, rc)
+    standardName, canonicalUnits, rc)
 ! !ARGUMENTS:
     type(ESMF_Container),             intent(inout)         :: fieldDictionary
     character(*),                     intent(in)            :: standardName
     character(*),                     intent(out), optional :: canonicalUnits
-    character(*),                     intent(out), optional :: defaultLongName
-    character(*),                     intent(out), optional :: defaultShortName
     integer,                          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Query an entry in the NUOPC Field dictionary.
@@ -123,17 +113,13 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_ContainerGetUDT(fieldDictionary, trim(StandardName), &
+    call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName), &
       fdEntry, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
     if (present(canonicalUnits)) &
       canonicalUnits = trim(fdEntry%wrap%canonicalUnits)
-    if (present(defaultLongName)) &
-      defaultLongName = trim(fdEntry%wrap%defaultLongName)
-    if (present(defaultShortName)) &
-      defaultShortName = trim(fdEntry%wrap%defaultShortName)
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -171,6 +157,106 @@ module NUOPC_FieldDictionaryDef
 
   !-----------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: NUOPC_FieldDictionaryMatchSynoI - Check whether the NUOPC Field dictionary considers the standard names synonyms
+! !INTERFACE:
+  function NUOPC_FieldDictionaryMatchSynoI(fieldDictionary, standardName1, &
+    standardName2, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryMatchSynoI
+! !ARGUMENTS:
+    type(ESMF_Container),         intent(inout)         :: fieldDictionary
+    character(*),                 intent(in)            :: standardName1
+    character(*),                 intent(in)            :: standardName2
+    integer,                      intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the NUOPC Field dictionary considers
+!   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
+!   otherwise. An entry with standard name of {\tt standardName1} must
+!   exist in the field dictionary, or else an error will be returned. 
+!   However, {\tt standardName2} need not correspond to an existing entry.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                           :: i
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    NUOPC_FieldDictionaryMatchSynoI = .true. ! initialize
+    
+    if (trim(standardName2) == trim(standardName1)) return  ! early bail out
+    
+    call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName1), &
+      fdEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    NUOPC_FieldDictionaryMatchSynoI = .false. ! initialize
+    do i=1, size(fdEntry%wrap%synonyms)
+      if (trim(standardName2) == trim(fdEntry%wrap%synonyms(i))) then
+        NUOPC_FieldDictionaryMatchSynoI = .true.
+        exit  ! bail out on finding synonym
+      endif
+    enddo
+    
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionarySetSynoI - Set synonyms in the NUOPC Field dictionary entry
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionarySetSynoI(fieldDictionary, &
+    standardNames, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),             intent(inout)         :: fieldDictionary
+    character(*),                     intent(in)            :: standardNames(:)
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set all of the elements of the {\tt standardNames} argument to be considered
+!   synonyms by the field dictionary. Every element in {\tt standardNames} must
+!   correspond to the standard name of already existing entries in the field 
+!   dictionary, or else an error will be returned.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                           :: i, k, j, stat
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    character(ESMF_MAXSTR), pointer   :: synonyms(:)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    do i=1, size(standardNames)
+    
+      call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &
+        fdEntry, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      j = size(fdEntry%wrap%synonyms)
+      allocate(synonyms(j+size(standardNames)-1), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms array", &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      do k=1, j
+        synonyms(k) = fdEntry%wrap%synonyms(k)  ! fill in the existing entries
+      enddo
+      
+      do k=1, size(standardNames)
+        if (k==i) cycle
+        j = j+1
+        synonyms(j) = trim(standardNames(k))
+      enddo
+      
+      deallocate(fdEntry%wrap%synonyms)
+      fdEntry%wrap%synonyms => synonyms
+
+    enddo
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryDefinition - Create the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryDefinition(fieldDictionary, rc)
@@ -183,21 +269,13 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-!BOLT l l l l
+!BOLT l l
 ! "{\bf StandardName}"
-! "{\bf Units}"
-! "{\bf LongName}"
-! "{\bf ShortName} \\"
-! ""
-! "(canonical)"
-! "(default)"
-! "(default)"
+! "{\bf CanonicalUnits}"
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "air_pressure_at_sea_level", &
       canonicalUnits    = "Pa", &
-      defaultLongName   = "Air Pressure at Sea Level", &
-      defaultShortName  = "pmsl", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -206,8 +284,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "magnitude_of_surface_downward_stress", &
       canonicalUnits    = "Pa", &
-      defaultLongName   = "Magnitude of Surface Downward Stress", &
-      defaultShortName  = "taum", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -216,8 +292,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "precipitation_flux", &
       canonicalUnits    = "kg m-2 s-1", &
-      defaultLongName   = "Precipitation Flux", &
-      defaultShortName  = "prcf", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -226,8 +300,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_height_above_sea_level", &
       canonicalUnits    = "m", &
-      defaultLongName   = "Sea Surface Height Above Sea Level", &
-      defaultShortName  = "ssh", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -236,8 +308,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_salinity", &
       canonicalUnits    = "1e-3", &
-      defaultLongName   = "Sea Surface Salinity", &
-      defaultShortName  = "sss", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -246,8 +316,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_temperature", &
       canonicalUnits    = "K", &
-      defaultLongName   = "Sea Surface Temperature", &
-      defaultShortName  = "sst", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -256,8 +324,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_eastward_sea_water_velocity", &
       canonicalUnits    = "m s-1", &
-      defaultLongName   = "Surface Eastward Sea Water Velocity", &
-      defaultShortName  = "sscu", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -266,8 +332,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_eastward_stress", &
       canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Downward Eastward Stress", &
-      defaultShortName  = "tauu", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -276,8 +340,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_heat_flux_in_air", &
       canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Downward Heat Flux in Air", &
-      defaultShortName  = "hfns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -286,8 +348,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_water_flux", &
       canonicalUnits    = "kg m-2 s-1", &
-      defaultLongName   = "Surface Downward Water Flux", &
-      defaultShortName  = "wfns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -296,8 +356,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_northward_stress", &
       canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Downward Northward Stress", &
-      defaultShortName  = "tauv", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -306,8 +364,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_net_downward_shortwave_flux", &
       canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Net Downward Shortwave Flux", &
-      defaultShortName  = "rsns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -316,8 +372,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_net_downward_longwave_flux", &
       canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Net Downward Longwave Flux", &
-      defaultShortName  = "rlns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -326,8 +380,6 @@ module NUOPC_FieldDictionaryDef
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_northward_sea_water_velocity", &
       canonicalUnits    = "m s-1", &
-      defaultLongName   = "Surface Northward Sea Water Velocity", &
-      defaultShortName  = "sscv", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out

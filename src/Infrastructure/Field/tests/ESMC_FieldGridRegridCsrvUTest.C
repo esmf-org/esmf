@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -334,8 +334,16 @@ int main(void){
                1.0,3.0, 1.5,3.0, 2.5,3.0, 3.0,3.0};
   int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   int elemId [] ={1,2,3,4,5,6,7,8,9};
-  // ESMF_MESHELEMTYPE_QUAD=9
-  int elemType [] = {9,9,9,9,9,9,9,9,9};
+  // ESMF_MESHELEMTYPE_QUAD
+  int elemType [] = {ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD};
   int elemConn [] ={1,2,6,5,
               2,3,7,6,
               3,4,8,7,

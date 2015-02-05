@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -21,49 +21,47 @@ module NUOPC_Model
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
-    ModelBase_routine_SS            => routine_SetServices, &
+    ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-!    type_InternalState              => type_InternalState, &
-!    type_InternalStateStruct        => type_InternalStateStruct, &
-    label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
-    ModelBase_label_TimestampExport => label_TimestampExport
+    label_Finalize                  => label_Finalize, &
+    ModelBase_label_TimestampExport => label_TimestampExport, &
+    NUOPC_ModelBaseGet
 
   implicit none
   
   private
   
   public &
-    routine_Run, &
-    routine_SetServices
-    
-!  public &
-!    type_InternalState, &
-!    type_InternalStateStruct
+    SetServices, &
+    routine_Run
     
   public &
-    label_InternalState, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
     label_DataInitialize, &
     label_SetClock, &
-    label_SetRunClock
+    label_SetRunClock, &
+    label_Finalize
   
   character(*), parameter :: &
     label_DataInitialize = "Model_DataInitialize"
   character(*), parameter :: &
     label_SetClock = "Model_SetClock"
     
+  ! Generic methods
+  public NUOPC_ModelGet
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(gcomp, rc)
+  subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)   :: gcomp
     integer, intent(out)  :: rc
     
@@ -404,4 +402,46 @@ module NUOPC_Model
     
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ModelGet - Get info from a Model
+!
+! !INTERFACE:
+  subroutine NUOPC_ModelGet(model, driverClock, modelClock, &
+    importState, exportState, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: model
+    type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: modelClock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Access Model information.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(model, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query ModeBase
+    call NUOPC_ModelBaseGet(model, driverClock=driverClock, clock=modelClock, &
+      importState=importState, exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module

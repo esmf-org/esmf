@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -21,6 +21,7 @@
 #include <Mesh/include/ESMCI_MCoord.h>
 
 #include <vector>
+#include <limits>
 
 namespace ESMCI {
 
@@ -50,7 +51,8 @@ namespace ESMCI {
 
   void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids);
 
-  void remove_0len_edges3D(int *num_p, double *p);
+
+  void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind=NULL);
 
   void remove_0len_edges2D(int *num_p, double *p);
 
@@ -81,11 +83,12 @@ int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, doubl
 int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
                            double *p1, double *p2);
 
+//// Handy macros ////
 
-
-
+// Do it this way because some compilers don't support isfinite (e.g. pgi)
+#define MU_IS_FINITE(n) ((n) <= std::numeric_limits<double>::max() && (n) >= -std::numeric_limits<double>::max())
   
-  // Handy macros
+
 #define MU_SET_MIN_VEC3D(min,vec)       \
   if (vec[0]<min[0]) min[0]=vec[0];\
   if (vec[1]<min[1]) min[1]=vec[1];\

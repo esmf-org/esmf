@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2015, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -10016,7 +10016,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    deallocate(elemConn)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
 
    call ESMF_MeshWrite(dstMesh,"dstMesh")
@@ -11010,7 +11010,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    deallocate(elemConn)
 
 
-#if 1
+#if 0
    call ESMF_MeshWrite(srcMesh,"srcMesh")
 
    call ESMF_MeshWrite(dstMesh,"dstMesh")

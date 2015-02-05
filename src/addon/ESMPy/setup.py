@@ -59,7 +59,9 @@ class CleanCommand(Command):
         os.system('rm src/ESMF/interface/esmfmkfile.py')
         os.system('rm -rf build')
         os.system('rm -rf dist')
-        os.system('rm -rf src/ESMF/test/regrid_test/regrid_from_file_test/data')
+        os.system('rm -rf src/ESMF/test/regrid_from_file/data')
+        os.system('rm -rf examples/data')
+
 
 class DustCommand(Command):
     description = "dust: will remove log and output files"
@@ -83,7 +85,7 @@ class TestCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/run_unit_test.py')
+        os.system('python src/ESMF/test/run_alltest.py')
 
 class TestRegridCommand(Command):
     description = "test regrid"
@@ -94,7 +96,29 @@ class TestRegridCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/regrid_test/run_regrid.py')
+        os.system('nosetests -vs src/ESMF/test/test_api/test_regrid.py')
+
+class TestExamplesCommand(Command):
+    description = "run examples"
+    user_options = []
+    def initialize_options(self):
+        self.cwd = None
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+    def run(self):
+        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
+        os.system('python examples/run_examples.py')
+
+class TestExamplesDryrunCommand(Command):
+    description = "run examples"
+    user_options = []
+    def initialize_options(self):
+        self.cwd = None
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+    def run(self):
+        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
+        os.system('python examples/run_examples_dryrun.py')
 
 class TestRegridFromFileCommand(Command):
     description = "test regrid from file"
@@ -105,7 +129,7 @@ class TestRegridFromFileCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py')
+        os.system('python src/ESMF/test/regrid_from_file/run_regrid_from_file.py')
 
 class TestRegridFromFileDryrunCommand(Command):
     description = "test regrid from file dryrun"
@@ -116,20 +140,7 @@ class TestRegridFromFileDryrunCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file_dryrun.py')
-
-class TestAllCommand(Command):
-    description = "test all"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/run_unit_test.py')
-        os.system('python src/ESMF/test/regrid_test/run_regrid.py')
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py')
+        os.system('python src/ESMF/test/regrid_from_file/run_regrid_from_file_dryrun.py')
 
 # unit test in parallel
 class TestParallelCommand(Command):
@@ -145,7 +156,7 @@ class TestParallelCommand(Command):
             import mpi4py
         except:
             raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('python src/ESMF/test/run_unit_test.py --parallel')
+        os.system('python src/ESMF/test/run_alltest.py --parallel')
 
 # test regridding in parallel
 class TestRegridParallelCommand(Command):
@@ -161,7 +172,23 @@ class TestRegridParallelCommand(Command):
             import mpi4py
         except:
             raise ImportError("mpi4py is required for parallel regrid testing!")
-        os.system('python src/ESMF/test/regrid_test/run_regrid.py --parallel')
+        os.system('nosetests -vs  src/ESMF/test/test_api/test_regrid.py')
+
+# run examples in parallel
+class TestExamplesParallelCommand(Command):
+    description = "run examples parallel"
+    user_options = []
+    def initialize_options(self):
+        self.cwd = None
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+    def run(self):
+        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
+        try:
+            import mpi4py
+        except:
+            raise ImportError("mpi4py is required for parallel regrid testing!")
+        os.system('python examples/run_examples.py --parallel')
 
 # test regridding from file in parallel
 class TestRegridFromFileParallelCommand(Command):
@@ -177,26 +204,7 @@ class TestRegridFromFileParallelCommand(Command):
             import mpi4py
         except:
             raise ImportError("mpi4py is required for parallel regrid from file testing!")
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py --parallel')
-
-# test all in parallel
-class TestAllParallelCommand(Command):
-    description = "test all parallel"
-    user_options = []
-    def initialize_options(self):
-        self.cwd = None
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-    def run(self):
-        assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        try:
-            import mpi4py
-        except:
-            raise ImportError("mpi4py is required for parallel regrid from file testing!")
-        os.system('python src/ESMF/test/run_unit_test.py --parallel')
-        os.system('python src/ESMF/test/regrid_test/run_regrid.py --parallel')
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py --parallel')
-
+        os.system('python src/ESMF/test/regrid_from_file/run_regrid_from_file.py --parallel')
 
 ## get package structure
 def _get_dot_(path,root='src'):
@@ -218,6 +226,9 @@ for dirpath,dirnames,filenames in os.walk(src_path):
         package = _get_dot_(dirpath)
         packages.append(package)
 
+# TODO: test examples
+# TODO: nosetest random ordering
+# TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(\
       name="ESMPy",
@@ -241,11 +252,12 @@ setup(\
                 'dust': DustCommand,
                 'test': TestCommand,
                 'test_regrid': TestRegridCommand,
+                'test_examples': TestExamplesCommand,
+                'test_examples_dryrun': TestExamplesDryrunCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
-                'test_all': TestAllCommand,
                 'test_parallel': TestParallelCommand,
                 'test_regrid_parallel': TestRegridParallelCommand,
-                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand,
-                'test_all_parallel': TestAllParallelCommand}
+                'test_examples_parallel': TestExamplesParallelCommand,
+                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand}
      )

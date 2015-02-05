@@ -1403,6 +1403,15 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
         
+      attributeName = "InternalInitializePhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
       attributeName = "RunPhaseMap"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &

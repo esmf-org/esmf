@@ -40,7 +40,9 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Model component with a default {\em explicit} time dependency. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
+Partial specialization of a component with a default {\em explicit} time dependency. Each time the {\tt Run} method is called the component steps one timeStep forward on the passed in parent
+clock. The component flags incompatibility during {\tt Run} if the current time of the incoming
+clock does not match the current time of the internal clock.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -51,8 +53,8 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \end{verbatim}
 
 \bigskip{\sf SETSERVICES:}
-\begin{verbatim}  subroutine routine_SetServices(gcomp, rc)
-    type(ESMF_GridComp)   :: gcomp
+\begin{verbatim}  subroutine SetServices(modelBase, rc)
+    type(ESMF_GridComp)   :: modelBase
     integer, intent(out)  :: rc
 \end{verbatim}
 
@@ -60,22 +62,20 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition), with the following mapping:
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: ({\sc Required, Implementor Provided})
-    \item IPDv00p2 = phase 2: ({\sc Required, Implementor Provided})
-    \item IPDv00p3 = phase 3: ({\sc Required, Implementor Provided})
-    \item IPDv00p4 = phase 4: ({\sc Required, Implementor Provided})
+    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
+    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
+    \item IPDv00p3 = 3: ({\sc Required, Implementor Provided})
+    \item IPDv00p4 = 4: ({\sc Required, Implementor Provided})
     \end{itemize}  
   \end{itemize}  
 \end{itemize}
 
 \bigskip{\sf RUN:}
 \begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
+\item phase 1: ({\sc NUOPC Provided})
   \begin{itemize}
-  \item Allocate internal state memory.
-  \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming Clock.
   \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
   \begin{itemize}
   \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
@@ -93,7 +93,6 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
   \item Advance the current time of the internal Clock according to the time step of the internal Clock.
   \end{itemize}
   \item {\sc Specialization Optional}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
-  \item Deallocate the internal state memory.
   \end{itemize}    
 \end{itemize}
 
@@ -101,21 +100,11 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Optionally overwrite the provided NOOP with model finalization code.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
   \end{itemize}      
 \end{itemize}
 
-\bigskip{\sf INTERNALSTATE:}
-\begin{verbatim}  label_InternalState
+\mbox{}\hrulefill\ 
 
-  type type_InternalState
-    type(type_InternalStateStruct), pointer :: wrap
-  end type
-
-  type type_InternalStateStruct
-    type(ESMF_Clock)      :: driverClock
-  end type
-
-\end{verbatim}
 %...............................................................
 

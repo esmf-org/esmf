@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -21,17 +21,15 @@ module NUOPC_Mediator
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
-    ModelBase_routine_SS            => routine_SetServices, &
+    ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-!    type_InternalState              => type_InternalState, &
-!    type_InternalStateStruct        => type_InternalStateStruct, &
-    label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
     label_TimestampExport           => label_TimestampExport, &
+    label_Finalize                  => label_Finalize, &
     NUOPC_ModelBaseGet
 
   implicit none
@@ -39,21 +37,17 @@ module NUOPC_Mediator
   private
   
   public &
-    routine_Run, &
-    routine_SetServices
-    
-!  public &
-!    type_InternalState, &
-!    type_InternalStateStruct
+    SetServices, &
+    routine_Run
     
   public &
-    label_InternalState, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
     label_DataInitialize, &
     label_SetRunClock, &
-    label_TimestampExport
+    label_TimestampExport, &
+    label_Finalize
 
   character(*), parameter :: &
     label_DataInitialize = "Mediator_DataInitialize"
@@ -65,7 +59,7 @@ module NUOPC_Mediator
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(gcomp, rc)
+  subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)   :: gcomp
     integer, intent(out)  :: rc
     
@@ -365,14 +359,18 @@ module NUOPC_Mediator
 ! !IROUTINE: NUOPC_MediatorGet - Get info from a Mediator
 !
 ! !INTERFACE:
-  subroutine NUOPC_MediatorGet(mediator, driverClock, rc)
+  subroutine NUOPC_MediatorGet(mediator, driverClock, mediatorClock, &
+    importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: mediator
-    type(ESMF_Clock),    intent(out)           :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: mediatorClock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get a the Clock of the parent driver.
+!   Access Mediator information.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -385,8 +383,10 @@ module NUOPC_Mediator
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query Component for the internal State
-    call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, rc=rc)
+    ! query ModeBase
+    call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, &
+      clock=mediatorClock, importState=importState, exportState=exportState, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

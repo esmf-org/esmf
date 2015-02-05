@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -57,7 +57,8 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   polekind[1] = ESMC_POLEKIND_BIPOLE;
   ESMC_PoleKind_Flag *pkptr = polekind;
 
-  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, &coordsys, &typekind, pkptr, NULL);
+  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind, 
+                                 pkptr, NULL);
 
   // free memory
   free(maxIndex);

@@ -6,24 +6,36 @@
 The NUOPC Component Explorer is a run-time tool that can be used to gain insight into a NUOPC Layer compliant component, or to test a component's compliance. The Component Explorer is currently available as a separate download from the prototype repository:
 
 \begin{verbatim}
-https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/trunk/ComponentExplorer/
+https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/trunk/v7-ComponentExplorer/
 \end{verbatim}
 
-There are two parts to the Component Explorer. First a script is available that can be used to compile and link the explorer application specifically against a specified component. This part of the explorer leverages the standardized component dependencies discussed in section \ref{componentDep}. This step is executed by providing the component's mk-file to the explorer script:
+There are two parts to the Component Explorer. First the script {\tt nuopcExplorerScript} is used to compile and link the explorer application specifically against a specified component. This part of the explorer leverages and tests the standardized component dependencies discussed in section \ref{componentDep}. This step is initiated by calling the explorer script with the component's mk-file as an argument:
 
 \begin{verbatim}
 ./nuopcExplorerScript <component-mk-file>
 \end{verbatim}
 
-Any issues found during this step are reported. The successful completion of this step will produce an executable called {\tt nuopcExplorerApp}.
+Any issues found during this step are reported. The successful completion of this step will produce an executable called {\tt nuopcExplorerApp}. Success is indicated by 
 
-The second part of the Component Explorer is the explorer application. It can either be built using the explorer script as outlined above, or by using the makefile directly:
+\begin{verbatim}
+SUCCESS: nuopcExplorerApp successfully built
+...exiting nuopcExplorerScript.
+\end{verbatim}
+
+and failure by
+
+\begin{verbatim}
+FAILURE: nuopcExplorerApp failed to build
+...exiting nuopcExplorerScript.
+\end{verbatim}
+
+The second part of the Component Explorer is the explorer application itself. It can either be built using the explorer script as outlined above (recommended when a makefile fragment for the component is available) or by using the makefile directly:
 
 \begin{verbatim}
 make nuopcExplorerApp
 \end{verbatim}
 
-In the second case, the resulting {\tt nuopcExplorerApp} will not be tied to a specific component, but expects a component in form of a shared object to be specified when executing {\tt nuopcExplorerApp}. In either case the explorer application needs to be started according to the execution requirements of the component it attempts to explore. This may mean that input files must be present, and a sufficient number of processes need to be specified. In terms of the common {\tt mpirun} tool launching {\tt nuopcExplorerApp} may look like this
+In the second case, the resulting {\tt nuopcExplorerApp} is not tied to a specific component, instead the executable expects a component in form of a shared object to be specified as a command line argument when executing {\tt nuopcExplorerApp}. In either case the explorer application needs to be started according to the execution requirements of the component it attempts to explore. This may mean that input files must be present, and that the executable be launched on a sufficient number of processes. In terms of the common {\tt mpirun} tool, launching of {\tt nuopcExplorerApp} may look like this
 \begin{verbatim}
 mpirun -np X ./nuopcExplorerApp
 \end{verbatim}

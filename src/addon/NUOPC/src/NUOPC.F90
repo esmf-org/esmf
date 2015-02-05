@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,9 +44,11 @@ module NUOPC
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
-  public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldDictionaryGetEntry  
-  public NUOPC_FieldDictionaryHasEntry  
+  public NUOPC_FieldDictionaryAddEntry
+  public NUOPC_FieldDictionaryGetEntry
+  public NUOPC_FieldDictionaryHasEntry
+  public NUOPC_FieldDictionaryMatchSyno  
+  public NUOPC_FieldDictionarySetSyno  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
@@ -86,6 +88,7 @@ module NUOPC
   public NUOPC_CompAreServicesSet  
   public NUOPC_CompAttributeAdd
   public NUOPC_CompAttributeGet
+  public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap

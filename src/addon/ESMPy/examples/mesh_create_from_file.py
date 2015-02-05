@@ -9,12 +9,11 @@ import ESMF
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = ESMF.Mesh(filename="mpas_uniform_10242_dual_counterclockwise.nc",
+mesh = ESMF.Mesh(filename="examples/data/mpas_uniform_10242_dual_counterclockwise.nc",
                  filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the nodes of the mesh
 field = ESMF.Field(mesh, "field", meshloc=ESMF.MeshLoc.NODE)
 
-print "Successfully read a mesh and created a field!"
-print "The field values on PET (processor) # {0} are:".format(ESMF.local_pet())
-print field
+if ESMF.local_pet() == 0:
+    print "Successfully read a mesh and created a field!"

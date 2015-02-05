@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -639,28 +639,29 @@ void PIO_Handler::arrayRead(
       varname = arr_p->getName();
     }
     PRINTMSG(" (" << my_rank << "): varname = " << varname);
-    // Make sure the variable is in the file
+
+    // This should work if it is a NetCDF file.
     piorc = pio_cpp_inquire(pioFileDesc, &nDims,
                               &nVar, &nAtt, &unlim);
-      // This should work if it is a NetCDF file.
     if (!CHECKPIOERROR(piorc, "File is not in NetCDF format",
         localrc))
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         free (vardesc);
+        vardesc = NULL;
         return;
       }
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
     piorc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
     // An error here means the variable is not in the file
-    std::string errmsg;
-    errmsg = std::string("variable ").append (varname).append (" not found in file");
+    std::string errmsg = std::string("variable ") + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg.c_str(),
                              localrc))
       if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         free (vardesc);
+        vardesc = NULL;
         return;
       }
   }
@@ -674,6 +675,7 @@ void PIO_Handler::arrayRead(
         if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
           free (vardesc);
+          vardesc = NULL;
           return;
         }
       // Check to see if time is the unlimited dimension
@@ -684,6 +686,7 @@ void PIO_Handler::arrayRead(
             " Time is not the file's unlimited dimension",
             ESMC_CONTEXT, rc)) {
           free (vardesc);
+          vardesc = NULL;
           return;
         }
       }
@@ -694,6 +697,7 @@ void PIO_Handler::arrayRead(
         if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
           free (vardesc);
+          vardesc = NULL;
           return;
         }
       if (*timeslice > time_len) {
@@ -705,6 +709,7 @@ void PIO_Handler::arrayRead(
             "Timeframe is greater than max in file",
             ESMC_CONTEXT, rc)) {
           free (vardesc);
+          vardesc = NULL;
           return;
         }
       }
@@ -1414,8 +1419,8 @@ ESMC_Logical PIO_Handler::isOpen(
     return ESMF_TRUE;
   } else {
     // This really should not happen, warn and clean up just in case
-    char errmsg[32 + ESMF_MAXSTR];
-    sprintf(errmsg, "File, %s, closed by PIO", getFilename());
+    std::string errmsg;
+    errmsg = std::string ("File, ") + getFilename() + ", closed by PIO";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     free(pioFileDesc);
     pioFileDesc = (pio_file_desc_t)NULL;
@@ -1800,13 +1805,13 @@ int PIO_IODescHandler::constructPioDecomp(
   currentVM = ESMC_VMGetCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &localrc)) {
-    return false;
+    return localrc;
   }
   localrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
                        &mpiCommunicator, (int *)NULL, (int *)NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &localrc)) {
-    return false;
+    return localrc;
   }
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
   PRINTMSG("localDeCount = " << localDeCount);
@@ -1853,7 +1858,15 @@ int PIO_IODescHandler::constructPioDecomp(
   // TODO: multiple DEs.
   localDe = 0;
   localrc = arr_p->constructFileMap(pioDofList, pioDofCount, localDe);
-  if (ESMF_SUCCESS == localrc) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &localrc)) {
+    free(handle->io_descriptor);
+    handle->io_descriptor = NULL;
+    free(pioDofList);
+    pioDofList = (int64_t *)NULL;
+    return localrc;
+  }
+
 #if 0
     std::cout << " pioDofList = [";
     for (int i = 0; i < pioDofCount; i++) {
@@ -1863,32 +1876,33 @@ int PIO_IODescHandler::constructPioDecomp(
     std::cout << "]" << std::endl;
 #endif // 0
     // Get TKR info
-    switch(arr_p->getTypekind()) {
-    case ESMC_TYPEKIND_I4:
-      handle->basepiotype = PIO_int;
-      break;
-    case ESMC_TYPEKIND_R4:
-      handle->basepiotype = PIO_real;
-      break;
-    case ESMC_TYPEKIND_R8:
-      handle->basepiotype = PIO_double;
-      break;
-    case ESMC_TYPEKIND_I1:
-    case ESMC_TYPEKIND_I2:
-    case ESMC_TYPEKIND_I8:
-    case ESMC_TYPEKIND_CHARACTER:
-    case ESMF_C8:
-    case ESMF_C16:
-    case ESMC_TYPEKIND_LOGICAL:
-    default:
-      ESMC_LogDefault.Write("Unsupported typekind",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      localrc = ESMF_RC_ARG_BAD;
+  switch(arr_p->getTypekind()) {
+  case ESMC_TYPEKIND_I4:
+    handle->basepiotype = PIO_int;
+    break;
+   case ESMC_TYPEKIND_R4:
+    handle->basepiotype = PIO_real;
+    break;
+   case ESMC_TYPEKIND_R8:
+    handle->basepiotype = PIO_double;
+    break;
+  case ESMC_TYPEKIND_I1:
+  case ESMC_TYPEKIND_I2:
+  case ESMC_TYPEKIND_I8:
+  case ESMC_TYPEKIND_CHARACTER:
+  case ESMF_C8:
+  case ESMF_C16:
+  case ESMC_TYPEKIND_LOGICAL:
+  default:
+    localrc = ESMF_RC_ARG_BAD;
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported typekind", ESMC_CONTEXT,
+        &localrc)) {
+      free(handle->io_descriptor);
+      handle->io_descriptor = NULL;
+      free(pioDofList);
+      pioDofList = (int64_t *)NULL;
+      return localrc;
     }
-  } else {
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &localrc);
-    // Can't return, need to free pioDofList
   }
 
   if (ESMF_SUCCESS == localrc) {

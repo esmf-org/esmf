@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -96,8 +96,11 @@ int main(void){
                0.0,2.0, 1.0,2.0, 2.0,2.0};
   int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
   int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
-  int elemType_s [] ={9,9,9,9};
+  // ESMF_MESHELEMTYPE_QUAD 
+  int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD};
   double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
   int elemConn_s [] ={1,2,5,4,
               2,3,6,5,
@@ -187,7 +190,7 @@ int main(void){
   double *coords;
   coords = (double *)malloc(num_node_owned_out*3*sizeof(double));
   int num_nodes, num_dims;
-  ESMC_MeshGetCoord(mesh, coords, &num_nodes, &num_dims, &rc);
+   ESMC_MeshGetCoord(mesh, coords, &num_nodes, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   printf("Found num_nodes=%d, num_dims=%d\n", num_nodes, num_dims);
@@ -249,7 +252,7 @@ int main(void){
 				 NULL, NULL, "", NULL, "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  rc = ESMC_MeshDestroy(&mesh);
+   rc = ESMC_MeshDestroy(&mesh);
 #else
   // No NetCDF, so just PASS this test.
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);

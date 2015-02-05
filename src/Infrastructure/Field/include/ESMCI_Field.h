@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -84,6 +84,9 @@ namespace ESMCI{
     static int getbounds(Field *field, int *localDe,
       InterfaceInt *exclusiveLBound, InterfaceInt *exclusiveUBound);
     int print();
+    int read(const char *file,
+      const char* variableName,
+      int timeslice, ESMC_IOFmt_Flag iofmt);
     int castToFortran(F90ClassHolder *fc);
     static int regridgetarea(Field *field);
     static int regridstore(Field *fieldsrc, Field *fielddst,
@@ -98,6 +101,11 @@ namespace ESMCI{
     static int regrid(Field *fieldsrc, Field *fielddst, 
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
+    int write(const char *file,
+      const char* variableName,
+      int overwrite,
+      ESMC_FileStatus_Flag status,
+      int timeslice, ESMC_IOFmt_Flag iofmt);
   }; 
 }
 

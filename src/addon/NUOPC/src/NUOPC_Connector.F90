@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -27,11 +27,9 @@ module NUOPC_Connector
   
   private
   
-  public routine_SetServices
-!  public type_InternalState, type_InternalStateStruct
-!  public label_InternalState
+  public SetServices
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
-    label_ReleaseRouteHandle
+    label_ReleaseRouteHandle, label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "Connector_InternalState"
@@ -41,6 +39,8 @@ module NUOPC_Connector
     label_ExecuteRouteHandle = "Connector_ExecuteRH"
   character(*), parameter :: &
     label_ReleaseRouteHandle = "Connector_ReleaseRH"
+  character(*), parameter :: &
+    label_Finalize = "Connector_Finalize"
 
   type type_InternalStateStruct
     type(ESMF_FieldBundle)              :: srcFields
@@ -61,8 +61,8 @@ module NUOPC_Connector
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(cplcomp, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine SetServices(connector, rc)
+    type(ESMF_CplComp)   :: connector
     integer, intent(out) :: rc
     
     ! local variables
@@ -71,19 +71,19 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC CplComp Attribute Package to the Connector
-    call NUOPC_CompAttributeAdd(cplcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call ESMF_CplCompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -92,66 +92,66 @@ module NUOPC_Connector
     ! NUOPC_CompSetEntryPoint() calls is critical to produce the old default
     ! InitializePhaseMap.
 
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
       userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv03p4", "IPDv04p4"/), &
       userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
       userRoutine=InitializeP5a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
       userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1a"/), &
       userRoutine=InitializeP1a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv04p1b"/), &
       userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2a"/), &
       userRoutine=Initialize00P2a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p2b"/), &
       userRoutine=Initialize00P2b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Run phases
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_RUN, &
       phaseLabelList=(/"RunPhase1"/), userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! Finalize phases
-    call NUOPC_CompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_FINALIZE, &
       phaseLabelList=(/"FinalizePhase1"/), userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -260,7 +260,8 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (importStandardNameList(i) == exportStandardNameList(j)) then
+          if (NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j))) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -367,9 +368,9 @@ call ESMF_VMLogMemInfo("aftP1b Reconcile")
 #endif
 
     ! set Attributes
-    call ESMF_AttributeSet(cplcomp, &
+    call NUOPC_CompAttributeSet(cplcomp, &
       name="ComponentLongName", value="NUOPC Generic Connector Component", &
-      convention="NUOPC", purpose="General", rc=rc)
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -413,16 +414,18 @@ call printStringList("exportNamespaceList", exportNamespaceList)
       ! simple linear search of items that match between both lists
       do j=1, size(exportStandardNameList)  ! consumer side
         do i=1, size(importStandardNameList)  ! producer side
-          if (importStandardNameList(i) == exportStandardNameList(j)) then
+          if (NUOPC_FieldDictionaryMatchSyno( &
+            importStandardNameList(i), exportStandardNameList(j))) then
             ! found matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
               getBondLevel(importNamespaceList(i), exportNamespaceList(j))
-            if (bondLevel == -1) cycle  ! break out and look for next match
-
+              
 #if 0
 print *, "current bondLevel=", bondLevel
 #endif
+
+            if (bondLevel == -1) cycle  ! break out and look for next match
                        
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -476,9 +479,8 @@ print *, "current bondLevel=", bondLevel
       
       if (associated(cplList)) then
         if (count>0) then
-          call ESMF_AttributeSet(cplcomp, &
-            name="CplList", valueList=cplList(1:count), &
-            convention="NUOPC", purpose="General", rc=rc)
+          call NUOPC_CompAttributeSet(cplcomp, &
+            name="CplList", valueList=cplList(1:count), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
@@ -612,7 +614,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+      itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -621,7 +624,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -652,8 +656,9 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -879,8 +884,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     
     ! determine verbosity
     verbose = .false. ! initialize
-    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      rc=rc)
     if (trim(valueString)=="high") &
       verbose = .true.
 
@@ -915,7 +920,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+      itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -924,7 +930,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -955,8 +962,9 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1146,8 +1154,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     
     ! determine verbosity
     verbose = .false. ! initialize
-    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      rc=rc)
     if (trim(valueString)=="high") &
       verbose = .true.
     
@@ -1182,7 +1190,8 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+      itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1191,7 +1200,8 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1222,8 +1232,9 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1446,7 +1457,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+      itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1455,7 +1467,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1494,8 +1507,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
         do iMatch=1, size(importStandardNameList)  ! producer side
-          if ((importStandardNameList(iMatch) == cplName).and. &
-            (exportStandardNameList(eMatch) == cplName)) then
+          if (NUOPC_FieldDictionaryMatchSyno(importStandardNameList(iMatch), &
+            cplName) .and. NUOPC_FieldDictionaryMatchSyno( &
+            exportStandardNameList(eMatch), cplName)) then
             ! found a matching standard name pair
             ! -> determine bondLevel according to namespace matching
             bondLevel = &
@@ -1559,16 +1573,12 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
         ! set the connected Attribute on import Field
-        call ESMF_AttributeSet(iField, &
-          name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
+        call NUOPC_FieldAttributeSet(iField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
-        call ESMF_AttributeSet(eField, &
-          name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
+        call NUOPC_FieldAttributeSet(eField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1690,8 +1700,8 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         
     ! determine verbosity
     verbose = .false. ! initialize
-    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      rc=rc)
     if (trim(valueString)=="high") &
       verbose = .true.
     
@@ -1822,6 +1832,16 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(cplcomp, label=label_Finalize, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! deallocate and destroy remaining internal state members
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
@@ -2485,9 +2505,9 @@ print *, "found match:"// &
 ! !IROUTINE: NUOPC_ConnectorGet - Get parameters from a Connector
 !
 ! !INTERFACE:
-  subroutine NUOPC_ConnectorGet(cplcomp, srcFields, dstFields, rh, state, rc)
+  subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
     type(ESMF_FieldBundle), intent(out), optional :: dstFields
     type(ESMF_RouteHandle), intent(out), optional :: rh
@@ -2505,13 +2525,13 @@ print *, "found match:"// &
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2530,9 +2550,9 @@ print *, "found match:"// &
 ! !IROUTINE: NUOPC_ConnectorSet - Set parameters in a Connector
 !
 ! !INTERFACE:
-  subroutine NUOPC_ConnectorSet(cplcomp, srcFields, dstFields, rh, state, rc)
+  subroutine NUOPC_ConnectorSet(connector, srcFields, dstFields, rh, state, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(in),  optional :: srcFields
     type(ESMF_FieldBundle), intent(in),  optional :: dstFields
     type(ESMF_RouteHandle), intent(in),  optional :: rh
@@ -2550,13 +2570,13 @@ print *, "found match:"// &
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

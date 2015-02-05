@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -69,7 +69,8 @@ void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
-    int *maxIndex, int *len1, 
+    int *maxIndex, int *len1, int *periodicDim, int *pd_present,
+    int *poleDim, int *pld_present,
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
     ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
@@ -256,6 +257,8 @@ int setDefaultsLUA(int dimCount,
 //
 // !ARGUMENTS:
     ESMC_InterfaceInt *maxIndex, 
+    int *periodicDim,
+    int *poleDim,
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_PoleKind_Flag *poleKind,
@@ -272,10 +275,12 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int cs_present, ctk_present, pk_present;
+    int cs_present, ctk_present, pk_present, pd_present, pld_present;
     cs_present = 0;
     ctk_present = 0;
     pk_present = 0;
+    pd_present = 0;
+    pld_present = 0;
 
     int pksize = 2;
 
@@ -294,12 +299,23 @@ int setDefaultsLUA(int dimCount,
       ctk_present = 1; 
     if (poleKind != NULL)
       pk_present = 1; 
-
+    int periodicDimLoc = 1;
+    if (periodicDim != NULL) {
+      pd_present = 1;
+      periodicDimLoc = *periodicDim;
+    }
+    int poleDimLoc = 2;
+    if (poleDim != NULL) {
+      pld_present = 1;
+      poleDimLoc = *poleDim;
+    }
     // allocate the grid object
     Grid *grid;
   
     FTN_X(f_esmf_gridcreate1peridim)(&grid, 
                                      mi->array, &mi->extent[0], 
+                                     &periodicDimLoc, &pd_present,
+                                     &poleDimLoc, &pld_present,
                                      coordSys, &cs_present,
                                      coordTypeKind, &ctk_present,
                                      poleKind, &pk_present, &pksize,

@@ -7,6 +7,7 @@
 #98
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
+
 ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-03 : 10E-13
 wr50a_090614.nc : T42_grid.nc : patch : --src_regional -i : 10E-04 : 10E-16
 wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i : 10E-06 : 10E-16

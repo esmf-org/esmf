@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Model component with a default {\em explicit} time dependency. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
+Model component with a default {\em explicit} time dependency. Each time the {\tt Run} method is called the model integrates one timeStep forward on the passed in parent clock. The internal clock is advanced at the end of each {\tt Run} call. The component flags incompatibility during {\tt Run} if the current time of the incoming clock does not match the current time of the internal clock.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  NUOPC_ModelBase
@@ -51,8 +51,8 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \end{verbatim}
 
 \bigskip{\sf SETSERVICES:}
-\begin{verbatim}  subroutine routine_SetServices(gcomp, rc)
-    type(ESMF_GridComp)   :: gcomp
+\begin{verbatim}  subroutine SetServices(model, rc)
+    type(ESMF_GridComp)   :: model
     integer, intent(out)  :: rc
 \end{verbatim}
 
@@ -60,38 +60,38 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition), with the following mapping:
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: ({\sc Required, Implementor Provided})
+    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
       \begin{itemize}
       \item Advertise Fields in import and export States.
       \end{itemize}
-    \item IPDv00p2 = phase 2: ({\sc Required, Implementor Provided})
+    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
       \begin{itemize}
       \item Realize the advertised Fields in import and export States.
       \end{itemize}  
-    \item IPDv00p3 = phase 3: ({\sc Required, NUOPC Provided})
+    \item IPDv00p3 = 3: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Check compatibility of the Fields' Connected status.
       \end{itemize}
-    \item IPDv00p4 = phase 4: ({\sc Required, NUOPC Provided})
+    \item IPDv00p4 = 4: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Handle Field data initialization. Time stamp the export Fields.
       \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 3: ({\sc NUOPC Provided}, suitable for: IPDv00p3, IPDv01p4, IPDv02p4)
+\item IPDv00p3, IPDv01p4, IPDv02p4: ({\sc NUOPC Provided})
   \begin{itemize}
   \item If the model internal clock is found to be not set, then set the model internal clock as a copy of the incoming clock. 
   \item {\it Optional specialization} to set the internal clock and/or alarms: {\tt label\_SetClock}.
   \item Check compatibility, ensuring all advertised import Fields are connected.
   \end{itemize}  
-\item phase 4: ({\sc NUOPC Provided}, suitable for: IPDv00p4, IPDv01p5)
+\item IPDv00p4, IPDv01p5: ({\sc NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
   \item Time stamp Fields in export State for compatibility checking.
   \end{itemize}    
-\item phase 5: ({\sc NUOPC Provided}, suitable for: IPDv02p5)
+\item IPDv02p5: ({\sc NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
   \item Timestamp Fields in export State for compatibility checking.
@@ -103,8 +103,6 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Allocate internal state memory.
-  \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming Clock.
   \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
   \begin{itemize}
   \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
@@ -122,7 +120,6 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
   \item Advance the current time of the internal Clock according to the time step of the internal Clock.
   \end{itemize}
   \item Timestamp all Fields in the export State according to the current time of the internal Clock, which now is identical to the stop time of the internal Clock.
-  \item Deallocate the internal state memory.
   \end{itemize}    
 \end{itemize}
 
@@ -130,21 +127,10 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Optionally overwrite the provided NOOP with model finalization code.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
   \end{itemize}      
 \end{itemize}
 
-\bigskip{\sf INTERNALSTATE:}
-\begin{verbatim}  label_InternalState
+\mbox{}\hrulefill\ 
 
-  type type_InternalState
-    type(type_InternalStateStruct), pointer :: wrap
-  end type
-
-  type type_InternalStateStruct
-    type(ESMF_Clock)      :: driverClock
-  end type
-
-\end{verbatim}
 %...............................................................
-

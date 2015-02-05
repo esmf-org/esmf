@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -131,6 +131,12 @@ int main(void){
   // VTKBody returns zero based elemConn, so make them 1 based
   for (int i = 0; i < conn_size; i++){
     elemConn[i] = elemConn[i]+1;
+  }
+
+  // We no longer use VTK 2D element types, so translate
+  for (int i = 0; i < num_elem; i++){
+    if (elemType[i]==5) elemType[i]=ESMC_MESHELEMTYPE_TRI;
+    else if (elemType[i]==9) elemType[i]=ESMC_MESHELEMTYPE_QUAD;
   }
 
   // Calculate the number of owned nodes 

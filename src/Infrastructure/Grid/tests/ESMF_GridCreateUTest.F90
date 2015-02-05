@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2015, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -385,56 +385,6 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing Grid copy from grid and regular distribution specification"
-  write(failMsg, *) "Incorrect result"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid 1
-  grid=ESMF_GridCreateNoPeriDim(maxIndex=(/20,20/), regDecomp=(/2,2/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Get name, so we can set name in the grid create copy
-  ! to insure things are identical
-  call ESMF_GridGet(grid, name=grid_name, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Create Grid 2 from the original grid and distgrid
-  grid2=ESMF_GridCreate(grid, name=trim(grid_name), regDecomp=(/2,2/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-#if 0
-  ! If the grid create copy works, then grid2 should now be 
-  ! a perfect copy of grid, so check that match returns true
-  if (.not. ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-#endif
-
-  ! get rid of first grid
-  call ESMF_GridDestroy(grid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! get rid of second grid
-  call ESMF_GridDestroy(grid2,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
 
 
   !-----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -48,7 +48,7 @@ Mesh();
 ~Mesh();
 static Mesh *createfromfile(const char *filename, int fileTypeFlag,
 			    int *convertToDual, int *addUserArea, 
-			    const char *meshname, int *addMask, const char *varname, 
+			    const char *meshname, int *maskFlag, const char *varname, 
 			    int *rc);
 
 /**

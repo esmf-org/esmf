@@ -275,15 +275,20 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
+                                          OptionalNamedConstant,
+                                          OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
+def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None, 
+                            coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
     Arguments:\n
         :RETURN: ESMP_Grid    :: grid\n
         Numpy.array(dtype=int32) :: maxIndex\n
+        integer (optional) :: periodicDim\n
+        integer (optional) :: poleDim\n
         CoordSys (optional)   :: coordSys\n
             Argument Values:\n
                 CoordSys.CART\n
@@ -306,7 +311,8 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), coordSys,
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
+                                               periodicDim, poleDim, coordSys,
                                                coordTypeKind, None, 
                                                ct.byref(lrc))
 
@@ -819,7 +825,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
-                            meshname="", addMask=None, varname=""):
+                            meshname="", maskFlag=None, varname=""):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Mesh has been created.\n
@@ -834,13 +840,16 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
         bool (optional)    :: convertToDual\n
         bool (optional)    :: addUserArea\n
         string (optional)  :: meshname\n
-        bool (optional)    :: addMask\n
+        MeshLoc (optional) :: maskFlag\n
+            Argument Values:\n
+                MeshLoc.NODE\n
+                MeshLoc.ELEMENT\n
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
-                                         meshname, addMask, varname,
+                                         meshname, maskFlag, varname,
                                          ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
@@ -1199,22 +1208,6 @@ def ESMP_FieldDestroy(field):
         raise ValueError('ESMC_FieldDestroy() failed with rc = ' + \
                                         str(rc) + '.    ' + constants._errmsg)
 
-_ESMF.ESMC_FieldPrint.restype = ct.c_int
-_ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
-@deprecated
-def ESMP_FieldPrint(field):
-    """
-    Preconditions: An ESMP_Field has been created.\n
-    Postconditions: The contents of 'field' have been printed to 
-                    standard out.\n
-    Arguments:\n
-        ESMP_Field :: field\n
-    """
-    rc = _ESMF.ESMC_FieldPrint(field.ptr)
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_FieldPrint() failed with rc = '+str(rc)+'.    '+
-                        constants._errmsg)
-
 _ESMF.ESMC_FieldGetPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_FieldGetPtr.argtypes = [ct.c_void_p, ct.c_int, ct.POINTER(ct.c_int)]
 @deprecated
@@ -1280,6 +1273,47 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
     lbounds = lbounds - 1
 
     return lbounds.copy(), ubounds.copy()
+
+_ESMF.ESMC_FieldPrint.restype = ct.c_int
+_ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
+@deprecated
+def ESMP_FieldPrint(field):
+    """
+    Preconditions: An ESMP_Field has been created.\n
+    Postconditions: The contents of 'field' have been printed to
+                    standard out.\n
+    Arguments:\n
+        ESMP_Field :: field\n
+    """
+    rc = _ESMF.ESMC_FieldPrint(field.ptr)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldPrint() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+_ESMF.ESMC_FieldRead.restype = ct.c_int
+_ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
+                                 ct.c_char_p,
+                                 ct.c_char_p,
+                                 ct.c_uint,
+                                 ct.c_uint]
+def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
+    #TODO: C doc says it defaults to NETCDF(1), but actually defaults to BIN(0)
+    """
+    Preconditions: An ESMP_Field has been created.\n
+    Postconditions: The contents of 'field' have been read from file.\n
+    Arguments:\n
+        ESMP_Field :: field\n
+        string     :: filename\n
+        string     :: variablename\n
+        integer    :: timeslice\n
+        IOFmt      :: iofmt\n
+    """
+    rc = _ESMF.ESMC_FieldRead(field.struct.ptr, filename, variablename, timeslice, iofmt)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldRead() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+
 
 _ESMF.ESMC_FieldRegridGetArea.restype = ct.c_int
 _ESMF.ESMC_FieldRegridGetArea.argtypes = [ct.c_void_p]

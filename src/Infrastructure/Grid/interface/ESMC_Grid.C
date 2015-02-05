@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -93,10 +93,11 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
-                                   enum ESMC_CoordSys_Flag *coordSys,
-                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
-                                   enum ESMC_PoleKind_Flag *poleKind, 
-                                   int *rc){
+                                  int *periodicDim, int *poleDim,
+                                  enum ESMC_CoordSys_Flag *coordSys,
+                                  enum ESMC_TypeKind_Flag *coordTypeKind, 
+                                  enum ESMC_PoleKind_Flag *poleKind, 
+                                  int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
@@ -105,8 +106,12 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
   grid.ptr = NULL;
   
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::create1peridim(maxIndex,
-                                      coordSys, coordTypeKind, poleKind, 
-                                      &localrc));
+                                                                  periodicDim, 
+                                                                  poleDim,
+                                                                  coordSys, 
+                                                                  coordTypeKind, 
+                                                                  poleKind, 
+                                                                  &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
 

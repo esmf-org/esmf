@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,7 +42,7 @@ extern "C" {
  					int *convertToDual, int *ctodpresent,
  					int *addUserArea, int *auapresent,
 					const char *meshname, int *mnpresent,
- 					int *addMask, int *ampresent,
+ 					int *maskFlag, int *mfpresent,
  					const char *varname, int *vnpresent,
 					int *rc,
 					ESMCI_FortranStrLenArg len_filename,
@@ -76,7 +76,7 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
 			   int *convertToDual,
 			   int *addUserArea,
 			   const char *meshname,
-			   int *addMask,
+			   int *maskFlag,
 			   const char *varname,
 			   int *rc) {
 
@@ -85,11 +85,11 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
     // handle the optional arguments
-    int ctodpresent, auapresent, mnpresent, ampresent, vnpresent;
+    int ctodpresent, auapresent, mnpresent, mfpresent, vnpresent;
     ctodpresent = convertToDual != NULL;
     auapresent = addUserArea != NULL;
     mnpresent = strlen(meshname) > 0;
-    ampresent = addMask != NULL;
+    mfpresent = maskFlag != NULL;
     vnpresent = strlen(varname) > 0;
 
     // allocate the mesh object
@@ -100,7 +100,7 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
 				     convertToDual, &ctodpresent,
 				     addUserArea, &auapresent,
 				     meshname, &mnpresent,
-				     addMask, &ampresent,
+				     maskFlag, &mfpresent,
 				     varname, &vnpresent,
 				     &localrc, strlen(filename),
 				     strlen(meshname), strlen(varname));

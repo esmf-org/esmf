@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -117,6 +117,18 @@ enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
 			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
 			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
 			   ESMC_FILEFORMAT_GRIDSPEC};
+
+// File status flag (for IO write functions)
+enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
+                            ESMC_FILESTATUS_OLD = 1,
+                            ESMC_FILESTATUS_NEW = 2,
+                            ESMC_FILESTATUS_REPLACE = 3};
+
+// io format type
+enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
+                       ESMF_IOFMT_NETCDF,
+                       ESMF_IOFMT_NETCDF4P,
+                       ESMF_IOFMT_NETCDF4C};
 
 enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
 		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,

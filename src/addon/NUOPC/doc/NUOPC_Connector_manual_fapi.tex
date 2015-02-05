@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Connector component that uses a default bilinear regrid method during {\tt Run} to transfer data from the connected import Fields to the connected export Fields.
+Component that makes a unidirectional connection between model, mediator, and or driver components. During initialization field pairing is performed between the import and export side according to section \ref{FieldPairing}, and paired fields are connected. By default the bilinear regrid method is used during {\tt Run} to transfer data from the connected import Fields to the connected export Fields.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_CplComp
@@ -51,8 +51,8 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 \end{verbatim}
 
 \bigskip{\sf SETSERVICES:}
-\begin{verbatim}  subroutine routine_SetServices(cplcomp, rc)
-    type(ESMF_CplComp)    :: cplcomp
+\begin{verbatim}  subroutine SetServices(connector, rc)
+    type(ESMF_CplComp)    :: connector
     integer, intent(out)  :: rc
 \end{verbatim}
 
@@ -60,25 +60,29 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 \begin{itemize}
 \item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 01 (see section \ref{IPD} for a precise definition), with the following mapping:
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 04 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
     \begin{itemize}
-    \item IPDv01p1 = phase 1: ({\sc Required, NUOPC Provided})
-    \item IPDv01p2 = phase 2: ({\sc Required, NUOPC Provided})
-    \item IPDv01p3 = phase 3: ({\sc Required, NUOPC Provided})
+    \item IPDv04p1a = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p1b = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p2  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p3  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p4  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p5a = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p5b = phase : ({\sc Required, NUOPC Provided})
     \end{itemize}  
   \end{itemize}  
-\item phase 1: ({\sc NUOPC Provided}, suitable for: IPDv01p1, IPDv02p1)
+\item IPDv01p1, IPDv02p1: ({\sc NUOPC Provided})
   \begin{itemize}
   \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
   \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
   \end{itemize}
-\item phase 2: ({\sc NUOPC Provided}, suitable for: IPDv01p2, IPDv02p2)
+\item IPDv01p2, IPDv02p2: ({\sc NUOPC Provided})
   \begin{itemize}
   \item Allocate and initialize the internal state.
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
   \end{itemize}  
-\item phase 3: ({\sc NUOPC Provided}, suitable for: IPDv01p3, IPDv02p3)
+\item IPDv01p3, IPDv02p3: ({\sc NUOPC Provided})
   \begin{itemize}
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
@@ -101,27 +105,13 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item {\it Optional specialization} to release a Connector operation: {\tt label\_ReleaseRouteHandle}.
-  \item By default (if {\tt label\_ReleaseRouteHandle} was {\em not} provided) release the precomputed Connector RouteHandle.
-  \item Destroy the internal state members.
-  \item Deallocate the internal state.
+  \item {\it Optional specialization} to release the custom Connector operation: {\tt label\_ReleaseRouteHandle}; or by default, if {\tt label\_ReleaseRouteHandle} was {\em not} provided, release the default Connector RouteHandle.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \item Internal clean-up.
   \end{itemize}      
 \end{itemize}
 
-\bigskip{\sf INTERNALSTATE:}
-\begin{verbatim}  label_InternalState
+\mbox{}\hrulefill\ 
 
-  type type_InternalState
-    type(type_InternalStateStruct), pointer :: wrap
-  end type
-
-  type type_InternalStateStruct
-    type(ESMF_FieldBundle)  :: srcFields
-    type(ESMF_FieldBundle)  :: dstFields
-    type(ESMF_RouteHandle)  :: rh
-    type(ESMF_State)        :: state
-  end type
-
-\end{verbatim}
 %...............................................................
 

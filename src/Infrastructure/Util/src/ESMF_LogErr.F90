@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2015, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2179,6 +2179,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           do, i=1, size (alog%logmsgAbort)
             if (local_logmsgflag%mtype == alog%logmsgAbort(i)%mtype) then
               alog%stopprogram=.true.
+              alog%fIndex = alog%fIndex + 1
+              call ESMF_LogFlush(log,rc=rc2) 
               call ESMF_LogClose(ESMF_LogDefault, rc=rc2)
               exit
             end if

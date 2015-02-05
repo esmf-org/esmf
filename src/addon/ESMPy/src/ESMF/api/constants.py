@@ -60,7 +60,7 @@ class _CoordSys(object):
             following order: x,y,z. (e.g. using coord_dim=1 in 
             Grid.get_coords() references the y dimension)
         SPH_DEG = 1
-            Spherical coordinates in degrees. In this system, the spherical
+             Spherical coordinates in degrees. In this system, the spherical
             coordinates are mapped to the Grid coordinate dimensions in the 
             following order: longitude, latitude, radius. (E.g. using 
             coord_dim=1 in Grid.get_coords() references the latitude dimension) 
@@ -122,7 +122,7 @@ class _FileFormat(object):
             Use ESMF unstructured grid file format.
         ESMFGRID = 4
             Use ESMF structured grid file format.
-        UGRID = 5
+         UGRID = 5
             Use CF-convention unstructured grid file format.
         GRIDSPEC = 6
             Use a single tile grid file conforming with the proposed
@@ -166,7 +166,8 @@ class _LogKind(object):
 
 # MeshElemType
 MeshElemType = namedtuple('MeshElemType', ['TRI', 'QUAD', 'TETRA', 'HEX'])
-MeshElemType = MeshElemType(TRI=5, QUAD=9, TETRA=10, HEX=12)
+#MeshElemType = MeshElemType(TRI=5, QUAD=9, TETRA=10, HEX=12)
+MeshElemType = MeshElemType(TRI=3, QUAD=4, TETRA=10, HEX=12)
 
 # This is a dummy class object used for documentation purposes only
 class _MeshElemType(object):

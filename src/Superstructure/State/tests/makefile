@@ -10,6 +10,7 @@ LOCDIR	  = src/Superstructure/State/tests
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateCreateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
+                $(ESMF_TESTDIR)/ESMF_StateReconcileProxyUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReadWriteUTest \
 		$(ESMF_TESTDIR)/ESMF_StateUTest
 
@@ -21,6 +22,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
 TESTS_RUN     =	RUN_ESMC_StateUTest \
          	RUN_ESMF_StateCreateUTest \
                 RUN_ESMF_StateReconcileUTest \
+                RUN_ESMF_StateReconcileProxyUTest \
                 RUN_ESMF_StateReadWriteUTest \
 		RUN_ESMF_StateUTest
 #		RUN_ESMF_StateLimitUTest \
@@ -73,6 +75,13 @@ RUN_ESMF_StateReconcileUTest:
 
 RUN_ESMF_StateReconcileUTestUNI:
 	$(MAKE) TNAME=StateReconcile NP=1 ftest
+
+#       
+# StateReconcileProxy Unit Test
+#
+
+RUN_ESMF_StateReconcileProxyUTest:
+	$(MAKE) TNAME=StateReconcileProxy NP=4 ftest
 
 #
 # ESMC_StateUTest

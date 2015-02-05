@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -34,7 +34,7 @@
                                         convertToDual, ctodpresent, &
                                         addUserArea, auapresent, &
                                         meshname, mnpresent, &
-                                        maskFlag, ampresent, &
+                                        maskFlag, mfpresent, &
                                         varname, vnpresent, &
                                         rc)
    use ESMF_UtilTypesMod
@@ -49,7 +49,7 @@
    type(ESMF_FileFormat_Flag)     :: fileTypeFlag
    integer                        :: ctodpresent
    integer                        :: auapresent, mnpresent
-   integer                        :: ampresent, vnpresent
+   integer                        :: mfpresent, vnpresent
    logical                        :: convertToDual
    logical                        :: addUserArea
    character(len=*)               :: meshname
@@ -141,7 +141,7 @@
       	     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
-       if (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
+       if (mnpresent == 1 .and. mfpresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	       	                 meshname=meshname, maskFlag=maskFlag, &
 				 varname=varname, rc=rc)
@@ -152,7 +152,7 @@
 	       	                 meshname=meshname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-       elseif (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
+       elseif (mnpresent == 1 .and. mfpresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	       	                 meshname=meshname, maskFlag=maskFlag, &
 				 varname=varname, rc=rc)

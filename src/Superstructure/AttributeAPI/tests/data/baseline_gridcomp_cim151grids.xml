@@ -10,7 +10,8 @@
       </simpleGridGeom>
     </gridTile>
   </esmModelGrid>
-  <documentID>12da0505-18f3-dd9f-1871-687949c4951f</documentID>
-  <documentVersion>1.0.0</documentVersion>
-  <documentCreationDate>2014-06-17T09:22:53</documentCreationDate>
+  <documentID>33b8839e-8af3-375c-b8f2-03dd6a313fac</documentID>
+  <documentProject>ESMF test project</documentProject>
+  <documentVersion>1</documentVersion>
+  <documentCreationDate>2014-12-16T15:23:39</documentCreationDate>
 </gridSpec>

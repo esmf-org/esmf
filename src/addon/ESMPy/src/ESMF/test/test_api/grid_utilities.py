@@ -38,9 +38,6 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
     cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
     
-    cellcenter_x = cellwidth_x/2
-    cellcenter_y = cellwidth_y/2
-    
     max_index = np.array([ub_x,ub_y])
 
     grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART)
@@ -198,10 +195,6 @@ def grid_create_3d(bounds, coords, domask=False, doarea=False):
     cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
     cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
     cellwidth_z = (max_z-min_z)/(ub_z-lb_z)
-    
-    cellcenter_x = cellwidth_x/2
-    cellcenter_y = cellwidth_y/2
-    cellcenter_z = cellwidth_z/2
     
     max_index = np.array([ub_x,ub_y,ub_z])
 
@@ -394,16 +387,15 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     field2mask_flat = np.ravel(field2.mask)
     dstfracfield_flat = np.ravel(dstfracfield.data)
 
+    # TODO: would be nice to add a condition to ignore where original value is unchanged
     for i in range(field2_flat.size):     
         if ((not field2mask_flat[i]) and 
             (regrid_method != ESMF.RegridMethod.CONSERVE or
-            dstfracfield_flat[i] >= 0.999)):
-            if (field2_flat.data[i] != 0.0):
-                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
-                            field2_flat[i])/abs(field2_flat[i])
-            else:
-                err = abs(field1_flat[i]/dstfracfield_flat[i] - \
-                            field2_flat[i])
+            dstfracfield_flat[i] >= 0.999) and
+            field2_flat[i] != 0.0):
+
+            err = abs(field1_flat[i]/dstfracfield_flat[i] - \
+                        field2_flat[i])/abs(field2_flat[i])
 
             if err > 1:
                 print field1_flat[i], field2_flat[i], dstfracfield_flat[i]
@@ -470,6 +462,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
         itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
 
     # print pass or fail
+    assert (itrp and csrv)
     if (itrp and csrv):
         print "PET{0} - PASS".format(ESMF.local_pet())
         correct = True

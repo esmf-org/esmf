@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -49,8 +49,8 @@ typedef struct{
 
 
 // MESH ELEMENT TYPES
-#define ESMC_MESHELEMTYPE_TRI  5
-#define ESMC_MESHELEMTYPE_QUAD 9
+#define ESMC_MESHELEMTYPE_TRI  3
+#define ESMC_MESHELEMTYPE_QUAD 4
 #define ESMC_MESHELEMTYPE_TETRA 10
 #define ESMC_MESHELEMTYPE_HEX  12
 
@@ -243,7 +243,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 				  int *convertToDual,   // in (optional)
 				  int *addUserArea,     // in (optional)
 				  const char *meshname, // in (optional)
-				  int *addMask,         // in (optional)
+				  int *maskFlag,        // in (optional)
 				  const char *varname,  // in (optional)
 				  int *rc               // out
 );
@@ -273,12 +273,15 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //   \item[{[meshname]}]
 //         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 //         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
-//   \item[{[addMask]}]
-//         If 1, generate the mask using the missing\_value attribute defined in 'varname'
-//         This flag is only supported when the grid file is in the UGRID format.
-//         If not specified, defaults to 0.  
+//   \item[{[maskFlag]}]
+//         An enumerated integer that, if specified, tells whether a mask in 
+//         a UGRID file should be defined on the nodes (MeshLoc.NODE) or 
+//         elements (MeshLoc.ELEMENT) of the mesh.  If specified, generate 
+//         the mask using the missing\_value attribute defined in 'varname'.
+//         This flag is only supported when the grid file is in the UGRID 
+//         format.  If not specified, defaults to no mask.  
 //   \item[{[varname]}]
-//         If addMask is 1, provide a variable name stored in the UGRID file and
+//         If maskFlag is specified, provide a variable name stored in the UGRID file and
 //         the mask will be generated using the missing value of the data value of
 //         this variable.  The first two dimensions of the variable has to be the
 //         the longitude and the latitude dimension and the mask is derived from the

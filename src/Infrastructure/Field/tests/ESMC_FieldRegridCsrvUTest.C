@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -94,8 +94,11 @@ int main(void){
                0.0,2.0, 1.0,2.0, 2.0,2.0};
   int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
   int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
-  int elemType_s [] ={9,9,9,9};
+  // ESMF_MESHELEMTYPE_QUAD
+  int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD,
+                      ESMC_MESHELEMTYPE_QUAD};
   int elemConn_s [] ={1,2,5,4,
               2,3,6,5,
               4,5,8,7,
@@ -193,8 +196,16 @@ int main(void){
                0.0,2.0, 0.5,2.0, 1.5,2.0, 2.0,2.0};
   int nodeOwner_d [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   int elemId_d [] ={1,2,3,4,5,6,7,8,9};
-  // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
-  int elemType_d [] = {9,9,9,9,9,9,9,9,9};
+  // ESMF_MESHELEMTYPE_QUAD
+  int elemType_d [] = {ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD};
   int elemConn_d [] ={1,2,6,5,
               2,3,7,6,
               3,4,8,7,

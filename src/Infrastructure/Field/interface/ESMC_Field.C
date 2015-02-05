@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Copyright 2002-2015, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -325,6 +325,30 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     return rc;
   }
 //--------------------------------------------------------------------------
+  
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRead()"
+  int ESMC_FieldRead(ESMC_Field field, const char *file,
+      const char *variableName, int timeslice, ESMC_IOFmt_Flag iofmt){
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
+
+    // Invoke the C++ interface
+    localrc = fieldp->read(file, variableName, timeslice, iofmt);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
 
 
 //--------------------------------------------------------------------------
@@ -425,6 +449,31 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     
     // mark invalid
     routehandle->ptr = NULL;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+  
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldWrite()"
+  int ESMC_FieldWrite(ESMC_Field field, const char *file,
+      const char *variableName, int overwrite, ESMC_FileStatus_Flag status,
+      int timeslice, ESMC_IOFmt_Flag iofmt){
+    // Initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
+
+    // Invoke the C++ interface
+    localrc = fieldp->write(file, variableName, overwrite, status, timeslice, iofmt);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;

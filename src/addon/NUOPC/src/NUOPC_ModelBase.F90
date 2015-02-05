@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
+! Copyright 2002-2015, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -26,21 +26,17 @@ module NUOPC_ModelBase
   private
   
   public &
+    SetServices, &
     routine_Run, &
-    routine_SetServices, &
     routine_Nop
-    
-!  public &
-!    type_InternalState, &
-!    type_InternalStateStruct
-    
+ 
   public &
-    label_InternalState, &
     label_Advance, &
     label_AdvanceClock, &
     label_CheckImport, &
     label_SetRunClock, &
-    label_TimestampExport
+    label_TimestampExport, &
+    label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "ModelBase_InternalState"
@@ -54,6 +50,8 @@ module NUOPC_ModelBase
     label_SetRunClock = "ModelBase_SetRunClock"
   character(*), parameter :: &
     label_TimestampExport = "ModelBase_TimestampExport"
+  character(*), parameter :: &
+    label_Finalize = "ModelBase_Finalize"
 
   type type_InternalStateStruct
     type(ESMF_Clock)      :: driverClock
@@ -70,7 +68,7 @@ module NUOPC_ModelBase
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine routine_SetServices(gcomp, rc)
+  subroutine SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
     
@@ -120,7 +118,7 @@ module NUOPC_ModelBase
 
     ! Finalize phases
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
-      phaseLabelList=(/"FinalizePhase1"/), userRoutine=routine_nop, rc=rc)
+      phaseLabelList=(/"FinalizePhase1"/), userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -514,6 +512,37 @@ module NUOPC_ModelBase
     
   !-----------------------------------------------------------------------------
   
+  recursive subroutine Finalize(gcomp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    ! local variables
+    integer                   :: localrc
+    logical                   :: existflag
+    character(ESMF_MAXSTR)    :: name
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
+      userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   
@@ -522,14 +551,18 @@ module NUOPC_ModelBase
 ! !IROUTINE: NUOPC_ModelBaseGet - Get info from a ModelBase
 !
 ! !INTERFACE:
-  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, rc)
+  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, clock, importState, &
+    exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: gcomp
-    type(ESMF_Clock),    intent(out)           :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: driverClock
+    type(ESMF_Clock),    intent(out), optional :: clock
+    type(ESMF_State),    intent(out), optional :: importState
+    type(ESMF_State),    intent(out), optional :: exportState
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get a the Clock of the parent driver.
+!   Access ModelBase information.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -550,8 +583,14 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Return the driverClock member
-    driverClock = is%wrap%driverClock
+    ! driverClock
+    if (present(driverClock)) driverClock = is%wrap%driverClock
+    
+    ! remaining arguments
+    call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2589,8 +2589,8 @@ int Array::read(
 //
 // !ARGUMENTS:
 //
-  const char  *file,              // in    - name of file being read
-  const char  *variableName,      // in    - optional variable name
+  const std::string &file,        // in    - name of file being read
+  const std::string &variableName,// in    - optional variable name
   int   *timeslice,               // in    - timeslice option
   ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
   ){
@@ -2612,7 +2612,7 @@ int Array::read(
     &rc)) return rc;
   // For here on, we have to be sure to clean up before returning
   if (ESMF_SUCCESS == localrc) {
-    localrc = newIO->addArray(this, variableName);
+    localrc = newIO->addArray(this, variableName.c_str());
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
   }
@@ -2623,18 +2623,19 @@ int Array::read(
     localiofmt = ESMF_IOFMT_NETCDF;
   }
   // It is an error to supply a variable name if not in NetCDF mode
-  if ((ESMF_IOFMT_NETCDF != localiofmt) &&
-      ((char *)NULL != variableName) && (strlen(variableName) > 0)) {
+  if (ESMF_IOFMT_NETCDF != localiofmt)
+     if (variableName.size() > 0) {
     ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+    IO::destroy(&newIO);
+    newIO = (IO *)NULL;
     return ESMF_RC_ARG_BAD;
   }
-  if (ESMF_SUCCESS == localrc) {
-    // Call the IO read function
-    localrc = newIO->read(file, localiofmt, timeslice);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc);
-  }
+
+  // Call the IO read function
+  localrc = newIO->read(file.c_str(), localiofmt, timeslice);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc);
 
   // cleanup
   IO::destroy(&newIO);
@@ -2660,8 +2661,8 @@ int Array::write(
 //
 // !ARGUMENTS:
 //
-  const char  *file,              // in    - name of file being written
-  const char  *variableName,      // in    - optional variable name
+  const std::string &file,        // in    - name of file being written
+  const std::string &variableName,// in    - optional variable name
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
@@ -2686,9 +2687,11 @@ int Array::write(
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  if (ESMF_SUCCESS == rc) {
-    rc = newIO->addArray(this, variableName);
-    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+  rc = newIO->addArray(this, variableName.c_str());
+  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+    IO::destroy(&newIO);
+    newIO = (IO *)NULL;
+    return rc;
   }
 
   // Handle format default
@@ -2709,20 +2712,21 @@ int Array::write(
   } else {
     localstatus = *status;
   }
-  if (ESMF_SUCCESS == rc) {
-    // It is an error to supply a variable name in binary mode
-    if ((ESMF_IOFMT_BIN == localiofmt) && (strlen(variableName) > 0)) {
-      ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      rc = ESMF_RC_ARG_BAD;
-    }
+
+  // It is an error to supply a variable name in binary mode
+  if (ESMF_IOFMT_NETCDF != localiofmt)
+     if (variableName.size() > 0) {
+    ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+    IO::destroy(&newIO);
+    newIO = (IO *)NULL;
+    return ESMF_RC_ARG_BAD;
   }
-  if (ESMF_SUCCESS == rc) {
-    // Call the IO write function
-    rc = newIO->write(file, localiofmt,
-                      localoverwrite, localstatus, timeslice);
-    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
-  }
+
+  // Call the IO write function
+  rc = newIO->write(file.c_str(), localiofmt,
+                    localoverwrite, localstatus, timeslice);
+  ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
 
   // cleanup
   IO::destroy(&newIO);

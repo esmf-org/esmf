@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -327,11 +327,11 @@ int main(void){
     elemId[2]=3;
     elemId[3]=5;
     elemId[4]=6;
-    elemType[0]=9;
-    elemType[1]=5;
-    elemType[2]=5;
-    elemType[3]=9;
-    elemType[4]=9;
+    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
+    elemType[1]=ESMC_MESHELEMTYPE_TRI;
+    elemType[2]=ESMC_MESHELEMTYPE_TRI;
+    elemType[3]=ESMC_MESHELEMTYPE_QUAD;
+    elemType[4]=ESMC_MESHELEMTYPE_QUAD;
     // ESMF_MESHELEMTYPE_QUAD=9
     // ESMF_MESHELEMTYPE_TRI=5
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
@@ -380,8 +380,8 @@ int main(void){
     elemId[1]=7;
     // ESMF_MESHELEMTYPE_QUAD=9
     // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=9;
-    elemType[1]=9;
+    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
+    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
     elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
   }
@@ -424,8 +424,8 @@ int main(void){
     elemId[1]=9;
     // ESMF_MESHELEMTYPE_QUAD=9
     // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=9;
-    elemType[1]=9;
+    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
+    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
     elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
   }
@@ -459,7 +459,7 @@ int main(void){
     elemId[0]=10;
     // ESMF_MESHELEMTYPE_QUAD=9
     // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=9;
+    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
   }
 

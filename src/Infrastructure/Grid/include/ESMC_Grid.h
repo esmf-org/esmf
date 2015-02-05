@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -96,6 +96,8 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
   ESMC_InterfaceInt *maxIndex,  // in
+  int *periodicDim, // in
+  int *poleDim, // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
   enum ESMC_PoleKind_Flag *poleKind, // in
@@ -112,6 +114,11 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  \begin{description}
 //  \item[maxIndex]
 //  The upper extent of the grid array.
+//  \item[periodicDim]
+//  The periodic dimension.  If not specified, defaults to 1.
+//  \item[poleDim]
+//  The dimension at which the poles are located at the ends.  If not
+//  specified, defaults to 2.
 //  \item[coordSys]
 //  The coordinated system of the grid coordinate data. If not specified then
 //  defaults to ESMF\_COORDSYS\_SPH\_DEG.

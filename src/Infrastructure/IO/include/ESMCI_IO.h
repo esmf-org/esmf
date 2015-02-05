@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -182,7 +182,7 @@ namespace ESMCI {
     int close(void);
 
     // add and remove objects
-    int addArray(ESMC_Base *arr_p,
+    int addArray(Array *arr_p,
                  const char * const variableName);
 // TBI
 #if 0
@@ -194,6 +194,8 @@ namespace ESMCI {
     void addGrid(ESMC_Base *grid_p, char *gridName,
                  int *rc=NULL);
 #endif // TBI
+    bool redist_check(Array *array_p, int *rc);
+    void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
     void clear();
 
 // TBI

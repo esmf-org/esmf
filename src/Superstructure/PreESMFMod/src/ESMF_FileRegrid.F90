@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2015, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -45,6 +45,7 @@ module ESMF_FileRegridMod
   use ESMF_FieldRegridMod
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
+  use ESMF_IO_NCPutGetMod
   use ESMF_IOUGridMod
   use ESMF_RHandleMod
 
@@ -936,7 +937,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           allocate(start(2), count(2))
           start = tlbound(:,PetNo+1)
           count = tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
-          call GridSpecPutGetVar2d(srcFile, srcVarName, fptr2d, start=start, count=count, rc=localrc)
+          call ESMF_IO_NCPutGetVar(srcFile, srcVarName, fptr2d, start=start, count=count, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -948,7 +949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            count(1:srcRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
            count(srcRank+1:3)=ubnd(:)
            allocate(varBuf3D(count(1), count(2), count(3)))
-           call GridSpecPutGetVar3D(srcFile, srcVarName, varBuf3D, start=start, count=count, rc=localrc)
+           call ESMF_IO_NCPutGetVar(srcFile, srcVarName, varBuf3D, start=start, count=count, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -968,7 +969,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            count(1:srcRank)=tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
            count(srcRank+1:4)=ubnd
            allocate(varBuf4D(count(1), count(2), count(3), count(4)))
-           call GridSpecPutGetVar4D(srcFile, srcVarName, varBuf4D, start=start, count=count, rc=localrc)
+           call ESMF_IO_NCPutGetVar(srcFile, srcVarName, varBuf4D, start=start, count=count, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1272,7 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             allocate(start(2), count(2))
   	    start(1:dstRank) = tlbound(:,PetNo+1)
             count(1:dstRank) = tubound(:,PetNo+1)-tlbound(:,PetNo+1)+1
-            call GridSpecPutGetVar2d(dstFile, dstVarName, fptr2d, start=start, count=count, &
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, fptr2d, start=start, count=count, &
 	         putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -1292,7 +1293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do j=1,count(3)
 	         varBuf3D(:,:,j)=fptr3d(j,:,:)
             enddo
-            call GridSpecPutGetVar3D(dstFile, dstVarName, varBuf3D, start=start, count=count, &
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf3D, start=start, count=count, &
 	    	 putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1312,7 +1313,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	         varBuf4D(:,:,k,j)=fptr4d(k,j,:,:)
 	        enddo
             enddo
-            call GridSpecPutGetVar4D(dstFile, dstVarName, varBuf4D, start=start, count=count, putflag=.TRUE.,rc=localrc)
+            call ESMF_IO_NCPutGetVar(dstFile, dstVarName, varBuf4D, start=start, count=count, putflag=.TRUE.,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1828,433 +1829,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
   end subroutine checkFileType
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "GridspecPutGetVar2D"
-!BOPI
-! !ROUTINE: GridspecPutGetVar2D
-!
-! !INTERFACE:
-  subroutine GridspecPutGetVar2D(grid_filename, var_name,  &
-                        var_buffer, start, count, putflag, rc)
-    character(len=*),  intent(in) :: grid_filename
-    character(len=*),  intent(in) :: var_name
-    real(ESMF_KIND_R8), intent(inout) :: var_buffer(:,:)
-    integer, intent(in), optional :: start(:), count(:)
-    logical, intent(in), optional :: putflag
-    integer, intent(out), optional:: rc
-
-    integer:: ncStatus
-    integer:: gridid, varid, ndims
-    integer:: vardimids(4)
-    integer:: len, i, vartype
-    character(len=256) :: errmsg
-    logical:: localPutFlag
-    real(ESMF_KIND_R4), pointer :: fptr(:,:)
-    integer, parameter :: nf90_noerror = 0
-
-#ifdef ESMF_NETCDF
-
-    if (present(putFlag)) then
-       localPutFlag = putFlag
-    else
-       localPutFlag = .FALSE.
-    endif
-    ! Open the grid and mosaic files
-    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename), &
-      rc)) return
-
-    ncStatus = nf90_inq_varid( gridid, var_name, varid)
-    errmsg = "variable "//trim(var_name)// " in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_inquire_variable(gridid, varid, xtype=vartype, &
-                ndims=ndims, dimids=vardimids)
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    if (ndims /= 2) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- variable dimension is not equal to 2", &
-	       ESMF_CONTEXT, rcToReturn=rc)
-        return
-    end if
-
-#if 0
-    if (vartype == NF90_FLOAT .and. localPutFlag) then
-       allocate(fptr(size(var_buffer,1), size(var_buffer,2)))
-       fptr = var_buffer
-       if (present(start) .and. present(count)) then
-           ncStatus = nf90_put_var(gridid, varid, fptr, start=start, &
-  	       count=count)
-       else
-            ncStatus = nf90_put_var(gridid, varid, fptr)
-       endif
-       deallocate(fptr)
-    else
-#endif
-    if (present(start) .and. present(count)) then
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      endif
-    else
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer)
-      endif
-    endif
-#if 0
-    endif
-#endif
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_close(gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename),&
-      rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
-    return
-#else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-    return
-#endif
-    
-end subroutine GridspecPutGetVar2D
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "GridspecPutGetVar3D"
-!BOPI
-! !ROUTINE: GridspecPutGetVar3D
-!
-! !INTERFACE:
-  subroutine GridspecPutGetVar3D(grid_filename, var_name,  &
-                        var_buffer, start, count, putflag, rc)
-    character(len=*),  intent(in) :: grid_filename
-    character(len=*),  intent(in) :: var_name
-    real(ESMF_KIND_R8), intent(inout) :: var_buffer(:,:,:)
-    integer, intent(in), optional :: start(:), count(:)
-    logical, intent(in), optional :: putflag
-    integer, intent(out), optional:: rc
-
-    integer:: ncStatus
-    integer:: gridid, varid, ndims
-    integer:: vardimids(4)
-    integer:: len, i
-    character(len=256) :: errmsg
-    logical:: localPutFlag
-    integer, parameter :: nf90_noerror = 0
-
-#ifdef ESMF_NETCDF
-    if (present(putFlag)) then
-       localPutFlag = putFlag
-    else
-       localPutFlag = .FALSE.
-    endif
-    ! Open the grid and mosaic files
-    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename), &
-      rc)) return
-
-    ncStatus = nf90_inq_varid( gridid, var_name, varid)
-    errmsg = "variable "//trim(var_name)// " in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_inquire_variable(gridid, varid, ndims=ndims, dimids=vardimids)
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    if (ndims /= 3) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- variable dimension is not equal to 3", &
-	       ESMF_CONTEXT, rcToReturn=rc)
-        return
-    end if
-
-    ! find the dimension length and check if it matches with the var array
-    ! get variable
-    
-    if (present(start) .and. present(count)) then
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      endif
-    else
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer)
-      endif
-    endif
-
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_close(gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename),&
-      rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
-    return
-#else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-    return
-#endif
-    
-end subroutine GridspecPutGetVar3D
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "GridspecPutGetVar4D"
-!BOPI
-! !ROUTINE: GridspecPutGetVar4D
-!
-! !INTERFACE:
-  subroutine GridspecPutGetVar4D(grid_filename, var_name,  &
-                        var_buffer, start, count, putflag, rc)
-    character(len=*),  intent(in) :: grid_filename
-    character(len=*),  intent(in) :: var_name
-    real(ESMF_KIND_R8), intent(inout) :: var_buffer(:,:,:,:)
-    integer, intent(in), optional :: start(:), count(:) 
-    logical, intent(in), optional :: putflag
-    integer, intent(out), optional:: rc
-
-    integer:: ncStatus
-    integer:: gridid, varid, ndims
-    integer:: vardimids(4)
-    integer:: len, i
-    character(len=256) :: errmsg
-    logical:: localPutFlag
-    integer, parameter :: nf90_noerror = 0
-
-#ifdef ESMF_NETCDF
-    if (present(putFlag)) then
-       localPutFlag = putFlag
-    else
-       localPutFlag = .FALSE.
-    endif
-    ! Open the grid and mosaic files
-    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename), &
-      rc)) return
-
-    ncStatus = nf90_inq_varid( gridid, var_name, varid)
-    errmsg = "variable "//trim(var_name)// " in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_inquire_variable(gridid, varid, ndims=ndims, dimids=vardimids)
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    if (ndims /= 4) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- variable dimension is not equal to 4", &
-	       ESMF_CONTEXT, rcToReturn=rc)
-        return
-    end if
-
-    ! find the dimension length and check if it matches with the var array
-    ! get variable
-    
-    if (present(start) .and. present(count)) then
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      endif
-    else
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer)
-      endif
-    endif
-
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_close(gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename),&
-      rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
-    return
-#else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-    return
-#endif
-    
-end subroutine GridspecPutGetVar4D
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "UGridPutGetVar1D"
-!BOPI
-! !ROUTINE: UGridPutGetVar1D
-!
-! !INTERFACE:
-  subroutine GridspecPutGetVar1D(grid_filename, var_name,  &
-                        var_buffer, start, count, putflag, rc)
-    character(len=*),  intent(in) :: grid_filename
-    character(len=*),  intent(in) :: var_name
-    real(ESMF_KIND_R8), intent(inout) :: var_buffer(:)
-    integer, intent(in), optional :: start(:), count(:)
-    logical, intent(in), optional :: putflag
-    integer, intent(out), optional:: rc
-
-    integer:: ncStatus
-    integer:: gridid, varid, ndims
-    integer:: vardimids(4)
-    integer:: len, i
-    character(len=256) :: errmsg
-    logical:: localPutFlag
-    integer, parameter :: nf90_noerror = 0
-
-#ifdef ESMF_NETCDF
-    if (present(putFlag)) then
-       localPutFlag = putFlag
-    else
-       localPutFlag = .FALSE.
-    endif
-    ! Open the grid and mosaic files
-    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename), &
-      rc)) return
-
-    ncStatus = nf90_inq_varid( gridid, var_name, varid)
-    errmsg = "variable "//trim(var_name)// " in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_inquire_variable(gridid, varid, ndims=ndims, dimids=vardimids)
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    if (ndims /= 1) then
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-	       msg="- variable dimension is not equal to 1", &
-	       ESMF_CONTEXT, rcToReturn=rc)
-        return
-    end if
-
-    if (present(start) .and. present(count)) then
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, &
-  	       count=count)
-      endif
-    else
-      if (localPutFlag) then
-         ncStatus = nf90_put_var(gridid, varid, var_buffer)
-      else
-         ncStatus = nf90_get_var(gridid, varid, var_buffer)
-      endif
-    endif
-    errmsg = "Variable "//trim(var_name)//" in "//trim(grid_filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      errmsg, &
-      rc)) return
-
-    ncStatus = nf90_close(gridid)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD, &
-      ESMF_SRCLINE,&
-      trim(grid_filename),&
-      rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
-    return
-#else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-    return
-#endif
-
-end subroutine GridspecPutGetVar1D
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateDstVar"
