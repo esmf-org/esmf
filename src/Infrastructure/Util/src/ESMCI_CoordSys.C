@@ -69,12 +69,12 @@ static const char *const version = "$Id$";
   if (coordSys==ESMC_COORDSYS_CART) {
     *cart_dim=in_dim;
   } else if ((coordSys==ESMC_COORDSYS_SPH_DEG) || (coordSys==ESMC_COORDSYS_SPH_RAD)) {
-    if (in_dim==2) {
+    if ((in_dim==2)||(in_dim==3)) {
       *cart_dim=3;
     } else {
       int rc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- ESMF_COORDSYS_SPH currently only works with 2D coordinates",
+        "- ESMF_COORDSYS_SPH currently only works with 2D or 3D coordinates",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -85,7 +85,7 @@ static const char *const version = "$Id$";
 }
 
 
-
+//// STOPPED HERE!!!!! ////
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -124,12 +124,21 @@ template <class TYPE>
   } else if (cs==ESMC_COORDSYS_SPH_DEG) {
     double lon = in_coord[0];
     double lat = in_coord[1];
+
     const double ninety = 90.0;
     double theta = lon*ESMC_CoordSys_Deg2Rad;
     double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
     cart_coord[0] = std::cos(theta)*std::sin(phi);
     cart_coord[1] = std::sin(theta)*std::sin(phi);
-    cart_coord[2] = std::cos(phi);    
+    cart_coord[2] = std::cos(phi);   
+
+    // If 3D Sph then multiply through by radius
+    if (in_dim==3) {
+      cart_coord[0] *= in_coord[2];
+      cart_coord[1] *= in_coord[2];
+      cart_coord[2] *= in_coord[2];
+    }
+    
   } else if (cs==ESMC_COORDSYS_SPH_RAD) {
     const double half_pi = 0.5*M_PI;
     double theta = in_coord[0];
@@ -137,12 +146,20 @@ template <class TYPE>
     cart_coord[0] = std::cos(theta)*std::sin(phi);
     cart_coord[1] = std::sin(theta)*std::sin(phi);
     cart_coord[2] = std::cos(phi);    
+
+    // If 3D Sph then multiply through by radius
+    if (in_dim==3) {
+      cart_coord[0] *= in_coord[2];
+      cart_coord[1] *= in_coord[2];
+      cart_coord[2] *= in_coord[2];
+    }
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
               "Unknown CoordSys", ESMC_CONTEXT, &localrc);
     return localrc;
   }
 
+  
   // return success
   return ESMF_SUCCESS;
 }

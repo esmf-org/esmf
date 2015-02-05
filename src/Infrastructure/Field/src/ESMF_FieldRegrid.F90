@@ -44,6 +44,7 @@ module ESMF_FieldRegridMod
   use ESMF_XGridMod
   use ESMF_XGridGetMod
   use ESMF_PointListMod
+  use ESMF_LocStreamMod
   
   implicit none
   private
@@ -353,7 +354,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout), optional :: dstFracField
       integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
       integer,                        intent(out),   optional :: rc 
-      type(ESMF_PointList) :: dstPointList, srcPointList
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -604,7 +604,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_LineType_Flag):: localLineType
         type(ESMF_NormType_Flag):: localNormType
         logical :: srcDual, src_pl_used, dst_pl_used
-
+        type(ESMF_PointList) :: dstPointList, srcPointList
+        type(ESMF_LocStream) :: dstLocStream, srcLocStream
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -853,7 +854,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-        else
+        else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+
           call ESMF_FieldGet(srcField, mesh=tempMesh, meshloc=srcMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -927,8 +929,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           endif
 
+        else if (srcgeomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
 
-       endif
+          if (lregridmethod .eq. ESMF_REGRIDMETHOD_BILINEAR .or. &
+              lregridmethod .eq. ESMF_REGRIDMETHOD_PATCH    .or. &
+              lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+               msg="- only nearest neighbor regridding allowed when using location stream as source", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return	  
+          endif
+
+          !extract locstream from srcField, then pass into pointlistcreate
+          call ESMF_FieldGet(srcField, locStream=srcLocStream, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+          srcPointList=ESMF_PointListCreate(srcLocStream, &
+                                            maskValues=srcMaskValues, &
+                                            rc=localrc)
+
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+          src_pl_used=.true.
+
+
+        else
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg="source GEOMTYPE not supported, must be GRID,MESH or LOCSTREAM", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+
+        endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(dstField, grid=dstGrid, &
@@ -998,9 +1031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 
+        else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
 
-
-        else
           call ESMF_FieldGet(dstField, mesh=tempMesh, meshloc=dstMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1041,12 +1073,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           endif
           
+        else if (dstgeomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
 
+          if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+               msg="- conservative regridding not allowed with location stream as destination", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return	  
+          endif
+
+          !extract locstream from dstField, then pass into pointlistcreate
+          call ESMF_FieldGet(dstField, locStream=dstLocStream, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+          dstPointList=ESMF_PointListCreate(dstLocStream, &
+                                            maskValues=dstMaskValues, &
+                                            rc=localrc)
+
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+          dst_pl_used=.true.
+
+        else
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg="destination GEOMTYPE not supported, must be GRID,MESH or LOCSTREAM", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
 
         endif
 
-        ! At this point, we have the meshes, so we are ready to call
-        ! the 'mesh only' interface of the regrid.
+        ! At this point, we have the meshes or pointlists, so we are ready to call
+        ! the interface of the regrid.
 
         ! call into the Regrid mesh interface
         if (present(weights) .or. present(factorList) .or. &

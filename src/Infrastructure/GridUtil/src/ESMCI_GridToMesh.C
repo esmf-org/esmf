@@ -125,6 +125,14 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
 
  mesh.set_spatial_dimension(sdim);
 
+ // Tell Mesh if it's a sphere
+ ESMC_CoordSys_Flag coordSys=grid.getCoordSys();
+ if ((coordSys==ESMC_COORDSYS_SPH_DEG) || (coordSys==ESMC_COORDSYS_SPH_RAD)) {
+   mesh.is_sph=true;
+ } else {
+   mesh.is_sph=false;
+ }
+
  // See if this is for conservative regridding
  bool isConserve=false;
  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) isConserve=true;
@@ -1042,6 +1050,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list) 
+      printf("mvr: before pointlist create from grid: grid dim= %d\n",grid.getCartCoordDimCount());
+      fflush(stdout);
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid
@@ -1087,6 +1097,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list) 
+      printf("mvr: before pointlist create from grid: grid dim= %d\n",grid.getCartCoordDimCount());
+      fflush(stdout);
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid

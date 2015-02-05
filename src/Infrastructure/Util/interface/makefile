@@ -4,7 +4,7 @@ ALL: build_here
 
 SOURCEC	  = ESMCI_Util_F.C ESMC_Util.C ESMCI_F90Interface_F.C ESMC_Interface.C \
             ESMCI_Fraction_F.C
-SOURCEF	  = ESMF_Util.F90 ESMF_F90Interface.F90 ESMF_Fraction.F90
+SOURCEF	  = ESMF_Util.F90 ESMF_F90Interface.F90 ESMF_Fraction.F90 ESMF_Util_C.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir

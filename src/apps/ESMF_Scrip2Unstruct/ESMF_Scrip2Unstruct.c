@@ -47,6 +47,22 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
 void convert3D(double lon, double lat, double *x, double *y);
 void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf, int *next);
 
+int print_usage() {
+      /* standard --help argument was specified */
+      printf("ESMF_Scrip2Unstruct: Convert an unstructured grid file in SCRIP format into either a ESMF unstructured file or a UGRID file format.\n");
+      printf("Usage: ESMF_Scrip2Unstruct [--help] [--version] [-V] inputfile outputfile dualflag [fileformat]\n");
+      printf("    [--help]        Display this information and exit.\n");
+      printf("    [--version]     Display ESMF version and license information "
+        "and exit.\n");
+      printf("    [-V]            Display ESMF version string and exit.\n");
+      printf("    inputfile       input grid filename \n");
+      printf("    outputfile      output filename \n");
+      printf("    dualflag        1 to generate a dual mesh, 0 for non-dual mesh\n");
+      printf("    [fileformat]    Either ESMF or UGRID, the default is ESMF\n");
+      printf("\n");
+      return 0;
+}
+
 // Create a ESMF unstructured grid file and define all the dimension, variables and attributes
 int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, size_t nelmts, size_t maxconnection, int nocenter, int nomask, int noarea)
 {
@@ -360,17 +376,50 @@ int main(int argc, char** argv)
   int totalsize;
   ESMC_VM vm;
   MPI_Comm mpi_comm;
+  int argIndex;
+  int argFlag;
   int pthreadflag, openmpflag;
+  int rc;
   
   ESMC_Initialize(&status, ESMC_ArgLast);
   vm = ESMC_VMGetGlobal(&status);
   status = ESMC_VMGet(vm, &myrank, &nprocs, &npes, &mpi_comm, &pthreadflag, &openmpflag);
 
+  if (myrank == 0){
+    argFlag = 0;
+    int vFlag = 0;
+    int versionFlag = 0;
+
+    /* check for standard command line arguments */
+    argIndex = ESMC_UtilGetArgIndex(argc, argv, "--help", &rc);
+    if (argIndex >= 0){
+      argFlag=1;
+      print_usage();
+    }
+    argIndex = ESMC_UtilGetArgIndex(argc, argv, "--version", &rc);
+    if (argIndex >= 0){
+      argFlag=1;
+      versionFlag = 1;
+    }
+    argIndex = ESMC_UtilGetArgIndex(argc, argv, "-V", &rc);
+    if (argIndex >= 0){
+      argFlag=1;
+      vFlag = 1;
+    }
+    if (argFlag)
+      ESMC_UtilVersionPrint (vFlag, versionFlag, &rc);
+  }
+  // broadcast the argIndex to all the processors
+  MPI_Bcast(&argFlag, 1, MPI_INT, 0, mpi_comm);
+  if (argFlag == 1) {
+    ESMC_Finalize();
+    exit(0);
+  }
+             
 #ifdef ESMF_NETCDF
   if (argc < 4) {
     if (myrank == 0) {
-      fprintf(stderr, "USAGE: Scrip2Unstruct inputfile outputfile dualflag [fileformat]\n");
-      fprintf(stderr,"  where dualflag = 1 or 0 and fileformat is either ESMF or UGRID\n  if fileformat is not given, the default file format is ESMF\n");
+      print_usage();
     }
     ESMC_Finalize();
     exit(1);
@@ -1080,4 +1129,5 @@ int main(int argc, char** argv)
   exit(1);
 #endif
   }
+
 

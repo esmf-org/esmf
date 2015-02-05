@@ -99,7 +99,7 @@ subroutine pio_cpp_init_intercom_int(component_count, peer_comm, comp_comms,  &
 
   !  local
 
-  integer, target :: iosystem_handle_array(component_count)
+  integer, allocatable, target :: iosystem_handle_array(:)
   type(iosystem_desc_t), pointer :: iosystem_desc_p(:)
   integer :: i
 
@@ -107,6 +107,7 @@ subroutine pio_cpp_init_intercom_int(component_count, peer_comm, comp_comms,  &
   continue
 
   !  get a new iosystem_desc_t for this connection
+  allocate (iosystem_handle_array(int (component_count)))
   call new_pio_iosys_handles(iosystem_handle_array, iosystem_desc_p)
 
   !  call the Fortran procedure

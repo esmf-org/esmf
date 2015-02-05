@@ -1615,6 +1615,7 @@ end function ESMF_MeshCreateFromMeshes
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFile()"
 !BOP
+!\label{API:MeshCreateFromFile}
 ! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
 !
 ! !INTERFACE:

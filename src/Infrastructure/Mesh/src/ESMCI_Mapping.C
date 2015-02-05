@@ -32,6 +32,8 @@ namespace ESMCI {
   // eventually could be broadened to specify other types
   MAP_TYPE sph_map_type=MAP_TYPE_CART_APPROX;
 
+  bool is_map_sph=false;
+
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::classInstance = NULL;
 
@@ -396,7 +398,7 @@ std::cout << std::endl;
        +normal[2].val()*normal[2].val()));
 
   // check parametric bounds.
-  double sdist(0);
+  double sdist=0.0;
   bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
   if(dist) *dist += sdist;
   return resu;
@@ -409,6 +411,43 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
                                                                               double *pcoord,
                                                                               double *dist) const
 {
+
+ /* XMRKX */
+
+  // Init output
+  if (dist) *dist = std::numeric_limits<double>::max();
+
+#define SPH_MAP
+#ifdef SPH_MAP
+  // Is this spherical and 3D, then use Spherical mapping
+  // TODO: ORGANIZE THIS BETTER
+  // ALSO NEED TO MAKE SURE IS HEX.
+  if (is_map_sph) {
+    double p[3];
+
+    // Only support hexes in spherical right now
+    if (SFUNC_TYPE::ndofs != 8) {
+      Throw() << "3D spherical mapping is only currently supported for hexahedrons";
+    }
+
+    // Calculate p in hex defined by mdata
+    if (!calc_p_hex_sph3D_xyz(mdata, point, p)) {
+      //// Didn't converge, so just leave...
+      pcoord[0]=0.0; pcoord[1]=0.0; pcoord[2]=0.0;
+      return false;
+    }
+
+    //printf(" In Spherical p=%f %f %f\n",p[0],p[1],p[2]);
+
+    // Compute pcoord from p
+    pcoord[0]=2.0*p[0]-1.0;
+    pcoord[1]=2.0*p[1]-1.0;
+    pcoord[2]=2.0*p[2]-1.0;
+
+
+  } else { // Cartesian method
+#endif
+
   // Newton's method
   const double ctol = 1e-10;
   const int max_iter = 15;
@@ -484,11 +523,13 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
     if (dist) *dist = std::numeric_limits<double>::max();
     return false;
   }
-
+#ifdef SPH_MAP
+  }
+#endif
   // check parametric bounds.
-  double sdist(0);
+  double sdist=0.0;
   bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
-  if(dist) *dist += sdist;
+  if(dist) *dist = sdist;
   return resu;
 }
 

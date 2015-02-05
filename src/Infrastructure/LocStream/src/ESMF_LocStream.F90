@@ -80,7 +80,8 @@ module ESMF_LocStreamMod
      type (ESMF_Base)                     :: base             ! base class object
      logical                              :: destroyDistgrid 
      type (ESMF_DistGrid)                 :: distgrid         ! description of index space of Arrays
-     type(ESMF_Index_Flag)                 :: indexflag
+     type(ESMF_Index_Flag)                :: indexflag
+     type(ESMF_CoordSys_Flag)             :: coordSys
      integer                              :: keyCount         ! Number of keys
      character(len=ESMF_MAXSTR), pointer  :: keyNames(:)      ! Names
      character(len=ESMF_MAXSTR), pointer  :: keyUnits(:)      ! Units
@@ -1332,7 +1333,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateFromDG(name, distgrid, &
-                 destroyDistgrid, indexflag, rc )
+                 destroyDistgrid, indexflag, coordSys, rc )
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromDG
@@ -1343,6 +1344,7 @@ contains
       type(ESMF_DistGrid),   intent(in)            :: distgrid
       logical,               intent(in), optional  :: destroyDistgrid
       type(ESMF_Index_Flag),  intent(in), optional  :: indexflag    
+      type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1363,6 +1365,10 @@ contains
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1374,6 +1380,7 @@ contains
       type(ESMF_LocStream)               :: locstream 
       integer :: dimCount 
       type(ESMF_Index_Flag)  :: indexflagLocal
+      type(ESMF_CoordSys_Flag) :: coordSysLocal
       logical :: destroyDistgridLocal
 
       ! Initialize return code; assume failure until success is certain
@@ -1398,6 +1405,12 @@ contains
          indexflagLocal=indexflag
       else
          indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      if (present(coordSys)) then
+         coordSysLocal=coordSys
+      else
+         coordSysLocal=ESMF_COORDSYS_CART
       endif
 
       if (present(destroyDistgrid)) then
@@ -1426,6 +1439,7 @@ contains
 
       ! Set some remaining info into the struct      
       lstypep%indexflag=indexflagLocal
+      lstypep%coordSys=coordSysLocal
       lstypep%destroyDistgrid=destroyDistgridLocal
       lstypep%distgrid=distgrid
       lstypep%keyCount=0
@@ -1467,7 +1481,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateIrreg(name, minIndex, countsPerDE, &
-                  indexflag, rc)
+                  indexflag, coordSys, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateIrreg
@@ -1478,6 +1492,7 @@ contains
       integer, intent(in), optional                   :: minIndex
       integer, intent(in)                             :: countsPerDE(:)
       type(ESMF_Index_Flag), intent(in), optional      :: indexflag
+      type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
@@ -1499,6 +1514,10 @@ contains
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1511,6 +1530,8 @@ contains
     integer, pointer :: deBLockList(:,:,:)   
     integer               :: minIndexLocal, maxIndexLocal
     type(ESMF_Index_Flag)  :: indexflagLocal
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
+
     integer :: numDEs
 
       ! Initialize return code; assume failure until success is certain
@@ -1521,6 +1542,12 @@ contains
          indexflagLocal=indexflag
       else
          indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      if (present(coordSys)) then
+         coordSysLocal=coordSys
+      else
+         coordSysLocal=ESMF_COORDSYS_CART
       endif
 
       if (present(minIndex)) then
@@ -1573,6 +1600,7 @@ contains
                                                                distgrid=distgrid, &
                                                                destroyDistgrid=.true., &
                                                                indexflag=indexflagLocal, &
+                                                               coordSys=coordSysLocal, &
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1593,7 +1621,7 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromLocal(name, localCount, indexflag, rc)
+      function ESMF_LocStreamCreateFromLocal(name, localCount, indexflag, coordSys, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromLocal
@@ -1603,6 +1631,7 @@ contains
       character (len=*), intent(in), optional         :: name
       integer, intent(in)                             :: localCount
       type(ESMF_Index_Flag), intent(in), optional      :: indexflag
+      type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
@@ -1621,6 +1650,10 @@ contains
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1636,6 +1669,8 @@ contains
     integer, pointer :: deBLockList(:,:,:)   
     integer               :: minIndex(1), maxIndex(1)
     type(ESMF_Index_Flag)  :: indexflagLocal
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
+
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1645,6 +1680,12 @@ contains
          indexflagLocal=indexflag
       else
          indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      if (present(coordSys)) then
+         coordSysLocal=coordSys
+      else
+         coordSysLocal=ESMF_COORDSYS_CART
       endif
 
       ! Get VM for this context
@@ -1705,6 +1746,7 @@ contains
                                                                distgrid=distgrid, &
                                                                destroyDistgrid=.true., &
                                                                indexflag=indexflagLocal, &
+                                                               coordSys=coordSysLocal, &
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1726,7 +1768,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateReg(name, &
-                 regDecomp, decompFlag, minIndex, maxIndex, indexflag, rc )
+                 regDecomp, decompFlag, minIndex, maxIndex, indexflag, coordSys, rc )
 
 
 !
@@ -1741,6 +1783,7 @@ contains
       integer,               intent(in),  optional  :: minIndex
       integer,               intent(in)             :: maxIndex
       type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
+      type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1772,6 +1815,10 @@ contains
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1783,6 +1830,8 @@ contains
       integer               :: minIndexLocal,regDecompLocal
       type(ESMF_Decomp_Flag) :: decompFlagLocal
       type(ESMF_Index_Flag)  :: indexflagLocal
+      type(ESMF_CoordSys_Flag) :: coordSysLocal
+
       type(ESMF_VM)         :: vm 
 
       ! Initialize return code; assume failure until success is certain
@@ -1799,6 +1848,12 @@ contains
          indexflagLocal=indexflag
       else
          indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      if (present(coordSys)) then
+         coordSysLocal=coordSys
+      else
+         coordSysLocal=ESMF_COORDSYS_CART
       endif
 
       if (present(minIndex)) then
@@ -1841,6 +1896,7 @@ contains
                                                          distgrid=distgrid, &
                                                          destroyDistgrid=.true., &
                                                          indexflag=indexflagLocal,&
+                                                         coordSys=coordSysLocal, &
                                                          rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2015,7 +2071,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()
   subroutine ESMF_LocStreamGetDefault(locstream, distgrid, keyCount, &
-               keyNames, localDECount, indexflag, name, rc)
+               keyNames, localDECount, indexflag, coordSys, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)             :: locstream
@@ -2024,6 +2080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXSTR),optional          :: keyNames(:) 
     integer, intent(out),optional                :: localDECount
     type(ESMF_Index_Flag), intent(out), optional  :: indexflag
+    type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     character(len=*), intent(out),     optional  :: name
     integer, intent(out), optional               :: rc
 !
@@ -2048,6 +2105,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Number of DEs on this PET in the {\tt locstream}.
 ! \item [{[indexflag]}]
 ! The indexflag for this indexflag.
+! \item [{[coordSys]}]
+! The coordinate system for this location stream.
 ! \item [{[name]}]
 ! Name of queried item.
 ! \item [{[rc]}]
@@ -2108,6 +2167,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! get indexflag
     if (present(indexflag)) then
         indexflag = lstypep%indexflag
+    endif
+
+    ! get coordSys
+    if (present(coordSys)) then
+        coordSys = lstypep%coordSys
     endif
 
     if (present(name)) then
@@ -2327,7 +2391,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
   subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, &
-                keyLongName, typekind, rc)
+                keyLongName, typekind, isPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)              :: locstream
@@ -2335,6 +2399,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
     character (len=*),    intent(out), optional   :: keyUnits 
     character (len=*),    intent(out), optional   :: keyLongName 
     type(ESMF_TypeKind_Flag), intent(out), optional    :: typekind
+    logical,              intent(out), optional   :: isPresent
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2354,6 +2419,8 @@ end subroutine ESMF_LocStreamGetKeyBounds
 ! If not specified, then the item remains blank.  
 ! \item [{[typekind]}]
 ! The typekind of the key data
+! \item [{[isPresent]}]
+! Whether or not the keyname is present 
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2382,26 +2449,39 @@ end subroutine ESMF_LocStreamGetKeyBounds
        endif
     enddo
 
-   ! If nothing found return error
+
    if (keyIndex==0) then
-      if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-            msg=" - keyName not found in this LocStream", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-   endif
+     if (present(isPresent) .and. &
+         .not. present(keyUnits) .and. &
+         .not. present(keyLongName) .and. &
+         .not. present(typekind)) then
+       isPresent = .false.
+     else
+       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+                              msg=" - LocStream info not found for this keyName", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+     endif     
+   else
 
-   ! Get Info
-   if (present(keyUnits)) then
-      keyUnits=lstypep%keyUnits(keyIndex)
-   endif
+     ! Get Info
+     if (present(isPresent)) then
+       isPresent=.true.
+     endif
 
-   if (present(keyLongName)) then
-      keyLongName=lstypep%keyLongNames(keyIndex)
-   endif
+     if (present(keyUnits)) then
+       keyUnits=lstypep%keyUnits(keyIndex)
+     endif
 
-   if (present(typekind)) then
-      call ESMF_ArrayGet(lstypep%keys(keyIndex), typekind=typekind, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-          ESMF_CONTEXT, rcToReturn=rc)) return
+     if (present(keyLongName)) then
+       keyLongName=lstypep%keyLongNames(keyIndex)
+     endif
+
+     if (present(typekind)) then
+       call ESMF_ArrayGet(lstypep%keys(keyIndex), typekind=typekind, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+     endif
+
    endif
 
    ! return success
@@ -5311,6 +5391,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_ArrayBundle) :: oldAB, newAB
       type(ESMF_RouteHandle) :: routehandle
       type(ESMF_TypeKind_Flag) ::keyTypeKind
+      type(ESMF_CoordSys_Flag) :: coordSysLocal
       character(len=ESMF_MAXSTR)    :: keytemp, string
       integer :: keyCount,i
       integer :: localrc
@@ -5326,10 +5407,16 @@ end subroutine ESMF_LocStreamGetBounds
       ! Get old locstream internal pointer
       oldLStypep=>locstream%lstypep     
 
+      !mvr call to locstreamget for coordsys and pass into create below
+      call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
 
       ! Create new locStream
       newLocStream=ESMF_LocStreamCreateFromDG(name=name, distgrid=distgrid, &
-                destroyDistgrid=destroyDistgrid, indexflag=oldLSTypep%indexFlag, rc=localrc) 
+                destroyDistgrid=destroyDistgrid, indexflag=oldLSTypep%indexFlag, &
+                coordSys=coordSysLocal,rc=localrc) 
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return     
@@ -5652,7 +5739,6 @@ end subroutine ESMF_LocStreamGetBounds
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LocStreamGetPntList
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

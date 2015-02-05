@@ -81,6 +81,8 @@ namespace ESMCI{
     static int destroy(Field *field);
     ESMC_Mesh getMesh(int *rc);
     ESMC_Array getArray(int *rc);
+    static int getbounds(Field *field, int *localDe,
+      InterfaceInt *exclusiveLBound, InterfaceInt *exclusiveUBound);
     int print();
     int castToFortran(F90ClassHolder *fc);
     static int regridgetarea(Field *field);

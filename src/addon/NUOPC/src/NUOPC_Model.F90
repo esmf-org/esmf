@@ -24,8 +24,8 @@ module NUOPC_Model
     ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-    type_InternalState              => type_InternalState, &
-    type_InternalStateStruct        => type_InternalStateStruct, &
+!    type_InternalState              => type_InternalState, &
+!    type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
@@ -41,9 +41,9 @@ module NUOPC_Model
     routine_Run, &
     routine_SetServices
     
-  public &
-    type_InternalState, &
-    type_InternalStateStruct
+!  public &
+!    type_InternalState, &
+!    type_InternalStateStruct
     
   public &
     label_InternalState, &
@@ -162,7 +162,7 @@ module NUOPC_Model
       
     if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
-      call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+      call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif

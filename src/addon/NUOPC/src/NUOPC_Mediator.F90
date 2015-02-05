@@ -24,14 +24,15 @@ module NUOPC_Mediator
     ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
-    type_InternalState              => type_InternalState, &
-    type_InternalStateStruct        => type_InternalStateStruct, &
+!    type_InternalState              => type_InternalState, &
+!    type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
-    label_TimestampExport           => label_TimestampExport
+    label_TimestampExport           => label_TimestampExport, &
+    NUOPC_ModelBaseGet
 
   implicit none
   
@@ -41,9 +42,9 @@ module NUOPC_Mediator
     routine_Run, &
     routine_SetServices
     
-  public &
-    type_InternalState, &
-    type_InternalStateStruct
+!  public &
+!    type_InternalState, &
+!    type_InternalStateStruct
     
   public &
     label_InternalState, &
@@ -151,7 +152,7 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! set the internal clock to the parent clock
-    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    call NUOPC_CompSetClock(gcomp, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -376,7 +377,6 @@ module NUOPC_Mediator
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)          :: name
-    type(type_InternalState)        :: is
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -386,14 +386,10 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for the internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(mediator, label_InternalState, is, rc)
+    call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
-    ! Return the driverClock member
-    driverClock = is%wrap%driverClock
     
   end subroutine
   !-----------------------------------------------------------------------------

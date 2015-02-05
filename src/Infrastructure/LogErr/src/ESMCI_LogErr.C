@@ -128,7 +128,7 @@ bool LogErr::MsgAllocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)).append(msg);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
@@ -154,7 +154,7 @@ bool LogErr::MsgAllocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)).append(msg);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
@@ -219,7 +219,7 @@ bool LogErr::MsgDeallocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)).append(msg);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
@@ -245,7 +245,7 @@ bool LogErr::MsgDeallocError(
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
-    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)).append(msg);
+    string logMsg = string(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE)) + " - " + msg;
     Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
@@ -606,7 +606,7 @@ bool LogErr::MsgFoundError(
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
 
-        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)).append(msg);
+        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)) + " - " + msg;
         Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
       }
     }
@@ -647,7 +647,7 @@ bool LogErr::MsgFoundError(
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
 
-        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)).append(msg);
+        string logMsg = string(ESMC_LogGetErrMsg(rcToCheck)) + " - " + msg;
         Write(logMsg,ESMC_LOGMSG_ERROR,LINE,FILE,method);
       }
     }

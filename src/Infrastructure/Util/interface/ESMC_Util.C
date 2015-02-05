@@ -26,6 +26,7 @@
 #include "ESMC_Util.h"
 
 // include higher level, 3rd party or system headers
+#include <stdio.h>
 #include <string.h>
 
 // include ESMF headers
@@ -39,6 +40,8 @@ static const char *const version = "$Id$";
 
 
 extern "C" {
+
+void FTN_X(f_esmf_utilversionprint) (ESMC_Logical *Flag, ESMC_Logical *versionFlag, int *rc);
 
 int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *rc){
   // initialize return code; assume routine not implemented
@@ -57,5 +60,17 @@ int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *
   if (rc) *rc = ESMF_SUCCESS;
   return argIndex;
 }  
+
+void ESMC_UtilVersionPrint (int vFlag, int versionFlag, int *rc) {
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
+
+  fflush (stdout);
+
+  ESMC_Logical vf = (vFlag != 0) ? ESMF_TRUE:ESMF_FALSE;
+  ESMC_Logical versionf= (versionFlag != 0) ? ESMF_TRUE:ESMF_FALSE;
+  FTN_X (f_esmf_utilversionprint) (&vf, &versionf, rc);
+}
 
 }; // extern "C"

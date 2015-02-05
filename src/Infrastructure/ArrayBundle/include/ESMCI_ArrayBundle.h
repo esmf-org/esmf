@@ -76,7 +76,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     // create() and destroy()
     static ArrayBundle *create(Array **arrayList, int arrayCount,
       bool multi=false, bool relaxed=false, int *rc=NULL);
-    static int destroy(ArrayBundle **arraybundle);
+    static int destroy(ArrayBundle **arraybundle, bool noGarbage=false);
     // add(), get(), isPresent(), remove(), replace(), set()
     void add(Array *array, bool multi=false, bool relaxed=false){
       arrayContainer.add(array->getName(), array, multi, relaxed);

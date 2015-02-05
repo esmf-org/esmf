@@ -99,9 +99,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Execute a precomputed Field redistribution from {\tt srcField} to
 !   {\tt dstField}. Both {\tt srcField} and {\tt dstField} must be
 !   congruent and typekind conform with the respective Fields used during 
-!   {\tt ESMF\_FieldRedistStore()}. Congruent Fields possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the Fields for every DE. For weakly congruent
+!   {\tt ESMF\_FieldRedistStore()}. Congruent Fields possess matching DistGrids
+!   and the shape of the local array tiles, i.e. the memory allocation, matches
+!   between the Fields for every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -325,8 +325,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldRedist()} on any pair of Fields that are weakly congruent
 !   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for 
+!   every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -694,8 +695,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldRedist()} on any pair of Fields that are weakly congruent
 !   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for
+!   every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class

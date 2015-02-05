@@ -173,25 +173,25 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CplCompAreServicesSet() Test"
+  write(name, *) "NUOPC_CompAreServicesSet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_CplCompAreServicesSet(cplComp, rc=rc)
+  flag = NUOPC_CompAreServicesSet(cplComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CplCompAttributeAdd() Test"
+  write(name, *) "NUOPC_CompAttributeAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CplCompAttributeAdd(cplComp, rc=rc)
+  call NUOPC_CompAttributeAdd(cplComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CplCompAttributeGet() Test"
+  write(name, *) "NUOPC_CompAttributeGet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CplCompAttributeGet(cplComp, rc=rc)
+  call NUOPC_CompAttributeGet(cplComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -335,43 +335,43 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCompAreServicesSet() Test"
+  write(name, *) "NUOPC_CompAreServicesSet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_GridCompAreServicesSet(gridComp, rc=rc)
+  flag = NUOPC_CompAreServicesSet(gridComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCompAttributeAdd() Test"
+  write(name, *) "NUOPC_CompAttributeAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_GridCompAttributeAdd(gridComp, rc=rc)
+  call NUOPC_CompAttributeAdd(gridComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCompCheckSetClock() Test"
+  write(name, *) "NUOPC_CompCheckSetClock() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_GridCompCheckSetClock(gridComp, clockB, rc=rc)
+  call NUOPC_CompCheckSetClock(gridComp, clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCompSetClock() Test"
+  write(name, *) "NUOPC_CompSetClock() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_GridCompSetClock(gridComp, clockB, rc=rc)
+  call NUOPC_CompSetClock(gridComp, clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCompSetServices() Test"
+  write(name, *) "NUOPC_CompSetServices() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   ! Not specifying the sharedObj argument results in look-up in the executable
   ! itself.... and there is a SetServices() routine outside the program below.
-  call NUOPC_GridCompSetServices(gridComp, rc=rc)
+  call NUOPC_CompSetServices(gridComp, rc=rc)
   rc=ESMF_SUCCESS  ! for now do not really check because some systems have issues.
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
@@ -653,7 +653,7 @@ program ESMF_NUOPC_UTest
 end program ESMF_NUOPC_UTest
 
 
-! -- A SetServices() routine must be present for the NUOPC_GridCompSetService()
+! -- A SetServices() routine must be present for the NUOPC_CompSetService()
 ! -- unit test above.
 subroutine SetServices(gcomp, rc)
   use ESMF

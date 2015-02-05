@@ -1568,10 +1568,11 @@ mvr_interp(mvr_imethod)
 	OctSearch_w_dst_pl(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-        if(freeze_src_)
+	if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
-        else
+        } else {
           OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+	}
       }
     }
     

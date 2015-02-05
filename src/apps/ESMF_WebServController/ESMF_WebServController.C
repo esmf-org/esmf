@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 //#include "ESMCI_WebServPassThruSvr.h"
+#include "ESMC.h"
 #include "ESMCI_WebServProcCtrl.h"
 
 
@@ -75,14 +76,72 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int print_usage() 
+{
+   printf("ESMF_WebServController: Run a Process Controller that provides access to an ESMF Web Service enabled Component.\n");
+   printf("Usage: ESMF_WebServController [--help] [--version] [-V] procCtrlPort registrarHost registrarPort\n");
+   printf("    [--help]        Display this information and exit.\n");
+   printf("    [--version]     Display ESMF version and license information "
+        "and exit.\n");
+   printf("    [-V]            Display ESMF version string and exit.\n");
+   printf("    procCtrlPort    Port num for Process Controller listener.\n");
+   printf("    registrarHost   Host name on which Registrar is running.\n");
+   printf("    registrarPort   Port num on which Registrar is listening.\n");
+   printf("\n");
+   return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 int main(int    argc, 
          char*  argv[])
 {
-  	printf("hello from ESMF_WebServController\n");
+   string   compSvrHost = "localhost";
+   int      compSvrStartPort = 27060;
+   int      portPoolSize = 5;
+   string   compSvrScriptDir = "/nics/c/home/ksaint/Scripts";
+   string   compSvrScriptName = "runjob.sh";
+
+
+   int	argIndex = 0;
+   int	argFlag = 0;
+   int	vFlag = 0;
+   int	versionFlag = 0;
+   int   rc = 0;
+
+   /* check for standard command line arguments */
+   /* if any of these flags are set, print out the info and exit */
+   argIndex = ESMC_UtilGetArgIndex(argc, argv, "--help", &rc);
+   if (argIndex >= 0)
+   {
+      argFlag = 1;
+      print_usage();
+   }
+
+   argIndex = ESMC_UtilGetArgIndex(argc, argv, "--version", &rc);
+   if (argIndex >= 0)
+   {
+      argFlag = 1;
+      versionFlag = 1;
+   }
+
+   argIndex = ESMC_UtilGetArgIndex(argc, argv, "-V", &rc);
+   if (argIndex >= 0)
+   {
+      argFlag = 1;
+      vFlag = 1;
+   }
+
+   if (argFlag)
+   {
+      ESMC_UtilVersionPrint(vFlag, versionFlag, &rc);
+		return 0;
+   }
 
 	if (argc < 4)
 	{
-      printf("Usage: ESMF_WebServController <procCtrlPort> <registrarHost> <registrarPort>\n");
+      print_usage();
 		return 1;
 	}
 
@@ -90,13 +149,6 @@ int main(int    argc,
    char     registrarHost[256];
    strcpy(registrarHost, argv[2]);
    int      registrarPort = atoi(argv[3]);
-
-   string   compSvrHost = "localhost";
-   int      compSvrStartPort = 27060;
-   int      portPoolSize = 5;
-   string   compSvrScriptDir = "/nics/c/home/ksaint/Scripts";
-   string   compSvrScriptName = "runjob.sh";
-
 
    ESMCI::ESMCI_WebServProcCtrl
       server(procCtrlPort,

@@ -237,14 +237,16 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
       if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, wts, &regridConserve, 
 			regridMethod, regridPoleType, regridPoleNPnts, 
-                        regridScheme, map_type, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction)) {
         Throw() << "Online regridding error" << std::endl;
+      }
 
 
 
 
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
+
       if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, wts, &regridConserve, 
 			&tempRegridMethod, regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction))

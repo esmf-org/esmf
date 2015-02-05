@@ -1,0 +1,227 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $Id$
+!
+! Earth System Modeling Framework
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!!-------------------------------------------------------------------------------------
+
+!==============================================================================
+^define ESMF_FILENAME "ESMF_IO_NCPutGet.F90"
+!==============================================================================
+!
+module ESMF_IO_NCPutGetMod
+!
+!==============================================================================
+!
+! This file contains type specific putgets for a NetCDF file
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+^include "ESMF.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
+
+!------------------------------------------------------------------------------
+! !USES:
+
+  use ESMF_LogErrMod
+  use ESMF_UtilTypesMod
+
+^ifdef ESMF_NETCDF
+  use netcdf
+^endif
+  
+  implicit none
+  private
+
+^define ESMF_NO_GREATER_THAN_4D
+
+  interface ESMF_IO_NCPutGetVar
+    TypeKindRankInterfaceMacro(IO_NCPutGetVar)
+  end interface
+!
+! !PUBLIC MEMBER FUNCTIONS:
+!
+! - ESMF-public methods:
+
+  public ESMF_IO_NCPutGetVar
+  public ESMF_IO_NCCheckError
+
+! The following macro is used to get around the first pass preprocessing,
+! which treats the string concatenation operator // as an inline comment.
+^define CONCAT /
+
+! -------------------------- ESMF-public method -------------------------------
+
+contains
+
+#define IO_NCPutGetVarDoc() \
+!BOPI @\
+! !ROUTINE: ESMF_IO_NCPutGetVar##mrank##D##mtypekind @\
+! @\
+! !INTERFACE: @\
+!  subroutine ESMF_IO_NCPutGetVar##mrank##D##mtypekind(grid_filename, var_name,  & @\
+!                        var_buffer, start, count, putflag, rc) @\
+!    character(len=*),  intent(in) :: grid_filename @\
+!    character(len=*),  intent(in) :: var_name @\
+!    <type> (<kind>), intent(inout) :: var_buffer(<rank>) @\
+!    integer, intent(in), optional :: start(:), count(:) @\
+!    logical, intent(in), optional :: putflag @\
+!    integer, intent(out), optional:: rc @\
+!EOPI @\
+
+#define IO_NCPutGetVarMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc)  \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_IO_NCPutGetVar##mrank##D##mtypekind" @\
+!BOPI @\
+! !ROUTINE: ESMF_IO_NCPutGetVar##mrank##D##mtypekind @\
+! @\
+! !INTERFACE: @\
+  subroutine ESMF_IO_NCPutGetVar##mrank##D##mtypekind(grid_filename, var_name,  & @\
+                        var_buffer, start, count, putflag, rc) @\
+    character(len=*),  intent(in) :: grid_filename @\
+    character(len=*),  intent(in) :: var_name @\
+    mname (ESMF_KIND_##mtypekind), intent(inout) :: var_buffer(mdim) @\
+    integer, intent(in), optional :: start(:), count(:) @\
+    logical, intent(in), optional :: putflag @\
+    integer, intent(out), optional:: rc @\
+!EOPI @\
+ @\
+    integer:: ncStatus @\
+    integer:: gridid, varid, ndims @\
+    integer:: vardimids(4) @\
+    integer:: len, i, vartype @\
+    character(len=ESMF_MAXPATHLEN) :: errmsg @\
+    logical:: localPutFlag @\
+    mname(ESMF_KIND_##mtypekind), pointer :: fptr(mdim) @\
+    integer, parameter :: nf90_noerror = 0 @\
+ @\
+^ifdef ESMF_NETCDF @\
+ @\
+    if (present(putFlag)) then @\
+       localPutFlag = putFlag @\
+    else @\
+       localPutFlag = .FALSE. @\
+    endif @\
+    ! Open the grid and mosaic files @\
+    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid) @\
+    if (ESMF_IO_NCCheckError (ncStatus, & @\
+      ESMF_METHOD, & @\
+      ESMF_SRCLINE,& @\
+      trim(grid_filename), & @\
+      rc)) return @\
+ @\
+    ncStatus = nf90_inq_varid( gridid, var_name, varid) @\
+    errmsg = "variable " CONCAT/ trim (var_name) CONCAT/ " in " CONCAT/ grid_filename @\
+    if (ESMF_IO_NCCheckError (ncStatus, & @\
+      ESMF_METHOD, & @\
+      ESMF_SRCLINE,& @\
+      errmsg, & @\
+      rc)) return @\
+ @\
+    ncStatus = nf90_inquire_variable(gridid, varid, xtype=vartype, & @\
+                ndims=ndims, dimids=vardimids) @\
+    errmsg = "Variable " CONCAT/ trim(var_name) CONCAT/" in " CONCAT/ grid_filename @\
+    if (ESMF_IO_NCCheckError (ncStatus, & @\
+      ESMF_METHOD, & @\
+      ESMF_SRCLINE,& @\
+      errmsg, & @\
+      rc)) return @\
+ @\
+    if (ndims /= mrank) then @\
+	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & @\
+	       msg="- variable dimension is not equal to " CONCAT/ #mrank, & @\
+	       ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+    end if @\
+ @\
+    if (present(start) .and. present(count)) then @\
+      if (localPutFlag) then @\
+         ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, & @\
+  	       count=count) @\
+      else @\
+         ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, & @\
+  	       count=count) @\
+      endif @\
+    else @\
+      if (localPutFlag) then @\
+         ncStatus = nf90_put_var(gridid, varid, var_buffer) @\
+      else @\
+         ncStatus = nf90_get_var(gridid, varid, var_buffer) @\
+      endif @\
+    endif @\
+    errmsg = "Variable " CONCAT/ trim(var_name) CONCAT/ " in " CONCAT/ grid_filename @\
+    if (ESMF_IO_NCCheckError (ncStatus, & @\
+      ESMF_METHOD, & @\
+      ESMF_SRCLINE,& @\
+      errmsg, & @\
+      rc)) return @\
+ @\
+    ncStatus = nf90_close(gridid) @\
+    if (ESMF_IO_NCCheckError (ncStatus, & @\
+      ESMF_METHOD, & @\
+      ESMF_SRCLINE,& @\
+      trim(grid_filename),& @\
+      rc)) return @\
+ @\
+    if(present(rc)) rc = ESMF_SUCCESS @\
+    return @\
+^else @\
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &  @\
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &  @\
+                 ESMF_CONTEXT, rcToReturn=rc)  @\
+    return @\
+^endif @\
+ @\
+end subroutine ESMF_IO_NCPutGetVar##mrank##D##mtypekind
+
+TypeKindRankDeclarationMacro(IO_NCPutGetVar)
+
+!------------------------------------------------------------------------------
+!
+!  check CDF file error code
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IO_NCCheckError"
+function ESMF_IO_NCCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
+
+    logical                       :: ESMF_IO_NCCheckError
+
+    integer,          intent(in)  :: ncStatus
+    character(len=*), intent(in)  :: module
+    character(len=*), intent(in)  :: fileName
+    integer,          intent(in)  :: lineNo
+    character(len=*), intent(in)  :: errmsg
+    integer, intent(out),optional :: rc
+
+    integer, parameter :: nf90_noerror = 0
+
+    ESMF_IO_NCCheckError = .FALSE.
+
+#ifdef ESMF_NETCDF
+    if ( ncStatus .ne. nf90_noerror) then
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+            line=lineNo, file=fileName, method=module)
+        print '("NetCDF Error: ", A, " : ", A)', &
+    		trim(errmsg),trim(nf90_strerror(ncStatus))
+        call ESMF_LogFlush()
+        if (present(rc)) rc = ESMF_FAILURE
+    	ESMF_IO_NCCheckError = .TRUE.
+    else
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    end if
+#else
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end function ESMF_IO_NCCheckError
+
+end module

@@ -22,14 +22,38 @@ module NUOPC_Comp
   private
   
   ! public module interfaces
+  public NUOPC_CompAreServicesSet
+  public NUOPC_CompAttributeAdd
+  public NUOPC_CompAttributeGet
+  public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompSearchPhaseMap
+  public NUOPC_CompSetClock
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
+  public NUOPC_CompSetServices
   public NUOPC_CompSpecialize
   
   ! interface blocks
+  interface NUOPC_CompAreServicesSet
+    module procedure NUOPC_GridCompAreServicesSet
+    module procedure NUOPC_CplCompAreServicesSet
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeAdd
+    module procedure NUOPC_GridCompAttributeAdd
+    module procedure NUOPC_CplCompAttributeAdd
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeGet
+    module procedure NUOPC_CplCompAttributeGet
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompCheckSetClock
+    module procedure NUOPC_GridCompCheckSetClock
+  end interface
+  !---------------------------------------------
   interface NUOPC_CompDerive
     module procedure NUOPC_GridCompDerive
     module procedure NUOPC_CplCompDerive
@@ -45,6 +69,10 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompSearchPhaseMap
   end interface
   !---------------------------------------------
+  interface NUOPC_CompSetClock
+    module procedure NUOPC_GridCompSetClock
+  end interface
+  !---------------------------------------------
   interface NUOPC_CompSetEntryPoint
     module procedure NUOPC_GridCompSetEntryPoint
     module procedure NUOPC_CplCompSetEntryPoint
@@ -52,6 +80,10 @@ module NUOPC_Comp
   !---------------------------------------------
   interface NUOPC_CompSetInternalEntryPoint
     module procedure NUOPC_GridCompSetIntEntryPoint
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompSetServices
+    module procedure NUOPC_GridCompSetServices
   end interface
   !---------------------------------------------
   interface NUOPC_CompSpecialize
@@ -63,6 +95,314 @@ module NUOPC_Comp
   contains
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAreServicesSet - Check if SetServices was called
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAreServicesSet() 
+  function NUOPC_GridCompAreServicesSet(comp, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_GridCompAreServicesSet
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)            :: comp
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}. 
+!   Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Pointer)      :: vm_info
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! make a copy of the external externalClock
+    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (vm_info == ESMF_NULL_POINTER) then
+      NUOPC_GridCompAreServicesSet = .false.
+    else
+      NUOPC_GridCompAreServicesSet = .true.
+    endif
+      
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAreServicesSet - Check if SetServices was called
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAreServicesSet() 
+  function NUOPC_CplCompAreServicesSet(comp, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_CplCompAreServicesSet
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in)            :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}.
+!   Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Pointer)      :: vm_info
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! make a copy of the external externalClock
+    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (vm_info == ESMF_NULL_POINTER) then
+      NUOPC_CplCompAreServicesSet = .false.
+    else
+      NUOPC_CplCompAreServicesSet = .true.
+    endif
+      
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeAdd - Add the NUOPC GridComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeAdd() 
+  subroutine NUOPC_GridCompAttributeAdd(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                   :: comp
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Adds standard NUOPC Attributes to a Gridded Component.
+!
+!   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
+!   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
+!   package extends the CIM Component Attribute package: convention="CIM 1.5",
+!   purpose="ModelComp".
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)            :: attrList(9)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Set up a customized list of Attributes to be added to the Fields
+    attrList(1) = "Verbosity"           ! control verbosity
+    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(4) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(5) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(6) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(7) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(8) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    
+    ! add Attribute packages
+if (ESMF_VERSION_MAJOR >= 6) then
+    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
+      purpose="ModelComp", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="CIM 1.5", &
+      nestPurpose="ModelComp", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+else
+! gjt: keep this branch for now because I have an old sandbox where most of
+! the ESMF is back in the MAJOR 5 because of I/O issues in MAJOR 6.
+! TODO: remove this else branch once the I/O issues in MAJOR 6 are fixed.
+    call ESMF_AttributeAdd(comp, convention="CIM", &
+      purpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="CIM", &
+      nestPurpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+endif
+
+    ! set Attributes to defaults
+    call ESMF_AttributeSet(comp, &
+      name="Verbosity", value="low", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="NestingGeneration", value=0, &        ! default to parent level
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="Nestling", value=0, &                 ! default to first nestling
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="InitializeDataComplete", value="false", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="InitializeDataProgress", value="false", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeAdd - Add the NUOPC CplComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeAdd() 
+  subroutine NUOPC_CplCompAttributeAdd(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Adds standard NUOPC Attributes to a Coupler Component. Checks the provided
+!   importState and exportState arguments for matching Fields and adds the list
+!   as "CplList" Attribute.
+!
+!   This adds the standard NUOPC Coupler Attribute package: convention="NUOPC", 
+!   purpose="General" to the Field. The NUOPC Coupler Attribute package extends
+!   the ESG Component Attribute package: convention="ESG", purpose="General".
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are added.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: attrList(5)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Set up a customized list of Attributes to be added to the CplComp
+    attrList(1) = "Verbosity"           ! control verbosity
+    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(3) = "RunPhaseMap"         ! list of strings to map str to phase #
+    attrList(4) = "FinalizePhaseMap"    ! list of strings to map str to phase #
+    attrList(5) = "CplList"
+    
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+          
+    ! set Attributes to defaults
+    call ESMF_AttributeSet(comp, &
+      name="Verbosity", value="low", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeGet() 
+  subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in)            :: comp
+    character(*),       intent(out), optional :: cplList(:)
+    integer,            intent(out), optional :: cplListSize
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Accesses the "CplList" Attribute inside of {\tt comp} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   the Attribute is not present or not set.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(cplList)) then
+      call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_AttributeGet(comp, name="CplList", &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompCheckSetClock - Check Clock compatibility and set stopTime
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompCheckSetClock() 
+  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    type(ESMF_Clock),        intent(in)            :: externalClock
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!   Compares {\tt externalClock} to the Component internal Clock to make sure
+!   they match in their current Time. Further ensures that the external Clock's
+!   timeStep is a multiple of the internal Clock's timeStep. If both
+!   these condition are satisfied then the stopTime of the internal Clock is
+!   set to be reachable in one timeStep of the external Clock, taking into
+!   account the direction of the Clock.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Clock)        :: internalClock
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_GridCompGet(comp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_ClockCheckSetClock(setClock=internalClock, &
+      checkClock=externalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompDerive - Derive a GridComp from a generic component
@@ -527,6 +867,46 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_CompSetClock - Initialize and set the internal Clock of a GridComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSetClock()
+  subroutine NUOPC_GridCompSetClock(comp, externalClock, stabilityTimeStep, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    type(ESMF_Clock),        intent(in)            :: externalClock
+    type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!   Sets the Component internal Clock as a copy of {\tt externalClock}, but
+!   with a timeStep that is less than or equal to the stabilityTimeStep.
+!   At the same time ensures that the timeStep of the external Clock is
+!   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
+!   argument is not provided then the internal Clock will simply be set
+!   as a copy of the externalClock.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Clock)        :: internalClock
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_GridCompSet(comp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_CompSetEntryPoint - Set entry point for a GridComp
 !
 ! !INTERFACE:
@@ -909,6 +1289,131 @@ module NUOPC_Comp
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSetServices - Try to find and call SetServices in a shared object
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSetServices()
+  recursive subroutine NUOPC_GridCompSetServices(comp, sharedObj, userRc, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    character(len=*),        intent(in),  optional :: sharedObj
+    integer,                 intent(out), optional :: userRc
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!   Try to find a routine called "SetServices" in the sharedObj and execute it
+!   to set the component's services. An attempt is made to find a routine that
+!   is close in name to "SetServices", allowing compiler name mangeling, i.e.
+!   upper and lower case, as well as trailing underscores.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    logical           :: userRoutineFound
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! attempt to find something called SetServices, allowing variations
+    ! caused by compiler name mangeling
+    
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    ! getting down to here means that none of the attempts were successful
+    if (present(sharedObj)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in the executable.", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    endif
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompSpecialize - Specialize a derived GridComp

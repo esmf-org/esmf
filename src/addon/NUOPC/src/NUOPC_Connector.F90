@@ -28,8 +28,8 @@ module NUOPC_Connector
   private
   
   public routine_SetServices
-  public type_InternalState, type_InternalStateStruct
-  public label_InternalState
+!  public type_InternalState, type_InternalStateStruct
+!  public label_InternalState
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle
   
@@ -54,6 +54,9 @@ module NUOPC_Connector
     type(type_InternalStateStruct), pointer :: wrap
   end type
 
+  ! Generic methods
+  public NUOPC_ConnectorGet, NUOPC_ConnectorSet
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -73,7 +76,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC CplComp Attribute Package to the Connector
-    call NUOPC_CplCompAttributeAdd(cplcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(cplcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
@@ -609,7 +612,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -618,7 +621,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -912,7 +915,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -921,7 +924,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1179,7 +1182,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
 #endif
     
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1188,7 +1191,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1443,7 +1446,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! get the cplList Attribute
-    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    call NUOPC_CompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (cplListSize>0) then
@@ -1452,7 +1455,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      call NUOPC_CompAttributeGet(cplcomp, cplList=cplList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2472,6 +2475,99 @@ print *, "found match:"// &
 
   end subroutine
 
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ConnectorGet - Get parameters from a Connector
+!
+! !INTERFACE:
+  subroutine NUOPC_ConnectorGet(cplcomp, srcFields, dstFields, rh, state, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_FieldBundle), intent(out), optional :: srcFields
+    type(ESMF_FieldBundle), intent(out), optional :: dstFields
+    type(ESMF_RouteHandle), intent(out), optional :: rh
+    type(ESMF_State),       intent(out), optional :: state
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Get parameters from a Connector.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Get the requested members
+    if (present(srcFields)) srcFields = is%wrap%srcFields
+    if (present(dstFields)) dstFields = is%wrap%dstFields
+    if (present(rh))        rh = is%wrap%rh
+    if (present(state))     state = is%wrap%state
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ConnectorSet - Set parameters in a Connector
+!
+! !INTERFACE:
+  subroutine NUOPC_ConnectorSet(cplcomp, srcFields, dstFields, rh, state, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                            :: cplcomp
+    type(ESMF_FieldBundle), intent(in),  optional :: srcFields
+    type(ESMF_FieldBundle), intent(in),  optional :: dstFields
+    type(ESMF_RouteHandle), intent(in),  optional :: rh
+    type(ESMF_State),       intent(in),  optional :: state
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set parameters in a Connector.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Set the requested members
+    if (present(srcFields)) is%wrap%srcFields = srcFields
+    if (present(dstFields)) is%wrap%dstFields = dstFields
+    if (present(rh))        is%wrap%rh = rh
+    if (present(state))     is%wrap%state = state
+    
+  end subroutine
   !-----------------------------------------------------------------------------
 
 end module

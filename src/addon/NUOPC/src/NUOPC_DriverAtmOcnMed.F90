@@ -29,7 +29,8 @@ module NUOPC_DriverAtmOcnMed
     Driver_label_SetModelServices => label_SetModelServices, &
     label_SetRunSequence          => label_SetRunSequence, &
     Driver_label_Finalize         => label_Finalize, &
-    NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel, &
+    NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSet, &
+    NUOPC_DriverSetModel, &
     NUOPC_DriverNewRunSequence, NUOPC_DriverSetRunSequence, &
     NUOPC_DriverAddRunElement, NUOPC_DriverPrint
 
@@ -38,8 +39,9 @@ module NUOPC_DriverAtmOcnMed
   private
   
   public routine_SetServices
-  public type_InternalState, type_InternalStateStruct
-  public label_InternalState, label_SetModelPetLists
+!  public type_InternalState, type_InternalStateStruct
+!  public label_InternalState
+  public label_SetModelPetLists
   public label_SetModelServices, label_SetRunSequence, label_Finalize
   
   public NUOPC_DriverAddComp, NUOPC_DriverGetComp, NUOPC_DriverSetModel
@@ -128,7 +130,6 @@ module NUOPC_DriverAtmOcnMed
     integer, intent(out) :: rc
     
     ! local variables
-    type(Driver_type_IS)  :: superIS
     character(ESMF_MAXSTR):: name
 
     rc = ESMF_SUCCESS
@@ -138,15 +139,11 @@ module NUOPC_DriverAtmOcnMed
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query Component for super internal State
-    nullify(superIS%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, Driver_label_IS, superIS, rc)
+    ! set the modelCount for ATM-OCN-MED coupling
+    call NUOPC_DriverSet(gcomp, modelCount=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! set the modelCount for ATM-OCN-MED coupling
-    superIS%wrap%modelCount = 3
-    
   end subroutine
   
   !-----------------------------------------------------------------------------

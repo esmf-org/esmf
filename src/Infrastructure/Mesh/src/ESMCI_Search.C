@@ -44,7 +44,7 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
-
+  
 
 extern bool mathutil_debug;
 
@@ -92,7 +92,7 @@ struct Search_index {
 class Search_Less : public std::binary_function<Search_index*,Search_index*,bool> {
 public:
   Search_Less(int _dim) : dim(_dim) {}
-  bool operator()(const Search_index* l, const Search_index* r) {
+    bool operator()(const Search_index* l, const Search_index* r) {
     return l->sort_val[dim] < r->sort_val[dim];
   }
 private:
@@ -140,7 +140,7 @@ static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, d
   
   int ret = 0;
 
-  MEField<> &coord_field = *src.GetCoordField();
+   MEField<> &coord_field = *src.GetCoordField();
   
   KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
   
@@ -158,12 +158,11 @@ static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, d
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-     BBox bounding_box(coord_field, elem, nexp);
+      BBox bounding_box(coord_field, elem, nexp, src.is_sph);
   
      // First check to see if the box even intersects the dest mesh bounding
      // box.  
      if (BBoxIntersect(dstBBox, bounding_box, btol)) ++ret;
-  
     }
     
   }
@@ -188,17 +187,17 @@ static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, doubl
     
     MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
     
-    std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
+     std::vector<double> node_coord(cme.num_functions()*src.spatial_dim());
     
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-     BBox bounding_box(coord_field, elem, nexp);
+      BBox bounding_box(coord_field, elem, nexp, src.is_sph);
   
-     // First check to see if the box even intersects the dest mesh bounding
-     // box.  
-     if (BBoxIntersect(dstBBox, bounding_box, btol)) {
-       
+      // First check to see if the box even intersects the dest mesh bounding
+      // box.  
+      if (BBoxIntersect(dstBBox, bounding_box, btol)) {
+        
        double min[3], max[3];
        
        min[0] = bounding_box.getMin()[0] - btol;
@@ -219,8 +218,7 @@ static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, doubl
        // Add element to search tree
        box->add(min, max, (void*)&elem);
 
-     }
-  
+      }
     }
     
   }
@@ -242,6 +240,7 @@ bool is_in;
 static int found_func(void *c, void *y) {
   MeshObj &elem = *static_cast<MeshObj*>(c);
   OctSearchNodesData &si = *static_cast<OctSearchNodesData*>(y);
+
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
@@ -288,7 +287,7 @@ static int found_func(void *c, void *y) {
 
     // Do the is_in calculation
   const MappingBase &map = GetMapping(elem);
-  double pcoord[3];
+  double pcoord[3]={0.0,0.0,0.0};
   double dist;
     
   const MeshObjTopo *etopo = GetMeshObjTopo(elem);
@@ -310,13 +309,8 @@ static int found_func(void *c, void *y) {
 
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-  //#ifdef PNTLIST
   if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],dist,elem.get_id());
-    //#else
-      //if (si.snr.node->get_id()== ESMF_REGRID_DEBUG_MAP_NODE) {
-    //printf("Mapping node=%d in=%d pcoords=%f %f dist=%e s_elem=%d [",si.snr.node->get_id(),in,pcoord[0],pcoord[1],dist,elem.get_id());
-    //#endif
+    printf("Mapping node=%d in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
 
     double coords[3*40];
     int num_nds;
@@ -325,6 +319,8 @@ static int found_func(void *c, void *y) {
     get_elem_coords_and_ids(&elem, si.src_cfield, etopo->spatial_dim, 40, &num_nds, coords, ids);
     
     for (int i=0; i<num_nds; i++) {
+      double *pnt=coords+3*i;
+
       printf("%d ",ids[i]);
     }
     printf("]\n");
@@ -402,7 +398,7 @@ static int found_func(void *c, void *y) {
       }
     } else {
       std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
-                       ne = to_investigate->end();
+                        ne = to_investigate->end();
       for (; ni != ne; ++ni) dest_nlist.push_back(*ni);
       if (dest_nlist.size() == 0) return;
     }
@@ -449,7 +445,7 @@ static int found_func(void *c, void *y) {
   if (!box_in) {
     int num_box = num_intersecting(src, dstBBox, dstint, normexp);
   
-    box=new OTree(num_box); 
+     box=new OTree(num_box); 
 
     populate_box(box, src, dstBBox, dstint, normexp);
 
@@ -473,7 +469,7 @@ static int found_func(void *c, void *y) {
     const double *c = dstcoord_field.data(node);
     
     double pmin[3], pmax[3];
-    
+
     pmin[0] = c[0]-stol;
     pmin[1] = c[1] - stol;
     pmin[2] = sdim == 3 ? c[2]-stol : -stol;
@@ -481,7 +477,7 @@ static int found_func(void *c, void *y) {
     pmax[0] = c[0] + stol;
     pmax[1] = c[1] + stol;
     pmax[2] = sdim == 3 ? c[2]+stol : +stol;
-    
+
     OctSearchNodesData si;
     si.snr.node = &node;
     si.investigated = false;
@@ -495,6 +491,16 @@ static int found_func(void *c, void *y) {
     // The node coordinates.
     si.coords[0] = c[0]; si.coords[1] = c[1]; si.coords[2] = (sdim == 3 ? c[2] : 0.0);
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (node.get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
+      printf("node_id=%d coords=%e %e %e \n",node.get_id(),si.coords[0],si.coords[1],si.coords[2]);
+    }
+#endif
+    
+    // Set spherical map type
+    bool old_is_map_sph=is_map_sph;
+    is_map_sph=src.is_sph;    
+ 
     // Set global map_type
     // TODO: pass this directly to is_in_cell mapping function
     MAP_TYPE old_sph_map_type=sph_map_type;
@@ -505,6 +511,9 @@ static int found_func(void *c, void *y) {
     
     // Reset global map_type
     sph_map_type=old_sph_map_type;
+
+    // Reset
+    is_map_sph=old_is_map_sph;
 
 
 #if 0
@@ -590,7 +599,7 @@ static int num_intersecting_elems(const Mesh &meshA, const BBox &meshBBBox, doub
     
     if (ker.type() != MeshObj::ELEMENT || !ker.is_active()) continue;
     
-    Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
+     Kernel::obj_const_iterator ei = ker.obj_begin(), ee = ker.obj_end();
     
     MasterElement<> &cme = *GetME(coord_field, ker)(METraits<>());
     
@@ -600,7 +609,7 @@ static int num_intersecting_elems(const Mesh &meshA, const BBox &meshBBBox, doub
       const MeshObj &elem = *ei;
    
      BBox bounding_box(coord_field, elem, nexp);
-  
+   
      // First check to see if the box even intersects the meshB mesh bounding
      // box.  
      if (BBoxIntersect(meshBBBox, bounding_box, btol)) ++ret;
@@ -638,7 +647,7 @@ static int num_intersecting_elems(const Mesh &meshA, const BBox &meshBBBox, doub
   
      // First check to see if the box even intersects the meshB mesh bounding
      // box.  
-     if (BBoxIntersect(meshBBBox, bounding_box, btol)) {
+       if (BBoxIntersect(meshBBBox, bounding_box, btol)) {
        
        // Create Search result
        Search_result *sr=new Search_result();       
@@ -648,7 +657,7 @@ static int num_intersecting_elems(const Mesh &meshA, const BBox &meshBBBox, doub
        // Add it to results list
        result.push_back(sr);
 
-       // Add it to tree
+        // Add it to tree
        double min[3], max[3];
        
        min[0] = bounding_box.getMin()[0] - btol;
@@ -686,7 +695,7 @@ static int found_func_elems(void *c, void *y) {
   OctSearchElemsData *si = static_cast<OctSearchElemsData*>(y);
 
 
-  // It might make sense to do something here to trim down the 
+   // It might make sense to do something here to trim down the 
   // number of candidates beyond just those that intersect the 
   // minmax box of the search element. However, I'm not sure
   // that there is anything that would be more efficient than
@@ -734,7 +743,7 @@ static int found_func_elems(void *c, void *y) {
   std::vector<const MeshObj*> meshB_elist;
   if (dmptr == NULL){ // No meshB masks
       MeshDB::const_iterator ei = meshB.elem_begin(), ee = meshB.elem_end();
-      for (; ei != ee; ++ei) {
+       for (; ei != ee; ++ei) {
           meshB_elist.push_back(&*ei);
       }
   } else { // meshB masks exist
@@ -782,7 +791,7 @@ static int found_func_elems(void *c, void *y) {
   UInt sdim = meshB.spatial_dim();
     
   
-  // Loop the mesh B elements, find the corresponding mesh A elements
+   // Loop the mesh B elements, find the corresponding mesh A elements
   bool meshB_elem_not_found=false;
   for (UInt p = 0; p < meshB_elist.size(); ++p) {
     

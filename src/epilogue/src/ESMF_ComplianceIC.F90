@@ -917,14 +917,9 @@ module ESMF_ComplianceICMod
       convention = "NUOPC"
       purpose = "General"
       
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
       call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
         ESMF_LOGMSG_INFO, rc=rc)
-#else
-      call ESMF_LogWrite(trim(prefix)//" State level attribute check.", &
-        ESMF_LOGMSG_INFO, rc=rc)
-#endif
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -1089,7 +1084,6 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
     call ESMF_AttributeGetAttPack(state, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1107,8 +1101,6 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
     endif
-#endif
-#ifdef RECONCILE_STATE_ATTPACK_BUG_FIXED
     call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1208,41 +1200,6 @@ module ESMF_ComplianceICMod
           return  ! bail out
       endif
     endif
-#else
-    allocate(valueStringList(1))
-    call ESMF_AttributeGet(state, name=attributeName, &
-      defaultvalue="CheckThisDefaultValue", &
-      value=valueStringList(1), rc=rc)
-    if (trim(valueStringList(1)) == trim("CheckThisDefaultValue")) then
-      ! attribute not present
-      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else if (len_trim(valueStringList(1)) == 0) then
-      ! attribute present but not set
-      call ESMF_LogWrite(trim(prefix)//" ==> State level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", &
-        ESMF_LOGMSG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else
-      call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
-        trim(attributeName)//"> "// &
-        "present and set: "// trim(valueStringList(1)), &
-        ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    endif
-    deallocate(valueStringList)
-#endif
 
   end subroutine
 

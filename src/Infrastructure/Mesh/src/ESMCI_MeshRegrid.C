@@ -143,8 +143,9 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 
       if (!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, NULL, 
 		  wts, regridMethod, regridScheme, 
-                  regridPoleType, regridPoleNPnts, map_type, unmappedaction))
+                  regridPoleType, regridPoleNPnts, map_type, unmappedaction)) {
         Throw() << "Regridding error" << std::endl;
+      }
 
       // Remove non-locally owned weights (assuming destination mesh decomposition)
 

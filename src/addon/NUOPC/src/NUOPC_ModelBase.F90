@@ -30,9 +30,9 @@ module NUOPC_ModelBase
     routine_SetServices, &
     routine_Nop
     
-  public &
-    type_InternalState, &
-    type_InternalStateStruct
+!  public &
+!    type_InternalState, &
+!    type_InternalStateStruct
     
   public &
     label_InternalState, &
@@ -63,6 +63,9 @@ module NUOPC_ModelBase
     type(type_InternalStateStruct), pointer :: wrap
   end type
 
+  ! Generic methods
+  public NUOPC_ModelBaseGet
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -82,7 +85,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC GridComp Attribute Package to the Model
-    call NUOPC_GridCompAttributeAdd(gcomp, rc=rc)
+    call NUOPC_CompAttributeAdd(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -446,7 +449,7 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check and set the model clock against the driver clock
-    call NUOPC_GridCompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
+    call NUOPC_CompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -511,4 +514,46 @@ module NUOPC_ModelBase
     
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ModelBaseGet - Get info from a ModelBase
+!
+! !INTERFACE:
+  subroutine NUOPC_ModelBaseGet(gcomp, driverClock, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: gcomp
+    type(ESMF_Clock),    intent(out)           :: driverClock
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Get a the Clock of the parent driver.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! Return the driverClock member
+    driverClock = is%wrap%driverClock
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module

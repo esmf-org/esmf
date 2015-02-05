@@ -747,12 +747,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleDestroy - Release resources associated with an ArrayBundle
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleDestroy(arraybundle, keywordEnforcer, rc)
+  subroutine ESMF_ArrayBundleDestroy(arraybundle, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc  
+    logical,                intent(in),   optional  :: noGarbage
+    integer,                intent(out),  optional  :: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
@@ -766,15 +767,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[arraybundle] 
+! \item[arraybundle]
 !      {\tt ESMF\_ArrayBundle} object to be destroyed.
-! \item[{[rc]}] 
+! \item [{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the garbage collection system. In this case there is no protection
+!      against following a dangling alias, which may lead to hard to debug
+!      application crashes. The default is {\tt .FALSE.}, i.e. keep a reference
+!      of the object in the garbage collection system.
+! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: localrc        ! local return code
+    type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -783,8 +791,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
+    ! Set default flags
+    opt_noGarbage = ESMF_FALSE
+    if (present(noGarbage)) opt_noGarbage = noGarbage
+
     ! Call into the C++ interface layer
-    call c_ESMC_ArrayBundleDestroy(arraybundle, localrc)
+    call c_ESMC_ArrayBundleDestroy(arraybundle, opt_noGarbage, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1326,7 +1338,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   and typekind conform to {\tt arraybundle}. Congruency for ArrayBundles is
 !   given by the congruency of its constituents.
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -1778,7 +1791,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -2115,7 +2129,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -2641,7 +2656,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -3023,7 +3039,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   are weakly congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Arrays for every DE. For weakly congruent
+!   array tiles, i.e. the memory allocation, matches between the Arrays for
+!   every DE. For weakly congruent
 !   Arrays the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class

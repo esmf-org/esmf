@@ -1146,17 +1146,13 @@ def field_switchedindices_grid_test():
     gridtofieldmap = np.array([2,1])
 
     field = Field(grid, 'Field!', TypeKind.R8,
-                  grid_to_field_map=gridtofieldmap)
+                  ndbounds=gridtofieldmap)
     field2 = Field(grid, 'Field!',
-                   grid_to_field_map=np.array([2,1]))
+                   ndbounds=np.array([2,1]))
 
-    for i in range(field.shape[0]):
-        for j in range(field.shape[1]):
-            field[i, j] = 10
+    field[...] = 10
 
-    for i in range(field2.shape[0]):
-        for j in range(field2.shape[1]):
-            field2[i, j] = 10
+    field2[...] = 10
 
     # return True from unit test
     return True
@@ -1177,21 +1173,16 @@ def field_switchedindices_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    gridtofieldmap = np.array([1])
-
     field = Field(mesh, 'Field!',
                   TypeKind.R8,
-                  MeshLoc.NODE,
-                  grid_to_field_map=gridtofieldmap)
+                  MeshLoc.NODE)
     field2 = Field(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
-                   grid_to_field_map=np.array([1]))
+                   ndbounds=np.array([2,5]))
 
-    for i in range(field.shape[0]):
-        field[i] = 10
+    field[...] = 10
 
-    for i in range(field2.shape[0]):
-        field2[i] = 10
+    field2[...] = 10
 
     # return True from unit test
     return True
@@ -1212,23 +1203,16 @@ def field_extraindices_mesh_test():
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_50()
 
-    gridtofieldmap = np.array([1])
-
     field = Field(mesh, 'Field!',
                   TypeKind.R8,
-                  MeshLoc.NODE,
-                  grid_to_field_map=gridtofieldmap)
+                  MeshLoc.NODE)
     field2 = Field(mesh, 'Field!',
                    meshloc=MeshLoc.ELEMENT,
-                   grid_to_field_map=np.array([2]),
-                   ungridded_lower_bound=np.array([0,0]),
-                   ungridded_upper_bound=np.array([1,1]))
+                   ndbounds=np.array([2, 5]))
 
-    for i in range(field.shape[0]):
-        field[i] = 10
+    field[...] = 10
 
-    for i in range(field2.shape[0]):
-        field2[i] = 10
+    field2[...] = 10
 
     # return True from unit test
     return True

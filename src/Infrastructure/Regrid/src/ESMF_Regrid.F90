@@ -298,7 +298,6 @@ end function my_xor
        endif
 
 
-       !mvr added this conditional, but maybe it should be if dstmesh not null or present?
        if (.not. dst_pl_used) then
          ! Make sure the dstMesh has its internal bits in place
          call ESMF_MeshGet(dstMesh, isMemFreed=isMemFreed, rc=localrc)
@@ -314,6 +313,7 @@ end function my_xor
        endif
 
        ! Call through to the C++ object that does the work
+
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList%this, &
                    dstMesh%this, dstArray, dstPointList%this, &
                    regridmethod,  &

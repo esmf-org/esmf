@@ -1,0 +1,330 @@
+% $Id$
+
+\section{ESMF\_FileRegrid}
+\label{sec:ESMF_FileRegrid}
+
+\subsection{Description}
+
+This section describes the file-based regridding application provided by ESMF (for a description of ESMF regridding in general see Section~\ref{sec:regrid}). Regridding, also called remapping or interpolation, is the process of changing the grid that underlies data values while preserving qualities of the original data. Different kinds of transformations are appropriate for different problems. Regridding may be needed when communicating data between Earth system model components such as land and atmosphere, or between different data sets to support operations such as visualization. 
+
+Regridding can be broken into two stages. The first stage is generation of an interpolation weight matrix that describes how points in
+the source grid contribute to points in the destination grid. The second stage is the multiplication of values on the source grid by the
+interpolation weight matrix to produce values on the destination grid. This occurs through a parallel sparse matrix multiply.
+
+The {\tt ESMF\_RegridWeightGen} application described in Section~\ref{sec:ESMF_RegridWeightGen} 
+performs the first stage of the regridding process - generate the interpolation weight matrix. 
+This tool not only calculates the interpolation weights, it also applies the weights to a variable 
+stored in the source grid file and produces the interpolated values on the destination grid. 
+The interpolated output variable is written out to the destination grid file.  This tool only
+supports two CF compliant file formats: the GRIDSPEC Tile grid file format(~\ref{sec:fileformat:gridspec}) for
+a logically rectangular grid and the UGRID file format(~\ref{sec:fileformat:ugrid}) for unstructured grid.  
+The SCRIP format(~\ref{sec:fileformat:scrip}) and the ESMF unstructured grid format(~\ref{sec:fileformat:esmf}) are not supported because there is no way to define a variable field using these two formats. Currently, the tool only works with 2D grids, the support for the 3D grid will be 
+made available in the future release.  The variable array can be up to four dimensions.  The
+variable type is currently limited to single or double precision real numbers.  The support for 
+other data types, such as integer or short will be added in the future release.  
+
+The user interface of this tool is greatly simplified from {\tt ESMF\_RegridWeightGen}.  User only 
+needs to provide two input file names, the source and the destination variable names and the regrid method.  The tool will figure out the type of the grid file automatically based on the attributes of the variable.
+If the variable has a {\tt coordinates} attribute, the grid file is a GRIDSPEC file and the value of the 
+{\tt coordinates} defines the longitude and latitude variable's names.  For example, following is a simple
+GRIDSPEC file with a variable named {\tt PSL} and coordinate variables named {\tt lon} and {\tt lat}.
+
+\label{gridspecexample}
+\begin{verbatim}
+netcdf simple_gridspec {
+dimensions:
+      lat = 192 ;
+      lon = 288 ;
+variables:
+      float PSL(lat, lon) ;
+         PSL:time = 50. ;
+         PSL:units = "Pa" ;
+         PSL:long_name = "Sea level pressure" ;
+         PSL:cell_method = "time: mean" ;
+         PSL:coordinates = "lon lat" ;
+      double lat(lat) ;
+         lat:long_name = "latitude" ;
+         lat:units = "degrees_north" ;
+      double lon(lon) ;
+         lon:long_name = "longitude" ;
+         lon:units = "degrees_east" ;
+}
+\end{verbatim}
+
+If the variable has a {\tt mesh} attribute and a {\tt location} attribute, the grid file is in UGRID 
+format(~\ref{sec:fileformat:ugrid}).  The value of {\tt mesh} attribute is the name of a dummy variable that defines the mesh topology.  If the application performs a conservative regridding, the value of the {\tt location} attribute has to be {\tt face}, otherwise, it has to be {\tt node}.  
+This is because ESMF only supports non-conservative regridding on the data stored at the nodes of a ESMF\_Mesh object, and conservative regridding on the data stored at the cells of
+a ESMF\_Mesh object.
+
+Here is an example 2D UGRID file:
+
+\label{ugridexample}
+\begin{verbatim}
+netcdf simple_ugrid {
+dimensions:
+      node = 4176 ; 
+      nele = 8268 ;
+      three = 3 ;
+      time  = 2 ;
+variables:
+      float lon(node) ;
+         lon:units = "degrees_east" ;
+      float lat(node) ;
+         lat:units = "degrees_north" ;
+      float lonc(nele) ;
+         lonc:units = "degrees_east" ;
+      float latc(nele) ;
+         latc:units = "degrees_north" ;
+      int nv(nele, three) ;
+         nv:standard_name = "face_node_connectivity" ;
+         nv:start_index = 1. ;
+      float zeta(time, node) ;
+         zeta:standard_name = "sea_surface_height_above_geoid" ;
+         zeta:_FillValue = -999. ;
+         zeta:location = "node" ;
+         zeta:mesh = "fvcom_mesh" ;
+      float ua(time, nele) ;
+         ua:standard_name = "barotropic_eastward_sea_water_velocity" ;
+         ua:_FillValue = -999. ;
+         ua:location = "face" ;
+         ua:mesh = "fvcom_mesh" ;
+      float va(time, nele) ;
+         va:standard_name = "barotropic_northward_sea_water_velocity" ;
+         va:_FillValue = -999. ;
+         va:location = "face" ;
+         va:mesh = "fvcom_mesh" ;
+      int fvcom_mesh(node) ;
+         fvcom_mesh:cf_role = "mesh_topology" ;
+         fvcom_mesh:dimension = 2. ;
+         fvcom_mesh:locations = "face node" ;
+         fvcom_mesh:node_coordinates = "lon lat" ;
+         fvcom_mesh:face_coordinates = "lonc latc" ;
+         fvcom_mesh:face_node_connectivity = "nv" ;
+}
+\end{verbatim}
+
+There are three variables defined in the above UGRID file - {\tt zeta} on the node of the mesh, {\tt ua} and
+{\tt va} on the face of the mesh.  All three variables have one extra time dimension.  
+
+If the variable specified for the destination file does not already exist in the file, the file type is determined as follows:  
+First search for a variable that has a {\tt cf\_role} attribute of value {\tt mesh\_topology}.  If successful,
+the file is a UGRID file.  If not, check if there is a variable with its {\tt units} attribute set to {\tt degrees\_east} and another variable with it's {\tt units} attribute set to {\tt degrees\_west}.  If such a pair is found, 
+the file is a GRIDSPEC file and the above two variables will be used as the coordinate variables for the 
+variable to be created.  If more than one pair of coordinate variables are found in the file, the application 
+will fail with an error message.  In case it happens, user can use an optional argument 
+{\tt --dst\_coordinates} to specify which pair of variables to be used for the coordinates of the variable.
+
+If the destination 
+variable exists in the destination grid file, it has to have the same number of dimensions and the same type as the source variable. Except for the latitude and longitude dimensions, the sise of 
+the destination variable's extra dimensions (e.g., time and vertical layers) has to match with the 
+source variable.   A
+new variable will be created with the same type and matching dimensions as the source variable in the destination grid file.
+All the attributes of the source variable will be copied to the destination variable except those
+related to the grid defination (i.e. {\tt coordinates} attribute if the destination file is in  
+GRIDSPEC format or {\tt mesh} and {\tt location} attributes if the destination file is in UGRID format.
+
+Addition rules beyond the CF convention are adopted to determine whether there is a time dimension defined
+in the source and destination files.  In this application, only a dimension with a name {\tt time} is 
+considered as a time dimension.
+If the source variable has a {\tt time} dimension and the destination variable is not already defined, 
+the application first checks if there is a {\tt time} dimension defined in the destination file.  If so, 
+the values of the {\tt time} dimension in both files have to be identical.  If they are not, the application
+terminates with an error message.  The application does not check the existence of a {\tt time} variable 
+or if the {\tt units} attribute of the {\tt time} variable match in two input files.  If the destination 
+file does not have a {\tt time} dimension, it will be created.  UNLIMITED time dimension is allowed in the
+source file, but the {\tt time} dimension created in the destination file is not UNLIMITED.
+
+This application requires the NetCDF libary to read the grid files and write out the interpolated variable.  To compile ESMF with
+the NetCDF library, please refer to the "Third Party Libraries" Section in the ESMF User's Guide for more information.
+
+Internally this application uses the ESMF public API to perform regridding.
+If a source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}(~\ref{API:GridCreateFrmNCFile}) is used to create an ESMF\_Grid object from the file. The coordinate variables are stored
+at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}).  If the application performs a 
+conservative regridding, the {\tt addCornerStager} argument is set to {\tt TRUE} and the bound variables in the grid file will
+be read  in and stored at the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER}).  If the variable has an {\tt \_FillValue} attribute defined, a mask will be generated using the missing values of the variable. 
+The data variable is defined as a ESMF\_Field object at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) of the grid.   
+
+{\tt ESMF\_MeshCreate()}(~\ref{API:MeshCreateFromFile}) is used to create an ESMF\_Mesh object if the
+source or destination grid is an unstructured grid. Currently, only the 2D mesh is supported.
+If the application performs a conservative regridding, the varible has to be defined on the face of the mesh cells, i.e., its {\tt location} attribute has to be set to {\tt face}.  Otherwise, the variable has to be 
+defined on the node and its ({\tt location} attribute is set to {\tt node}).
+
+Similar to {\tt ESMF\_RegridWeightGen} application (Section~\ref{sec:ESMF_RegridWeightGen}), this application supports
+bilinear, patch, nearest neighbor, or first-order conservative interpolation. The descriptions of different 
+interpolation methods can be found at Section~\ref{sec:regrid} and Section~\ref{sec:ESMF_RegridWeightGen}. 
+It also supports different pole methods for non-conservative interpolation and allows user to choose to 
+ignore the errors when some of the destination points cannot be mapped by any source points. 
+
+\subsection{Usage}\label{sec:fileregridusage}
+
+The command line arguments are all keyword based.  Both the long keyword prefixed with \verb+ '--' + or the
+one character short keyword prefixed with {\tt '-'} are supported.  The format to run the application is
+as follows:
+
+\begin{verbatim}
+ESMF_FileRegrid  
+        --source|-s src_grid_filename
+        --destination|-d dst_grid_filename
+	--src_var var_name
+	--dst_var var_name
+        [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
+        [--pole|-p none|all|teeth|1|2|..]
+        [--ignore_unmapped|-i]
+        [-r]
+        [--src_regional]
+        [--dst_regional]
+	[--dst_coordinates lon_name,var_name]
+        [--no_log]
+	[--help]
+        [--version]
+        [-V]
+where
+  --source or -s      - a required argument specifying the source grid
+                        file name
+
+  --destination or -d - a required argument specifying the destination
+                        grid file name
+
+  -- src_var          - a required argument specifying the name of the variable 
+                        in the src grid file to be interpolated from
+
+  -- dst_var          - a required argument specifying the name of the variable 
+                        to be interpolated to.  The variable may or may not 
+                        exist in the destination grid file
+
+  --method or -m      - an optional argument specifying which interpolation
+                        method is used. The value can be one of the following:
+
+                        bilinear   - for bilinear interpolation, also the
+                                     default method if not specified.
+                        patch      - for patch recovery interpolation
+                        nearstdtos - for nearest destination to source interpolation
+                        nearststod - for nearest source to destination interpolation
+                        conserve   - for first-order conservative interpolation
+
+  --pole or -p        - an optional argument indicating what to do with
+                        the pole.
+                        The value can be one of the following:
+
+                        none  - No pole, the source grid ends at the top
+                                (and bottom) row of nodes specified in
+                                <source grid>.
+                        all   - Construct an artificial pole placed in the
+                                center of the top (or bottom) row of nodes,
+                                but projected onto the sphere formed by the
+                                rest of the grid. The value at this pole is
+                                the average of all the pole values. This
+                                is the default option.
+
+                        teeth - No new pole point is constructed, instead
+                                the holes at the poles are filled by
+                                constructing triangles across the top and
+                                bottom row of the source Grid. This can be
+                                useful because no averaging occurs, however,
+                                because the top and bottom of the sphere are
+                                now flat, for a big enough mismatch between
+                                the size of the destination and source pole
+                                regions, some destination points may still
+                                not be able to be mapped to the source Grid.
+
+                        <N>   - Construct an artificial pole placed in the
+                                center of the top (or bottom) row of nodes,
+                                but projected onto the sphere formed by the
+                                rest of the grid. The value at this pole is
+                                the average of the N source nodes next to
+                                the pole and surrounding the destination
+                                point (i.e.  the value may differ for each
+                                destination point. Here N ranges from 1 to
+                                the number of nodes around the pole.
+
+    --ignore_unmapped
+           or
+           -i         - ignore unmapped destination points. If not specified
+                        the default is to stop with an error if an unmapped
+                        point is found.
+
+    -r                - an optional argument specifying that the source and
+                        destination grids are regional grids.  If the argument
+                        is not given, the grids are assumed to be global.
+
+    --src_regional    - an optional argument specifying that the source is
+                        a regional grid and the destination is a global grid.
+
+    --dst_regional    - an optional argument specifying that the destination
+                        is a regional grid and the source is a global grid.
+
+    --dst_coordinates - an optional argument that defines the longitude and
+			 latitude variable names in the destination grid file
+			 if the file type is GRIDSPEC.  The variable names are
+			 separated by comma.  This argument is required when
+                         the destination variable is not defined and
+			 there are multiple sets of coordinate variables defined
+			 in the file.  
+
+     --no_log         - Turn off the ESMF error log.
+
+     --help           - Print the usage message and exit.
+
+     --version        - Print ESMF version and license information and exit.
+
+     -V               - Print ESMF version number and exit.
+\end{verbatim}
+
+
+\subsection{Examples}
+
+The example below regrids the node variable {\tt zeta} defined in the sample UGRID file(\ref{ugridexample}) to 
+the destination grid defined in the sample GRIDSPEC file(\ref{gridspecexample}) using bilinear regridding
+method and write the interpolated data into a variable named {\tt zeta}.  
+
+\begin{verbatim}
+
+  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+                --src_var zeta --dst_var zeta
+
+\end{verbatim}
+
+In this case, the destination variable does not exist in {\tt simple\_ugrid.nc} and the {\tt time}
+dimension is not defined in the destination file.  The resulting output file has a new time dimension and a new variable {\tt zeta}.
+The attributes from the source variable {\tt zeta} are copied to the destination variable except for 
+{\tt mesh} and {\tt location}.  A new attribute {\tt coordinates} is created for the destination variable to
+specify the names of the coordinate variables.  The header of the output file looks like:
+
+\begin{verbatim}
+netcdf simple_gridspec {
+dimensions:
+      lat = 192 ;
+      lon = 288 ;
+      time = 2  ;
+variables:
+      float PSL(lat, lon) ;
+         PSL:time = 50. ;
+         PSL:units = "Pa" ;
+         PSL:long_name = "Sea level pressure" ;
+         PSL:cell_method = "time: mean" ;
+         PSL:coordinates = "lon lat" ;
+      double lat(lat) ;
+         lat:long_name = "latitude" ;
+         lat:units = "degrees_north" ;
+      double lon(lon) ;
+         lon:long_name = "longitude" ;
+         lon:units = "degrees_east" ;
+      float zeta(time, lat, lon) ;
+         zeta:standard_name = "sea_surface_height_above_geoid" ;
+         zeta:_FillValue = -999. ;
+         zeta:coordinates = "lon lat" ;
+}
+\end{verbatim}
+  
+The next example shows the command to do the same thing as the previous example but for a 
+different variable {\tt ua}.  Since {\tt ua} is defined on the face, we can only do a conservative 
+regridding.
+
+\begin{verbatim}
+
+  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+               --src_var ua --dst_var ua -m conserve
+
+\end{verbatim}
+
+

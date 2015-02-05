@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
   int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *rc);
+  void ESMC_UtilVersionPrint (int Flag, int versionFlag, int *rc);
 
 #ifdef __cplusplus
 } // extern "C"

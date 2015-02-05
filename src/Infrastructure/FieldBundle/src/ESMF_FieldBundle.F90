@@ -1756,7 +1756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
+        call ESMF_ArrayBundleDestroy(arrayBundle, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1852,8 +1852,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_FieldBundleHalo()} on any FieldBundle that is weakly congruent
 !   and typekind conform to {\tt fieldbundle}. Congruency for FieldBundles is
 !   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for
+!   every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
 !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
@@ -1915,7 +1916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
+        call ESMF_ArrayBundleDestroy(arrayBundle, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2198,9 +2199,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Execute a precomputed FieldBundle redistribution from {\tt srcFieldBundle} to
 !   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
 !   weakly congruent and typekind conform with the respective FieldBundles used during 
-!   {\tt ESMF\_FieldBundleRedistStore()}. Congruent FieldBundles possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the FieldBundles for every DE. For weakly congruent Fields the sizes of the 
+!   {\tt ESMF\_FieldBundleRedistStore()}. Congruency for FieldBundles is
+!   given by the congruency of its constituents.
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for
+!   every DE. For weakly congruent Fields the sizes of the 
 !   undistributed dimensions, that vary faster with memory than the first distributed 
 !   dimension, are permitted to be different. This means that the same {\tt routehandle} 
 !   can be applied to a large class of similar Fields that differ in the number of 
@@ -2303,12 +2306,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! garbage collection
     if (present(srcFieldBundle)) then
-      call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+      call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstFieldBundle)) then
-      call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+      call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2420,8 +2423,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 ! {\tt ESMF\_FieldBundleRedist()} on any pair of FieldBundles that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
-! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
+! conform with the srcFieldBundle, dstFieldBundle pair. 
+! Congruency for FieldBundles is given by the congruency of its constituents.
+! Congruent Fields possess matching DistGrids and the shape of the local
+! array tiles, i.e. the memory allocation, matches between the Fields for
 ! every DE. For weakly congruent Fields the sizes of the 
 ! undistributed dimensions, that vary faster with memory than the first distributed 
 ! dimension, are permitted to be different. This means that the same {\tt routehandle} 
@@ -2530,10 +2535,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2610,10 +2615,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2690,10 +2695,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2770,10 +2775,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2835,8 +2840,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 ! {\tt ESMF\_FieldBundleRedist()} on any pair of Fields that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
+! conform with the srcFieldBundle, dstFieldBundle pair. 
+! Congruent Fields possess matching DistGrids and the shape of the local
+! array tiles, i.e. the memory allocation, matches between the Fields for
 ! every DE. For weakly congruent Fields the sizes of the 
 !   undistributed dimensions, that vary faster with memory than the first distributed 
 !   dimension, are permitted to be different. This means that the same {\tt routehandle} 
@@ -2950,10 +2956,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3000,9 +3006,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Execute a precomputed FieldBundle regrid from {\tt srcFieldBundle} to
 !   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
 !   congruent and typekind conform with the respective FieldBundles used during 
-!   {\tt ESMF\_FieldBundleRegridStore()}. Congruent FieldBundles possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the FieldBundles for every DE. For weakly congruent Fields the sizes of the 
+!   {\tt ESMF\_FieldBundleRegridStore()}. Congruency for FieldBundles is
+!   given by the congruency of its constituents.
+!   Congruent Fields possess matching DistGrids and the shape of the local
+!   array tiles, i.e. the memory allocation, matches between the Fields for
+!   every DE. For weakly congruent Fields the sizes of the 
 !   undistributed dimensions, that vary faster with memory than the first distributed 
 !   dimension, are permitted to be different. This means that the same {\tt routehandle} 
 !   can be applied to a large class of similar Fields that differ in the number of 
@@ -4154,12 +4162,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             
         ! garbage collection
         if (present(srcFieldBundle)) then
-          call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+          call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         if (present(dstFieldBundle)) then
-          call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+          call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -4408,10 +4416,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4487,10 +4495,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4566,10 +4574,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4645,10 +4653,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4816,10 +4824,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! garbage collection
-        call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(srcab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayBundleDestroy(dstab, rc=localrc)
+        call ESMF_ArrayBundleDestroy(dstab, noGarbage=.true., rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
