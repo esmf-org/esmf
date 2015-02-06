@@ -30,6 +30,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 
+#include <string>
+
 using namespace ESMCI;
 
 extern "C" {
@@ -335,12 +337,30 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    
+
+    // Set iofmt based on file name extension (if present)
+    ESMC_IOFmt_Flag opt_iofmt;
+    if (iofmt)
+      opt_iofmt = iofmt;
+    else {
+      const char *file_ext_p = strrchr (file, '.');
+      if (file_ext_p) {
+        std::string file_ext = std::string(file_ext_p);
+        if (file_ext == ".nc")
+          opt_iofmt = ESMF_IOFMT_NETCDF;
+        else if (file_ext == ".bin")
+          opt_iofmt = ESMF_IOFMT_BIN;
+        else
+          opt_iofmt = ESMF_IOFMT_NETCDF;
+      } else
+        opt_iofmt = ESMF_IOFMT_NETCDF;
+    }
+ 
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
     // Invoke the C++ interface
-    localrc = fieldp->read(file, variableName, timeslice, iofmt);
+    localrc = fieldp->read(file, variableName, timeslice, opt_iofmt);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
@@ -466,12 +486,30 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    
+
+    // Set iofmt based on file name extension (if present)
+    ESMC_IOFmt_Flag opt_iofmt;
+    if (iofmt)
+      opt_iofmt = iofmt;
+    else {
+      const char *file_ext_p = strrchr (file, '.');
+      if (file_ext_p) {
+        std::string file_ext = std::string(file_ext_p);
+        if (file_ext == ".nc")
+          opt_iofmt = ESMF_IOFMT_NETCDF;
+        else if (file_ext == ".bin")
+          opt_iofmt = ESMF_IOFMT_BIN;
+        else
+          opt_iofmt = ESMF_IOFMT_NETCDF;
+      } else
+        opt_iofmt = ESMF_IOFMT_NETCDF;
+    }
+
     // typecase into ESMCI type
     ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
     // Invoke the C++ interface
-    localrc = fieldp->write(file, variableName, overwrite, status, timeslice, iofmt);
+    localrc = fieldp->write(file, variableName, overwrite, status, timeslice, opt_iofmt);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 

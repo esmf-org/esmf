@@ -1547,6 +1547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc              ! local return code
     type(ESMF_Logical)      :: opt_singlefileflag   ! helper variable
     integer                 :: len_fileName         ! helper variable
+    type(ESMF_IOFmt_Flag)   :: opt_iofmt            ! helper variable
+    integer                 :: file_ext_p
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -1567,9 +1569,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     endif
 
+    ! Set iofmt based on file name extension (if present)
+    if (present (iofmt)) then
+      opt_iofmt = iofmt
+    else
+      if (index (file, '.') > 0) then
+        file_ext_p = index (file, '.', back=.true.)
+        select case (file(file_ext_p:))
+        case ('.nc')
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        case ('.bin')
+          opt_iofmt = ESMF_IOFMT_BIN
+        case default
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        end select
+      else
+        opt_iofmt = ESMF_IOFMT_NETCDF
+      end if
+    end if
+
     ! Call into the C++ interface, which will call IO object
     call c_esmc_arraybundleread(arraybundle, file, len_fileName     ,     &
-        opt_singlefileflag, timeslice, iofmt, localrc)
+        opt_singlefileflag, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                    &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3246,6 +3267,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)         :: opt_overwriteflag   ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status          ! helper variable
     type(ESMF_IOFmt_Flag)      :: opt_iofmt           ! helper variable
+    integer                    :: file_ext_p
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -3266,8 +3288,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     opt_status = ESMF_FILESTATUS_UNKNOWN
     if (present(status)) opt_status = status
 
-    opt_iofmt = ESMF_IOFMT_NETCDF;
-    if ( present(iofmt)) opt_iofmt = iofmt
+    ! Set iofmt based on file name extension (if present)
+    if (present (iofmt)) then
+      opt_iofmt = iofmt
+    else
+      if (index (file, '.') > 0) then
+        file_ext_p = index (file, '.', back=.true.)
+        select case (file(file_ext_p:))
+        case ('.nc')
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        case ('.bin')
+          opt_iofmt = ESMF_IOFMT_BIN
+        case default
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        end select
+      else
+        opt_iofmt = ESMF_IOFMT_NETCDF
+      end if
+    end if
 
     ! Get string lengths
     len_fileName = len_trim(file)

@@ -273,8 +273,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array)                :: array 
     integer                         :: localrc
     type(ESMF_FieldStatus_Flag)     :: fieldstatus  ! Field's status
-    type(ESMF_IOFmt_Flag)           :: iofmtd
+    type(ESMF_IOFmt_Flag)           :: opt_iofmt
     type(ESMF_IO)                   :: io           ! The I/O object
+    integer                         :: file_ext_p
     logical                         :: errorFound   ! True if error condition
     integer                         :: time
 
@@ -286,10 +287,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    iofmtd = ESMF_IOFMT_NETCDF   ! default format
-    if(present(iofmt)) iofmtd = iofmt
     time = 0
     if(present(timeslice)) time = timeslice
+
+    ! Set iofmt based on file name extension (if present)
+    if (present (iofmt)) then
+      opt_iofmt = iofmt
+    else
+      if (index (file, '.') > 0) then
+        file_ext_p = index (file, '.', back=.true.)
+        select case (file(file_ext_p:))
+        case ('.nc')
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        case ('.bin')
+          opt_iofmt = ESMF_IOFMT_BIN
+        case default
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        end select
+      else
+        opt_iofmt = ESMF_IOFMT_NETCDF
+      end if
+    end if
 
     if (present(variableName)) then
       name = variableName
@@ -320,7 +338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (.not. errorfound) then
       call ESMF_IORead(io, trim(file), timeslice=time,              &
-          iofmt=iofmtd, rc=localrc)
+          iofmt=opt_iofmt, rc=localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
           ESMF_CONTEXT, rcToReturn=rc)
     endif
