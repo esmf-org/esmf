@@ -208,7 +208,7 @@ program ESMF_StateReconcileProxyUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Test whether dg1 and dg2 are aliases to the same DistGrid in memory
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_removeUTest_Multi_Proc_Only
   write(name, *) "Ensure dg1 and dg2 are aliases to the same DistGrid Test"
   write(failMsg, *) "Found non-aliased DistGrid objects!"
   call ESMF_Test((dg1==dg2), name, failMsg, result, ESMF_SRCLINE)
