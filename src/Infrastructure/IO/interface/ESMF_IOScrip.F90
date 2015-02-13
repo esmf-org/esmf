@@ -2689,12 +2689,13 @@ end subroutine ESMF_EsmfInqUnits
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_EsmfGetNode"
 subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
-			    convertToDeg, rc)
+			    convertToDeg, coordSys, rc)
 
     character(len=*), intent(in)   :: filename
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
     integer(ESMF_KIND_I4), pointer, optional :: nodeMask (:)
     logical, intent(in), optional  :: convertToDeg
+    type(ESMF_CoordSys_Flag), optional :: coordSys
     integer, intent(out), optional :: rc
 
     type(ESMF_VM) :: vm
@@ -2713,8 +2714,10 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
     character(len=80) :: units
     integer :: len
     logical :: convertToDegLocal
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
 #ifdef ESMF_NETCDF
+    coordSysLocal = ESMF_COORDSYS_SPH_DEG
     convertToDegLocal = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
@@ -2797,7 +2800,13 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        ! word.  Otherwise, return the whole thing
      if (units(len:len) .eq. achar(0)) len = len-1
        call ESMF_StringLowerCase(units(1:len), rc=rc)
-       if (units(1:len) .ne. 'degrees' .and. &
+       ! if the units is meters, kilometers, or km, make it Cartisian 2D
+       if (units(1:len) .eq. "meters" .or. &
+           units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
+           coordSysLocal = ESMF_COORDSYS_CART
+       elseif (units(1:len) .eq. 'radians' .and. .not. convertToDegLocal) then
+            coordSysLocal = ESMF_COORDSYS_SPH_RAD
+       elseif (units(1:len) .ne. 'degrees' .and. &
             units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -2836,6 +2845,10 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
+
+    if (present(coordSys)) then
+       coordSys = coordSysLocal
+    endif
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
