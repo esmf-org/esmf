@@ -571,8 +571,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
-!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    of options. If not present, file names with a {\tt .bin} extension will
+!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
+!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
+!    {\tt ESMF\_IOFMT\_NETCDF}.
 !    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
