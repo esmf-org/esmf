@@ -1386,6 +1386,8 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     logical                         :: verbose
     character(ESMF_MAXSTR)          :: defaultvalue
+    integer                         :: runCounter
+    real(ESMF_KIND_R8)              :: timeBase, time
 
     rc = ESMF_SUCCESS
     
@@ -1427,6 +1429,21 @@ module NUOPC_Driver
         trim(name)//" - entered Run with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMWtime(timeBase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMWtime(time, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      runCounter=0
+      write (msgString, *) "RunProfile time=", time-timeBase, "runCounter=", &
+        runCounter
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1505,6 +1522,21 @@ module NUOPC_Driver
           else
             exState=is%wrap%modelIS(j)
           endif
+          
+          if (verbose) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            runCounter=runCounter+1
+            write (msgString, *) "CplRunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
@@ -1520,12 +1552,43 @@ module NUOPC_Driver
             " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+            
+          if (verbose) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            write (msgString, *) "CplRunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+            
+            
         endif
       else
         ! model or mediator component
         if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
           write (iString, *) i
           write (pString, *) phase
+          
+          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            runCounter=runCounter+1
+            write (msgString, *) "RunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          
+          
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
@@ -1539,6 +1602,21 @@ module NUOPC_Driver
             trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+            
+          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            write (msgString, *) "RunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+            
+            
         endif
       endif
 
