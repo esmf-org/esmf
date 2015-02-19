@@ -12,6 +12,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMC_StateUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
                 $(ESMF_TESTDIR)/ESMF_StateReadWriteUTest \
 		$(ESMF_TESTDIR)/ESMF_StateUTest
+#		$(ESMF_TESTDIR)/ESMF_StateReconcileProxyUTest \
 
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
@@ -23,6 +24,7 @@ TESTS_RUN     =	RUN_ESMC_StateUTest \
                 RUN_ESMF_StateReconcileUTest \
                 RUN_ESMF_StateReadWriteUTest \
 		RUN_ESMF_StateUTest
+#               RUN_ESMF_StateReconcileProxyUTest \
 #		RUN_ESMF_StateLimitUTest \
 
 TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI \
@@ -73,6 +75,13 @@ RUN_ESMF_StateReconcileUTest:
 
 RUN_ESMF_StateReconcileUTestUNI:
 	$(MAKE) TNAME=StateReconcile NP=1 ftest
+
+#       
+# StateReconcileProxy Unit Test
+#
+
+RUN_ESMF_StateReconcileProxyUTest:
+	$(MAKE) TNAME=StateReconcileProxy NP=4 ftest
 
 #
 # ESMC_StateUTest

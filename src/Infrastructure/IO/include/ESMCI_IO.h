@@ -182,7 +182,7 @@ namespace ESMCI {
     int close(void);
 
     // add and remove objects
-    int addArray(ESMC_Base *arr_p,
+    int addArray(Array *arr_p,
                  const char * const variableName);
 // TBI
 #if 0
@@ -194,6 +194,8 @@ namespace ESMCI {
     void addGrid(ESMC_Base *grid_p, char *gridName,
                  int *rc=NULL);
 #endif // TBI
+    bool redist_check(Array *array_p, int *rc);
+    void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
     void clear();
 
 // TBI

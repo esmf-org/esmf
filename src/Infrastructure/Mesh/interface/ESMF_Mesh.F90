@@ -186,7 +186,6 @@ module ESMF_MeshMod
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
 
-
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -1794,924 +1793,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 
-#if 0
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
-!BOPI
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in the ESMF Unstructured
-!  Grid format -- this is the parallel version and it only works for UGRID.  
-!  Keep the code here but commented it out for 6.3.0 release
-!  Create a triangle and quad mesh using a global node coordinate table and a distributed
-! element connection array
-!  arguments:  VertexCoords(3, NodeCnt), where NodeCnt is the total node count for the
-!  global mesh, the first dimension stores the x,y,z coordinates of the node
-!              CellConnect(4, ElemCnt), where ElemCnt is the total number of elements
-!                The first dimension contains the global node IDs at the four corner of the element 
-!              StartCell, the first Element ID in this PET
-!  in this local PET.  Note the CellConnect is local and VertexCoords is global.
-!  In this routine, we have to figure out which nodes are used by the local Elements 
-!  and who are the owners of the local nodes, then add the local nodes and elements into
-!  the mesh
-! !INTERFACE:
-! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
-			addUserArea, maskFlag, varname, rc)
-!
-!
-! !RETURN VALUE:
-    type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
-! !ARGUMENTS:
-    character(len=*), intent(in)              :: filename
-    type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
-    character(len=*), optional, intent(in)    :: meshname
-    logical, intent(in), optional	      :: addUserArea
-    type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
-    character(len=*), optional, intent(in)    :: varname
-    integer, intent(out), optional            :: rc
-!
-! !DESCRIPTION:
-!   Create a mesh from a grid file defined in the ESMF Unstructured grid format.
-!
-!   \begin{description}
-!   \item [filename]
-!         The name of the grid file
-!   \item[{[addUserArea]}] 
-!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
-!         only supported when the grid file is in the SCRIP or ESMF format. 
-!   \item [{[filetype]}]
-!         The type of grid file
-!   \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
-!         is {\tt ESMF\_FILEFORMAT\_UGRID}
-!   \item[{[maskFlag]}]
-!      If present, generate the mask using the missing\_value attribute defined in 'varname' on
-!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or 
-!      {\tt ESMF\_MESHLOC\_ELEMENT}
-!   \item[{[varname]}]
-!      If maskFlag is present, provide a variable name stored in the grid file and
-!      the mask will be generated using the missing value of the data value of
-!      this variable.  The first two dimensions of the variable has to be the
-!      the longitude and the latitude dimension and the mask is derived from the
-!      first 2D values of this variable even if this data is 3D, or 4D array.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                             :: localrc      ! local return code
-    integer			        :: PetNo, PetCnt 
-    real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:)
-    integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
-    integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
-    integer                             :: startElmt
-    integer                             :: NodeNo
-    integer                             :: NodeCnt, total
-    integer, allocatable                :: NodeId(:)
-    integer, allocatable                :: NodeUsed(:)
-    real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
-    real(ESMF_KIND_R8), allocatable     :: NodeCoordsCart(:)
-    real(ESMF_KIND_R8)                  :: coorX, coorY
-    integer, allocatable                :: NodeOwners(:)
-    integer, allocatable                :: NodeOwners1(:)
-    integer, pointer                    :: glbNodeMask(:), NodeMask(:)
-
-    integer                             :: ElemNo, TotalElements, startElemNo
-    integer                             :: ElemCnt,i,j,k,n,dim, nedges
-    integer				:: localNodes, myStartElmt
-    integer                             :: ConnNo, TotalConnects
-    integer, allocatable                :: ElemId(:)
-    integer, allocatable                :: ElemType(:)
-    integer, allocatable                :: ElemConn(:)
-    integer, pointer                    :: elementMask(:), ElemMask(:)
-    real(ESMF_KIND_R8), pointer         :: elementArea(:), ElemArea(:)
-    integer, allocatable                :: LocalElmTable(:)
-    integer                             :: sndBuf(1)
-    type(ESMF_VM)                       :: vm
-    type(ESMF_Mesh)                     :: Mesh
-    integer(ESMF_KIND_I4)               :: localSplitElems(1)
-    integer(ESMF_KIND_I4)               :: globalSplitElems(1)
-    logical                             :: existSplitElems
-    integer                             :: numPoly
-#if 0
-    integer, parameter                  :: maxNumPoly=20
-    real(ESMF_KIND_R8)                  :: polyCoords(3*maxNumPoly)
-    real(ESMF_KIND_R8)                  :: polyDblBuf(3*maxNumPoly)
-    real(ESMF_KIND_R8)                  :: area(maxNumPoly)
-    integer                             :: polyIntBuf(maxNumPoly)
-    integer                             :: triInd(3*(maxNumPoly-2))
-#else 
-    integer                             :: maxNumPoly
-    real(ESMF_KIND_R8),allocatable      :: polyCoords(:)
-    real(ESMF_KIND_R8),allocatable      :: polyDblBuf(:)
-    real(ESMF_KIND_R8),allocatable      :: area(:)
-    integer,allocatable                 :: polyIntBuf(:)
-    integer,allocatable                 :: triInd(:)
-#endif
-    real(ESMF_KIND_R8)                  :: totalarea
-    integer                             :: spatialDim
-    integer                             :: parametricDim
-    integer                             :: lni,ti,tk
-    type(ESMF_FileFormat_Flag)          :: filetypelocal
-    integer                             :: coordDim
-    logical                             :: convertToDeg
-    logical                             :: haveNodeMask, haveElmtMask
-    logical                             :: haveMask
-    logical 				:: localAddUserArea
-    type(ESMF_MeshLoc)			:: localAddMask
-    real(ESMF_KIND_R8), pointer         :: varbuffer(:)
-    real(ESMF_KIND_R8)                  :: missingvalue
-    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to cart
-
-    ! additional variables used to parallelize node IO 
-    integer, pointer                    :: segmentTbl(:), pairoffsets(:)
-    integer, pointer                    :: nodepairs(:), newpairs(:), mypair(:), allpairs(:)
-    integer, pointer                    :: seqIndexList(:)
-    integer, pointer                    :: haloIndexList(:)
-    integer                             :: totalpairs, startind, endind
-    integer                             :: localnodecnt, totalnodecnt, halonodecnt    
-    integer                             :: haloNodes, startNode
-    type(ESMF_DistGrid)                 :: regDistGrid, nodeDistGrid
-    type(ESMF_Array)                    :: regCoordArray, nodeCoordArray
-    real(ESMF_KIND_R8), pointer         :: fptr(:,:)
-    type(ESMF_RouteHandle)              :: redistHdl, haloHandle
-
-    ! Initialize return code; assume failure until success is certain
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    if (present(addUserArea)) then
-	localAddUserArea = addUserArea
-    else
-	localAddUserArea = .false.
-    endif
-
-    if (present(maskFlag)) then
-	localAddMask = maskFlag
-    else
-	localAddMask = ESMF_MESHLOC_NONE
-    endif
-
-    ! Read the mesh definition from the file
-    if (present(filetype)) then
-	filetypelocal = filetype
-    else
-	filetypelocal = ESMF_FILEFORMAT_ESMFMESH
-    endif
-
-    if (filetypelocal == ESMF_FILEFORMAT_UGRID) then
-	if (.not. present(meshname)) then
-           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- meshname argument is missing", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
-        endif
-    endif
-
-    ! get global vm information
-    !
-    call ESMF_VMGetCurrent(vm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! set up local pet info
-    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
- 
-    if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
-       ! Get coordDim
-       call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
-       	    haveElmtMask=haveElmtMask, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Don't convert if not 2D because that'll be cartesian right now
-       if (coordDim .eq. 2) then
-          convertToDeg = .true.
-       else 
-          convertToDeg = .false.
-       endif
-
-       ! Get information from file     
-       if (haveNodeMask) then
-           call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
-	   		      convertToDeg=convertToDeg, rc=localrc)
-       else
-           call ESMF_EsmfGetNode(filename, nodeCoords, &
-	   		      convertToDeg=convertToDeg, rc=localrc)
-       endif			      			       
-       if (haveElmtMask) then
-	if (localAddUserArea) then
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 rc=localrc)
-	else
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, &
-	 			 rc=localrc)
-	endif
-       else
-	if (localAddUserArea) then
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementArea=elementArea, &
-				 rc=localrc)
-	else
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, rc=localrc)
-	endif
-       endif
-
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
-       haveElmtMask = .false.
-       haveNodeMask = .false.
-       if (localAddMask == ESMF_MESHLOC_ELEMENT) then
-          haveElmtMask = .true.
-       elseif (localAddMask == ESMF_MESHLOC_NODE) then
-          haveNodeMask = .true.
-       endif
-       ! Get information from file
-       call ESMF_GetElemFromUGridFile(filename, meshname, elementConn, &
-                                   elmtNum, startElmt, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Chenk if the grid is 3D or 2D
-       call ESMF_UGridInq(filename, meshname, nodeCount=nodeCnt, &
-       	    			    nodeCoordDim=coordDim, rc=localrc)
-
-       if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of local elements
-          ElemCnt = ubound (elementConn, 2)
-          allocate(varbuffer(ElemCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
-		count=ElemCnt, location="face", &
-		missingvalue=missingvalue, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(elementMask(ElemCnt))
-	  elementMask(:)=1
-	  do i=1,ElemCnt
-	    if (varbuffer(i) == missingvalue) elementMask(i)=0
-          enddo
-	  deallocate(varbuffer)
-       elseif (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_NODE) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of total nodes
-          allocate(varbuffer(nodeCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
-		location="node", &
-		missingvalue=missingvalue, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(glbNodeMask(nodeCnt))
-	  glbNodeMask(:)=1
-	  do i=1,nodeCnt
-	    if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
-          enddo
-	  deallocate(varbuffer)
-       endif 
-    else
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- unrecognized filetype", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
-       return
-    endif
-
-   ! Figure out dimensions 
-    if (coordDim .eq. 2) then
-       parametricDim=2
-       spatialDim = 2
-       cartSpatialDim=3  ! Assuming that this is spherical
-    else if (coordDim .eq. 3) then
-       parametricDim=3
-       spatialDim=3
-       cartSpatialDim=3  
-    else
-       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-            msg="- only coordDim 2 or 3 is supported right now", & 
-            ESMF_CONTEXT, rcToReturn=rc) 
-       return
-    endif
-
-    ! create the mesh
-    if (parametricDim == 2) then
-        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=ESMF_COORDSYS_SPH_DEG,rc=localrc)
-    else
-        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=ESMF_COORDSYS_CART,rc=localrc)
-    endif    
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! These two arrays are temp arrays
-    ! NodeUsed() used for multiple purposes, first, find the owners of the node
-    ! later, used to store the local Node ID to be used in the ElmtConn table
-    print *, PetNo, 'Before allocate NodeUsed'
-    allocate (NodeUsed(NodeCnt))
-
-    ! Set to a number > PetCnt because it will store the PetNo if this node is used by
-    ! the local elements and we will do a global reduce to find the minimal values
-    NodeUsed(:)=PetCnt+100
-
-    ! Total number of local elements
-    ElemCnt = ubound (elementConn, 2)
-
-    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
-    ! Also calculate the total number of mesh elements based on elmtNum
-    ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
-    totalElements = ElemCnt
-    totalConnects = 0
-    maxNumPoly=0
-    if (parametricDim .eq. 2) then
-       do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
-             NodeUsed(elementConn(i,ElemNo))=PetNo
-          enddo
-          if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
-          if (elmtNum(ElemNo) <= 4) then
-             TotalConnects = TotalConnects+elmtNum(ElemNo)
-          else
-             TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
-          end if
-          if (elmtNum(ElemNo) > maxNumPoly) then
-             maxNumPoly=elmtNum(ElemNo)
-          endif
-       end do
-    else ! If not parametricDim==2, assuming parmetricDim==3
-       do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
-             NodeUsed(elementConn(i,ElemNo))=PetNo
-          enddo
-          TotalConnects = TotalConnects+elmtNum(ElemNo)
-       end do       
-    endif
-
-   ! write(*,*) "maxNumPoly=",maxNumPoly
-
-    ! create sparse matrix for localNode
-    totalpairs = 200
-    allocate(mypair(1), nodepairs(totalpairs))
-    mypair(1) = 0
-    i=1
-    j=1
-    totalnodecnt=0
-    do while (i <= NodeCnt)
-      do while (NodeUsed(i)>PetNo)
-        i=i+1
-      end do
-      if (i > NodeCnt) EXIT
-      nodepairs(j)=i
-      do while (NodeUsed(i)==PetNo)
-        i=i+1
-        totalnodecnt = totalnodecnt+1
-      end do
-      nodepairs(j+1)=i-1
-      j=j+2
-      mypair(1)=mypair(1)+1
-      if (j>totalpairs) then
-         !print *, 'reallocate nodepairs'
-         allocate(newpairs(totalpairs*2))
-	 newpairs(1:totalpairs)=nodepairs
-         deallocate(nodepairs)
-         nodepairs => newpairs
-         totalpairs=totalpairs*2
-      endif
-    enddo
-
-    ! collect the node segment pairs in all the PETs  
-    allocate(allpairs(PetCnt))
-    call ESMF_VMAllGather(vm, mypair, allpairs, 1, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    allocate(pairoffsets(PetCnt))
-    pairoffsets(1)=0
-    allpairs = allpairs*2
-    totalpairs = allpairs(1)
-    do i=2,PetCnt
-      pairoffsets(i)=pairoffsets(i-1)+allpairs(i-1)
-      totalpairs = totalpairs+allpairs(i)
-    enddo
-   
-    print *, PetNo, " Total node pairs and total nodes: ",  mypair(1), totalpairs, totalnodecnt
-
-    allocate(segmentTbl(totalpairs))
-    call ESMF_VMAllGatherV(vm, nodepairs, mypair(1)*2, segmentTbl, allpairs, &
-             pairoffsets, rc=localrc)
-
-    !print *, 'pairoffsets ', pairoffsets
-    !print *, PetNo, 'segmentTbl ', segmentTbl(pairoffsets(PetNo+1)+1:pairoffsets(PetNo+1)+100)
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Need to decide who owns the local nodes
-    ! Assign the node to the first PET that uses it, so only need to 
-    ! search the pairs from PET=0:PetNo-1
-    halonodecnt = 0
-    do j=1, mypair(1)
-      startind=nodepairs((j-1)*2+1)
-      endind = nodepairs((j-1)*2+2)
-      !print *, PetNo, "nodepairs: ", j, startind, endind
-      do k=startind, endind
-        do i=1, PetNo
-          do n = pairoffsets(i)+1, pairoffsets(i+1),2
-            if (k < segmentTbl(n)) EXIT
-            if (k > segmentTbl(n+1)) CYCLE
-            NodeUsed(k)= i-1
-	    halonodecnt = halonodecnt+1
-	    !print *, PetNo, k, 'fall within ', segmentTbl(n), segmentTbl(n+1)
-            goto 100
-           enddo
-        enddo
-        100 continue
-      enddo
-    enddo
-
-    deallocate(pairoffsets, segmentTbl, allpairs, mypair, nodepairs)
-    print *, PetNo, "total local nodes and halo nodes counts:", totalnodecnt, halonodecnt
-
-    ! Create a distgrid based on the local ownership of the node ids
-     allocate(seqIndexList(totalnodecnt-halonodecnt))
-     allocate(haloIndexList(halonodecnt))
-    ! count number of nodes used and convert NodeUsed values into local index
-    localNodes = 0
-    haloNodes = 0
-    do NodeNo = 1, NodeCnt
-       if (NodeUsed(NodeNo) == PetNo) then
-         localNodes = localNodes+1
-         seqIndexList(localNodes)=NodeNo
-       elseif (NodeUsed(NodeNo) < PetNo) then
-         haloNodes = haloNodes+1
-         haloIndexList(haloNodes)=NodeNo
-       endif
-    enddo
-    nodeDistGrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=localrc)
-    nodeCoordArray= ESMF_ArrayCreate(nodeDistGrid, ESMF_TYPEKIND_R8, &
-    		                distgridToArrayMap=(/2/), &
- 		    		haloSeqIndexList=haloIndexList, undistLBound=(/1/), & 
-				undistUBound=(/coordDim/),rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Read in the node coordinates in parallel and redistribute it based on the arb. distgrid
-    localnodecnt=NodeCnt/PetCnt
-    startNode=localnodecnt*PetNo+1
-    if (PetNo == PetCnt-1) then
-       localnodecnt = localnodecnt + mod(NodeCnt, PetCnt)
-    endif
-    call ESMF_GetNodeFromUGridFile(filename, meshname, nodeCoords, &
-         nodeCount=localnodecnt, startNode=startNode, &
-         convertToDeg = .true., rc=localrc) 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    print *, PetNo, 'NodeCoords ', nodeCoords(1,1000), nodeCoords(2,1000)
-   
-    ! Create a distgrid with regular distribution for the NodeCoords
-    regDistGrid = ESMF_DistGridCreate((/1/), (/NodeCnt/), &
-    		  	   regDecomp=(/PetCnt/), &
-    		           decompflag=(/ESMF_DECOMP_RESTLAST/), &
-			   indexflag=ESMF_INDEX_GLOBAL,  rc=localrc) 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Create an array with one undistributed dimension for the coordinates
-    regCoordArray= ESMF_ArrayCreate(regDistGrid, ESMF_TYPEKIND_R8, &
-    		            distgridToArrayMap=(/2/), &
-   		    	    undistLBound=(/1/), undistUBound=(/coordDim/),rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set array values
-    call ESMF_ArrayGet(regCoordArray, localDe=0, farrayPtr=fptr, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! NodeCoords(coordDim, localnodecnt), fptr(coordDim, startNode:startNode+localnodecnt)
-    ! can we do the following array assignment?
-    print *, 'size of NodeCoords: ', ubound(NodeCoords)
-    ! print *, 'bounds of fptr: ', lbound(fptr), ubound(fptr)
-    fptr(:,:) = NodeCoords(:,:)
-
-    ! print *, 'fptr ', fptr(1,1000), fptr(2,1000)
-
-    deallocate(NodeCoords)
-
-    print *, PetNo, 'Before ArrayRedistStore'
-    ! call array redist to redist to the new distribution
-    call ESMF_ArrayRedistStore(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
-    	 				      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_ArrayRedist(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
-    	 				 rc=localrc)               
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    print *, PetNo, 'Before ArrayHaloStore'
-    ! Need to get the data for the Halo region
-    call ESMF_ArrayHaloStore(nodeCoordArray, haloHandle, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_ArrayHalo(nodeCoordArray, haloHandle, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Release the route handle
-    call ESMF_ArrayHaloRelease(haloHandle, rc=localrc)
-    call ESMF_ArrayRedistRelease(redistHdl, rc=localrc)
-    call ESMF_ArrayDestroy(regCoordArray)
-    call ESMF_DistGridDestroy(regDistGrid)
-
-    ! Now, get the node coordinates fortran pointer, this fptr includes both the
-    ! exclusive region and the halo region 
-    call ESMF_ArrayGet(nodeCoordArray, farrayPtr=nodeCoords, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !print *, 'NodeCoords ', nodeCoords(1,1000), nodeCoords(2,1000)
-    ! allocate nodes arrays for ESMF_MeshAddNodes()
-    allocate (NodeId(totalnodecnt))
-    allocate (NodeOwners(totalnodecnt))
-
-    localnodecnt=totalnodecnt-halonodecnt
-    NodeId(1:localnodecnt)=seqIndexList
-    NodeId(localnodecnt+1:totalnodecnt)=haloIndexList
-    NodeOwners(1:localnodecnt)=PetNo
-    ! Now change NodeUsed content to store the local node index to be used by elemConn    
-    do i = 1, localnodecnt
-       NodeUsed(seqIndexList(i))=i
-    enddo
-    do i = 1, halonodecnt
-      NodeOwners(localnodecnt+i) = NodeUsed(haloIndexList(i))
-      NodeUsed(haloIndexList(i))=localnodecnt+i
-    enddo
-    deallocate(seqIndexList, haloIndexList)
-
-    if (parametricDim .eq. 2) then
-       allocate (NodeCoords1D(totalnodecnt*CoordDim))
-    else ! If not parametricDim==2, assuming parmetricDim==3
-       allocate(NodeCoords1D(totalnodecnt*3))
-    endif
-
-    i = 1
-    total = 0
-    if (parametricDim .eq. 2) then
-       do i = 1, totalnodecnt
-          do dim = 1, CoordDim
-            NodeCoords1D ((i-1)*CoordDim+dim) = nodeCoords (dim, i)
-          end do
-       end do
-    else ! If not parametricDim==2, assuming parmetricDim==3
-       do NodeNo = 1, totalnodecnt
-          do dim = 1, 3
-             NodeCoords1D ((i-1)*3+dim) = nodeCoords(dim, NodeNo)
-	  end do
-       end do
-    endif
-
-    print *, PetNo, 'Before ESMF_MeshAddNodes'
-    ! Add nodes
-    if (.not. haveNodeMask) then
-       ! Add nodes
-       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
-                            NodeCoords=NodeCoords1D, &
-                            NodeOwners=NodeOwners, &
-                            rc=localrc)
-    else
-       allocate(NodeMask(localNodes))
-       do i=1,localNodes
-         NodeMask(i)=glbNodeMask(NodeId(i))
-       enddo
-       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
-                            NodeCoords=NodeCoords1D, &
-                            NodeOwners=NodeOwners, &
-			    NodeMask = NodeMask, &
-                            rc=localrc)
-       deallocate(NodeMask)
-       deallocate(glbNodeMask)		    
-    endif 
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call ESMF_ArrayDestroy(nodeCoordArray)
-    call ESMF_DistGridDestroy(nodeDistGrid)
-
-    ! Need to calculate the total number of ESMF_MESH objects and the start element ID
-    ! Do a global gather to get all the local TotalElements
-
-    allocate(localElmTable(PetCnt))
-    sndBuf(1)=TotalElements
-    call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    
-    ! Find out the start element ID
-    myStartElmt=0
-    do i=1,PetNo
-      myStartElmt = myStartElmt+localElmTable(i)
-    end do
-    deallocate(localElmTable)
-
-    ! allocate element arrays for the local elements
-    allocate (ElemId(TotalElements))
-    allocate (ElemType(TotalElements))
-    allocate (ElemConn(TotalConnects))
-    if (localAddUserArea) allocate(ElemArea(TotalElements))
-
-    ! Allocate mask if the user wants one
-    haveMask=.false.
-    if (haveElmtMask) then 
-       allocate (ElemMask(TotalElements))
-       haveMask=.true.
-    endif
-
-    ! figure out if there are split elements globally
-    !! Fake logical allreduce .or. with MAX
-    if (totalElements .gt. ElemCnt) then
-       localSplitElems(1)=1
-    else 
-       localSplitElems(1)=0
-    endif
-    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_REDUCE_MAX, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
-    if (globalSplitElems(1) .eq. 1) then
-       existSplitElems=.true.
-    else 
-       existSplitElems=.false.
-    endif
-
-
-    ! Set split element info
-    if (existSplitElems) then    
-       Mesh%hasSplitElem=.true.
-       allocate(mesh%splitElemMap(TotalElements))
-       Mesh%splitElemStart=myStartElmt+1  ! position of first element
-       Mesh%splitElemCount=TotalElements
-       Mesh%origElemStart=startElmt  ! position of first element
-       Mesh%origElemCount=ElemCnt
-    endif
-
-    ! Allocate a mask even if the user doesn't want one, if we have split elements 
-    if (existSplitElems .and. .not. haveElmtMask) then
-       allocate (ElemMask(TotalElements))
-       haveMask=.true.
-       ElemMask(:)=1  ! default to nothing masked out
-    endif    
-
-
-    ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
-    ! element IDs will be from startElmt to startElmt+ElemCnt-1
-    ! The ElemConn() contains the four corner node IDs for each element and it is organized
-    ! as a 1D array.  The node IDs are "local", which are stored in NodeUsed(:)
-    ElemNo = 1
-    ConnNo = 0
-    if (parametricDim .eq. 2) then
-       ! Allocate variables for triangulation
-       allocate(polyCoords(3*maxNumPoly))
-       allocate(polyDblBuf(3*maxNumPoly))
-       allocate(area(maxNumPoly))
-       allocate(polyIntBuf(maxNumPoly))
-       allocate(triInd(3*(maxNumPoly-2)))
-
-       ! Parametric dim=2 and cartSpatialDim=3 
-       ! Means spherical, so calc. cart. coordinates
-       if (cartSpatialDim .eq. 3) then
-          allocate(NodeCoordsCart(cartSpatialDim*localNodes))
-
-          ti=0
-          tk=0
-          do i=1,localNodes
-             call c_esmc_sphdeg_to_cart(NodeCoords1D(ti+1), &
-                                        NodeCoords1D(ti+2),  &
-                                        NodeCoordsCart(tk+1), &
-                                        NodeCoordsCart(tk+2), &
-                                        NodeCoordsCart(tk+3),  &
-                                        localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return    
-
-             ti=ti+2
-             tk=tk+3
-          enddo
-       endif
-
-       ! Loop through creating Mesh appropriate elements
-       do j = 1, ElemCnt
-          if (elmtNum(j)==3) then        
-             ElemId(ElemNo) = myStartElmt+ElemNo
-             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-             do i=1,3
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-             end do
-             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
-             ElemNo=ElemNo+1
-             ConnNo=ConnNo+3
-          elseif (elmtNum(j)==4) then
-             ElemId(ElemNo) = myStartElmt+ElemNo
-             ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
-             do i=1,4
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-             end do
-             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
-             ElemNo=ElemNo+1
-             ConnNo=ConnNo+4
-          else
-             ! number of points in poly to triangulate
-             numPoly=elmtNum(j)
-             if (numPoly > maxNumPoly) then
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                     msg="- File contains polygons with more sides than triangulation is supported for", &
-                     ESMF_CONTEXT, rcToReturn=rc)
-                return
-             endif
-
-             ! Copy points into input list
-             if (cartSpatialDim==2) then
-                ti=0
-                do k=1,numPoly
-                   lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                   polyCoords(ti+1)=NodeCoords1D(lni+1)
-                   polyCoords(ti+2)=NodeCoords1D(lni+2)
-                   ti=ti+2
-                enddo
-             else if (cartSpatialDim==3) then
-                ti=0
-                do k=1,numPoly
-                   lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                   polyCoords(ti+1)=NodeCoordsCart(lni+1)
-                   polyCoords(ti+2)=NodeCoordsCart(lni+2)
-                   polyCoords(ti+3)=NodeCoordsCart(lni+3)
-                   ti=ti+3
-                enddo
-             endif
-
-             ! Checking for other spatialDims above, not here in a loop
-
-             ! call triangulation routine
-             call c_ESMC_triangulate(parametricDim, cartSpatialDim, &
-                  numPoly, polyCoords, polyDblBuf, polyIntBuf, &
-                  triInd, localrc)   
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-             ! translate triangulation out of output list
-             ti=0
-	     startElemNo = ElemNo
-             do k=1,numPoly-2
-                ElemId(ElemNo)=myStartElmt+ElemNo
-                ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-                ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
-                ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
-                ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
-                if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
- 	        if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-                
-                ! Calculate area of sub-triangle
-  	        !if (localAddUserArea) then 
-                   if (cartSpatialDim==2) then
-		     tk=0
-		     do i=1,3
-                       lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-      	               polyCoords(tk+1)=NodeCoords1D(lni+1)
-                       polyCoords(tk+2)=NodeCoords1D(lni+2)
-                       tk=tk+2
-                     enddo
-	           else if (cartSpatialDim==3) then
-                     tk=0
-                     do i=1,3
-                       lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-                       polyCoords(tk+1)=NodeCoordsCart(lni+1)
-                       polyCoords(tk+2)=NodeCoordsCart(lni+2)
-                       polyCoords(tk+3)=NodeCoordsCart(lni+3)
-                       tk=tk+3
-                     enddo
-                   endif
-                   nEdges = 3
-                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc) 
-	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        	          ESMF_CONTEXT, rcToReturn=rc)) return
-                ! endif
-
-                ! If the area of the subtriangle is 0.0 mask it out
-                if (area(k)==0.0) then
-                   ElemMask(ElemNo)=0
-                endif
-
-                ElemNo=ElemNo+1
-                ConnNo=ConnNo+3
-                ti=ti+3
-             enddo
-             !!! set the area for each splitted triangle
-	     if (localAddUserArea) then
-	        totalarea = 0
-		do k=1,numPoly-2
-	          totalarea = totalarea + area(k)
-                enddo
-                do k=1, numPoly-2
-                  elemArea(startElemNo+k) = elementArea(j)*(area(k)/totalarea)
-                enddo
-              endif
-          end if
-       end do
-
-       ! deallocate cart nodes
-       if (cartSpatialDim .eq. 3) then
-          deallocate(NodeCoordsCart)
-       endif
-
-       ! deallocate after triangulation
-       deallocate(polyCoords)
-       deallocate(polyDblBuf)
-       deallocate(area)
-       deallocate(polyIntBuf)
-       deallocate(triInd)
-    else ! If not parametricDim==2, assuming parmetricDim==3
-       do j = 1, ElemCnt
-          if (elmtNum(j)==4) then        
-             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
-          elseif (elmtNum(j)==8) then
-             ElemType (ElemNo) = ESMF_MESHELEMTYPE_HEX
-          else
-             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
-             return
-          endif
-
-          do i=1,elmtNum(j)
-             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-          end do
-          ElemId(ElemNo) = myStartElmt+ElemNo
-          if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-          if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
-          ElemNo=ElemNo+1
-          ConnNo=ConnNo+elmtNum(j)
-       end do
-    endif
-
-
-    if (ElemNo /= TotalElements+1) then
-	write (ESMF_UtilIOStdout,*)  &
-            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
-    end if
-
-    ! Add elements
-    print *, PetNo, 'Before ESMF_MeshAddElement'
-    if (haveMask .and. localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
-    elseif (haveMask) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, rc=localrc)
-    elseif (localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementArea=ElemArea, rc=localrc)
-    else
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
-    end if
-    print *, PetNo, ' after MeshAddElments()'
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
-    if (existSplitElems) then
-       Mesh%hasSplitElem=.true.
-    else
-       Mesh%hasSplitElem=.false.
-    endif
-
-    deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners)
-    deallocate(ElemId, ElemType, ElemConn)
-    deallocate(elementConn, elmtNum)
-    if (haveElmtMask) deallocate(elementMask) 
-    if (haveMask) deallocate(ElemMask) 
-     
-    print *, PetNo, 'Done ESMF_MeshCreateFromUnstruct'
-
-    if (localAddUserArea) deallocate(elementArea, ElemArea)
-    ESMF_MeshCreateFromUnstruct = Mesh
-
-    if (present(rc)) rc=ESMF_SUCCESS
-    return
-end function ESMF_MeshCreateFromUnstruct
-!------------------------------------------------------------------------------
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2839,7 +1920,7 @@ end function ESMF_MeshCreateFromUnstruct
     type(ESMF_MeshLoc)			:: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
-    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to cart
+    type(ESMF_CoordSys_Flag)            :: coordSys
 
 
     ! Initialize return code; assume failure until success is certain
@@ -2883,6 +1964,9 @@ end function ESMF_MeshCreateFromUnstruct
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! define default coordinate system
+    coordSys = ESMF_COORDSYS_SPH_DEG
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
@@ -2898,13 +1982,14 @@ end function ESMF_MeshCreateFromUnstruct
           convertToDeg = .false.
        endif
 
-       ! Get information from file     
+       ! Get information from file    
+       ! Need to return the coordinate system for the nodeCoords 
        if (haveNodeMask) then
            call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
-	   		      convertToDeg=convertToDeg, rc=localrc)
+	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
-	   		      convertToDeg=convertToDeg, rc=localrc)
+	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        endif			      			       
        if (haveElmtMask) then
 	if (localAddUserArea) then
@@ -2994,11 +2079,10 @@ end function ESMF_MeshCreateFromUnstruct
     if (coordDim .eq. 2) then
        parametricDim = 2
        spatialDim = 2
-       cartSpatialDim=3  ! Assuming that this is spherical
     else if (coordDim .eq. 3) then
        parametricDim = 3
        spatialDim = 3
-       cartSpatialDim=3  
+       coordSys=ESMF_COORDSYS_CART
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
@@ -3009,10 +2093,10 @@ end function ESMF_MeshCreateFromUnstruct
     ! create the mesh
     if (parametricDim == 2) then
         Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=ESMF_COORDSYS_SPH_DEG,rc=localrc)
+	       coordSys=coordSys,rc=localrc)
     else
         Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=ESMF_COORDSYS_CART,rc=localrc)
+		coordSys=coordSys,rc=localrc)
     endif    
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3140,7 +2224,7 @@ end function ESMF_MeshCreateFromUnstruct
        deallocate(NodeMask)
        deallocate(glbNodeMask)		    
     endif 
-    
+
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3165,7 +2249,7 @@ end function ESMF_MeshCreateFromUnstruct
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
     if (localAddUserArea) allocate(ElemArea(TotalElements))
-
+    
     ! Allocate mask if the user wants one
     haveMask=.false.
     if (haveElmtMask) then 
@@ -3507,7 +2591,8 @@ end function ESMF_MeshCreateFromScrip
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
     ! initialize return code; assume routine not implemented
 
-    ESMF_MeshCreateFromPointer%this=mesh_pointer
+    ! Set pointer
+    ESMF_MeshCreateFromPointer%this = mesh_pointer
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
@@ -3626,6 +2711,93 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSetMOAB()"
+!BOPI
+! !IROUTINE: ESMF_MeshSetMOAB -- Turn on or off moab
+!
+! !INTERFACE:
+   subroutine ESMF_MeshSetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in)                        :: moabOn
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on Moab 
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Variable used to turn MOAB on or off
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+   ! Translate to integer
+   intMoabOn=0
+   if (moabOn) then
+      intMoabOn=1
+   endif
+
+    call c_esmc_meshsetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshSetMOAB
+
+    
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetIntPtr()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetIntPtr -- get internal pointer
+!
+! !INTERFACE:
+   subroutine ESMF_MeshGetIntPtr(mesh, internalPtr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    type(ESMF_Pointer), intent(out)          :: internalPtr
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Get the internal pointer. 
+!
+!   \begin{description}
+!   \item [mesh]
+!         Mesh to get internal pointer from
+!   \item [internalPtr]
+!         Internal pointer
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+    call c_esmc_meshgetinternalptr(mesh, internalPtr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshGetIntPtr
 
 !!!!!!!!  private Mesh subroutines !!!!!!!!!!
 #undef  ESMF_METHOD
@@ -5820,94 +4992,6 @@ end subroutine ESMF_MeshMergeSplitDstInd
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshSetMOAB()"
-!BOPI
-! !IROUTINE: ESMF_MeshSetMOAB -- Turn on or off moab
-!
-! !INTERFACE:
-   subroutine ESMF_MeshSetMOAB(moabOn, rc)
-!
-! !ARGUMENTS:
-    logical, intent(in)                        :: moabOn
-    integer, intent(out) , optional            :: rc
-!
-! !DESCRIPTION:
-!   Turn on Moab 
-!
-!   \begin{description}
-!   \item [moabOn]
-!         Variable used to turn MOAB on or off
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
-
-    ! Init localrc
-    localrc = ESMF_SUCCESS
-    
-   ! Translate to integer
-   intMoabOn=0
-   if (moabOn) then
-      intMoabOn=1
-   endif
-
-    call c_esmc_meshsetMOAB(intMoabOn, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    end subroutine ESMF_MeshSetMOAB
-
-    
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshGetIntPtr()"
-!BOPI
-! !IROUTINE: ESMF_MeshGetIntPtr -- get internal pointer
-!
-! !INTERFACE:
-   subroutine ESMF_MeshGetIntPtr(mesh, internalPtr, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(in)                :: mesh
-    type(ESMF_Pointer), intent(out)          :: internalPtr
-    integer, intent(out) , optional            :: rc
-!
-! !DESCRIPTION:
-!   Get the internal pointer. 
-!
-!   \begin{description}
-!   \item [mesh]
-!         Mesh to get internal pointer from
-!   \item [internalPtr]
-!         Internal pointer
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
-
-    ! Init localrc
-    localrc = ESMF_SUCCESS
-    
-    call c_esmc_meshgetinternalptr(mesh, internalPtr, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    end subroutine ESMF_MeshGetIntPtr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshLocEqual"
 !BOPI
 ! !IROUTINE: ESMF_MeshLocEqual - Equality of MeshLoc statuses
@@ -6010,5 +5094,934 @@ end subroutine ESMF_MeshMergeSplitDstInd
     end function ESMF_MeshGetInit
 
 !------------------------------------------------------------------------------
+
+#if 0
+!------------------------------------------------------------------------------
+!---  In this function, the node coordinates of the mesh are read in to multiple PETs in 
+!---  parallel and redistributed to its resident nodes based on the cell partition.
+!---  The other version of the same function reads the entire node coordinates into every
+!---  PET and only store the ones the local cells use.  This version may same some memory
+!---  space if the number of nodes in the mesh is huge.  But it creates more communication
+!---  and handshaking thus will run slower in most of the cases.
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in the ESMF Unstructured
+!  Grid format -- this is the parallel version and it only works for UGRID.  
+!  Keep the code here but commented it out for 6.3.0 release
+!  Create a triangle and quad mesh using a global node coordinate table and a distributed
+! element connection array
+!  arguments:  VertexCoords(3, NodeCnt), where NodeCnt is the total node count for the
+!  global mesh, the first dimension stores the x,y,z coordinates of the node
+!              CellConnect(4, ElemCnt), where ElemCnt is the total number of elements
+!                The first dimension contains the global node IDs at the four corner of the element 
+!              StartCell, the first Element ID in this PET
+!  in this local PET.  Note the CellConnect is local and VertexCoords is global.
+!  In this routine, we have to figure out which nodes are used by the local Elements 
+!  and who are the owners of the local nodes, then add the local nodes and elements into
+!  the mesh
+! !INTERFACE:
+! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
+			addUserArea, maskFlag, varname, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
+! !ARGUMENTS:
+    character(len=*), intent(in)              :: filename
+    type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
+    character(len=*), optional, intent(in)    :: meshname
+    logical, intent(in), optional	      :: addUserArea
+    type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
+    character(len=*), optional, intent(in)    :: varname
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh from a grid file defined in the ESMF Unstructured grid format.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[{[addUserArea]}] 
+!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
+!         only supported when the grid file is in the SCRIP or ESMF format. 
+!   \item [{[filetype]}]
+!         The type of grid file
+!   \item[{[meshname]}]
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         is {\tt ESMF\_FILEFORMAT\_UGRID}
+!   \item[{[maskFlag]}]
+!      If present, generate the mask using the missing\_value attribute defined in 'varname' on
+!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or 
+!      {\tt ESMF\_MESHLOC\_ELEMENT}
+!   \item[{[varname]}]
+!      If maskFlag is present, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                             :: localrc      ! local return code
+    integer			        :: PetNo, PetCnt 
+    real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
+    integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
+    integer                             :: startElmt
+    integer                             :: NodeNo
+    integer                             :: NodeCnt, total
+    integer, allocatable                :: NodeId(:)
+    integer, allocatable                :: NodeUsed(:)
+    real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
+    real(ESMF_KIND_R8), allocatable     :: NodeCoordsCart(:)
+    real(ESMF_KIND_R8)                  :: coorX, coorY
+    integer, allocatable                :: NodeOwners(:)
+    integer, allocatable                :: NodeOwners1(:)
+    integer, pointer                    :: glbNodeMask(:), NodeMask(:)
+
+    integer                             :: ElemNo, TotalElements, startElemNo
+    integer                             :: ElemCnt,i,j,k,n,dim, nedges
+    integer				:: localNodes, myStartElmt
+    integer                             :: ConnNo, TotalConnects
+    integer, allocatable                :: ElemId(:)
+    integer, allocatable                :: ElemType(:)
+    integer, allocatable                :: ElemConn(:)
+    integer, pointer                    :: elementMask(:), ElemMask(:)
+    real(ESMF_KIND_R8), pointer         :: elementArea(:), ElemArea(:)
+    integer, allocatable                :: LocalElmTable(:)
+    integer                             :: sndBuf(1)
+    type(ESMF_VM)                       :: vm
+    type(ESMF_Mesh)                     :: Mesh
+    integer(ESMF_KIND_I4)               :: localSplitElems(1)
+    integer(ESMF_KIND_I4)               :: globalSplitElems(1)
+    logical                             :: existSplitElems
+    integer                             :: numPoly
+#if 0
+    integer, parameter                  :: maxNumPoly=20
+    real(ESMF_KIND_R8)                  :: polyCoords(3*maxNumPoly)
+    real(ESMF_KIND_R8)                  :: polyDblBuf(3*maxNumPoly)
+    real(ESMF_KIND_R8)                  :: area(maxNumPoly)
+    integer                             :: polyIntBuf(maxNumPoly)
+    integer                             :: triInd(3*(maxNumPoly-2))
+#else 
+    integer                             :: maxNumPoly
+    real(ESMF_KIND_R8),allocatable      :: polyCoords(:)
+    real(ESMF_KIND_R8),allocatable      :: polyDblBuf(:)
+    real(ESMF_KIND_R8),allocatable      :: area(:)
+    integer,allocatable                 :: polyIntBuf(:)
+    integer,allocatable                 :: triInd(:)
+#endif
+    real(ESMF_KIND_R8)                  :: totalarea
+    integer                             :: spatialDim
+    integer                             :: parametricDim
+    integer                             :: lni,ti,tk
+    type(ESMF_FileFormat_Flag)          :: filetypelocal
+    integer                             :: coordDim
+    logical                             :: convertToDeg
+    logical                             :: haveNodeMask, haveElmtMask
+    logical                             :: haveMask
+    logical 				:: localAddUserArea
+    type(ESMF_MeshLoc)			:: localAddMask
+    real(ESMF_KIND_R8), pointer         :: varbuffer(:)
+    real(ESMF_KIND_R8)                  :: missingvalue
+    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to 
+    type(ESMF_CoordSys_Flag)            :: coordSys
+
+    ! additional variables used to parallelize node IO 
+    integer, pointer                    :: segmentTbl(:), pairoffsets(:)
+    integer, pointer                    :: nodepairs(:), newpairs(:), mypair(:), allpairs(:)
+    integer, pointer                    :: seqIndexList(:)
+    integer, pointer                    :: haloIndexList(:)
+    integer                             :: totalpairs, startind, endind
+    integer                             :: localnodecnt, totalnodecnt, halonodecnt    
+    integer                             :: haloNodes, startNode
+    type(ESMF_DistGrid)                 :: regDistGrid, nodeDistGrid
+    type(ESMF_Array)                    :: regCoordArray, nodeCoordArray
+    real(ESMF_KIND_R8), pointer         :: fptr(:,:)
+    type(ESMF_RouteHandle)              :: redistHdl, haloHandle
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if (present(addUserArea)) then
+	localAddUserArea = addUserArea
+    else
+	localAddUserArea = .false.
+    endif
+
+    if (present(maskFlag)) then
+	localAddMask = maskFlag
+    else
+	localAddMask = ESMF_MESHLOC_NONE
+    endif
+
+    ! Read the mesh definition from the file
+    if (present(filetype)) then
+	filetypelocal = filetype
+    else
+	filetypelocal = ESMF_FILEFORMAT_ESMFMESH
+    endif
+
+    if (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+	if (.not. present(meshname)) then
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                             msg="- meshname argument is missing", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
+        endif
+    endif
+
+    ! get global vm information
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Default coordinate system
+    coordSys = ESMF_COORDSYS_SPH_DEG
+ 
+    if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
+       ! Get coordDim
+       call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
+       	    haveElmtMask=haveElmtMask, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Don't convert if not 2D because that'll be cartesian right now
+       if (coordDim .eq. 2) then
+          convertToDeg = .true.
+       else 
+          convertToDeg = .false.
+       endif
+
+       ! Get information from file     
+       if (haveNodeMask) then
+           call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
+	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+       else
+           call ESMF_EsmfGetNode(filename, nodeCoords, &
+	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+       endif			      			       
+       if (haveElmtMask) then
+	if (localAddUserArea) then
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
+	 			 rc=localrc)
+	else
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, &
+	 			 rc=localrc)
+	endif
+       else
+	if (localAddUserArea) then
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementArea=elementArea, &
+				 rc=localrc)
+	else
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, rc=localrc)
+	endif
+       endif
+
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+       haveElmtMask = .false.
+       haveNodeMask = .false.
+       if (localAddMask == ESMF_MESHLOC_ELEMENT) then
+          haveElmtMask = .true.
+       elseif (localAddMask == ESMF_MESHLOC_NODE) then
+          haveNodeMask = .true.
+       endif
+       ! Get information from file
+       call ESMF_GetElemFromUGridFile(filename, meshname, elementConn, &
+                                   elmtNum, startElmt, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Chenk if the grid is 3D or 2D
+       call ESMF_UGridInq(filename, meshname, nodeCount=nodeCnt, &
+       	    			    nodeCoordDim=coordDim, rc=localrc)
+
+       if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
+	  !Get the variable and the missing value attribute from file
+	  ! Total number of local elements
+          ElemCnt = ubound (elementConn, 2)
+          allocate(varbuffer(ElemCnt))
+	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
+		count=ElemCnt, location="face", &
+		missingvalue=missingvalue, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+	  ! Create local mask 
+	  allocate(elementMask(ElemCnt))
+	  elementMask(:)=1
+	  do i=1,ElemCnt
+	    if (varbuffer(i) == missingvalue) elementMask(i)=0
+          enddo
+	  deallocate(varbuffer)
+       elseif (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_NODE) then
+	  !Get the variable and the missing value attribute from file
+	  ! Total number of total nodes
+          allocate(varbuffer(nodeCnt))
+	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+		location="node", &
+		missingvalue=missingvalue, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+	  ! Create local mask 
+	  allocate(glbNodeMask(nodeCnt))
+	  glbNodeMask(:)=1
+	  do i=1,nodeCnt
+	    if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
+          enddo
+	  deallocate(varbuffer)
+       endif 
+    else
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                             msg="- unrecognized filetype", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
+   ! Figure out dimensions 
+    if (coordDim .eq. 2) then
+       parametricDim=2
+       spatialDim = 2
+       if (coordSys == ESMF_COORDSYS_CART) then
+         cartSpatialDim = 2
+       else
+         cartSpatialDim=3  ! Assuming that this is spherical
+       endif
+    else if (coordDim .eq. 3) then
+       parametricDim=3
+       spatialDim=3
+       cartSpatialDim=3 
+       coordSys = ESMF_COORDSYS_CART 
+    else
+       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
+            msg="- only coordDim 2 or 3 is supported right now", & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
+    if (parametricDim == 2) then
+        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
+	       coordSys=coordSys,rc=localrc)
+    else
+        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
+	       coordSys=coordSys,rc=localrc)
+    endif    
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! These two arrays are temp arrays
+    ! NodeUsed() used for multiple purposes, first, find the owners of the node
+    ! later, used to store the local Node ID to be used in the ElmtConn table
+    print *, PetNo, 'Before allocate NodeUsed'
+    allocate (NodeUsed(NodeCnt))
+
+    ! Set to a number > PetCnt because it will store the PetNo if this node is used by
+    ! the local elements and we will do a global reduce to find the minimal values
+    NodeUsed(:)=PetCnt+100
+
+    ! Total number of local elements
+    ElemCnt = ubound (elementConn, 2)
+
+    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
+    ! Also calculate the total number of mesh elements based on elmtNum
+    ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
+    totalElements = ElemCnt
+    totalConnects = 0
+    maxNumPoly=0
+    if (parametricDim .eq. 2) then
+       do ElemNo =1, ElemCnt
+          do i=1,elmtNum(ElemNo)	
+             NodeUsed(elementConn(i,ElemNo))=PetNo
+          enddo
+          if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
+          if (elmtNum(ElemNo) <= 4) then
+             TotalConnects = TotalConnects+elmtNum(ElemNo)
+          else
+             TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
+          end if
+          if (elmtNum(ElemNo) > maxNumPoly) then
+             maxNumPoly=elmtNum(ElemNo)
+          endif
+       end do
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do ElemNo =1, ElemCnt
+          do i=1,elmtNum(ElemNo)	
+             NodeUsed(elementConn(i,ElemNo))=PetNo
+          enddo
+          TotalConnects = TotalConnects+elmtNum(ElemNo)
+       end do       
+    endif
+
+   ! write(*,*) "maxNumPoly=",maxNumPoly
+
+    ! create sparse matrix for localNode
+    totalpairs = 200
+    allocate(mypair(1), nodepairs(totalpairs))
+    mypair(1) = 0
+    i=1
+    j=1
+    totalnodecnt=0
+    do while (i <= NodeCnt)
+      do while (NodeUsed(i)>PetNo)
+        i=i+1
+      end do
+      if (i > NodeCnt) EXIT
+      nodepairs(j)=i
+      do while (NodeUsed(i)==PetNo)
+        i=i+1
+        totalnodecnt = totalnodecnt+1
+      end do
+      nodepairs(j+1)=i-1
+      j=j+2
+      mypair(1)=mypair(1)+1
+      if (j>totalpairs) then
+         !print *, 'reallocate nodepairs'
+         allocate(newpairs(totalpairs*2))
+	 newpairs(1:totalpairs)=nodepairs
+         deallocate(nodepairs)
+         nodepairs => newpairs
+         totalpairs=totalpairs*2
+      endif
+    enddo
+
+    ! collect the node segment pairs in all the PETs  
+    allocate(allpairs(PetCnt))
+    call ESMF_VMAllGather(vm, mypair, allpairs, 1, rc=localrc) 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    allocate(pairoffsets(PetCnt))
+    pairoffsets(1)=0
+    allpairs = allpairs*2
+    totalpairs = allpairs(1)
+    do i=2,PetCnt
+      pairoffsets(i)=pairoffsets(i-1)+allpairs(i-1)
+      totalpairs = totalpairs+allpairs(i)
+    enddo
+   
+    print *, PetNo, " Total node pairs and total nodes: ",  mypair(1), totalpairs, totalnodecnt
+
+    allocate(segmentTbl(totalpairs))
+    call ESMF_VMAllGatherV(vm, nodepairs, mypair(1)*2, segmentTbl, allpairs, &
+             pairoffsets, rc=localrc)
+
+    !print *, 'pairoffsets ', pairoffsets
+    !print *, PetNo, 'segmentTbl ', segmentTbl(pairoffsets(PetNo+1)+1:pairoffsets(PetNo+1)+100)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Need to decide who owns the local nodes
+    ! Assign the node to the first PET that uses it, so only need to 
+    ! search the pairs from PET=0:PetNo-1
+    halonodecnt = 0
+    do j=1, mypair(1)
+      startind=nodepairs((j-1)*2+1)
+      endind = nodepairs((j-1)*2+2)
+      !print *, PetNo, "nodepairs: ", j, startind, endind
+      do k=startind, endind
+        do i=1, PetNo
+          do n = pairoffsets(i)+1, pairoffsets(i+1),2
+            if (k < segmentTbl(n)) EXIT
+            if (k > segmentTbl(n+1)) CYCLE
+            NodeUsed(k)= i-1
+	    halonodecnt = halonodecnt+1
+	    !print *, PetNo, k, 'fall within ', segmentTbl(n), segmentTbl(n+1)
+            goto 100
+           enddo
+        enddo
+        100 continue
+      enddo
+    enddo
+
+    deallocate(pairoffsets, segmentTbl, allpairs, mypair, nodepairs)
+    print *, PetNo, "total local nodes and halo nodes counts:", totalnodecnt, halonodecnt
+
+    ! Create a distgrid based on the local ownership of the node ids
+     allocate(seqIndexList(totalnodecnt-halonodecnt))
+     allocate(haloIndexList(halonodecnt))
+    ! count number of nodes used and convert NodeUsed values into local index
+    localNodes = 0
+    haloNodes = 0
+    do NodeNo = 1, NodeCnt
+       if (NodeUsed(NodeNo) == PetNo) then
+         localNodes = localNodes+1
+         seqIndexList(localNodes)=NodeNo
+       elseif (NodeUsed(NodeNo) < PetNo) then
+         haloNodes = haloNodes+1
+         haloIndexList(haloNodes)=NodeNo
+       endif
+    enddo
+    nodeDistGrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=localrc)
+    nodeCoordArray= ESMF_ArrayCreate(nodeDistGrid, ESMF_TYPEKIND_R8, &
+    		                distgridToArrayMap=(/2/), &
+ 		    		haloSeqIndexList=haloIndexList, undistLBound=(/1/), & 
+				undistUBound=(/coordDim/),rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Read in the node coordinates in parallel and redistribute it based on the arb. distgrid
+    localnodecnt=NodeCnt/PetCnt
+    startNode=localnodecnt*PetNo+1
+    if (PetNo == PetCnt-1) then
+       localnodecnt = localnodecnt + mod(NodeCnt, PetCnt)
+    endif
+    call ESMF_GetNodeFromUGridFile(filename, meshname, nodeCoords, &
+         nodeCount=localnodecnt, startNode=startNode, &
+         convertToDeg = .true., rc=localrc) 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    print *, PetNo, 'NodeCoords ', nodeCoords(1,1000), nodeCoords(2,1000)
+   
+    ! Create a distgrid with regular distribution for the NodeCoords
+    regDistGrid = ESMF_DistGridCreate((/1/), (/NodeCnt/), &
+    		  	   regDecomp=(/PetCnt/), &
+    		           decompflag=(/ESMF_DECOMP_RESTLAST/), &
+			   indexflag=ESMF_INDEX_GLOBAL,  rc=localrc) 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create an array with one undistributed dimension for the coordinates
+    regCoordArray= ESMF_ArrayCreate(regDistGrid, ESMF_TYPEKIND_R8, &
+    		            distgridToArrayMap=(/2/), &
+   		    	    undistLBound=(/1/), undistUBound=(/coordDim/),rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set array values
+    call ESMF_ArrayGet(regCoordArray, localDe=0, farrayPtr=fptr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! NodeCoords(coordDim, localnodecnt), fptr(coordDim, startNode:startNode+localnodecnt)
+    ! can we do the following array assignment?
+    print *, 'size of NodeCoords: ', ubound(NodeCoords)
+    ! print *, 'bounds of fptr: ', lbound(fptr), ubound(fptr)
+    fptr(:,:) = NodeCoords(:,:)
+
+    ! print *, 'fptr ', fptr(1,1000), fptr(2,1000)
+
+    deallocate(NodeCoords)
+
+    print *, PetNo, 'Before ArrayRedistStore'
+    ! call array redist to redist to the new distribution
+    call ESMF_ArrayRedistStore(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
+    	 				      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayRedist(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
+    	 				 rc=localrc)               
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    print *, PetNo, 'Before ArrayHaloStore'
+    ! Need to get the data for the Halo region
+    call ESMF_ArrayHaloStore(nodeCoordArray, haloHandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayHalo(nodeCoordArray, haloHandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Release the route handle
+    call ESMF_ArrayHaloRelease(haloHandle, rc=localrc)
+    call ESMF_ArrayRedistRelease(redistHdl, rc=localrc)
+    call ESMF_ArrayDestroy(regCoordArray)
+    call ESMF_DistGridDestroy(regDistGrid)
+
+    ! Now, get the node coordinates fortran pointer, this fptr includes both the
+    ! exclusive region and the halo region 
+    call ESMF_ArrayGet(nodeCoordArray, farrayPtr=nodeCoords, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !print *, 'NodeCoords ', nodeCoords(1,1000), nodeCoords(2,1000)
+    ! allocate nodes arrays for ESMF_MeshAddNodes()
+    allocate (NodeId(totalnodecnt))
+    allocate (NodeOwners(totalnodecnt))
+
+    localnodecnt=totalnodecnt-halonodecnt
+    NodeId(1:localnodecnt)=seqIndexList
+    NodeId(localnodecnt+1:totalnodecnt)=haloIndexList
+    NodeOwners(1:localnodecnt)=PetNo
+    ! Now change NodeUsed content to store the local node index to be used by elemConn    
+    do i = 1, localnodecnt
+       NodeUsed(seqIndexList(i))=i
+    enddo
+    do i = 1, halonodecnt
+      NodeOwners(localnodecnt+i) = NodeUsed(haloIndexList(i))
+      NodeUsed(haloIndexList(i))=localnodecnt+i
+    enddo
+    deallocate(seqIndexList, haloIndexList)
+
+    if (parametricDim .eq. 2) then
+       allocate (NodeCoords1D(totalnodecnt*CoordDim))
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       allocate(NodeCoords1D(totalnodecnt*3))
+    endif
+
+    i = 1
+    total = 0
+    if (parametricDim .eq. 2) then
+       do i = 1, totalnodecnt
+          do dim = 1, CoordDim
+            NodeCoords1D ((i-1)*CoordDim+dim) = nodeCoords (dim, i)
+          end do
+       end do
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do NodeNo = 1, totalnodecnt
+          do dim = 1, 3
+             NodeCoords1D ((i-1)*3+dim) = nodeCoords(dim, NodeNo)
+	  end do
+       end do
+    endif
+
+    ! Add nodes
+    if (.not. haveNodeMask) then
+       ! Add nodes
+       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+                            NodeCoords=NodeCoords1D, &
+                            NodeOwners=NodeOwners, &
+                            rc=localrc)
+    else
+       allocate(NodeMask(localNodes))
+       do i=1,localNodes
+         NodeMask(i)=glbNodeMask(NodeId(i))
+       enddo
+       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+                            NodeCoords=NodeCoords1D, &
+                            NodeOwners=NodeOwners, &
+			    NodeMask = NodeMask, &
+                            rc=localrc)
+       deallocate(NodeMask)
+       deallocate(glbNodeMask)		    
+    endif 
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayDestroy(nodeCoordArray)
+    call ESMF_DistGridDestroy(nodeDistGrid)
+
+    ! Need to calculate the total number of ESMF_MESH objects and the start element ID
+    ! Do a global gather to get all the local TotalElements
+
+    allocate(localElmTable(PetCnt))
+    sndBuf(1)=TotalElements
+    call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+    ! Find out the start element ID
+    myStartElmt=0
+    do i=1,PetNo
+      myStartElmt = myStartElmt+localElmTable(i)
+    end do
+    deallocate(localElmTable)
+
+    ! allocate element arrays for the local elements
+    allocate (ElemId(TotalElements))
+    allocate (ElemType(TotalElements))
+    allocate (ElemConn(TotalConnects))
+    if (localAddUserArea) allocate(ElemArea(TotalElements))
+
+    ! Allocate mask if the user wants one
+    haveMask=.false.
+    if (haveElmtMask) then 
+       allocate (ElemMask(TotalElements))
+       haveMask=.true.
+    endif
+
+    ! figure out if there are split elements globally
+    !! Fake logical allreduce .or. with MAX
+    if (totalElements .gt. ElemCnt) then
+       localSplitElems(1)=1
+    else 
+       localSplitElems(1)=0
+    endif
+    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_REDUCE_MAX, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return    
+    if (globalSplitElems(1) .eq. 1) then
+       existSplitElems=.true.
+    else 
+       existSplitElems=.false.
+    endif
+
+
+    ! Set split element info
+    if (existSplitElems) then    
+       Mesh%hasSplitElem=.true.
+       allocate(mesh%splitElemMap(TotalElements))
+       Mesh%splitElemStart=myStartElmt+1  ! position of first element
+       Mesh%splitElemCount=TotalElements
+       Mesh%origElemStart=startElmt  ! position of first element
+       Mesh%origElemCount=ElemCnt
+    endif
+
+    ! Allocate a mask even if the user doesn't want one, if we have split elements 
+    if (existSplitElems .and. .not. haveElmtMask) then
+       allocate (ElemMask(TotalElements))
+       haveMask=.true.
+       ElemMask(:)=1  ! default to nothing masked out
+    endif    
+
+
+    ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
+    ! element IDs will be from startElmt to startElmt+ElemCnt-1
+    ! The ElemConn() contains the four corner node IDs for each element and it is organized
+    ! as a 1D array.  The node IDs are "local", which are stored in NodeUsed(:)
+    ElemNo = 1
+    ConnNo = 0
+    if (parametricDim .eq. 2) then
+       ! Allocate variables for triangulation
+       allocate(polyCoords(3*maxNumPoly))
+       allocate(polyDblBuf(3*maxNumPoly))
+       allocate(area(maxNumPoly))
+       allocate(polyIntBuf(maxNumPoly))
+       allocate(triInd(3*(maxNumPoly-2)))
+
+       ! Parametric dim=2 and cartSpatialDim=3 
+       ! Means spherical, so calc. cart. coordinates
+       if (cartSpatialDim .eq. 3) then
+          allocate(NodeCoordsCart(cartSpatialDim*localNodes))
+
+          ti=0
+          tk=0
+          do i=1,localNodes
+             call c_esmc_sphdeg_to_cart(NodeCoords1D(ti+1), &
+                                        NodeCoords1D(ti+2),  &
+                                        NodeCoordsCart(tk+1), &
+                                        NodeCoordsCart(tk+2), &
+                                        NodeCoordsCart(tk+3),  &
+                                        localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return    
+
+             ti=ti+2
+             tk=tk+3
+          enddo
+       endif
+
+       ! Loop through creating Mesh appropriate elements
+       do j = 1, ElemCnt
+          if (elmtNum(j)==3) then        
+             ElemId(ElemNo) = myStartElmt+ElemNo
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+             do i=1,3
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             end do
+             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             ElemNo=ElemNo+1
+             ConnNo=ConnNo+3
+          elseif (elmtNum(j)==4) then
+             ElemId(ElemNo) = myStartElmt+ElemNo
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
+             do i=1,4
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             end do
+             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             ElemNo=ElemNo+1
+             ConnNo=ConnNo+4
+          else
+             ! number of points in poly to triangulate
+             numPoly=elmtNum(j)
+             if (numPoly > maxNumPoly) then
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                     msg="- File contains polygons with more sides than triangulation is supported for", &
+                     ESMF_CONTEXT, rcToReturn=rc)
+                return
+             endif
+
+             ! Copy points into input list
+             if (cartSpatialDim==2) then
+                ti=0
+                do k=1,numPoly
+                   lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                   polyCoords(ti+1)=NodeCoords1D(lni+1)
+                   polyCoords(ti+2)=NodeCoords1D(lni+2)
+                   ti=ti+2
+                enddo
+             else if (cartSpatialDim==3) then
+                ti=0
+                do k=1,numPoly
+                   lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                   polyCoords(ti+1)=NodeCoordsCart(lni+1)
+                   polyCoords(ti+2)=NodeCoordsCart(lni+2)
+                   polyCoords(ti+3)=NodeCoordsCart(lni+3)
+                   ti=ti+3
+                enddo
+             endif
+
+             ! Checking for other spatialDims above, not here in a loop
+
+             ! call triangulation routine
+             call c_ESMC_triangulate(parametricDim, cartSpatialDim, &
+                  numPoly, polyCoords, polyDblBuf, polyIntBuf, &
+                  triInd, localrc)   
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! translate triangulation out of output list
+             ti=0
+	     startElemNo = ElemNo
+             do k=1,numPoly-2
+                ElemId(ElemNo)=myStartElmt+ElemNo
+                ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+                ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
+                ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
+                ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
+                if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+ 	        if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+                
+                ! Calculate area of sub-triangle
+  	        !if (localAddUserArea) then 
+                   if (cartSpatialDim==2) then
+		     tk=0
+		     do i=1,3
+                       lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
+      	               polyCoords(tk+1)=NodeCoords1D(lni+1)
+                       polyCoords(tk+2)=NodeCoords1D(lni+2)
+                       tk=tk+2
+                     enddo
+	           else if (cartSpatialDim==3) then
+                     tk=0
+                     do i=1,3
+                       lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
+                       polyCoords(tk+1)=NodeCoordsCart(lni+1)
+                       polyCoords(tk+2)=NodeCoordsCart(lni+2)
+                       polyCoords(tk+3)=NodeCoordsCart(lni+3)
+                       tk=tk+3
+                     enddo
+                   endif
+                   nEdges = 3
+                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc) 
+	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        	          ESMF_CONTEXT, rcToReturn=rc)) return
+                ! endif
+
+                ! If the area of the subtriangle is 0.0 mask it out
+                if (area(k)==0.0) then
+                   ElemMask(ElemNo)=0
+                endif
+
+                ElemNo=ElemNo+1
+                ConnNo=ConnNo+3
+                ti=ti+3
+             enddo
+             !!! set the area for each splitted triangle
+	     if (localAddUserArea) then
+	        totalarea = 0
+		do k=1,numPoly-2
+	          totalarea = totalarea + area(k)
+                enddo
+                do k=1, numPoly-2
+                  elemArea(startElemNo+k) = elementArea(j)*(area(k)/totalarea)
+                enddo
+              endif
+          end if
+       end do
+
+       ! deallocate cart nodes
+       if (cartSpatialDim .eq. 3) then
+          deallocate(NodeCoordsCart)
+       endif
+
+       ! deallocate after triangulation
+       deallocate(polyCoords)
+       deallocate(polyDblBuf)
+       deallocate(area)
+       deallocate(polyIntBuf)
+       deallocate(triInd)
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do j = 1, ElemCnt
+          if (elmtNum(j)==4) then        
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
+          elseif (elmtNum(j)==8) then
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_HEX
+          else
+             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
+                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+             return
+          endif
+
+          do i=1,elmtNum(j)
+             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+          end do
+          ElemId(ElemNo) = myStartElmt+ElemNo
+          if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+          if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+          ElemNo=ElemNo+1
+          ConnNo=ConnNo+elmtNum(j)
+       end do
+    endif
+
+
+    if (ElemNo /= TotalElements+1) then
+	write (ESMF_UtilIOStdout,*)  &
+            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
+    end if
+
+    ! Add elements
+    if (haveMask .and. localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
+    elseif (haveMask) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, rc=localrc)
+    elseif (localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementArea=ElemArea, rc=localrc)
+    else
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
+    end if
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
+    if (existSplitElems) then
+       Mesh%hasSplitElem=.true.
+    else
+       Mesh%hasSplitElem=.false.
+    endif
+
+    deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners)
+    deallocate(ElemId, ElemType, ElemConn)
+    deallocate(elementConn, elmtNum)
+    if (haveElmtMask) deallocate(elementMask) 
+    if (haveMask) deallocate(ElemMask) 
+     
+    if (localAddUserArea) deallocate(elementArea, ElemArea)
+    ESMF_MeshCreateFromUnstruct = Mesh
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromUnstruct
+!------------------------------------------------------------------------------
+#endif
 
 end module ESMF_MeshMod

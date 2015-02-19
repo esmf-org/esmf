@@ -571,8 +571,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
-!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
-!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list
+!    of options. If not present, file names with a {\tt .bin} extension will
+!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
+!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
+!    {\tt ESMF\_IOFMT\_NETCDF}.
 !    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -583,6 +586,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local vars
     integer              :: localrc              ! local return code
     integer              :: len_varName          ! helper variable
+    type(ESMF_IOFmt_Flag) :: opt_iofmt           ! helper variable
+    integer              :: file_ext_p
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -593,6 +598,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
+    ! Set iofmt based on file name extension (if present)
+    if (present (iofmt)) then
+      opt_iofmt = iofmt
+    else
+      if (index (file, '.') > 0) then
+        file_ext_p = index (file, '.', back=.true.)
+        select case (file(file_ext_p:))
+        case ('.nc')
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        case ('.bin')
+          opt_iofmt = ESMF_IOFMT_BIN
+        case default
+          opt_iofmt = ESMF_IOFMT_NETCDF
+        end select
+      else
+        opt_iofmt = ESMF_IOFMT_NETCDF
+      end if
+    end if
+
     ! Get string length
     if (present(variableName)) then
       len_varName = len_trim (variableName)
@@ -602,7 +626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will call IO object
     call c_esmc_arrayread(array, file,                        &
-        variableName, len_varName, timeslice, iofmt, localrc)
+        variableName, len_varName, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,        &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

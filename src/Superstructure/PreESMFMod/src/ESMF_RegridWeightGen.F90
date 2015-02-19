@@ -2432,11 +2432,10 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   real(ESMF_KIND_R8), pointer :: frac(:)
   integer :: rc
 
-  type (ESMF_DistGrid) :: distgrid
-  integer (ESMF_KIND_I4) :: localCount(1), elementCount(1)
+  integer (ESMF_KIND_I4) :: localCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer (ESMF_KIND_I4),pointer :: buffer(:), buffer1(:)
-  integer :: totalCount
+  integer :: totalCount, maxIndex
   integer :: i, j, total 
   integer :: petNo,petCnt
   integer :: count, saved
@@ -2446,12 +2445,6 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   ! Allocate List of counts
   allocate(globalCount(petCnt))
 
-  call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=rc)
-  if (rc /=ESMF_SUCCESS) then
-      return
-  endif
-
-  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
   total = size(indices,2)
   ! find unique indices in the destination column: indices(2,:)
   count = 0
@@ -2516,7 +2509,8 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   endif  
 
   if (PetNo==0) then
-    allocate(frac(elementCount(1)))
+    maxIndex = maxval(buffer1)
+    allocate(frac(maxIndex))
     frac = 0
     do i=1,totalCount
 	frac(buffer1(i))=1
