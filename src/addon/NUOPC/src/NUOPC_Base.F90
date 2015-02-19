@@ -35,7 +35,7 @@ module NUOPC_Base
   ! public module variables
   type(ESMF_Container), save  :: NUOPC_FieldDictionary
   public NUOPC_FieldDictionary
-  integer, parameter          :: NUOPC_PhaseMapStringLength = 30
+  integer, parameter          :: NUOPC_PhaseMapStringLength = 160
   public NUOPC_PhaseMapStringLength
 
   ! public module interfaces
