@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_GridToMesh.h"
+#include "ESMCI_Mesh_GToM_Glue.h"
 
 #include "ESMCI_Grid.h"
 #include "ESMCI_VM.h"
@@ -33,10 +33,6 @@
 #include "Mesh/include/ESMCI_DDir.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
-
-#ifdef PNTLIST
-#include "Mesh/include/ESMCI_PntList.h"
-#endif
 
 #include <limits>
 #include <iostream>
@@ -55,9 +51,6 @@
 // using namespace ESMCI;
 
 namespace ESMCI {
-
-  //// MOVED TO ESMCI_Mesh_GToM_Glue.C ////
-#if 0
 
   extern bool grid_debug;
 
@@ -89,15 +82,17 @@ namespace ESMCI {
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
-  const std::vector<ESMCI::Array*> &arrays, ESMCI::InterfaceInt *maskValuesArg,
-  int *regridConserve) {
+void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc, 
+                      const std::vector<ESMCI::Array*> &arrays, 
+                      ESMCI::InterfaceInt *maskValuesArg,
+                      int *regridConserve, Mesh **out_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToMesh()" 
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
+  try {
+     // local error code
  int localrc;
- int rc;
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -115,6 +110,15 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
 	    "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
    throw localrc;
  }
+
+ // Create Mesh
+ Mesh *meshp = new Mesh();
+ 
+ // Set output mesh
+ *out_meshpp=meshp;
+
+ // Make reference
+ Mesh &mesh = *meshp;
      
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
@@ -761,12 +765,31 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
    delete gni;
    delete gci;
 
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                  "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+  
+  // SET OUTPUT MESH BY WHERE ALLOCATED
+  // Set output mesh
+  // *out_meshpp=&mesh;
+  
+  // Set successful return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  
 }
 #undef  ESMC_METHOD
 
+#if 0
 
   // Only works for scalar data right now, but would be pretty easy to add more dimensions 
-void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
+void ESMCI_CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "CpMeshDataToArray()" 
   Trace __trace("CpMeshDataToArray()");
@@ -815,8 +838,9 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 #undef  ESMC_METHOD
 
 
+
   // Assumes array is on center staggerloc of grid
-  void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
+  void ESMCI_CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "CpMeshElemDataToArray()" 
   Trace __trace("CpMeshElemDataToArray()");
@@ -867,10 +891,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 }
 
 
-
-
-
-  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
+  void ESMCI_PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "CpMeshElemDataToArray()" 
     Trace __trace("CpMeshElemDataToArray()");
@@ -991,67 +1012,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
    delete gci;
 
 }
-
 #undef  ESMC_METHOD
 
- /* XMRKX */
-
-#ifdef PNTLIST
-
-  // Convert Grid To PntList
-  // TODO: pnt_list should only contain non-masked points.
-void GridToPntList(Grid &grid, int staggerLoc, ESMCI::PntList **_pl) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "GridToPntList()" 
-  Trace __trace("GridToPntList()");
-
- int localrc;
- int rc;
-
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-
- // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
-   ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
-
-   // Count all local pnts in the Grid
-   int num_local_pnts=0;
-   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-     if(!gni->isLocal()) continue;
-       num_local_pnts++;
-   }
-
-   // Create PntList
-   // (Put Cartesian coordinates in list) 
-   ESMCI::PntList *pl=new PntList(grid.getCartCoordDimCount(), num_local_pnts);
-
-   // loop through all nodes in the Grid
-   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-     if(!gni->isLocal()) continue;
-
-       // get the global id of this Grid node
-       int gid=gni->getGlobalID(); 
-
-       // get cartesian coordinates
-       double cart_coord[ESMF_MAXDIM];
-       gni->getCartCoord(cart_coord);
-
-       // Add Point
-       pl->add(gid,cart_coord);
-   }
-
-
-   // delete Grid Iters
-   delete gni;
-
-   // Output point list
-   *_pl=pl;
-}
-
-#undef  ESMC_METHOD
-#endif
 #endif
 
 } // namespace

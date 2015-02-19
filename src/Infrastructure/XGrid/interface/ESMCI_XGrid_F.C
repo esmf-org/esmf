@@ -29,6 +29,7 @@ using namespace std;
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h"
@@ -45,6 +46,8 @@ using namespace std;
 
 using namespace ESMCI;
 
+#if 0
+  // Defined in Mesh now
 namespace ESMCI {
   struct TempWeights {
     int nentries;
@@ -52,6 +55,8 @@ namespace ESMCI {
     double *factors;
   };
 }
+
+#endif
 
 extern "C" {
 //
@@ -91,7 +96,7 @@ void FTN_X(c_esmc_xgridserialize)(
     ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)online, sizeof(int));
-    ptr += sizeof(int);
+      ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)flag, sizeof(int));
     ptr += sizeof(int);
@@ -140,7 +145,7 @@ void FTN_X(c_esmc_xgriddeserialize)(
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
-} 
+  } 
 
 // non-method functions
 void FTN_X(c_esmc_smmspecserialize)(
@@ -185,102 +190,24 @@ void FTN_X(c_esmc_smmspecdeserialize)(
 
 // xgrid regrid create method tailored for XGrid
 void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
-                   Mesh **meshsrcpp, Mesh **meshdstpp, 
-                   Mesh **mesh,
+                   MeshCap **meshsrcpp, MeshCap **meshdstpp, 
+                   MeshCap **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
-                   int *unmappedaction,
+                    int *unmappedaction,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()" 
-  Trace __trace(" FTN_X(c_esmc_xgridregrid_create)");
-  ESMCI::VM *vm = *vmpp;
 
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-
-  Mesh &srcmesh = **meshsrcpp;
-  Mesh &dstmesh = **meshdstpp;
-  if(*compute_midmesh) *mesh = new Mesh();
-  else *mesh = 0;
- 
-  // Old Regrid conserve turned off for now
-  int regridConserve=ESMC_REGRID_CONSERVE_OFF;
-
-  try {
-
-    // Weights matrix
-    IWeights wts;
-
-    if(!online_regrid_xgrid(srcmesh, dstmesh, *mesh, wts, &regridConserve, regridMethod,
-                      unmappedaction))
-      Throw() << "Online regridding error" << std::endl;
-
-    // Firstly, the index list
-    std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
-    int num_entries = iisize.first;
-    int *iientries = new int[2*iisize.first]; 
-    int larg[2] = {2, iisize.first};
-    // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
-
-    double *factors = new double[iisize.first];
-
-    // Translate weights to sparse matrix representatio
-    UInt i = 0;
-    WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
-    for (; wi != we; ++wi) {
-      const WMat::Entry &w = wi->first;
-      
-      std::vector<WMat::Entry> &wcol = wi->second;
-      
-      // Construct factor index list
-      for (UInt j = 0; j < wcol.size(); ++j) {
-        UInt twoi = 2*i;
-        const WMat::Entry &wc = wcol[j];
-        
-        // Construct factor list entry
-        iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
-        factors[i] = wc.value;
-
-        i++;
-      } // for j
-    } // for wi
-
-    *nentries = num_entries;
-    // Clean up.  If has_iw, then we will use the arrays to
-    // fill out the users pointers.  These will be deleted following a copy.
-    // Save off the weights so the F90 caller can allocate arrays and
-    // copy the values.
-    *tweights = new ESMCI::TempWeights;
-    (*tweights)->nentries = num_entries;
-    (*tweights)->factors = factors;
-    (*tweights)->iientries = iientries;
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-
+  MeshCap::xgridregrid_create(vmpp,
+                              meshsrcpp, meshdstpp, 
+                              mesh,
+                              compute_midmesh,
+                              regridMethod, 
+                              unmappedaction,
+                              nentries, tweights,
+                              rc);
 }
 
 void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
@@ -303,176 +230,50 @@ void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, dou
 }
 
 // mesh merge
-void FTN_X(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
-                   Mesh **meshpp,
+void FTN_X(c_esmc_meshmerge)(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
+                   MeshCap **meshpp,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshmerge()" 
-  Trace __trace(" FTN_X(meshmerge) ");
 
-  Mesh &srcmesh = **srcmeshpp;
-  Mesh &dstmesh = **dstmeshpp;
- 
-  try {
-    MeshMerge(srcmesh, dstmesh, meshpp);
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-
+  *meshpp=MeshCap::merge(srcmeshpp, dstmeshpp,
+                           rc);
 }
 
 // mesh set fraction
-void FTN_X(c_esmc_meshsetfraction)(Mesh **meshpp, double * fraction, 
+void FTN_X(c_esmc_meshsetfraction)(MeshCap **meshpp, double * fraction, 
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetfraction()" 
-  Trace __trace(" FTN(meshsetfraction) ");
 
-  Mesh &mesh = **meshpp;
- 
-  try {
-    MeshSetFraction(mesh, *fraction);
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  (*meshpp)->meshsetfrac(fraction,rc);
 
 }
 
 // Assumes array is center stagger loc
 extern "C" void FTN_X(c_esmc_xgrid_getfrac)(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getfrac()" 
-  Trace __trace(" FTN_X(regrid_getfrac)()");
 
-  ESMCI::Array &array = **arraypp;
-  Mesh &mesh = **meshpp;
-  Grid &grid = **gridpp;
-
-  try {
-
-
-    // Get the integration weights
-    MEField<> *frac = mesh.GetField("elem_frac");
-    if (!frac) Throw() << "Could not find elem_frac field on this mesh"
-                             <<std::endl; 
-
-    CpMeshElemDataToArray(grid, *staggerLoc, mesh, array, frac);
- 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  (*meshpp)->xgrid_getfrac(gridpp,
+                           arraypp, staggerLoc,
+                           rc);
 
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Assumes array is center stagger loc
 extern "C" void FTN_X(c_esmc_xgrid_getfrac2)(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getfrac2()" 
-  Trace __trace(" FTN_X(regrid_getfrac2)()");
 
-  ESMCI::Array &array = **arraypp;
-  Mesh &mesh = **meshpp;
-  Grid &grid = **gridpp;
-
-  try {
-
-
-    // Get the integration weights
-    MEField<> *frac = mesh.GetField("elem_frac2");
-    if (!frac) Throw() << "Could not find elem_frac2 field on this mesh"
-                             <<std::endl; 
-
-    CpMeshElemDataToArray(grid, *staggerLoc, mesh, array, frac);
- 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-
+  (*meshpp)->xgrid_getfrac2(gridpp,
+                            arraypp, staggerLoc,
+                            rc);
 }
 
 } // end extern "C"

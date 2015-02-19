@@ -1035,7 +1035,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-
         ! Get Fraction info
         if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
            if (present(srcFracField)) then

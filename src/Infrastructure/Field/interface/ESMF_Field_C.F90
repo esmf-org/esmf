@@ -231,7 +231,7 @@
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    mesh = ESMF_MeshCreate(mesh_pointer)
+    mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
   
     if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
     field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
@@ -312,7 +312,7 @@
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    mesh = ESMF_MeshCreate(mesh_pointer)
+    mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
 
     if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
     field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &

@@ -174,8 +174,11 @@
    else
    endif
   
-   meshp=mesh%this
-
+   ! Get internal pointer
+   call ESMF_MeshGetIntPtr(mesh, meshp, rc=rc)
+   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  
    rc = ESMF_SUCCESS
   
    end subroutine f_esmf_meshcreatefromfile
