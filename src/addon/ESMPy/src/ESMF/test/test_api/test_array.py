@@ -125,9 +125,6 @@ class TestMaskedArray(TestBase):
         res = array0 * 2
         self.assertTrue(np.all(vals * 2 == res))
 
-
-
-
     def test_mul(self):
         esmpyarray1 = self.get_array()
         esmpyarray2 = self.get_array()
@@ -191,7 +188,6 @@ class TestMaskedArray(TestBase):
         self.assertNumpyAll(array0, array1)
         self.assertNumpyAll(array0, array2)
         self.assertNumpyAll(array1, array2)
-
 
     def test_new(self):
         data0, mask, tk, lb1, ub1, grid = self.get_maskedarray_info()

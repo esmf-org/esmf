@@ -7,8 +7,8 @@ The ESMPyManager API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.constants import *
-from ESMF.interface.cbindings import *
 from ESMF.util.exceptions import *
+from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
 import re

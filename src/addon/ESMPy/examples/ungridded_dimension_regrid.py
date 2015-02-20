@@ -89,11 +89,11 @@ dstmass = 0
 relerr = 0
 for timestep in range(time):
     for level in range(levels):
-        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*srcfield[level, timestep, :, :].data))
-        dstmass += numpy.sum(numpy.abs(dstareafield.data*dstfield[level, timestep, :, :].data))
-        relerr += numpy.sum(numpy.abs(dstfield[level, timestep, :, :].data /
-                                      dstfracfield.data - xctfield[level, timestep, :, :].data) /
-                            numpy.abs(xctfield[level, timestep, :, :].data))
+        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*srcfield.data[level, timestep, :, :]))
+        dstmass += numpy.sum(numpy.abs(dstareafield.data*dstfield.data[level, timestep, :, :]))
+        relerr += numpy.sum(numpy.abs(dstfield.data[level, timestep, :, :] /
+                                      dstfracfield.data - xctfield.data[level, timestep, :, :]) /
+                            numpy.abs(xctfield.data[level, timestep, :, :]))
 
 # compute the mean relative interpolation and conservation error
 from operator import mul

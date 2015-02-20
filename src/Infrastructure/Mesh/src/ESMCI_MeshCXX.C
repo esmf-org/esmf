@@ -308,7 +308,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 
     // call MeshCXX destructor
     delete *meshpp; 
-    
+
     // Set to NULL
     *meshpp=(MeshCXX*)NULL;
 

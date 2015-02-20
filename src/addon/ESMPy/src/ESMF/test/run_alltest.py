@@ -21,9 +21,9 @@ if parallel:
     num_proc = 4
 
 if constants._ESMF_OS is constants._ESMF_OS_UNICOS:
-    os.system("aprun -n "+str(num_proc)+" -a xt nosetests -vs")
+    os.system("aprun -n "+str(num_proc)+" -a xt nosetests -vs --with-id -a '!slow,!serial'")
 else:
     if parallel:
-        os.system("mpirun -np "+str(num_proc)+" nosetests -vs")
+        os.system("mpirun -np "+str(num_proc)+" nosetests -vs --with-id -a '!slow,!serial'")
     else:
-        os.system("nosetests -vs")
+        os.system("nosetests -vs --with-id -a '!slow'")

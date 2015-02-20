@@ -4,7 +4,7 @@
 examples test file
 """
 
-from ESMF.test.base import TestBase
+from ESMF.test.base import TestBase, attr
 
 class TestExamples(TestBase):
 
@@ -20,6 +20,7 @@ class TestExamples(TestBase):
     def test_gridmeshrg(self):
         import grid_mesh_regrid
 
+    @attr('slow')
     def test_tripolerg(self):
         import tripole_regrid
 
