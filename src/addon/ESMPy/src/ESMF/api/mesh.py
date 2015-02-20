@@ -6,11 +6,15 @@ The Mesh API
 
 #### IMPORT LIBRARIES #########################################################
 
+from copy import copy, deepcopy
+
 from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
+from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
+from ESMF.util.helpers import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
 import warnings
 
@@ -122,7 +126,7 @@ class Mesh(object):
                 warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
         
         # ctypes stuff
-        self.struct = ESMP_Mesh()
+        self.struct = None
     
         # bookkeeping
         self.size = [None, None]
@@ -131,8 +135,8 @@ class Mesh(object):
         self.spatial_dim = None
         self.rank = 1
 
-        # for ocgis compatibility
-        self._ocgis = {}
+        # for arbitrary attributes
+        self.meta = {}
 
         if not fromfile:
             # initialize not fromfile variables
@@ -165,13 +169,16 @@ class Mesh(object):
             self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
 
             # link the coords here for meshes created from file, in add_elements for others
-            self._link_coords()
+            self._link_coords_()
 
         # TODO: parametric_dim and spatial_dim are not set for meshes from file
 
-        # regist with atexit
+        # register with atexit
         import atexit; atexit.register(self.__del__)
         self._finalized = False
+
+        # set the single stagger flag
+        self._singlestagger = False
 
     def __del__(self):
         """
@@ -183,10 +190,9 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if hasattr(self, '_finalized'):
-            if not self._finalized:
-                ESMP_MeshDestroy(self)
-                self._finalized = True
+        if not self._finalized:
+            ESMP_MeshDestroy(self)
+            self._finalized = True
 
 
     def __repr__(self):
@@ -194,20 +200,76 @@ class Mesh(object):
         Return a string containing a printable representation of the object
         """
         string = ("Mesh:\n"
-                  "    struct = %r\n"
                   "    parametric_dim = %r\n"
                   "    spatial_dim = %r\n"
                   "    size = %r\n"
                   "    size_local = %r\n" 
+                  "    coords = %r\n"
                   %
-                  (self.struct, 
+                  (
                    self.parametric_dim,
                    self.spatial_dim,
                    self.size,
-                   self.size_local))
+                   self.size_local,
+                   self.coords))
 
         return string
-    
+
+    def _copy_(self):
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        # NOTE: the ESMF Mesh destructor is particularly unsafe in this situation
+        ret._finalized = True
+
+        return ret
+
+    def __getitem__(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        slc = get_formatted_slice(slc, self.rank)
+        ret = self._copy_()
+
+        # TODO: cannot get element coordinates, so the slice has them set to None
+        ret.coords = [[get_none_or_slice(get_none_or_slice(get_none_or_slice(self.coords, 0), coorddim), slc) for
+                       coorddim in range(self.parametric_dim)], [None for x in range(self.parametric_dim)]]
+
+        # size is "sliced" by taking the shape of the coords
+        ret.size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
+        ret.size_local = ret.size
+
+        return ret
+
+    def _preslice_(self, meshloc):
+        # to be used to slice off one stagger location of a grid for a specific field
+        ret = self._copy_()
+        ret.coords = get_none_or_slice(self.coords, meshloc)
+
+        # preslice the size to only return the meshloc of this field
+        ret.size = get_none_or_slice(self.size, meshloc)
+        ret.size_local = ret.size
+
+        ret._singlestagger = True
+
+        return ret
+
+    def _slice_onestagger_(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        # to be used to slice the single stagger grid, one that has already been presliced
+        slc = get_formatted_slice(slc, self.rank)
+        ret = self._copy_()
+
+        ret.coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.parametric_dim)]
+
+        # size is "sliced" by taking the shape of the coords
+        ret.size = get_none_or_bound_list(ret.coords, 0)
+        ret.size_local = ret.size
+
+        return ret
+
     def add_elements(self, element_count,
                      element_ids,
                      element_types,
@@ -294,7 +356,7 @@ class Mesh(object):
         self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
         
         # link the coords here for meshes not created from file
-        self._link_coords()
+        self._link_coords_()
 
     def add_nodes(self, node_count,
                   node_ids,
@@ -377,11 +439,18 @@ class Mesh(object):
             None \n
         """
 
+        ret = None
         # only nodes for now
-        assert(self.coords_done[meshloc][coord_dim])
-        return self.coords[meshloc][coord_dim]
+        if not self._singlestagger:
+            assert(self.coords_done[meshloc][coord_dim])
+            ret = self.coords[meshloc][coord_dim]
+        else:
+            assert(self.coords_done[coord_dim])
+            ret = self.coords[coord_dim]
 
-    def _write(self, filename):
+        return ret
+
+    def _write_(self, filename):
         """
         Write the Mesh to a vtk formatted file. \n
         Required Arguments: \n
@@ -395,7 +464,7 @@ class Mesh(object):
         # call into ctypes layer
         ESMP_MeshWrite(self, filename)
 
-    def _link_coords(self, meshloc=node):
+    def _link_coords_(self, meshloc=node):
         """
         Link Python Mesh to ESMC Mesh coordinates.
         Required Arguments: \n
@@ -412,9 +481,12 @@ class Mesh(object):
         # get the pointer to the underlying ESMF data array for coordinates
         coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
 
+        if not self.parametric_dim:
+            self.parametric_dim = num_dims
+
         # initialize the coordinates structures
         # index order is [meshloc][coord_dim]
-        self.coords = [[np.zeros(None) for a in range(num_dims)] \
+        self.coords = [[None for a in range(num_dims)] \
                         for b in range(2)]
         self.coords_done = [[False for a in range(num_dims)] \
                              for b in range(2)]

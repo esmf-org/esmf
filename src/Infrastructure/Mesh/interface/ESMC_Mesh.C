@@ -176,7 +176,7 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshDestroy()"
 int ESMC_MeshDestroy(ESMC_Mesh *mesh){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -225,7 +225,7 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetCoord()"
-void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
+void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
            double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);

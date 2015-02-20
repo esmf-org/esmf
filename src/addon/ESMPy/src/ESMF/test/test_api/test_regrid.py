@@ -3,7 +3,7 @@ regrid unit test file
 """
 
 from ESMF import *
-from ESMF.test.base import TestBase
+from ESMF.test.base import TestBase, attr
 from ESMF.test.test_api.mesh_utilities import *
 from ESMF.test.test_api.grid_utilities import *
 
@@ -13,7 +13,7 @@ from ESMF.test.test_api.grid_utilities import *
   #  3. types of the grids underneath the field
 
 class TestRegrid(TestBase):
-    def test_field_regrid(self):
+    def est_field_regrid(self):
         # create grids
         max_index = np.array([20, 20])
         srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
@@ -173,15 +173,17 @@ class TestRegrid(TestBase):
 
         for i in range(srcarea.shape[x]):
             for j in range(srcarea.shape[y]):
-                if (srcarea[i, j] != 5):
+                if (srcarea.data[i, j] != 5):
                     print "Cell area is {0}, but expected 5".format(srcarea[i, j])
 
         # subtract two because the last two cells of mesh are triangles with half area
         for i in range(dstarea.shape[0]):
-            if (dstarea[i] != 0.25):
-                assert (dstarea[i] == 0.125)
+            if (dstarea.data[i] != 0.25):
+                assert (dstarea.data[i] == 0.125)
 
-    def est_grid_mesh_pentahexa_regrid_csrv(self):
+    #TODO: doesn't work in parallel because the 5 element mesh is not big enough to distribute to 4 procs
+    @attr('serial')
+    def test_grid_mesh_pentahexa_regrid_csrv(self):
         esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
         parallel = False
@@ -220,10 +222,10 @@ class TestRegrid(TestBase):
         exactfield.data[...] = 25.
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -295,7 +297,7 @@ class TestRegrid(TestBase):
 
         # create a grid
         srcgrid = grid_create_3d([0, 0, 0, 21, 21, 21], [0, 0, 0, 21, 21, 21])
-        dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5], \
+        dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5],
                                  [0.5, 0.5, 0.5, 19.5, 19.5, 19.5])
 
         # create Field objects on the Meshes
@@ -312,10 +314,10 @@ class TestRegrid(TestBase):
         exactfield = initialize_field_grid_3d(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -355,11 +357,11 @@ class TestRegrid(TestBase):
         dstfield2 = initialize_field_grid(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    src_mask_values=np.array([0]), \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -409,11 +411,11 @@ class TestRegrid(TestBase):
         exactfield = initialize_field_grid(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    src_mask_values=np.array([0]), \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -462,8 +464,8 @@ class TestRegrid(TestBase):
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -507,7 +509,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
-                                    dst_mask_values=np.array([0]), \
+                                    dst_mask_values=np.array([0]),
                                     regrid_method=ESMF.RegridMethod.BILINEAR,
                                     unmapped_action=ESMF.UnmappedAction.IGNORE)
         dstfield = regridSrc2Dst(srcfield, dstfield)
@@ -586,16 +588,16 @@ class TestRegrid(TestBase):
         exactfield = ESMF.Field(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # initialize the Fields to an analytic function
-        srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc, \
+        srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc,
                                          elemTypeSrc, elemConnSrc)
-        exactfield = initialize_field_mesh(exactfield, nodeCoordDst, nodeOwnerDst, \
+        exactfield = initialize_field_mesh(exactfield, nodeCoordDst, nodeOwnerDst,
                                            elemTypeDst, elemConnDst)
 
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
