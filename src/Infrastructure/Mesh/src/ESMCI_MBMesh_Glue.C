@@ -57,6 +57,8 @@ void MBMesh_create(void **mbmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreate()"
 
+#ifdef ESMF_MOAB
+
   // Init output
   *mbmpp=NULL;
 
@@ -159,6 +161,11 @@ void MBMesh_create(void **mbmpp,
     // Set return code 
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
+
 } // meshcreate
 
 
@@ -168,7 +175,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
                      int *rc) 
 {
 
-
+#ifdef ESMF_MOAB
 
   // Should we do exception handling in here, since MOAB doesn't??? 
    try {
@@ -414,6 +421,10 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
   // Set return code 
    if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
 } 
 
 
@@ -554,6 +565,9 @@ void MBMesh_addelements(void **mbmpp,
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc) 
 {
+
+
+#ifdef ESMF_MOAB
 
   /* XMRKX */
 
@@ -1267,11 +1281,18 @@ void MBMesh_addelements(void **mbmpp,
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
+
 } 
 
  
 void MBMesh_write(void **mbmpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
+
+#ifdef ESMF_MOAB
 
  #if 0
   // Initialize the parallel environment for mesh (if not already done)
@@ -1317,45 +1338,21 @@ void MBMesh_write(void **mbmpp, char *fname, int *rc,
         
     // Set return code 
     if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
+
  }
 
 
 extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
-#if 0
-/**
- * Sort nodes by the order in which they were originally declared
- * (which is stored by get_data_index)
- */
-void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
-
-  UInt nnodes = mesh.num_nodes();
-
-  Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-  std::vector<std::pair<int,int> > gids;
-
-  for (; ni != ne; ++ni) {
-
-    MeshObj &node = *ni;
-
-    if (!GetAttr(node).is_locally_owned()) continue;
-
-    int idx = node.get_data_index();
-
-     gids.push_back(std::make_pair(idx, node.get_id()));
-
-  }
-
-  std::sort(gids.begin(), gids.end());
-
-  ngid.clear();
-  for (UInt i = 0; i < gids.size(); ++i) ngid.push_back(gids[i].second);
-
-}
-#endif
 
 void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
+
+#ifdef ESMF_MOAB
 
   // Declare id vectors
   std::vector<int> ngids; 
@@ -1455,6 +1452,12 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
+
 }
 
  /* XMRKX */
@@ -1466,6 +1469,8 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
 // DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT 
 void getElemGIDS(void **mbmpp, std::vector<int> &egids) {
+
+#ifdef ESMF_MOAB
 
   // Get localPet
   int localrc;
@@ -1538,10 +1543,13 @@ void getElemGIDS(void **mbmpp, std::vector<int> &egids) {
     // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
 
   }    
+#endif
+
 }
 
 
 void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *rc) {
+#ifdef ESMF_MOAB
 
   // Declare id vectors
   std::vector<int> egids; 
@@ -1598,11 +1606,16 @@ void MBMesh_createelemdistgrid(void **mbmpp, int *egrid, int *num_lelems, int *r
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
 }
 
 
 // DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT 
 void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
+#if ESMF_MOAB
 
   // Get localPet
   int localrc;
@@ -1676,11 +1689,13 @@ void getElems(void **mbmpp, std::vector<EntityHandle> &ehs) {
     // printf("pos=%d egids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
 
   }    
+
+#endif
 }
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
+#ifdef ESMF_MOAB
 
-  
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
 #define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
@@ -1937,13 +1952,18 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 #undef  MAX_NUM_POLY_COORDS  
 #undef  MAX_NUM_POLY_NODES_2D
 #undef  MAX_NUM_POLY_NODES_3D
+
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
+
 }
 
 
 
  /* XMRKX */
 #if 0
-
 
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)

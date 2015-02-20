@@ -55,6 +55,7 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
                      int *regridScheme, 
                      int *map_type, int *unmappedaction);
 
+
 #if 0
 // prototypes from below
 static bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
@@ -97,6 +98,10 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+
+#ifdef ESMF_MOAB
+
+
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
@@ -509,6 +514,10 @@ printf("Inside MBMesh Regrid!\n");
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
+#else
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
 }
 
 #if 0
@@ -1465,6 +1474,7 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
                      int *regridScheme, 
                      int *map_type, int *unmappedaction) {
 
+#ifdef ESMF_MOAB
 
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
@@ -1473,7 +1483,16 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
     Throw() << "This regrid method not currently supported with MOAB";
   }
 
+#else
+   {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, &localrc)) throw localrc;
+   }
+#endif
+
   return 1;
+
 }
 
 

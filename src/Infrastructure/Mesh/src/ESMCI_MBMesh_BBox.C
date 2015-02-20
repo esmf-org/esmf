@@ -56,7 +56,9 @@ MBMesh_BBox &MBMesh_BBox::operator=(const MBMesh_BBox &rhs) {
 MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
   isempty(false)
 {
-  int merr;
+#ifdef ESMF_MOAB
+ 
+ int merr;
 
   // Set dim as spatial dim
   dim=mbmp->sdim;
@@ -98,6 +100,8 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
     }
   } // nonshell
 
+
+#endif
 }
 
 
@@ -105,6 +109,8 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
 MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
  isempty(false)
 {
+#ifdef ESMF_MOAB
+
   int merr;
 
   // Set dim as spatial dim
@@ -131,6 +137,8 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
         if (coords[j] > max[j]) max[j] = coords[j];
       }
   }
+
+#endif
 }
 
 void MBMesh_BBox::checkEmpty() {

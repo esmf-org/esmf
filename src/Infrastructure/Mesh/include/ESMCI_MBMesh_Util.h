@@ -33,7 +33,9 @@
 
 using namespace ESMCI;
 
+#ifdef ESMF_MOAB
+
 void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords);
 
-
+#endif
 #endif
