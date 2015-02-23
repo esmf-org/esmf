@@ -36,6 +36,7 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_GridToMesh.h"
+#include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
@@ -468,45 +469,36 @@ int setDefaultsLUA(int dimCount,
 //      Note2:  this code is duplicated in ESMCI_GridUtil_F.C in gridio
 //
 //EOP
-    // Initialize return code. Assume routine not implemented
-    int localrc = ESMC_RC_NOT_IMPL;
+
+   // Initialize return code. Assume routine not implemented
+   int localrc = ESMC_RC_NOT_IMPL;
     int rc = ESMC_RC_NOT_IMPL;
 
   ESMCI::Grid &gridp = *this;
 
-  // Get VM
-  ESMCI::VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-    ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-
-  // Get pet info
-  int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
-
+  // Temp. empty array of Arrays
   std::vector<ESMCI::Array*> arrays;
 
-  Mesh mesh;
 
-  try {
+  // Convert Grid to Mesh
+  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  MeshCap *meshp=MeshCap::GridToMesh(gridp, staggerloc, 
+                                     arrays,
+                                     NULL,
+                                     &regridConserve, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+  
+  
+  char *non_const_fname = const_cast<char *>(fname);
+  int nlen=strlen(non_const_fname);
+  meshp->meshwrite(non_const_fname, &localrc, nlen);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
-    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
-    ESMCI::GridToMesh(gridp, staggerloc, mesh, arrays, NULL, &regridConserve);
+  // Get rid of Mesh  
+  delete meshp;
 
-    WriteMesh(mesh, fname);
-
-  }
-
-  catch(std::exception &x) {
-    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
-    return ESMF_FAILURE;
-  }
-  catch(...) {
-    std::cout << "Error, unknown exception" << std::endl;
-    return ESMF_FAILURE;
-  }
-
+  // return success
   return ESMF_SUCCESS;
-
  }
 
 //-----------------------------------------------------------------------------

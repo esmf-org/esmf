@@ -27,6 +27,8 @@
 
 namespace ESMCI {
 
+#if 0
+
 class Mesh;
 class Grid;
 class Array;
@@ -39,6 +41,8 @@ class Array;
  void CpMeshElemDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 
  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
+
+#endif
 
 } // namespace
 

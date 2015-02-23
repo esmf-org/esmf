@@ -80,6 +80,18 @@ SOURCEC	  = \
            ESMCI_MeshRedist.C \
            ESMCI_MeshDual.C \
            ESMCI_ClumpPnts.C \
+           ESMCI_Regrid_Helper.C \
+           ESMCI_Mesh_Glue.C \
+           ESMCI_Mesh_Regrid_Glue.C \
+           ESMCI_MBMesh_Util.C \
+           ESMCI_MBMesh_BBox.C \
+           ESMCI_MBMesh_Conserve.C \
+           ESMCI_MBMesh_Glue.C \
+           ESMCI_MBMesh_Regrid_Glue.C \
+           ESMCI_Mesh_GToM_Glue.C \
+           ESMCI_Mesh_XGrid_Glue.C \
+           ESMCI_MBMesh.C \
+           ESMCI_MeshCap.C \
            ESMCI_MeshCXX.C
 
 SOURCEF	  = ESMF_SolverUtil_C.F90 \
@@ -100,6 +112,12 @@ CLEANFILES  =
 CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
+
+ifeq ($(ESMF_MOAB),internal)
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/src/Infrastructure/Mesh/src/Moab/moab
+endif
+
 
 DIRS	  = Zoltan
 ifeq ($(ESMF_LAPACK),internal)
