@@ -62,7 +62,7 @@ dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 dgridCoordLat = dstgrid.get_coords(lat)
 dstmaskedlats = dgridCoordLat[numpy.where(dstfield.data == missing_val)]
 
-masked_values = 0
+masked_values = dstmaskedlats.size
 try:
     # use mpi4py to collect values
     from mpi4py import MPI
@@ -70,7 +70,6 @@ try:
     masked_values = comm.reduce(dstmaskedlats.size, op=MPI.SUM)
 except:
     pass
-
 
 if ESMF.local_pet() == 0:
     assert (masked_values > 0)
