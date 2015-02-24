@@ -9,6 +9,18 @@ from ESMF.test.test_api.mesh_utilities import mesh_create_50, mesh_create_50_par
 
 
 class TestField(TestBase):
+    # this is for the documentation, do not modify
+    def create_field(grid_or_mesh, name):
+        '''
+        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+                       will be used to initialize the name of a new Field.\n
+        POSTCONDITIONS: A Field has been created.\n
+        RETURN VALUES: \n Field :: field \n
+        '''
+        field = ESMF.Field(grid_or_mesh, name)
+
+        return field
+
     def examine_field_attributes(self, field):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.staggerloc) is int)
@@ -196,6 +208,18 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
     # TODO: 3d Field mesh?
+
+    # don't change this function, it's used in the documentation
+    def create_field(grid_or_mesh, name):
+        '''
+        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+                       will be used to initialize the name of a new Field.\n
+        POSTCONDITIONS: A Field has been created.\n
+        RETURN VALUES: \n Field :: field \n
+        '''
+        field = ESMF.Field(grid_or_mesh, name)
+
+        return field
 
     def test_field_mask(self):
 

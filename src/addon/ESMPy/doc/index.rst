@@ -62,10 +62,10 @@ The following packages are *required* to work with ESMPy:
 
 The following packages are *optional*:
 
-* mpi4py - python bindings to MPI, needed to run the parallel regridding tests
+* `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run the parallel regridding tests
 * ESMF installation with NetCDF - required to create grids and meshes from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
-* nose - for nose testing
+* `nose <https://nose.readthedocs.org/en/latest/>`_ - for nose testing
 
 ============
 Installation
@@ -125,24 +125,18 @@ To use this package in an external program, import it with:
 Validation
 ----------
 
-The setup.py file can be used to run all of the ESMPy tests (in serial or 
-parallel), like this:
-
-    python setup.py test_all
-
-    python setup.py test_all_parallel
-
-or subsets of the tests individually, like this:
+The ESMPy testing is done with the nose package, both in serial and
+parallel.  The nose commands are wrapped in the following ESMPy targets:
 
     python setup.py test
 
-    python setup.py test_regrid
+    python setup.py test_examples
 
     python setup.py test_regrid_from_file
 
     python setup.py test_parallel
 
-    python setup.py test_regrid_parallel
+    python setup.py test_examples_parallel
 
     python setup.py test_regrid_from_file_parallel
 
@@ -151,17 +145,13 @@ The "test_regrid_from_file_dryrun" command will simply download the test
 files without actually running them (allowing the stress on the machine to
 be applied to bandwidth first, and then memory).
 
-Alternatively, if the nose package is available, the tests can be run with:
-
-    nosetests
-
-Individual tests can be run with nose using the following format:
+Alternatively, individual tests can be run with nose using the following format:
 
     nosetests <file>:<test>
 
 e.g.  
 
-    nosetests src/ESMF/test/unit_test.py:field_regrid_test
+    nosetests src/ESMF/test/test_api/test_regrid.py:TestRegrid.test_field_regrid
 
 ===========
 Limitations
@@ -180,7 +170,8 @@ to ESMF offline and integrated regridding capabilities.
 
 Testing related:
 
-- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux running gfortran with openMPI.
+- Nightly regression testing is limited to a small subset of the ESMF test platforms, including Darwin and Linux and
+  Cray running gfortran with openMPI.
 
 
 ===============================
@@ -515,43 +506,43 @@ necessary to regrid data between Fields built on Grids and Meshes.
 Create a 2D Grid
 ~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
         :pyobject: grid_create
 
 ~~~~~~~~~~~~~~~~
 Create a 3D Grid
 ~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
         :pyobject: grid_create_3d
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Create a periodic Grid
 ~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
         :pyobject: grid_create_periodic
 
 ~~~~~~~~~~~~~~~~~~~~~~~
 Create a 5 element Mesh
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/mesh_regridding_utilities.py
+    .. literalinclude:: ../src/ESMF/test/test_api/mesh_utilities.py
         :pyobject: mesh_create_5
 
 ~~~~~~~~~~~~~~
 Create a Field
 ~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/unit_test.py
-        :pyobject: create_field
+    .. literalinclude:: ../src/ESMF/test/test_api/test_field.py
+        :pyobject: TestField.create_field
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Initialize an analytic Field
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+    .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
         :pyobject: initialize_field_grid_periodic
 
 
@@ -559,15 +550,15 @@ Initialize an analytic Field
 Run ESMPy regridding
 ~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../src/ESMF/test/unit_test.py
-        :pyobject: run_regridding
+    .. literalinclude:: ../src/ESMF/test/test_api/test_regrid.py
+        :pyobject: TestRegrid.run_regridding
 
 
 ~~~~~~~~~~~~~~~~~~
 Compute Field mass
 ~~~~~~~~~~~~~~~~~~
 
-  .. literalinclude:: ../src/ESMF/test/regrid_test/grid_regridding_utilities.py
+  .. literalinclude:: ../src/ESMF/test/test_api/grid_utilities.py
     :pyobject: compute_mass_grid
 
 

@@ -7,13 +7,33 @@ from ESMF.test.base import TestBase, attr
 from ESMF.test.test_api.mesh_utilities import *
 from ESMF.test.test_api.grid_utilities import *
 
-# TODO: combinatorial expansions in regrid tests are complex
-  #  1. argument values of the regrid methods
-  #  2. types of field that go into the regrid methods
-  #  3. types of the grids underneath the field
-
 class TestRegrid(TestBase):
-    def est_field_regrid(self):
+    # this is for the documentation, do not modify
+    def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
+        '''
+        PRECONDITIONS: Two Fields have been created and a regridding
+                       operation is desired from 'srcfield' to 'dstfield'.
+                       The 'srcfracfield' and 'dstfractfield' are Fields
+                       created to hold the fractions of the source and
+                       destination fields which contribute to conservative
+                       regridding.\n
+        POSTCONDITIONS: A regridding operation has set the data on
+                        'dstfield', 'srcfracfield', and 'dstfracfield'.\n
+        RETURN VALUES: \n Field :: dstfield \n
+                          Field :: srcfracfield \n
+                          Field :: dstfracfield \n
+        '''
+        # call the regridding functions
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        return dstfield, srcfracfield, dstfracfield
+
+    def test_field_regrid(self):
         # create grids
         max_index = np.array([20, 20])
         srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
