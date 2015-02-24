@@ -42,7 +42,6 @@ struct MBMesh_Search_result {
   bool operator!=(const MBMesh_Search_result &rhs) const {
     return !(*this == rhs);
    }
-#endif
 };
 typedef std::vector<MBMesh_Search_result*> MBMesh_SearchResult;
 
