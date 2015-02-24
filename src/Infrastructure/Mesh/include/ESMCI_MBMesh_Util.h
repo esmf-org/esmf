@@ -21,6 +21,9 @@
 #ifndef ESMCI_MBMesh_Util_h
 #define ESMCI_MBMesh_Util_h
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include "Mesh/include/ESMCI_MBMesh.h"
 
 
@@ -33,9 +36,9 @@
 
 using namespace ESMCI;
 
-#ifdef ESMF_MOAB
 
 void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords);
 
-#endif
+#endif // ESMF_MOAB
+
 #endif

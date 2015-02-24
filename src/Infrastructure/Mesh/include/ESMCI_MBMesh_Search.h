@@ -12,29 +12,22 @@
 #ifndef ESMCI_MBMesh_Search_h
 #define ESMCI_MBMesh_Search_h
 
-#include <list>
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
 
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_SearchFlags.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
 
-#include <vector>
 
+#include <list>
+#include <vector>
 
 namespace ESMCI {
 
-#if 0
-// The return type from search.  A list of source grid node to
-// destination grid element pairs
-struct MBMesh_Search_node_result {
-  EntityHandle *node;  // Take this out when everything converted to PntList?
-
-  double pcoord[3];  // parametric coord of node in elem
-};
-#endif
-
 
 struct MBMesh_Search_result {
+
   EntityHandle src_elem;
   std::vector<EntityHandle> dst_elems;
 
@@ -48,7 +41,8 @@ struct MBMesh_Search_result {
   }
   bool operator!=(const MBMesh_Search_result &rhs) const {
     return !(*this == rhs);
-  }
+   }
+#endif
 };
 typedef std::vector<MBMesh_Search_result*> MBMesh_SearchResult;
 
@@ -58,5 +52,7 @@ typedef std::vector<MBMesh_Search_result*> MBMesh_SearchResult;
 //void DestroySearchResult(SearchResult &sres);
 
 } //namespace
+
+#endif // ESMF_MOAB
 
 #endif

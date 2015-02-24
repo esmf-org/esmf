@@ -9,6 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/ESMCI_WMat.h>
@@ -38,7 +42,7 @@ static const char *const version = "$Id$";
           
 using namespace ESMCI;
 
-#ifdef ESMF_MOAB
+
 
   // Not really a math routine, but useful as a starting point for math routines
 void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords) {
@@ -83,4 +87,5 @@ void MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, 
   // Get number of nodes
   *num_nodes=num_verts;
 }
-#endif
+
+#endif // ESMF_MOAB

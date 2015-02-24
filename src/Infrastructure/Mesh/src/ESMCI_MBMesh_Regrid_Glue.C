@@ -9,6 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+
 #define ESMC_FILENAME "ESMCI_Regrid_F.C"
 //==============================================================================
 //
@@ -17,6 +18,10 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
@@ -99,8 +104,6 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
-#ifdef ESMF_MOAB
-
 
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
@@ -129,10 +132,7 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
 #ifdef MEMLOG_on
   VM::logMemInfo(std::string("RegridCreate1.0"));
 #endif
-
-
-printf("Inside MBMesh Regrid!\n");
-
+ 
  
   try {
 
@@ -190,7 +190,7 @@ printf("Inside MBMesh Regrid!\n");
       // Check mesh elements 
 //BOB      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
-      // Concave
+       // Concave
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -248,7 +248,7 @@ printf("Inside MBMesh Regrid!\n");
 #endif
 
 #ifdef MEMLOG_on
-  VM::logMemInfo(std::string("RegridCreate3.0"));
+   VM::logMemInfo(std::string("RegridCreate3.0"));
 #endif
 
 #if 0
@@ -306,7 +306,7 @@ printf("Inside MBMesh Regrid!\n");
         }
       }
     }
-#ifdef PROGRESSLOG_on
+ #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Prepare for ArraySMMStore().", ESMC_LOGMSG_INFO);
 #endif
 
@@ -364,7 +364,7 @@ printf("Inside MBMesh Regrid!\n");
 
           i++;
         } // for j
-      } // for wi
+       } // for wi
       
     } else {
       UInt i = 0;
@@ -422,7 +422,7 @@ printf("Inside MBMesh Regrid!\n");
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
-      FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
+       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -480,7 +480,7 @@ printf("Inside MBMesh Regrid!\n");
 
        // Output information
        *_num_udl=num_udl;      
-       *_tudl=tudl;
+        *_tudl=tudl;
     }
 #endif
 
@@ -513,11 +513,6 @@ printf("Inside MBMesh Regrid!\n");
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
-#else
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-             "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
-#endif
 }
 
 #if 0
@@ -1474,8 +1469,6 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
                      int *regridScheme, 
                      int *map_type, int *unmappedaction) {
 
-#ifdef ESMF_MOAB
-
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
    calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
@@ -1483,17 +1476,10 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts,
     Throw() << "This regrid method not currently supported with MOAB";
   }
 
-#else
-   {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, &localrc)) throw localrc;
-   }
-#endif
-
   return 1;
 
 }
 
-
 #undef  ESMC_METHOD
+
+#endif // ESMF_MOAB

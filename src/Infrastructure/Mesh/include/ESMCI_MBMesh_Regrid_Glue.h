@@ -21,6 +21,9 @@
 #ifndef ESMCI_MBMesh_Regrid_Glue_h
 #define ESMCI_MBMesh_Regrid_Glue_h
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
@@ -64,18 +67,7 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
                           int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
                           int*rc);
 
-#if 0
-void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
 
-void ESMCI_regrid_getarea(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
-
-void ESMCI_regrid_getfrac(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                     int *rc);
-#endif
+#endif // ESMF_MOAB
 
 #endif // ESMCI_Mesh_Regrid_Glue_h
