@@ -1767,7 +1767,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only 1 DE per PET supported.
+!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -1784,7 +1784,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!      A logical flag, the default is .false., i.e., existing field data may
+!      A logical flag, the default is .false., i.e., existing Array data may
 !      {\em not} be overwritten. If .true., the overwrite behavior depends
 !      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
