@@ -71,6 +71,7 @@ module ESMF_LocStreamMod
 ! ! ESMF_LocStreamType
 ! ! Definition of the LocStream class.
 
+
   type ESMF_LocStreamType
 #ifndef ESMF_NO_SEQUENCE
      sequence
@@ -1366,7 +1367,7 @@ contains
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[coordSys]}]
-!         The coordinate system of the grid coordinate data.
+!         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
@@ -1515,7 +1516,7 @@ contains
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[coordSys]}]
-!         The coordinate system of the grid coordinate data.
+!         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
@@ -1651,7 +1652,7 @@ contains
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[coordSys]}]
-!         The coordinate system of the grid coordinate data.
+!         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
@@ -1816,7 +1817,7 @@ contains
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[coordSys]}]
-!         The coordinate system of the grid coordinate data.
+!         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_CART.
 !     \item[{[rc]}]
@@ -2227,6 +2228,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    print*,'mvr: in getkeyarray'
+
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
@@ -2244,14 +2247,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! If nothing found return error
    if (keyIndex==0) then
+      print*,'mvr: cant find this keyname: ',keyName
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
             msg=" - keyName not found in this LocStream", &
             ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
+   print*,'mvr: getkeyarray 1'
    ! Get Array
    keyArray=lstypep%keys(keyIndex)
 
+   print*,'mvr: getkeyarray 2'
    ! return success
    if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2998,6 +3004,9 @@ end subroutine ESMF_LocStreamGetKeyR4
  localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
+ print*,'mvr: in getkeyr8: keyname= ',keyName
+
+
  ! Check init status of arguments 
  ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
@@ -3043,19 +3052,29 @@ end subroutine ESMF_LocStreamGetKeyR4
     return 
  endif 
 
+ print*,'mvr: before getkeyarray'
+
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
+
+ print*,'mvr: after getkeyarray'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
+ print*,'mvr: after check of getkeyarray'
+
  ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
+ print*,'mvr: hello1'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
+ print*,'mvr: hello2'
  
  call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
+ print*,'mvr: hello3'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
+ print*,'mvr: hello4'
 
   ! Get Bounds via C++
    call c_ESMC_locstreamgetkeybnds(array, localDE, & 
@@ -3063,8 +3082,10 @@ end subroutine ESMF_LocStreamGetKeyR4
                  computationalLBound, computationalUBound, computationalCount, &
                  totalLBound, totalUBound, totalCount, &
                  localrc)
+ print*,'mvr: hello5'
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
+ print*,'mvr: hello6'
 
 
  ! Return successfully 

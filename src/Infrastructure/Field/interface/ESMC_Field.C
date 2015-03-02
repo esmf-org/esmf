@@ -481,4 +481,68 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   }
 //--------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldCreateLocStreamArraySpec()"
+  ESMC_Field ESMC_FieldCreateLocStreamArraySpec(ESMC_LocStream locstream, 
+    ESMC_ArraySpec arrayspec,
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name, int *rc){
+    // Initialize return code. Assume routine not implemented
+    if (rc) *rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMF_RC_NOT_IMPL;
+
+    ESMC_Field field;
+
+    // Invoke the C++ interface
+    field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&locstream, arrayspec,
+      gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
+      field.ptr = NULL;  // invalidate
+      return field; // bail out
+    }
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+    return field;
+  }
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldCreateLocStreamTypeKind()"
+  ESMC_Field ESMC_FieldCreateLocStreamTypeKind(ESMC_LocStream locstream, 
+    enum ESMC_TypeKind_Flag typekind,
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name, int *rc){
+    // Initialize return code. Assume routine not implemented
+    if (rc) *rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMF_RC_NOT_IMPL;
+
+    ESMC_Field field;
+
+    // Invoke the C++ interface
+    printf("mvr: esmc_fieldcreatelocstreamtypekind: before c++ call to create\n");
+    fflush(stdout);
+    field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&locstream, typekind,
+      gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
+    printf("mvr: esmc_fieldcreatelocstreamtypekind: after c++ call to create\n");
+    fflush(stdout);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
+      field.ptr = NULL;  // invalidate
+      return field; // bail out
+    }
+    printf("mvr: esmc_fieldcreatelocstreamtypekind: after error check of c++ call to create\n");
+    fflush(stdout);
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+    return field;
+  }
+//--------------------------------------------------------------------------
+
 }

@@ -49,6 +49,16 @@ int main(void){
   ESMC_Mesh dstmesh;
   int num_elem_d, num_node_d;
 
+  // LocStream variables 
+  ESMC_LocStream dstlocstream;
+  int ls_size=16;
+  char *keyNameX="ESMF:X";
+  char *keyNameY="ESMF:Y";
+  ESMC_Array keyArray;
+  double *farray;
+  double *farray2;
+
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -368,6 +378,8 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "Validation of regrid operation()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double x,y;
   int i;
   bool correct = true;
@@ -384,7 +396,177 @@ int main(void){
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldDestroy(&dstfield);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Mesh object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshDestroy(&dstmesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
   free(maskValues);
+
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest 
+  strcpy(name, "LocStreamCreateLocal");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  dstlocstream = ESMC_LocStreamCreateLocal(ls_size,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest  
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameX);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest 
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray = (double *) ESMC_LocStreamGetKeyPtr(dstlocstream,keyNameX,0,&rc);
+  farray[0]=0.0;
+  farray[1]=0.5;
+  farray[2]=1.5;
+  farray[3]=2.0;
+  farray[4]=0.0;
+  farray[5]=0.5;
+  farray[6]=1.5;
+  farray[7]=2.0;
+  farray[8]=0.0;
+  farray[9]=0.5;
+  farray[10]=1.5;
+  farray[11]=2.0;
+  farray[12]=0.0;
+  farray[13]=0.5;
+  farray[14]=1.5;
+  farray[15]=2.0;
+  
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest  
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameY);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest 
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray2 = (double *) ESMC_LocStreamGetKeyPtr(dstlocstream,keyNameY,0,&rc);
+  farray2[0]=0.0;
+  farray2[1]=0.0;
+  farray2[2]=0.0;
+  farray2[3]=0.0;
+  farray2[4]=0.5;
+  farray2[5]=0.5;
+  farray2[6]=0.5;
+  farray2[7]=0.5;
+  farray2[8]=1.5;
+  farray2[9]=1.5;
+  farray2[10]=1.5;
+  farray2[11]=1.5;
+  farray2[12]=2.0;
+  farray2[13]=2.0;
+  farray2[14]=2.0;
+  farray2[15]=2.0;
+  
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest 
+  strcpy(name, "Create ESMC_Field object on LocStream");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  dstfield = ESMC_FieldCreateLocStreamTypeKind(dstlocstream, ESMC_TYPEKIND_R8,
+					       NULL, NULL, NULL, "dstfield", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // initialize destination field
+  {
+    int i;
+    for(i=0;i<ls_size;++i)
+      dstfieldptr[i] = 0.0;
+  }
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, 
+                             NULL, NULL,
+                             &routehandle,
+                             NULL, NULL,
+                             NULL, NULL,
+                             NULL, NULL);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Execute ESMC_FieldRegrid()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Execute ESMC_RouteHandlePrint()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_RouteHandlePrint(routehandle);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Release an ESMC_RouteHandle via ESMC_FieldRegridRelease()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldRegridRelease(&routehandle);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //-------------------------- REGRID VALIDATION -------------------------------
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Validation of regrid operation()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  correct = true;
+  // 2. check destination field against source field
+  for(i=0;i<ls_size;++i) {
+    x=nodeCoord_d[2*i];
+    y=nodeCoord_d[2*i+1];
+    // if error is too big report an error
+    if (ESMC_dabs(dstfieldptr[i]-(x+y+20.0)) > 0.0001) {
+      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
+      correct=false;
+    }
+  }
+  ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -412,9 +594,9 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Destroy ESMC_Mesh object");
+  strcpy(name, "Destroy ESMC_LocStream object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshDestroy(&dstmesh);
+  rc = ESMC_LocStreamDestroy(&dstlocstream);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

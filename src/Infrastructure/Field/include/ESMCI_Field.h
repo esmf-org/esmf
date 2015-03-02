@@ -44,7 +44,7 @@
 #include "ESMC_Interface.h"
 #include "ESMCI_Util.h"
 #include "ESMC_Grid.h"
-
+#include "ESMC_LocStream.h"
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -76,6 +76,13 @@ namespace ESMCI{
       ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_TypeKind_Flag typekind,
       ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
+      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      const char *name, int *rc); 
+    static Field* create(ESMC_LocStream *locstream, ESMC_ArraySpec arrayspec,
+      ESMC_InterfaceInt *gridToFieldMap, ESMC_InterfaceInt *ungriddedLBound,
+      ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
+    static Field* create(ESMC_LocStream *locstream, ESMC_TypeKind_Flag typekind,
+      ESMC_InterfaceInt *gridToFieldMap, 
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
     static int destroy(Field *field);

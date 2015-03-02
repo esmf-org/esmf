@@ -33,6 +33,7 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Array.h"
 #include "ESMCI_Grid.h"
+#include "ESMCI_LocStream.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -85,6 +86,22 @@ void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer,
 
 void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_TypeKind_Flag *typekind, ESMC_MeshLoc_Flag *meshloc,
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN_X(f_esmf_fieldcreatelocstreamas)(ESMCI::Field *fieldp, ESMCI::LocStream **locstream, 
+    ESMC_ArraySpec *arrayspec, 
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN_X(f_esmf_fieldcreatelocstreamtk)(ESMCI::Field *fieldp, ESMCI::LocStream *locstream,
+    ESMC_TypeKind_Flag *typekind,
     int *gridToFieldMap, int *len1, int *gtfm_present, 
     int *ungriddedLBound, int *len2, int *uglb_present,
     int *ungriddedUBound, int *len3, int *ugub_present,
@@ -681,6 +698,286 @@ namespace ESMCI {
     return field;
 
  }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::create()"
+//BOP
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from LocStream and ArraySpec
+//
+// !INTERFACE:
+      Field *Field::create(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Field object
+//
+// !ARGUMENTS:
+    ESMC_LocStream *locstream, 
+    ESMC_ArraySpec arrayspec,
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, 
+    ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name,  
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
+    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
+      if(gtfm->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      gtfm_present = 1;
+    } else
+      gtfm = new ESMCI::InterfaceInt();
+
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
+      if(uglb->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      uglb_present = 1;
+    } else
+      uglb = new ESMCI::InterfaceInt();
+
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
+      if(ugub->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      ugub_present = 1;
+    } else
+      ugub = new ESMCI::InterfaceInt();
+
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
+    }
+
+    // prepare the field pointer
+    ESMCI::Field * field = NULL;
+    try{
+      field = new Field;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
+      delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+
+    // prepare the locstream pointer
+    ESMCI::LocStream *locstreamp = reinterpret_cast<ESMCI::LocStream *>(locstream->ptr); 
+ 
+    FTN_X(f_esmf_fieldcreatelocstreamas)(field, &locstreamp,
+        &arrayspec,
+        gtfm->array, &gtfm->extent[0], &gtfm_present,
+        uglb->array, &uglb->extent[0], &uglb_present,
+        ugub->array, &ugub->extent[0], &ugub_present,
+        fName, &localrc, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
+      if(fName) delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+  
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
+    if(fName) delete[] fName;
+  
+    if (rc) *rc = localrc;
+  
+    return field;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::create()"
+//BOP
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from LocStream and typekind
+//
+// !INTERFACE:
+      Field *Field::create(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Field object
+//
+// !ARGUMENTS:
+    ESMC_LocStream *locstream, 
+    ESMC_TypeKind_Flag typekind, 
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, 
+    ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name,  
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    printf("mvr: just in the c++ code field create1\n");
+    fflush(stdout);
+
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
+    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+
+    gtfm = (ESMCI::InterfaceInt *)gridToFieldMap;
+    if (present(gtfm)) {
+      if(gtfm->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      gtfm_present = 1;
+    } else
+      gtfm = new ESMCI::InterfaceInt();
+
+    uglb = (ESMCI::InterfaceInt *)ungriddedLBound;
+    if (present(uglb)) {
+      if(uglb->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      uglb_present = 1;
+    } else
+      uglb = new ESMCI::InterfaceInt();
+
+    ugub = (ESMCI::InterfaceInt *)ungriddedUBound;
+    if (present(ugub)) {
+      if(ugub->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      ugub_present = 1;
+    } else
+      ugub = new ESMCI::InterfaceInt();
+
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
+    }
+
+    // prepare the Field pointer
+    ESMCI::Field * field = NULL;
+    try{
+      field = new Field;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
+      if(fName) delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+  
+    printf("mvr: just in the c++ code field create2\n");
+    fflush(stdout);
+    // prepare the LocStream pointer
+    ESMCI::LocStream *locstreamp = reinterpret_cast<ESMCI::LocStream *>(locstream->ptr); 
+
+    printf("mvr: just in the c++ code field create3\n");
+    fflush(stdout);
+    FTN_X(f_esmf_fieldcreatelocstreamtk)(field, locstreamp, 
+        &typekind,
+        gtfm->array, &gtfm->extent[0], &gtfm_present,
+        uglb->array, &uglb->extent[0], &uglb_present,
+        ugub->array, &ugub->extent[0], &ugub_present,
+        fName, &localrc, slen);
+    printf("mvr: just in the c++ code field create4\n");
+    fflush(stdout);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
+      if(fName) delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+    printf("mvr: just in the c++ code field create5\n");
+    fflush(stdout);
+  
+    if(fName) delete[] fName;
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
+  
+    if (rc) *rc = localrc;
+  
+    return field;
+
+ }
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

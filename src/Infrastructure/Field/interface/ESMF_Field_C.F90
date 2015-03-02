@@ -359,6 +359,184 @@
   end subroutine f_esmf_fieldcreatemeshtk
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcreatelocstreamas"
+  subroutine f_esmf_fieldcreatelocstreamas(field, locstream_pointer, arrayspec, &
+    staggerloc, gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_ArraySpecMod
+    use ESMF_StaggerLocMod
+    use ESMF_LocStreamMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+
+    implicit none
+
+    ! arguments
+    type(ESMF_Field)               :: field
+    type(ESMF_LocStreamType)             :: locstream_pointer
+    type(ESMF_ArraySpec)           :: arrayspec
+    type(ESMF_StaggerLoc)          :: staggerloc
+    integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
+    integer                        :: gridToFieldMap(1:len1), &
+                                      ungriddedLBound(1:len2), &
+                                      ungriddedUBound(1:len3)
+    character(len=*),intent(in)    :: name
+    integer, intent(out)           :: rc              
+  
+    ! local variables  
+    type(ESMF_LocStream)          :: locstream
+  
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    locstream%lstypep = locstream_pointer
+
+    ESMF_INIT_SET_CREATED(locstream)
+    
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(locstream, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    endif
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+   
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_fieldcreatelocstreamas
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcreatelocstreamtk"
+  subroutine f_esmf_fieldcreatelocstreamtk(field, locstream, typekind, &
+    gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+    use ESMF_StaggerLocMod
+    use ESMF_LocStreamMod
+
+    implicit none
+
+    ! arguments
+    type(ESMF_Field)               :: field
+    type(ESMF_LocStream)             :: locstream
+    type(ESMF_TypeKind_Flag)       :: typekind
+    type(ESMF_StaggerLoc)          :: staggerloc
+    integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
+    integer                        :: gridToFieldMap(1:len1), &
+                                      ungriddedLBound(1:len2), &
+                                      ungriddedUBound(1:len3)
+    character(len=*),intent(in)    :: name
+    integer, intent(out)           :: rc              
+  
+    ! local variables  
+!    type(ESMF_LocStream)          :: locstream
+ 
+  ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    print*,'mvr: esmf_field_c.f90: hello1'
+!    locstream%lstypep = locstream_pointer
+    print*,'mvr: esmf_field_c.f90: hello2'
+
+    ESMF_INIT_SET_CREATED(locstream)
+ 
+    print*,'mvr: esmf_field_c.f90: hello3'
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    print*,'mvr: esmf_field_c.f90: hello4'
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        name=name, rc=rc)    
+    print*,'mvr: esmf_field_c.f90: hello5'
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        gridToFieldMap=gridToFieldMap, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(locstream, typekind=typekind, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    endif
+    print*,'mvr: esmf_field_c.f90: hello6'
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    print*,'mvr: esmf_field_c.f90: hello7'
+
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_fieldcreatelocstreamtk
+
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldprint"
   subroutine f_esmf_fieldprint(field, rc)
 
