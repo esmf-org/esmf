@@ -213,10 +213,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
       }
      }
 
-
- /* XMRKX */
-    printf("Inside MOAB Add nodes!\n");
-
     // Number of verts
     int num_verts=*num_nodes;
     mbmp->num_verts=num_verts;
