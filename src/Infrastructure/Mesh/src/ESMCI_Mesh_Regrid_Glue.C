@@ -41,7 +41,7 @@
 #include <vector>
 #include <map>
 
- //------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
 //
@@ -83,7 +83,7 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                      Mesh **meshdstpp, ESMCI::Array **arraydstpp,
+                       Mesh **meshdstpp, ESMCI::Array **arraydstpp,
                      int *regridMethod, 
                      int *map_type,
                      int *norm_type,
@@ -126,7 +126,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
-     if (*_ignoreDegenerate) ignoreDegenerate=true;
+      if (*_ignoreDegenerate) ignoreDegenerate=true;
     else ignoreDegenerate=false;
 
 
@@ -158,7 +158,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     // Clockwise
     if (clockwise) {
       int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell whose corners are clockwise", ESMC_CONTEXT,
         &localrc)) throw localrc;
     }
@@ -169,7 +169,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell that has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+     }
 
     // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
     // matter what the cell looks like
@@ -177,7 +177,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
       // Check mesh elements 
       cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
-      // Concave
+       // Concave
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -208,11 +208,20 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
+  // Declare output structure in which weights are to be put
+  int num_entries;
+  int *iientries; 
+  double *factors;
+
+  // Declare vector to hold unmapped destination points
+  std::vector<int> unmappedDstList;
+
+  { //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
 
     // Compute Weights matrix
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
-    // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
+     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -228,7 +237,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
-#ifdef PROGRESSLOG_on
+ #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
 #endif
 
@@ -237,7 +246,6 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #endif
 
     // If requested get list of unmapped destination points
-    std::vector<int> unmappedDstList;
     if (*has_udl) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
@@ -270,7 +278,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
-#if 0
+ #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -298,22 +306,17 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
-    /////// We have the weights, now set up the sparsemm object /////
+    /////// Translate the internal weight representation to rep. to be output or passed to arraysmm /////
 
-    // Firstly, the index list
+    // Allocated output format to put weights into
     std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
-    int num_entries = iisize.first;
-    int *iientries = new int[2*iisize.first]; 
-    int larg[2] = {2, iisize.first};
-    // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
-
-    double *factors = new double[iisize.first];
+    num_entries = iisize.first;
+    iientries = new int[2*iisize.first]; 
+    factors = new double[iisize.first];
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      UInt i = 0;
+        UInt i = 0;
       WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
@@ -328,7 +331,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-          
+             
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
@@ -356,7 +359,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         
         std::vector<WMat::Entry> &wcol = wi->second;
         
-        // Construct factor index list
+          // Construct factor index list
         for (UInt j = 0; j < wcol.size(); ++j) {
           UInt twoi = 2*i;
           const WMat::Entry &wc = wcol[j];
@@ -371,7 +374,10 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           i++;
         } // for j
       } // for wi
-    }
+       }
+
+  } //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
+
 
 
     ///// If conservative, translate split element weights to non-split //////
@@ -396,17 +402,25 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #ifdef MEMLOG_on
   VM::logMemInfo(std::string("RegridCreate5.0"));
 #endif
-
+ 
     // Build the ArraySMM
     if (*has_rh != 0) {
+      // Wrap weigts in a Structure to pass into arraysmm
+      int larg[2] = {2, num_entries};
+      ESMCI::InterfaceInt ii(iientries, 2, larg);
+      ESMCI::InterfaceInt *iiptr = &ii;
+      
+      // Setup to call arraysmm
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+
+      // Call arraysmm
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-            &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
-            pipelineDepth, &localrc);
+                                   &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
+                                  pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
 #ifdef PROGRESSLOG_on
