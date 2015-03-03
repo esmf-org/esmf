@@ -304,7 +304,7 @@ class Field(MaskedArray):
         # call into the ctypes layer
         ESMP_FieldRegridGetArea(self)
 
-    def read(self, filename, variable, timeslice, format=1):
+    def read(self, filename, variable, ndbounds=None):
         """
         Read data into a Field from a NetCDF file. \n
         Required Arguments: \n
@@ -318,7 +318,31 @@ class Field(MaskedArray):
         """
         assert (type(filename) is str)
         assert (type(variable) is str)
-        assert (type(timeslice) is int)
+
+        # format defaults to NetCDF for now
+        format = 1
+
+        # if ndbounds is not passed in, set it to the first of extra field dimenstions, if they exist
+        timeslice = 1
+        if ndbounds is None:
+            if self.ndbounds is not None:
+                if type(self.ndbounds) is list:
+                    timeslice = self.ndbounds[0]
+                elif type(self.ndbounds) is int:
+                    timeslice = self.ndbounds
+        # if ndbounds is passed in, make sure it is a reasonable value
+        else:
+            if self.ndbounds is not None:
+                if type(ndbounds) is not int:
+                    raise ValueError("ndbounds argument can only be a single integer at this time")
+                else:
+                    timeslice_local = 1
+                    if type(self.ndbounds) is list:
+                        timeslice_local = self.ndbounds[0]
+                    elif type(self.ndbounds) is int:
+                        timeslice_local = self.ndbounds
+                    assert (ndbounds <= timeslice_local)
+                    timeslice = ndbounds
 
         ESMP_FieldRead(self, filename=filename,
                        variablename=variable,
