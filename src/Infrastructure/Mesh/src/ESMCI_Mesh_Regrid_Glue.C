@@ -34,14 +34,14 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
-#include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
+ #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 
 #include <iostream>
 #include <vector>
 #include <map>
 
-//------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
 //
@@ -69,7 +69,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
                                int *iientries, double *factors);
 
 // external C functions
-extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
+ extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt *factorIndexList, ESMC_Logical *ignoreUnmatched,
@@ -83,7 +83,7 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                     Mesh **meshdstpp, ESMCI::Array **arraydstpp,
+                       Mesh **meshdstpp, ESMCI::Array **arraydstpp,
                      int *regridMethod, 
                      int *map_type,
                      int *norm_type,
@@ -102,12 +102,12 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
-  int localPet = vm->getLocalPet();
+   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
   Mesh &srcmesh = **meshsrcpp;
   Mesh &dstmesh = **meshdstpp;
- 
+  
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
@@ -126,7 +126,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
-    if (*_ignoreDegenerate) ignoreDegenerate=true;
+      if (*_ignoreDegenerate) ignoreDegenerate=true;
     else ignoreDegenerate=false;
 
 
@@ -138,7 +138,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     // Check source mesh elements 
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check cells for conservative
-//BOB      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
     } else {
 #if 0
       // STILL NEED TO FINISH THIS
@@ -158,7 +158,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     // Clockwise
     if (clockwise) {
       int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell whose corners are clockwise", ESMC_CONTEXT,
         &localrc)) throw localrc;
     }
@@ -169,15 +169,15 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell that has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+     }
 
     // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-//BOB      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
-      // Concave
+       // Concave
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -208,11 +208,20 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
+  // Declare output structure in which weights are to be put
+  int num_entries;
+  int *iientries; 
+  double *factors;
+
+  // Declare vector to hold unmapped destination points
+  std::vector<int> unmappedDstList;
+
+  { //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
 
     // Compute Weights matrix
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
-    // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
+     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -228,7 +237,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
-#ifdef PROGRESSLOG_on
+ #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
 #endif
 
@@ -237,7 +246,6 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #endif
 
     // If requested get list of unmapped destination points
-    std::vector<int> unmappedDstList;
     if (*has_udl) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
@@ -270,7 +278,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
-#if 0
+ #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -298,22 +306,17 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
-    /////// We have the weights, now set up the sparsemm object /////
+    /////// Translate the internal weight representation to rep. to be output or passed to arraysmm /////
 
-    // Firstly, the index list
+    // Allocated output format to put weights into
     std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
-    int num_entries = iisize.first;
-    int *iientries = new int[2*iisize.first]; 
-    int larg[2] = {2, iisize.first};
-    // Gather the list
-    ESMCI::InterfaceInt ii(iientries, 2, larg);
-    ESMCI::InterfaceInt *iiptr = &ii;
-
-    double *factors = new double[iisize.first];
+    num_entries = iisize.first;
+    iientries = new int[2*iisize.first]; 
+    factors = new double[iisize.first];
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      UInt i = 0;
+        UInt i = 0;
       WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
@@ -328,7 +331,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-          
+             
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
@@ -356,7 +359,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         
         std::vector<WMat::Entry> &wcol = wi->second;
         
-        // Construct factor index list
+          // Construct factor index list
         for (UInt j = 0; j < wcol.size(); ++j) {
           UInt twoi = 2*i;
           const WMat::Entry &wc = wcol[j];
@@ -371,7 +374,10 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           i++;
         } // for j
       } // for wi
-    }
+       }
+
+  } //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
+
 
 
     ///// If conservative, translate split element weights to non-split //////
@@ -396,17 +402,25 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #ifdef MEMLOG_on
   VM::logMemInfo(std::string("RegridCreate5.0"));
 #endif
-
+ 
     // Build the ArraySMM
     if (*has_rh != 0) {
+      // Wrap weigts in a Structure to pass into arraysmm
+      int larg[2] = {2, num_entries};
+      ESMCI::InterfaceInt ii(iientries, 2, larg);
+      ESMCI::InterfaceInt *iiptr = &ii;
+      
+      // Setup to call arraysmm
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+
+      // Call arraysmm
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-            &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
-            pipelineDepth, &localrc);
+                                   &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
+                                  pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
 #ifdef PROGRESSLOG_on
@@ -789,7 +803,7 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
     }
   }
 
-  // Still here, so must have found them all
+   // Still here, so must have found them all
   return true;
 
 }
@@ -823,7 +837,7 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
     // get weight id
     int wt_id=wi->first.id;
-
+ 
     // Advance weights until not less than elem id
     while ((wi != we) && (wi->first.id <elem_id)) {
       wi++;
@@ -867,10 +881,6 @@ static void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool
   int num_poly_nodes_orig;
   double poly_coords_orig[MAX_NUM_POLY_COORDS];
    
-
-printf(" IN CONCAVE\n");
-
-
   // Init variables
   *concave=false;
   *clockwise=false;
@@ -884,8 +894,8 @@ printf(" IN CONCAVE\n");
 
   // Get dimensions
   int sdim=mesh.spatial_dim();
-  int pdim=mesh.parametric_dim();
-    
+   int pdim=mesh.parametric_dim();
+     
   // Compute area depending on dimensions
   if (pdim==2) {
     if (sdim==2) {
@@ -896,7 +906,7 @@ printf(" IN CONCAVE\n");
         
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-
+ 
         // Skip masked elements
         if (mptr != NULL) {
           double *m=mptr->data(elem);
@@ -927,10 +937,10 @@ printf(" IN CONCAVE\n");
           if (ignore_degenerate) {
             continue;
           } else {
-            char msg[1024];
+             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
-            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
@@ -946,7 +956,9 @@ printf(" IN CONCAVE\n");
             return;
           }
         }
-        
+     
+        //// WE CAN NOW HANDLE CONCAVE CELLS, SO DON'T CHECK THIS ////
+#if 0
         // Get elem rotation
         bool left_turn;
         bool right_turn;
@@ -963,17 +975,18 @@ printf(" IN CONCAVE\n");
             ESMC_LogDefault.Write("  concave elem. coords ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
-              double *pnt=poly_coords_orig+2*i;
+               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
                ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *concave=true;
             return;
           }
         }
+#endif
       }
     } else if (sdim==3) {
       MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
@@ -997,7 +1010,7 @@ printf(" IN CONCAVE\n");
         // Get the coords
         get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
 
-        // Save original coords
+         // Save original coords
         std::copy(poly_coords,poly_coords+3*num_poly_nodes,poly_coords_orig);
         num_poly_nodes_orig=num_poly_nodes;
 
@@ -1010,7 +1023,7 @@ printf(" IN CONCAVE\n");
         if (num_poly_nodes <3) is_degenerate=true;
 
 
-        // If is smashed quad then is degenerate
+         // If is smashed quad then is degenerate
         if (is_smashed_quad3D(num_poly_nodes, poly_coords)) is_degenerate=true;
 
 
@@ -1030,8 +1043,8 @@ printf(" IN CONCAVE\n");
               double *pnt=poly_coords_orig+3*i;
               
               double lon, lat, r;
-              convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
-                                      &lon, &lat, &r);
+               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
               ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
@@ -1043,11 +1056,13 @@ printf(" IN CONCAVE\n");
           }
         } 
 
+        //// WE CAN NOW HANDLE CONCAVE CELLS, SO DON'T CHECK THIS ////
+#if 0
         // Get elem rotation
         bool left_turn;
         bool right_turn;
         rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
-       
+        
         // Look for errors
         if (right_turn) {
           if (left_turn) { 
@@ -1060,7 +1075,7 @@ printf(" IN CONCAVE\n");
             ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
-              
+               
               double lon, lat, r;
               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
                                       &lon, &lat, &r);
@@ -1070,17 +1085,15 @@ printf(" IN CONCAVE\n");
             }
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
-#if 0
-            write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 
-#endif
-
             *concave=true;
             return;
           } 
         }
+#endif
       }
     }
   }
+
 
   // TODO: Check to see if 3D elements are in correct order.
 

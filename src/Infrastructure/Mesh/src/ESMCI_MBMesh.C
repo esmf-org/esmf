@@ -18,6 +18,9 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <string>
 #include <ostream>
 #include <iterator>
@@ -48,6 +51,8 @@ MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL) {
 MBMesh::~MBMesh() {
 
 } 
+
+#endif // ESMF_MOAB
 
 
 

@@ -260,7 +260,7 @@ static int found_func(void *c, void *y) {
     // Setup for source masks, if used
   std::vector<double> src_node_mask;
   MasterElement<> *mme;
-  MEField<> *src_mask_field_ptr = si.src_mask_field_ptr;
+   MEField<> *src_mask_field_ptr = si.src_mask_field_ptr;
   if (src_mask_field_ptr != NULL) {
     mme=GetME(*src_mask_field_ptr, ker)(METraits<>());
     src_node_mask.resize(mme->num_functions(),0.0);
@@ -303,7 +303,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
-    mathutil_debug=true;
+     mathutil_debug=true;
   }
 #endif
 
@@ -327,7 +327,7 @@ static int found_func(void *c, void *y) {
     
     for (int i=0; i<num_nds; i++) {
       double *pnt=coords+3*i;
-
+ 
       printf("%d ",ids[i]);
     }
     printf("]\n");
@@ -338,13 +338,13 @@ static int found_func(void *c, void *y) {
 
 
   // if we're too far away don't even consider this as a fall back candidate
-  if (!in && (dist > 1.0E-10)) return 0;
+  if (!in && (dist > 1.0E-8)) return 0;
 
 
   // In or close enough, so set as a candidate, until someone better comes along...
   if (in) {
     std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    si.best_dist = 0.0;
+     si.best_dist = 0.0;
     si.elem = &elem;
     si.is_in=true;
     si.elem_masked=elem_masked;

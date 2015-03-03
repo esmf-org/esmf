@@ -9,8 +9,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_MBMesh_BBox.h>
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
+#include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
 #include <limits>
@@ -56,7 +59,6 @@ MBMesh_BBox &MBMesh_BBox::operator=(const MBMesh_BBox &rhs) {
 MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
   isempty(false)
 {
-#ifdef ESMF_MOAB
  
  int merr;
 
@@ -99,17 +101,12 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
       }
     }
   } // nonshell
-
-
-#endif
 }
-
 
 
 MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
  isempty(false)
 {
-#ifdef ESMF_MOAB
 
   int merr;
 
@@ -138,7 +135,6 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
       }
   }
 
-#endif
 }
 
 void MBMesh_BBox::checkEmpty() {
@@ -226,3 +222,5 @@ std::ostream &operator<<(std::ostream &os, const MBMesh_BBox &cn) {
 }
 
 }
+
+#endif // ESMF_MOAB

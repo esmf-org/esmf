@@ -536,7 +536,7 @@
                       failMsg, result, ESMF_SRCLINE)
 
       ! Comment out for now until we make sure MeshCap works with daily testing
-#if 0
+#if 1
       !============== MOAB Mesh to Mesh =======================================
       ! initialize 
       rc=ESMF_SUCCESS
@@ -544,7 +544,7 @@
       call test_MOABMeshToMesh(itrp, csrv, rc)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Returned an error"
       write(name, *) "Conservative regridding MOAB Mesh to Mesh."
@@ -554,7 +554,7 @@
                       failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
       write(name, *) "Conservative regridding MOAB Mesh to Mesh.", &
@@ -566,7 +566,7 @@
                       failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding conservation
       write(failMsg, *) "Conservation relative error is greater than 10^-12"
       write(name, *) "Conservative regridding MOAB Mesh to Mesh.", &
@@ -11363,6 +11363,11 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! Init to success
   rc=ESMF_SUCCESS
+  itrp=.true.
+  csrv=.true.
+
+  ! Don't do the test is MOAB isn't available
+#ifdef ESMF_MOAB
 
   ! get pet info
   call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -12333,8 +12338,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
       return
    endif
 
-  ! return success if we've gotten this far
-    rc=ESMF_SUCCESS
+#endif
+   ! rc, itrp, csrv init to success above
 
  end subroutine test_MOABMeshToMesh
 

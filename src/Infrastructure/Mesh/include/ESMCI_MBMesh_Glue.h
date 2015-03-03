@@ -21,6 +21,9 @@
 #ifndef ESMCI_MBMesh_Glue_h
 #define ESMCI_MBMesh_Glue_h
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <string>
 #include <ostream>
 #include <iterator>
@@ -209,5 +212,7 @@ void ESMCI_meshtopntlist(Mesh **meshpp, PntList **plpp, int *rc);
 #endif
 
 #endif
+
+#endif // ESMF_MOAB
 
 #endif // ESMCI_Mesh_Glue_h
