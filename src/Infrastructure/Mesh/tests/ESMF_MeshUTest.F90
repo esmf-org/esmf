@@ -1771,13 +1771,16 @@ endif
   write(name, *) "Test creating a MOAB Mesh"
   write(failMsg, *) "Incorrect result"
 
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Don't test if MOAB isn't available
+#ifdef ESMF_MOAB
 
   call ESMF_MeshSetMOAB(.true., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! init success flag
-   rc=ESMF_SUCCESS
-  correct=.true.
 
   ! Create test mesh
   call createTestMesh3x3(mesh, rc=localrc)  
@@ -1882,6 +1885,9 @@ endif
 
   call ESMF_MeshSetMOAB(.false., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#endif 
+
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 #endif

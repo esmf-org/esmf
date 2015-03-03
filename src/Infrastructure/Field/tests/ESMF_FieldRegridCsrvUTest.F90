@@ -11363,6 +11363,11 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! Init to success
   rc=ESMF_SUCCESS
+  itrp=.true.
+  csrv=.true.
+
+  ! Don't do the test is MOAB isn't available
+#ifdef ESMF_MOAB
 
   ! get pet info
   call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -12333,8 +12338,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
       return
    endif
 
-  ! return success if we've gotten this far
-    rc=ESMF_SUCCESS
+#endif
+   ! rc, itrp, csrv init to success above
 
  end subroutine test_MOABMeshToMesh
 
