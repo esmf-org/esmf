@@ -316,6 +316,7 @@ class Field(MaskedArray):
         Returns: \n
             Field \n
         """
+
         assert (type(filename) is str)
         assert (type(variable) is str)
 

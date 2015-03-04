@@ -477,17 +477,12 @@ Hello World
 
     .. literalinclude:: ../examples/hello_world.py
 
-~~~~~~~~~~~~~~~~~~~~~
-Grid Create From File
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a Grid or Mesh From File
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../examples/grid_create_from_file.py
+    .. literalinclude:: ../examples/create_read_from_file.py
 
-~~~~~~~~~~~~~~~~~~~~~
-Mesh Create From File
-~~~~~~~~~~~~~~~~~~~~~
-
-    .. literalinclude:: ../examples/mesh_create_from_file.py
 
 ~~~~~~~~~~~~~~~~
 Grid Mesh Regrid
