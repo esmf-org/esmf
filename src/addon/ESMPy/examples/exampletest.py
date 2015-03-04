@@ -11,11 +11,8 @@ class TestExamples(TestBase):
     def test_helloworld(self):
         import hello_world
 
-    def test_gridcff(self):
-        import grid_create_from_file
-
-    def test_meshcff(self):
-        import mesh_create_from_file
+    def test_crff(self):
+        import create_read_from_file
 
     def test_gridmeshrg(self):
         import grid_mesh_regrid

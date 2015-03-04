@@ -2035,7 +2035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only 1 DE per PET supported.
+!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !

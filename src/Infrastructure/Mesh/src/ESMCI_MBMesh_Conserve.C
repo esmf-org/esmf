@@ -9,6 +9,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
@@ -36,6 +40,9 @@
 #include <vector>
 
 #include <ESMCI_VM.h>
+#include <ESMCI_LogErr.h>
+
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -52,8 +59,6 @@ static const char *const version = "$Id$";
 using namespace ESMCI;
 
  bool debug=false;
-
-#ifdef ESMF_MOAB
 
   
   // Intersects between the line a and the seqment s
@@ -701,13 +706,10 @@ static int found_func_elems(void *c, void *y) {
   if (box != NULL) delete box;
 }
 
-#endif // ESMF_MOAB
-
 
 void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
-#ifdef ESMF_MOAB
 
   // determine if we should use the dst_frac variable
   bool use_dst_frac=false;
@@ -938,7 +940,6 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
       }
 } // for searchresult
 
-#endif
 }
 
 
@@ -981,7 +982,7 @@ void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sr
 
 
 void calc_cnsrv_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts) {
-#ifdef ESMF_MOAB
+#define ESMC_METHOD "calc_cnsrc_regrid_wgts()"
 
   // Do search
   MBMesh_SearchResult result;
@@ -992,11 +993,6 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts) {
   IWeights dst_frac;
   calc_conserve_mat(srcmbmp, dstmbmp, result, wts, src_frac, dst_frac);
 
-#else
-   {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, &localrc)) throw localrc;
-   }
-#endif
 }
+
+#endif // ESMF_MOAB

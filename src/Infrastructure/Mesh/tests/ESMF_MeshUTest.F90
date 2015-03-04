@@ -1763,56 +1763,40 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 0
+#if 1
   ! OFF UNTIL I SEE IF THE OLD STUFF WORKS
 
   !------------------------------------------------------------------------
-  !NEX_OUT_UTest
+  !NEX_UTest
   write(name, *) "Test creating a MOAB Mesh"
   write(failMsg, *) "Incorrect result"
-
- ! XMRKX
-
-  !!!!!!!!!!!!!!!!!!!!!
-  ! 
-  !              Mesh Ids
-  !
-  !  2.0   7 ------- 8 -------- 9
-  !        |         |          |
-  !        |    3    |    4     |
-  !        |         |          |
-  !  1.0   4 ------- 5 -------- 6
-  !        |         |          |
-  !        |    1    |    2     |
-  !        |         |          |
-  !  0.0   1 ------- 2 -------- 3
-   !
-  !       0.0       1.0        2.0 
-  !
-  !      Node Ids at corners
-  !      Element Ids in centers
-  !
-  !!!
-  !      ( Everything owned by PET 0) 
-  !!!!! 
-
-  call ESMF_MeshSetMOAB(.true., rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! init success flag
   rc=ESMF_SUCCESS
   correct=.true.
 
+  ! Don't test if MOAB isn't available
+#ifdef ESMF_MOAB
+
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create test mesh
+  call createTestMesh3x3(mesh, rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
   ! Only do this if we have 1 processor
   if (petCount .eq. 1) then
 
   ! Create Mesh structure
   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Fill in node data
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+   ! Fill in node data
   numNodes=9
-
+ 
   !! node ids
   allocate(nodeIds(numNodes))
   nodeIds=(/1,2,3,4,5,6,7,8,9/) 
@@ -1820,19 +1804,19 @@ endif
   !! node Coords
   allocate(nodeCoords(numNodes*2))
   nodeCoords=(/0.0,0.0, &
-               1.0,0.0, &
-               2.0,0.0, &
+                1.0,0.0, &
+                2.0,0.0, &
                0.0,1.0, &
                1.0,1.0, &
                2.0,1.0, &
                0.0,2.0, &
                1.0,2.0, &
                2.0,2.0 /)
-
-  !! node owners
+ 
+   !! node owners
   allocate(nodeOwners(numNodes))
   nodeOwners=0 ! everything on proc 0
-
+ 
   ! Add nodes
   call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1840,7 +1824,7 @@ endif
    ! deallocate node data
   deallocate(nodeIds)
   deallocate(nodeCoords)
-  deallocate(nodeOwners)
+    deallocate(nodeOwners)
 
  ! XMRKX
 
@@ -1848,11 +1832,11 @@ endif
   numElems=4
 
   !! elem ids
-  allocate(elemIds(numElems))
-  elemIds=(/1,2,3,4/) 
+   allocate(elemIds(numElems))
+   elemIds=(/1,2,3,4/) 
 
   !! elem types
-  allocate(elemTypes(numElems))
+   allocate(elemTypes(numElems))
   elemTypes=ESMF_MESHELEMTYPE_QUAD
 
   !! elem area
@@ -1860,7 +1844,7 @@ endif
   elemAreas=(/2.0,3.0,4.0,5.0/)
 
   !! elem conn
-  allocate(elemConn(numElems*4))
+    allocate(elemConn(numElems*4))
   elemConn=(/1,2,5,4, & 
              2,3,6,5, & 
              4,5,8,7, & 
@@ -1868,11 +1852,11 @@ endif
 
   ! Add Elements
   call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,&
-                            elementArea=elemAreas, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+                             elementArea=elemAreas, rc=localrc)
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! deallocate elem data
-  deallocate(elemIds)
+   deallocate(elemIds)
   deallocate(elemTypes)
   deallocate(elemConn)
   deallocate(elemAreas)
@@ -1880,25 +1864,30 @@ endif
   !! Write mesh for debugging
   call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
+  
 !  call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
   endif 
+#endif
 
- ! XMRKX
+
+  ! XMRKX
   ! Test creating field
    field = ESMF_FieldCreate(mesh, arrayspec,  meshloc=ESMF_MESHLOC_ELEMENT, &
-       rc=localrc)
+         rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! check field
+   ! check field
   call ESMF_FieldValidate(field,rc=localrc) 
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_MeshSetMOAB(.false., rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#endif 
+
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 #endif

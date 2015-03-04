@@ -12,6 +12,9 @@
 #ifndef ESMCI_MBMesh_BBox_h
 #define ESMCI_MBMesh_BBox_h
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include <Mesh/include/ESMCI_MBMesh.h>
 
 #include <iostream>
@@ -29,9 +32,12 @@ public:
 MBMesh_BBox() {}
 MBMesh_BBox(int _dim) : isempty(true), dim(_dim) {}
 MBMesh_BBox(int dim, const double min[], const double max[]); 
+
+#ifdef ESMF_MOAB
 // Construct a box around an element.  If the object is a shell, the box
 // will be expanded in the normal direction by normexp*diameter of object
  MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp = 0.0);
+#endif
 
 // Build a box around the whole mesh.  Not a cheap operation (loops nodes)
 MBMesh_BBox(MBMesh *mesh);
@@ -76,5 +82,7 @@ std::ostream &operator<<(std::ostream &os, const MBMesh_BBox &cn);
 
 
 } // namespace
+
+#endif // ESMF_MOAB
 
 #endif

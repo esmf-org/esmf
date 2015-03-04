@@ -21,6 +21,9 @@
 #ifndef ESMCI_MBMesh_Conserve_h
 #define ESMCI_MBMesh_Conserve_h
 
+// Take out if MOAB isn't being used
+#ifdef ESMF_MOAB
+
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_WMat.h"
 
@@ -36,5 +39,5 @@ using namespace ESMCI;
 
 void calc_cnsrv_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, IWeights &wts);
 
-
+#endif
 #endif
