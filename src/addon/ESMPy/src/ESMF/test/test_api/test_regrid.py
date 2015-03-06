@@ -184,8 +184,6 @@ class TestRegrid(TestBase):
     #TODO: doesn't work in parallel because the 5 element mesh is not big enough to distribute to 4 procs
     @attr('serial')
     def test_grid_mesh_pentahexa_regrid_csrv(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -239,8 +237,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_field_regrid_periodic(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -287,8 +283,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_grid_grid_regrid_csrv_mask_3D(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -331,8 +325,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_grid_grid_regrid_csrv_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -375,8 +367,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_grid_mesh_regrid_csrv_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -429,8 +419,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_grid_mesh_regrid_csrv(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -479,8 +467,6 @@ class TestRegrid(TestBase):
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
     def test_grid_mesh_regrid_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -519,8 +505,6 @@ class TestRegrid(TestBase):
                             regrid_method=ESMF.RegridMethod.BILINEAR)
 
     def test_grid_mesh_regrid(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -558,8 +542,6 @@ class TestRegrid(TestBase):
                             regrid_method=ESMF.RegridMethod.BILINEAR)
 
     def test_mesh_mesh_regrid(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() > 4:

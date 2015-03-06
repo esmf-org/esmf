@@ -4,9 +4,8 @@
 
 import ESMF
 
-# Start up ESMF, this call is only necessary to override the default parameters
-# for logkind (ESMF.LogKind.NONE) and debug (False)
-esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+#esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 grid = ESMF.Grid(filename="examples/data/so_Omon_GISS-E2.nc", filetype=ESMF.FileFormat.GRIDSPEC)
