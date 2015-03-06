@@ -28,7 +28,8 @@ class Regrid(object):
                  regrid_pole_npoints=None,
                  unmapped_action=None,
                  src_frac_field=None,
-                 dst_frac_field=None):
+                 dst_frac_field=None,
+                 norm_type=None):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
@@ -78,6 +79,10 @@ class Regrid(object):
                             weights corresponding to the amount of each 
                             Field value which contributes to the total 
                             mass of the Field. \n
+            norm_type: control which type of normalization to do when generating conservative regridding weights. \n
+                Argument values are: \n
+                    (default) NormType.DSTAREA \n
+                    NormType.DSTFRAC \n
         Returns: \n
             Regrid \n
         """
@@ -113,7 +118,8 @@ class Regrid(object):
                                             regridPoleNPnts=regrid_pole_npoints,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
-                                            dstFracField=dst_frac_field)
+                                            dstFracField=dst_frac_field,
+                                            normType=norm_type)
         
         self.srcfield = srcfield
         self.dstfield = dstfield
@@ -125,6 +131,7 @@ class Regrid(object):
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
+        self.norm_type = norm_type
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)

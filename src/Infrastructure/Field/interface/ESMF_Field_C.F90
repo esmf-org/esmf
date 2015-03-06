@@ -701,10 +701,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 srcMaskValues, len1, smvpresent, &
                                 dstMaskValues, len2, dmvpresent, &
                                 routehandle, &
-				regridmethod, rmpresent, &
-				polemethod, pmpresent, &
-				regridPoleNPnts, &
+				                regridmethod, rmpresent, &
+				                polemethod, pmpresent, &
+				                regridPoleNPnts, &
                                 rpnppresent, &
+                                normtype, ntpresent, &
                                 unmappedaction, uapresent, &
                                 srcFracField, sffpresent, &
                                 dstFracField, dffpresent, rc)
@@ -718,20 +719,20 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     implicit none
 
-      type(ESMF_Field)                       :: srcField
-      type(ESMF_Field)                       :: dstField
-      integer                    :: len1, len2
-      integer                    :: smvpresent, dmvpresent
-      integer, intent(in)                    :: sffpresent, dffpresent
-      integer                                :: srcMaskValues(1:len1), &
-                                                dstMaskValues(1:len2)
-      type(ESMF_RouteHandle)                 :: routehandle
-      integer                    :: rmpresent, uapresent
-      type(ESMF_RegridMethod_Flag)           :: regridmethod
-      type(ESMF_PoleMethod_Flag) :: polemethod
-      integer                    :: pmpresent, rpnppresent
-      integer                   :: regridPoleNPnts
-      
+      type(ESMF_Field)               :: srcField
+      type(ESMF_Field)               :: dstField
+      integer                        :: len1, len2
+      integer                        :: smvpresent, dmvpresent
+      integer, intent(in)            :: sffpresent, dffpresent
+      integer                        :: srcMaskValues(1:len1), &
+                                        dstMaskValues(1:len2)
+      type(ESMF_RouteHandle)         :: routehandle
+      integer                        :: rmpresent, ntpresent, uapresent
+      type(ESMF_RegridMethod_Flag)   :: regridmethod
+      type(ESMF_PoleMethod_Flag)     :: polemethod
+      integer                        :: pmpresent, rpnppresent
+      integer                        :: regridPoleNPnts
+      type(ESMF_NormType_Flag)       :: normtype
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       type(ESMF_Field)               :: srcFracField
       type(ESMF_Field)               :: dstFracField
@@ -769,110 +770,120 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
 
     ! handle the optional parameters
-    if (rmpresent == 1 .and. uapresent == 1) then
+    if (rmpresent == 1 .and. ntpresent == 1 .and. uapresent == 1) then
       if (smvpresent == 0 .and. dmvpresent == 0 &
           .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+                                   polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+				                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -880,22 +891,24 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -903,23 +916,25 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -927,11 +942,12 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -939,270 +955,297 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
-    elseif (rmpresent == 0 .and. uapresent == 1) then
+    elseif (rmpresent == 0 .and. ntpresent == 1 .and. uapresent == 1) then
       if (smvpresent == 0 .and. dmvpresent == 0 &
           .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
-    elseif (rmpresent == 1 .and. uapresent == 0) then
+    elseif (rmpresent == 1 .and. ntpresent == 1 .and. uapresent == 0) then
       if (smvpresent == 0 .and. dmvpresent == 0 &
           .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
-                                   routehandle=l_routehandle, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
+    				               routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -1210,20 +1253,22 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1231,21 +1276,23 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1253,10 +1300,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1264,52 +1312,58 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
-    elseif (rmpresent == 0 .and. uapresent == 0) then
+    elseif (rmpresent == 0 .and. ntpresent == 1 .and. uapresent == 0) then
       if (smvpresent == 0 .and. dmvpresent == 0 &
           .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   normtype=normtype, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1317,8 +1371,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1326,8 +1381,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1335,8 +1391,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1344,8 +1401,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1353,8 +1411,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -1362,8 +1421,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1372,8 +1432,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1382,8 +1443,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1392,8 +1454,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1402,8 +1465,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1413,8 +1477,658 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
-    				   polemethod=polemethod_loc, &
-				   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+    				               normtype=normtype, &
+                                   rc=localrc)
+      endif
+    else if (rmpresent == 1 .and. ntpresent == 0 .and. uapresent == 1) then
+      if (smvpresent == 0 .and. dmvpresent == 0 &
+          .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+                                   polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+				                   normtype=normtype, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      endif
+    elseif (rmpresent == 0 .and. ntpresent == 0 .and. uapresent == 1) then
+      if (smvpresent == 0 .and. dmvpresent == 0 &
+          .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   unmappedaction=unmappedaction, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      endif
+    elseif (rmpresent == 1 .and. ntpresent == 0 .and. uapresent == 0) then
+      if (smvpresent == 0 .and. dmvpresent == 0 &
+          .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+				                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      endif
+    elseif (rmpresent == 0 .and. ntpresent == 0 .and. uapresent == 0) then
+      if (smvpresent == 0 .and. dmvpresent == 0 &
+          .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   routehandle=l_routehandle, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 0 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 0) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 0 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 0 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
+                                   rc=localrc)
+      else if (smvpresent == 1 .and. dmvpresent == 1 &
+               .and. sffpresent == 1 .and. dffpresent == 1) then
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   routehandle=l_routehandle, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+    				               polemethod=polemethod_loc, &
+				                   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
     endif

@@ -1370,6 +1370,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalNamedConstant,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
+                                        OptionalNamedConstant,
                                         OptionalField,
                                         OptionalField]
 @deprecated
@@ -1377,7 +1378,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None, polemethod=None,
                           regridPoleNPnts=None, unmappedaction=None,
-                          srcFracField=None, dstFracField=None):
+                          srcFracField=None, dstFracField=None,
+                          normType=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
                    sufficiently for a regridding operation to take 
@@ -1414,6 +1416,10 @@ def ESMP_FieldRegridStore(srcField, dstField,
                 UnmappedAction.IGNORE\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
+        NormType (optional)                 :: normType\n
+            Argument values:\n
+                (default) NormType.DSTAREA \n
+                NormType.DSTFRAC \n
     """
     routehandle = ct.c_void_p(0)
     if regridPoleNPnts:
@@ -1435,16 +1441,17 @@ def ESMP_FieldRegridStore(srcField, dstField,
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
 
-    rc = _ESMF.ESMC_FieldRegridStore(srcField.struct.ptr, \
-                                     dstField.struct.ptr, \
-                                     srcMaskValues_i, \
-                                     dstMaskValues_i, \
-                                     ct.byref(routehandle), \
-                                     regridmethod, \
-                                     polemethod, \
-                                     regridPoleNPnts_ct, \
-                                     unmappedaction, \
-                                     srcFracField, \
+    rc = _ESMF.ESMC_FieldRegridStore(srcField.struct.ptr,
+                                     dstField.struct.ptr,
+                                     srcMaskValues_i,
+                                     dstMaskValues_i,
+                                     ct.byref(routehandle),
+                                     regridmethod,
+                                     polemethod,
+                                     regridPoleNPnts_ct,
+                                     unmappedaction,
+                                     normType,
+                                     srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+
