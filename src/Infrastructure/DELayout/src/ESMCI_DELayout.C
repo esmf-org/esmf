@@ -2921,7 +2921,6 @@ int XXE::exec(
           // there is an outstanding active communication
           int completeFlag;
           VMK::status status;
-          memset (&status, 0, sizeof (VMK::status));
           vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
           xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
           if (completeFlag){
