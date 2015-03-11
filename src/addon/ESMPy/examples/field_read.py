@@ -5,8 +5,8 @@
 
 import ESMF
 
-# create a manager object with multiprocessor logging in debug mode
-ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+#esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 datafile = "data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"
 gridfile = "data/ll1deg_grid.nc"

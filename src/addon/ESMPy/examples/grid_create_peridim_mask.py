@@ -3,8 +3,7 @@
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to override the default parameters
-# for logkind (ESMF.LogKind.NONE) and debug (False)
+# Start up ESMF, this call is only necessary to enable debug logging
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # Create the source grid from memory with periodic dimension specified.
