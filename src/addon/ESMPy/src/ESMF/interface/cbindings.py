@@ -1376,10 +1376,10 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
 @deprecated
 def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
-                          regridmethod=None, polemethod=None,
-                          regridPoleNPnts=None, unmappedaction=None,
-                          srcFracField=None, dstFracField=None,
-                          normType=None):
+                          regridmethod=None,
+                          polemethod=None, regridPoleNPnts=None,
+                          normType=None, unmappedaction=None,
+                          srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
                    sufficiently for a regridding operation to take 
@@ -1410,16 +1410,16 @@ def ESMP_FieldRegridStore(srcField, dstField,
                 PoleMethod.NPNTAVG\n
                 PoleMethod.TEETH\n
         integer (optional)                  :: regridPoleNPnts\n
+        NormType (optional)                 :: normType\n
+            Argument values:\n
+                (default) NormType.DSTAREA \n
+                NormType.DSTFRAC \n
         UnmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
-        NormType (optional)                 :: normType\n
-            Argument values:\n
-                (default) NormType.DSTAREA \n
-                NormType.DSTFRAC \n
     """
     routehandle = ct.c_void_p(0)
     if regridPoleNPnts:
@@ -1449,8 +1449,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridmethod,
                                      polemethod,
                                      regridPoleNPnts_ct,
-                                     unmappedaction,
                                      normType,
+                                     unmappedaction,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

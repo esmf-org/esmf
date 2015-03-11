@@ -452,6 +452,7 @@ class TestRegrid(TestBase):
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    norm_type=ESMF.NormType.FRACAREA,
                                     unmapped_action=ESMF.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
@@ -460,7 +461,8 @@ class TestRegrid(TestBase):
         # compute the mass
         srcmass = compute_mass_mesh(srcfield, srcareafield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield, dstareafield,
+                                    dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
         compare_fields_grid(dstfield, exactfield, 50E-1, 10E-16, parallel=parallel,
@@ -551,12 +553,12 @@ class TestRegrid(TestBase):
         # create two unique Mesh objects
         if parallel:
             srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
-                mesh_create_5_parallel()
+                mesh_create_50_parallel()
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
                 mesh_create_10_parallel()
         else:
             srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
-                mesh_create_5()
+                mesh_create_50()
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
                 mesh_create_10()
 
@@ -578,6 +580,7 @@ class TestRegrid(TestBase):
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    norm_type=ESMF.NormType.FRACAREA,
                                     unmapped_action=ESMF.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
@@ -586,8 +589,9 @@ class TestRegrid(TestBase):
         # compute the mass
         srcmass = compute_mass_mesh(srcfield, srcareafield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_mesh(dstfield, dstareafield)
+        dstmass = compute_mass_mesh(dstfield, dstareafield,
+                                    dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
-        compare_fields_mesh(dstfield, exactfield, 10E-2, 10E-16, parallel=parallel,
+        compare_fields_mesh(dstfield, exactfield, 20E-2, 10E-16, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)

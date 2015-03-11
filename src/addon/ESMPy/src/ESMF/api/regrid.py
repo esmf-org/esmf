@@ -26,10 +26,10 @@ class Regrid(object):
                  regrid_method=None,
                  pole_method=None,
                  regrid_pole_npoints=None,
+                 norm_type=None,
                  unmapped_action=None,
                  src_frac_field=None,
-                 dst_frac_field=None,
-                 norm_type=None):
+                 dst_frac_field=None):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
@@ -65,7 +65,11 @@ class Regrid(object):
                     PoleMethod.TEETH\n
             regrid_pole_npoints: specifies how many points to average over 
                              if polemethod == PoleMethod.NPNTAVG\n
-            unmapped_action: specifies which action to take if a 
+            norm_type: control which type of normalization to do when generating conservative regridding weights. \n
+                Argument values are: \n
+                    (default) NormType.DSTAREA \n
+                    NormType.FRACAREA \n
+            unmapped_action: specifies which action to take if a
                              destination point is found which does not 
                              map to any source point.\n
                 Argument values are : \n
@@ -79,10 +83,6 @@ class Regrid(object):
                             weights corresponding to the amount of each 
                             Field value which contributes to the total 
                             mass of the Field. \n
-            norm_type: control which type of normalization to do when generating conservative regridding weights. \n
-                Argument values are: \n
-                    (default) NormType.DSTAREA \n
-                    NormType.DSTFRAC \n
         Returns: \n
             Regrid \n
         """
@@ -116,10 +116,10 @@ class Regrid(object):
                                             regridmethod=regrid_method,
                                             polemethod=pole_method,
                                             regridPoleNPnts=regrid_pole_npoints,
+                                            normType=norm_type,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
-                                            dstFracField=dst_frac_field,
-                                            normType=norm_type)
+                                            dstFracField=dst_frac_field)
         
         self.srcfield = srcfield
         self.dstfield = dstfield
@@ -128,10 +128,10 @@ class Regrid(object):
         self.regrid_method = regrid_method
         self.pole_method = pole_method
         self.regrid_pole_npoints = regrid_pole_npoints
+        self.norm_type = norm_type
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
-        self.norm_type = norm_type
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
