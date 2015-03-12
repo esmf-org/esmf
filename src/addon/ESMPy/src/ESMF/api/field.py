@@ -307,6 +307,7 @@ class Field(MaskedArray):
     def read(self, filename, variable, ndbounds=None):
         """
         Read data into a Field from a NetCDF file. \n
+        NOTE: This interface is not supported when ESMF is built with ESMF_COMM=mpiuni. \n
         Required Arguments: \n
             filename: the name of the NetCDF file. \n
             variable: the name of the data variable to read. \n

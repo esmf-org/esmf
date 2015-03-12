@@ -13,7 +13,10 @@ grid = ESMF.Grid(filename="examples/data/so_Omon_GISS-E2.nc", filetype=ESMF.File
 # Create a field on the centers of the grid
 field = ESMF.Field(grid, "field", staggerloc=ESMF.StaggerLoc.CENTER)#, ndbounds=[2])
 
-field.read(filename="examples/data/so_Omon_GISS-E2.nc", variable="so")
+
+# field.read does not work if ESMF is built with MPIUNI
+if ESMF.api.constants._ESMF_COMM is not ESMF.api.constants._ESMF_COMM_MPIUNI:
+    field.read(filename="examples/data/so_Omon_GISS-E2.nc", variable="so")
 
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
