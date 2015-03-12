@@ -2565,8 +2565,10 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
 //fprintf(stderr, "(%d)VMK::commtest: nhandles=%d\n", mypet, nhandles);
 //fprintf(stderr, "(%d)VMK::commtest: *ch=%p\n", mypet, *ch);
   int localrc=0;
-  if (status)
+  if (status) {
+    memset (status, 0, sizeof (status));      // quiet valgrind
     status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
+  }
   if ((ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     int localCompleteFlag = 0;

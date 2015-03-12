@@ -61,8 +61,8 @@ class TestMaskedArray(TestBase):
         :param type: the type of the esmf buffer
         :type type: ESMF.TypeKind
         '''
-        # turn on debuggin and initialize the cbindings calls
-        Manager(logkind=LogKind.MULTI, debug=True)
+        # create manager because we are doing some lower level stuff here without automatic initialization
+        Manager()
 
         # create a ctypes grid object to hold pointer and other info for ctypes layer
         if array.dtype is not np.int32:

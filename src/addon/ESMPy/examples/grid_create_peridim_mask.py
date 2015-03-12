@@ -3,16 +3,18 @@
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to override the default parameters
-# for logkind (ESMF.LogKind.NONE) and debug (False)
+# Start up ESMF, this call is only necessary to enable debug logging
 esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 # Create the source grid from memory with periodic dimension specified.
 [lat,lon] = [1,0]
-lons  = numpy.arange(  0, 360, 360./70.)
-lats = numpy.arange(-90., 90.1, 180./140.)
+# switch lats and lons to correspond to swapping the periodic and pole dimensions (below)
+lats  = numpy.arange(  0, 360, 360./70.)
+lons = numpy.arange(-90., 90.1, 180./140.)
 max_index = numpy.array([lons.size, lats.size])
-srcgrid = ESMF.Grid(max_index, num_peri_dims=1, coord_sys=ESMF.CoordSys.SPH_DEG)
+# TODO: commented out coord_typekind demonstrates the source mask/zero region bug in ticket #3613699
+srcgrid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.SPH_DEG, #coord_typekind=ESMF.TypeKind.R4,
+                    num_peri_dims=1, periodic_dim=1, pole_dim=0)
 
 # Add coordinates to the source grid.
 srcgrid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER])

@@ -342,17 +342,20 @@ int main(void){
 
   ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  ESMC_NormType_Flag normtype = ESMC_NORMTYPE_FRACAREA;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              &i_maskValues, NULL,
                              &routehandle,
-                             &regridmethod, NULL, NULL, &unmappedaction,
+                             &regridmethod, NULL, NULL,
+                             &normtype, &unmappedaction,
                              &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
-                             &regridmethod, NULL, NULL, NULL,
+                             &regridmethod, NULL, NULL,
+                             &normtype, NULL
                              &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -440,7 +443,7 @@ int main(void){
   // check destination field against source field
   for(int i=0;i<num_elem_d;++i) {
     // compute the mass
-    dstmass += dstFieldPtr[i]*dstAreaFieldPtr[i];
+    dstmass += dstFieldPtr[i]*dstAreaFieldPtr[i]*dstFracFieldPtr[i];
     // if error is too big report an error
 #ifdef masking
     if (ESMC_dabs(dstFieldPtr[i]-(20.0)) > 100) {
