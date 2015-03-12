@@ -649,7 +649,7 @@ int ESMC_FieldRegridStore(
 //  \item[normType]
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
-//    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA.
+//    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
