@@ -25,6 +25,8 @@
 
 namespace ESMCI {
 
+  bool is_outside_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz);
+
   bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p);
 
   bool invert_matrix_3x3(double m[], double m_inv[]);
@@ -123,6 +125,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 #define MU_CROSS_PRODUCT_VEC3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
 
 #define MU_LEN_VEC3D(a) std::sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+
+#define MU_LENSQ_VEC3D(a) (a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 
 #define MU_DOT_VEC3D(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
