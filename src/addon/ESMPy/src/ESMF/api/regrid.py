@@ -156,13 +156,13 @@ class Regrid(object):
         Returns: \n
             dstfield
         """
-
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
                          self.routehandle, zeroregion=zero_region)
         return dstfield
 
-    def __del__(self):
+    # manual destructor
+    def release(self):
         """
         Release the memory associated with a Regrid operation. \n
         Required Arguments: \n
@@ -177,6 +177,17 @@ class Regrid(object):
                 ESMP_FieldRegridRelease(self.routehandle)
                 self._finalized = True
 
+    def __del__(self):
+        """
+        Release the memory associated with a Regrid operation. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        self.release()
 
     def __repr__(self):
         """

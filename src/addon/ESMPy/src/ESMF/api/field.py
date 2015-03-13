@@ -190,7 +190,22 @@ class Field(MaskedArray):
 
         return obj
 
-    # destructor
+    # manual destructor
+    def release(self):
+        """
+        Release the memory associated with a Field. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if self._finalized is False:
+                ESMP_FieldDestroy(self)
+                self._finalized = True
+
     def __del__(self):
         """
         Release the memory associated with a Field. \n
@@ -201,11 +216,7 @@ class Field(MaskedArray):
         Returns: \n
             None \n
         """
-
-        if hasattr(self,'_finalized'):
-            if self._finalized is False:
-                ESMP_FieldDestroy(self)
-                self._finalized = True
+        self.release()
 
     def __repr__(self):
         """
