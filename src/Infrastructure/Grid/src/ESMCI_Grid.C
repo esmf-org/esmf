@@ -44,7 +44,7 @@
 // Some xlf compilers don't define this
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif
+ #endif
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -2168,6 +2168,26 @@ int Grid::getDistExclusiveUBound(
 //-----------------------------------------------------------------------------
 
 
+// Translate type to typekind for debugging
+  template<class TYPE> 
+  ESMC_TypeKind_Flag get_TypeKind_from_Type() {
+    return ESMF_NOKIND;
+  }
+
+  template<> 
+  ESMC_TypeKind_Flag get_TypeKind_from_Type<ESMC_R8>() {
+    return ESMC_TYPEKIND_R8;
+  }
+
+  template<> 
+  ESMC_TypeKind_Flag get_TypeKind_from_Type<ESMC_R4>() {
+    return ESMC_TYPEKIND_R4;
+  }
+
+  template<> 
+  ESMC_TypeKind_Flag get_TypeKind_from_Type<ESMC_I4>() {
+    return ESMC_TYPEKIND_I4;
+  }
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2176,7 +2196,7 @@ int Grid::getDistExclusiveUBound(
 // !IROUTINE:  Grid::getCoordInternal()"
 //
 // !INTERFACE:
-template <class TYPE>
+ template <class TYPE>
 void Grid::getCoordInternal(
 //
 // !RETURN VALUE:
@@ -2191,8 +2211,11 @@ void Grid::getCoordInternal(
                                  ){
 //
 // !DESCRIPTION:
-//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking
-//  for a public version with error checking see  Grid::getCoord().  
+//
+//   WARNING: NO ERROR CHECKING OR TYPE CONVERSION MAKE SURE THIS IS BEING DONE IN CALLING ROUTINE
+// 
+//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking or
+//  type conversion for a public version with error checking see  Grid::getCoord().  
 //
 //
 //EOPI
@@ -2215,13 +2238,13 @@ void Grid::getCoordInternal(
       }
       //// Get LocalArray cooresponding to staggerloc, coord and localDE
       localArray=(coordArrayList[staggerloc][c]->getLocalarrayList())[localDE];
-      
+       
       //// Get pointer to LocalArray data
       localArray->getDataInternal(coordIndex, coord+c);
     }
       
   } else {
-     index1D = convertIndex(index);
+      index1D = convertIndex(index);
      //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      //					       &rc)) return rc;
      for (int c=0; c<dimCount; c++) {
@@ -2232,7 +2255,7 @@ void Grid::getCoordInternal(
        for (int i=1; i<coordDimCount[c]; i++) {
 	 if (coordDimMap[c][i] == ESMC_GRID_ARBDIM) {
 	   coordIndex[i] = index1D;
-	 } else {
+ 	 } else {
 	   coordIndex[i] = index[coordDimMap[c][i]];
 	 }
        }
@@ -2248,6 +2271,86 @@ template void Grid::getCoordInternal(int staggerloc, int localDE, int *index, ES
 template void Grid::getCoordInternal(int staggerloc, int localDE, int *index, ESMC_I4 *data);
 
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getCoordInternalConvert()"
+//BOPI
+ // !IROUTINE:  Grid::getCoordInternalConvert()"
+//
+// !INTERFACE:
+template <class TYPE>
+int Grid::getCoordInternalConvert(
+ //
+// !RETURN VALUE:
+//    return code
+//
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid dimCount
+                                 TYPE *coord     // (out) needs to be of size Grid dimCount
+                                 ){
+//
+// !DESCRIPTION:
+//
+//  WARNING: NO ERROR CHECKING EXCEPT FOR TYPEKIND, MAKE SURE OTHER CHECKING IS BEING DONE IN CALLING ROUTINE
+//
+//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking, except
+//  on the typekind. For a public version with full error checking see  Grid::getCoord(). 
+//  However, this version does convert types of the coordinates if necessary
+//
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  // Get coordinates depending on type of the grid
+  if (typekind == ESMC_TYPEKIND_R8) {
+    ESMC_R8 tmp_coord[ESMF_MAXDIM];
+
+    // get coordinates
+    getCoordInternal(staggerloc, localDE, index, tmp_coord);
+    
+    // Copy/convert to output
+     for (int i=0; i<dimCount; i++) {   
+      coord[i]=static_cast<TYPE>(tmp_coord[i]);
+    }
+  } else if (typekind == ESMC_TYPEKIND_R4) {
+    ESMC_R4 tmp_coord[ESMF_MAXDIM];
+
+    // get coordinates
+    getCoordInternal(staggerloc, localDE, index, tmp_coord);
+    
+    // Copy/convert to output
+    for (int i=0; i<dimCount; i++) {   
+      coord[i]=static_cast<TYPE>(tmp_coord[i]);
+    }
+  } else if (typekind == ESMC_TYPEKIND_I4) {
+    ESMC_I4 tmp_coord[ESMF_MAXDIM];
+    
+    // get coordinates
+    getCoordInternal(staggerloc, localDE, index, tmp_coord);
+    
+    // Copy/convert to output
+    for (int i=0; i<dimCount; i++) {   
+      coord[i]=static_cast<TYPE>(tmp_coord[i]);
+    }
+  } else {
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                  "- Unsupported typekind in conversion", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // return success
+  return ESMF_SUCCESS;
+}
+
+// Add more types here if necessary
+template int Grid::getCoordInternalConvert(int staggerloc, int localDE, int *index, ESMC_R8 *data);
+template int Grid::getCoordInternalConvert(int staggerloc, int localDE, int *index, ESMC_R4 *data);
+ template int Grid::getCoordInternalConvert(int staggerloc, int localDE, int *index, ESMC_I4 *data);
 
 
 //-----------------------------------------------------------------------------
@@ -2291,6 +2394,13 @@ int Grid::getCoord(
     return rc;
   }
 
+  // Check typekind
+  if (typekind != get_TypeKind_from_Type<TYPE>()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of coordinates in grid", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
   // Check staggerloc
   if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
@@ -2302,9 +2412,9 @@ int Grid::getCoord(
   if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", ESMC_CONTEXT, &rc);
-        return rc;
+         return rc;
   }
-
+ 
   // Check here for coordinate Array existance
   if (!hasCoordStaggerLoc(staggerloc)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
@@ -2312,7 +2422,7 @@ int Grid::getCoord(
     return rc;
   }
 
-  // For arbitrary grid, need to find the index of the 1D distgrid from the original index
+ // For arbitrary grid, need to find the index of the 1D distgrid from the original index
   if (decompType == ESMC_GRID_NONARBITRARY) {
     // Loop Getting coordinates
     for (int c=0; c<dimCount; c++) {
@@ -2335,13 +2445,13 @@ int Grid::getCoord(
      for (int c=0; c<dimCount; c++) {
        
        //// Get LocalArray cooresponding to staggerloc, coord and localDE
-       localArray=(coordArrayList[staggerloc][c]->getLocalarrayList())[localDE];
+        localArray=(coordArrayList[staggerloc][c]->getLocalarrayList())[localDE];
 
        for (int i=0; i<coordDimCount[c]; i++) {
 	 if (coordDimMap[c][i] == ESMC_GRID_ARBDIM) {
-	   coordIndex[i] = index1D;
+ 	   coordIndex[i] = index1D;
 	 } else {
-	   coordIndex[i] = index[coordDimMap[c][i]];
+ 	   coordIndex[i] = index[coordDimMap[c][i]];
 	 }
        }
        
@@ -2376,7 +2486,7 @@ template <class TYPE>
 void Grid::getItemInternal(
 //
 // !RETURN VALUE:
-//   void
+ //   void
 //
 // !ARGUMENTS:
 //
@@ -2388,6 +2498,9 @@ void Grid::getItemInternal(
                                  ){
 //
 // !DESCRIPTION:
+// 
+//  WARNING: NO ERROR CHECKING OR TYPE CONVERSION MAKE SURE THAT THIS IS BEING DONE IN CALLING ROUTINE 
+//
 //  Get item value from an index tuple. For efficiency reasons this version doesn't do error checking
 //  for a public version with error checking see  Grid::getItem().  
 //
@@ -2396,7 +2509,7 @@ void Grid::getItemInternal(
 //-----------------------------------------------------------------------------
   int itemIndex[ESMF_MAXDIM];
   LocalArray *localArray;
-  int index1D;
+   int index1D;
   int localrc;
 
   // TODO: need to make this function more efficient. Use templates? 
@@ -2410,7 +2523,7 @@ void Grid::getItemInternal(
       localArray=(itemArrayList[staggerloc][item]->getLocalarrayList())[localDE];
       
       //// Get pointer to LocalArray data
-      localArray->getDataInternal(index, value);
+       localArray->getDataInternal(index, value);
       
   } else {
 #if 0 // Talk to PLi and then fix this
@@ -2440,9 +2553,88 @@ template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *
 template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *index, ESMC_R4 *data);
 template void Grid::getItemInternal(int staggerloc, int item, int localDE, int *index, ESMC_I4 *data);
 
-
 //-----------------------------------------------------------------------------
 
+
+
+ //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getItemInternalConvert()"
+ //BOPI
+ // !IROUTINE:  Grid::getItemInternalConvert()"
+//
+// !INTERFACE:
+template <class TYPE>
+int Grid::getItemInternalConvert(
+ //
+// !RETURN VALUE:
+//   void
+//
+// !ARGUMENTS:
+//
+                                 int staggerloc, // (in)
+                                 int item,       // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid dimCount
+                                 TYPE *value     // (out) needs to be just a single value
+                                 ){
+//
+// !DESCRIPTION:
+//
+//  WARNING: NO ERROR CHECKING MAKE SURE THIS IS BEING DONE IN CALLING ROUTINE
+//
+//  Get coordinates from an index tuple. For efficiency reasons this version doesn't do error checking
+//  for a public version with error checking see  Grid::getCoord(). However, this version does convert
+//  types of the coordinates if necessary
+//
+//
+ //EOPI
+//-----------------------------------------------------------------------------
+
+  // Get item typekind
+  ESMC_TypeKind_Flag itemtk=itemArrayList[staggerloc][item]->getTypekind();
+
+  // Get coordinates depending on type of the grid
+  if (itemtk == ESMC_TYPEKIND_R8) {
+    ESMC_R8 tmp_value;
+ 
+    // get coordinates
+    getItemInternal(staggerloc, item, localDE, index, &tmp_value);
+    
+    // Copy/convert to output
+    *value=static_cast<TYPE>(tmp_value);
+  } else if (itemtk == ESMC_TYPEKIND_R4) {
+    ESMC_R4 tmp_value;
+
+    // get coordinates
+    getItemInternal(staggerloc, item, localDE, index, &tmp_value);
+    
+    // Copy/convert to output
+    *value=static_cast<TYPE>(tmp_value);
+   } else if (itemtk == ESMC_TYPEKIND_I4) {
+    ESMC_I4 tmp_value;
+
+    // get coordinates
+    getItemInternal(staggerloc, item, localDE, index, &tmp_value);
+    
+    // Copy/convert to output
+    *value=static_cast<TYPE>(tmp_value);
+  } else {
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                  "- Unsupported typekind in conversion", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // return success
+  return ESMF_SUCCESS;
+}
+
+// Add more types here if necessary
+template int Grid::getItemInternalConvert(int staggerloc, int item, int localDE, int *index, ESMC_R8 *data);
+template int Grid::getItemInternalConvert(int staggerloc, int item, int localDE, int *index, ESMC_R4 *data);
+template int Grid::getItemInternalConvert(int staggerloc, int item, int localDE, int *index, ESMC_I4 *data);
+ 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2456,7 +2648,7 @@ int Grid::getItem(
 //
 // !RETURN VALUE:
 //   return code
-//   
+ //   
 // !ARGUMENTS:
 //
                                  int staggerloc, // (in)
@@ -2483,6 +2675,13 @@ int Grid::getItem(
   if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
       "- Grid not fully created", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // Check typekind
+  if (itemArrayList[staggerloc][item]->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in item ", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -2514,6 +2713,13 @@ int Grid::getItem(
     return rc;
   }
 
+  // Check typekind
+  if (itemArrayList[staggerloc][item]->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in item ", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
   // For arbitrary grid, need to find the index of the 1D distgrid from the original index
   if (decompType == ESMC_GRID_NONARBITRARY) {
 
@@ -2539,7 +2745,7 @@ int Grid::getItem(
 	 } else {
 	   itemIndex[i] = index[coordDimMap[c][i]];
 	 }
-       }
+        }
        //// Get pointer to LocalArray data
        localArray->getDataInternal(itemIndex, value);
      
@@ -6945,7 +7151,7 @@ void GridIter::getDEBnds(
   if (cellNodes) {
 #if 0
     if (grid->isForceConn()) {
-      for (int i=0; i<rank; i++) {
+       for (int i=0; i<rank; i++) {
         //// Expand to include all nodes touched by cells on this proc
         if (!grid->isLBnd(localDE,i)) lBnd[i]--;
         if (!grid->isUBnd(localDE,i)) uBnd[i]++;
@@ -7008,7 +7214,7 @@ void GridIter::setDEBnds(
   // Set Bounds of iteration on this proc
   this->getDEBnds(localDE,uBndInd,lBndInd);
 
-  // Setup info for calculating the DE index tuple location quickly
+   // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
   int currOff=1;
   lOff=0;
@@ -7071,7 +7277,7 @@ void GridIter::setDEBnds(
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
+ #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter()"
 //BOPI
 // !IROUTINE:  GridIter Construct
@@ -7134,7 +7340,7 @@ GridIter::GridIter(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::toBeg()"
-//BOPI
+ //BOPI
 // !IROUTINE:  toBeg
 //
 // !INTERFACE:
@@ -7197,7 +7403,7 @@ GridIter *GridIter::adv(
 //    none
 //
 // !ARGUMENTS:
-//  
+ //  
 
  ){
 //
@@ -7208,7 +7414,7 @@ GridIter *GridIter::adv(
 //-----------------------------------------------------------------------------
 
   // if done then leave
-  if (done) return this;
+   if (done) return this;
 
   //  printf("A cur=[%d,%d] \n",curInd[0],curInd[1]);
 
@@ -7271,7 +7477,7 @@ int GridIter::getGlobalID(
 // !DESCRIPTION:
 // return the global identifier of this item
 //
-//EOPI
+ //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
   int gid;
@@ -7334,7 +7540,7 @@ int GridIter::getPoleID(
     }
 
 #if 0
-  } else {
+   } else {
     // check to see if we're on this proc
     for (int i=0; i<rank; i++) {
       if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i)) return 2*(i+1);
@@ -7397,7 +7603,7 @@ int GridIter::getCount(
 
 }
 //-----------------------------------------------------------------------------
-
+ 
 
 
 //-----------------------------------------------------------------------------
@@ -7460,7 +7666,7 @@ bool GridIter::isLocal(
   if (done) return false;
 
   // if not cell then they're all on this proc
-  if (!cellNodes) return true;
+   if (!cellNodes) return true;
 
   // TODO: FIX THIS FOR DISTGRID CONNECTIONS!!!!!!!!!!!!!!
 
@@ -7523,7 +7729,7 @@ bool GridIter::isShared(
 
   // If none of the above are true then return true, because we might be shared
   return true;
-}
+ }
 //-----------------------------------------------------------------------------
 
 
@@ -7586,23 +7792,26 @@ void GridIter::getCoord(
 // !ARGUMENTS:
 //   Coordinate output 
 // 
-                        TYPE *coord // (out) input array needs to be at
+                         TYPE *coord // (out) input array needs to be at
                                        // least of size grid dimCount    
  ){
 //
 // !DESCRIPTION:
 //  Returns the coordinates for an iteration location. Array should be at least
-// be of size Grid dimCount.
+// be of size Grid dimCount. Converts coords to input typekind.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
+  int localrc, rc;
 
   // if done then leave
   if (done) return;
 
   // get coordinates
-  grid->getCoordInternal(staggerloc, curDE, curInd, coord);
+  localrc=grid->getCoordInternalConvert(staggerloc, curDE, curInd, coord);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) throw rc;
+
 }
 // Add more types here if necessary
 template void GridIter::getCoord(ESMC_R8 *data);
@@ -7645,8 +7854,9 @@ void GridIter::getCartCoord(
   if (done) return;
 
   // get coordinates
-  grid->getCoordInternal(staggerloc, curDE, curInd, orig_coord);
-
+  localrc=grid->getCoordInternalConvert(staggerloc, curDE, curInd, orig_coord);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) throw rc;
   
   // Call into coordsys method to convert to Cart
   localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
@@ -7691,14 +7901,15 @@ void GridIter::getItem(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
+  int localrc, rc;
 
   // if done then leave
   if (done) return;
 
-  // get coordinates
-  grid->getItemInternal(staggerloc, item, curDE, curInd, value);
-
+  // get item
+  localrc=grid->getItemInternalConvert(staggerloc, item, curDE, curInd, value);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) throw rc;
 }
 // Add more types here if necessary
 template void GridIter::getItem(int item, ESMC_R8 *data);
@@ -7740,13 +7951,23 @@ void GridIter::getArrayData(
   
   // if done then leave
   if (done) return;
+
+  // Check typekind
+  if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
   
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
   
   //// Get pointer to LocalArray data
   localArray->getDataInternal(curInd, data);
-  
+ 
+
+ 
 }
 
 // Add more types here if necessary
@@ -7788,6 +8009,14 @@ void GridIter::setArrayData(
   // if done then leave
   if (done) return;
   
+  // Check typekind
+  if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
   
@@ -8609,6 +8838,14 @@ void GridCellIter::setArrayData(
   
   // if done then leave
   if (done) return;
+
+  // Check typekind
+  if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
   
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
@@ -8660,6 +8897,14 @@ void GridCellIter::getArrayData(
   // if done then leave
   if (done) return;
   
+  // Check typekind
+  if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
   
@@ -8702,13 +8947,15 @@ void GridCellIter::getItem(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
+  int localrc,rc;
 
   // if done then leave
   if (done) return;
 
   // get item data from center stagger (where the data for a cell lives)
-  grid->getItemInternal(0, item, curDE, curInd, value);
+  localrc=grid->getItemInternalConvert(0, item, curDE, curInd, value);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) throw rc;
 
 }
 // Add more types here if necessary
@@ -8855,7 +9102,7 @@ bool Grid:: matchCoordInternal(
       int lBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // Initialize loops ranges so that 
       int uBnd[ESMF_MAXDIM]={0,0,0,0,0,0,0}; // loops outside of dimCount only go once
       TYPE coord1[ESMF_MAXDIM];
-      TYPE coord2[ESMF_MAXDIM];
+       TYPE coord2[ESMF_MAXDIM];
       const int dimCount=grid1->dimCount;
 
       // Loop through coordinates
@@ -8918,7 +9165,7 @@ bool Grid:: matchItemInternal(
 //   
                               int staggerloc,
 			      int item,
-			      Grid *grid1,
+ 			      Grid *grid1,
 			      Grid *grid2
 			      ){
   //
@@ -8981,7 +9228,7 @@ bool Grid:: matchItemInternal(
   return true;
 }
 
-
+ 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::match()"
@@ -9044,7 +9291,7 @@ bool Grid::match(
   // (Note at this point grids status are equal)
   if (grid1->status < ESMC_GRIDSTATUS_SHAPE_READY) {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return false;
+     return false;
   }
 
 
@@ -9107,7 +9354,7 @@ bool Grid::match(
 
   // DON'T CHECK GRIDALIGN, GRIDEDGEWIDTH INFO, INSTEAD CHECK STAGGERLOC PARTICUALR VERSIONS
   // REASON: THESE ARE ONLY USED TO SET DEFAULTS, THE PARTICULAR STAGGER INFO IS WHAT IS ACTUALLY
-  //         USED IN THE GRID
+   //         USED IN THE GRID
   //  int *gridEdgeLWidth; // size of grid dimCount
   //  int *gridEdgeUWidth; // size of grid dimCount
   //  int *gridAlign; // size of grid dimCount
@@ -9170,7 +9417,7 @@ bool Grid::match(
   // Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
 
 
-  // Check coordArrayList
+   // Check coordArrayList
   for (int i=0; i<grid1->staggerLocCount; i++) {
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->coordArrayList[i][j] != ESMC_NULL_POINTER &&
@@ -9233,7 +9480,7 @@ bool Grid::match(
   }
 
   // Check staggerEdgeUWidthList
-  for (int i=0; i<grid1->staggerLocCount; i++) {
+   for (int i=0; i<grid1->staggerLocCount; i++) {
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->staggerEdgeUWidthList[i][j] != grid2->staggerEdgeUWidthList[i][j]) {
 	if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -9296,7 +9543,7 @@ bool Grid::match(
 	}
 	
       }
-    }
+     }
   }
 
   // Don't check this:
@@ -9359,7 +9606,7 @@ bool Grid::match(
   switch(grid1->typekind) {
   case ESMC_TYPEKIND_R4:
     coordMatch=matchCoordInternal<ESMC_R4>(grid1,grid2);
-    break;
+     break;
   case ESMC_TYPEKIND_R8:
     coordMatch=matchCoordInternal<ESMC_R8>(grid1,grid2);
     break;
@@ -9422,7 +9669,7 @@ int Grid::getCartCoordDimCount() {
   // If don't have just one neg orientation, then not a monopole
   if (neg != 1) return false;
 
-  // Check lower vs. upper
+   // Check lower vs. upper
   bool isLower;
   if (conn[2+poleDim]==1) isLower=true;
   else if (conn[2+poleDim]==2*widthIndex[poleDim]+1) isLower=false;
@@ -9485,7 +9732,7 @@ int Grid::getCartCoordDimCount() {
   *isLowerOut=isLower;
   *poleDimOut=poleDim;
   *periodicDimOut=periodicDim;
-  return true;
+   return true;
  }
 
 
@@ -9548,7 +9795,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
  
   // Loop through counting non-pole connections
  int newConnCount=0;  
- for (int i=0; i<connCount; i++) {
+  for (int i=0; i<connCount; i++) {
    if (!isPoleConn(connList[i],dimCount,minIndexPTile,maxIndexPTile)) newConnCount++;
  }
 
@@ -9611,7 +9858,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
 
  // Free memory
  delete newConnListII;
- delete [] newConnList;
+  delete [] newConnList;
 }
 
 void _translate_distgrid_conn(DistGrid *distgrid, 
@@ -9674,7 +9921,7 @@ void _translate_distgrid_conn(DistGrid *distgrid,
    }
  }
 
-  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully 
+   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully 
 }
 
 
@@ -9737,7 +9984,7 @@ void _add_poles_to_conn(DistGrid *distgrid,
 
  // Put in Lower poles
  for (int i=0; i<dimCount; i++) {
-   if (connL[i]==ESMC_GRIDCONN_POLE) {
+    if (connL[i]==ESMC_GRIDCONN_POLE) {
      newConnList[newPos*connSize+0]=1;
      newConnList[newPos*connSize+1]=1;
      for(int j=0; j<dimCount; j++) {
@@ -9800,7 +10047,7 @@ void _add_poles_to_conn(DistGrid *distgrid,
  }
 
 
-#if 0
+ #if 0
  printf("CONNECTIONS\n");
  int k=0;
  for (int i=0; i<newConnCount; i++) {
@@ -9863,7 +10110,7 @@ int Grid::getDistExclusiveUBound(
   rc = ESMC_RC_NOT_IMPL;
   
   // Check status
-  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+   if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Grid not fully created", ESMC_CONTEXT, &rc);
     return rc;
@@ -9926,7 +10173,7 @@ int Grid::getDistExclusiveUBound(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getDistExclusiveLBound()"
 //BOPI
-// !IROUTINE:  Grid::getDistExclusiveLBound()"
+ // !IROUTINE:  Grid::getDistExclusiveLBound()"
 //
 // !INTERFACE:
 int Grid::getDistExclusiveLBound(
@@ -9989,7 +10236,7 @@ int Grid::getDistExclusiveLBound(
         &rc)) return rc;
       
       // make sure this dimension is contiguous         
-      const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
+       const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       if (!contig) {

@@ -239,6 +239,7 @@ template <class TYPE>
   static bool matchItemInternal(int staggerloc, int item, Grid *grid1,Grid *grid2);
 
 
+
  public:
 
   // ESMC interface:
@@ -609,6 +610,16 @@ int getComputationalUBound(
                                  int *index,     // (in)  needs to be of size Grid rank
                                  TYPE *coord     // (out) needs to be of size Grid rank
                                  );
+
+
+ // Get data from a specific coordinate location without error checking 
+ template <class TYPE> int getCoordInternalConvert(
+                                 int staggerloc, // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 TYPE *coord     // (out) needs to be of size Grid rank
+                                 );
+
  
  // Get data from a specific coordinate location
  template <class TYPE> int getItem(  
@@ -619,8 +630,17 @@ int getComputationalUBound(
                                      TYPE *value     // (out) only 1 value of type TYPE
                                      );
 
- // Get data from a specific coordinate location without error checking 
+ // Get data from a specific item location without error checking 
  template <class TYPE> void getItemInternal(
+                                 int staggerloc, // (in)
+				 int item,       // (in)
+                                 int localDE,    // (in)
+                                 int *index,     // (in)  needs to be of size Grid rank
+                                 TYPE *value     // (out) only 1 value of type TYPE
+                                 );
+
+ // Get data from a specific item location without error checking, but with conversion 
+ template <class TYPE> int getItemInternalConvert(
                                  int staggerloc, // (in)
 				 int item,       // (in)
                                  int localDE,    // (in)
