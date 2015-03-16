@@ -389,7 +389,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     ///// If conservative then modify weights according to norm type //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
+      if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
 #ifdef PROGRESSLOG_on

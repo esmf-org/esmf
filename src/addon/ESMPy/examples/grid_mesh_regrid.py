@@ -6,8 +6,8 @@
 import ESMF
 import numpy
 
-# create a manager object with multiprocessor logging in debug mode
-esmf = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+#esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
 grid1 = "examples/data/ll1deg_grid.nc"
 grid2 = "examples/data/mpas_uniform_10242_dual_counterclockwise.nc"

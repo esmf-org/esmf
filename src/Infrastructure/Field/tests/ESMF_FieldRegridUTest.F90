@@ -18815,7 +18815,7 @@ return
   real(ESMF_KIND_R8) :: lat_rad, lon_rad
 
   real(ESMF_KIND_R8) :: err, relErr, maxRelErr
-  
+
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -19170,7 +19170,7 @@ return
   i2=1
   do i1=1,numNodes
 
-     if (nodeOwners(i1) .eq. localPet) then
+      if (nodeOwners(i1) .eq. localPet) then
         ! Get coordinates
         x=nodeCoords(3*i1-2)
         y=nodeCoords(3*i1-1)
@@ -19220,7 +19220,7 @@ return
    dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
+     rc=ESMF_FAILURE
     return
   endif
 
@@ -19271,7 +19271,7 @@ return
 
 
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Destination grid
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -19322,7 +19322,7 @@ return
         farrayPtrXC(i1,i2,i3) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
         farrayPtrYC(i1,i2,i3) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
         farrayPtrZC(i1,i2,i3) = ((dst_maxz-dst_minz)*REAL(i3-1)/REAL(dst_nz-1))+dst_minz
-
+ 
         ! Put in more convenient form
         x=farrayPtrXC(i1,i2,i3)
         y=farrayPtrYC(i1,i2,i3)
@@ -19347,6 +19347,7 @@ return
   enddo    ! lDE
 
 
+
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
@@ -19359,6 +19360,8 @@ return
       rc=ESMF_FAILURE
       return
    endif
+
+
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
@@ -19542,6 +19545,7 @@ return
   integer :: spherical_grid
 
   integer :: localPet, petCount
+  real(ESMF_KIND_R8) :: beg_time, end_time  
 
   ! result code
   integer :: finalrc
@@ -19564,7 +19568,7 @@ return
   src_minr=0.9
    src_maxr=2.1
 
-  dst_nx=50
+   dst_nx=50
   dst_ny=50
   dst_nz=11
   dst_minr=1.0
@@ -19627,7 +19631,7 @@ return
 
   ! Get memory and set coords for dst
   do lDE=0,localDECount-1
- 
+  
      !! get coords
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -19690,7 +19694,7 @@ return
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
-  endif
+   endif
 
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
@@ -19753,7 +19757,7 @@ return
   ! Get number of local DEs
    call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
+     rc=ESMF_FAILURE
     return
   endif
 
@@ -19816,7 +19820,7 @@ return
         !xfarrayPtr(i1,i2,i3)=r*5.0+2. + cos(lon_rad)**2.*cos(2.*lat_rad)
         !xfarrayPtr(i1,i2,i3)= 1.0+r*0.01+ cos(lat_rad)**2.*cos(2.*lon_rad) 
         xfarrayPtr(i1,i2,i3)= r*5.0+2.0+ cos(lon_rad)**2.*cos(2.*lat_rad) 
-        !xfarrayPtr(i1,i2,i3)= 1.0
+         !xfarrayPtr(i1,i2,i3)= 1.0
         !xfarrayPtr(i1,i2,i3)=r
 
         ! Initialize destination field
@@ -19828,6 +19832,8 @@ return
 
   enddo    ! lDE
 
+  ! Get start time
+  ! call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -19842,6 +19848,12 @@ return
       rc=ESMF_FAILURE
       return
    endif
+
+  ! Get end time
+  !call ESMF_VMWtime(end_time)
+
+  ! output time
+  ! write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)

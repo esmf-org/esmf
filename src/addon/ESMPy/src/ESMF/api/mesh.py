@@ -180,6 +180,22 @@ class Mesh(object):
         # set the single stagger flag
         self._singlestagger = False
 
+    # manual destructor
+    def release(self):
+        """
+        Release the memory associated with a Mesh. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_MeshDestroy(self)
+                self._finalized = True
+
     def __del__(self):
         """
         Release the memory associated with a Mesh. \n
@@ -190,10 +206,7 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if not self._finalized:
-            ESMP_MeshDestroy(self)
-            self._finalized = True
-
+        self.release()
 
     def __repr__(self):
         """

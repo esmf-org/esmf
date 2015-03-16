@@ -344,7 +344,8 @@ class Grid(object):
         # set the single stagger flag
         self._singlestagger = False
 
-    def __del__(self):
+    # manual destructor
+    def release(self):
         """
         Release the memory associated with a Grid. \n
         Required Arguments: \n
@@ -358,6 +359,18 @@ class Grid(object):
             if not self._finalized:
                 ESMP_GridDestroy(self)
                 self._finalized = True
+
+    def __del__(self):
+        """
+        Release the memory associated with a Grid. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        self.release()
 
     def __repr__(self):
         """
