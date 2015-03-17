@@ -14,7 +14,7 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def grid_create(bounds, coords, domask=False, doarea=False):
+def grid_create(bounds, coords, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
     '''
     PRECONDITIONS: 'bounds' contains the number of indices required for the 
                    two dimensions of a 2D Grid.  'coords' contains the 
@@ -40,7 +40,7 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     
     max_index = np.array([ub_x,ub_y])
 
-    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART)
+    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
     ##     CORNERS
     grid.add_coords(staggerloc=[ESMF.StaggerLoc.CORNER])

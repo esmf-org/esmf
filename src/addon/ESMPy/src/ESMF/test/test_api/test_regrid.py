@@ -13,7 +13,7 @@ from ESMF.test.test_api.grid_utilities import *
   #  3. types of the grids underneath the field
 
 class TestRegrid(TestBase):
-    def est_field_regrid(self):
+    def test_field_regrid(self):
         # create grids
         max_index = np.array([20, 20])
         srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
@@ -333,6 +333,54 @@ class TestRegrid(TestBase):
 
         # create two unique Grid objects
         srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True)
+        dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
+        srcareafield = ESMF.Field(srcgrid, 'srcareafield')
+        srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
+        dstfield = ESMF.Field(dstgrid, 'dstfield')
+        dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+        dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
+        exactfield = ESMF.Field(dstgrid, 'exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid(srcfield)
+        dstfield2 = initialize_field_grid(exactfield)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_grid(srcfield, srcareafield,
+                                    dofrac=True, fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
+                            dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+    def test_grid_grid_regrid_srcmask_types(self):
+        """
+        NOTE: this tests an old issue where the items of a grid were not properly set when
+        the grid coord_typekind differed from the field typekind.
+        :return:
+        """
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create two unique Grid objects
+        srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True,
+                              ctk=ESMF.TypeKind.R4)
         dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
 
         # create Field objects on the Meshes
