@@ -7,7 +7,7 @@ import ESMF
 import numpy
 
 # Start up ESMF, this call is only necessary to enable debug logging
-#esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/GRIDSPEC_ACCESS1.nc"
 grid2 = "examples/data/tx0.1v2_070911.nc"

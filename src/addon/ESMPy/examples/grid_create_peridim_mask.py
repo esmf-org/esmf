@@ -4,7 +4,7 @@ import ESMF
 import numpy
 
 # Start up ESMF, this call is only necessary to enable debug logging
-esmpy = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# esmpy = ESMF.Manager(debug=True)
 
 # Create the source grid from memory with periodic dimension specified.
 [lat,lon] = [1,0]

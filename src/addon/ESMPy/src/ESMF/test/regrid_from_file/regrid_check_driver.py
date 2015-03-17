@@ -26,7 +26,7 @@ from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_te
 # read from a control file.    Retrieve data files for each test from a remote
 # server if they do not exist locally.
 # Start up ESMF.
-esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+esmp = ESMF.Manager(debug=True)
 
 parallel = False
 if ESMF.pet_count() > 1:
