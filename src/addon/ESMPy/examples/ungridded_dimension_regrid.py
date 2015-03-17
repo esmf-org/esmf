@@ -123,5 +123,5 @@ if ESMF.local_pet() is 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
     print "ESMPy Ungridded Field Dimensions Example"
-    print "  interpolation mean relative error = {}".format(meanrelerr)
-    print "  mass conservation relative error  = {}".format(csrverr)
+    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print "  mass conservation relative error  = {0}".format(csrverr)
