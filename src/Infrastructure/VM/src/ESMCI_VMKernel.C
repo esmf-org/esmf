@@ -11,7 +11,6 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VMKernel.h"
-#include "ESMC_Conf.h"
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
