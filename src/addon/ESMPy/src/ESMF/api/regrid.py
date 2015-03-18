@@ -162,7 +162,7 @@ class Regrid(object):
         return dstfield
 
     # manual destructor
-    def release(self):
+    def destroy(self):
         """
         Release the memory associated with a Regrid operation. \n
         Required Arguments: \n
@@ -187,7 +187,7 @@ class Regrid(object):
         Returns: \n
             None \n
         """
-        self.release()
+        self.destroy()
 
     def __repr__(self):
         """

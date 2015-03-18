@@ -345,7 +345,7 @@ class Grid(object):
         self._singlestagger = False
 
     # manual destructor
-    def release(self):
+    def destroy(self):
         """
         Release the memory associated with a Grid. \n
         Required Arguments: \n
@@ -370,7 +370,7 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        self.release()
+        self.destroy()
 
     def __repr__(self):
         """

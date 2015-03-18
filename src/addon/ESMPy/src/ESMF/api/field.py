@@ -191,7 +191,7 @@ class Field(MaskedArray):
         return obj
 
     # manual destructor
-    def release(self):
+    def destroy(self):
         """
         Release the memory associated with a Field. \n
         Required Arguments: \n
@@ -216,7 +216,7 @@ class Field(MaskedArray):
         Returns: \n
             None \n
         """
-        self.release()
+        self.destroy()
 
     def __repr__(self):
         """
