@@ -1233,7 +1233,7 @@ void *VMK::startup(class VMKPlan *vmp,
       new_tid[new_petid]=local_tid;   // new tid is continuous count per pid
       // next, determine how many cores the new pet will have & its contributors
       new_ncpet[new_petid]=0;         // reset the counter
-      new_nadevs[new_petid]=nadevs[i];         // FIXME: Is this correct?
+      new_nadevs[new_petid]=nadevs[i];         // copy the number of acc devs
       new_ncontributors[new_petid]=0; // reset the counter
       for (int kk=0; kk<npets; kk++){
         int k = vmp->petlist[kk];   // indirection to preserve petlist order
