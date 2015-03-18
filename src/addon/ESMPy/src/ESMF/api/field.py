@@ -334,7 +334,7 @@ class Field(MaskedArray):
         # format defaults to NetCDF for now
         format = 1
 
-        # if ndbounds is not passed in, set it to the first of extra field dimenstions, if they exist
+        # if ndbounds is not passed in, set it to the first of extra field dimensions, if they exist
         timeslice = 1
         if ndbounds is None:
             if self.ndbounds is not None:

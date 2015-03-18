@@ -996,6 +996,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # gather error on processor 0 or set global variables in serial case
     mass1_global = 0
     mass2_global = 0
+    csrv_error_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -1045,6 +1046,8 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # broadcast in parallel case
     if parallel:
         itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+        total_error_global, csrv_error_global = \
+            MPI.COMM_WORLD.bcast([total_error_global, csrv_error_global], 0)
 
     # print pass or fail
     assert (itrp and csrv)
@@ -1052,3 +1055,5 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
         print "PET{0} - PASS".format(ESMF.local_pet())
     else:
         print "PET{0} - FAIL".format(ESMF.local_pet())
+
+    return total_error_global, csrv_error_global
