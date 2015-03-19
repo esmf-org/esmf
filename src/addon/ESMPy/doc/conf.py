@@ -16,13 +16,7 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# this is currently ...../python/ESMP/doc
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/api')
-sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/interface')
-sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/util')
-sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/test/regrid_test/')
-sys.path.insert(0, os.path.abspath('.')+'/../examples/')
+sys.path.insert(0, os.path.abspath('../src'))
 
 import ESMF
 
@@ -70,10 +64,11 @@ release = ESMF.__release__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['CoordSys.rst', 'DecompFlag', 'FileFormat', 'GridItem', 
-                    'LogKind', 'MeshElemType', 'MeshLoc', 'PoleMethod',
-                    'Region', 'RegridMethod', 'StaggerLoc', 'TypeKind', 
-                    'UnmappedAction']
+exclude_patterns = ['CoordSys.rst', 'DecompFlag.rst', 'FileFormat.rst', 'GridItem.rst',
+                    'LogKind.rst', 'MeshElemType.rst', 'MeshLoc.rst', 'PoleMethod.rst',
+                    'Region.rst', 'RegridMethod.rst', 'StaggerLoc.rst', 'TypeKind.rst',
+                    'UnmappedAction.rst', 'field.rst', 'grid.rst', 'manager.rst',
+                    'mesh.rst', 'regrid.rst']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -138,7 +133,7 @@ html_theme = 'default'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

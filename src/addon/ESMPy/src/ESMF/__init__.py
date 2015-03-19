@@ -65,14 +65,14 @@ from util.decorators import expected_failure
 
 __name__ = "ESMF"
 __description__ = "ESMF Python interface"
-__author__ = "University Corporation for Atmospheric Research, \
-              Massachusetts Institute of Technology, \
-              Geophysical Fluid Dynamics Laboratory, \
-              University of Michigan, \
-              National Centers for Environmental Prediction, \
-              Los Alamos National Laboratory, \
-              Argonne National Laboratory, \
-              NASA Goddard Space Flight Center"
+__author__ = "University Corporation for Atmospheric Research, " + \
+             "Massachusetts Institute of Technology, " + \
+             "Geophysical Fluid Dynamics Laboratory, " + \
+             "University of Michigan, " + \
+             "National Centers for Environmental Prediction, " + \
+             "Los Alamos National Laboratory, " + \
+             "Argonne National Laboratory, " + \
+             "NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
 __release__ = api.constants._ESMF_VERSION
 
