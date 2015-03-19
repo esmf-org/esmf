@@ -84,18 +84,18 @@ The ESMPy build can be installed in a custom location using the
 --prefix, --home, or --install-base flags to the install command.  If this
 is done, then this location needs to be added to the PYTHONPATH environment
 variable in the user's shell EVERY time that a new shell is initiated.  If a
-customized install location is not specified, ESMPy will be installed in the 
+customized install location is not specified, ESMPy will be installed in the
 standard Python package installation directory on that particular machine.
 
-Note: The ESMPy build does not have to be installed to be used.  The 
-PYTHONPATH environment variable can simply be pointed to the directory 
-containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone) 
+Note: The ESMPy build does not have to be installed to be used.  The
+PYTHONPATH environment variable can simply be pointed to the directory
+containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone)
 after the build command.
 
 As usual, any command followed by --help should print out some information
 on what options are available.
 
-An installation of ESMPy in the default location for Python packages can be done 
+An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory:
 
 - default Python package installation:
@@ -108,7 +108,7 @@ with the following command issued from the top level ESMPy directory:
 
     python setup.py install --prefix=<custom_install_location>
 
-    setenv PYTHONPATH <custom_install_location>/lib/*/site_packages
+    setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
@@ -140,8 +140,8 @@ parallel.  The nose commands are wrapped in the following ESMPy targets:
 
     python setup.py test_regrid_from_file_parallel
 
-NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.  
-The "test_regrid_from_file_dryrun" command will simply download the test 
+NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.
+The "test_regrid_from_file_dryrun" command will simply download the test
 files without actually running them (allowing the stress on the machine to
 be applied to bandwidth first, and then memory).
 
@@ -149,7 +149,7 @@ Alternatively, individual tests can be run with nose using the following format:
 
     nosetests <file>:<test>
 
-e.g.  
+e.g.
 
     nosetests src/ESMF/test/test_api/test_regrid.py:TestRegrid.test_field_regrid
 
@@ -163,7 +163,7 @@ to ESMF offline and integrated regridding capabilities.
 
 - There is no FieldBundle class, only single Fields.
 - There is no support for tripole or multi-tile Grids.
-- ESMPy cannot use an ESMF installation that is built with external LAPACK 
+- ESMPy cannot use an ESMF installation that is built with external LAPACK
   support.
 - Conservative regridding with a source Mesh created from file is not supported, because the Mesh cannot retrieve
   coordinates from the elements.
@@ -190,9 +190,9 @@ File Formats
 SCRIP
 ~~~~~
 
-This file format is used by the SCRIP [4] package, grid files that 
-work with that package should also work here.  SCRIP format files are 
-capable of storing either 2D logically rectangular grids or 2D 
+This file format is used by the SCRIP [4] package, grid files that
+work with that package should also work here.  SCRIP format files are
+capable of storing either 2D logically rectangular grids or 2D
 unstructured grids.  More information can be found in the ESMF reference
 manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03024000000000000000>`_.
 
@@ -200,10 +200,10 @@ manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.or
 ESMF
 ~~~~
 
-ESMF has custom unstructured grid file format for describing meshes. 
-This format is more compatible than the SCRIP format with the methods 
-used to create a Mesh object, so less conversion needs to be done to 
-create a Mesh. The ESMF format is thus more efficient than SCRIP when 
+ESMF has custom unstructured grid file format for describing meshes.
+This format is more compatible than the SCRIP format with the methods
+used to create a Mesh object, so less conversion needs to be done to
+create a Mesh. The ESMF format is thus more efficient than SCRIP when
 used with ESMPy.  More information can be found in the ESMF reference
 manual section on the `ESMF Unstructured Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03025000000000000000>`_.
 
@@ -211,21 +211,21 @@ manual section on the `ESMF Unstructured Grid File Format <http://www.earthsyste
 GRIDSPEC
 ~~~~~~~~
 
-GRIDSPEC is an extension to the Climate and Forecast (CF) metadata 
-conventions for the representation of gridded data for Earth System 
-Models.  ESMPy supports NetCDF files that follow the CF GRIDSPEC 
-convention to support logically rectangular lat/lon grids.  More 
-information can be found in the ESMF reference manual section on the 
+GRIDSPEC is an extension to the Climate and Forecast (CF) metadata
+conventions for the representation of gridded data for Earth System
+Models.  ESMPy supports NetCDF files that follow the CF GRIDSPEC
+convention to support logically rectangular lat/lon grids.  More
+information can be found in the ESMF reference manual section on the
 `CF Convention GRIDSPEC File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03026000000000000000>`_.
 
 ~~~~~
 UGRID
 ~~~~~
 
-UGRID is an extension to the CF metadata 
-conventions for the unstructured grid data model.  ESMPy support 
+UGRID is an extension to the CF metadata
+conventions for the unstructured grid data model.  ESMPy support
 NetCDF files that follow the CF UGRID convention for unstructured grids.
-More information can be found in the ESMF reference manual section on 
+More information can be found in the ESMF reference manual section on
 the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
 
 ----------------
@@ -241,17 +241,17 @@ in the file. If the user wishes to not construct the dual mesh, the
 optional argument 'convert_to_dual' may be used to control this
 behavior. When 'convert_to_dual' is set to False, the Mesh constructed
 from the file will not be the dual. This is necessary when the Mesh is
-part of a conservative regridding operation, so the 
+part of a conservative regridding operation, so the
 weights are properly generated for the cell centers in the file.
 
 A Mesh may also be created with boolean flags to specify whether or not to
 add an area property to the Mesh 'add_user_area', or to add a mask
-'add_mask' held by the NetCDF variable indicated in the optional argument, 
+'add_mask' held by the NetCDF variable indicated in the optional argument,
 'varname'.  These argument are only valid for UGRID formatted files.
 
-----------------
+---------------
 Grids From File
-----------------
+---------------
 
 A number of optional boolean arguments are also supported to create a
 structured Grid from a file.  These include 'is_sphere' to indicate whether
@@ -262,7 +262,7 @@ NetCDF file or to calculate them.  Also, for GRIDSPEC formmated files
 there is the 'add_mask' optional argument
 to add a mask held by the NetCDF variable indicated in optional
 argument, 'varname', and the 'coord_names' argument to specify the longitude
-and latitude variable names in GRIDSPEC file containing multiple sets of 
+and latitude variable names in GRIDSPEC file containing multiple sets of
 coordinates.
 
 ================
@@ -357,18 +357,18 @@ portion of the field built on that part of the grid should not
 receive regridded data.  This is useful, for example, when part of
 the grid isn't being used (e.g. the land portion of an ocean grid).
 
-ESMPy currently supports masking for Fields built on structured 
-Grids and element masking for Fields built on unstructured Meshes.  
+ESMPy currently supports masking for Fields built on structured
+Grids and element masking for Fields built on unstructured Meshes.
 A Grid mask is initialized by setting mask values in the
 Numpy Array returned from the Grid.get_item() call using the 'item'
 variable.  A Mesh mask is initialized by passing mask values into
-the Mesh.add_elements() call using the 'element_mask' variable.  The 
+the Mesh.add_elements() call using the 'element_mask' variable.  The
 Field mask can then be setup by indicating the values to use for
 the mask in the 'mask_values' variable of the Field constructor.  However,
 the Field mask does not need to be setup to mask values in the
 regridding operation.  Regrid masking is handled by passing the
-mask values into the 'src_mask_values' or 'dst_mask_values' 
-variables of the Regrid constructor.  For example, if 
+mask values into the 'src_mask_values' or 'dst_mask_values'
+variables of the Regrid constructor.  For example, if
 'dst_mask_values' is set to (/1,2/), then any location
 in the Grid or Mesh that has a value of 1 or 2 will be masked.
 
@@ -452,8 +452,8 @@ Named constants                                  Description
 :download:`MeshElemType <MeshElemType.rst>`      Specify the type of the Mesh elements
 :download:`MeshLoc <MeshLoc.rst>`                Specify a nodal or elemental Mesh
 :download:`Region <Region.rst>`                  Specify various regions in the data layout of
-:download:`RegridMethod <RegridMethod.rst>`      Specify which interpolation method to use regridding              
-:download:`StaggerLoc <StaggerLoc.rst>`          Specify the position for data in a Grid cell     
+:download:`RegridMethod <RegridMethod.rst>`      Specify which interpolation method to use regridding
+:download:`StaggerLoc <StaggerLoc.rst>`          Specify the position for data in a Grid cell
 :download:`TypeKind <TypeKind.rst>`              Specify the type and kind of data
 :download:`UnmappedAction <UnmappedAction.rst>`  Specify which action to take with respect to unmapped destination points
 :download:`PoleMethod <PoleMethod.rst>`          Specify  which type of artificial pole to construct on the source Grid for regridding
@@ -465,7 +465,7 @@ Tutorials
 =========
 
 The first few tutorials are stand-alone scripts that can be run from any Python
-interpeter.
+interpreter.
 
 ---------------
 Script examples
@@ -557,9 +557,6 @@ Compute Field mass
     :pyobject: compute_mass_grid
 
 
-.. toctree::
-    :maxdepth: 2
-
 ==========
 References
 ==========
@@ -578,9 +575,9 @@ Finite Elements in Analysis and Design, 40(5-6), 2004.
 Conservative rezoning algorithm for generalized two-dimensional meshes.
 Journal of Computational Physics, 59, 1985.
 
-[4] Jones, P.W. 
-SCRIP: A Spherical Coordinate Remapping and Interpolation Package. 
-http://www.acl.lanl.gov/climate/software/SCRIP/. 
+[4] Jones, P.W.
+SCRIP: A Spherical Coordinate Remapping and Interpolation Package.
+http://www.acl.lanl.gov/climate/software/SCRIP/.
 Los Alamos National Laboratory Software Release LACC 98-45.
 
 * :ref:`genindex`
