@@ -47,8 +47,9 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
-    def test_mesh_5_pentahexa(self):
+    def test_mesh_50_ngons(self):
 
+        Manager(debug=True)
         parallel = False
         if pet_count() > 1:
             if pet_count() > 4:
@@ -57,10 +58,10 @@ class TestMesh(TestBase):
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa_parallel()
+                mesh_create_50_ngons_parallel()
         else:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa()
+                mesh_create_50_ngons()
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 

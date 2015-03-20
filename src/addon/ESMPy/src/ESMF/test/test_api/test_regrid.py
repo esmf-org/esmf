@@ -202,64 +202,6 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
-    #TODO: doesn't work in parallel because the 5 element mesh is not big enough to distribute to 4 procs
-    @attr('serial')
-    def test_grid_mesh_pentahexa_regrid_csrv(self):
-        parallel = False
-        if ESMF.pet_count() > 1:
-            if ESMF.pet_count() != 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
-
-        # create a Mesh
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa()
-
-        # create a grid
-        grid = grid_create([0, 0, 4, 4], [-0.1, -0.1, 2.5, 2.5], doarea=True)
-
-        # create Field objects on the Meshes
-        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-
-        # make gridded fields
-        exactfield = ESMF.Field(grid, 'exactfield')
-        dstfield = ESMF.Field(grid, 'dstfield')
-        dstfracfield = ESMF.Field(grid, 'dstfracfield')
-        dstareafield = ESMF.Field(grid, 'dstareafield')
-
-        # initialize the Fields to an analytic function
-        #srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
-        #exactfield = initialize_field_grid(exactfield)
-        # TODO: cannot make analytic fields on ngons yet
-        srcfield.data[...] = 25.
-        exactfield.data[...] = 25.
-
-        # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
-                                    regrid_method=ESMF.RegridMethod.CONSERVE,
-                                    unmapped_action=ESMF.UnmappedAction.ERROR,
-                                    src_frac_field=srcfracfield,
-                                    dst_frac_field=dstfracfield)
-        dstfield = regridSrc2Dst(srcfield, dstfield)
-
-        # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
-                                    fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
-
-        # compare results and output PASS or FAIL
-        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
-                            dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
-
-        self.assertAlmostEqual(meanrel, 0.9155)
-        self.assertAlmostEqual(csrvrel, 2.1014202906e-16)
-
     def test_field_regrid_periodic(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -691,3 +633,152 @@ class TestRegrid(TestBase):
 
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
+
+    def est_grid_mesh_pentatri_regrid_csrv(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+                                    fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
+                                               dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        assert (meanrel < 10E-2)
+        assert (csrvrel < 10E-14)
+
+    @attr('serial')
+    def est_grid_mesh_pentatri_regrid_csrv_simple(self):
+        if ESMF.pet_count() > 1:
+            raise NameError('This test can only be run in serial!')
+
+        # create a Mesh
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_4_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 3, 3], [0, 2.5, 2, 3.5], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+                                    fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15,
+                                               dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        assert (meanrel < 10E-2)
+        assert (csrvrel < 10E-14)
+
+    def test_grid_mesh_pentatri_regrid_bilinear(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.NODE)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.BILINEAR,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, _ = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-16, parallel=parallel)
+
+        self.assertAlmostEqual(meanrel, 0)
