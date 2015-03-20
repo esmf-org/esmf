@@ -219,6 +219,7 @@ end type ESMF_LogPrivate
    public ESMF_LogGet
    public ESMF_LogInitialize
    public ESMF_LogOpen
+   public ESMF_LogRc2Msg
    public ESMF_LogSet
    public ESMF_LogSetError
    public ESMF_LogWrite
@@ -1017,7 +1018,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \end{description}
 ! 
 !EOP
-    character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
@@ -1046,18 +1046,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call ESMF_Breakpoint()  ! no-op to assist debugging
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
+        call ESMF_LogRc2Msg (ESMF_RC_MEM_ALLOCATE, allocmsg, msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
-        allocmsg=tempmsg(1:msglen)
         if (present(msg)) then
-          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-        else
-          call ESMF_LogWrite(trim(allocmsg),ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-        endif
+          allocmsg = allocmsg(:msglen) // " - " // msg
+          msglen = len_trim (allocmsg)
+        end if
+        call ESMF_LogWrite(allocmsg(:msglen), ESMF_LOGMSG_ERROR,  &
+            line=line, file=file, method=method, log=log)
         ESMF_LogFoundAllocError=.TRUE.
     endif
        
@@ -1128,7 +1126,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \end{description}
 ! 
 !EOP
-    character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
@@ -1157,18 +1154,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call ESMF_Breakpoint()  ! no-op to assist debugging
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
+        call ESMF_LogRc2Msg (ESMF_RC_MEM_DEALLOCATE, allocmsg, msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_DEALLOCATE
         endif
-        allocmsg=tempmsg(1:msglen)
         if (present(msg)) then
-          call ESMF_LogWrite(trim(allocmsg)//" - "//msg, ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-        else
-          call ESMF_LogWrite(trim(allocmsg), ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-        endif
+          allocmsg = allocmsg(:msglen) // " - " // msg
+          msglen = len_trim (allocmsg)
+        end if
+        call ESMF_LogWrite(allocmsg(:msglen), ESMF_LOGMSG_ERROR,  &
+            line=line, file=file, method=method, log=log)
         ESMF_LogFoundDeallocError=.TRUE.
     endif
        
@@ -1246,9 +1241,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer:: i
     logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
-    character(len=ESMF_MAXSTR)::tempmsg
-    character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen
+    character(len=ESMF_MAXSTR) :: errmsg
+    integer :: msglen
     
     ! set default return
     ESMF_LogFoundError = .FALSE.
@@ -1290,15 +1284,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
         if (.not.masked) then
           call ESMF_Breakpoint()  ! no-op to assist debugging
-          call c_esmc_loggeterrormsg(rcToCheckInternal,tempmsg,msglen)
-          allocmsg=tempmsg(1:msglen)
+          call ESMF_LogRc2Msg (rcToCheckInternal, errmsg, msglen)
           if (present(msg)) then
-            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOGMSG_ERROR,  &
+            errmsg = errmsg(:msglen) // " - " // msg
+            msglen = len_trim (errmsg)
+          end if
+          call ESMF_LogWrite(errmsg(:msglen), ESMF_LOGMSG_ERROR,  &
               line=line, file=file, method=method, log=log)
-          else
-            call ESMF_LogWrite(trim(allocmsg),ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-          endif
           ESMF_LogFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheckInternal
         endif
@@ -1677,6 +1669,41 @@ end subroutine ESMF_LogOpen
 
 !--------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogRc2Msg()"
+!BOPI
+! !IROUTINE: ESMF_LogRc2Msg - Convert rc to message string
+
+! !INTERFACE:
+    subroutine ESMF_LogRc2Msg (rcToCheck, msg, msglen)
+!
+! !ARGUMENTS:
+!
+      integer,      intent(in)  :: rcToCheck
+      character(*), intent(out) :: msg
+      integer,      intent(out) :: msglen
+!
+! !DESCRIPTION:
+!     This subroutine converts an integer rc to a message string.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [rcToCheck]
+!       An ESMF return code.
+!     \item [msg]
+!       A character string for the message
+!     \item [msglen]
+!       Message length exclusive of trailing blanks.
+!     \end{description}
+!
+!EOPI
+
+      call c_esmc_loggeterrormsg (rcToCheck, msg, msglen)
+
+end subroutine ESMF_LogRc2Msg
+
+!--------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogSet()"
 !BOP
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
@@ -1927,9 +1954,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer:: i
     logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
-    character(len=ESMF_MAXSTR)::tempmsg
-    character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen
+    character(len=ESMF_MAXSTR) :: errmsg
+    integer :: msglen
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -1958,15 +1984,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
         if (.not.masked) then
           call ESMF_Breakpoint()  ! no-op to assist debugging
-          call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
-          allocmsg=tempmsg(1:msglen)
+          call ESMF_LogRc2Msg (rcToCheck, errmsg, msglen)
           if (present(msg)) then
-            call ESMF_LogWrite(trim(allocmsg)//" - "//msg, ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-          else
-            call ESMF_LogWrite(trim(allocmsg), ESMF_LOGMSG_ERROR,  &
-              line=line, file=file, method=method, log=log)
-          endif
+            errmsg = errmsg(:msglen) // " - " // msg
+            msglen = len_trim (errmsg)
+          end if
+          call ESMF_LogWrite(errmsg(:msglen), ESMF_LOGMSG_ERROR,  &
+            line=line, file=file, method=method, log=log)
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
       endif
