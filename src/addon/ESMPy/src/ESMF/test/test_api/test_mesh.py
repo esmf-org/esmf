@@ -97,6 +97,7 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
+    @attr('data')
     def test_mesh_create_from_file_scrip(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -105,6 +106,7 @@ class TestMesh(TestBase):
         except:
             raise NameError('mesh_create_from_file_scrip failed!')
 
+    @attr('data')
     def test_mesh_create_from_file_esmfmesh(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -147,6 +149,7 @@ class TestMesh(TestBase):
         assert mesh3.size == [2, None]
         assert mesh3.size_local == [2, None]
 
+    @attr('data')
     @attr('serial')
     def test_slice_mesh_created_from_file_scrip(self):
         try:
@@ -168,6 +171,7 @@ class TestMesh(TestBase):
         assert mesh2.size == [5, None]
         assert mesh2.size_local == [5, None]
 
+    @attr('data')
     @attr('serial')
     def test_slice_mesh_created_from_file_esmfmesh(self):
         try:
