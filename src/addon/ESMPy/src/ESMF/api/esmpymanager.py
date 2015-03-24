@@ -84,7 +84,7 @@ class Manager(object):
             None \n
         Optional Arguments: \n
             debug: outputs logging information to ESMF logfiles. \n
-                type: boolean (defaults to False)
+                type: boolean (defaults to False) \n
         Returns: \n
             Manager \n
         '''

@@ -43,14 +43,14 @@ class Regrid(object):
                              dtype=numpy.int32)of values that can be 
                              used to specify a masked value on the 
                              source Field. \n
-                type: numpy.array
-                shape: (n, 1) where n is the number of values
+                type: numpy.array \n
+                shape: (n, 1) where n is the number of values \n
             dst_mask_values: a numpy array (internally cast to 
                              dtype=numpy.int32)of values that can be 
                              used to specify a masked value on the 
                              destination Field. \n
-                type: numpy.array
-                shape: (n, 1) where n is the number of values
+                type: numpy.array \n
+                shape: (n, 1) where n is the number of values \n
             regrid_method: specifies which regridding method to use. \n
                 Argument values are: \n
                     (default) RegridMethod.BILINEAR\n

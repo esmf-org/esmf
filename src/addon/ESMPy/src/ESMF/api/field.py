@@ -309,7 +309,7 @@ class Field(MaskedArray):
         Optional Arguments: \n
             None \n
         Returns: \n
-            None \n
+            None
         """
 
         # call into the ctypes layer
@@ -324,7 +324,7 @@ class Field(MaskedArray):
             variable: the name of the data variable to read. \n
             timeslice: the number of time slices to read. \n
         Optional Arguments: \n
-            format: unimplemented (defaults to NetCDF)
+            format: unimplemented (defaults to NetCDF)\n
         Returns: \n
             Field \n
         """

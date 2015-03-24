@@ -27,7 +27,10 @@ import ESMF
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
+# for python related libraries
+intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None)}
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -64,11 +67,7 @@ release = ESMF.__release__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['CoordSys.rst', 'DecompFlag.rst', 'FileFormat.rst', 'GridItem.rst',
-                    'LogKind.rst', 'MeshElemType.rst', 'MeshLoc.rst', 'PoleMethod.rst',
-                    'Region.rst', 'RegridMethod.rst', 'StaggerLoc.rst', 'TypeKind.rst',
-                    'UnmappedAction.rst', 'field.rst', 'grid.rst', 'manager.rst',
-                    'mesh.rst', 'regrid.rst']
+exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

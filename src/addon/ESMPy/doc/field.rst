@@ -1,11 +1,7 @@
-.. toctree::
-   :maxdepth: 2
-
-.. _field:
-
+~~~~~
 Field
-=====
+~~~~~
 
-.. autoclass:: ESMF.Field
+.. autoclass:: ESMF.api.field.Field
     :members:
     

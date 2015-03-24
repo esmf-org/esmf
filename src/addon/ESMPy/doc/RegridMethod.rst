@@ -1,31 +1,6 @@
+~~~~~~~~~~~~
 RegridMethod
-============
+~~~~~~~~~~~~
 
-Specify which interpolation method to use during regridding.
-
-Values are:
-
-    BILINEAR = 0
-        Bilinear interpolation.  Destination value is a linear combination
-        of the source values in the cell which contains the destination 
-        point.  The weights for the linear combination are based on the 
-        distance of the destination point from each source value.
-    PATCH = 1
-        Higher-order patch recovery interpolation.  Destination value is a
-        weighted average of 2D polynomial patches constructed from cells 
-        surrounding the source cell which contains the destination point. 
-        This method typically results in better approximations to values 
-        and derivatives than bilinear.  However, because of its larger 
-        stencil, it also results in a much larger interpolation matrix than 
-        the bilinear method.
-    CONSERVE = 2
-        First order conservative interpolation.  Value of a destination cell
-        is the weighted sum of the values of the source cells that it 
-        overlaps.  The weights are determined by the amount the source cell 
-        overlaps the destination cell.  This method will typically give less 
-        accurate approximations to values than the other interpolation 
-        methods, however, it will do a much better job preserving the 
-        integral of the value between the source and destination.  This
-        method requires the corner coordinate values to be provided in the 
-        Grid, and it currently only works for Fields created on the Grid 
-        center stagger (or the Mesh element location).
+.. autoclass:: ESMF.api.constants._RegridMethod
+    :members:
