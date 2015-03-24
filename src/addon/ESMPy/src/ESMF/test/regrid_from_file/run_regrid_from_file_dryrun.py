@@ -12,7 +12,7 @@ import sys
 import os
 
 from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
-from read_test_cases_from_control_file import read_test_cases_from_control_file
+from read_test_cases_from_control_file import read_control_file
 
 
 # If fname doesn't exist, retrieve it from the remote server via http.
@@ -61,7 +61,7 @@ def cache_data_files_for_test_cases(test_cases):
 # locally for each test read from a control file.
 def main():
     # Read the test case parameters from the control file.
-    test_cases = read_test_cases_from_control_file()
+    test_cases = read_control_file()
 
     # Retrieve the data files needed for the test cases from the remote server.
     status_ok = cache_data_files_for_test_cases(test_cases)

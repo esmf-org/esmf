@@ -20,7 +20,7 @@ except:
 from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
 from ESMF.test.regrid_from_file.run_regrid_from_file_dryrun import cache_data_files_for_test_cases
 from ESMF.test.regrid_from_file.regrid_check import regrid_check
-from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_test_cases_from_control_file
+from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
 # Start up ESMF and run regrid test for each line of options
 # read from a control file.    Retrieve data files for each test from a remote
@@ -33,7 +33,7 @@ if ESMF.pet_count() > 1:
     parallel = True
 
 # Read the test case parameters from the control file.
-test_cases = read_test_cases_from_control_file()
+test_cases = read_control_file()
 
 if (ESMF.local_pet() == 0):
     # Retrieve the data files needed for the test cases from the remote server.
