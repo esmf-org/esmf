@@ -138,6 +138,18 @@ script_info:
 	    echo "ESMF_LAPACK_LIBPATH:    $(ESMF_LAPACK_LIBPATH)" ; \
           fi; \
          fi
+	-@if [ -n "$(ESMF_ACC_SOFTWARE_STACK)" ] ; then \
+	  echo "ESMF_ACC_SOFTWARE_STACK:            $(ESMF_ACC_SOFTWARE_STACK)" ; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ] ; then \
+	    echo "ESMF_ACC_SOFTWARE_STACK_INCLUDE:    $(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBS)" ] ; then \
+	    echo "ESMF_ACC_SOFTWARE_STACK_LIBS:       $(ESMF_ACC_SOFTWARE_STACK_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ] ; then \
+	    echo "ESMF_ACC_SOFTWARE_STACK_LIBPATH:    $(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ; \
+          fi; \
+         fi
 	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
 	  echo "ESMF_NETCDF:            $(ESMF_NETCDF)" ; \
 	  if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
@@ -382,6 +394,18 @@ info_mk: chkdir_lib
           fi; \
 	  if [ -n "$(ESMF_LAPACK_LIBPATH)" ] ; then \
 	    echo "# ESMF_LAPACK_LIBPATH:    $(ESMF_LAPACK_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_ACC_SOFTWARE_STACK)" ] ; then \
+	  echo "#ESMF_ACC_SOFTWARE_STACK:            $(ESMF_ACC_SOFTWARE_STACK)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ] ; then \
+	    echo "# ESMF_ACC_SOFTWARE_STACK_INCLUDE:    $(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" >> $(MKINFO); \
+          fi; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBS)" ] ; then \
+	    echo "# ESMF_ACC_SOFTWARE_STACK_LIBS:       $(ESMF_ACC_SOFTWARE_STACK_LIBS)" >> $(MKINFO); \
+          fi; \
+	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ] ; then \
+	    echo "# ESMF_ACC_SOFTWARE_STACK_LIBPATH:    $(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" >> $(MKINFO); \
           fi; \
          fi
 	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
