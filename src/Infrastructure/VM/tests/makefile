@@ -93,7 +93,7 @@ RUN_ESMF_VMUTestUNI:
 RUN_ESMF_VMAccUTest:
 	$(MAKE) TNAME=VMAcc NP=4 ftest
 
-RUN_ESMF_VMUAccTestUNI:
+RUN_ESMF_VMAccUTestUNI:
 	$(MAKE) TNAME=VMAcc NP=1 ftest
 
 #
