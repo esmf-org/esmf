@@ -11340,7 +11340,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   real(ESMF_KIND_R8), pointer :: srcAreaPtr(:), dstAreaPtr(:)
  real(ESMF_KIND_R8), pointer :: srcFracPtr(:), dstFracPtr(:)
   integer :: clbnd(1),cubnd(1)
-  integer :: i1,i2,i3
+   integer :: i1,i2,i3
   real(ESMF_KIND_R8) :: x,y,z
   integer :: localPet, petCount
   real(ESMF_KIND_R8) :: srcmass(1), dstmass(1), srcmassg(1), dstmassg(1)
@@ -11421,7 +11421,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
      nodeCoords=(/0.0,0.0, & ! node id 1
                    1.0,0.0, & ! node id 2
                    2.0,0.0, & ! node id 3
-                   0.0, 1.0, & ! node id 4
+                    0.0, 1.0, & ! node id 4
                    1.0, 1.0, & ! node id 5
                    2.0, 1.0, & ! node id 6
                    0.0, 2.0, & ! node id 7
@@ -11445,7 +11445,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numTotElems))
-     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
                  ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
                  ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
                  ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
@@ -11460,7 +11460,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
      ! section for the corresponding entry
      ! in the elemTypes array.
      allocate(elemConn(4*numQuadElems+3*numTriElems))
-     elemConn=(/1,2,5,4, &  ! elem id 1
+      elemConn=(/1,2,5,4, &  ! elem id 1
                 2,3,5,   &  ! elem id 2
                 3,6,5,   &  ! elem id 3
                 4,5,8,7, &  ! elem id 4
@@ -11484,7 +11484,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
        nodeCoords=(/0.0, 0.0, & ! node id 1
                      1.0, 0.0, & ! node id 2
                     0.0,  1.0, & ! node id 4
-                     1.0,  1.0 /) ! node id 5
+                      1.0,  1.0 /) ! node id 5
 
        ! Allocate and fill the node owner array.
        allocate(nodeOwners(numNodes))
@@ -11499,7 +11499,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
        numTotElems=numQuadElems+numTriElems
 
        ! Allocate and fill the element id array.
-       allocate(elemIds(numTotElems))
+        allocate(elemIds(numTotElems))
        elemIds=(/1/) 
 
        ! Allocate and fill the element topology type array.
@@ -11523,7 +11523,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
        ! Since this is a 2D Mesh the size is 2x the
        ! number of nodes.
        allocate(nodeCoords(2*numNodes))
-       nodeCoords=(/1.0,0.0, & ! node id 2
+        nodeCoords=(/1.0,0.0, & ! node id 2
                     2.0,0.0, & ! node id 3
                     1.0, 1.0, & ! node id 5
                     2.0, 1.0 /) ! node id 6
@@ -11538,7 +11538,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
        ! Set the number of each type of element, plus the total number.
        numQuadElems=0
        numTriElems=2
-       numTotElems=numQuadElems+numTriElems
+        numTotElems=numQuadElems+numTriElems
 
        ! Allocate and fill the element id array.
        allocate(elemIds(numTotElems))
@@ -11562,7 +11562,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         allocate(nodeIds(numNodes))
         nodeIds=(/4,5,7,8/) 
 
-        ! Allocate and fill node coordinate array.
+         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
         ! number of nodes.
         allocate(nodeCoords(2*numNodes))
@@ -11577,7 +11577,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         nodeOwners=(/0, & ! node id 4
                      0, & ! node id 5
                      2, & ! node id 7
-                     2/)  ! node id 8
+                      2/)  ! node id 8
 
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
@@ -11601,7 +11601,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         numNodes=4
 
         ! Allocate and fill the node id array.
-        allocate(nodeIds(numNodes))
+         allocate(nodeIds(numNodes))
         nodeIds=(/5,6,8,9/) 
 
         ! Allocate and fill node coordinate array.
@@ -11640,7 +11640,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
     endif
 
    ! Create Mesh structure in 1 step
-  srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+   srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -11679,7 +11679,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
   endif
 
   
-  ! Load test data into the source Field
+   ! Load test data into the source Field
   ! Should only be 1 localDE
   call ESMF_FieldGet(srcField, 0, srcFarrayPtr,  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -11718,7 +11718,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
-   deallocate(elemConn)
+    deallocate(elemConn)
 
   !!!!!!!!!!!!!!! Setup Destination Mesh !!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

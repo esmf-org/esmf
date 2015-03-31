@@ -640,6 +640,8 @@ int ESMC_FieldRegridStore(
 //  \item [polemethod]
 //    Which type of artificial pole
 //    to construct on the source Grid for regridding. 
+//    If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods, 
+//    and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods. 
 //    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}. 
 //  \item [regridPoleNPnts]
 //    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
