@@ -1773,6 +1773,8 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
       endif
     enddo
 
+    ! keep the coordinates as Spherical Degree
+#if 0
     if (meshDim == 3) then
     ! Convert the coordinates into Cartesian 3D
       do i=1,localCount
@@ -1782,6 +1784,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
         nodeCoords(:,i)=coord(:)
       enddo
     endif
+#endif
     ! Deallocations
     deallocate( nodeCoordNames, nodeCoord1D)
 

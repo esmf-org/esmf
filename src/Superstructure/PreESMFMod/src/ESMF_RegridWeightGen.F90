@@ -91,7 +91,7 @@ contains
   ! Private name; call using ESMF_RegridWeightGen()
   subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
     regridmethod, polemethod, regridPoleNPnts, normType, &
-    unmappedaction, srcFileType, dstFileType, &
+    unmappedaction, ignoreDegenerate, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
     srcMissingvalueFlag, srcMissingvalueVar, &
     dstMissingvalueFlag, dstMissingvalueVar, &
@@ -112,6 +112,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_NormType_Flag),    intent(in),   optional :: normType
 
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
+  logical,                      intent(in),  optional :: ignoreDegenerate
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: dstFileType
   logical,                      intent(in),  optional :: srcRegionalFlag
@@ -185,6 +186,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[ignoreDegenerate]}]
+!     Ignore degenrate cells when checking the input Grids or Meshes for errors. The flag only applies to
+!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     The default is .FALSE.  
 !   \item [{[srcFileType]}]
 !     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
 !     Section~\ref{const:mesh:fileformat} for a list of valid options.
@@ -307,6 +312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer            :: commandbuf(6)
     !real(ESMF_KIND_R8) :: starttime, endtime
     type(ESMF_NormType_Flag):: localNormType
+    logical            :: localIgnoreDegenerate
 
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -340,6 +346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     useSrcCoordVar = .false.
     useDstCoordVar = .false.
     localPoleNPnts = 0
+    localIgnoreDegenerate = .false.
 
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -480,6 +487,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localUnmappedaction = unmappedaction
     else
       localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+    endif
+
+    if (present(ignoreDegenerate)) then
+      localIgnoreDegenerate = ignoreDegenerate
     endif
 
     if (present(srcRegionalFlag)) then
@@ -768,6 +779,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
 	 print *, "  Ignore unmapped destination points"
+      endif
+      if (localIgnoreDegenerate) then
+         print *, "  Ignore degenerated cells in the input grids"
       endif
       if (localLargeFileFlag) then
 	 print *, "  Output weight file in 64bit offset NetCDF file format"
@@ -1141,6 +1155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      factorIndexList=factorIndexList, factorList=factorList, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
@@ -1154,6 +1169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      srcMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      factorIndexList=factorIndexList, factorList=factorList, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
@@ -1167,6 +1183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      factorIndexList=factorIndexList, factorList=factorList, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
@@ -1179,6 +1196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else	
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      factorIndexList=factorIndexList, factorList=factorList, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
@@ -1456,7 +1474,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
     keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
-    weightFile, regridmethod, normType, unmappedaction, useUserAreaFlag, &
+    weightFile, regridmethod, normType, unmappedaction, &
+    ignoreDegenerate, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
@@ -1473,6 +1492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_NormType_Flag),    intent(in),   optional :: normType
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
+  logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
@@ -1530,6 +1550,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[ignoreDegenerate]}]
+!     Ignore degenrate cells when checking the input Grids or Meshes for errors. The flag only applies to
+!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     The default is .FALSE.  
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.
 !     Only the SCRIP and ESMF format grid files have user specified areas. This flag
@@ -1580,6 +1604,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=256) :: argStr
     !real(ESMF_KIND_R8) :: starttime, endtime
     type(ESMF_NormType_Flag):: localNormType
+    logical            :: localIgnoreDegenerate
 
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -1602,6 +1627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localLargeFileFlag = .false.
     localNetcdf4FileFlag = .false.
     localUserAreaflag = .false.
+    localIgnoreDegenerate = .false.
 
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -1611,6 +1637,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localUnmappedaction = unmappedaction
     else
       localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+    endif
+
+    if (present(ignoreDegenerate)) then
+      localIgnoreDegenerate = ignoreDegenerate
     endif
 
     if (present(largefileFlag)) then
@@ -1804,6 +1834,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      routehandle=regridRouteHandle, &
 	      factorIndexList=factorIndexList, factorList=factorList, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
@@ -1815,6 +1846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
 	      routehandle=regridRouteHandle, &
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &

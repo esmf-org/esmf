@@ -2082,7 +2082,8 @@ end function ESMF_MeshCreateFromFile
     else if (coordDim .eq. 3) then
        parametricDim = 3
        spatialDim = 3
-       coordSys=ESMF_COORDSYS_CART
+       ! Do not set the default coordinate system to CART 
+       ! coordSys=ESMF_COORDSYS_CART
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
