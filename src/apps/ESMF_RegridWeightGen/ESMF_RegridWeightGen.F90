@@ -801,6 +801,7 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
+    print *, "                      [--ignore_degenerate]
     print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC]" 
     print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC]"
     print *, "                      [-t SCRIP|ESMF|UGRID|GRIDSPEC]"
@@ -835,6 +836,8 @@ contains
     print *, "--norm_type - an optional argument indicating the type of normalization to"
     print *, "              do when generating conserative weights. The default value is dstarea."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
+    print *, "                          the default is to stop with an error."
+    print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--src_type - an optional argument specifying the source grid file type."
     print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."

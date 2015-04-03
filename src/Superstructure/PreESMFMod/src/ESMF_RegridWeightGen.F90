@@ -187,7 +187,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
-!     Ignore degenrate cells when checking the input Grids or Meshes for errors. The flag only applies to
+!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
 !     the conservative regridding.  If set to false, a degenenate cell produces an error.
 !     The default is .FALSE.  
 !   \item [{[srcFileType]}]
@@ -781,7 +781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	 print *, "  Ignore unmapped destination points"
       endif
       if (localIgnoreDegenerate) then
-         print *, "  Ignore degenerated cells in the input grids"
+         print *, "  Ignore degenerate cells in the input grids"
       endif
       if (localLargeFileFlag) then
 	 print *, "  Output weight file in 64bit offset NetCDF file format"

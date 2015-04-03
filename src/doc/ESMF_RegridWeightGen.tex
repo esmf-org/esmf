@@ -238,6 +238,7 @@ ESMF_RegridWeightGen
         [--pole|-p none|all|teeth|1|2|..]
         [--norm_type dstarea|fracarea]
         [--ignore_unmapped|-i]
+        [--ignore_degenerate]
         [--src_type SCRIP|GRIDSPEC|ESMF|UGRID]
         [--dst_type SCRIP|GRIDSPEC|ESMF|UGRID]
         [-t SCRIP|GRIDSPEC|ESMF|UGRID]
@@ -320,6 +321,10 @@ where
            -i         - ignore unmapped destination points. If not specified
                         the default is to stop with an error if an unmapped
                         point is found.
+
+    --ignore_degenerate - ignore degenerate cells in the input grids. If not specified
+                        the default is to stop with an error if an degenerate
+                        cell is found.
 
     --src_type        - an optional argument specifying the source grid file
                         type.  The value could be one of SCRIP, GRIDSPEC, ESMF
