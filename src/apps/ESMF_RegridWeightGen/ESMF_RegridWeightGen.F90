@@ -801,7 +801,7 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
-    print *, "                      [--ignore_degenerate]
+    print *, "                      [--ignore_degenerate]"
     print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC]" 
     print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC]"
     print *, "                      [-t SCRIP|ESMF|UGRID|GRIDSPEC]"
