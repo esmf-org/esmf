@@ -163,8 +163,8 @@ extern "C" void FTN_X(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *n
 
 extern "C" void FTN_X(c_esmc_meshdestroy)(MeshCap **meshpp, int *rc) {
 
-  // TODO: fix this by making a static function
-  delete *meshpp;
+  MeshCap::destroy(meshpp, rc);
+
 }
 
 extern "C" void FTN_X(c_esmc_meshfreememory)(MeshCap **meshpp, int *rc) {

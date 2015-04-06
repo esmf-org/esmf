@@ -3297,8 +3297,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !  This call removes internal memory associated with {\tt mesh}. 
 !  After this call {\tt mesh} will no longer be usable.
-!
-! The arguments are:
+ !
+ ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to be destroyed.
@@ -3314,6 +3314,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
         call C_ESMC_MeshDestroy(mesh%this, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set this for consistancies sake
          mesh%isCMeshFreed=.true.
