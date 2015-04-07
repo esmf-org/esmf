@@ -2816,10 +2816,11 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        endif
 
        ! if units is "radians", convert it to degree
+       ! if nodeDim=3, only convert the first two dimensions, leave the 3rd dim unchanged
        if (convertToDegLocal) then
           if (units(1:len) .eq. "radians") then
-             nodeCoords(:,:) = &
-                 nodeCoords(:,:)*ESMF_COORDSYS_RAD2DEG
+             nodeCoords(1:2,:) = &
+                 nodeCoords(1:2,:)*ESMF_COORDSYS_RAD2DEG
           endif
        endif
 
