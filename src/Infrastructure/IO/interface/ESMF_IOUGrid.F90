@@ -1233,8 +1233,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       endif
     enddo
 
+! save coordinates as ESMF_COORDSYS_SPH_DEG, no need to convert to CART
+#if 0    
     ! Convert the coordinates into Cartesian 3D
-    
     do i=1,nodeCount
       call c_esmc_sphdeg_to_cart(nodeCoords(1,i), nodeCoords(2,i), & 
                   coord(1), coord(2), coord(3), &
@@ -1245,6 +1246,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       nodeCoords(2,i)=nodeCoords(3,i)*coord(2)
       nodeCoords(3,i)=nodeCoords(3,i)*coord(3)
     enddo
+#endif
 
     ! Get element connectivity, if it does not exist, bail out
     errmsg = "Attribute volume_node_connectivity in "//trim(filename)
