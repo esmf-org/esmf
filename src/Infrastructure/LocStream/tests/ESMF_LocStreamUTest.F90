@@ -89,6 +89,9 @@ program ESMF_LocStreamCreateUTest
   distgrid=ESMF_DistGridCreate(minIndex=(/1/),maxIndex=(/10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+#if 0
+!mvr
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1509,28 +1512,26 @@ program ESMF_LocStreamCreateUTest
 
 
   ! Add key X
-  call ESMF_LocStreamAddKey(locstream, keyName="X", farray=X,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:X", farray=X,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     goto 100
   endif
 
   ! Add key Y
-  call ESMF_LocStreamAddKey(locstream, keyName="Y", farray=Y,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Y", farray=Y,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     goto 100
   endif
 
-
   ! Do locStream create from background mesh
-  newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="X:Y", &
+  newLocstream=ESMF_LocStreamCreate(locstream, &
                  background=mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      goto 100
   endif
-
 
   call ESMF_LocStreamDestroy(locstream,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
@@ -1551,7 +1552,7 @@ program ESMF_LocStreamCreateUTest
   endif
 
   !!!!!!!!! Check results !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="X", &
+  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="ESMF:X", &
          farray=tstX, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
@@ -1559,7 +1560,7 @@ program ESMF_LocStreamCreateUTest
     goto 100
   endif
 
-  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="Y", &
+  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="ESMF:Y", &
          farray=tstY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1603,6 +1604,7 @@ program ESMF_LocStreamCreateUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_LocStream Create From Background Grid"
@@ -1633,6 +1635,10 @@ program ESMF_LocStreamCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  !-----------------------------------------------------------------------------
 
+#endif
+!mvr
+
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_LocStream Create From Background Grid on Sphere"
@@ -1648,6 +1654,8 @@ program ESMF_LocStreamCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  !-----------------------------------------------------------------------------
 
+stop
+!mvr
 
   ! Destroy distgrid
   call ESMF_DistGridDestroy(distgrid, rc=rc)
@@ -1810,15 +1818,15 @@ contains
 
 
   ! Add key X
-  call ESMF_LocStreamAddKey(locstream, keyName="X", farray=X,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:X", farray=X,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Add key Y
-  call ESMF_LocStreamAddKey(locstream, keyName="Y", farray=Y,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Y", farray=Y,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Do locStream create from background mesh
-  newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="X:Y", &
+  newLocstream=ESMF_LocStreamCreate(locstream, &
                  background=gridA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -1883,12 +1891,12 @@ contains
 
 
   !!!!!!!!! Check locstream points vs Grid min max !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="X", &
+  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="ESMF:X", &
          farray=tstX, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="Y", &
+  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="ESMF:Y", &
          farray=tstY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2078,15 +2086,15 @@ contains
 
 
   ! Add key X
-  call ESMF_LocStreamAddKey(locstream, keyName="X", farray=X,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:X", farray=X,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Add key Y
-  call ESMF_LocStreamAddKey(locstream, keyName="Y", farray=Y,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Y", farray=Y,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Do locStream create from background mesh
-  newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="X:Y", &
+  newLocstream=ESMF_LocStreamCreate(locstream, &
                  background=gridA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -2153,12 +2161,12 @@ contains
 
 
   !!!!!!!!! Check locstream points vs Grid min max !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="X", &
+  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="ESMF:X", &
          farray=tstX, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="Y", &
+  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="ESMF:Y", &
          farray=tstY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2247,13 +2255,16 @@ contains
   
   ! setup source grid
   gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nlon,A_nlat/),regDecomp=(/petCount,1/), &
-                              coordSys=ESMF_COORDSYS_CART, &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
+
+  print*,'mvr: grid created'
+
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -2311,9 +2322,11 @@ contains
 
 
   ! Create LocStream
-  locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
+  locstream=ESMF_LocStreamCreate(localCount=pntCount, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
+  print*,'mvr: locstream created'
+
   ! Allocate Lon array
   allocate(Lon(pntCount))
 
@@ -2343,21 +2356,29 @@ contains
   endif
 
 
+  print*,'mvr: before key adds'
+
   ! Add key Lon
-  call ESMF_LocStreamAddKey(locstream, keyName="Lon", farray=Lon,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lon", farray=Lon,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  print*,'mvr: lon key added'
 
   ! Add key Lat
-  call ESMF_LocStreamAddKey(locstream, keyName="Lat", farray=Lat,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lat", farray=Lat,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  print*,'mvr: lat key added'
+
   ! Do locStream create from background mesh
-  newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="Lon:Lat", &
+  newLocstream=ESMF_LocStreamCreate(locstream, &
                  background=gridA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
+
+  print*,'mvr: newlocstream created?'
 
   
   call ESMF_LocStreamDestroy(locstream,rc=localrc)
@@ -2421,12 +2442,12 @@ contains
  !  write(*,*) localPet," [",de_minlon,de_maxlon,"]"
 
   !!!!!!!!! Check locstream points vs Grid min max !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="Lon", &
+  call ESMF_LocStreamGetKey(newlocStream,localDE=0,keyName="ESMF:Lon", &
          farray=tstLon, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="Lat", &
+  call ESMF_LocStreamGetKey(newLocStream,localDE=0,keyName="ESMF:Lat", &
          farray=tstLat, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

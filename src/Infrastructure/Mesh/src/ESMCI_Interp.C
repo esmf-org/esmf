@@ -260,7 +260,7 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
  * Patch interpolation, where destination and source fields are nodal.
  */
 
-void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, SearchResult &sres, Mesh *srcmesh, int mvr_interp) {
+void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, SearchResult &sres, Mesh *srcmesh, int imethod) {
    Trace __trace("patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres)");
 
 
@@ -281,7 +281,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
   for (UInt i = 0; i < _nfields; i++) {
   
     // Only process interp_patch  
-    if (mvr_interp != Interp::INTERP_PATCH) continue;
+    if (imethod != Interp::INTERP_PATCH) continue;
    
     int patch_order=2;
     pdeg_set.insert(patch_order);
@@ -405,67 +405,6 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
   
 }
 
-#if 0 //mvr  
- void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres, PointList *dstpointlist) {
-  Trace __trace("point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
-
-
-  if (num_fields == 0) return;
-
-  SearchResult::iterator sb = sres.begin(), se = sres.end();
-
-  int dstpointlist_dim=dstpointlist->get_coord_dim();
-
-  for (; sb != se; sb++) {
-
-    Search_result &sres = **sb;
-
-    // Trick:  Gather the data from the source field so we may call interpolate point
-    const MeshObj &elem = *(*sb)->elem;
-
-    UInt pdim = GetMeshObjTopo(elem)->parametric_dim;
-
-    // Inner loop through fields
-    for (UInt i = 0; i < num_fields; i++) {
-
-      if (iflag[i] != Interp::INTERP_STD) continue;
-
-      MEField<> &sfield = *sfields[i];
-      _field &dfield = *dfields[i];
-
-      MEValues<> mev(sfield.GetMEFamily());
-
-      if (dstpointlist_dim != sfield.dim())
-        Throw() << "dest and source fields have incompatible dimensions";
-
-     // Load Parametric coords
-     UInt npts = sres.nodes.size(); // number of points to interpolate
-     std::vector<double> pcoord(pdim*npts);
-     for (UInt np = 0; np < npts; np++) {
-       for (UInt pd = 0; pd < pdim; pd++)
-         pcoord[np*pdim+pd] = sres.nodes[np].pcoord[pd];
-     }
-
-     arbq pintg(pdim, npts, &pcoord[0]);
-     mev.Setup(elem, MEV::update_sf, &pintg);
-     mev.ReInit(elem);
-
-     std::vector<double> ires(npts*dstpointlist_dim);
-     mev.GetFunctionValues(sfield, &ires[0]);
-
-     // Copy data to nodes
-     for (UInt n = 0; n < npts; n++) {
-       const MeshObj &node = *sres.nodes[n].node;
-       for (UInt d = 0; d < dstpointlist_dim; d++) {
-         ((double*)dfield.data(node))[d] = ires[n*dstpointlist_dim+d];
-       }
-     }
-
-    } // for fields
-
-  } // for searchresult
-}
-#endif //mvr 
 
 struct dof_add_col {
 
@@ -1337,12 +1276,6 @@ void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, S
   Trace __trace("calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
 
 
-  // both meshes have to have the same dimensions
-  //mvr  if (srcmesh->parametric_dim() != dstmesh->parametric_dim()) {
-  //mvr    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
-  //mvr  }
-
-  //mvr  if (srcmesh->spatial_dim() != dstmesh->spatial_dim()) {
   if (srcpointlist->get_coord_dim() != dstpointlist->get_coord_dim()) {
     Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
   }
@@ -1472,7 +1405,7 @@ std::cout << "**diff=" << sval - ires[n*nrhs+d].val() << std::endl;
 
 }
  
-static GeomRend::DstConfig get_dst_config(int mvr_interp) {
+static GeomRend::DstConfig get_dst_config(int imethod) {
   
   // Determine the rendezvous destination configuration.  Use Field 0 for the info.  
   // All other fields must have compatability with the first.
@@ -1485,8 +1418,8 @@ static GeomRend::DstConfig get_dst_config(int mvr_interp) {
   bool nbor = false;
   bool cnsrv = false;
 
-  if (mvr_interp == Interp::INTERP_PATCH) nbor = true;
-  else if (mvr_interp == Interp::INTERP_CONSERVE) cnsrv = true;
+  if (imethod == Interp::INTERP_PATCH) nbor = true;
+  else if (imethod == Interp::INTERP_CONSERVE) cnsrv = true;
 
   Context default_context;
   default_context.flip();
@@ -1500,9 +1433,9 @@ static GeomRend::DstConfig get_dst_config(int mvr_interp) {
 }
   
 
-Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, bool freeze_src_, int mvr_imethod, MAP_TYPE mtype, int unmappedaction) :
+Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, bool freeze_src_, int imethod, MAP_TYPE mtype, int unmappedaction) :
 sres(),
-grend(src, srcplist, dest, dstplist, get_dst_config(mvr_imethod), freeze_src_),
+grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_),
 is_parallel(Par::Size() > 1),
 srcF(),
 dstF(),
@@ -1517,35 +1450,26 @@ dstpointlist(dstplist),
 srcpointlist(srcplist),
 midmesh(midmesh),
 zz(0),
-mvr_interp(mvr_imethod)
+interp_method(imethod)
 {
-
-  printf("mvr: hello\n");
-  fflush(stdout);
 
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
 
-  //mvr dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
-
   if (srcmesh != NULL) 
     srcF.push_back(srcmesh->GetCoordField());
 
-  iflag.push_back(mvr_interp);
+  iflag.push_back(interp_method);
 
-  if (mvr_interp == Interp::INTERP_STD) has_std = true;
-  else if (mvr_interp == Interp::INTERP_PATCH) has_patch = true;
-  else if (mvr_interp == Interp::INTERP_CONSERVE) has_cnsrv = true;
-  else if (mvr_interp == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
-  else if (mvr_interp == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
+  if (interp_method == Interp::INTERP_STD) has_std = true;
+  else if (interp_method == Interp::INTERP_PATCH) has_patch = true;
+  else if (interp_method == Interp::INTERP_CONSERVE) has_cnsrv = true;
+  else if (interp_method == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
+  else if (interp_method == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
 
   if (dstmesh != NULL) {
     //must get dst info from mesh
-    //mvr    MEField<> &dcoord = dstmesh->GetCoordField();
-    //mvr dstF.push_back(&dcoord);
     dstF.push_back(dstmesh->GetCoordField());
-  } else {
-    //mvr will need something here to fill in dstF from pointlist for parallel cases
   }
 
   if (is_parallel) {
@@ -1558,14 +1482,13 @@ mvr_interp(mvr_imethod)
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
 
     if (has_nearest_dst_to_src) {
-      ParSearchNearestDstToSrc(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+      Throw() << "unable to proceed with interpolation method dst_to_src";
+
     } else if (has_nearest_src_to_dst) {
-      //mvr ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
-      ParSearchNearestSrcToDst_w_plist(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres);
+      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
-	//mvr        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
-	OctSearch_w_dst_pl(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
+	OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
 	if(freeze_src_) {
@@ -1587,15 +1510,13 @@ mvr_interp(mvr_imethod)
     // the subset of the mesh for interpolating??)
 
     if (has_nearest_dst_to_src) {
-#if 0  //not working  (mvr)
-        SearchNearestDstToSrc_w_plist(*src, *dstpointlist, unmappedaction, sres);
-#endif 
+      Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
-        SearchNearestSrcToDst_w_plist(*srcpointlist, *dstpointlist, unmappedaction, sres);
+        SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres);
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
-	OctSearch_w_dst_pl(*src, *dstpointlist, mtype, search_obj_type, unmappedaction, sres, 1e-8);
+	OctSearch(*src, *dstpointlist, mtype, search_obj_type, unmappedaction, sres, 1e-8);
 	//OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
@@ -1614,15 +1535,6 @@ mvr_interp(mvr_imethod)
 Interp::~Interp() {
   DestroySearchResult(sres);
 }
-
-#if 0 //mvr
-void Interp::operator()() {
-  Trace __trace("Interp::operator()()");  
-  
-  if (is_parallel) transfer_parallel(); else transfer_serial();
-  
-}
-#endif //mvr
 
 /*
  * There is an ASSUMPTION here that the field is nodal, both sides
@@ -1807,70 +1719,15 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
 
 }
 
-
-#if 0 //mvr
-void Interp::transfer_serial() {
-  Trace __trace("Interp::transfer_serial()");
-
-  // Standard interpolation
-  if (has_std) {
-
-    point_serial_transfer(srcF.size(), &(*srcF.begin()), &(*dstf.begin()), &iflag[0], sres, dstpointlist);
-  
-  } 
-  
-  // Patch interpolation
-  if (has_patch) {
-    
-    patch_serial_transfer(srcmesh->GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), sres,srcmesh,mvr_interp);
-  
-  } 
-}
-
-void Interp::transfer_parallel() {
-  Trace __trace("Interp::transfer_parallel()");
-  
-  // Send source data to rendezvous decomp
-  const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
-  
-  grend.GetSrcComm().SendFields(src_rend_Fields.size(), &(*srcF.begin()), &(*src_rend_Fields.begin()));
-  
-  // Perform the interpolation
-  const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
-  
-  ThrowRequire(dst_rend_fields.size() == src_rend_Fields.size());
-  
-  if (has_std) point_serial_transfer(dst_rend_fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), &iflag[0], sres, dstpointlist);
-
-  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), sres,srcmesh, mvr_interp);
-  
-  // Retrieve the interpolated data
-  CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
-
-  // Send the data back (comm has been transposed in GeomRend::Build)
-  ThrowRequire(dstf.size() == dst_rend_fields.size());
-  dst_node_rel.send_fields(dstf.size(), &(*dst_rend_fields.begin()), &(*dstf.begin()));
-  
-  // TODO:Process interpolation (if needed).  This means, for instance, collecting the values 
-  // received above and asking the master element to manufacture coefficients.
-  
-}
-
-#endif //mvr
-
 void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("Interp::mat_transfer_serial(int fpair_num)");
 
-  // Only implemented for nodal to nodal.  Higher interpolation must
-  // use the full interpolation framework.
-  //mvr  ThrowRequire(fpair.first->is_nodal() && fpair.second->is_nodal());
 
-
-  if (mvr_interp == INTERP_STD) mat_point_serial_transfer(*srcF[fpair_num], sres, iw, dstpointlist);
-  else if (mvr_interp == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh->GetCoordField(), *srcF[fpair_num], sres, srcmesh, iw, dstpointlist);
-  else if (mvr_interp == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
-  else if (mvr_interp == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
-  else if (mvr_interp == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  if (interp_method == INTERP_STD) mat_point_serial_transfer(*srcF[fpair_num], sres, iw, dstpointlist);
+  else if (interp_method == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh->GetCoordField(), *srcF[fpair_num], sres, srcmesh, iw, dstpointlist);
+  else if (interp_method == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
+  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
 
 }
 
@@ -1879,14 +1736,12 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
   // By all rights, here we don't HAVE to actually perform the interpolation.
   // However, we actually do it as a cross check.
 
-  if (mvr_interp == INTERP_CONSERVE) {
+  if (interp_method == INTERP_CONSERVE) {
     calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
  midmesh, sres, iw, src_frac, dst_frac, zz);
-  } else if (mvr_interp == INTERP_NEAREST_SRC_TO_DST) {
-    //mvr i fear the first two parameters cannot be so easily replaced
+  } else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
-  } else if (mvr_interp == INTERP_NEAREST_DST_TO_SRC) {
-    //mvr i fear the first two parameters cannot be so easily replaced
+  } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   } else {
     // Send source data to rendezvous decomp
@@ -1903,12 +1758,11 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     
     // Calc. Matrix for bilinear and patch
 
-  //mvr try vvvv
-  PointList &plist_rend = grend.GetDstPlistRend();
+    PointList &plist_rend = grend.GetDstPlistRend();
 
-  if (mvr_interp == INTERP_STD) {
+  if (interp_method == INTERP_STD) {
       mat_point_serial_transfer(*sFR, sres, iw, &plist_rend);
-  } else if (mvr_interp == INTERP_PATCH) {
+  } else if (interp_method == INTERP_PATCH) {
       mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, sres, &grend.GetSrcRend(), iw, dstpointlist);
   }    
     // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM VALUES    

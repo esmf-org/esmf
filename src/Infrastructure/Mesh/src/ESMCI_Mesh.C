@@ -1818,6 +1818,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
      throw localrc;  // bail out with exception
 
+
    if (meshLoc == ESMC_MESHLOC_NODE) {
 
      //     cfield = GetCoordField();

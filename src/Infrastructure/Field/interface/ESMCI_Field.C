@@ -865,9 +865,6 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
-    printf("mvr: just in the c++ code field create1\n");
-    fflush(stdout);
-
     int gtfm_present, uglb_present, ugub_present;
     bool gtfm_created, uglb_created, ugub_created;
     gtfm_present = 0;
@@ -941,21 +938,15 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
   
-    printf("mvr: just in the c++ code field create2\n");
-    fflush(stdout);
     // prepare the LocStream pointer
     ESMCI::LocStream *locstreamp = reinterpret_cast<ESMCI::LocStream *>(locstream->ptr); 
 
-    printf("mvr: just in the c++ code field create3\n");
-    fflush(stdout);
     FTN_X(f_esmf_fieldcreatelocstreamtk)(field, locstreamp, 
         &typekind,
         gtfm->array, &gtfm->extent[0], &gtfm_present,
         uglb->array, &uglb->extent[0], &uglb_present,
         ugub->array, &ugub->extent[0], &ugub_present,
         fName, &localrc, slen);
-    printf("mvr: just in the c++ code field create4\n");
-    fflush(stdout);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) {
       if (gtfm_created) delete gtfm;
@@ -964,8 +955,6 @@ namespace ESMCI {
       if(fName) delete[] fName;
       return ESMC_NULL_POINTER;
     }
-    printf("mvr: just in the c++ code field create5\n");
-    fflush(stdout);
   
     if(fName) delete[] fName;
     if (gtfm_created) delete gtfm;

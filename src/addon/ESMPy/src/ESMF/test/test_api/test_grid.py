@@ -6,7 +6,7 @@ grid unit test file
 import ESMF
 from ESMF import *
 from ESMF.interface.cbindings import *
-from ESMF.test.base import TestBase
+from ESMF.test.base import TestBase, attr
 
 import numpy as np
 import os
@@ -14,19 +14,81 @@ import inspect
 
 class TestGrid(TestBase):
 
-    class ctypesgrid(object):
-        def __init__(self, maxindex):
-            '''
-            :param self: testgrid object
-            :param maxindex: maxindex of the grid
-            :type maxindex: np array with dtype = int32
-            :return:
-            '''
-            self.struct = ESMP_GridStruct(self)
-            self.maxindex = maxindex
-            self.rank = len(maxindex)
+    def examine_grid_attributes(self, grid):
+        # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.staggerloc returns a boolean list of the activated stagger locations
+        assert (type(grid.staggerloc) is list)
+        assert (len(grid.staggerloc) is 2 ** grid.rank)
 
-    def make_grid(self, dim=0):
+        # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.size returns a list of the local (processor specific) sizes of grid coordinates in each stagger location
+        assert (type(grid.size) is list)
+        assert (len(grid.size) is 2 ** grid.rank)
+
+        # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.lower_bounds or grid.upper_bounds returns a list of numpy arrays containing the bounds of all coordinate dimensions in the grid
+        assert (type(grid.lower_bounds) is list)
+        assert (len(grid.lower_bounds) is 2 ** grid.rank)
+        assert (type(grid.upper_bounds) is list)
+        assert (len(grid.upper_bounds) is 2 ** grid.rank)
+
+        # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.coords returns a list of lists of numpy arrays for coordinates of all stagger locations and coordinate dimensions
+        assert (type(grid.coords) is list)
+        assert (len(grid.coords) is 2 ** grid.rank)
+
+        # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.mask returns a list of numpy arrays containing the grid mask at each stagger location
+        assert (type(grid.mask) is list)
+        assert (len(grid.mask) is 2 ** grid.rank)
+
+        # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid.area returns a list of numpy arrays containing the grid cell areas at each stagger location
+        assert (type(grid.mask) is list)
+        assert (len(grid.mask) is 2 ** grid.rank)
+
+        # stagger specific attributes
+        for i in range(len(grid.staggerloc)):
+            if grid.staggerloc[i]:
+
+                # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                # grid.size[i] returns a numpy array of the local (processor specific) size of the grid coordinates at the i'th stagger location
+                assert (type(grid.size[i]) is np.ndarray)
+                assert (grid.size[i].shape == tuple([grid.rank]))
+
+                # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                # grid.lower_bounds[i] or grid.upper_bounds[i] returns a numpy array containing the bounds of all coordinate dimensions at the i'th stagger location
+                assert (type(grid.lower_bounds[i] is np.ndarray))
+                assert (grid.lower_bounds[i].shape == tuple([grid.rank]))
+                assert (type(grid.upper_bounds[i] is np.ndarray))
+                assert (grid.upper_bounds[i].shape == tuple([grid.rank]))
+
+                # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                # grid.coords[i] returns a list of length=rank containing numpy arrays for each coordinate dimension
+                assert (type(grid.coords[i]) is list)
+                assert (len(grid.coords[i]) is grid.rank)
+
+                # grid.coords[i][j] returns a numpy array containing coordinates of i'th stagger location and j'th coordinate dimension
+                for j in range(grid.rank):
+                    assert (type(grid.coords[i][j] is np.ndarray))
+                    assert (
+                        grid.coords[i][j].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+
+                # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                # grid.mask[i] returns a numpy array containing the grid mask at the i'th stagger location
+                if grid.mask[i] is not None:
+                    assert (type(grid.mask[i]) is np.ndarray)
+                    assert (
+                        grid.mask[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+
+                # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                # grid.area[i] returns a numpy array containing the grid cell areas at the i'th stagger location
+                if grid.area[i] is not None:
+                    assert (type(grid.area[i]) is np.ndarray)
+                    assert (
+                        grid.area[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+
+    def make_grid_2d(self):
         typekind = TypeKind.R8
         grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
                     coord_typekind=typekind, staggerloc=[StaggerLoc.CENTER])
@@ -34,60 +96,302 @@ class TestGrid(TestBase):
         grid_row = grid.get_coords(0, staggerloc=StaggerLoc.CENTER)
         grid_col = grid.get_coords(1, staggerloc=StaggerLoc.CENTER)
 
-        row = np.random.rand(100, 100)
-        col = np.random.rand(100, 100)
+        row = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CENTER]-grid.lower_bounds[StaggerLoc.CENTER]))
+        col = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CENTER]-grid.lower_bounds[StaggerLoc.CENTER]))
 
         grid_row[:] = row
         grid_col[:] = col
 
-        data = ESMP_GridGetCoordPtr(grid, dim)
-        lbounds, ubounds = ESMP_GridGetCoordBounds(grid)
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
 
-        mask = [False]*reduce(mul, ubounds-lbounds)
+        return grid
 
-        return data, mask, typekind, lbounds, ubounds, grid
+    def make_grid_3d(self):
+        typekind = TypeKind.R8
+        grid = Grid(np.array([100, 100, 100]), coord_sys=CoordSys.CART,
+                    coord_typekind=typekind, staggerloc=[StaggerLoc.CENTER])
+
+        grid_row = grid.get_coords(0, staggerloc=StaggerLoc.CENTER)
+        grid_col = grid.get_coords(1, staggerloc=StaggerLoc.CENTER)
+        grid_vrt = grid.get_coords(2, staggerloc=StaggerLoc.CENTER)
+
+        row = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CENTER]-grid.lower_bounds[StaggerLoc.CENTER]))
+        col = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CENTER]-grid.lower_bounds[StaggerLoc.CENTER]))
+        vrt = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CENTER]-grid.lower_bounds[StaggerLoc.CENTER]))
+
+        grid_row[:] = row
+        grid_col[:] = col
+        grid_vrt[:] = vrt
+
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
+
+        return grid
+
+    def make_grid_periodic(self):
+        lon = np.arange(0, 360, 360 / 100.)
+        lat = np.linspace(90., -90., 100)
+
+        assert lon.size == 100
+        assert lat.size == 100
+
+        grid = ESMF.Grid(np.array([lon.size, lat.size], 'int32'),
+                         num_peri_dims=1, staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER])
+
+        gridXCorner = grid.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)
+        lon_par = lon[grid.lower_bounds[ESMF.StaggerLoc.CORNER][0]:grid.upper_bounds[ESMF.StaggerLoc.CORNER][0]]
+        gridXCorner[...] = lon_par.reshape((lon_par.size, 1))
+
+        gridYCorner = grid.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)
+        lat_corner = np.linspace(90, -90, lat.size + 1)
+        lat_par = lat_corner[grid.lower_bounds[ESMF.StaggerLoc.CORNER][1]:grid.upper_bounds[ESMF.StaggerLoc.CORNER][1]]
+        gridYCorner[...] = lat_par.reshape((1, lat_par.size))
+
+        offset_lon = 360. / lon.size / 2.
+        lon -= offset_lon
+        gridXCenter = grid.get_coords(0)
+        lon_par = lon[grid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
+
+        offset_lat = 180. / (lat.size) / 2.
+        lat = np.linspace(90 - offset_lat, -90 + offset_lat, lat.size)
+        gridYCenter = grid.get_coords(1)
+        lat_par = lat[grid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        gridYCenter[...] = lat_par.reshape((1, lat_par.size))
 
 
-    def test_grid_create(self):
+        return grid, lon.size, lat.size
 
-        max_index = np.array([12, 20])
+    def test_grid_attributes_2d(self):
+        grid = self.make_grid_2d()
+        self.examine_grid_attributes(grid)
 
-        grid = Grid(max_index)
+    def test_grid_attributes_3d(self):
+        grid = self.make_grid_3d()
+        self.examine_grid_attributes(grid)
 
-        grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
-                     coord_typekind=TypeKind.R4)
-        grid3 = Grid(max_index, num_peri_dims=1)
+    def test_grid_periodic(self):
+        grid,_,_ = self.make_grid_periodic()
+        self.examine_grid_attributes(grid)
 
-        grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
-                     coord_typekind=TypeKind.R4)
-        grid5 = Grid(max_index, num_peri_dims=1, periodic_dim=1,
-                     coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
-        grid6 = Grid(max_index, num_peri_dims=1, periodic_dim=2, pole_dim=1,
-                     coord_sys=CoordSys.SPH_DEG, coord_typekind=TypeKind.R4)
+    @attr('serial')
+    @attr('slow')
+    def test_grid_create_2d(self):
+        keywords = dict(
+            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1],
+                      [0, None, None], [0, None, 0], [0, None, 1],
+                      [1, None, None], [1, 0, 1], [1, 1, 0]],
+            staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
+        )
+
+        testcases = self.iter_product_keywords(keywords)
+        fail = []
+        for a in testcases:
+            try:
+                grid = Grid(np.array([12, 12]),
+                            num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
+                            coord_sys=a.coord_sys, coord_typekind=a.typekind, staggerloc=a.staggerloc)
+                grid.add_item(GridItem.MASK)
+                grid.add_item(GridItem.AREA)
+                grid2 = grid[2:10, 4:7]
+                self.examine_grid_attributes(grid)
+                self.examine_grid_attributes(grid2)
+            except:
+                fail += a
+
+        if len(fail) > 0:
+            raise ValueError(
+                "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
+
+    @attr('serial')
+    @attr('slow')
+    def test_grid_create_3d(self):
+        keywords = dict(
+            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+                      [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+                      [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+            staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+                        StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+                        StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
+
+        testcases = self.iter_product_keywords(keywords)
+        fail = []
+        for a in testcases:
+            try:
+                grid = Grid(np.array([12, 12, 12]),
+                            num_peri_dims=a.periodic[0], periodic_dim=a.periodic[1], pole_dim=a.periodic[2],
+                            coord_sys=a.coord_sys, coord_typekind=a.typekind, staggerloc=a.staggerloc)
+                grid.add_item(GridItem.MASK)
+                grid.add_item(GridItem.AREA)
+                grid2 = grid[2:10, 4:7, 1:9]
+                self.examine_grid_attributes(grid)
+                self.examine_grid_attributes(grid2)
+            except:
+                fail += a
+
+        if len(fail) > 0:
+            raise ValueError(
+                "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
+
+    @attr('serial')
+    def test_grid_slice_2d(self):
+        grid = self.make_grid_2d()
+
+        grid2 = grid[1:21, 3:17]
+        grid3 = grid2[4:6, 5:6]
+
+        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100)
+        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100]
 
         del grid
+
+        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
+        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
+
         del grid2
-        del grid3
-        del grid4
-        del grid5
-        del grid6
 
-    def test_grid_create_3D(self):
+        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
+        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
 
-        max_index = np.array([12, 20, 37])
+    @attr('serial')
+    def test_grid_slice_2d_corners(self):
+        grid = self.make_grid_2d()
 
-        grid = Grid(max_index)
+        grid.add_coords(staggerloc=ESMF.StaggerLoc.CORNER)
+        grid_row = grid.get_coords(0, staggerloc=StaggerLoc.CORNER)
+        grid_col = grid.get_coords(1, staggerloc=StaggerLoc.CORNER)
 
-        grid2 = Grid(max_index, num_peri_dims=0, coord_sys=CoordSys.SPH_RAD,
-                     coord_typekind=TypeKind.R4)
-        grid3 = Grid(max_index, num_peri_dims=1)
-        grid4 = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_DEG,
-                     coord_typekind=TypeKind.R4)
+        row = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CORNER] - grid.lower_bounds[StaggerLoc.CORNER]))
+        col = np.random.rand(*tuple(grid.upper_bounds[StaggerLoc.CORNER] - grid.lower_bounds[StaggerLoc.CORNER]))
+
+        grid_row[:] = row
+        grid_col[:] = col
+
+        grid2 = grid[1:21, 3:17]
+        grid3 = grid2[4:6, 5:6]
+
+        assert grid.coords[StaggerLoc.CORNER][0].shape == (101, 101)
+        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [101, 101]
 
         del grid
+
+        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
+        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
+
         del grid2
-        del grid3
-        del grid4
+
+        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
+        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
+
+
+    @attr('serial')
+    def test_grid_slice_3d(self):
+        grid = self.make_grid_3d()
+
+        grid2 = grid[1:21, 3:17, 7:47]
+        grid3 = grid[4:6, 5:6, 0:2]
+
+        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100, 100)
+        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100, 100]
+
+        del grid
+
+        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14, 40)
+        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14, 40]
+
+        del grid2
+
+        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1, 2)
+        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1, 2]
+
+    @attr('serial')
+    def test_grid_slice_3d_corners(self):
+        grid = self.make_grid_3d()
+
+        cvf = StaggerLoc.CORNER_VFACE
+        grid.add_coords(staggerloc=cvf)
+
+        grid_row = grid.get_coords(0, staggerloc=cvf)
+        grid_col = grid.get_coords(1, staggerloc=cvf)
+        grid_vrt = grid.get_coords(2, staggerloc=cvf)
+
+        row = np.random.rand(*tuple(grid.upper_bounds[cvf] - grid.lower_bounds[cvf]))
+        col = np.random.rand(*tuple(grid.upper_bounds[cvf] - grid.lower_bounds[cvf]))
+        vrt = np.random.rand(*tuple(grid.upper_bounds[cvf] - grid.lower_bounds[cvf]))
+
+        grid_row[:] = row
+        grid_col[:] = col
+        grid_vrt[:] = vrt
+
+        grid2 = grid[1:21, 3:17, 7:47]
+        grid3 = grid[4:6, 5:6, 0:2]
+
+        assert grid.coords[cvf][0].shape == (101, 101, 101)
+        assert grid.upper_bounds[cvf].tolist() == [101, 101, 101]
+
+        del grid
+
+        assert grid2.coords[cvf][0].shape == (21, 15, 41)
+        assert grid2.upper_bounds[cvf].tolist() == [21, 15, 41]
+
+        del grid2
+
+        assert grid3.coords[cvf][0].shape == (3, 2, 3)
+        assert grid3.upper_bounds[cvf].tolist() == [3, 2, 3]
+
+    @attr('serial')
+    def test_grid_slice_periodic(self):
+        grid, x, y = self.make_grid_periodic()
+
+        grid2 = grid[1:21, 3:17]
+        grid3 = grid2[4:6, 5:6]
+
+        assert grid.coords[StaggerLoc.CENTER][0].shape == (x, y)
+        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [x, y]
+        assert grid.coords[StaggerLoc.CORNER][0].shape == (x, y + 1)
+        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [x, y + 1]
+
+        del grid
+
+        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
+        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
+        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
+        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
+
+        del grid2
+
+        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
+        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
+        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
+        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
+
+    @attr('serial')
+    def test_slice_grid_created_from_file_scrip(self):
+        reg_decomp = [pet_count(), 1]
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            grid = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+                        filetype=FileFormat.SCRIP,
+                        reg_decomp=reg_decomp)
+        except:
+            raise NameError('grid_create_from_file_scrip failed!')
+
+        grid2 = grid[0:5, 0:5]
+
+        assert grid.coords[0][0].shape == (128, 64)
+        assert grid.upper_bounds[0].tolist() == [128, 64]
+
+        del grid
+
+        assert grid2.coords[0][0].shape == (5, 5)
+        assert grid2.upper_bounds[0].tolist() == [5, 5]
 
     def test_grid_coords(self):
 

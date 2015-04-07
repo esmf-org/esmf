@@ -28,6 +28,8 @@
 
 namespace ESMCI {
 
+#if 0
+
 class Mesh;
 class Grid;
 class Array;
@@ -41,8 +43,8 @@ class Array;
 
  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
+#endif
  void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt *maskValuesArg, ESMCI::PointList **_pl, int *localrc);
-
 
 } // namespace
 

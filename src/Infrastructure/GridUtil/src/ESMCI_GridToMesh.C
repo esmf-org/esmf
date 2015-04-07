@@ -34,9 +34,6 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
 
-#ifdef PNTLIST
-#include "Mesh/include/ESMCI_PntList.h"
-#endif
 #include "PointList/include/ESMCI_PointList.h"
 
 #include <limits>
@@ -56,6 +53,9 @@
 // using namespace ESMCI;
 
 namespace ESMCI {
+
+  //// MOVED TO ESMCI_Mesh_GToM_Glue.C ////
+#if 0
 
   extern bool grid_debug;
 
@@ -159,7 +159,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
  int *ptrMaskValues;
  if (hasMask) {
    if (present(maskValuesArg)) {
-   //mvr   if (maskValuesArg != NULL) {
      // Error check mask values
      if (maskValuesArg->dimCount != 1) {
        Throw() << " Mask values must be of rank 1.";
@@ -995,7 +994,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
  /* XMRKX */
 
-  // #ifdef PNTLIST
+
+#endif
 
   // Convert Grid To PointList
   void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterfaceInt *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
@@ -1050,8 +1050,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list) 
-      printf("mvr: before pointlist create from grid: grid dim= %d\n",grid.getCartCoordDimCount());
-      fflush(stdout);
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid
@@ -1097,8 +1095,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list) 
-      printf("mvr: before pointlist create from grid: grid dim= %d\n",grid.getCartCoordDimCount());
-      fflush(stdout);
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid

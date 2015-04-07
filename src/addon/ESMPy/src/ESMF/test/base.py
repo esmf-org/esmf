@@ -1,13 +1,13 @@
 import unittest
 import numpy as np
+import ESMF
+from ESMF.util.itester import iter_product_keywords
+
 
 class TestBase(unittest.TestCase):
 
     def __init__(self, *args, **kwds):
         super(TestBase, self).__init__(*args, **kwds)
-
-        import ESMF
-        ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
 
     def assertNumpyAll(self, arr1, arr2, check_fill_value_dtype=True, check_arr_dtype=True):
         """
@@ -68,3 +68,23 @@ class TestBase(unittest.TestCase):
             for k, v in d1.iteritems():
                 self.assertEqual(v, d2[k])
             self.assertEqual(set(d1.keys()), set(d2.keys()))
+
+    def iter_product_keywords(self, keywords, as_namedtuple=True):
+        return iter_product_keywords(keywords, as_namedtuple=as_namedtuple)
+
+def attr(*args, **kwargs):
+    """
+    Decorator that adds attributes to classes or functions for use with the Attribute (-a) plugin.
+
+    http://nose.readthedocs.org/en/latest/plugins/attrib.html
+    """
+
+    def wrap_ob(ob):
+        for name in args:
+            setattr(ob, name, True)
+        for name, value in kwargs.iteritems():
+            setattr(ob, name, value)
+        return ob
+
+    return wrap_ob
+

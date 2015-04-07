@@ -22,6 +22,12 @@ class MethodNotImplemented(ESMPyException):
     """Raised when an unimplemented method is called."""
     pass
 
+class SerialMethod(ESMPyException):
+    """This method is not safe to run in parallel!"""
+    pass
+
+
+
 class GridException(ESMPyException):
     """Base class for errors in the Grid class."""
     pass

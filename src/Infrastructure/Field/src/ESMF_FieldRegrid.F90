@@ -60,6 +60,8 @@ module ESMF_FieldRegridMod
    public ESMF_FieldRegridGetIwts      ! get integration weights
    public ESMF_FieldRegridGetArea      ! get area
    private checkGrid                   ! small subroutine to check the grid
+   private checkGridLite               ! same as checkGrid but less restrictive 
+                                       !  due to anticipated conversion to pointlist
 
 !==============================================================================
 !
@@ -828,14 +830,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    srcStaggerlocG2M=srcStaggerloc
           endif
 
-          ! check grid
-          call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
           if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
               lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
 
+            ! check grid
+            call checkGridLite(srcGrid,srcStaggerlocG2M,rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
             srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerlocG2M, &
                                               maskValues=srcMaskValues, &
@@ -846,6 +848,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    src_pl_used=.true.
 
           else
+
+            ! check grid
+            call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! Convert Grid to Mesh
             srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
@@ -1014,7 +1021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    dstStaggerlocG2M=dstStaggerloc
 
             ! check grid
-            call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
+            call checkGridLite(dstGrid,dstStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1110,8 +1117,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(weights) .or. present(factorList) .or. &
             present(indices) .or. present(factorIndexList)) then
 
-          !mvr what should be sent for dstPointList if conservative?
-
             call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
                                   dstMesh, dstArray, dstPointList, dst_pl_used, &
                                   lregridmethod, &
@@ -1141,8 +1146,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (.not. (present(indices) .or. present(factorIndexList))) deallocate(tmp_indices)
         else
 
-          !mvr what should be sent for dstPointList if conservative?
-
             call ESMF_RegridStore(srcMesh, srcArray, srcPointList, src_pl_used, &
                                   dstMesh, dstArray, dstPointList, dst_pl_used, &
                                   lregridmethod, &
@@ -1163,9 +1166,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-
-
-
         if (dst_pl_used) then
           call ESMF_PointListDestroy(dstPointList,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1176,7 +1176,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
-
 
 
         ! Get Fraction info
@@ -2271,6 +2270,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        if(present(rc)) rc = ESMF_SUCCESS
    end subroutine checkGrid
+
+!------------------------------------------------------------------------------
+
+    ! Same as checkGrid, but less restrictive due to anticipated conversion to a pointlist
+    subroutine checkGridLite(grid,staggerloc,rc)
+        type (ESMF_Grid) :: grid
+        type(ESMF_StaggerLoc) :: staggerloc
+        integer, intent(out), optional :: rc
+        type(ESMF_GridDecompType) :: decompType
+        integer :: localDECount, lDE, ec(ESMF_MAXDIM)
+        integer :: localrc, i, dimCount
+
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! Make sure Grid isn't arbitrarily distributed
+        call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Error if decompType is ARBITRARY
+       if (decompType .eq. ESMF_GRID_ARBITRARY) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                 msg="- can't currently regrid an arbitrarily distributed Grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+              return
+       endif        
+
+       if(present(rc)) rc = ESMF_SUCCESS
+   end subroutine checkGridLite
 
 !------------------------------------------------------------------------------
 

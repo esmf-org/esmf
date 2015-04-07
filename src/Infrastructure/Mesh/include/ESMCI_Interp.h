@@ -148,7 +148,7 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int mvr_imethod,
+  Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int imethod,
          MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
   
   ~Interp();
@@ -170,10 +170,6 @@ public:
   GeomRend & get_grend()    { return grend; }
   
   private:
-
-  // interpolation parallel?
-  //mvr  void transfer_serial();
-  //mvr void transfer_parallel();
 
   // interpolation type
   void mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac);
@@ -201,7 +197,7 @@ public:
   PointList *dstpointlist;
   Mesh *midmesh;
   Zoltan_Struct * zz;
-  int mvr_interp;
+  int interp_method;
 };
 
 } // namespace

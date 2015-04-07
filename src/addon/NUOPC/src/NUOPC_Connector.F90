@@ -1135,7 +1135,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: providerGrid, acceptorGrid
     type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
-    type(ESMF_DistGrid)             :: distgrid
+    logical                         :: meshNoConnections
+    type(ESMF_DistGrid)             :: distgrid, eDistgrid, nDistgrid
     type(ESMF_VM)                   :: vm
     integer                         :: stat
     type(type_InternalState)        :: is
@@ -1333,17 +1334,32 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=providerMesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+          call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_MeshGet(acceptorMesh, elementDistgrid=distgrid, rc=rc)
+          call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
+            elementDistgrid=eDistgrid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          acceptorMesh = ESMF_MeshCreate(providerMesh, &
-            elementDistgrid=distgrid, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (meshNoConnections) then
+            ! provider Mesh does not have connections
+            ! -> need both DistGrids on the acceptor side
+            acceptorMesh = ESMF_MeshCreate(providerMesh, &
+              nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! provider Mesh does have connections
+            ! -> only need one DistGrid on the acceptor side -> use eDistgrid
+            acceptorMesh = ESMF_MeshCreate(providerMesh, &
+              elementDistgrid=eDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

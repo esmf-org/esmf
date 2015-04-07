@@ -258,7 +258,7 @@ static int found_func(void *c, void *y) {
     // Setup for source masks, if used
   std::vector<double> src_node_mask;
   MasterElement<> *mme;
-  MEField<> *src_mask_field_ptr = si.src_mask_field_ptr;
+   MEField<> *src_mask_field_ptr = si.src_mask_field_ptr;
   if (src_mask_field_ptr != NULL) {
     mme=GetME(*src_mask_field_ptr, ker)(METraits<>());
     src_node_mask.resize(mme->num_functions(),0.0);
@@ -301,7 +301,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
-    mathutil_debug=true;
+     mathutil_debug=true;
   }
 #endif
 
@@ -320,7 +320,7 @@ static int found_func(void *c, void *y) {
     
     for (int i=0; i<num_nds; i++) {
       double *pnt=coords+3*i;
-
+ 
       printf("%d ",ids[i]);
     }
     printf("]\n");
@@ -332,13 +332,13 @@ static int found_func(void *c, void *y) {
 
 
   // if we're too far away don't even consider this as a fall back candidate
-  if (!in && (dist > 1.0E-10)) return 0;
+  if (!in && (dist > 1.0E-8)) return 0;
 
 
   // In or close enough, so set as a candidate, until someone better comes along...
   if (in) {
     std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-    si.best_dist = 0.0;
+     si.best_dist = 0.0;
     si.elem = &elem;
     si.is_in=true;
     si.elem_masked=elem_masked;
@@ -355,230 +355,6 @@ static int found_func(void *c, void *y) {
     
   //  return in&&!elem_masked ? 1 : 0;
   return 0;
-}
-
-// The main routine
-  void OctSearch(const Mesh &src, const Mesh &dest, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, 
-     std::vector<const MeshObj*> *to_investigate,OTree *box_in) {
-  Trace __trace("Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *to_investigate");
-
-  //std::cout << "Start octree search" << std::endl;
-
-  MEField<> &coord_field = *src.GetCoordField();
-
-  MEField<> *src_mask_field_ptr = src.GetField("mask");
-
-  
-  // Destination coordinate is only a _field, not an MEField, since there
-  // are no master elements.
-  _field *dcptr = dest.Getfield("coordinates_1");
-  ThrowRequire(dcptr);
-  _field &dstcoord_field = *dcptr;
-
-  // Get destination mask field
-  _field *dmptr = dest.Getfield("mask_1");
-  _field &dstmask_field = *dmptr;
-   
-  //MEField<> &dstcoord_field = *dest.GetCoordField();
-
-  if (src.spatial_dim() != dest.spatial_dim()) {
-    Throw() << "Meshes must have same spatial dim for search";
-  }
-
-
-  // Load the destination objects into a list
-  std::vector<const MeshObj*> dest_nlist;
-  if (dmptr == NULL){ // No dest masks
-
-    if (to_investigate == NULL) {
-      MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
-      for (; ni != ne; ++ni) {
-        if (dst_obj_type & ni->get_type())
-          dest_nlist.push_back(&*ni);
-      }
-    } else {
-      std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
-                        ne = to_investigate->end();
-      for (; ni != ne; ++ni) dest_nlist.push_back(*ni);
-      if (dest_nlist.size() == 0) return;
-    }
-
-  } else { // dest masks exist
-    if (to_investigate == NULL) {
-      MeshDB::const_iterator ni = dest.obj_begin(), ne = dest.obj_end();
-      for (; ni != ne; ++ni) {
-	if (dst_obj_type & ni->get_type()) {
-	  // Get mask value
-	  double *m=dstmask_field.data(*ni);
-	  
-	  // Only put objects in if they're not masked
-	  if (*m < 0.5) {
-	    dest_nlist.push_back(&*ni);
-	  }
-	}
-      }
-    } else {
-      std::vector<const MeshObj*>::const_iterator ni = to_investigate->begin(),
-                       ne = to_investigate->end();
-      for (; ni != ne; ++ni) {
-	// Get mask value
-	double *m=dstmask_field.data(**ni);
-
-	// Only put objects in if they're not masked
-	if (*m < 0.5) {
-          dest_nlist.push_back(*ni);
-	}
-      }
-      if (dest_nlist.size() == 0) return;
-    }
-  }
-
-  // Get a bounding box for the dest mesh.
-  // TODO: NEED TO MAKE BOUNDING BOX ONLY DEPEND ON NON-MASKED POINTS
-  BBox dstBBox(dstcoord_field, dest);
-  
-  OTree *box;
-  
-  const double normexp = 0.15;
-  const double dstint = 1e-8;
-  
-  if (!box_in) {
-    int num_box = num_intersecting(src, dstBBox, dstint, normexp);
-  
-     box=new OTree(num_box); 
-
-    populate_box(box, src, dstBBox, dstint, normexp);
-
-    box->commit();
-
-  } else box = box_in;
-  
-  UInt sdim = dest.spatial_dim();
-  
-  std::vector<const MeshObj *> again;
-  
-  std::set<Search_result> tmp_sr; // store in map for quick lookup
-
-
-  // Loop the destination points, find hosts.
-  for (UInt p = 0; p < dest_nlist.size(); ++p) {
-    
-    const MeshObj &node = *dest_nlist[p];
-    
-    
-    const double *c = dstcoord_field.data(node);
-    
-    double pmin[3], pmax[3];
-
-    pmin[0] = c[0]-stol;
-    pmin[1] = c[1] - stol;
-    pmin[2] = sdim == 3 ? c[2]-stol : -stol;
-    
-    pmax[0] = c[0] + stol;
-    pmax[1] = c[1] + stol;
-    pmax[2] = sdim == 3 ? c[2]+stol : +stol;
-
-    OctSearchNodesData si;
-    si.snr.node = &node;
-    si.investigated = false;
-    si.best_dist = std::numeric_limits<double>::max();
-    si.src_cfield = &coord_field; 
-    si.src_mask_field_ptr = src_mask_field_ptr; 
-    si.is_in=false;
-    si.elem_masked=false;
-    si.elem=NULL;  
-
-    // The node coordinates.
-    si.coords[0] = c[0]; si.coords[1] = c[1]; si.coords[2] = (sdim == 3 ? c[2] : 0.0);
-
-#ifdef ESMF_REGRID_DEBUG_MAP_NODE
-    if (node.get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
-      printf("node_id=%d coords=%e %e %e \n",node.get_id(),si.coords[0],si.coords[1],si.coords[2]);
-    }
-#endif
-    
-    // Set spherical map type
-    bool old_is_map_sph=is_map_sph;
-    is_map_sph=src.is_sph;    
- 
-    // Set global map_type
-    // TODO: pass this directly to is_in_cell mapping function
-    MAP_TYPE old_sph_map_type=sph_map_type;
-    sph_map_type=mtype;
-
-    // Do Search and mapping
-    box->runon(pmin, pmax, found_func, (void*)&si);
-    
-    // Reset global map_type
-    sph_map_type=old_sph_map_type;
-
-    // Reset
-    is_map_sph=old_is_map_sph;
-
-
-#if 0
-     if (node.get_id()==1) {
-    printf("HH Mapped node=%d in=%d pcoords=%20.17f %20.17f s_elem=%d\n",node.get_id(),si.is_in,si.snr.pcoord[0],si.snr.pcoord[1],si.elem->get_id());
-
-  }
-#endif
-    if (!si.investigated) {
-      again.push_back(&node);
-    } else {
-      if (si.elem_masked) {
-	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";
-	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-	  // don't do anything
-	} else {
-	  Throw() << " Unknown unmappedaction option";
-	}
-      } else {
-	Search_result sr; sr.elem = si.elem;
-	std::set<Search_result>::iterator sri =
-	  tmp_sr.lower_bound(sr);
-	if (sri == tmp_sr.end() || *sri != sr) {
-	  sr.nodes.push_back(si.snr);
-	  tmp_sr.insert(sri, sr);
-	} else {
-	  // std::cout << "second choice" << std::endl;
-	  std::vector<Search_node_result> &r
-	    = const_cast<std::vector<Search_node_result>&>(sri->nodes);
-	  r.push_back(si.snr);	  
-	  //std::cout << "size=" << sri->nodes.size() << std::endl;
-	}
-      }
-    }
-    
-  } // for dest nodes
-  
-  {
-    // Build seach res
-    std::set<Search_result>::iterator si = 
-      tmp_sr.begin(), se = tmp_sr.end();
-    
-    for (; si != se; ++si)
-      result.push_back(new Search_result(*si));
-  }
-  
-  std::set<Search_result>().swap(tmp_sr);
-  std::vector<const MeshObj*>().swap(dest_nlist);
-
-  if (!again.empty()) {
-     if (stol > 1e-6) {
-	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-	  // don't do anything
-	} else {
-	  Throw() << " Unknown unmappedaction option";
-	}
-     } else {
-       OctSearch(src, dest, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
-     }
-  }
-
-  if (!box_in) delete box;
-
 }
 
 
@@ -877,7 +653,6 @@ void DestroySearchResult(SearchResult &result) {
   result.clear();
 }
 
-//#ifdef PNTLIST
 BBox bbox_from_pl(PointList &dst_pl) {
 
     // Init min to biggest double
@@ -926,8 +701,8 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
 // The main routine
 // dst_pl is assumed to only contain non-masked points
-void OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
-  Trace __trace("OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+  Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
 
 
   MEField<> &coord_field = *src.GetCoordField();
@@ -1085,13 +860,12 @@ void OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt
 	  Throw() << " Unknown unmappedaction option";
 	}
      } else {
-      OctSearch_w_dst_pl(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
+      OctSearch(src, dst_pl, mtype, dst_obj_type, unmappedaction, result, stol*1e+2, &again, box);
      }
   }
 
   if (!box_in) delete box;
 
 }
-//#endif
 
 } // namespace

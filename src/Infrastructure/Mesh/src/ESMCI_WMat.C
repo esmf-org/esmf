@@ -346,57 +346,46 @@ for (; wi != we; ++wi) {
 
 
 // Migrate WMat based on pointlist's ids
-void WMat::Migrate(PointList &plist) { 
-  Trace __trace("WMat::Migrate(PointList &plist)");
+  void WMat::Migrate(PointList &plist) { 
+    Trace __trace("WMat::Migrate(PointList &plist)");
   
-  {
-    std::vector<UInt> plist_dist, iw_dist;
+    {
+      std::vector<UInt> plist_dist, iw_dist;
     
-    int num_pts = plist.get_curr_num_pts();
+      int num_pts = plist.get_curr_num_pts();
 
-    for (int iii=0; iii<num_pts; iii++) {
-      int asb_id=plist.get_id(iii);
-      plist_dist.push_back(asb_id);
-    }
+      for (int iii=0; iii<num_pts; iii++) {
+	int asb_id=plist.get_id(iii);
+	plist_dist.push_back(asb_id);
+      }
 
-    GetRowGIDS(iw_dist);
+      GetRowGIDS(iw_dist);
+      
+      Migrator mig(plist_dist.size(), plist_dist.size() > 0 ? &plist_dist[0] : NULL, 0,
+		   iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
     
-    Migrator mig(plist_dist.size(), plist_dist.size() > 0 ? &plist_dist[0] : NULL, 0,
-		 iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
-    
-    mig.Migrate(*this);
+      mig.Migrate(*this);
 
 
-    //#define CHECK_WEIGHT_MIG
+      //#define CHECK_WEIGHT_MIG
 #ifdef CHECK_WEIGHT_MIG
-// Check something: should have 1 to 1 coresp ids and entries
-for (UInt i = 0; i < plist_dist.size(); i++) {
-  Entry ent(plist_dist[i]);
-  WeightMap::iterator wi = weights.lower_bound(ent);
-  if (wi == weights.end() || wi->first.id != ent.id) {
-    Throw() << "Did not find id:" << ent.id << std::endl;
-  }
-}
+      // Check something: should have 1 to 1 coresp ids and entries
+      for (UInt i = 0; i < plist_dist.size(); i++) {
+	Entry ent(plist_dist[i]);
+	WeightMap::iterator wi = weights.lower_bound(ent);
+	if (wi == weights.end() || wi->first.id != ent.id) {
+	  Throw() << "Did not find id:" << ent.id << std::endl;
+	}
+      }
 
-// And the other way
-std::sort(plist_dist.begin(), plist_dist.end());
-WeightMap::iterator wi = weights.begin(), we = weights.end();
-#endif //mvr
-#if 0  //mvr
-WeightMap::iterator wi = weights.begin(), we = weights.end();
-for (; wi != we; ++wi) {
-  std::vector<UInt>::iterator lb =
-    std::lower_bound(plist_dist.begin(), plist_dist.end(), wi->first.id);
-  
-  if (lb == plist_dist.end() || *lb != wi->first.id) {
-    Throw() << "Weight entry:" << wi->first.id << " not a mesh id!";
-  }
-}
+      // And the other way
+      std::sort(plist_dist.begin(), plist_dist.end());
+      WeightMap::iterator wi = weights.begin(), we = weights.end();
 #endif
 
-  }    
-  return;
-}
+    }    
+    return;
+  }
 
 // Migrate WMat based on mesh's element ids
 //void WMat::Migrate(CommRel &crel) {

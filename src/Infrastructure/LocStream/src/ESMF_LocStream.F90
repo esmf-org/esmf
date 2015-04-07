@@ -1045,7 +1045,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgGrid(locstream, name, &
-                 coordKeyNames, background, maskValues, &
+                 background, maskValues, &
                  unmappedaction, rc)
 
 !
@@ -1056,7 +1056,6 @@ contains
 ! !ARGUMENTS:
       type(ESMF_LocStream),           intent(in)            :: locstream
       character (len=*),              intent(in),  optional :: name
-      character (len=*),              intent(in)            :: coordKeyNames
       type(ESMF_Grid),                intent(in)            :: background
       integer(ESMF_KIND_I4),          intent(in),  optional :: maskValues(:)
       type(ESMF_UnmappedAction_Flag), intent(in),  optional :: unmappedaction
@@ -1068,7 +1067,8 @@ contains
 !     the distribution of the background Grid.  The entries
 !     in the new location stream are redistributed, so that they lie on the same PET
 !     as the piece of Grid which contains the coordinates of the entries. The coordinates
-!     of the entries are the data in the keys named by {\tt coordKeyNames}. To copy data in
+!     of the entries are the data in the keys named ESMF:Lon, ESMF:Lat, ESMF:Radius in the 
+!     case of a spherical system and ESMF:X, ESMF:Y, ESMF:Z for cartesian. To copy data in
 !     Fields or FieldBundles built on {\tt locstream} to the new one simply use {\tt ESMF\_FieldRedist()}
 !     or {\tt ESMF\_FieldBundleRedist()}.
 !
@@ -1078,15 +1078,9 @@ contains
 !          Location stream from which the new location stream is to be created
 !      \item[{[name]}]
 !          Name of the resulting location stream
-!      \item[coordKeyNames]
-!          Names of the keys used to determine the link to background Grid.
-!          The first key in this list matches up with the first coordinate of the 
-!          Grid, the second key in this list matches up with the second coordinate
-!          of the Grid, and so on. The key names should be separated by the : character. 
 !      \item[background]
 !          Background Grid which determines the distribution of the entries in the new location stream.
 !          The background Grid 
-!          needs to have the same number of dimensions as the number of keys in {\tt coordKeyNames}.  
 !          Note also that this subroutine uses the corner stagger location in the Grid for determining 
 !          where a point lies, because this is the stagger location which fully contains the cell. 
 !          A Grid must have coordinate data in this stagger location to be used in this subroutine. 
@@ -1119,6 +1113,8 @@ contains
       integer, pointer :: petList(:), gidList(:)
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: gridDimCount, isSphere
+      type(ESMF_CoordSys_Flag) :: mvr_coordSys, coordSys_ofBkgMesh
+
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1129,11 +1125,12 @@ contains
 
 
       ! Get Grid dimension
-      call ESMF_GridGet(background, dimCount=gridDimCount, rc=localrc)
+      call ESMF_GridGet(background, dimCount=gridDimCount, coordSys=mvr_coordSys, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+     print*,'mvr: in bkgGrid: coordSys= ',mvr_coordSys
 
      ! Chose staggerloc based on dimension
      if (gridDimCount .eq. 2) then
@@ -1152,8 +1149,17 @@ contains
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+!mvr temp vvvvvvvvvv
+      call ESMF_MeshGet(mesh, coordSys=coordSys_ofBkgMesh, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
+
+     print*,'mvr: in bkgGrid: coordSys_ofBkgMesh= ',coordSys_ofBkgMesh
+
+
      ! Create new locstream from Background Mesh
-     ESMF_LocStreamCreateByBkgGrid=ESMF_LocStreamCreate(locstream, name, coordKeyNames, &
+     ESMF_LocStreamCreateByBkgGrid=ESMF_LocStreamCreate(locstream, name, &
                  mesh, unmappedaction, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -1174,7 +1180,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgMesh(locstream, name, &
-                 coordKeyNames, background, unmappedaction, rc)
+                 background, unmappedaction, rc)
 
 !
 ! !RETURN VALUE:
@@ -1184,7 +1190,6 @@ contains
 ! !ARGUMENTS:
       type(ESMF_LocStream),           intent(in)           :: locstream
       character (len=*),              intent(in), optional :: name
-      character (len=*),              intent(in)           :: coordKeyNames
       type(ESMF_Mesh),                intent(in)           :: background
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       integer,                        intent(out),optional :: rc
@@ -1195,7 +1200,8 @@ contains
 !     the distribution of the background Mesh.  The entries
 !     in the new location stream are redistributed, so that they lie on the same PET
 !     as the piece of Mesh which contains the coordinates of the entries. The coordinates
-!     of the entries are the data in the keys named by {\tt coordKeyNames}. To copy data in
+!     of the entries are the data in the keys named ESMF:Lon, ESMF:Lat, ESMF:Radius in the 
+!     case of a spherical system and ESMF:X, ESMF:Y, ESMF:Z for cartesian. To copy data in
 !     Fields or FieldBundles built on {\tt locstream} to the new one simply use {\tt ESMF\_FieldRedist()}
 !     or {\tt ESMF\_FieldBundleRedist()}.
 !
@@ -1205,15 +1211,8 @@ contains
 !          Location stream from which the new location stream is to be created
 !      \item[{[name]}]
 !          Name of the resulting location stream
-!      \item[coordKeyNames]
-!          Names of the keys used to determine the link to background Mesh.
-!          The first key in this list matches up with the first coordinate of the 
-!          Mesh, the second key in this list matches up with the second coordinate
-!          of the Mesh, and so on. The key names should be separated by the : character. 
 !      \item[background]
 !          Background Mesh which determines the distribution of entries in the new locatiion stream.
-!          The Mesh must have the same spatial dimension as the number of keys in
-!          {\tt coordKeyNames}. 
 !      \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -1235,6 +1234,9 @@ contains
       integer :: pntDim, pntCount
       real(ESMF_KIND_R8),  pointer  :: pntList(:)
       integer, pointer :: petList(:)
+      character (len=ESMF_MAXSTR)            :: coordKeyNames
+      type(ESMF_CoordSys_Flag) :: coordSysLocal, coordSys_ofBkgMesh
+      logical :: three_dims
 
 
       ! Initialize return code; assume failure until success is certain
@@ -1263,6 +1265,70 @@ contains
       ! Get old locstream internal pointer
       oldLStypep=>locstream%lstypep
 
+      print*,'mvr: hello1'
+
+      call ESMF_MeshGet(background, coordSys=coordSys_ofBkgMesh, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      print*,'mvr: hello2'
+      call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      print*,'mvr: hello3: coordSysLocal= ',coordSysLocal,'  coordSys_ofBkgMesh= ',coordSys_ofBkgMesh
+      print*,'mvr: ESMF_COORDSYS_CART= ',ESMF_COORDSYS_CART
+      print*,'mvr: ESMF_COORDSYS_SPH_RAD= ',ESMF_COORDSYS_SPH_RAD
+      print*,'mvr: ESMF_COORDSYS_SPH_DEG= ',ESMF_COORDSYS_SPH_DEG
+
+      if ((coordSysLocal .eq. ESMF_COORDSYS_CART .and. &
+           coordSys_ofBkgMesh .ne. ESMF_COORDSYS_CART) .or. &
+          (coordSysLocal .ne. ESMF_COORDSYS_CART .and. &
+           coordSys_ofBkgMesh .eq. ESMF_COORDSYS_CART)) then
+        if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+           msg=" - coordinate systems of LocStream and Mesh are not compatible ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      print*,'mvr: hello4'
+      if (coordSysLocal .eq. ESMF_COORDSYS_CART) then
+      print*,'mvr: hello1'
+        call ESMF_LocStreamGetKey(locstream, keyName="ESMF:Z", &
+                                  isPresent=three_dims, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      print*,'mvr: hello5'
+        if (three_dims) then
+      print*,'mvr: hello1'
+          coordKeyNames = "ESMF:X,ESMF:Y,ESMF:Z"
+        else
+      print*,'mvr: hello6'
+          coordKeyNames = "ESMF:X,ESMF:Y"
+        endif
+
+      else
+      print*,'mvr: hello7'
+        call ESMF_LocStreamGetKey(locstream, keyName="ESMF:Radius", &
+                                  isPresent=three_dims, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      print*,'mvr: hello8'
+        if (three_dims) then
+      print*,'mvr: hello9'
+          coordKeyNames = "ESMF:Lon,ESMF:Lat,ESMF:Radius"
+        else
+      print*,'mvr: hello10'
+          coordKeyNames = "ESMF:Lon,ESMF:Lat"
+        endif
+      print*,'mvr: hello11'
+
+      endif
+      print*,'mvr: hello12'
+
       ! Calculate pntDim 
        pntDim = 0
        string = trim(coordKeyNames )
@@ -1271,6 +1337,7 @@ contains
           pntDim = pntDim + 1
        enddo
 
+      print*,'mvr: hello13'
       ! Calculate number of local points
       call ESMF_LocStreamGetNumLocal(locstream, localCount=pntCount, &
                                      rc=localrc)      
@@ -1279,16 +1346,19 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+      print*,'mvr: hello14'
       ! Allocate memory for points
       allocate(pntList(pntDim*pntCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
+      print*,'mvr: hello15'
       ! Allocate memory for pets
       allocate(petList(pntCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
+      print*,'mvr: hello16'
       ! Get Points 
       call ESMF_LocStreamGetPntList(locstream, coordKeyNames, pntDim, &
               pntCount, pntList, rc=localrc)
@@ -1297,6 +1367,7 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+      print*,'mvr: hello17'
       ! Find out where points lie on Mesh
       call ESMF_MeshFindPnt(background, localunmappedaction, &
                                 pntDim, pntCount, pntList, &
@@ -1306,9 +1377,11 @@ contains
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+      print*,'mvr: hello18'
       ! Can now get rid of pntList
       deallocate(pntList)
 
+      print*,'mvr: hello19'
       ! Create a new location stream by shifting the entries between 
       ! the pets based on petList
       ESMF_LocStreamCreateByBkgMesh=ESMF_LocStreamCreatePetList(locstream, name, &
@@ -1317,6 +1390,7 @@ contains
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     
+      print*,'mvr: hello20'
      ! Can now get rid of pntList
       deallocate(petList)
 
@@ -2228,8 +2302,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    print*,'mvr: in getkeyarray'
-
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
@@ -2247,17 +2319,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! If nothing found return error
    if (keyIndex==0) then
-      print*,'mvr: cant find this keyname: ',keyName
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
             msg=" - keyName not found in this LocStream", &
             ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
-   print*,'mvr: getkeyarray 1'
    ! Get Array
    keyArray=lstypep%keys(keyIndex)
 
-   print*,'mvr: getkeyarray 2'
    ! return success
    if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3004,7 +3073,6 @@ end subroutine ESMF_LocStreamGetKeyR4
  localrc = ESMF_RC_NOT_IMPL 
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
- print*,'mvr: in getkeyr8: keyname= ',keyName
 
 
  ! Check init status of arguments 
@@ -3052,29 +3120,22 @@ end subroutine ESMF_LocStreamGetKeyR4
     return 
  endif 
 
- print*,'mvr: before getkeyarray'
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
 
- print*,'mvr: after getkeyarray'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
- print*,'mvr: after check of getkeyarray'
 
  ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
- print*,'mvr: hello1'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
- print*,'mvr: hello2'
  
  call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
- print*,'mvr: hello3'
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
- print*,'mvr: hello4'
 
   ! Get Bounds via C++
    call c_ESMC_locstreamgetkeybnds(array, localDE, & 
@@ -3082,10 +3143,8 @@ end subroutine ESMF_LocStreamGetKeyR4
                  computationalLBound, computationalUBound, computationalCount, &
                  totalLBound, totalUBound, totalCount, &
                  localrc)
- print*,'mvr: hello5'
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
- print*,'mvr: hello6'
 
 
  ! Return successfully 
@@ -5428,7 +5487,6 @@ end subroutine ESMF_LocStreamGetBounds
       ! Get old locstream internal pointer
       oldLStypep=>locstream%lstypep     
 
-      !mvr call to locstreamget for coordsys and pass into create below
       call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -5657,6 +5715,8 @@ end subroutine ESMF_LocStreamGetBounds
       ! Check Variables
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
+      print*,'mvr: wow1'
+
       ! Get keynames
       ! Calculate pntDim 
        dim = 1
@@ -5676,6 +5736,7 @@ end subroutine ESMF_LocStreamGetBounds
           dim = dim + 1
        enddo
 
+      print*,'mvr: wow2'
        ! check pntDim
        if (pntDim /= dim-1) then
 	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
@@ -5683,12 +5744,14 @@ end subroutine ESMF_LocStreamGetBounds
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
+      print*,'mvr: wow3'
 
       ! Get number of localDEs
       call ESMF_LocStreamGet(locstream, localDECount=localDECount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+      print*,'mvr: wow4'
 
 
      ! Get pnt coordinates
@@ -5696,10 +5759,14 @@ end subroutine ESMF_LocStreamGetBounds
      !!       at some point it might make sense to get rid of these
      do i=1,pntDim
 
+       print*,'mvr: coordKeyList(',i,')= ',coordKeyList(i)
+
        ! Get typeKind
        call ESMF_LocStreamGetKey(locstream,keyName=trim(coordKeyList(i)), typekind=typekind, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        print*,'mvr: wow i= ',i
 
 	! Copy data based on typekind
 	if (typekind .eq. ESMF_TYPEKIND_R8) then
@@ -5786,7 +5853,7 @@ end subroutine ESMF_LocStreamGetBounds
 
       integer   :: pos
 
-      pos = index( string, ':')
+      pos = index( string, ',')
       if ( pos == 0 ) then
         key = string
         string = ''

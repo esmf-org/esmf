@@ -32,11 +32,8 @@ class Mesh;
 // The return type from search.  A list of source grid node to
 // destination grid element pairs
 struct Search_node_result {
-  const MeshObj *node;  // Take this out when everything converted to PntList?
-  //#ifdef PNTLIST
-    int dst_gid;
-  //#endif
-
+  const MeshObj *node;
+  int dst_gid;
   double pcoord[3];  // parametric coord of node in elem
 };
 
@@ -65,29 +62,17 @@ struct Search_result {
 typedef std::vector<Search_result*> SearchResult;
 
 
-//#ifdef PNTLIST
-  void OctSearch_w_dst_pl(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc=NULL, OTree *box_in=NULL);
-  //#endif
+ void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc=NULL, OTree *box_in=NULL);
 
   void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, int unmappedactionB, 
                       double stol, SearchResult &result);
 
-  void OctSearch(const Mesh &src, const Mesh &dest, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, 
-                 std::vector<const MeshObj*> *to_investigate=NULL,OTree *box_in=NULL);
 
+void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
 
-void SearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
-void SearchNearestSrcToDst_w_plist(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
-
-void ParSearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
-
-void ParSearchNearestSrcToDst_w_plist(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
+void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result);
 
 void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
-
-#if 0  //not working (mvr)
-void SearchNearestDstToSrc_w_plist(const Mesh &src, const PointList &dst_pl, int unmappedaction, SearchResult &result);
-#endif
 
 void ParSearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 

@@ -57,9 +57,6 @@
 #ifdef ESMF_TESTEXHAUSTIVE
 #if 1
 
-!#if 0
-!mvr
-
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -69,9 +66,6 @@
       ! initialize 
       rc=ESMF_SUCCESS
       
-!      call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
-!      call ESMF_VMLogMemInfo("mvrbefore",rc)
-
       ! do test
       call test_regrid180vs360(rc)
 
@@ -518,6 +512,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid matrix
@@ -533,7 +528,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
 
 
       !------------------------------------------------------------------------
@@ -727,8 +721,6 @@
 
       !------------------------------------------------------------------------
 
-!#endif
-!mvr
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -811,10 +803,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
-!stop
-!mvr
 
 
 #endif
@@ -19565,9 +19553,9 @@ return
 
 	!! if error is too big report an error
 	if (relErr > 0.009) then
-	   print*,'mvr: yup, error too big, relErr= ',relErr
            correct=.false.	
 	endif	
+
      enddo
      enddo
      enddo
@@ -20049,7 +20037,6 @@ return
 
 	!! if error is too big report an error
 	if (relErr > 0.002) then
-	   print*,'mvr: yup error too big, relErr= ',relErr
            correct=.false.	
 	endif	
      enddo

@@ -277,7 +277,7 @@ def initialize_field_grid(field, domask=False, doarea=False):
     gridXCoord = field.grid.get_coords(0, ESMF.StaggerLoc.CENTER)
     gridYCoord = field.grid.get_coords(1, ESMF.StaggerLoc.CENTER)
 
-    field.data[:]=20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridYCoord**2
+    field.data[:] = 20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridYCoord**2
 
     if domask:
         field.data[mask == 0] = 0

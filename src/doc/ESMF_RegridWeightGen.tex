@@ -626,11 +626,17 @@ variables:
 
  In the ESMF format the netCDF variables have the following meanings. The {\tt nodeCoords} variable contains the coordinates for each node.
  {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
- For a 2D Grid, {\tt coordDim} is 2 and the grid is assumed to be spherical. {\tt nodeCoords(:,1)} contains the longitude coordinates and
- {\tt nodeCoords(:,2)} contains the latitude coordinates.  The same order applies to {\tt centerCoords}.
+ For a 2D Grid, {\tt coordDim} is 2 and the grid can be either spherical or Cartisian. If the {\tt units}
+ attribute is either {\tt degrees} or {\tt radians}, it is spherical. {\tt nodeCoords(:,1)} contains 
+the longitude coordinates and {\tt nodeCoords(:,2)} contains the latitude coordinates.  If the value of 
+the {\tt units} attribute is {\tt km}, {\tt kilometers} or {\tt meters}, the grid is in 2D Cartesian 
+coordinates. {\tt nodeCoords(:,1)} contains the x coordinates and
+ {\tt nodeCoords(:,2)} contains the y coordinates.
+ The same order applies to {\tt centerCoords}.
  For a 3D Grid, {\tt coordDim} is 3 and the grid is assumed to be Cartesian. {\tt nodeCoords(:,1)} contains the x coordinates, {\tt nodeCoords(:,2)} contains the y coordinates, 
  and {\tt nodeCoords(:,3)} contains the z coordinates.  The same order applies to {\tt centerCoords}.
-
+A 2D grid in the Cartesian coordinate can only be regridded into another 2D grid in the Cartesian coordinate.
+ 
  The {\tt elementConn} variable describes how the nodes are connected together to form each element. For each element (i.e. each iteration of the first
  dimension of the variable), this variable contains a list of 1-based indices into the {\tt nodeCoords} variable pointing to the nodes which make up that
  element. For example, if {\tt elementConn(2,1..3)} contains (1,2,4), then that means that the second element consists of the nodes whose coordinates are

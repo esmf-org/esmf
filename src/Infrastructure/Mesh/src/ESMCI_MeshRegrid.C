@@ -147,20 +147,6 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
         Throw() << "Regridding error" << std::endl;
       }
 
-      // Remove non-locally owned weights (assuming destination mesh decomposition)
-
-      // This prune won't work for conserve
-      // because wghts not on nodes, earlier mask code shouldn't allow weights
-      // at this point anyways. 
-      //      if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) {
-      // mvr prune not needed for pointlist
-      // mvr won't need to prune at all once NEAREST methods us pointlist
-      //mvr      if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST || *regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-
-      //mvr	wts.Prune(*dstmesh, 0);
-
-      //mvr      }
-
     } break;
 
     default:

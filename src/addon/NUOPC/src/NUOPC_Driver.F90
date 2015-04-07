@@ -1386,6 +1386,8 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     logical                         :: verbose
     character(ESMF_MAXSTR)          :: defaultvalue
+    integer                         :: runCounter
+    real(ESMF_KIND_R8)              :: timeBase, time
 
     rc = ESMF_SUCCESS
     
@@ -1427,6 +1429,21 @@ module NUOPC_Driver
         trim(name)//" - entered Run with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMWtime(timeBase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMWtime(time, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      runCounter=0
+      write (msgString, *) "RunProfile time=", time-timeBase, "runCounter=", &
+        runCounter
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1505,6 +1522,21 @@ module NUOPC_Driver
           else
             exState=is%wrap%modelIS(j)
           endif
+          
+          if (verbose) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            runCounter=runCounter+1
+            write (msgString, *) "CplRunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
@@ -1520,12 +1552,43 @@ module NUOPC_Driver
             " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+            
+          if (verbose) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            write (msgString, *) "CplRunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+            
+            
         endif
       else
         ! model or mediator component
         if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
           write (iString, *) i
           write (pString, *) phase
+          
+          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            runCounter=runCounter+1
+            write (msgString, *) "RunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          
+          
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
@@ -1539,6 +1602,21 @@ module NUOPC_Driver
             trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+            
+          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+            call ESMF_VMWtime(time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            write (msgString, *) "RunProfile time=", time-timeBase, &
+              "runCounter=", runCounter
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+            
+            
         endif
       endif
 
@@ -2140,6 +2218,7 @@ module NUOPC_Driver
     type(ESMF_GridComp)             :: srcComp, dstComp
     integer, pointer                :: connectorPetList(:)
     integer, pointer                :: connectorPetListTemp(:)
+    integer, pointer                :: connectorPetListTemp2(:)
     integer, pointer                :: srcPetList(:), dstPetList(:)
     integer                         :: k, l, cIndex, lineCount
     character(ESMF_MAXSTR)          :: petListBuffer(100)
@@ -2162,11 +2241,14 @@ module NUOPC_Driver
     ! Entering this call means that the new style members are being used
     is%wrap%newStyleFlag = .true.
     
+    ! set up connectorPetList
+    nullify(connectorPetList)     ! invalidate
+    nullify(connectorPetListTemp) ! invalidate
     if (present(petList)) then
-      allocate(connectorPetList(size(petList)))
-      connectorPetList = petList  ! copy elements
+      ! explict petList was provided
+      connectorPetList => petList ! point to the provided petList
     else
-      ! figure out the default union petList....
+      ! figure out the default union petList.... if necessary
       call NUOPC_DriverGetComp(driver, srcCompLabel, petList=srcPetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2176,17 +2258,17 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (associated(srcPetList).and.associated(dstPetList)) then
-        ! construct the union petList
+        ! must construct the union petList
         allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), stat=stat)
         if (ESMF_LogFoundAllocError(statusToCheck=stat, &
           msg="Allocation #1 of connector petList failed.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        connectorPetListTemp = srcPetList ! copy contents i_petList start of connectorPetList
+        connectorPetListTemp = srcPetList ! copy contents
         ! there is no guarantee of order, no way to optimize construction
         cIndex = size(srcPetList) + 1
         do k=1, size(dstPetList)
-          ! append element k in j_petList to c_petList if not yet present
+          ! append element k in dstPetList to connectorPetList if not yet in
           do l=1, size(srcPetList)
             if (connectorPetListTemp(l) == dstPetList(k)) exit
           enddo
@@ -2196,26 +2278,8 @@ module NUOPC_Driver
             cIndex = cIndex + 1
           endif
         enddo
-        if (cIndex-1 < size(connectorPetListTemp)) then
-          ! shrink the size of connectorPetList to just what it needs to be
-          allocate(connectorPetList(cIndex-1), stat=stat)
-          if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation #2 of connector petList failed.", &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
-          connectorPetList = connectorPetListTemp(1:cIndex-1)
-          deallocate(connectorPetListTemp, stat=stat)
-          if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-            msg="Deallocation of connector petList failed.", &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
-        else
-          ! c_petList is already the right size
-          connectorPetList => connectorPetListTemp
-        endif
-      
+        connectorPetList => connectorPetListTemp(1:cIndex-1)
       endif
-      
     endif
     
     ! Add another connector to the connectorMap with associated compLabel
@@ -2225,6 +2289,7 @@ module NUOPC_Driver
       return  ! bail out
     cmEntry%wrap%label = trim(srcCompLabel)//"-TO-"//trim(dstCompLabel)
     if (associated(connectorPetList)) then
+      ! connectorPetList was either explicitly provided or constructed
       write (lString, *) size(connectorPetList)
       write (msgString,"(A)") trim(name)//&
         " - Creating connector component "//trim(cmEntry%wrap%label)//&
@@ -2233,7 +2298,6 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      
       if (size(connectorPetList) <= 1000) then
         ! have the resources to print the entire petList
         write (petListBuffer, "(10I7)") connectorPetList
@@ -2253,6 +2317,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     else
+      ! create the connector without petList
       write (msgString,"(A)") trim(name)//" - Creating connector component "//&
         trim(cmEntry%wrap%label)//" without petList."
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2264,9 +2329,27 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+    
+    ! store the petList 
+    nullify(connectorPetListTemp2)  ! invalidate
+    if (associated(connectorPetList)) then
+      ! either provided or constructed connectorPetList
+      allocate(connectorPetListTemp2(size(connectorPetList)))
+      connectorPetListTemp2 = connectorPetList  ! copy contents
+    endif
+    cmEntry%wrap%petList => connectorPetListTemp2  ! transferring ownership
 
-    cmEntry%wrap%petList => connectorPetList
+    ! clean-up
+    if (associated(connectorPetListTemp)) then
+      ! clean-up
+      deallocate(connectorPetListTemp, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of connector petList failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
+    ! add the new connector component into the connectorMap
     call ESMF_ContainerAddUDT(is%wrap%connectorMap, trim(cmEntry%wrap%label), &
       cmEntry, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

@@ -113,8 +113,7 @@ private:
 
   void build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud);
 
-  void build_src_mig_plist(Zoltan_Struct *zz, ZoltanUD &zud);
-  void build_src_mig_plist_try(ZoltanUD &zud, int numExport,
+  void build_src_mig_plist(ZoltanUD &zud, int numExport,
 			   ZOLTAN_ID_PTR exportGids, 
 			   int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids);
 
