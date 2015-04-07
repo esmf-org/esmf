@@ -42,9 +42,9 @@ if (ESMF.local_pet() == 0):
 # For each test case line from the control file parse the line and call
 # the test subroutine.
 for test_case in test_cases:
-    (src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err) = test_case
-    test_str = 'Regrid %s to %s as %s with %s itrp_err = %f and csrv_err = %f' % \
-      (src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err)
+    (src_fname, dst_fname, regrid_method, options, 
+     itrp_mean_err, itrp_max_err, csrv_err) = test_case
+    test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
     print '\n' + test_str + ' - START\n'
     src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
     dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
@@ -58,8 +58,8 @@ for test_case in test_cases:
     # run the data file retrieval and regridding through try/except
     correct = False
     try:
-        correct = regrid_check(src_fname_full, dst_fname_full,
-                               regrid_method, options, itrp_err, csrv_err)
+        correct = regrid_check(src_fname_full, dst_fname_full, regrid_method, 
+                               options, itrp_mean_err, itrp_max_err, csrv_err)
     except:
         print "Regridding ERROR:\n"
         traceback.print_exc(file=sys.stdout)
