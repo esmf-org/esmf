@@ -44,7 +44,7 @@ program ESMF_ArrayIOUTest
                Farray3D_wouthalo2, Farray3D_withhalo3
   integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: Farray3D_DE0, Farray3D_DE1
   integer(ESMF_KIND_I4), pointer, dimension(:,:,:) :: Farray3D_DE0_r, Farray3D_DE1_r
-  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray2D_withhalo, Farray2D_wouthalo
+  real(ESMF_KIND_R8),    pointer, dimension(:,:)   ::  Farray2D_withhalo, Farray2D_wouthalo
   real(ESMF_KIND_R8), dimension(5,5) :: FarrayGr_1 , FarrayGr_2
   type(ESMF_DistGrid)                     :: distgrid, distgrid_diff
   type(ESMF_DistGrid)                     :: distgrid_2DE
@@ -708,8 +708,6 @@ program ESMF_ArrayIOUTest
   Farray3D_DE1 = localPet*100 + 1
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
-! call ESMF_ArrayPrint (array_2DE)
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
@@ -772,23 +770,23 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2 DE read Array - DE 0 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #else
-  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+  rc = ESMF_SUCCESS
 #endif
+  call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2 DE read Array - DE 1 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE1_r == localPet*100 + 1))
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE1_r == localPet*100 + 1))
 #else
-  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+  rc = ESMF_SUCCESS
 #endif
+  call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

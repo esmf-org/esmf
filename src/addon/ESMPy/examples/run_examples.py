@@ -14,7 +14,7 @@ if len(sys.argv) > 1:
 
 # data files
 datafilelist = ["ll1deg_grid.nc", "ll2.5deg_grid.nc", "mpas_uniform_10242_dual_counterclockwise.nc",
-                "GRIDSPEC_ACCESS1.nc", "tx0.1v2_070911.nc", "T42_grid.nc"]
+                "GRIDSPEC_ACCESS1.nc", "tx0.1v2_070911.nc", "T42_grid.nc", "so_Omon_GISS-E2.nc"]
 
 # Create data subdirectory if it doesn't exist.
 datadir = "examples/data"
@@ -41,9 +41,9 @@ if parallel:
     num_proc = 4
 
 if constants._ESMF_OS is constants._ESMF_OS_UNICOS:
-    os.system("aprun -n "+str(num_proc)+" -a xt nosetests -vs examples/exampletest.py")
+    os.system("aprun -n "+str(num_proc)+" -a xt nosetests -vs --with-id -a '!slow' examples/exampletest.py")
 else:
     if parallel:
-        os.system("mpirun -np "+str(num_proc)+" nosetests -vs examples/exampletest.py")
+        os.system("mpirun -np "+str(num_proc)+" nosetests -vs --with-id -a '!slow' examples/exampletest.py")
     else:
-        os.system("nosetests -vs examples/exampletest.py")
+        os.system("nosetests -vs --with-id -a '!slow' examples/exampletest.py")

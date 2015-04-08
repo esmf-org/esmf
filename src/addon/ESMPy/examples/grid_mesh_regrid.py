@@ -6,8 +6,8 @@
 import ESMF
 import numpy
 
-# create a manager object with multiprocessor logging in debug mode
-esmf = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+# esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll1deg_grid.nc"
 grid2 = "examples/data/mpas_uniform_10242_dual_counterclockwise.nc"
@@ -78,4 +78,4 @@ if ESMF.pet_count() > 1:
 if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
     print "ESMPy Grid Mesh Regridding Example"
-    print "  interpolation mean relative error = {}".format(meanrelerr)
+    print "  interpolation mean relative error = {0}".format(meanrelerr)

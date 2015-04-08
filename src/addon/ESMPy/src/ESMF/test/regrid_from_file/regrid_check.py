@@ -66,8 +66,8 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
         lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
 
         if grid_or_mesh.ndims == 1:
-            lons_1d = ESMF.esmf_array1d(lonptr, grid_or_mesh.type, grid_or_mesh.size_local[ESMF.StaggerLoc.CENTER][0])
-            lats_1d = ESMF.esmf_array1d(latptr, grid_or_mesh.type, grid_or_mesh.size_local[ESMF.StaggerLoc.CENTER][1])
+            lons_1d = ESMF.esmf_array1d(lonptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0])
+            lats_1d = ESMF.esmf_array1d(latptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1])
 
             lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
             lats = np.array([lats_1d for lon in lons_1d])
@@ -142,11 +142,12 @@ def run_regridding(srcfield, dstfield, src_mask, dst_mask,
                                 pole_method=pole_method,
                                 regrid_pole_npoints=regrid_pole_npoints)
     dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
+    regridSrc2Dst.destroy()
 
     return dstfield
 
-def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False, 
-                   dstfracfield=None, mass1=None, mass2=None, 
+def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
+                   parallel=False, dstfracfield=None, mass1=None, mass2=None, 
                    regrid_method=ESMF.RegridMethod.CONSERVE, uninitval=422397696.):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
@@ -219,7 +220,8 @@ def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False,
             mass2_global = mass2
 
     # compute relative error measures and compare against tolerance values
-    itrp = False
+    itrp_mean = False
+    itrp_max = False
     csrv = False
     if ESMF.local_pet() == 0:
         if mass1_global == 0:
@@ -228,12 +230,14 @@ def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False,
             csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
 
         # compute mean relative error
-        if num_nodes != 0:
+        if num_nodes_global != 0:
             total_error_global = total_error_global/num_nodes_global
 
         # determine if interpolation and conservation are up to spec
-        if (total_error_global < itrp_tol):
-            itrp = True
+        if (total_error_global < itrp_mean_tol):
+            itrp_mean = True
+        if (max_error_global < itrp_max_tol):
+            itrp_max = True
         if (csrv_error_global < csrv_tol):
             csrv = True
 
@@ -247,10 +251,11 @@ def compare_fields(field1, field2, itrp_tol, csrv_tol, parallel=False,
 
     # broadcast in parallel case
     if parallel:
-        itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+        itrp_mean, itrp_max, csrv = \
+            MPI.COMM_WORLD.bcast([itrp_mean, itrp_max, csrv],0)
 
     # print pass or fail
-    if (itrp and csrv):
+    if (itrp_mean and itrp_max  and csrv):
         print "PET{0} - PASS".format(ESMF.local_pet())
         correct = True
     else:
@@ -306,7 +311,8 @@ def parse_options(options):
                 unmapped_action, pole_method_str, src_regional, dst_regional,
                 src_missingvalue, dst_missingvalue)
 
-def regrid_check(src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err):
+def regrid_check(src_fname, dst_fname, regrid_method, options, 
+                 itrp_mean_err, itrp_max_err, csrv_err):
 
 #    print "\nregrid_weight_gen_check.py: mesh_check()"
 
@@ -392,13 +398,28 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, itrp_err, csrv_er
                             dofrac=True, fracfield=srcfracfield)
         dstmass = compute_mass(dstfield, dstareafield, uninitval=UNINITVAL)
     else:
+        srcfracfield.destroy()
+        dstfracfield.destroy()
         srcfracfield = None
         dstfracfield = None
 
-    correct = compare_fields(dstfield, dstfield2, itrp_err, csrv_err, 
-                              parallel=parallel, dstfracfield=dstfracfield,
-                              mass1=srcmass, mass2=dstmass, 
-                              regrid_method=regrid_method, uninitval=UNINITVAL)
+    correct = compare_fields(dstfield, dstfield2, itrp_mean_err, itrp_max_err, 
+                             csrv_err, parallel=parallel, 
+                             dstfracfield=dstfracfield,
+                             mass1=srcmass, mass2=dstmass, 
+                             regrid_method=regrid_method, uninitval=UNINITVAL)
+
+       # Destroy ESMF objects
+    srcfield.destroy()
+    dstfield.destroy()
+    dstfield2.destroy()
+    if regrid_method == ESMF.RegridMethod.CONSERVE: 
+        srcfracfield.destroy()
+        dstfracfield.destroy()
+        srcareafield.destroy()
+        dstareafield.destroy()
+    srcgrid.destroy()
+    dstgrid.destroy()
 
     return correct
 

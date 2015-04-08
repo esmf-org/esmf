@@ -61,8 +61,8 @@ class TestMaskedArray(TestBase):
         :param type: the type of the esmf buffer
         :type type: ESMF.TypeKind
         '''
-        # turn on debuggin and initialize the cbindings calls
-        Manager(logkind=LogKind.MULTI, debug=True)
+        # create manager because we are doing some lower level stuff here without automatic initialization
+        Manager()
 
         # create a ctypes grid object to hold pointer and other info for ctypes layer
         if array.dtype is not np.int32:
@@ -124,9 +124,6 @@ class TestMaskedArray(TestBase):
 
         res = array0 * 2
         self.assertTrue(np.all(vals * 2 == res))
-
-
-
 
     def test_mul(self):
         esmpyarray1 = self.get_array()
@@ -191,7 +188,6 @@ class TestMaskedArray(TestBase):
         self.assertNumpyAll(array0, array1)
         self.assertNumpyAll(array0, array2)
         self.assertNumpyAll(array1, array2)
-
 
     def test_new(self):
         data0, mask, tk, lb1, ub1, grid = self.get_maskedarray_info()

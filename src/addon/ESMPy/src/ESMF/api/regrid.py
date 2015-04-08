@@ -26,6 +26,7 @@ class Regrid(object):
                  regrid_method=None,
                  pole_method=None,
                  regrid_pole_npoints=None,
+                 norm_type=None,
                  unmapped_action=None,
                  src_frac_field=None,
                  dst_frac_field=None):
@@ -42,14 +43,14 @@ class Regrid(object):
                              dtype=numpy.int32)of values that can be 
                              used to specify a masked value on the 
                              source Field. \n
-                type: numpy.array
-                shape: (n, 1) where n is the number of values
+                type: numpy.array \n
+                shape: (n, 1) where n is the number of values \n
             dst_mask_values: a numpy array (internally cast to 
                              dtype=numpy.int32)of values that can be 
                              used to specify a masked value on the 
                              destination Field. \n
-                type: numpy.array
-                shape: (n, 1) where n is the number of values
+                type: numpy.array \n
+                shape: (n, 1) where n is the number of values \n
             regrid_method: specifies which regridding method to use. \n
                 Argument values are: \n
                     (default) RegridMethod.BILINEAR\n
@@ -64,7 +65,11 @@ class Regrid(object):
                     PoleMethod.TEETH\n
             regrid_pole_npoints: specifies how many points to average over 
                              if polemethod == PoleMethod.NPNTAVG\n
-            unmapped_action: specifies which action to take if a 
+            norm_type: control which type of normalization to do when generating conservative regridding weights. \n
+                Argument values are: \n
+                    (default) NormType.DSTAREA \n
+                    NormType.FRACAREA \n
+            unmapped_action: specifies which action to take if a
                              destination point is found which does not 
                              map to any source point.\n
                 Argument values are : \n
@@ -111,6 +116,7 @@ class Regrid(object):
                                             regridmethod=regrid_method,
                                             polemethod=pole_method,
                                             regridPoleNPnts=regrid_pole_npoints,
+                                            normType=norm_type,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
                                             dstFracField=dst_frac_field)
@@ -122,6 +128,7 @@ class Regrid(object):
         self.regrid_method = regrid_method
         self.pole_method = pole_method
         self.regrid_pole_npoints = regrid_pole_npoints
+        self.norm_type = norm_type
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
@@ -149,13 +156,13 @@ class Regrid(object):
         Returns: \n
             dstfield
         """
-
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
                          self.routehandle, zeroregion=zero_region)
         return dstfield
 
-    def __del__(self):
+    # manual destructor
+    def destroy(self):
         """
         Release the memory associated with a Regrid operation. \n
         Required Arguments: \n
@@ -170,6 +177,17 @@ class Regrid(object):
                 ESMP_FieldRegridRelease(self.routehandle)
                 self._finalized = True
 
+    def __del__(self):
+        """
+        Release the memory associated with a Regrid operation. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        self.destroy()
 
     def __repr__(self):
         """

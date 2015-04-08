@@ -1763,6 +1763,135 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+#if 1
+  ! OFF UNTIL I SEE IF THE OLD STUFF WORKS
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating a MOAB Mesh"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Don't test if MOAB isn't available
+#ifdef ESMF_MOAB
+
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create test mesh
+  call createTestMesh3x3(mesh, rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  ! Create Mesh structure
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+   ! Fill in node data
+  numNodes=9
+ 
+  !! node ids
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  !! node Coords
+  allocate(nodeCoords(numNodes*2))
+  nodeCoords=(/0.0,0.0, &
+                1.0,0.0, &
+                2.0,0.0, &
+               0.0,1.0, &
+               1.0,1.0, &
+               2.0,1.0, &
+               0.0,2.0, &
+               1.0,2.0, &
+               2.0,2.0 /)
+ 
+   !! node owners
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on proc 0
+ 
+  ! Add nodes
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+    deallocate(nodeOwners)
+
+ ! XMRKX
+
+  ! Fill in elem data
+  numElems=4
+
+  !! elem ids
+   allocate(elemIds(numElems))
+   elemIds=(/1,2,3,4/) 
+
+  !! elem types
+   allocate(elemTypes(numElems))
+  elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+  !! elem area
+  allocate(elemAreas(numElems))
+  elemAreas=(/2.0,3.0,4.0,5.0/)
+
+  !! elem conn
+    allocate(elemConn(numElems*4))
+  elemConn=(/1,2,5,4, & 
+             2,3,6,5, & 
+             4,5,8,7, & 
+             5,6,9,8/)
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,&
+                             elementArea=elemAreas, rc=localrc)
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate elem data
+   deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+  deallocate(elemAreas)
+
+  !! Write mesh for debugging
+  call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+!  call ESMF_MeshDestroy(mesh, rc=rc)
+
+  ! endif for skip for >1 proc
+  endif 
+#endif
+
+
+  ! XMRKX
+  ! Test creating field
+   field = ESMF_FieldCreate(mesh, arrayspec,  meshloc=ESMF_MESHLOC_ELEMENT, &
+         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! check field
+  call ESMF_FieldValidate(field,rc=localrc) 
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#endif 
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -1775,7 +1904,6 @@ endif
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
-
 
 contains
 

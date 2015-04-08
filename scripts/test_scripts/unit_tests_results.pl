@@ -103,39 +103,14 @@ use File::Find
                         # Put all files in a list
                         push @all_files, "$File::Find::name\n" ;
         }
-        # Get all unit tests files
-        @temp_files=grep (/UTest/, @all_files);
-        @ut_files=grep(!/cppF90/, @temp_files);
-	# Delete all testg or testO from list
-	@Log_files=grep (/test$ESMF_BOPT/, @ut_files);
-        # Delete Log files from list
-        foreach $file ( @Log_files) {
-                foreach (@ut_files){
-                        s/$file//s;     
-                }               
+        # Get all source unit tests files
+        @c_files=grep (/UTest.C/, @all_files);
+        @F90_files=grep (/UTest.F90/, @all_files);
+        foreach $file ( @c_files) {
+                push (@F90_files, $file);               
         }
-	# Delete all UTestLog from list
-	@log_files=grep (/UTestLog/, @ut_files);
-        # Delete logfile files from list
-        foreach $file ( @log_files) {
-                foreach (@ut_files){
-                        s/$file//s;     
-                }               
-        }
-	# Clear all_files list
-	@all_files = ();
-	# Get the list of Unit tests Log files
-        find(\&wanted_Logfiles, $TEST_DIR);
-        sub wanted_Logfiles {
-                        # Put all files in a list
-                        push @all_files, "$File::Find::name\n" if -e ;
-        }
-        @Log_files=grep (/UTest.Log/, @all_files);
-	# Sort the Log files list
-	@Log_files=sort(@Log_files);
-
-        # Get stripped unit tests names
-        @st_ut_files = @ut_files;
+	@st_ut_files = @F90_files;
+        @ut_files = @st_ut_files;
         foreach ( @st_ut_files) {
                 s/\.\///; # Delete all the "./"
                 s/\///g; # Delete all the "/"

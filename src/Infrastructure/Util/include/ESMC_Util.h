@@ -63,22 +63,25 @@ enum ESMC_LogMsgType_Flag{
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
                         ESMC_MESHLOC_ELEMENT};
 
+enum ESMC_NormType_Flag {ESMC_NORMTYPE_DSTAREA=0,
+                        ESMC_NORMTYPE_FRACAREA=1};
+
 enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_MONOPOLE=1,
                          ESMC_POLEKIND_BIPOLE=2};
 
 enum ESMC_PoleMethod_Flag {ESMC_POLEMETHOD_NONE=0,
-			   ESMC_POLEMETHOD_ALLAVG,
-			   ESMC_POLEMETHOD_NPNTAVG,
-			   ESMC_POLEMETHOD_TEETH};
+			               ESMC_POLEMETHOD_ALLAVG,
+			               ESMC_POLEMETHOD_NPNTAVG,
+			               ESMC_POLEMETHOD_TEETH};
 
 enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
-                       ESMC_REGION_SELECT,
-                       ESMC_REGION_EMPTY};
+                        ESMC_REGION_SELECT,
+                        ESMC_REGION_EMPTY};
 
 enum ESMC_RegridMethod_Flag {ESMC_REGRIDMETHOD_BILINEAR=0,
-			     ESMC_REGRIDMETHOD_PATCH,
-			     ESMC_REGRIDMETHOD_CONSERVE,
+			                 ESMC_REGRIDMETHOD_PATCH,
+			                 ESMC_REGRIDMETHOD_CONSERVE,
                              ESMC_REGRIDMETHOD_NEAREST_STOD,
                              ESMC_REGRIDMETHOD_NEAREST_DTOS};
 

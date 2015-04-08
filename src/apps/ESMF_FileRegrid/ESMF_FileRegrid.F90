@@ -35,9 +35,10 @@ program ESMF_FileRegridApp
   integer            :: poleptrs
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
-  integer            :: commandbuf2(6)
+  integer            :: commandbuf2(7)
   integer            :: ind, pos
-  logical 		 :: ignoreUnmapped, userAreaFlag
+  logical 	     :: ignoreUnmapped, userAreaFlag
+  logical            :: ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
   character(len=256) :: argStr
@@ -226,6 +227,12 @@ program ESMF_FileRegridApp
       ignoreUnmapped=.true.
     endif
 
+    ignoreDegenerate=.false.
+    call ESMF_UtilGetArgIndex('--ignore_degenerate', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      ignoreDegenerate=.true.
+    endif
+
     srcIsRegional = .false.
     dstIsRegional = .false.
     call ESMF_UtilGetArgIndex('-r', argindex=ind, rc=rc)
@@ -280,6 +287,7 @@ program ESMF_FileRegridApp
       if (dstIsRegional) commandbuf2(4) = 1
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
+      if (ignoreDegenerate) commandbuf2(7) = 1
     endif 
 
     call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
@@ -350,6 +358,12 @@ program ESMF_FileRegridApp
       userAreaFlag=.false.
     endif
 
+    if (commandbuf2(7) == 1) then
+      ignoreDegenerate=.true.
+    else
+      ignoreDegenerate=.false.
+    endif
+
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     srcfile = commandbuf1(1)
@@ -380,6 +394,7 @@ program ESMF_FileRegridApp
        		            regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, &
 			    unmappedaction = unmappedaction, &
+			    ignoreDegenerate = ignoreDegenerate, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             useUserAreaFlag = userAreaFlag, &
                             verboseFlag = .true., rc = rc)
@@ -420,6 +435,7 @@ contains
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--ignore_unmapped|-i]"
+    print *, "                      [--ignore_degenerate]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
@@ -442,6 +458,8 @@ contains
     print *, "--pole or -p - an optional argument indicating what to do with the pole."
     print *, "                 The default value is all"
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
+    print *, "                          the default is to stop with an error."
+    print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "-r         - an optional argument specifying the source and destination grids"
     print *, "             are regional grids.  Without this argument, the grids are assumed"

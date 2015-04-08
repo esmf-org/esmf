@@ -3,16 +3,37 @@ regrid unit test file
 """
 
 from ESMF import *
-from ESMF.test.base import TestBase
+from ESMF.test.base import TestBase, attr
 from ESMF.test.test_api.mesh_utilities import *
 from ESMF.test.test_api.grid_utilities import *
 
-# TODO: combinatorial expansions in regrid tests are complex
-  #  1. argument values of the regrid methods
-  #  2. types of field that go into the regrid methods
-  #  3. types of the grids underneath the field
-
 class TestRegrid(TestBase):
+
+    # this is for the documentation, do not modify
+    def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
+        '''
+        PRECONDITIONS: Two Fields have been created and a regridding
+                       operation is desired from 'srcfield' to 'dstfield'.
+                       The 'srcfracfield' and 'dstfractfield' are Fields
+                       created to hold the fractions of the source and
+                       destination fields which contribute to conservative
+                       regridding.\n
+        POSTCONDITIONS: A regridding operation has set the data on
+                        'dstfield', 'srcfracfield', and 'dstfracfield'.\n
+        RETURN VALUES: \n Field :: dstfield \n
+                          Field :: srcfracfield \n
+                          Field :: dstfracfield \n
+        '''
+        # call the regridding functions
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        return dstfield, srcfracfield, dstfracfield
+
     def test_field_regrid(self):
         # create grids
         max_index = np.array([20, 20])
@@ -173,72 +194,15 @@ class TestRegrid(TestBase):
 
         for i in range(srcarea.shape[x]):
             for j in range(srcarea.shape[y]):
-                if (srcarea[i, j] != 5):
+                if (srcarea.data[i, j] != 5):
                     print "Cell area is {0}, but expected 5".format(srcarea[i, j])
 
         # subtract two because the last two cells of mesh are triangles with half area
         for i in range(dstarea.shape[0]):
-            if (dstarea[i] != 0.25):
-                assert (dstarea[i] == 0.125)
-
-    def est_grid_mesh_pentahexa_regrid_csrv(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
-        parallel = False
-        if ESMF.pet_count() > 1:
-            if ESMF.pet_count() != 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
-
-        # create a Mesh
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa()
-
-        # create a grid
-        grid = grid_create([0, 0, 4, 4], [-0.1, -0.1, 2.5, 2.5], doarea=True)
-
-        # create Field objects on the Meshes
-        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
-
-        # make gridded fields
-        exactfield = ESMF.Field(grid, 'exactfield')
-        dstfield = ESMF.Field(grid, 'dstfield')
-        dstfracfield = ESMF.Field(grid, 'dstfracfield')
-        dstareafield = ESMF.Field(grid, 'dstareafield')
-
-        # initialize the Fields to an analytic function
-        #srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
-        #exactfield = initialize_field_grid(exactfield)
-        # TODO: cannot make analytic fields on ngons yet
-        srcfield.data[...] = 25.
-        exactfield.data[...] = 25.
-
-        # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
-                                    dst_frac_field=dstfracfield)
-        dstfield = regridSrc2Dst(srcfield, dstfield)
-
-        # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
-                                    fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
-
-        # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
-                            dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+            if (dstarea.data[i] != 0.25):
+                assert (dstarea.data[i] == 0.125)
 
     def test_field_regrid_periodic(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -281,12 +245,13 @@ class TestRegrid(TestBase):
         dstmass = compute_mass_grid(dstfield, dstareafield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
-    def test_grid_grid_regrid_csrv_mask_3D(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.0016447124122954575)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_grid_regrid_csrv_mask_3D(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -295,7 +260,7 @@ class TestRegrid(TestBase):
 
         # create a grid
         srcgrid = grid_create_3d([0, 0, 0, 21, 21, 21], [0, 0, 0, 21, 21, 21])
-        dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5], \
+        dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5],
                                  [0.5, 0.5, 0.5, 19.5, 19.5, 19.5])
 
         # create Field objects on the Meshes
@@ -312,10 +277,10 @@ class TestRegrid(TestBase):
         exactfield = initialize_field_grid_3d(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -325,12 +290,13 @@ class TestRegrid(TestBase):
         dstmass = compute_mass_grid(dstfield, dstareafield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 10E-03, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 10E-03, 10E-16, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
-    def test_grid_grid_regrid_csrv_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.0021560174316746865)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_grid_regrid_csrv_mask(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -355,11 +321,11 @@ class TestRegrid(TestBase):
         dstfield2 = initialize_field_grid(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    src_mask_values=np.array([0]), \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -369,12 +335,61 @@ class TestRegrid(TestBase):
         dstmass = compute_mass_grid(dstfield, dstareafield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
-    def test_grid_mesh_regrid_csrv_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.0024803189848013785)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_grid_regrid_srcmask_types(self):
+        # NOTE: this tests an old issue where the items of a grid were not properly set when
+        # the grid coord_typekind differed from the field typekind.
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create two unique Grid objects
+        srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True,
+                              ctk=ESMF.TypeKind.R4)
+        dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(srcgrid, 'srcfield', mask_values=[0])
+        srcareafield = ESMF.Field(srcgrid, 'srcareafield')
+        srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
+        dstfield = ESMF.Field(dstgrid, 'dstfield')
+        dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+        dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
+        exactfield = ESMF.Field(dstgrid, 'exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid(srcfield)
+        dstfield2 = initialize_field_grid(exactfield)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_grid(srcfield, srcareafield,
+                                    dofrac=True, fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel = compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
+                            dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        self.assertAlmostEqual(meanrel, 0.0024803189848013785)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
+    def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -409,11 +424,11 @@ class TestRegrid(TestBase):
         exactfield = initialize_field_grid(exactfield)
 
         # run the ESMF regridding
-        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield, \
-                                    src_mask_values=np.array([0]), \
-                                    regrid_method=ESMF.RegridMethod.CONSERVE, \
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
@@ -423,12 +438,13 @@ class TestRegrid(TestBase):
         dstmass = compute_mass_grid(dstfield, dstareafield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
-    def test_grid_mesh_regrid_csrv(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.038806630051265847)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_mesh_regrid_csrv(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -462,23 +478,26 @@ class TestRegrid(TestBase):
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+                                    norm_type=ESMF.NormType.FRACAREA,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
         srcmass = compute_mass_mesh(srcfield, srcareafield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield, dstareafield,
+                                    dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 50E-1, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 50E-1, 10E-16, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
 
-    def test_grid_mesh_regrid_mask(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.037733241800767432)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_mesh_regrid_mask(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -507,18 +526,19 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
-                                    dst_mask_values=np.array([0]), \
+                                    dst_mask_values=np.array([0]),
                                     regrid_method=ESMF.RegridMethod.BILINEAR,
                                     unmapped_action=ESMF.UnmappedAction.IGNORE)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 20E-1, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 20E-1, 10E-16, parallel=parallel,
                             regrid_method=ESMF.RegridMethod.BILINEAR)
 
-    def test_grid_mesh_regrid(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.0)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_grid_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() != 4:
@@ -552,12 +572,13 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compare results and output PASS or FAIL
-        compare_fields_grid(dstfield, exactfield, 40E-2, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 40E-2, 10E-16, parallel=parallel,
                             regrid_method=ESMF.RegridMethod.BILINEAR)
 
-    def test_mesh_mesh_regrid(self):
-        esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+        self.assertAlmostEqual(meanrel, 0.0)
+        self.assertAlmostEqual(csrvrel, 0.0)
 
+    def test_mesh_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
             if ESMF.pet_count() > 4:
@@ -567,12 +588,12 @@ class TestRegrid(TestBase):
         # create two unique Mesh objects
         if parallel:
             srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
-                mesh_create_5_parallel()
+                mesh_create_50_parallel()
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
                 mesh_create_10_parallel()
         else:
             srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
-                mesh_create_5()
+                mesh_create_50()
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
                 mesh_create_10()
 
@@ -586,24 +607,178 @@ class TestRegrid(TestBase):
         exactfield = ESMF.Field(dstmesh, 'exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # initialize the Fields to an analytic function
-        srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc, \
+        srcfield = initialize_field_mesh(srcfield, nodeCoordSrc, nodeOwnerSrc,
                                          elemTypeSrc, elemConnSrc)
-        exactfield = initialize_field_mesh(exactfield, nodeCoordDst, nodeOwnerDst, \
+        exactfield = initialize_field_mesh(exactfield, nodeCoordDst, nodeOwnerDst,
                                            elemTypeDst, elemConnDst)
 
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
-                                    unmapped_action=ESMF.UnmappedAction.ERROR, \
-                                    src_frac_field=srcfracfield, \
+                                    norm_type=ESMF.NormType.FRACAREA,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
         srcmass = compute_mass_mesh(srcfield, srcareafield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_mesh(dstfield, dstareafield)
+        dstmass = compute_mass_mesh(dstfield, dstareafield,
+                                    dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
-        compare_fields_mesh(dstfield, exactfield, 10E-2, 10E-16, parallel=parallel,
+        meanrel, csrvrel = compare_fields_mesh(dstfield, exactfield, 20E-2, 10E-16, parallel=parallel,
                             dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        self.assertAlmostEqual(meanrel, 0.037109375)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
+    def est_grid_mesh_pentatri_regrid_csrv(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+                                    fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
+                                               dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        assert (meanrel < 10E-2)
+        assert (csrvrel < 10E-14)
+
+    @attr('serial')
+    def est_grid_mesh_pentatri_regrid_csrv_simple(self):
+        if ESMF.pet_count() > 1:
+            raise NameError('This test can only be run in serial!')
+
+        # create a Mesh
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh_create_4_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 3, 3], [0, 2.5, 2, 3.5], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcfracfield = ESMF.Field(mesh, 'srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
+        srcareafield = ESMF.Field(mesh, 'srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+        dstfracfield = ESMF.Field(grid, 'dstfracfield')
+        dstareafield = ESMF.Field(grid, 'dstareafield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.CONSERVE,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+                                    fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield, dstareafield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15,
+                                               dstfracfield=dstfracfield, mass1=srcmass, mass2=dstmass)
+
+        assert (meanrel < 10E-2)
+        assert (csrvrel < 10E-14)
+
+    def test_grid_mesh_pentatri_regrid_bilinear(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons()
+
+        # create a grid
+        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(mesh, 'srcfield', meshloc=ESMF.MeshLoc.NODE)
+
+        # make gridded fields
+        exactfield = ESMF.Field(grid, 'exactfield')
+        dstfield = ESMF.Field(grid, 'dstfield')
+
+        # initialize the Fields to an analytic function
+        # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
+        # exactfield = initialize_field_grid(exactfield)
+        # TODO: cannot make analytic fields on ngons yet
+        srcfield.data[...] = 25.
+        exactfield.data[...] = 25.
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.BILINEAR,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, _ = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-16, parallel=parallel)
+
+        self.assertAlmostEqual(meanrel, 0)

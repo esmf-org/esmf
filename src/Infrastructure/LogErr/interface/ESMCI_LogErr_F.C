@@ -80,23 +80,23 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_LogGetErrMessage - initialize global Error Log
+// !IROUTINE:  c_ESMC_LogGetErrMessage - convert rc to message string
 //
 // !INTERFACE:
       void FTN_X(c_esmc_loggeterrormsg)(
 //
 // !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
+//    none.
 // 
 // !ARGUMENTS:
                 
       int *rc,        		// in - return code          
-      char *msg,		// out - message associted with code
-      int *msglen,  		// out - strlen(msg)
+      char *msg,		// out - message associated with code
+      int *msglen,  		// out - length of msg excluding trailing blanks
       ESMCI_FortranStrLenArg msg_l) { // hidden/in - msg length
 // 
 // !DESCRIPTION:
-//     Initialize C++ version of LogErr.
+//     Given an ESMF rc, return a Fortran string containing the error message.
 //
 //EOP
 // !REQUIREMENTS: 
@@ -106,16 +106,11 @@ extern "C" {
   int msg_local_len = strlen (msg_local);
 
   strncpy(msg, msg_local, msg_l);
-  if (msg_l > msg_local_len)
+  if (msg_l > msg_local_len) {
     memset (msg+msg_local_len, ' ', msg_l-msg_local_len);
-
-  // Ignore trailing blanks when setting msglen
-
-  int i;
-  for (i=msg_l; i>0; i--) {
-    if (msg[i-1] != ' ') break;
-  }
-  *msglen = i;
+    *msglen = msg_local_len;
+  } else
+    *msglen = msg_l;
 
   return;
 

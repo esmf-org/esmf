@@ -430,7 +430,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Specifies the type of pole
 !           to construct on the source Grid during regridding. Please see 
 !           Section~\ref{const:polemethod} for a list of
-!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
+!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods, 
+!           and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods.
 !     \item [{[regridPoleNPnts]}]
 !           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG},
 !           then this parameter indicates the number of points over which to average.
@@ -441,7 +442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[lineType]}]
 !           This argument controls the path of the line which connects two points on a sphere surface. This in
 !           turn controls the path along which distances are calculated and the shape of the edges that make
-!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+ !           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
 !           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
 !           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
 !           list of valid options for this argument. If not specified, the default depends on the 
@@ -463,7 +464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           with that regrid method this subroutine will behave as if
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
 !     \item [{[ignoreDegenerate]}]
-!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
+ !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
 !           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
 !           always skip degenerate cells. 
@@ -491,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     support both overriding and accessing the auto-tuning parameter.
 !     If an argument $>= 0$ is specified, it is used for the 
 !     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
-!     In this case the {\tt srcTermProcessing} argument is not modified on
+ !     In this case the {\tt srcTermProcessing} argument is not modified on
 !     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt srcTermProcessing} argument is re-set to the internally
@@ -522,7 +523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional 
 !     {\tt pipelineDepth} argument is omitted.
-!     \item [{[routehandle]}]
+ !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
 !           user doesn't need it, then they can indicate that by not requesting it. 
@@ -540,7 +541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           sequence indices corresponding to the coefficients in the {\tt factorList} argument. 
 !           The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifes 
 !           the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifes 
-!           the sequence index of the destination element in the {\tt dstField}. The second dimension of 
+!           the sequence index of the destination element in the {\tt dstField}. The se cond dimension of 
 !           {\tt factorIndexList} steps through the list of pairs, i.e. {\tt size(factorIndexList,2)==size(factorList)}.
 !           The array coming out of this variable is in the appropriate format to be used
 !           in other ESMF sparse matrix multiply calls, for example {\tt ESMF\_FieldSMMStore()}. 
@@ -562,7 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
 !           grid which only partially overlaps the source grid the destination field which is output from the 
 !           regrid operation should be divided by the corresponding destination fraction to yield the 
-!           true interpolated values for cells which are only partially covered by the source grid. 
+!           true interpolated values for cells which are only partially covered by the  source grid. 
 !     \item [{[unmappedDstList]}] 
 !           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}. 
 !           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
@@ -590,7 +591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
         type(ESMF_StaggerLoc) :: fracStaggerLoc
-        integer              :: gridDimCount
+         integer              :: gridDimCount
         type(ESMF_PoleMethod_Flag):: localpolemethod
         integer              :: localRegridPoleNPnts
         logical              :: srcIsLatLonDeg, dstIsLatLonDeg
@@ -619,7 +620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (present(weights)) then
            call ESMF_LogWrite("The use of argument 'weights' in call " // &
-                "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorList' " // &
+                "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorList' " //  &
                 "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -648,7 +649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (dstgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- RegridStore on XGrid is not supported in this overloaded method", & 
+              msg="- RegridStore on XGrid is not supported in this overloaded method",  & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
@@ -679,7 +680,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            localLineType=ESMF_LINETYPE_CART
         endif
 
-        ! Handle optional normType argument
+         ! Handle optional normType argument
         if (present(normType)) then
            localNormType=normType
         else     
@@ -1034,7 +1035,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-
 
         ! Get Fraction info
         if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then

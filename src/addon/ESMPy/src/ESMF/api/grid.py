@@ -7,10 +7,12 @@ The Grid API
 #### IMPORT LIBRARIES #########################################################
 
 import warnings
+from copy import copy
 
 from ESMF.api.esmpymanager import *
 from ESMF.api.array import *
 import ESMF.api.constants as constants
+from ESMF.util.helpers import get_formatted_slice, get_none_or_slice, get_none_or_bound, get_none_or_ssslice
 
 
 #### Grid class #########################################################
@@ -194,19 +196,22 @@ class Grid(object):
         self.type = TypeKind.R8
         self.areatype = TypeKind.R8
         self.rank = None
-        self.num_peri_dims = num_peri_dims
         self.periodic_dim = periodic_dim
         self.pole_dim = pole_dim
         self.coord_sys = coord_sys
         self.ndims = None # Applies to Gridspec only
 
-        # for ocgis compatibility
-        self._ocgis = {}
+
+        if num_peri_dims is None:
+            self.num_peri_dims = 0
+        else:
+            self.num_peri_dims = num_peri_dims
+
+        # for arbitrary attributes
+        self.meta = {}
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self.size = [None]
-        # size_local holds the sizes according to the parallel distribution
-        self.size_local = [None]
 
         # placeholder for staggerlocs, True if present, False if not
         self.staggerloc = [None]
@@ -262,6 +267,9 @@ class Grid(object):
                 self.num_peri_dims = 0
             else:
                 self.num_peri_dims = 1
+                self.periodic_dim = 0
+                # TODO: we assume that all periodic grids create from file will be periodic across the first
+                #       dimension.. is that true?
             
         else:
             # ctypes stuff
@@ -276,6 +284,9 @@ class Grid(object):
                                                       poleDim=pole_dim,
                                                       coordSys=coord_sys,
                                                       coordTypeKind=coord_typekind)
+                if periodic_dim == None:
+                    self.periodic_dim = 0
+                    self.pole_dim = 1
             else:
                 raise TypeError("Number of periodic dimensions should be 0 or 1")
 
@@ -292,68 +303,24 @@ class Grid(object):
         self.staggerloc = [False for a in range(2**self.rank)]
 
         # bounds
-        self.lower_bounds = [np.zeros(None) for a in range(2**self.rank)]
-        self.upper_bounds = [np.zeros(None) for a in range(2**self.rank)]
+        self.lower_bounds = [None for a in range(2**self.rank)]
+        self.upper_bounds = [None for a in range(2**self.rank)]
         self.bounds_done = [False for a in range(2**self.rank)]
 
         # distributed sizes
-        self.size_local = [np.zeros(None) for a in range(2**self.rank)]
-
-        # grid size according to stagger locations
-        peri_dim_offset = 1 - self.num_peri_dims
-        
-        if self.rank == 2:
-            self.size = [\
-                # ESMF_STAGGERLOC_CENTER
-                reduce(mul,self.max_index),
-                # ESMF_STAGGERLOC_EDGE1
-                (self.max_index[0] + peri_dim_offset) * self.max_index[1],
-                # ESMF_STAGGERLOC_EDGE2
-                self.max_index[0] * (self.max_index[1] + 1),
-                # ESMF_STAGGERLOC_CORNER
-                (self.max_index[0] + peri_dim_offset) * (self.max_index[1] + 1)]
-        elif self.rank == 3:
-            self.size = [\
-                # ESMF_STAGGERLOC_CENTER_VCENTER
-                reduce(mul,self.max_index),
-                # ESMF_STAGGERLOC_EDGE1_VCENTER
-                (self.max_index[0] + peri_dim_offset) * 
-                self.max_index[1] * 
-                self.max_index[2],
-                # ESMF_STAGGERLOC_EDGE2_VCENTER
-                self.max_index[0] * (self.max_index[1] + 1) * self.max_index[2],
-                # ESMF_STAGGERLOC_CORNER_VCENTER
-                (self.max_index[0] + peri_dim_offset) * 
-                (self.max_index[1] + 1) * 
-                self.max_index[2],
-                # ESMF_STAGGERLOC_CENTER_VFACE
-                self.max_index[0] * self.max_index[1] * (self.max_index[2] + 1),
-                # ESMF_STAGGERLOC_EDGE1_VFACE
-                (self.max_index[0] + peri_dim_offset) * 
-                self.max_index[1] * 
-                (self.max_index[2] + 1),
-                # ESMF_STAGGERLOC_EDGE2_VFACE
-                self.max_index[0] * (self.max_index[1] + 1) * 
-                (self.max_index[2] + 1),
-                # ESMF_STAGGERLOC_CORNER_VFACE
-                (self.max_index[0] + peri_dim_offset) * 
-                (self.max_index[1] + 1) * 
-                (self.max_index[2] + 1)]
-        else:
-            raise TypeError("max_index must be either a 2 or 3 dimensional \
-                             Numpy array!")
+        self.size = [None for a in range(2**self.rank)]
 
         # initialize the coordinates structures
         # index order is [staggerLoc][coord_dim]
-        self.coords = [[np.zeros(None) for a in range(self.rank)] \
+        self.coords = [[None for a in range(self.rank)] \
                         for b in range(2**self.rank)]
         self.coords_done = [[False for a in range(self.rank)] \
                              for b in range(2**self.rank)]
 
         # initialize the item structures
         # index order is [staggerLoc][itemDim]
-        self.mask = [[1] for a in range(2**self.rank)]
-        self.area = [[0] for a in range(2**self.rank)]
+        self.mask = [None for a in range(2**self.rank)]
+        self.area = [None for a in range(2**self.rank)]
         self.item_done = [[False for a in range(2)] \
                            for b in range(2**self.rank)]
 
@@ -374,8 +341,11 @@ class Grid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
+        # set the single stagger flag
+        self._singlestagger = False
 
-    def __del__(self):
+    # manual destructor
+    def destroy(self):
         """
         Release the memory associated with a Grid. \n
         Required Arguments: \n
@@ -390,37 +360,44 @@ class Grid(object):
                 ESMP_GridDestroy(self)
                 self._finalized = True
 
+    def __del__(self):
+        """
+        Release the memory associated with a Grid. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        self.destroy()
+
     def __repr__(self):
         """
         Return a string containing a printable representation of the object
         """
         string = ("Grid:\n"
-                  "    struct = %r \n"
                   "    type = %r \n"
                   "    areatype = %r \n"
                   "    rank = %r \n"
                   "    num_peri_dims = %r \n"
+                  "    periodic_dim = %r \n"
+                  "    pole_dim = %r \n"
                   "    coord_sys = %r \n"
-                  "    size = %r \n"
-                  "    size_local = %r \n"
-                  "    max_index = %r \n"
-                  "    staggerloc = %r \n"
-                  "    lower_bounds = %r \n"
-                  "    upper_bounds = %r \n"
+                  "    lower bounds = %r \n"
+                  "    upper bounds = %r \n"
                   "    coords = %r \n"
                   "    mask = %r \n"
-                  "    area = %r \n" 
+                  "    area = %r \n"
                   %
-                  (self.struct,
+                  (
                    self.type,
                    self.areatype,
                    self.rank,
                    self.num_peri_dims,
+                   self.periodic_dim,
+                   self.pole_dim,
                    self.coord_sys,
-                   self.size,
-                   self.size_local,
-                   self.max_index,
-                   self.staggerloc,
                    self.lower_bounds,
                    self.upper_bounds,
                    self.coords,
@@ -428,6 +405,70 @@ class Grid(object):
                    self.area))
 
         return string
+
+    def _copy_(self):
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        ret._finalized = True
+
+        return ret
+
+    def __getitem__(self, slc):
+        # no slicing in parallel
+        if pet_count() > 1:
+            raise SerialMethod
+
+        # format and copy
+        slc = get_formatted_slice(slc, self.rank)
+        ret = self._copy_()
+
+        # coords, mask and area
+        ret.coords = [[get_none_or_ssslice(get_none_or_slice(get_none_or_slice(self.coords, stagger), coorddim), slc, stagger, self.rank)
+                       for coorddim in range(self.rank)] for stagger in range(2**self.rank)]
+        ret.mask = [get_none_or_slice(get_none_or_slice(self.mask, stagger), slc) for stagger in range(2**self.rank)]
+        ret.area = [get_none_or_slice(get_none_or_slice(self.area, stagger), slc) for stagger in range(2**self.rank)]
+
+        # upper bounds are "sliced" by taking the shape of the coords
+        ret.upper_bounds = [get_none_or_bound(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2**self.rank)]
+        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
+
+        return ret
+
+    def _preslice_(self, stagger):
+        # to be used to slice off one stagger location of a grid for a specific field
+        ret = self._copy_()
+
+        # bounds, coords, mask and area
+        ret.lower_bounds = get_none_or_slice(self.lower_bounds, stagger)
+        ret.upper_bounds = get_none_or_slice(self.upper_bounds, stagger)
+        ret.coords = get_none_or_slice(self.coords, stagger)
+        ret.mask = get_none_or_slice(self.mask, stagger)
+        ret.area = get_none_or_slice(self.area, stagger)
+
+        ret._singlestagger = True
+
+        return ret
+
+    def _slice_onestagger_(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        # to be used to slice the single stagger grid, one that has already been presliced
+        slc = get_formatted_slice(slc, self.rank)
+        ret = self._copy_()
+
+        # coords, mask and area
+        ret.coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.rank)]
+        ret.mask = get_none_or_slice(self.mask, slc)
+        ret.area = get_none_or_slice(self.area, slc)
+
+        # upper bounds are "sliced" by taking the shape of the coords at first coorddim
+        ret.upper_bounds = get_none_or_bound(ret.coords, 0)
+        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
+
+        return ret
+
 
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
@@ -479,7 +520,7 @@ class Grid(object):
                     ESMP_GridAddCoord(self, staggerloc=stagger)
 
                 # and now for Python
-                self.allocate_coords(stagger)
+                self._allocate_coords_(stagger, from_file=from_file)
 
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
@@ -536,7 +577,7 @@ class Grid(object):
                     ESMP_GridAddItem(self, item, staggerloc=stagger)
 
                 # and now for Python..
-                self.allocate_items(item, stagger)
+                self._allocate_items_(item, stagger, from_file=from_file)
 
         if len(staggerlocs) is 1:
             if item == GridItem.MASK:
@@ -574,17 +615,23 @@ class Grid(object):
             None \n
         """
 
-        # handle the default case
-        #TODO: return full coordinates, and by dimension as optional
-        if staggerloc is None:
-            staggerloc = StaggerLoc.CENTER
-        elif type(staggerloc) is list:
-            raise GridSingleStaggerloc
-        elif type(staggerloc) is tuple:
-            raise GridSingleStaggerloc
+        ret = None
+        if not self._singlestagger:
+            # handle the default case
+            if staggerloc is None:
+                staggerloc = StaggerLoc.CENTER
+            elif type(staggerloc) is list:
+                raise GridSingleStaggerloc
+            elif type(staggerloc) is tuple:
+                raise GridSingleStaggerloc
 
-        assert(self.coords_done[staggerloc][coord_dim])
-        return self.coords[staggerloc][coord_dim]
+            assert (self.coords_done[staggerloc][coord_dim])
+            ret = self.coords[staggerloc][coord_dim]
+        else:
+            assert (self.coords_done[coord_dim])
+            ret = self.coords[coord_dim]
+
+        return ret
 
     def get_item(self, item, staggerloc=None):
         """
@@ -616,30 +663,42 @@ class Grid(object):
             None \n
         """
 
-        # handle the default case
-        if staggerloc is None:
-            staggerloc = StaggerLoc.CENTER
-        elif type(staggerloc) is list:
-            raise GridSingleStaggerloc
-        elif type(staggerloc) is tuple:
-            raise GridSingleStaggerloc
+        ret = None
+        if not self._singlestagger:
+            # handle the default case
+            if staggerloc is None:
+                staggerloc = StaggerLoc.CENTER
+            elif type(staggerloc) is list:
+                raise GridSingleStaggerloc
+            elif type(staggerloc) is tuple:
+                raise GridSingleStaggerloc
 
-        assert(self.item_done[staggerloc][item])
-        if item == GridItem.MASK:
-            return self.mask[staggerloc]
-        elif item == GridItem.AREA:
-            return self.area[staggerloc]
+            assert(self.item_done[staggerloc][item])
+            if item == GridItem.MASK:
+                ret = self.mask[staggerloc]
+            elif item == GridItem.AREA:
+                ret = self.area[staggerloc]
+            else:
+                raise GridItemNotSupported
         else:
-            raise GridItemNotSupported
+            assert(self.item_done[item])
+            if item == GridItem.MASK:
+                ret = self.mask
+            elif item == GridItem.AREA:
+                ret = self.area
+            else:
+                raise GridItemNotSupported
 
-    def _set_item_(self, item, staggerloc, item_data):
+        return ret
+
+    def set_item(self, item, staggerloc, item_data):
         raise MethodNotImplemented
         # check sizes
         # set item_out = item_data.copy()
         # set the item as a grid property and return this pointer
         #self.item[staggerloc_local] = item_out
 
-    def _set_coords_(self, staggerloc, item_data):
+    def set_coords(self, staggerloc, item_data):
         raise MethodNotImplemented
         # check sizes
         # assert (self.coords[staggerloc][:,:,coord_dim].shape == 
@@ -647,7 +706,7 @@ class Grid(object):
         # use user coordinates to initialize underlying ESMF data
         # self.coords[staggerloc][:,:,coord_dim] = coord_data.copy()
 
-    def _write(self, filename, staggerloc=None):
+    def _write_(self, filename, staggerloc=None):
         """
         Write a Grid to vtk formatted file at a specified stagger 
         location. \n
@@ -696,7 +755,7 @@ class Grid(object):
             self.upper_bounds[stagger] = np.copy(ub)
 
             # find the local size of this stagger
-            self.size_local[stagger] = np.array(self.upper_bounds[stagger] - \
+            self.size[stagger] = np.array(self.upper_bounds[stagger] - \
                                        self.lower_bounds[stagger])
             # set these to be done
             self.bounds_done[stagger] = True
@@ -704,42 +763,40 @@ class Grid(object):
             lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
             assert(self.lower_bounds[stagger].all() == lb.all())
             assert(self.upper_bounds[stagger].all() == ub.all())
-            assert(self.size_local[stagger].all() == np.array(ub-lb).all())
+            assert(self.size[stagger].all() == np.array(ub-lb).all())
 
-    def allocate_coords(self, stagger):
+    def _allocate_coords_(self, stagger, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
         self.verify_grid_bounds(stagger)
 
         # allocate space for the coordinates on the Python side
         self.coords[stagger][0] = np.zeros(\
-                                           shape = (self.size_local[stagger]),
+                                           shape = (self.size[stagger]),
                                            dtype = constants._ESMF2PythonType[self.type])
         self.coords[stagger][1] = np.zeros(\
-                                           shape = (self.size_local[stagger]),
+                                           shape = (self.size[stagger]),
                                            dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
             self.coords[stagger][2] = np.zeros(\
-                                        shape = (self.size_local[stagger]),
+                                        shape = (self.size[stagger]),
                                         dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         [x, y, z] = [0, 1, 2]
-        self.link_coord_buffer(x, stagger)
-        self.link_coord_buffer(y, stagger)
+        self._link_coord_buffer_(x, stagger)
+        self._link_coord_buffer_(y, stagger)
         if self.rank == 3:
-            self.link_coord_buffer(z, stagger)
+            self._link_coord_buffer_(z, stagger)
 
         # initialize to zeros, because ESMF doesn't handle that
-        #RLO: this has to be removed because grids created from file
-        #     have coordinates set by the time this is called, so it
-        #     doesn't make sense to initialize them to 0.
-        #self.coords[stagger][0][...] = 0
-        #self.coords[stagger][1][...] = 0
-        #if self.rank == 3:
-        #    self.coords[stagger][2][...] = 0
+        if not from_file:
+            self.coords[stagger][0][...] = 0
+            self.coords[stagger][1][...] = 0
+            if self.rank == 3:
+               self.coords[stagger][2][...] = 0
 
-    def link_coord_buffer(self, coord_dim, stagger):
+    def _link_coord_buffer_(self, coord_dim, stagger):
 
         if self.coords_done[stagger][coord_dim]:
             raise GridCoordsAlreadyLinked
@@ -756,7 +813,7 @@ class Grid(object):
         # set flag to tell this coordinate has been aliased
         self.coords_done[stagger][coord_dim] = True
 
-    def allocate_items(self, item, stagger):
+    def _allocate_items_(self, item, stagger, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
         self.verify_grid_bounds(stagger)
@@ -764,32 +821,30 @@ class Grid(object):
         # if the item is a mask it is of type I4
         if item == GridItem.MASK:
             self.mask[stagger] = np.zeros(\
-                                          shape = (self.size_local[stagger]),
+                                          shape = (self.size[stagger]),
                                           dtype = constants._ESMF2PythonType[TypeKind.I4])
         # if the item is area then it is of type R8
         elif item == GridItem.AREA:
             self.area[stagger] = np.zeros(\
-                                          shape = (self.size_local[stagger]),
+                                          shape = (self.size[stagger]),
                                           dtype = constants._ESMF2PythonType[TypeKind.R8])
         else:
             raise GridItemNotSupported
 
         # link the ESMF allocations to the grid properties
-        self.link_item_buffer(item, stagger)
+        self._link_item_buffer_(item, stagger)
         
         # initialize to zeros, because ESMF doesn't handle that
-        #RLO: this has to be removed because grids created from file
-        #     have mask and area set by the time this is called, so it
-        #     doesn't make sense to initialize them to 0.
-        #if item == GridItem.MASK:
-        #    self.mask[stagger][...] = 0
-        #elif item == GridItem.AREA:
-        #    self.area[stagger][...] = 0
-        #else:
-        #    raise GridItemNotSupported
+        if not from_file:
+            if item == GridItem.MASK:
+               self.mask[stagger][...] = 1
+            elif item == GridItem.AREA:
+               self.area[stagger][...] = 0
+            else:
+               raise GridItemNotSupported
 
 
-    def link_item_buffer(self, item, stagger):
+    def _link_item_buffer_(self, item, stagger):
 
         # mask is 0, area is 1
         if self.item_done[stagger][item]:
@@ -810,134 +865,3 @@ class Grid(object):
         # set flag to tell this item has been set up
         # mask is 0, area is 1
         self.item_done[stagger][item] = True
-
-    # def dump_gridinfo(self, stagger):
-    #
-    #     [x,y,z] = [0,1,2]
-    #
-    #     print "bounds - low, high"
-    #     print self.lower_bounds[stagger], \
-    #                 self.upper_bounds[stagger]
-    #     print "shape - [x, y, z] or [lat, lon]"
-    #     print self.coords[stagger][0].shape
-    #
-    #     if self.rank == 2:
-    #         return [self.coords[stagger][x], self.coords[stagger][y]]
-    #     elif self.rank == 3:
-    #         return [self.coords[stagger][x], self.coords[stagger][y], self.coords[stagger][z]]
-    #
-    # def dump_gridinfo_lower(self, stagger):
-    #     [x, y, z] = [0, 1, 2]
-    #
-    #     print "bounds - low, high"
-    #     print self.lower_bounds[stagger], \
-    #                 self.upper_bounds[stagger]
-    #     print "shape - [x, y, z] or [lat, lon]"
-    #     print self.coords[stagger][0].shape
-    #
-    #     # retrieve buffers to esmf coordinate memory
-    #     gridptrX = self.get_grid_coords_from_esmc(x, stagger)
-    #     gridptrY = self.get_grid_coords_from_esmc(y, stagger)
-    #
-    #     #print esmf_coords
-    #     if self.rank == 2:
-    #         return [gridptrX, gridptrY]
-    #     elif self.rank == 3:
-    #         gridptrZ = self.get_grid_coords_from_esmc(z, stagger)
-    #         return [gridptrX, gridptrY, gridptrZ]
-    #
-    # def dump_gridinfo_ctypes(self, stagger, dim=2):
-    #
-    #     # find the size of the local coordinates at this stagger location
-    #     from operator import mul
-    #     size = reduce(mul,self.size_local[stagger])
-    #     [x, y, z] = [0, 1, 2]
-    #
-    #     # get the pointer to the underlying ESMF data array for coordinates
-    #
-    #     xptr = ESMP_GridGetCoordPtr(self, x, staggerloc=stagger)
-    #
-    #     import ctypes;
-    #     buffer_from_memory = ctypes.pythonapi.PyBuffer_FromMemory
-    #     buffer_from_memory.restype = ctypes.py_object
-    #     xbuffer = buffer_from_memory(xptr, int(8*size))
-    #     '''
-    #     xbuffer = np.core.multiarray.int_asbuffer(
-    #         ct.addressof(xptr.contents),
-    #         np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
-    #     '''
-    #     xcoords = np.frombuffer(xbuffer, np.float64)
-    #     #xcoordarray = numpy.ndarray((nrows, ncols), dtype=numpy.float32, order='F',
-    #     #                 buffer=buf)
-    #
-    #     yptr = ESMP_GridGetCoordPtr(self, y, staggerloc=stagger)
-    #     ybuffer = np.core.multiarray.int_asbuffer(
-    #         ct.addressof(yptr.contents),
-    #         np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
-    #     ycoords = np.frombuffer(ybuffer, constants._ESMF2PythonType[self.type])
-    #
-    #     print "DIAGNOSTICS:"
-    #     print "self.type = ", self.type
-    #     print "constants._ESMF2PythonType", constants._ESMF2PythonType[self.type]
-    #     print "constants._ESMF2PythonType.itemsize", constants._ESMF2PythonType[self.type].itemsize
-    #
-    #
-    #     # find the size of the local coordinates at this stagger location
-    #     from operator import mul
-    #     size = reduce(mul,self.size_local[stagger])
-    #
-    #     # these appear to both return bounds information only
-    #     lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
-    #
-    #     print "Bounds:"
-    #     print "  ESMPy.Grid:    ", size
-    #     print "  ESMPy.ctypes1: ", lb, ub
-    #
-    #
-    #     print "Coordinates:"
-    #     I = ub[x]-lb[x]
-    #     J = ub[y]-lb[y]
-    #     if dim == 3:
-    #         K = ub[z]-lb[z]
-    #
-    #     coordcount = 0
-    #     if dim == 2:
-    #         for i in range(I):
-    #             for j in range(J):
-    #                 ind = i*J + j
-    #
-    #                 if  (1e-10 > xcoords[ind] and xcoords[ind] != 0) or \
-    #                     xcoords[ind] > 360 or \
-    #                     -90 > ycoords[ind] or \
-    #                     (ycoords[ind] > -1e-10 and 1e-10 > ycoords[ind] and ycoords[ind] != 0) or \
-    #                     ycoords[ind] > 90:
-    #
-    #                     print "[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]"
-    #
-    #                 coordcount += 1
-    #     elif dim == 3:
-    #         zptr = ESMP_GridGetCoordPtr(self, z, staggerloc=stagger)
-    #         zbuffer = np.core.multiarray.int_asbuffer(
-    #             ct.addressof(zptr.contents),
-    #             np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
-    #         zcoords = np.frombuffer(zbuffer, constants._ESMF2PythonType[self.type])
-    #
-    #         for i in xrange(I):
-    #             for j in xrange(J):
-    #                 for k in xrange(K):
-    #                     ind = i*I + j*J + k
-    #                     if  (1e-10 > xcoords[ind] and xcoords[ind] != 0) or \
-    #                         xcoords[ind] > 360 or \
-    #                         -90 > ycoords[ind] or \
-    #                         (ycoords[ind] > -1e-10 and 1e-10 > ycoords[ind] and ycoords[ind] != 0) or \
-    #                         ycoords[ind] > 90:
-    #
-    #                         print "[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]"
-    #                     coordcount += 1
-    #
-    #     print "Coordcount = ", coordcount
-    #     '''
-    #     # create a numpy array to point to the ESMF allocation
-    #     # reshape the numpy array of coordinates using Fortran ordering in Grid
-    #     gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
-    #     '''

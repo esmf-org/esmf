@@ -170,6 +170,7 @@ ESMF_FileRegrid
         [--method|-m bilinear|patch|nearestdtos|neareststod|conserve]
         [--pole|-p none|all|teeth|1|2|..]
         [--ignore_unmapped|-i]
+        [--ignore_degenerate]
         [-r]
         [--src_regional]
         [--dst_regional]
@@ -242,6 +243,10 @@ where
            -i         - ignore unmapped destination points. If not specified
                         the default is to stop with an error if an unmapped
                         point is found.
+
+    --ignore_degenerate - ignore degenerate cells in the input grids. If not specified
+                        the default is to stop with an error if an degenerate
+                        cell is found.
 
     -r                - an optional argument specifying that the source and
                         destination grids are regional grids.  If the argument

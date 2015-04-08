@@ -35,7 +35,7 @@ module NUOPC_Base
   ! public module variables
   type(ESMF_Container), save  :: NUOPC_FieldDictionary
   public NUOPC_FieldDictionary
-  integer, parameter          :: NUOPC_PhaseMapStringLength = 30
+  integer, parameter          :: NUOPC_PhaseMapStringLength = 160
   public NUOPC_PhaseMapStringLength
 
   ! public module interfaces
@@ -1682,10 +1682,12 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_StateAdvertiseFields - Advertise Fields in a State
 ! !INTERFACE:
-  subroutine NUOPC_StateAdvertiseFields(state, StandardNames, rc)
+  subroutine NUOPC_StateAdvertiseFields(state, StandardNames, &
+    TransferOfferGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
+    character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Advertises Fields in a State. Defaults are set according to the 
@@ -1698,6 +1700,12 @@ module NUOPC_Base
 !   \item[StandardNames]
 !     A list of StandardNames of the advertised Fields. Must be StandardNames 
 !     found in the  NUOPC Field Dictionary.
+!   \item[{[TransferOfferGeomObject]}]
+!     The transfer offer for the geom object (Grid, Mesh, LocStream, 
+!     XGrid) associated with the advertised Fields. This setting applies to all
+!     the Fields advertised in this call. NUOPC controls the vocabulary
+!     of this attribute: "will provide", "can provide", "cannot provide".
+!     If omitted, the default is "will provide".
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1711,7 +1719,7 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_StateAdvertiseField(state, StandardName=StandardNames(i), &
-        rc=rc)
+        TransferOfferGeomObject=TransferOfferGeomObject, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &

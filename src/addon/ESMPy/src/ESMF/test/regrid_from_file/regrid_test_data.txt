@@ -1,163 +1,156 @@
 # $Id$
-#
-# Input data for ESMPy regrid from file tests
+
+# Input data for the RegridWeightGenCheck external demo
 
 # total number of test cases
-67
-#98
+71
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
 
-ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-03 : 10E-13
-wr50a_090614.nc : T42_grid.nc : patch : --src_regional -i : 10E-04 : 10E-16
-wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i : 10E-06 : 10E-16
-ar9v4_100920.nc : wr50a_090614.nc : conserve : -i -r : 10E-03 : 10E-14
-#ar9v4_100920.nc : ne30np4-t2.nc : conserve : --src_regional -i : 10E-03 : 10E-13
-
 # mpas_uniform_10242_dual.nc: ESMF format unstructured file that contains clockwise cells
 # mpas_uniform_10242_dual_counterclockwise.nc has clockwise cells removed
-wr50a_090614.nc : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-wr50a_090614.nc : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
-wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-06 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
+wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-06 : 10E-16
 
 # FVCOM_grid2d.nc:  unstructured grid in UGRID format
-#FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-03 : 10E-15
-#scrip_regional_1140x690.nc : FVCOM_grid2d_20120314.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-04 : 10E-15
-#FVCOM_grid2d_20130228.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-03 : 10E-15
-#scrip_regional_1140x690.nc : FVCOM_grid2d_20130228.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-04 : 10E-15
+#FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+#scrip_regional_1140x690.nc : FVCOM_grid2d_20120314.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
+#FVCOM_grid2d_20130228.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+#scrip_regional_1140x690.nc : FVCOM_grid2d_20130228.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
 
 # global grids with pole options
-ll2.5deg_grid.nc : T42_grid.nc      : bilinear : -p none    : 10E-03 : 10E-16
-ll2.5deg_grid.nc : T42_grid.nc      : patch    : -p 4       : 10E-04 : 10E-16
-T42_grid.nc      : ll2.5deg_grid.nc : patch    : -p none -i : 10E-03 : 10E-16
-T42_grid.nc      : ll2.5deg_grid.nc : bilinear : -p 4       : 10E-03 : 10E-16
+ll2.5deg_grid.nc : T42_grid.nc      : bilinear : -p none    : 10E-04 : 10E-03 : 10E-16
+ll2.5deg_grid.nc : T42_grid.nc      : patch    : -p 4       : 10E-04 : 10E-04 : 10E-16
+T42_grid.nc      : ll2.5deg_grid.nc : patch    : -p none -i : 10E-04 : 10E-03 : 10E-16
+T42_grid.nc      : ll2.5deg_grid.nc : bilinear : -p 4       : 10E-04 : 10E-03 : 10E-16
 
 # global to global with file type arguments
-ll1deg_grid.nc : ll2.5deg_grid.nc : bilinear : -t SCRIP         : 10E-04 : 10E-16
-ll1deg_grid.nc : ll2.5deg_grid.nc : patch    : --src_type SCRIP : 10E-04 : 10E-16
-ll1deg_grid.nc : ll2.5deg_grid.nc : conserve : --dst_type SCRIP : 10E-04 : 10E-13
+ll1deg_grid.nc : ll2.5deg_grid.nc : bilinear : -t SCRIP         : 10E-05 : 10E-04 : 10E-16
+ll1deg_grid.nc : ll2.5deg_grid.nc : patch    : --src_type SCRIP : 10E-05 : 10E-04 : 10E-16
+ll1deg_grid.nc : ll2.5deg_grid.nc : conserve : --dst_type SCRIP : 10E-04 : 10E-04 : 10E-13
 
 # destination regional
-T42_grid.nc : wr50a_090614.nc : bilinear : --dst_regional : 10E-04 : 10E-16
-T42_grid.nc : wr50a_090614.nc : patch    : --dst_regional : 10E-04 : 10E-16
-T42_grid.nc : wr50a_090614.nc : conserve : --dst_regional : 10E-02 : 10E-14
+T42_grid.nc : wr50a_090614.nc : bilinear : --dst_regional : 10E-04 : 10E-04 : 10E-16
+T42_grid.nc : wr50a_090614.nc : patch    : --dst_regional : 10E-05 : 10E-04 : 10E-16
+T42_grid.nc : wr50a_090614.nc : conserve : --dst_regional : 10E-03 : 10E-02 : 10E-14
 
 # source regional
-wr50a_090614.nc : T42_grid.nc : bilinear : --src_regional -i : 10E-05 : 10E-16
-wr50a_090614.nc : T42_grid.nc : patch    : --src_regional -i : 10E-06 : 10E-16
-wr50a_090614.nc : T42_grid.nc : conserve : --src_regional -i : 10E-04 : 10E-14
+wr50a_090614.nc : T42_grid.nc : bilinear : --src_regional -i : 10E-06 : 10E-05 : 10E-16
+wr50a_090614.nc : T42_grid.nc : patch    : --src_regional -i : 10E-06 : 10E-06 : 10E-16
+wr50a_090614.nc : T42_grid.nc : conserve : --src_regional -i : 10E-04 : 10E-04 : 10E-14
 
 # destination regional with destination masking
-T42_grid.nc : ar9v4_100920.nc : bilinear : --dst_regional : 10E-04 : 10E-16
-T42_grid.nc : ar9v4_100920.nc : patch    : --dst_regional : 10E-04 : 10E-16
-T42_grid.nc : ar9v4_100920.nc : conserve : --dst_regional : 10E-02 : 10E-13
+T42_grid.nc : ar9v4_100920.nc : bilinear : --dst_regional : 10E-04 : 10E-04 : 10E-16
+T42_grid.nc : ar9v4_100920.nc : patch    : --dst_regional : 10E-04 : 10E-04 : 10E-16
+T42_grid.nc : ar9v4_100920.nc : conserve : --dst_regional : 10E-03 : 10E-02 : 10E-13
 
 # source regional with source masking
-ar9v4_100920.nc : T42_grid.nc : bilinear : --src_regional -i : 10E-07 : 10E-16
-ar9v4_100920.nc : T42_grid.nc : patch    : --src_regional -i : 10E-07 : 10E-16
-ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-03 : 10E-14
+ar9v4_100920.nc : T42_grid.nc : bilinear : --src_regional -i : 10E-07 : 10E-07 : 10E-16
+ar9v4_100920.nc : T42_grid.nc : patch    : --src_regional -i : 10E-08 : 10E-07 : 10E-16
+ar9v4_100920.nc : T42_grid.nc : conserve : --src_regional -i : 10E-04 : 10E-03 : 10E-14
 
 # regional to regional with destination masking
-wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-05 : 10E-16
-wr50a_090614.nc : ar9v4_100920.nc : patch    : -r -i --netcdf4 : 10E-06 : 10E-16
-wr50a_090614.nc : ar9v4_100920.nc : conserve : -r -i : 10E-03 : 10E-14
+wr50a_090614.nc : ar9v4_100920.nc : bilinear : -r -i --64bit_offset : 10E-06 : 10E-05 : 10E-16
+wr50a_090614.nc : ar9v4_100920.nc : patch    : -r -i --netcdf4 : 10E-06 : 10E-06 : 10E-16
+wr50a_090614.nc : ar9v4_100920.nc : conserve : -r -i : 10E-04 : 10E-03 : 10E-14
 
 # regional to regional with source masking
-ar9v4_100920.nc : wr50a_090614.nc : bilinear : -r -i --64bit_offset : 10E-07 : 10E-16
-ar9v4_100920.nc : wr50a_090614.nc : patch    : -r -i --netcdf4 : 10E-07 : 10E-16
-ar9v4_100920.nc : wr50a_090614.nc : conserve : -i -r : 10E-04 : 10E-13
+ar9v4_100920.nc : wr50a_090614.nc : bilinear : -r -i --64bit_offset : 10E-07 : 10E-07 : 10E-16
+ar9v4_100920.nc : wr50a_090614.nc : patch    : -r -i --netcdf4 : 10E-07 : 10E-07 : 10E-16
+ar9v4_100920.nc : wr50a_090614.nc : conserve : -i -r : 10E-06 : 10E-04 : 10E-13
 
 # cubed sphere to global with pole all
-ne30np4-t2.nc : fv1.9x2.5_050503.nc : bilinear : -p all  : 10E-04 : 10E-16
-ne30np4-t2.nc : fv1.9x2.5_050503.nc : patch    : -p all  : 10E-04 : 10E-16
-#ne30np4-t2.nc : fv1.9x2.5_050503.nc : conserve : -p none : 10E-03 : 10E-14
+ne30np4-t2.nc : fv1.9x2.5_050503.nc : bilinear : -p all  : 10E-05 : 10E-04 : 10E-16
+ne30np4-t2.nc : fv1.9x2.5_050503.nc : patch    : -p all  : 10E-05 : 10E-04 : 10E-16
+#ne30np4-t2.nc : fv1.9x2.5_050503.nc : conserve : -p none : 10E-04 : 10E-03 : 10E-14
 
 # global to cubed sphere with pole all
-fv1.9x2.5_050503.nc : ne30np4-t2.nc : bilinear : -p all  : 10E-03 : 10E-16
-fv1.9x2.5_050503.nc : ne30np4-t2.nc : patch    : -p all  : 10E-04 : 10E-16
-#fv1.9x2.5_050503.nc : ne30np4-t2.nc : conserve : -p none : 10E-02 : 10E-13
+fv1.9x2.5_050503.nc : ne30np4-t2.nc : bilinear : -p all  : 10E-04 : 10E-03 : 10E-16
+fv1.9x2.5_050503.nc : ne30np4-t2.nc : patch    : -p all  : 10E-04 : 10E-04 : 10E-16
+#fv1.9x2.5_050503.nc : ne30np4-t2.nc : conserve : -p none : 10E-03 : 10E-02 : 10E-13
 
 # cubed sphere to cubed sphere
-ne60np4_pentagons_100408.nc : ne30np4-t2.nc : bilinear : -p all -i : 10E-05 : 10E-16
-ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -p all -i : 10E-05 : 10E-16
-#ne60np4_pentagons_100408.nc : ne30np4-t2.nc : conserve : -p none -i : 10E-03 : 10E-13
+ne60np4_pentagons_100408.nc : ne30np4-t2.nc : bilinear : -p all -i  : 10E-05 : 10E-05 : 10E-16
+ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -p all -i  : 10E-05 : 10E-05 : 10E-16
+#ne60np4_pentagons_100408.nc : ne30np4-t2.nc : conserve : -p none -i : 10E-04 : 10E-03 : 10E-13
 
 # cubed sphere to regional, conservative with masking
-ne30np4-t2.nc : wr50a_090614.nc : bilinear : --dst_regional -i : 10E-04 : 10E-16
-ne30np4-t2.nc : wr50a_090614.nc : patch    : --dst_regional -i : 10E-05 : 10E-16
-#ne30np4-t2.nc : ar9v4_100920.nc : conserve : --dst_regional -i : 10E-02 : 10E-14
+ne30np4-t2.nc : wr50a_090614.nc : bilinear : --dst_regional -i : 10E-05 : 10E-04 : 10E-16
+ne30np4-t2.nc : wr50a_090614.nc : patch    : --dst_regional -i : 10E-05 : 10E-05 : 10E-16
+#ne30np4-t2.nc : ar9v4_100920.nc : conserve : --dst_regional -i : 10E-03 : 10E-02 : 10E-14
 
 # regional to cubed sphere, conservative with masking
-wr50a_090614.nc : ne30np4-t2.nc : bilinear : --src_regional -i : 10E-05 : 10E-16
-wr50a_090614.nc : ne30np4-t2.nc : patch    : --src_regional -i : 10E-06 : 10E-16
-#ar9v4_100920.nc : ne30np4-t2.nc : conserve : --src_regional -i : 10E-03 : 10E-14
+wr50a_090614.nc : ne30np4-t2.nc : bilinear : --src_regional -i : 10E-06 : 10E-05 : 10E-16
+wr50a_090614.nc : ne30np4-t2.nc : patch    : --src_regional -i : 10E-06 : 10E-06 : 10E-16
+#ar9v4_100920.nc : ne30np4-t2.nc : conserve : --src_regional -i : 10E-04 : 10E-03 : 10E-14
 
 #
 # the following tests use the mpas unstructured grids
 
 # mpas grids with dual
-#mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : bilinear : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-16
-#mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : bilinear : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-16
-#mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-16
-#mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-16
-#mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : conserve : -i --src_type ESMF --dst_type ESMF : 10E-04 : 10E-13
-#mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : conserve : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-14
+mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : bilinear : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
+mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : bilinear : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
+mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
+mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
+#mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : conserve : -i --src_type ESMF --dst_type ESMF : 10E-04 : 10E-03 : 10E-13
+#mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : conserve : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-14
 
 # mpas with regular grids
-T42_grid.nc                : mpas_uniform_10242_dual.nc :patch    : --dst_type ESMF    : 10E-03 : 10E-16
-mpas_uniform_10242_dual.nc : ll1deg_grid.nc             :patch    : --src_type ESMF    : 10E-04 : 10E-16
-#ll2.5deg_grid.nc           : mpas_uniform_10242_dual.nc :conserve : -i --dst_type ESMF : 10E-03 : 10E-14
-#mpas_uniform_10242_dual.nc : ll1deg_grid.nc             :conserve : --src_type ESMF    : 10E-03 : 10E-13
+T42_grid.nc                : mpas_uniform_10242_dual.nc : patch    : --dst_type ESMF    : 10E-04 : 10E-03 : 10E-16
+mpas_uniform_10242_dual.nc : ll1deg_grid.nc             : patch    : --src_type ESMF    : 10E-04 : 10E-04 : 10E-16
+#ll2.5deg_grid.nc           : mpas_uniform_10242_dual.nc : conserve : -i --dst_type ESMF : 10E-03 : 10E-03 : 10E-14
+#mpas_uniform_10242_dual.nc : ll1deg_grid.nc             : conserve : --src_type ESMF    : 10E-03 : 10E-03 : 10E-13
 
 # mpas with cubed sphere grid
-mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : bilinear : --src_type ESMF : 10E-04 : 10E-16
-#ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : bilinear : --dst_type ESMF : 10E-05 : 10E-16
-mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : patch    : --src_type ESMF : 10E-04 : 10E-16
-#ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : patch    : --dst_type ESMF : 10E-05 : 10E-16
-#mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : conserve : --src_type ESMF : 10E-02 : 10E-13
-#ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : conserve : --dst_type ESMF : 10E-04 : 10E-13
+mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : bilinear : --src_type ESMF : 10E-04 : 10E-04 : 10E-16
+ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : bilinear : --dst_type ESMF : 10E-05 : 10E-05 : 10E-16
+mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : patch    : --src_type ESMF : 10E-04 : 10E-04 : 10E-16
+ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : patch    : --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
+#mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : conserve : --src_type ESMF : 10E-03 : 10E-02 : 10E-13
+#ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : conserve : --dst_type ESMF : 10E-05 : 10E-04 : 10E-13
 
 # mpas with regional grid
-wr50a_090614.nc            : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-05 : 10E-16
-mpas_uniform_10242_dual.nc : wr50a_090614.nc            : bilinear : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
-wr50a_090614.nc            : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-16
-mpas_uniform_10242_dual.nc : wr50a_090614.nc            : patch    : --dst_regional --src_type ESMF    : 10E-04 : 10E-16
-#wr50a_090614.nc            : mpas_uniform_10242_dual.nc : conserve : -i --src_regional --dst_type ESMF : 10E-03 : 10E-14
-#mpas_uniform_10242_dual.nc : wr50a_090614.nc            : conserve : --dst_regional --src_type ESMF    : 10E-02 : 10E-14
+wr50a_090614.nc            : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
+mpas_uniform_10242_dual.nc : wr50a_090614.nc            : bilinear : --dst_regional --src_type ESMF    : 10E-05 : 10E-04 : 10E-16
+wr50a_090614.nc            : mpas_uniform_10242_dual.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-06 : 10E-16
+mpas_uniform_10242_dual.nc : wr50a_090614.nc            : patch    : --dst_regional --src_type ESMF    : 10E-05 : 10E-04 : 10E-16
+#wr50a_090614.nc            : mpas_uniform_10242_dual.nc : conserve : -i --src_regional --dst_type ESMF : 10E-04 : 10E-03 : 10E-14
+#mpas_uniform_10242_dual.nc : wr50a_090614.nc            : conserve : --dst_regional --src_type ESMF    : 10E-03 : 10E-02 : 10E-14
 
 # test grid with clockwise cells (ww3a_120213) in conservative
-T42_grid.nc    : ww3a_120213.nc : conserve : -i : 10E-03 : 10E-14
-ww3a_120213.nc : T42_grid.nc    : conserve : -i : 10E-02 : 10E-14
+T42_grid.nc    : ww3a_120213.nc : conserve : -i : 10E-03 : 10E-03 : 10E-14
+ww3a_120213.nc : T42_grid.nc    : conserve : -i : 10E-03 : 10E-02 : 10E-14
 
 # new cubed sphere grids with small precision errors
-ne15nc4_scrip.nc : fv1.9x2.5_050503.nc : bilinear : -p all   : 10E-04 : 10E-16
-#ne15nc4_scrip.nc : fv1.9x2.5_050503.nc : conserve : -p none  : 10E-03 : 10E-13
+ne15nc4_scrip.nc : fv1.9x2.5_050503.nc : bilinear : -p all   : 10E-05 : 10E-04 : 10E-16
+#ne15nc4_scrip.nc : fv1.9x2.5_050503.nc : conserve : -p none  : 10E-04 : 10E-03 : 10E-13
 
 # new cubed sphere grids with concave cells
-ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : bilinear : -p all  : 10E-04 : 10E-16
-#ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : conserve : -p none  : 10E-03 : 10E-13
+ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : bilinear : -p all  : 10E-05 : 10E-04 : 10E-16
+#ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : conserve : -p none  : 10E-04 : 10E-03 : 10E-13
 
 # Nearest source to destination
-wr50a_090614.nc : wr50a_090614.nc : neareststod : --src_regional --dst_regional : 10E-16 : 10E-16
-T42_grid.nc : T42_grid.nc : neareststod : -i : 10E-04 : 10E-16
-#mpas_uniform_10242.nc     : mpas_uniform_10242.nc : neareststod : --src_type ESMF --dst_type ESMF    : 10E-16 : 10E-15
+wr50a_090614.nc : wr50a_090614.nc : neareststod : --src_regional --dst_regional : 10E-16 : 10E-16 : 10E-16
+T42_grid.nc : T42_grid.nc : neareststod : -i : 10E-16 : 10E-16 : 10E-16
+mpas_uniform_10242.nc     : mpas_uniform_10242.nc : neareststod : --src_type ESMF --dst_type ESMF    : 10E-16 : 10E-16 : 10E-15
 
 # Nearest destination to source
-wr50a_090614.nc : wr50a_090614.nc : nearestdtos : --src_regional --dst_regional : 10E-16 : 10E-16
-T42_grid.nc : T42_grid.nc : nearestdtos : -i : 10E-04 : 10E-16
-#mpas_uniform_10242.nc     : mpas_uniform_10242.nc : nearestdtos : --src_type ESMF --dst_type ESMF    : 10E-16 : 10E-15
+wr50a_090614.nc : wr50a_090614.nc : nearestdtos : --src_regional --dst_regional : 10E-16 : 10E-16 : 10E-16
+T42_grid.nc : T42_grid.nc : nearestdtos : -i : 10E-16 : 10E-16 : 10E-16
+mpas_uniform_10242.nc     : mpas_uniform_10242.nc : nearestdtos : --src_type ESMF --dst_type ESMF    : 10E-16 : 10E-16 : 10E-15
 
 # GridSpec
-GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : bilinear : -p none -i --src_type GRIDSPEC --src_missingvalue so: 10E-05 : 10E-16
-GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC -i --src_missingvalue so: 10E-04 : 10E-13
-so_Omon_GISS-E2.nc : SCRIP_1x1.nc : bilinear : --src_type GRIDSPEC : 10E-08 : 10E-16
-so_Omon_GISS-E2.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC : 10E-08 : 10E-14
-GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : bilinear : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-02 : 10E-16
-GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-04 : 10E-13
+GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : bilinear : -p none -i --src_type GRIDSPEC --src_missingvalue so : 10E-06 : 10E-05 : 10E-16
+GRIDSPEC_ACCESS1.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC -i --src_missingvalue so : 10E-05 : 10E-04 : 10E-13
+so_Omon_GISS-E2.nc : SCRIP_1x1.nc : bilinear : --src_type GRIDSPEC : 10E-09 : 10E-08 : 10E-16
+so_Omon_GISS-E2.nc : SCRIP_1x1.nc : conserve : --src_type GRIDSPEC : 10E-09 : 10E-08 : 10E-14
+GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : bilinear : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-05 : 10E-02 : 10E-16
+GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-05 : 10E-04 : 10E-13
 
 # UGRID
-#FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-03 : 10E-15
-FVCOM_grid2d.nc : scrip_regional_1140x690.nc : bilinear : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-06 : 10E-16
-#scrip_regional_1140x690.nc : FVCOM_grid2d.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-04 : 10E-15
-scrip_regional_1140x690.nc : FVCOM_grid2d.nc : bilinear : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-07 : 10E-16
+#FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+FVCOM_grid2d.nc : scrip_regional_1140x690.nc : bilinear : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-07 : 10E-06 : 10E-16
+#scrip_regional_1140x690.nc : FVCOM_grid2d.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
+scrip_regional_1140x690.nc : FVCOM_grid2d.nc : bilinear : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-08 : 10E-07 : 10E-16

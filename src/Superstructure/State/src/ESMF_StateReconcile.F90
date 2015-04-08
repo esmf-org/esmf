@@ -113,7 +113,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_StateReconcile          ! make consistent for concurrent apps
+      public ESMF_StateReconcile_v1       ! make consistent for concurrent apps
 
 !EOPI
 
@@ -139,11 +139,11 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-      subroutine ESMF_StateReconcile(state, vm, attreconflag, rc)
+      subroutine ESMF_StateReconcile_v1 (state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),            intent(inout)         :: state
@@ -167,12 +167,14 @@
 !     for this capability is to {\it not} reconcile metadata unless told
 !     otherwise.
 !
+!     This call is collective across the specified VM.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
 !     \item[{[vm]}]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it set to the current vm.
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
 !       This flag is documented in section \ref{const:attreconcile}.
@@ -180,7 +182,7 @@
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc
     type(ESMF_VM) :: localvm
     type(ESMF_StateItemInfo), pointer :: stateinfo(:)
@@ -281,7 +283,7 @@
     if (present(rc)) rc = ESMF_SUCCESS
 
  
-    end subroutine ESMF_StateReconcile
+    end subroutine ESMF_StateReconcile_v1
 
 
 !------------------------------------------------------------------------------

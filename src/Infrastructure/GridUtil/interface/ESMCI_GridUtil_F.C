@@ -28,6 +28,7 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
 #include "Mesh/include/ESMCI_Exception.h"
@@ -80,39 +81,31 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
     arraypp6
   };
 
-
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
   if (*spherical != 0) grid.setSphere();
+#endif
 
   for (UInt i = 0; i < *num_arrays; ++i)
     arrays.push_back(*ar[i]);
 
-  Mesh mesh;
+  // Convert Grid to Mesh
+  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  int localrc;
+  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
+                                     arrays,
+                                     NULL,
+                                     &regridConserve, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+  
+  meshp->meshwrite(name, &localrc, nlen);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  try {
+  // Get rid of Mesh  
+  delete meshp;
 
-    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, &regridConserve);
-
-    char *meshname = ESMC_F90toCstring(name, nlen);
-
-    WriteMesh(mesh, meshname);
-
-    delete [] meshname;
-
-  }
-  catch(std::exception &x) {
-    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
-    *rc = ESMF_FAILURE;
-    return;
-  }
-  catch(...) {
-    std::cout << "Error, unknown exception" << std::endl;
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  *rc = ESMF_SUCCESS;
-
+  // Return success
+  if (rc) *rc = ESMF_SUCCESS;
 }
 
 
@@ -131,9 +124,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridio()" 
   ESMCI::Grid &grid = **gridpp;
+  int localrc;
 
   // Get VM
-  int localrc;
   ESMCI::VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
@@ -154,112 +147,74 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     arraypp6
   };
 
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
   bool prevIsSphere=grid.isSphere();
   if (*spherical != 0) grid.setSphere();
 
   ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
   if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
+#endif
 
-
+  // Make list of arrays
   for (UInt i = 0; i < *num_arrays; ++i)
     arrays.push_back(*ar[i]);
 
-  Mesh mesh;
+  // Convert Grid to Mesh
+  int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
+                                     arrays,
+                                     NULL,
+                                     &regridConserve, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+  
+  meshp->meshwrite(name, &localrc, nlen);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  try {
+  // Get rid of Mesh  
+  delete meshp;
 
-    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
-    ESMCI::GridToMesh(grid, *staggerLoc, mesh, arrays, NULL, &regridConserve);
-
-    char *meshname = ESMC_F90toCstring(name, nlen);
-
-    WriteMesh(mesh, meshname);
-
-    delete [] meshname;
-
-  }
-  catch(std::exception &x) {
-    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
-    *rc = ESMF_FAILURE;
-    return;
-  }
-  catch(...) {
-    std::cout << "Error, unknown exception" << std::endl;
-    *rc = ESMF_FAILURE;
-    return;
-  }
-
-  // Reset Grid back to previous state
-  //  if (!prevIsSphere) grid.clearSphere();
-  //grid.setCoordSys(prevCoordSys);
-
-
-  *rc = ESMF_SUCCESS;
-
+  // Return success
+  if (rc) *rc = ESMF_SUCCESS;
 }
-
-
 
 
 
   void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
-    int *isSphere, int *islatlondeg, Mesh **meshpp,
-    ESMCI::InterfaceInt *maskValuesArg, int *regridConserve, int *rc) {
+                                int *isSphere, int *islatlondeg, MeshCap **meshpp,
+                                ESMCI::InterfaceInt *maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
+    
+    ESMCI::Grid &grid = **gridpp;
+    
 
-  ESMCI::Grid &grid = **gridpp;
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
+    // Make grid spherical if requested
+    bool prevIsSphere=grid.isSphere();
+    if (*isSphere != 0) grid.setSphere();
+    
+    // Map coords to surface of a sphere if reqeusted
+    ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
+    if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
+#endif    
 
-  // Make grid spherical if requested
-  bool prevIsSphere=grid.isSphere();
-  if (*isSphere != 0) grid.setSphere();
-
-  // Map coords to surface of a sphere if reqeusted
-  ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
-  if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
-
-
-  Mesh *meshp = new Mesh();
-
-  try {
-
+    // Temp vector
     std::vector<ESMCI::Array*> arrays;
-    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays, maskValuesArg,
-      regridConserve);
-//WriteMesh(*meshp, "gridtomesh");
+    
+    // Convert Grid to Mesh
+    int localrc;
+    *meshpp=MeshCap::GridToMesh(grid, *staggerLoc, 
+                                arrays,
+                                maskValuesArg,
+                                regridConserve, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-    *meshpp = meshp;
-
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
+    
+    // Set return code 
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-
-  // Reset Grid back to previous state
-  //if (!prevIsSphere) grid.clearSphere();
-  //grid.setCoordSys(prevCoordSys);
-
-
-  // Set return code 
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-}
-
+  
 #undef  ESMC_METHOD
 }

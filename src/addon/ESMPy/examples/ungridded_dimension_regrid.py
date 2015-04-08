@@ -6,8 +6,8 @@
 import ESMF
 import numpy
 
-# create a manager object with multiprocessor logging in debug mode
-ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+# esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll2.5deg_grid.nc"
 grid2 = "examples/data/T42_grid.nc"
@@ -89,11 +89,11 @@ dstmass = 0
 relerr = 0
 for timestep in range(time):
     for level in range(levels):
-        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*srcfield[level, timestep, :, :].data))
-        dstmass += numpy.sum(numpy.abs(dstareafield.data*dstfield[level, timestep, :, :].data))
-        relerr += numpy.sum(numpy.abs(dstfield[level, timestep, :, :].data /
-                                      dstfracfield.data - xctfield[level, timestep, :, :].data) /
-                            numpy.abs(xctfield[level, timestep, :, :].data))
+        srcmass += numpy.sum(numpy.abs(srcareafield.data*srcfracfield.data*srcfield.data[level, timestep, :, :]))
+        dstmass += numpy.sum(numpy.abs(dstareafield.data*dstfield.data[level, timestep, :, :]))
+        relerr += numpy.sum(numpy.abs(dstfield.data[level, timestep, :, :] /
+                                      dstfracfield.data - xctfield.data[level, timestep, :, :]) /
+                            numpy.abs(xctfield.data[level, timestep, :, :]))
 
 # compute the mean relative interpolation and conservation error
 from operator import mul
@@ -123,5 +123,5 @@ if ESMF.local_pet() is 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
     print "ESMPy Ungridded Field Dimensions Example"
-    print "  interpolation mean relative error = {}".format(meanrelerr)
-    print "  mass conservation relative error  = {}".format(csrverr)
+    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print "  mass conservation relative error  = {0}".format(csrverr)

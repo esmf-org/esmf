@@ -182,6 +182,9 @@ module ESMF_MeshMod
   public ESMF_MeshTurnOnNodeMask
   public ESMF_MeshTurnOffNodeMask
   public ESMF_MeshCreateDual  ! not a public interface for now
+  public ESMF_MeshSetMOAB
+  public ESMF_MeshGetIntPtr
+  public ESMF_MeshCreateFromIntPtr
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -2079,7 +2082,8 @@ end function ESMF_MeshCreateFromFile
     else if (coordDim .eq. 3) then
        parametricDim = 3
        spatialDim = 3
-       coordSys=ESMF_COORDSYS_CART
+       ! Do not set the default coordinate system to CART 
+       ! coordSys=ESMF_COORDSYS_CART
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
@@ -2626,6 +2630,175 @@ end function ESMF_MeshCreateFromScrip
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromIntPtr()"
+!!! BELOW ROUTINE EXPECTED TO GO AWAY WHEN MeshCap AND MeshCXX MERGED !!!
+!BOPI
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a internal C++ pointer
+!
+! !INTERFACE:
+    function ESMF_MeshCreateFromIntPtr(mesh_pointer, rc)
+
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromIntPtr
+! !ARGUMENTS:
+    type(ESMF_Pointer),        intent(in)            :: mesh_pointer
+    integer, intent(out), optional                   :: rc
+!
+! !DESCRIPTION:
+!   Create an empty mesh.
+!
+!   \begin{description}
+!   \item [parametricDim]
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
+!   \item[spatialDim] 
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
+
+    ! Create internal structure and Set pointer
+    call C_ESMC_MeshCreateFromIntPtr(ESMF_MeshCreateFromIntPtr%this,  &
+                                  mesh_pointer, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    ! Check init status of arguments
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromIntPtr)
+
+    ! Create two distgrids, one for nodes and one for elements
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromIntPtr%this, &
+                                       ESMF_MeshCreateFromIntPtr%nodal_distgrid, &
+                                       ESMF_MeshCreateFromIntPtr%numOwnedNodes, &
+                                       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromIntPtr%this, &
+                                       ESMF_MeshCreateFromIntPtr%element_distgrid, &
+                                       ESMF_MeshCreateFromIntPtr%numOwnedElements, &
+                                       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    ! The C side has been created
+    ESMF_MeshCreateFromIntPtr%isCMeshFreed=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreateFromIntPtr%hasSplitElem=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreateFromIntPtr%isFullyCreated=.true.
+
+    ! Set default coordsys
+    ESMF_MeshCreateFromIntPtr%coordSys=ESMF_COORDSYS_CART
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_MeshCreateFromIntPtr
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSetMOAB()"
+!BOPI
+! !IROUTINE: ESMF_MeshSetMOAB -- Turn on or off moab
+!
+! !INTERFACE:
+   subroutine ESMF_MeshSetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in)                        :: moabOn
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on Moab 
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Variable used to turn MOAB on or off
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+   ! Translate to integer
+   intMoabOn=0
+   if (moabOn) then
+      intMoabOn=1
+   endif
+
+    call c_esmc_meshsetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshSetMOAB
+
+    
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetIntPtr()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetIntPtr -- get internal pointer
+!
+! !INTERFACE:
+   subroutine ESMF_MeshGetIntPtr(mesh, internalPtr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    type(ESMF_Pointer), intent(out)          :: internalPtr
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Get the internal pointer. 
+!
+!   \begin{description}
+!   \item [mesh]
+!         Mesh to get internal pointer from
+!   \item [internalPtr]
+!         Internal pointer
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+    call c_esmc_meshgetinternalptr(mesh, internalPtr, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshGetIntPtr
 
 !!!!!!!!  private Mesh subroutines !!!!!!!!!!
 #undef  ESMF_METHOD
@@ -3124,8 +3297,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !  This call removes internal memory associated with {\tt mesh}. 
 !  After this call {\tt mesh} will no longer be usable.
-!
-! The arguments are:
+ !
+ ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to be destroyed.
@@ -3141,6 +3314,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
         call C_ESMC_MeshDestroy(mesh%this, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set this for consistancies sake
          mesh%isCMeshFreed=.true.

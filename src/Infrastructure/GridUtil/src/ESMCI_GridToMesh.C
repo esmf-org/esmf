@@ -56,6 +56,9 @@
 
 namespace ESMCI {
 
+  //// MOVED TO ESMCI_Mesh_GToM_Glue.C ////
+#if 0
+
   extern bool grid_debug;
 
 // *** Convert a grid to a mesh.  The staggerLoc should describe
@@ -1048,6 +1051,7 @@ void GridToPntList(Grid &grid, int staggerLoc, ESMCI::PntList **_pl) {
 }
 
 #undef  ESMC_METHOD
+#endif
 #endif
 
 } // namespace

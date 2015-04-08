@@ -6,14 +6,12 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-from operator import mul
+from copy import copy
 
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 from ESMF.api.array import *
 import ESMF.api.constants as constants
-
-
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
@@ -22,9 +20,9 @@ class Field(MaskedArray):
 
     @initialize
     def __new__(cls, grid, name,
-                typekind=TypeKind.R8, 
-                staggerloc=StaggerLoc.CENTER,
-                meshloc=MeshLoc.NODE,
+                typekind=None,
+                staggerloc=None,
+                meshloc=None,
                 ndbounds=None,
                 mask_values=None):
         """
@@ -71,6 +69,14 @@ class Field(MaskedArray):
             Field \n
         """
 
+        # optional arguments
+        if staggerloc is None:
+            staggerloc = StaggerLoc.CENTER
+        if typekind is None:
+            typekind = TypeKind.R8
+        if meshloc is None:
+            meshloc = MeshLoc.NODE
+
         # extra levels?
         grid_to_field_map = None
         ungridded_lower_bound = None
@@ -85,6 +91,7 @@ class Field(MaskedArray):
         else:
             local_ndbounds = [ndbounds]
 
+        xd = 0
         if local_ndbounds:
             xd = len(local_ndbounds)
             lb = [1 for a in range(len(local_ndbounds))]
@@ -106,11 +113,6 @@ class Field(MaskedArray):
             # set the grid mask
             if (grid.item_done[staggerloc][GridItem.MASK]):
                 lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
-                # if there are extra field dimensions, find out how many
-                if ungridded_lower_bound is not None:
-                    xd = len(ungridded_lower_bound)
-                else:
-                    xd = 0
                 # verify that grid mask is the same shape as the extra field dimensions
                 if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd + rank] - lbounds[xd:xd + rank])):
                     # initialize the mask to all unmasked values
@@ -169,25 +171,41 @@ class Field(MaskedArray):
         # initialize field data
         obj.struct = struct
         obj.rank = rank
+        obj.xd = xd
         obj.type = typekind
         obj.staggerloc = staggerloc
         obj.lower_bounds = lbounds
         obj.upper_bounds = ubounds
         obj.ndbounds = local_ndbounds
-        obj.grid = grid
+        obj.grid = grid._preslice_(staggerloc)
         obj.name = name
 
-        # for ocgis compatibility
-        obj._ocgis = {}
+        # for arbitrary attributes
+        obj.meta = {}
 
         # register function with atexit
-        import atexit;
+        import atexit
         atexit.register(obj.__del__)
         obj._finalized = False
 
         return obj
 
-    # destructor
+    # manual destructor
+    def destroy(self):
+        """
+        Release the memory associated with a Field. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if self._finalized is False:
+                ESMP_FieldDestroy(self)
+                self._finalized = True
+
     def __del__(self):
         """
         Release the memory associated with a Field. \n
@@ -198,13 +216,7 @@ class Field(MaskedArray):
         Returns: \n
             None \n
         """
-
-        if hasattr(self,'_finalized'):
-            if self._finalized is False:
-                ESMP_FieldDestroy(self)
-                self._finalized = True
-
-
+        self.destroy()
 
     def __repr__(self):
         """
@@ -212,50 +224,81 @@ class Field(MaskedArray):
         """
         string = ("Field:\n"
                   "    name = %r\n"
-                  "    struct = %r\n"
-                  "    rank = %r\n"
                   "    type = %r\n"
+                  "    rank = %r\n"
+                  "    extra dimensions = %r\n"
                   "    staggerloc = %r\n"
-                  "    lower_bounds = %r\n"
-                  "    upper_bounds = %r\n"
-                  "    ndbounds = %r\n"
+                  "    lower bounds = %r\n"
+                  "    upper bounds = %r\n"
+                  "    extra bounds = %r\n"
+                  "    grid = \n%r\n"
                   "    mask = %r\n"
-                  "    grid = \n%r\n)"
+                  "    data = %r\n"
+                  ")"
                   %
                   (self.name,
-                   self.struct,
-                   self.rank,
                    self.type,
+                   self.rank,
+                   self.xd,
                    self.staggerloc,
                    self.lower_bounds,
                    self.upper_bounds,
                    self.ndbounds,
+                   self.grid,
                    self.mask,
-                   self.grid))
+                   self.data
+                  ))
 
         return string
 
-    def read(self, filename, variable, timeslice, format=1):
-        """
-        Read data into a Field from a NetCDF file. \n
-        Required Arguments: \n
-            filename: the name of the NetCDF file. \n
-            variable: the name of the data variable to read. \n
-            timeslice: the number of time slices to read. \n
-        Optional Arguments: \n
-            format: unimplemented (defaults to NetCDF)
-        Returns: \n
-            Field \n
-        """
-        assert(type(filename) is str)
-        assert(type(variable) is str)
-        assert(type(timeslice) is int)
+    def _copy_(self):
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        ret._finalized = True
 
-        ESMP_FieldRead(self, filename=filename,
-                       variablename=variable,
-                       timeslice=timeslice,
-                       iofmt=format)
+        return ret
 
+    def _merge_(self, obj):
+        # initialize field data
+        obj.struct = self.struct
+        obj.name = self.name
+        obj.rank = self.rank
+        obj.xd = self.xd
+        obj.type = self.type
+        obj.staggerloc = self.staggerloc
+        obj.lower_bounds = self.lower_bounds
+        obj.upper_bounds = self.upper_bounds
+        obj.ndbounds = self.ndbounds
+        obj.meta = self.meta
+
+        # set slice to be finalized so it doesn't call the ESMF garbage collector
+        obj._finalized = True
+
+        return obj
+
+    def __getitem__(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        slc_field = get_formatted_slice(slc, self.rank)
+        ret = super(Field, self).__getitem__(slc_field)
+
+        # have to "merge" ret and self
+        ret = self._merge_(ret)
+
+        # set grid to the last two dims of the slice
+        if self.xd > 0:
+            slc_grid = [slc_field[-1*x] for x in range(self.rank-self.xd, 0, -1)]
+        else:
+            slc_grid = slc_field
+        ret.grid = self.grid._slice_onestagger_(slc_grid)
+
+        # upper bounds are "sliced" by taking the shape of the data
+        ret.upper_bounds = np.array(ret.data.shape, dtype=np.int32)
+        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
+
+        return ret
 
     def get_area(self):
         """
@@ -266,25 +309,55 @@ class Field(MaskedArray):
         Optional Arguments: \n
             None \n
         Returns: \n
-            None \n
+            None
         """
 
         # call into the ctypes layer
         ESMP_FieldRegridGetArea(self)
 
-    def dump_ESMF_coords(self):
-        from operator import mul
+    def read(self, filename, variable, ndbounds=None):
+        """
+        Read data into a Field from a NetCDF file. \n
+        NOTE: This interface is not supported when ESMF is built with ESMF_COMM=mpiuni. \n
+        Required Arguments: \n
+            filename: the name of the NetCDF file. \n
+            variable: the name of the data variable to read. \n
+            timeslice: the number of time slices to read. \n
+        Optional Arguments: \n
+            format: unimplemented (defaults to NetCDF)\n
+        Returns: \n
+            Field \n
+        """
 
-        # retrieve buffers to esmf coordinate memory
-        field_data = ESMP_FieldGetPtr(self.struct)
+        assert (type(filename) is str)
+        assert (type(variable) is str)
 
-        # find the reduced size of the coordinate arrays
-        size = reduce(mul,self.grid.size_local[self.staggerloc])
+        # format defaults to NetCDF for now
+        format = 1
 
-        # loop through and alias esmf data to numpy arrays
-        buffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(field_data.contents),
-            np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
-        esmf_coords = np.frombuffer(buffer, constants._ESMF2PythonType[self.type])
+        # if ndbounds is not passed in, set it to the first of extra field dimensions, if they exist
+        timeslice = 1
+        if ndbounds is None:
+            if self.ndbounds is not None:
+                if type(self.ndbounds) is list:
+                    timeslice = self.ndbounds[0]
+                elif type(self.ndbounds) is int:
+                    timeslice = self.ndbounds
+        # if ndbounds is passed in, make sure it is a reasonable value
+        else:
+            if self.ndbounds is not None:
+                if type(ndbounds) is not int:
+                    raise ValueError("ndbounds argument can only be a single integer at this time")
+                else:
+                    timeslice_local = 1
+                    if type(self.ndbounds) is list:
+                        timeslice_local = self.ndbounds[0]
+                    elif type(self.ndbounds) is int:
+                        timeslice_local = self.ndbounds
+                    assert (ndbounds <= timeslice_local)
+                    timeslice = ndbounds
 
-        print esmf_coords
+        ESMP_FieldRead(self, filename=filename,
+                       variablename=variable,
+                       timeslice=timeslice,
+                       iofmt=format)

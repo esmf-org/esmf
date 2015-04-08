@@ -78,7 +78,7 @@ contains
 ! !INTERFACE:
   subroutine ESMF_FileRegrid(srcFile, dstFile, srcVarName, dstVarName, keywordEnforcer, &
     dstCoordVars, regridmethod, polemethod, regridPoleNPnts, &
-    unmappedaction, srcRegionalFlag, dstRegionalFlag, &
+    unmappedaction, ignoreDegenerate, srcRegionalFlag, dstRegionalFlag, &
     useUserAreaFlag, verboseFlag, rc) 
 
 ! !ARGUMENTS:
@@ -93,6 +93,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
   integer,                      intent(in),  optional :: regridPoleNPnts
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
+  logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: srcRegionalFlag
   logical,                      intent(in),  optional :: dstRegionalFlag
   logical,                      intent(in),  optional :: useUserAreaFlag
@@ -145,6 +146,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[ignoreDegenerate]}]
+!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
+!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     The default is .FALSE.  
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.
@@ -233,6 +238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=256) :: errmsg, attstr
     integer, parameter :: nf90_noerror = 0
     !real(ESMF_KIND_R8) :: starttime, endtime
+    logical            :: localIgnoreDegenerate
    
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -259,6 +265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dstIsRegional = .false.
     localUserAreaflag = .false.
     localPoleNPnts = 0
+    localIgnoreDegenerate = .false.
     
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -295,6 +302,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localUnmappedaction = unmappedaction
     else
       localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+    endif
+
+    if (present(ignoreDegenerate)) then
+      localIgnoreDegenerate = ignoreDegenerate
     endif
 
     if (present(srcRegionalFlag)) then
@@ -619,6 +630,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
 	      print *, "  Ignore unmapped destination points"
         endif
+        if (localIgnoreDegenerate) then
+              print *, "  Ignore degenerate cells in the input grids"
+        endif   
         if (localUserAreaFlag) then
 	      print *, "  Use user defined cell area for both the source and destination grids"
         endif
@@ -824,6 +838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField, dstField, & 
 	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	      routehandle = routehandle, &
@@ -835,6 +850,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      srcMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	      routehandle = routehandle, &
@@ -846,6 +862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      dstMaskValues = maskvals, &
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	      routehandle = routehandle, &
@@ -856,6 +873,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else	
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
               regridmethod = localRegridMethod, &
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	      routehandle = routehandle, &

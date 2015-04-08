@@ -11,7 +11,7 @@ import ESMF.api.constants as constants
 from ESMF.util.decorators import deprecated, netcdf
 from ESMF.interface.loadESMF import _ESMF
 
-def copy(src):
+def copy_struct(src):
     dst = type(src)()
     ct.pointer(dst)[0] = src
     return dst
@@ -309,6 +309,12 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
 
     # set up the max index interface int
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
+
+    # reset the periodic_dim and pole_dim to be 1 based for ESMF
+    if periodicDim is not None:
+        periodicDim += 1
+    if poleDim is not None:
+        poleDim += 1
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
     gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
@@ -748,7 +754,7 @@ def ESMP_MeshAddElements(mesh, elementCount,
     """
     lec = ct.c_int(elementCount)
     # ESMC expects the elementConn array to be 1 based..
-    elementConn = elementConn + 1;
+    elementConn = elementConn + 1
     rc = _ESMF.ESMC_MeshAddElements(mesh.struct.ptr, lec,
                                     elementIds, elementTypes,
                                     elementConn, elementMask, elementArea)
@@ -762,7 +768,7 @@ _ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
                                     np.ctypeslib.ndpointer(dtype=np.float64),
                                     np.ctypeslib.ndpointer(dtype=np.int32)]
 @deprecated
-def ESMP_MeshAddNodes(mesh, nodeCount, \
+def ESMP_MeshAddNodes(mesh, nodeCount,
                       nodeIds, nodeCoords, nodeOwners):
     """
     Preconditions: An ESMP_Mesh has been created.  'nodeIds' holds the 
@@ -786,7 +792,7 @@ def ESMP_MeshAddNodes(mesh, nodeCount, \
     # this variant uses the ndarray.astype casting function
     nodeOwnersD = np.ndarray.astype(nodeOwners, np.int32)
 
-    rc = _ESMF.ESMC_MeshAddNodes(mesh.struct.ptr, lnc, \
+    rc = _ESMF.ESMC_MeshAddNodes(mesh.struct.ptr, lnc,
                                  nodeIdsD, nodeCoordsD, nodeOwnersD)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddNodes() failed with rc = '+str(rc)+'.    '+
@@ -900,9 +906,9 @@ def ESMP_MeshFreeMemory(mesh):
                         '.    '+constants._errmsg)
 
 _ESMF.ESMC_MeshGetCoord.restype = None
-_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, 
+_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p,
                                     np.ctypeslib.ndpointer(dtype=np.float64),
-                                    ct.POINTER(ct.c_int), 
+                                    ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_MeshGetCoordPtr(mesh):
@@ -1364,13 +1370,15 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalNamedConstant,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
+                                        OptionalNamedConstant,
                                         OptionalField,
                                         OptionalField]
 @deprecated
 def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
-                          regridmethod=None, polemethod=None,
-                          regridPoleNPnts=None, unmappedaction=None,
+                          regridmethod=None,
+                          polemethod=None, regridPoleNPnts=None,
+                          normType=None, unmappedaction=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1402,6 +1410,10 @@ def ESMP_FieldRegridStore(srcField, dstField,
                 PoleMethod.NPNTAVG\n
                 PoleMethod.TEETH\n
         integer (optional)                  :: regridPoleNPnts\n
+        NormType (optional)                 :: normType\n
+            Argument values:\n
+                (default) NormType.DSTAREA \n
+                NormType.DSTFRAC \n
         UnmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
@@ -1429,16 +1441,17 @@ def ESMP_FieldRegridStore(srcField, dstField,
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
 
-    rc = _ESMF.ESMC_FieldRegridStore(srcField.struct.ptr, \
-                                     dstField.struct.ptr, \
-                                     srcMaskValues_i, \
-                                     dstMaskValues_i, \
-                                     ct.byref(routehandle), \
-                                     regridmethod, \
-                                     polemethod, \
-                                     regridPoleNPnts_ct, \
-                                     unmappedaction, \
-                                     srcFracField, \
+    rc = _ESMF.ESMC_FieldRegridStore(srcField.struct.ptr,
+                                     dstField.struct.ptr,
+                                     srcMaskValues_i,
+                                     dstMaskValues_i,
+                                     ct.byref(routehandle),
+                                     regridmethod,
+                                     polemethod,
+                                     regridPoleNPnts_ct,
+                                     normType,
+                                     unmappedaction,
+                                     srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+

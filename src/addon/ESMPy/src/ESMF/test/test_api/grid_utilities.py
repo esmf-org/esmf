@@ -14,7 +14,7 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def grid_create(bounds, coords, domask=False, doarea=False):
+def grid_create(bounds, coords, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
     '''
     PRECONDITIONS: 'bounds' contains the number of indices required for the 
                    two dimensions of a 2D Grid.  'coords' contains the 
@@ -40,7 +40,7 @@ def grid_create(bounds, coords, domask=False, doarea=False):
     
     max_index = np.array([ub_x,ub_y])
 
-    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART)
+    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
     ##     CORNERS
     grid.add_coords(staggerloc=[ESMF.StaggerLoc.CORNER])
@@ -277,7 +277,7 @@ def initialize_field_grid(field, domask=False, doarea=False):
     gridXCoord = field.grid.get_coords(0, ESMF.StaggerLoc.CENTER)
     gridYCoord = field.grid.get_coords(1, ESMF.StaggerLoc.CENTER)
 
-    field.data[:]=20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridYCoord**2
+    field.data[:] = 20.0 + gridXCoord**2 + gridXCoord*gridYCoord + gridYCoord**2
 
     if domask:
         field.data[mask == 0] = 0
@@ -410,6 +410,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # gather error on processor 0 or set global variables in serial case
     mass1_global = 0
     mass2_global = 0
+    csrv_error_global = 0
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -460,6 +461,8 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # broadcast in parallel case
     if parallel:
         itrp, csrv = MPI.COMM_WORLD.bcast([itrp, csrv],0)
+        total_error_global, csrv_error_global = \
+            MPI.COMM_WORLD.bcast([total_error_global, csrv_error_global], 0)
 
     # print pass or fail
     assert (itrp and csrv)
@@ -469,4 +472,4 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     else:
         print "PET{0} - FAIL".format(ESMF.local_pet())
 
-    return correct
+    return total_error_global, csrv_error_global

@@ -598,17 +598,18 @@ int ESMC_FieldRegridGetArea(
 //
 // !INTERFACE:
 int ESMC_FieldRegridStore( 
-    ESMC_Field srcField,                       // in
-    ESMC_Field dstField,                       // in
-    ESMC_InterfaceInt *srcMaskValues,          // in
-    ESMC_InterfaceInt *dstMaskValues,          // in
-    ESMC_RouteHandle *routehandle,             // inout
-    enum ESMC_RegridMethod_Flag *regridmethod, // in
-    enum ESMC_PoleMethod_Flag *polemethod,     // in
-    int *regridPoleNPnts,                      // in
-    enum ESMC_UnmappedAction_Flag *unmappedaction,   // in
-    ESMC_Field *srcFracField,                  // out
-    ESMC_Field *dstFracField);                 // out
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    ESMC_InterfaceInt *srcMaskValues,              // in
+    ESMC_InterfaceInt *dstMaskValues,              // in
+    ESMC_RouteHandle *routehandle,                 // inout
+    enum ESMC_RegridMethod_Flag *regridmethod,     // in
+    enum ESMC_PoleMethod_Flag *polemethod,         // in
+    int *regridPoleNPnts,                          // in
+    enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_UnmappedAction_Flag *unmappedaction, // in
+    ESMC_Field *srcFracField,                      // out
+    ESMC_Field *dstFracField);                     // out
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -633,22 +634,28 @@ int ESMC_FieldRegridStore(
 //    List of values that indicate a destination point should be masked out. 
 //    If not specified, no masking will occur.
 //  \item[routehandle]
-//    The handle that implements the regrid, to be used in ESMC\_FieldRegrid().
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
 //  \item[regridmethod]
-//    The type of interpolation. If not specified, defaults to ESMF\_REGRIDMETHOD\_BILINEAR.
+//    The type of interpolation. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
 //  \item [polemethod]
 //    Which type of artificial pole
 //    to construct on the source Grid for regridding. 
+//    If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods, 
+//    and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods. 
 //    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}. 
 //  \item [regridPoleNPnts]
 //    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
 //    This parameter indicates how many points should be averaged
 //    over. Must be specified if {\tt polemethod} is 
 //    {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//  \item[normType]
+//    This argument controls the type of normalization used when generating conservative weights.
+//    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
+//    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
-//    be mapped to a source cell. Options are ESMF\_UNMAPPEDACTION\_ERROR or 
-//    ESMF\_UNMAPPEDACTION\_IGNORE. If not specified, defaults to ESMF\_UNMAPPEDACTION\_ERROR.
+//    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
+//    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
 //  \item [{[srcFracField]}] 
 //    The fraction of each source cell participating in the regridding. Only 
 //    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.

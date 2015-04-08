@@ -90,7 +90,12 @@ use File::Find;
 	 		push @all_files, "$File::Find::name\n" ; 
 	}	
 	# Get all example files
-	@ex_files=grep (/Ex/, @all_files);
+        @c_files=grep (/Ex.C/, @all_files);
+        @F90_files=grep (/Ex.F90/, @all_files);
+        foreach $file ( @c_files) {
+                push (@F90_files, $file);
+        }
+        @ex_files = @F90_files;
 	# Find the example files 
 	# grep for "ESMF_EXAMPLE" and/or  "ESMF_MULTI_PROC_EXAMPLE" depending on "processor".
 	$count=0;
