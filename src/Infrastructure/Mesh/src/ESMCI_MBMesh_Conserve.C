@@ -945,7 +945,6 @@ void calc_conserve_mat_serial_2D_2D_cart(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMes
 
 void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
-#if 0
 
   // both meshes have to have the same dimensions
   if (srcmbmp->pdim != dstmbmp->pdim) {
@@ -977,7 +976,6 @@ void calc_conserve_mat(MBMesh *srcmbmp, MBMesh *dstmbmp, MBMesh_SearchResult &sr
     Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
   }
 
-#endif
 }
 
 
