@@ -158,7 +158,7 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Call Fortran with arg #2 not present 1D array Test");
+  strcpy(name, "Call Fortran with arg #2 not present 2D array Test");
   strcpy(failMsg, "Did not report correct arguments");
 
   arg1_idim = 10;
