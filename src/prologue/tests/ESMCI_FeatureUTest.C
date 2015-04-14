@@ -161,8 +161,8 @@ int main(void){
 
   arg1_idim = 10;
   arg2_idim = 20;
-  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(arg1_1d, &arg1_idim, arg2_2d, &arg2_idim);
-  ESMCI::Test(abs (returnSum-824.6) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(arg1_2d, &arg1_idim, arg2_2d, &arg2_idim);
+  ESMCI::Test(abs (returnSum-847.5) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -195,7 +195,7 @@ int main(void){
   arg1_idim = 0;
   arg2_idim = 0;
   returnSum = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(returnSum==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMCI::Test(returnSum==0.0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
