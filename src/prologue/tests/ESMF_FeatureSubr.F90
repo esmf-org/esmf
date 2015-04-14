@@ -11,12 +11,13 @@
 !==============================================================================
 
 module ESMF_FeatureSubr_mod
+  use ESMF
   implicit none
 
 contains
 
-  real(8) function ESMF_FeatureSum1D (array1, array2) result (ret)
-    real(8), intent(in), optional :: array1(:), array2(:)
+  real(ESMF_KIND_R8) function ESMF_FeatureSum1D (array1, array2) result (ret)
+    real(ESMF_KIND_R8), intent(in), optional :: array1(:), array2(:)
 
     ret = 0.0
     if (present (array1)) ret = ret + sum (array1)
@@ -24,8 +25,8 @@ contains
 
   end function
 
-  real(8) function ESMF_FeatureSum2D (array1, array2) result (ret)
-    real(8), intent(in), optional :: array1(:,:), array2(:,:)
+  real(ESMF_KIND_R8) function ESMF_FeatureSum2D (array1, array2) result (ret)
+    real(ESMF_KIND_R8), intent(in), optional :: array1(:,:), array2(:,:)
 
     ret = 0.0
     if (present (array1)) ret = ret + sum (array1)
@@ -46,25 +47,27 @@ integer function ESMF_Optional_arg_pos (i, j) result (ret)
 
 end function
 
-real(8) function ESMF_Optional_arg_sum_a1d (a1, a1_size, a2, a2_size) result (ret)
+real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a1d (a1, a1_size, a2, a2_size) result (ret)
+  use ESMF
   use ESMF_FeatureSubr_mod
   implicit none
 
 ! Demonstrate passing adjustable size arrays
   integer, intent(in) :: a1_size, a2_size  ! leading dimensions
-  real(8), intent(in), optional :: a1(a1_size), a2(a2_size)
+  real(ESMF_KIND_R8), intent(in), optional :: a1(a1_size), a2(a2_size)
 
   ret = ESMF_FeatureSum1D (a1, a2)
 
 end function
 
-real(8) function ESMF_Optional_arg_sum_a2d (a1, a1_size, a2, a2_size) result (ret)
+real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a2d (a1, a1_size, a2, a2_size) result (ret)
+  use ESMF
   use ESMF_FeatureSubr_mod
   implicit none
 
 ! Demonstrate passing assumed size arrays
   integer, intent(in) :: a1_size, a2_size  ! leading dimensions
-  real(8), intent(in), optional :: a1(a1_size,*), a2(a2_size,*)
+  real(ESMF_KIND_R8), intent(in), optional :: a1(a1_size,*), a2(a2_size,*)
 
 ! Assume arrays have square shape
   ret = ESMF_FeatureSum2D (a1(:,:a1_size), a2(:,:a2_size))
