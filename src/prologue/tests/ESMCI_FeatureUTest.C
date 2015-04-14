@@ -110,8 +110,8 @@ int main(void){
 
   arg1_idim = 10;
   arg2_idim = 20;
-  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, arg2_1d, &arg2_idim);
-  ESMCI::Test(abs (returnVal-2.35) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, arg2_1d, &arg2_idim);
+  ESMCI::Test(abs (returnSum-2.35) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -121,9 +121,8 @@ int main(void){
 
   arg1_idim = 0;
   arg2_idim = 20;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, arg2_1d, &arg2_idim);
-  ESMCI::Test(abs (returnVal-1.9) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, arg2_1d, &arg2_idim);
+  ESMCI::Test(abs (returnSum-1.9) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -133,9 +132,8 @@ int main(void){
 
   arg1_idim = 10;
   arg2_idim = 0;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(abs (returnVal-0.45) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(abs (returnSum-0.45) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -145,9 +143,8 @@ int main(void){
 
   arg1_idim = 0;
   arg2_idim = 0;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(returnVal==0.0, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(returnSum==0.0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // C->Fortran optional argument 2D array tests
@@ -164,9 +161,8 @@ int main(void){
 
   arg1_idim = 10;
   arg2_idim = 20;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(arg1_1d, &arg1_idim, arg2_2d, &arg2_idim);
-  ESMCI::Test(abs (returnVal-824.6) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(arg1_1d, &arg1_idim, arg2_2d, &arg2_idim);
+  ESMCI::Test(abs (returnSum-824.6) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -176,9 +172,8 @@ int main(void){
 
   arg1_idim = 0;
   arg2_idim = 20;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, arg2_2d, &arg2_idim);
-  ESMCI::Test(abs (returnVal-798.0) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, arg2_2d, &arg2_idim);
+  ESMCI::Test(abs (returnSum-798.0) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -188,9 +183,8 @@ int main(void){
 
   arg1_idim = 10;
   arg2_idim = 0;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(arg1_2d, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(abs (returnVal-49.5) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(arg1_2d, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(abs (returnSum-49.5) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -200,9 +194,8 @@ int main(void){
 
   arg1_idim = 0;
   arg2_idim = 0;
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(returnVal==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnSum = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(returnSum==0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
