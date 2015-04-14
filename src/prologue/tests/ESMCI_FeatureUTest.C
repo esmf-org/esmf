@@ -13,6 +13,8 @@
 #include "ESMCI_Test.h"
 #include "ESMCI.h"
 
+#include <cmath>
+
 //==============================================================================
 //BOP
 // !PROGRAM: ESMCI_FeatureUTest - Check for support of various compiler features.
@@ -27,11 +29,11 @@ extern "C" {
 }
 
 extern "C" {
-  int FTN_X(esmf_optional_arg_pos_a1d)(double a1[], double a2[]);
+  double FTN_X(esmf_optional_arg_sum_a1d)(double a1[], int *, double a2[], int *);
 }
 
 extern "C" {
-  int FTN_X(esmf_optional_arg_pos_a2d)(double a1[], int *, double a2[], int *);
+  double FTN_X(esmf_optional_arg_sum_a2d)(double a1[], int *, double a2[], int *);
 }
 
 int main(void){
@@ -41,16 +43,18 @@ int main(void){
   int result = 0;
 
   int arg1=42, arg2=43;
+  int returnVal;
+
   double arg1_1d[10], arg2_1d[20];
   double arg1_2d[10*10], arg2_2d[20*20];  // dense 2D arrays
   int arg1_idim, arg2_idim;               // leading dimension for dense 2D arrays
-  int returnVal;
+  double returnSum;
 
   //----------------------------------------------------------------------------
   ESMCI::TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  // C->Fortran optional argument tests
+  // C->Fortran optional argument scalar tests
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -92,14 +96,22 @@ int main(void){
   ESMCI::Test(returnVal==0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  // C->Fortran optional argument 1D array tests
+
+  for (int i=0; i<10; i++)
+    arg1_1d[i] = i*0.01;
+  for (int i=0; i<20; i++)
+    arg2_1d[i] = i*0.01;
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Call Fortran with both args present 1D array Test");
   strcpy(failMsg, "Did not report correct arguments");
 
-  // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a1d)(arg1_1d, arg2_1d);
-  ESMCI::Test(returnVal==3, name, failMsg, &result, __FILE__, __LINE__, 0);
+  arg1_idim = 10;
+  arg2_idim = 20;
+  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, arg2_1d, &arg2_idim);
+  ESMCI::Test(abs (returnVal-2.35) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -107,9 +119,11 @@ int main(void){
   strcpy(name, "Call Fortran with arg #1 not present 1D array Test");
   strcpy(failMsg, "Did not report correct arguments");
 
+  arg1_idim = 0;
+  arg2_idim = 20;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a1d)(NULL, arg2_1d);
-  ESMCI::Test(returnVal==2, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, arg2_1d, &arg2_idim);
+  ESMCI::Test(abs (returnVal-1.9) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -117,9 +131,11 @@ int main(void){
   strcpy(name, "Call Fortran with arg #2 not present 1D array Test");
   strcpy(failMsg, "Did not report correct arguments");
 
+  arg1_idim = 10;
+  arg2_idim = 0;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a1d)(arg1_1d, NULL);
-  ESMCI::Test(returnVal==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(arg1_1d, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(abs (returnVal-0.45) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -127,10 +143,19 @@ int main(void){
   strcpy(name, "Call Fortran with no args present 1D array Test");
   strcpy(failMsg, "Did not report correct arguments");
 
+  arg1_idim = 0;
+  arg2_idim = 0;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a1d)(NULL, NULL);
-  ESMCI::Test(returnVal==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a1d)(NULL, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(returnVal==0.0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  // C->Fortran optional argument 2D array tests
+
+  for (int i=0; i<10*10; i++)
+    arg1_2d[i] = i*0.01;
+  for (int i=0; i<20*20; i++)
+    arg2_2d[i] = i*0.01;
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -140,8 +165,8 @@ int main(void){
   arg1_idim = 10;
   arg2_idim = 20;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a2d)(arg1_1d, &arg1_idim, arg2_2d, &arg2_idim);
-  ESMCI::Test(returnVal==3, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(arg1_1d, &arg1_idim, arg2_2d, &arg2_idim);
+  ESMCI::Test(abs (returnVal-824.6) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -152,8 +177,8 @@ int main(void){
   arg1_idim = 0;
   arg2_idim = 20;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a2d)(NULL, &arg1_idim, arg2_2d, &arg2_idim);
-  ESMCI::Test(returnVal==2, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, arg2_2d, &arg2_idim);
+  ESMCI::Test(abs (returnVal-798.0) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -164,8 +189,8 @@ int main(void){
   arg1_idim = 10;
   arg2_idim = 0;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a2d)(arg1_2d, &arg1_idim, NULL, &arg2_idim);
-  ESMCI::Test(returnVal==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(arg1_2d, &arg1_idim, NULL, &arg2_idim);
+  ESMCI::Test(abs (returnVal-49.5) < 0.0001, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -176,7 +201,7 @@ int main(void){
   arg1_idim = 0;
   arg2_idim = 0;
   // Fortran function returns a 1 bit for each argument that is present.
-  returnVal = FTN_X(esmf_optional_arg_pos_a2d)(NULL, &arg1_idim, NULL, &arg2_idim);
+  returnVal = FTN_X(esmf_optional_arg_sum_a2d)(NULL, &arg1_idim, NULL, &arg2_idim);
   ESMCI::Test(returnVal==0, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
