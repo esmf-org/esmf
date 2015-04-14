@@ -36,10 +36,12 @@ contains
 
 end module
 
-integer function ESMF_Optional_arg_pos (i, j) result (ret)
+function ESMF_Optional_arg_pos (i, j) result (ret)
   implicit none
 
   integer, intent(in), optional :: i, j
+
+  integer :: ret
 
   ret = 0
   if (present (i)) ret = 1
@@ -47,7 +49,7 @@ integer function ESMF_Optional_arg_pos (i, j) result (ret)
 
 end function
 
-real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a1d (a1, a1_size, a2, a2_size) result (ret)
+function ESMF_Optional_arg_sum_a1d (a1, a1_size, a2, a2_size) result (ret)
   use ESMF
   use ESMF_FeatureSubr_mod
   implicit none
@@ -56,11 +58,13 @@ real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a1d (a1, a1_size, a2, a2_size)
   integer, intent(in) :: a1_size, a2_size  ! leading dimensions
   real(ESMF_KIND_R8), intent(in), optional :: a1(a1_size), a2(a2_size)
 
+  real(ESMF_KIND_R8) :: ret
+
   ret = ESMF_FeatureSum1D (a1, a2)
 
 end function
 
-real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a2d (a1, a1_size, a2, a2_size) result (ret)
+function ESMF_Optional_arg_sum_a2d (a1, a1_size, a2, a2_size) result (ret)
   use ESMF
   use ESMF_FeatureSubr_mod
   implicit none
@@ -68,6 +72,8 @@ real(ESMF_KIND_R8) function ESMF_Optional_arg_sum_a2d (a1, a1_size, a2, a2_size)
 ! Demonstrate passing assumed size arrays
   integer, intent(in) :: a1_size, a2_size  ! leading dimensions
   real(ESMF_KIND_R8), intent(in), optional :: a1(a1_size,*), a2(a2_size,*)
+
+  real(ESMF_KIND_R8) :: ret
 
 ! Assume arrays have square shape
   ret = ESMF_FeatureSum2D (a1(:,:a1_size), a2(:,:a2_size))
