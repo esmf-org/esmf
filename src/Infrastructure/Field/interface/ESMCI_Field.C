@@ -135,16 +135,17 @@ void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
 void FTN_X(f_esmf_regridgetarea)(ESMCI::Field *fieldp, int *rc);
 
 void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  int *srcMaskValues, int *len1, int *smv_present,
-  int *dstMaskValues, int *len2, int *dmv_present,
+  int *srcMaskValues, int *len1, //int *smv_present,
+  int *dstMaskValues, int *len2, //int *dmv_present,
   ESMCI::RouteHandle **routehandlep, 
-  ESMC_RegridMethod_Flag *regridmethod, int *rm_present,
-  ESMC_PoleMethod_Flag *polemethod, int *pm_present,
-  int *regridPoleNPnts, int *rpnp_present,
-  ESMC_NormType_Flag *normtype, int *nt_present,
-  ESMC_UnmappedAction_Flag *unmappedaction, int *ua_present,
-  ESMCI::Field *srcfracfieldp, int *sff_present,
-  ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
+  ESMC_RegridMethod_Flag *regridmethod, //int *rm_present,
+  ESMC_PoleMethod_Flag *polemethod, //int *pm_present,
+  int *regridPoleNPnts, //int *rpnp_present,
+  ESMC_NormType_Flag *normtype, //int *nt_present,
+  ESMC_UnmappedAction_Flag *unmappedaction, //int *ua_present,
+  ESMCI::Field *srcfracfieldp, //int *sff_present,
+  ESMCI::Field *dstfracfieldp, //int *dff_present,
+  int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, ESMC_Region_Flag *zeroregion, int *zr_present,
@@ -1290,22 +1291,9 @@ namespace ESMCI {
     // Initialize return code. Assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-  
-    int smv_present, dmv_present;
-    int sff_present, dff_present;
-    int rm_present, nt_present, ua_present;
-    int pm_present, rpnp_present;
+
     bool smv_created, dmv_created;
     bool sff_created, dff_created;
-    smv_present = 0;
-    dmv_present = 0;
-    sff_present = 0;
-    dff_present = 0;
-    rm_present = 0;
-    nt_present = 0;
-    ua_present = 0;
-    pm_present = 0;
-    rpnp_present = 0;
     smv_created = false;
     dmv_created = false;
     sff_created = false;
@@ -1320,7 +1308,6 @@ namespace ESMCI {
            "- srcMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
          return ESMC_NULL_POINTER;
       }
-      smv_present = 1;
     } else {
       smv = new ESMCI::InterfaceInt();
       smv_created = true;
@@ -1334,67 +1321,33 @@ namespace ESMCI {
          if (smv_created) delete smv;
          return ESMC_NULL_POINTER;
       }
-      dmv_present = 1;
     } else {
       dmv = new ESMCI::InterfaceInt();
       dmv_created = true;
     }
 
-    if (srcFracField != NULL) {
-      sff_present = 1;
-    } else {
+    if (srcFracField == NULL) {
       sff = new ESMCI::Field();
       sff_created = true;
     }
 
-    if (dstFracField != NULL) {
-      dff_present = 1;
-    } else {
+    if (dstFracField == NULL) {
       dff = new ESMCI::Field();
       dff_created = true;
     }
 
-    ESMC_RegridMethod_Flag rm_loc = ESMC_REGRIDMETHOD_BILINEAR;
-    if (regridMethod != NULL){
-      rm_loc = *regridMethod;
-      rm_present = 1;
-    }
-
-    ESMC_NormType_Flag nt_loc = ESMC_NORMTYPE_DSTAREA;
-    if (normType != NULL){
-      nt_loc = *normType;
-      nt_present = 1;
-    }
-
-    ESMC_UnmappedAction_Flag ua_loc = ESMC_UNMAPPEDACTION_ERROR;
-    if (unmappedAction != NULL){
-      ua_loc = *unmappedAction;
-      ua_present = 1;
-    }
-
-    ESMC_PoleMethod_Flag pm_loc = ESMC_POLEMETHOD_NONE;
-    if (polemethod != NULL){
-      pm_loc = *polemethod;
-      pm_present = 1;
-    }
-
-    int rpnp_loc = -1;  // initialize with something obvious
-    if (regridPoleNPnts != NULL){
-      rpnp_loc = *regridPoleNPnts;
-      rpnp_present = 1;
-    }
-
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
-                              smv->array, &smv->extent[0], &smv_present,
-                              dmv->array, &dmv->extent[0], &dmv_present,
+                              smv->array, &smv->extent[0],
+                              dmv->array, &dmv->extent[0],
                               routehandlep,
-                              &rm_loc, &rm_present,
-			                  &pm_loc, &pm_present,
-			                  &rpnp_loc, &rpnp_present,
-                              &nt_loc, &nt_present,
-                              &ua_loc, &ua_present,
-                              srcFracField, &sff_present,
-                              dstFracField, &dff_present, &localrc);
+                              regridMethod,
+			                  polemethod,
+			                  regridPoleNPnts,
+                              normType,
+                              unmappedAction,
+                              srcFracField,
+                              dstFracField,
+                              &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       if (smv_created) delete smv;

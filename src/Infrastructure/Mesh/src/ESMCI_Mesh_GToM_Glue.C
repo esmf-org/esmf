@@ -766,6 +766,17 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
    delete gci;
 
 
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
@@ -775,6 +786,8 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
                                   "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+
   
   // SET OUTPUT MESH BY WHERE ALLOCATED
   // Set output mesh

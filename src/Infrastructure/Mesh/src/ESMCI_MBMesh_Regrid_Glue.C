@@ -347,7 +347,6 @@ void MBMesh_regrid_create(ESMCI::VM **vmpp,
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
 #endif          
