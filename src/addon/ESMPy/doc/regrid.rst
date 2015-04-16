@@ -1,10 +1,6 @@
-.. toctree::
-   :maxdepth: 2
-
-.. _regrid:
-
+~~~~~~
 Regrid
-======
+~~~~~~
 
-.. autoclass:: ESMF.Regrid
+.. autoclass:: ESMF.api.regrid.Regrid
     :members:

@@ -89,9 +89,6 @@ program ESMF_LocStreamCreateUTest
   distgrid=ESMF_DistGridCreate(minIndex=(/1/),maxIndex=(/10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#if 0
-!mvr
-
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1635,9 +1632,6 @@ program ESMF_LocStreamCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  !-----------------------------------------------------------------------------
 
-#endif
-!mvr
-
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -1654,8 +1648,6 @@ program ESMF_LocStreamCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  !-----------------------------------------------------------------------------
 
-stop
-!mvr
 
   ! Destroy distgrid
   call ESMF_DistGridDestroy(distgrid, rc=rc)
@@ -2263,8 +2255,6 @@ contains
     return
   endif
 
-  print*,'mvr: grid created'
-
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -2325,7 +2315,6 @@ contains
   locstream=ESMF_LocStreamCreate(localCount=pntCount, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
-  print*,'mvr: locstream created'
 
   ! Allocate Lon array
   allocate(Lon(pntCount))
@@ -2356,19 +2345,13 @@ contains
   endif
 
 
-  print*,'mvr: before key adds'
-
   ! Add key Lon
   call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lon", farray=Lon,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  print*,'mvr: lon key added'
-
   ! Add key Lat
   call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lat", farray=Lat,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  print*,'mvr: lat key added'
 
   ! Do locStream create from background mesh
   newLocstream=ESMF_LocStreamCreate(locstream, &
@@ -2377,8 +2360,6 @@ contains
      rc=ESMF_FAILURE
      return
   endif
-
-  print*,'mvr: newlocstream created?'
 
   
   call ESMF_LocStreamDestroy(locstream,rc=localrc)

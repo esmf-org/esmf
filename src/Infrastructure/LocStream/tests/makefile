@@ -40,7 +40,7 @@ RUN_ESMF_LocStreamUTestUNI:
 	$(MAKE) TNAME=LocStream NP=1 ftest
 
 RUN_ESMC_LocStreamUTest:
-        $(MAKE) TNAME=FieldRegrid NP=1 ctest
+        $(MAKE) TNAME=LocStream NP=4 ctest
 
 RUN_ESMC_LocStreamUTestUNI:
-        $(MAKE) TNAME=FieldRegrid NP=1 ctest
+        $(MAKE) TNAME=LocStream NP=1 ctest

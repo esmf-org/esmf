@@ -69,7 +69,7 @@ module ESMF_StateReconcile2Mod
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-  public :: ESMF_StateReconcile2 ! make State consistent for concurrent apps
+  public :: ESMF_StateReconcile  ! make State consistent for concurrent apps
 
   ! These are only public for unit testing.  They are not intended
   ! to be called by ESMF users.
@@ -131,13 +131,13 @@ contains
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-  subroutine ESMF_StateReconcile2(state, vm, attreconflag, rc)
+  subroutine ESMF_StateReconcile (state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_State),                 intent(inout)         :: state
-    type(ESMF_VM),                 intent(in),  optional :: vm
+    type(ESMF_State),            intent(inout)         :: state
+    type(ESMF_VM),               intent(in),  optional :: vm
     type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
-    integer,                         intent(out), optional :: rc                   
+    integer,                     intent(out), optional :: rc                   
 !
 !
 ! !DESCRIPTION:
@@ -162,7 +162,7 @@ contains
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
 !     \item[{[vm]}]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it set to the current vm.
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
 !       This flag is documented in section \ref{const:attreconcile}.
@@ -213,7 +213,7 @@ contains
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_StateReconcile2
+  end subroutine ESMF_StateReconcile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

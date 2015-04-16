@@ -40,20 +40,23 @@
   ! Local variables
   integer :: rc, petCount,localPet
   type(ESMF_VM) :: vm
+  type(ESMF_ArraySpec):: arrayspec
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_1w, Farray_2w
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_1r, Farray_2r
-  type(ESMF_Grid) :: grid
+  real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:), Farray_DE0_r(:,:)
+  real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:), Farray_DE1_r(:,:)
+  type(ESMF_Grid) :: grid, grid_2DE
   type(ESMF_StaggerLoc)                       :: sloc
   integer :: i, j, localrc
   real(ESMF_KIND_R8) :: Maxvalue, diff
-  type(ESMF_Field) :: fieldRd(2),fieldTst(2)
+  type(ESMF_Field) :: fieldRd(3),fieldTst(3)
   type(ESMF_FieldBundle) :: bundleRd, bundleTst
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
 
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
-
+  integer :: countfail = 0
 
   !---------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize()
@@ -77,6 +80,17 @@
     name="landgrid", rc=rc)
   write(failMsg, *) ""
   write(name, *) "Creating a Grid to use in Field Tests"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verifying that a Grid with 2 DEs/PET can be created
+  grid_2DE = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/8,1/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+    name="landgrid", rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Creating a 2 DE/PET Grid to use in Field Tests"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -131,10 +145,50 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! Create a ArraySpec
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,   &
+                         rank=2, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Array Spec Set "
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field 
+  fieldTst(3)=ESMF_FieldCreate(grid_2DE, arrayspec,  &
+           name="temperature_2de_case",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a field from 2 DE/PET grid"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  call ESMF_FieldGet(fieldTst(3), localDe=0, farrayPtr=Farray_DE0_w, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill Farray_w from field DE 0"
+  Farray_DE0_w = 0.1_ESMF_KIND_R8
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  call ESMF_FieldGet(fieldTst(3), localDe=1, farrayPtr=Farray_DE1_w, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill Farray_w from field DE 1"
+  Farray_DE1_w = 1.1_ESMF_KIND_R8
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Try creating a bundle of these fields
   bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=rc)      
   write(failMsg, *) ""
-  write(name, *) "Create a bundle from 2 fields "
+  write(name, *) "Create a bundle from 3 fields "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -194,10 +248,20 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! Create Field 
+  fieldRd(3)=ESMF_FieldCreate(grid_2DE, arrayspec,  &
+           name="temperature_2de_case",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a field from 2 DE/PET grid"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Try creating a bundle of these fields
   bundleRd=ESMF_FieldBundleCreate(fieldList=fieldRd,rc=rc)
   write(failMsg, *) ""
-  write(name, *) "Create a bundle from 2 fields "
+  write(name, *) "Create a bundle from 3 fields "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -206,7 +270,7 @@
   ! FieldBundle Read from a single file Test
   call ESMF_FieldBundleRead(bundleRd, file="single.nc", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Writing a FieldBundle to a single file Test"
+  write(name, *) "Reading a FieldBundle from a single file Test"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -243,7 +307,7 @@
   call ESMF_FieldBundleRead(bundleRd, file="multi.nc", &
                            singleFile=.false., rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  write(name, *) "Writing a FieldBundle to a single file Test"
+  write(name, *) "Reading a FieldBundle from multiple files Test"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -276,6 +340,50 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get DE 0 Array pointer from Field
+  call ESMF_FieldGet(fieldRd(3), localDe=0, farrayPtr=Farray_DE0_r, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_r from field DE 0"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! DE 0 Array comparison test
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE0_r == 0.1_ESMF_KIND_R8))
+#else
+  rc = ESMF_SUCCESS
+#endif
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "DE 0 Array comparison test"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get DE 1 Array pointer from Field
+  call ESMF_FieldGet(fieldRd(3), localDe=1, farrayPtr=Farray_DE1_r, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_r from field DE 1"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! DE 1 Array comparison test
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE1_r == 1.1_ESMF_KIND_R8))
+#else
+  rc = ESMF_SUCCESS
+#endif
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "DE 1 Array comparison test"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
   ! cleanup 
    deallocate ( exclusiveLBound, exclusiveUBound ) 
 
@@ -301,16 +409,32 @@
   write(name, *) "Field Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(fieldRd(1), rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(fieldRd(2), rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(fieldRd(3), rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(fieldTst(1), rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(fieldTst(2), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(fieldTst(3), rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_Test(countfail == 0, name, failMsg, result, ESMF_SRCLINE)
 
   deallocate(Farray_1w)
   deallocate(Farray_2w)
   deallocate(Farray_1r)
   deallocate(Farray_2r)
 
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy globally indexed 2DE Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid_2DE, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------

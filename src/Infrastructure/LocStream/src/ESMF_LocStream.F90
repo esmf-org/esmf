@@ -1113,7 +1113,6 @@ contains
       integer, pointer :: petList(:), gidList(:)
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: gridDimCount, isSphere
-      type(ESMF_CoordSys_Flag) :: mvr_coordSys, coordSys_ofBkgMesh
 
 
       ! Initialize return code; assume failure until success is certain
@@ -1125,12 +1124,11 @@ contains
 
 
       ! Get Grid dimension
-      call ESMF_GridGet(background, dimCount=gridDimCount, coordSys=mvr_coordSys, rc=localrc)
+      call ESMF_GridGet(background, dimCount=gridDimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-     print*,'mvr: in bkgGrid: coordSys= ',mvr_coordSys
 
      ! Chose staggerloc based on dimension
      if (gridDimCount .eq. 2) then
@@ -1148,14 +1146,6 @@ contains
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
-!mvr temp vvvvvvvvvv
-      call ESMF_MeshGet(mesh, coordSys=coordSys_ofBkgMesh, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return     
-
-     print*,'mvr: in bkgGrid: coordSys_ofBkgMesh= ',coordSys_ofBkgMesh
 
 
      ! Create new locstream from Background Mesh
@@ -1229,15 +1219,15 @@ contains
       type(ESMF_DistGrid) :: newDistGrid
       type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
-      integer :: keyCount,i
+      integer :: keyCount,i,regrid_dims,idx,idx_cart
       integer :: localrc
       integer :: pntDim, pntCount
       real(ESMF_KIND_R8),  pointer  :: pntList(:)
+      real(ESMF_KIND_R8),  pointer  :: pntList_cart(:)
       integer, pointer :: petList(:)
       character (len=ESMF_MAXSTR)            :: coordKeyNames
       type(ESMF_CoordSys_Flag) :: coordSysLocal, coordSys_ofBkgMesh
       logical :: three_dims
-
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1265,23 +1255,15 @@ contains
       ! Get old locstream internal pointer
       oldLStypep=>locstream%lstypep
 
-      print*,'mvr: hello1'
-
       call ESMF_MeshGet(background, coordSys=coordSys_ofBkgMesh, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return     
 
-      print*,'mvr: hello2'
       call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      print*,'mvr: hello3: coordSysLocal= ',coordSysLocal,'  coordSys_ofBkgMesh= ',coordSys_ofBkgMesh
-      print*,'mvr: ESMF_COORDSYS_CART= ',ESMF_COORDSYS_CART
-      print*,'mvr: ESMF_COORDSYS_SPH_RAD= ',ESMF_COORDSYS_SPH_RAD
-      print*,'mvr: ESMF_COORDSYS_SPH_DEG= ',ESMF_COORDSYS_SPH_DEG
 
       if ((coordSysLocal .eq. ESMF_COORDSYS_CART .and. &
            coordSys_ofBkgMesh .ne. ESMF_COORDSYS_CART) .or. &
@@ -1292,42 +1274,31 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      print*,'mvr: hello4'
       if (coordSysLocal .eq. ESMF_COORDSYS_CART) then
-      print*,'mvr: hello1'
         call ESMF_LocStreamGetKey(locstream, keyName="ESMF:Z", &
                                   isPresent=three_dims, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-      print*,'mvr: hello5'
         if (three_dims) then
-      print*,'mvr: hello1'
           coordKeyNames = "ESMF:X,ESMF:Y,ESMF:Z"
         else
-      print*,'mvr: hello6'
           coordKeyNames = "ESMF:X,ESMF:Y"
         endif
 
       else
-      print*,'mvr: hello7'
         call ESMF_LocStreamGetKey(locstream, keyName="ESMF:Radius", &
                                   isPresent=three_dims, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-      print*,'mvr: hello8'
         if (three_dims) then
-      print*,'mvr: hello9'
           coordKeyNames = "ESMF:Lon,ESMF:Lat,ESMF:Radius"
         else
-      print*,'mvr: hello10'
           coordKeyNames = "ESMF:Lon,ESMF:Lat"
         endif
-      print*,'mvr: hello11'
 
       endif
-      print*,'mvr: hello12'
 
       ! Calculate pntDim 
        pntDim = 0
@@ -1337,7 +1308,6 @@ contains
           pntDim = pntDim + 1
        enddo
 
-      print*,'mvr: hello13'
       ! Calculate number of local points
       call ESMF_LocStreamGetNumLocal(locstream, localCount=pntCount, &
                                      rc=localrc)      
@@ -1346,19 +1316,16 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      print*,'mvr: hello14'
       ! Allocate memory for points
       allocate(pntList(pntDim*pntCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
-      print*,'mvr: hello15'
       ! Allocate memory for pets
       allocate(petList(pntCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating petList", &
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
-      print*,'mvr: hello16'
       ! Get Points 
       call ESMF_LocStreamGetPntList(locstream, coordKeyNames, pntDim, &
               pntCount, pntList, rc=localrc)
@@ -1367,21 +1334,37 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      print*,'mvr: hello17'
+      call c_ESMC_PointListCalcCartDim(coordSysLocal, pntDim, regrid_dims, localrc)
+      if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Allocate memory for points in cart
+      allocate(pntList_cart(regrid_dims*pntCount), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList_cart", &
+        ESMF_CONTEXT, rcToReturn=rc)) return   
+
+      do i=1,pntCount
+        idx = (i-1) * pntDim + 1
+        idx_cart = (i-1) * regrid_dims + 1
+        call c_ESMC_PointListSph2CartCoord(coordSysLocal, pntDim, &
+                   pntList(idx),pntList_cart(idx_cart),localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+                               rcToReturn=rc)) return
+      enddo
+
+
       ! Find out where points lie on Mesh
       call ESMF_MeshFindPnt(background, localunmappedaction, &
-                                pntDim, pntCount, pntList, &
+                                regrid_dims, pntCount, pntList_cart, &
                                 petList, rc=localrc)
 
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-      print*,'mvr: hello18'
       ! Can now get rid of pntList
       deallocate(pntList)
 
-      print*,'mvr: hello19'
       ! Create a new location stream by shifting the entries between 
       ! the pets based on petList
       ESMF_LocStreamCreateByBkgMesh=ESMF_LocStreamCreatePetList(locstream, name, &
@@ -1390,8 +1373,7 @@ contains
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     
-      print*,'mvr: hello20'
-     ! Can now get rid of pntList
+     ! Can now get rid of petList
       deallocate(petList)
 
       ! return success
@@ -5286,7 +5268,7 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Allocate space for seqInd
      allocate(seqInd(petListCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating seqInd", &
        ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
@@ -5715,8 +5697,6 @@ end subroutine ESMF_LocStreamGetBounds
       ! Check Variables
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
-      print*,'mvr: wow1'
-
       ! Get keynames
       ! Calculate pntDim 
        dim = 1
@@ -5736,7 +5716,6 @@ end subroutine ESMF_LocStreamGetBounds
           dim = dim + 1
        enddo
 
-      print*,'mvr: wow2'
        ! check pntDim
        if (pntDim /= dim-1) then
 	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
@@ -5744,14 +5723,10 @@ end subroutine ESMF_LocStreamGetBounds
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
-      print*,'mvr: wow3'
-
       ! Get number of localDEs
       call ESMF_LocStreamGet(locstream, localDECount=localDECount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-      print*,'mvr: wow4'
 
 
      ! Get pnt coordinates
@@ -5759,14 +5734,11 @@ end subroutine ESMF_LocStreamGetBounds
      !!       at some point it might make sense to get rid of these
      do i=1,pntDim
 
-       print*,'mvr: coordKeyList(',i,')= ',coordKeyList(i)
-
        ! Get typeKind
        call ESMF_LocStreamGetKey(locstream,keyName=trim(coordKeyList(i)), typekind=typekind, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        print*,'mvr: wow i= ',i
 
 	! Copy data based on typekind
 	if (typekind .eq. ESMF_TYPEKIND_R8) then

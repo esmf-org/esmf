@@ -37,58 +37,53 @@ class Mesh(object):
         Create an unstructured Mesh. This can be done two different ways, 
         as a Mesh in memory, or from a SCRIP formatted or CF compliant UGRID 
         file. The argument for each type of Mesh creation are outlined below. \n
-        Mesh in memory: \n
-            The in-memory Mesh can be created manually in 3 steps: \n
-            1. create the Mesh (specifying parametric_dim and spatial_dim), \n
-            2. add nodes, \n
-            3. add elements. \n
-            Required arguments for a Mesh in memory: \n
-                parametric_dim: the dimension of the topology of the Mesh (e.g.
-                a Mesh composed of squares would have a parametric dimension of 
-                2 and a Mesh composed of cubes would have a parametric dimension
-                of 3). \n
-                spatial_dim: the number of coordinate dimensions needed to
-                describe the locations of the nodes making up the Mesh.  For a
-                manifold the spatial dimension can be larger than the parametric
-                dimension (e.g. the 2D surface of a sphere in 3D space), but it
-                cannot be smaller. \n
-            Optional arguments for creating a Mesh in memory: \n
-                None \n
-        Mesh from file: \n
-            Note that Meshes created from file do not have the parametric_dim and
-            spatial dim set.  Required arguments for creating a Mesh from file: \n
-                filename: the name of NetCDF file containing the Mesh. \n
-                filetype: the input file type of the Mesh. \n
-                    Argument values are: \n
-                        FileFormat.SCRIP \n
-                        FileFormat.ESMFMESH \n
-                        FileFormat.UGRID \n
-            Optional arguments for creating a Mesh from file: \n
-                convert_to_dual: a boolean value to specify if the dual 
-                                 Mesh should be calculated. 
-                                 Defaults to True. This argument is only
-                                 supported with filetype FileFormat.SCRIP. \n
-                add_user_area: a boolean value to specify if an area 
-                               property should be added to the mesh.  This
-                               argument is only supported for filetype 
-                               FileFormat.SCRIP or FileFormat.ESMFMESH.  
-                               Defaults to False. \n
-                meshname: a string value specifying the name of the 
-                          Mesh metadata variable in a UGRID file.  This 
-                          argument is only supported with filetype 
-                          FileFormat.UGRID.  Defaults to the empty string. \n
-                mask_flag: an enumerated integer that, if specified, tells
-                           whether a mask in a UGRID file should be defined
-                           on the nodes (MeshLoc.NODE) or the elements 
-                           (MeshLoc.ELEMENT) of the Mesh.  This 
-                          argument is only supported with filetype 
-                          FileFormat.UGRID.  Defaults to no masking. \n
-                varname: a string to specify a variable name for the mask in a
-                         UGRID file if mask_flag is specified.  This argument
-                         is only supported for filetype FileFormat.UGRID.
-                         Defaults to the empty string. \n
-        Returns: \n
-            Mesh \n
+            Mesh in memory: \n
+                The in-memory Mesh can be created manually in 3 steps: \n
+                    1. create the Mesh (specifying parametric_dim and spatial_dim), \n
+                    2. add nodes, \n
+                    3. add elements. \n
+                    Required arguments for a Mesh in memory: \n
+                        parametric_dim: the dimension of the topology of the Mesh (e.g.
+                            a Mesh composed of squares would have a parametric dimension of
+                            2 and a Mesh composed of cubes would have a parametric dimension
+                            of 3). \n
+                        spatial_dim: the number of coordinate dimensions needed to
+                            describe the locations of the nodes making up the Mesh.  For a
+                            manifold the spatial dimension can be larger than the parametric
+                            dimension (e.g. the 2D surface of a sphere in 3D space), but it
+                            cannot be smaller. \n
+                    Optional arguments for creating a Mesh in memory: \n
+                        None \n
+            Mesh from file: \n
+                Note that Meshes created from file do not have the parametric_dim and
+                spatial dim set.  \n
+                Required arguments for creating a Mesh from file: \n
+                    filename: the name of NetCDF file containing the Mesh. \n
+                    filetype: the input file type of the Mesh. \n
+                        Argument values are: \n
+                            FileFormat.SCRIP \n
+                            FileFormat.ESMFMESH \n
+                            FileFormat.UGRID \n
+                Optional arguments for creating a Mesh from file: \n
+                    convert_to_dual: a boolean value to specify if the dual
+                        Mesh should be calculated.  Defaults to True.  This
+                        argument is only supported with filetype FileFormat.SCRIP.\n
+                    add_user_area: a boolean value to specify if an area
+                        property should be added to the mesh.  This argument is only
+                        supported for filetype FileFormat.SCRIP or FileFormat.ESMFMESH.
+                        Defaults to False. \n
+                    meshname: a string value specifying the name of the
+                        Mesh metadata variable in a UGRID file.  This argument is only
+                        supported with filetype FileFormat.UGRID.  Defaults to the empty string. \n
+                    mask_flag: an enumerated integer that, if specified, tells whether
+                        a mask in a UGRID file should be defined on the nodes (MeshLoc.NODE)
+                        or the elements (MeshLoc.ELEMENT) of the Mesh.  This argument is only
+                        supported with filetype FileFormat.UGRID.  Defaults to no masking. \n
+                    varname: a string to specify a variable name for the mask in a UGRID file
+                        if mask_flag is specified.  This argument is only supported for
+                        filetype FileFormat.UGRID.  Defaults to the empty string. \n
+            Returns: \n
+                Mesh \n
         """
 
         # handle input arguments
@@ -180,6 +175,22 @@ class Mesh(object):
         # set the single stagger flag
         self._singlestagger = False
 
+    # manual destructor
+    def destroy(self):
+        """
+        Release the memory associated with a Mesh. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_MeshDestroy(self)
+                self._finalized = True
+
     def __del__(self):
         """
         Release the memory associated with a Mesh. \n
@@ -190,10 +201,7 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        if not self._finalized:
-            ESMP_MeshDestroy(self)
-            self._finalized = True
-
+        self.destroy()
 
     def __repr__(self):
         """

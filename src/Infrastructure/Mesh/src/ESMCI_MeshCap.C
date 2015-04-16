@@ -667,27 +667,19 @@ void MeshCap::meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
 }
 
 
-// TODO: figure out how to pass error information out! 
+// Just destroy structure, internal meshes are destroyed in destroy()
 MeshCap::~MeshCap() {
-  int rc;
 
-  // Call into func. depending on mesh type
-  if (is_esmf_mesh) {
-    ESMCI_meshdestroy(&mesh, &rc);
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, &rc);
-    return;
-  }
 }
-
 
 void MeshCap::meshfreememory(int *rc) {
  
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_meshfreememory(&mesh, rc);
+
+    // Make this NULL to indicate that mesh is gone
+    mesh=NULL;
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
        "- this functionality is not currently supported using MOAB",
@@ -1270,3 +1262,34 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   // Output new MeshCap
   return mc;
 }
+
+void MeshCap::destroy(MeshCap **mcpp,int *rc) {
+
+  // Dereference meshcap
+  MeshCap *mcp=*mcpp;
+
+  // Get mesh type
+  bool is_esmf_mesh=mcp->is_esmf_mesh;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    // Only do if mesh is present
+    if (mcp->mesh != NULL) {
+      int localrc;
+      ESMCI_meshdestroy(&(mcp->mesh), &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
+    }
+  } else {
+    // NEED TO DO THIS IF WE GO TO MOAB
+  }
+
+  // delete MeshCap struct
+  delete mcp;
+
+  // Set to NULL
+  *mcpp=NULL;
+
+  // Set error code to success
+  if (rc) *rc=ESMF_SUCCESS;
+ }

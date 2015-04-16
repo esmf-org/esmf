@@ -42,6 +42,7 @@ program ESMF_FieldIOUTest
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
   type(ESMF_Field) :: field_w_nohalo
   type(ESMF_Field) :: field_gw, field_gr, field_gr2, field_gr3
+  type(ESMF_Field) :: field_r2de, field_w2de
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
@@ -50,7 +51,10 @@ program ESMF_FieldIOUTest
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
   ! field_s---Farray_sw; field_sr---Farray_sr
-  type(ESMF_Grid) :: grid, grid_g
+  type(ESMF_Grid) :: grid, grid_g, grid_2DE
+
+  real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
 
   integer                                 :: rc
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
@@ -87,7 +91,7 @@ program ESMF_FieldIOUTest
   ! Create a ArraySpec
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,   &
                          rank=2, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Array Spec Set "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -98,7 +102,7 @@ program ESMF_FieldIOUTest
   grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
     name="landgrid", rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Creating a Grid to use in Field Tests"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -120,7 +124,7 @@ program ESMF_FieldIOUTest
   field_w=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
            totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
            name="temperature",  rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a field from grid and fortran dummy array"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -131,7 +135,7 @@ program ESMF_FieldIOUTest
   call ESMF_FieldGet(field_w, localDe=0, farrayPtr=Farray_w, &
       exclusiveLBound=exclusiveLBound, &
       exclusiveUBound=exclusiveUBound, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_w from field"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -156,7 +160,7 @@ program ESMF_FieldIOUTest
   ! Write Fortran array in Field
   call ESMF_FieldWrite(field_w, file="field.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -170,7 +174,7 @@ program ESMF_FieldIOUTest
   ! Create Field without halo region
   field_w_nohalo=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
            name="temperature",  rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a field from grid and fortran dummy array without halo"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -181,7 +185,7 @@ program ESMF_FieldIOUTest
   call ESMF_FieldGet(field_w_nohalo, localDe=0, farrayPtr=Farray_w, &
       exclusiveLBound=exclusiveLBound, &
       exclusiveUBound=exclusiveUBound, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_w from nohalo field"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -204,7 +208,7 @@ program ESMF_FieldIOUTest
   ! Write Fortran array in nohalo Field
   call ESMF_FieldWrite(field_w_nohalo, file="fieldNoHalo.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in nohalo Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -327,7 +331,7 @@ program ESMF_FieldIOUTest
   ! Create a ArraySpec
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8,   &
                          rank=2, rc=rc)
-  write(failMsg, *) ""
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Array Spec Set "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
@@ -751,6 +755,152 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
+! Multiple DEs per PET tests
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verifying that a Grid can be created
+  grid_2DE = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/8,1/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+    name="landgrid", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Creating a Grid with 2DEs/PET to use in Field Tests"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_w2DE=ESMF_FieldCreate(grid_2DE, arrayspec=arrayspec, &
+           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
+           name="temperature",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field from 2DE grid and fortran dummy array"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  call ESMF_FieldGet(field_w2DE, localDe=0, farrayPtr=Farray_DE0_w, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill Farray_w from field DE 0"
+  Farray_DE0_w = 0.1
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from Field
+  call ESMF_FieldGet(field_w2DE, localDe=1, farrayPtr=Farray_DE1_w, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill Farray_w from field DE 1"
+  Farray_DE1_w = 1.1
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write Fortran 2DE array in Field
+  call ESMF_FieldWrite(field_w2DE, file="field_2DE.nc",        &
+       iofmt=ESMF_IOFMT_NETCDF,  &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write Fortran 2DE array in Field"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_r2DE=ESMF_FieldCreate(grid_2DE, arrayspec=arrayspec, &
+           name="temperature",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a globally indexed field from grid and fortran dummy array"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! read array into Field.
+  call ESMF_FieldRead(field_r2DE, file="field_2DE.nc",        &
+       rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Read 2DE Field Array data"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get DE 0 Array pointer from Field
+  call ESMF_FieldGet(field_r2DE, localDe=0, farrayPtr=Farray_DE0_r, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_r from field DE 0"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! DE 0 Array comparison test
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE0_r == 0.1))
+#else
+  rc = ESMF_SUCCESS
+#endif
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "DE 0 Array comparison test"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get DE 1 Array pointer from Field
+  call ESMF_FieldGet(field_r2DE, localDe=1, farrayPtr=Farray_DE1_r, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_r from field DE 1"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! DE 1 Array comparison test
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE1_r == 1.1))
+#else
+  rc = ESMF_SUCCESS
+#endif
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "DE 1 Array comparison test"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy globally indexed 2DE Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid_2DE, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
 ! Destroy all Fields and cleanup
 !------------------------------------------------------------------------
 
@@ -777,6 +927,10 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_w, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_gw, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_w2DE, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_r2DE, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"

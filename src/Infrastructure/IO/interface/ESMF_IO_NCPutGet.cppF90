@@ -108,7 +108,11 @@ contains
        localPutFlag = .FALSE. @\
     endif @\
     ! Open the grid and mosaic files @\
-    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid) @\
+    if (localPutFlag) then @\
+       ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_write, ncid=gridid) @\
+    else @\
+       ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_nowrite, ncid=gridid) @\
+    endif @\
     if (ESMF_IO_NCCheckError (ncStatus, & @\
       ESMF_METHOD, & @\
       ESMF_SRCLINE,& @\

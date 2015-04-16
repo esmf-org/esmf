@@ -81,8 +81,10 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
     arraypp6
   };
 
-
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
   if (*spherical != 0) grid.setSphere();
+#endif
 
   for (UInt i = 0; i < *num_arrays; ++i)
     arrays.push_back(*ar[i]);
@@ -145,11 +147,14 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     arraypp6
   };
 
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
   bool prevIsSphere=grid.isSphere();
   if (*spherical != 0) grid.setSphere();
 
   ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
   if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
+#endif
 
   // Make list of arrays
   for (UInt i = 0; i < *num_arrays; ++i)
@@ -183,6 +188,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     
     ESMCI::Grid &grid = **gridpp;
     
+
+    // Don't do the below. It should come from the grid CoordSys
+#if 0
     // Make grid spherical if requested
     bool prevIsSphere=grid.isSphere();
     if (*isSphere != 0) grid.setSphere();
@@ -190,7 +198,8 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
     // Map coords to surface of a sphere if reqeusted
     ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
     if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
-    
+#endif    
+
     // Temp vector
     std::vector<ESMCI::Array*> arrays;
     

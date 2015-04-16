@@ -141,8 +141,9 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMC_RegridMethod_Flag *regridmethod, int *rm_present,
   ESMC_PoleMethod_Flag *polemethod, int *pm_present,
   int *regridPoleNPnts, int *rpnp_present,
+  ESMC_NormType_Flag *normtype, int *nt_present,
   ESMC_UnmappedAction_Flag *unmappedaction, int *ua_present,
-  ESMCI::Field *srcfracfieldp, int *sff_present, 
+  ESMCI::Field *srcfracfieldp, int *sff_present,
   ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
@@ -1277,6 +1278,7 @@ namespace ESMCI {
     ESMC_RegridMethod_Flag *regridMethod, 
     ESMC_PoleMethod_Flag *polemethod,
     int *regridPoleNPnts,
+    ESMC_NormType_Flag *normType,
     ESMC_UnmappedAction_Flag *unmappedAction,
     Field *srcFracField, 
     Field *dstFracField) {
@@ -1291,7 +1293,7 @@ namespace ESMCI {
   
     int smv_present, dmv_present;
     int sff_present, dff_present;
-    int rm_present, ua_present;
+    int rm_present, nt_present, ua_present;
     int pm_present, rpnp_present;
     bool smv_created, dmv_created;
     bool sff_created, dff_created;
@@ -1300,6 +1302,7 @@ namespace ESMCI {
     sff_present = 0;
     dff_present = 0;
     rm_present = 0;
+    nt_present = 0;
     ua_present = 0;
     pm_present = 0;
     rpnp_present = 0;
@@ -1357,6 +1360,12 @@ namespace ESMCI {
       rm_present = 1;
     }
 
+    ESMC_NormType_Flag nt_loc = ESMC_NORMTYPE_DSTAREA;
+    if (normType != NULL){
+      nt_loc = *normType;
+      nt_present = 1;
+    }
+
     ESMC_UnmappedAction_Flag ua_loc = ESMC_UNMAPPEDACTION_ERROR;
     if (unmappedAction != NULL){
       ua_loc = *unmappedAction;
@@ -1380,8 +1389,9 @@ namespace ESMCI {
                               dmv->array, &dmv->extent[0], &dmv_present,
                               routehandlep,
                               &rm_loc, &rm_present,
-			      &pm_loc, &pm_present,
-			      &rpnp_loc, &rpnp_present,
+			                  &pm_loc, &pm_present,
+			                  &rpnp_loc, &rpnp_present,
+                              &nt_loc, &nt_present,
                               &ua_loc, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);

@@ -1391,12 +1391,15 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
 
     delete meshp;
 
+    // Set to NULL
+    *meshpp=NULL;
+
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
    					  x.what(), ESMC_CONTEXT, rc);
-    } else {
+     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
    					  "UNKNOWN", ESMC_CONTEXT, rc);
     }

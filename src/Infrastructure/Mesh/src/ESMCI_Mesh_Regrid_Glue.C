@@ -29,7 +29,7 @@
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_Integrate.h"
-#include "Mesh/include/ESMCI_Interp.h"
+ #include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
@@ -86,7 +86,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod, 
-                     int *map_type,
+                      int *map_type,
                      int *norm_type,
                      int *regridPoleType, int *regridPoleNPnts,  
                      int *regridScheme, 
@@ -122,7 +122,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #define MEMLOG_off
 
 #ifdef PROGRESSLOG_on
-  ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
+   ESMC_LogDefault.Write("c_esmc_regrid_create(): Just entered routine.", ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef MEMLOG_on
@@ -141,11 +141,12 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     bool concave=false;
     bool clockwise=false;
     bool degenerate=false;
-
+ 
     // Check source mesh elements 
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check cells for conservative
-//BOB      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+      //  Turned off until ignoreDegenerate available through R.W.G and Python
+      //     cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
     } else {
 #if 0
       // STILL NEED TO FINISH THIS
@@ -182,7 +183,8 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-//BOB      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
+      //  Turned off until ignoreDegenerate available through R.W.G and Python
+      //   cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
       // Concave
       if (concave) {
@@ -400,7 +402,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     ///// If conservative then modify weights according to norm type //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
+      if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
 #ifdef PROGRESSLOG_on

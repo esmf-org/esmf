@@ -20,20 +20,20 @@ except:
 from ESMF.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
 from ESMF.test.regrid_from_file.run_regrid_from_file_dryrun import cache_data_files_for_test_cases
 from ESMF.test.regrid_from_file.regrid_check import regrid_check
-from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_test_cases_from_control_file
+from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
 # Start up ESMF and run regrid test for each line of options
 # read from a control file.    Retrieve data files for each test from a remote
 # server if they do not exist locally.
 # Start up ESMF.
-esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+esmp = ESMF.Manager(debug=True)
 
 parallel = False
 if ESMF.pet_count() > 1:
     parallel = True
 
 # Read the test case parameters from the control file.
-test_cases = read_test_cases_from_control_file()
+test_cases = read_control_file()
 
 if (ESMF.local_pet() == 0):
     # Retrieve the data files needed for the test cases from the remote server.
@@ -42,9 +42,9 @@ if (ESMF.local_pet() == 0):
 # For each test case line from the control file parse the line and call
 # the test subroutine.
 for test_case in test_cases:
-    (src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err) = test_case
-    test_str = 'Regrid %s to %s as %s with %s itrp_err = %f and csrv_err = %f' % \
-      (src_fname, dst_fname, regrid_method, options, itrp_err, csrv_err)
+    (src_fname, dst_fname, regrid_method, options, 
+     itrp_mean_err, itrp_max_err, csrv_err) = test_case
+    test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
     print '\n' + test_str + ' - START\n'
     src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
     dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
@@ -58,8 +58,8 @@ for test_case in test_cases:
     # run the data file retrieval and regridding through try/except
     correct = False
     try:
-        correct = regrid_check(src_fname_full, dst_fname_full,
-                               regrid_method, options, itrp_err, csrv_err)
+        correct = regrid_check(src_fname_full, dst_fname_full, regrid_method, 
+                               options, itrp_mean_err, itrp_max_err, csrv_err)
     except:
         print "Regridding ERROR:\n"
         traceback.print_exc(file=sys.stdout)

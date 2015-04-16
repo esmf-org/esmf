@@ -1658,7 +1658,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
  /* XMRKX */
 
 
-void sph_comb_pnts(const double *pnt0, const double *pnt1, double p, double *out_pnt) {
+  void sph_comb_pnts(const double *pnt0, const double *pnt1, double p, double *out_pnt) {
 
   // Thought about doing a case here if the points are the same, but I think that 
   // the below will just work in that case, and this way I don't have to come up 
@@ -1927,6 +1927,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
         p[0]=best_p[0];
         p[1]=best_p[1];
         p[2]=best_p[2];
+        guess++;
       }
       continue; // back to top of loop with new p
     }
@@ -1941,8 +1942,13 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // Move to next approximation of p
     MU_SUB_VEC3D(p,p,delta_p);    
 
+
+    // TURNING OFF THE BELOW CAUSES AN ERROR IN THE GRID TO GRID TEST,
+    // REPLACE WITH ANGLE THING! 
+#if 1
+
     // If we're too far away then try something else
-    // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
+     // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
     // TODO: calculate beter limits for p from hex and use here
     if (guess < 9){
       if ((p[0]< -5.0) || (p[0]>4.0) ||
@@ -1958,10 +1964,15 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
           p[0]=best_p[0];
           p[1]=best_p[1];
           p[2]=best_p[2];
+          guess++;
         }
       }
     }
+#endif
+
   }
+
+
 
   // Use the best p
   p[0]=best_p[0];
@@ -1977,5 +1988,43 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   return true;
 }
 
+  // Do some quick checks to see if the point is 
+  // definitely outside the hex. 
+  // 
+  // Take in a spherical hex represented in xyz and 
+  // a point value. 
+  // hex_xyz - should be of size 24 (8 llr points)
+  // pnt_xyz  - should be of size 3  (1 llr point)
+  //
+  // Returns: true - if the point is definitely outside the hex, false otherwise
+  bool is_outside_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz) {
+#define TOL 1.0E-10
+
+    // Calc point radius squared
+    double pnt_radsq=MU_LENSQ_VEC3D(pnt_xyz);
+
+    // Loop through hex points calculating the min and max radius
+    double min_hex_radsq=std::numeric_limits<double>::max();
+    double max_hex_radsq=-std::numeric_limits<double>::max();
+    for (int i=0; i<8; i++) {
+      // Get hex pnt
+      const double *hex_pnt=hex_xyz+3*i;
+    
+      // Calculate radius of hex point
+      double hex_radsq=MU_LENSQ_VEC3D(hex_pnt);
+  
+      // Calulate min and max
+      if (hex_radsq < min_hex_radsq) min_hex_radsq=hex_radsq;
+      if (hex_radsq > max_hex_radsq) max_hex_radsq=hex_radsq;
+    }
+
+    // See if we're outside the hex
+    if (pnt_radsq < min_hex_radsq - TOL) return true;
+    if (pnt_radsq > max_hex_radsq + TOL) return true;
+
+
+    return false;
+#undef TOL
+  }
 
 } // namespace

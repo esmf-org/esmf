@@ -270,7 +270,7 @@ Individual tests can be run with nose using the following format:
 
 e.g.  
 
-    nosetests src/ESMF/test/test_api/test_regrid.py:test_grid_mesh_regrid
+    nosetests src/ESMF/test/test_api/test_regrid.py:TestRegrid.test_grid_mesh_regrid
 
 
 ================================================================================

@@ -347,6 +347,8 @@ module ESMF_GridUtilMod
     type(ESMF_Index_Flag) :: indexflag
     type(ESMF_RegridConserve) :: lregridConserve
     integer :: localIsLatLonDeg     
+    type(ESMF_CoordSys_Flag) :: coordSys
+    integer :: dimCount
 
     localrc = ESMF_SUCCESS
 
@@ -394,6 +396,18 @@ module ESMF_GridUtilMod
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
+
+    ! Set these here, eventually this will happen automatically internally inside ESMF_MeshCreate()
+    call ESMF_GridGet(grid,              &
+                      coordSys=coordSys, &
+                      dimCount=dimCount, &
+                      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridToMesh%coordSys=coordSys
+    ESMF_GridToMesh%parametricDim=dimCount
+    ESMF_GridToMesh%spatialDim=dimCount
 
     if (present(rc)) rc = ESMF_SUCCESS
 

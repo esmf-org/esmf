@@ -47,8 +47,9 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
-    def test_mesh_5_pentahexa(self):
+    def test_mesh_50_ngons(self):
 
+        Manager(debug=True)
         parallel = False
         if pet_count() > 1:
             if pet_count() > 4:
@@ -57,10 +58,10 @@ class TestMesh(TestBase):
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa_parallel()
+                mesh_create_50_ngons_parallel()
         else:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa()
+                mesh_create_50_ngons()
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
@@ -96,6 +97,7 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
+    @attr('data')
     def test_mesh_create_from_file_scrip(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -104,6 +106,7 @@ class TestMesh(TestBase):
         except:
             raise NameError('mesh_create_from_file_scrip failed!')
 
+    @attr('data')
     def test_mesh_create_from_file_esmfmesh(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -146,6 +149,7 @@ class TestMesh(TestBase):
         assert mesh3.size == [2, None]
         assert mesh3.size_local == [2, None]
 
+    @attr('data')
     @attr('serial')
     def test_slice_mesh_created_from_file_scrip(self):
         try:
@@ -167,6 +171,7 @@ class TestMesh(TestBase):
         assert mesh2.size == [5, None]
         assert mesh2.size_local == [5, None]
 
+    @attr('data')
     @attr('serial')
     def test_slice_mesh_created_from_file_esmfmesh(self):
         try:

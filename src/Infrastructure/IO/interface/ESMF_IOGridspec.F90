@@ -277,8 +277,8 @@
 	          varids(2)=i
 	          foundlat = .true.
 	        endif
-	      else
-                  print *, "not the right units :", attstr(1:len), len
+	      !else
+          !        print *, "not the right units :", attstr(1:len), len
 	      endif
 	   endif
          enddo

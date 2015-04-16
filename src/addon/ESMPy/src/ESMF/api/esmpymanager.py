@@ -57,7 +57,7 @@ class Manager(object):
     # The singleton instance for this class
     __singleton = None
     
-    def __new__(cls, logkind=LogKind.NONE, debug=False):
+    def __new__(cls, debug=False):
         '''
         Returns the singleton instance of this class,
         creating it if it does not already exist.
@@ -72,7 +72,7 @@ class Manager(object):
         return cls.__singleton
 
 
-    def __init__(self, logkind=LogKind.NONE, debug=False):
+    def __init__(self, debug=False):
         '''
         Calls ESMP_Initialize and registers __del__ with atexit
         when called the first time.  Subsequent calls only return
@@ -83,14 +83,8 @@ class Manager(object):
         Required Arguments: \n
             None \n
         Optional Arguments: \n
-            logkind: allows user to specify if there should be a single
-            log file, multiple log files, or none at all.  The default
-            is to not have a log file.  Argument values are: \n
-                                LogKind.MULTI\n
-                                (default) LogKind.NONE\n
-            debug: allows user to log after every call, instead of the
-            default of every 10 calls. \n
-                type: boolean (defaults to False)
+            debug: outputs logging information to ESMF logfiles. \n
+                type: boolean (defaults to False) \n
         Returns: \n
             Manager \n
         '''
@@ -100,16 +94,21 @@ class Manager(object):
             return
         # Call ESMP_Initialize if not already done previously
         if not self.__esmp_initialized:
+            # set up logging
+            logkind = LogKind.NONE
+            if debug:
+                logkind = LogKind.MULTI
+
+            # initialize ESMF
             ESMP_Initialize(logkind=logkind)
-            # KNOWN_BUG: this causes the manager to be deallocated before
-            # the objects in some cases which creates a neverending
-            # segfault from ESMF when trying to call Destroy routines
-            # on objects which have already been deallocated by the ESMF
-            # garbage collector.
             import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
+
+            # set information related to the ESMF Virtual Machine
             vm = ESMP_VMGetGlobal()
             self.local_pet, self.pet_count = ESMP_VMGet(vm)
+
+            # Increase frequency of log buffering upon user request
             ESMP_LogSet(debug)
         return
 

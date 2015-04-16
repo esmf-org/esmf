@@ -9,6 +9,18 @@ from ESMF.test.test_api.mesh_utilities import mesh_create_50, mesh_create_50_par
 
 
 class TestField(TestBase):
+    # this is for the documentation, do not modify
+    def create_field(grid_or_mesh, name):
+        '''
+        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+                       will be used to initialize the name of a new Field.\n
+        POSTCONDITIONS: A Field has been created.\n
+        RETURN VALUES: \n Field :: field \n
+        '''
+        field = ESMF.Field(grid_or_mesh, name)
+
+        return field
+
     def examine_field_attributes(self, field):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.staggerloc) is int)
@@ -57,17 +69,18 @@ class TestField(TestBase):
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
     def test_field_create_2d_grid(self):
+        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            periodic=[[None, None, None], [None, None, 0], [None, None, 1],
-                      [0, None, None], [0, None, 0], [0, None, 1],
-                      [1, None, None], [1, 0, 1], [1, 1, 0]],
-            staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
-            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            # periodic=[[None, None, None], [None, None, 0], [None, None, 1],
+            #           [0, None, None], [0, None, 0], [0, None, 1],
+            #           [1, None, None], [1, 0, 1], [1, 1, 0]],
+            # staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
+            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            mask_values = [None, [2], [2, 3, 4]],
+            # mask_values = [None, [2], [2, 3, 4]],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            ndbounds=[None, [2], [2, 5]]
+            # ndbounds=[None, [2], [2, 5]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -107,19 +120,20 @@ class TestField(TestBase):
     @attr('serial')
     @attr('slow')
     def test_field_create_3d_grid(self):
+        # NOTE: most are commented out to prevent average nose users from using up all available machine memory
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
-                      [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
-                      [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
-            staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
-                        StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
-                        StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
-            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
-            mask_values=[None, [2], [2, 3, 4]],
+            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            # mask_values=[None, [2], [2, 3, 4]],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            ndbounds=[None, [2], [2, 5]]
+            # ndbounds=[None, [2], [2, 5]]
             )
 
         testcases = self.iter_product_keywords(keywords)
@@ -196,6 +210,18 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
     # TODO: 3d Field mesh?
+
+    # don't change this function, it's used in the documentation
+    def create_field(grid_or_mesh, name):
+        '''
+        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+                       will be used to initialize the name of a new Field.\n
+        POSTCONDITIONS: A Field has been created.\n
+        RETURN VALUES: \n Field :: field \n
+        '''
+        field = ESMF.Field(grid_or_mesh, name)
+
+        return field
 
     def test_field_mask(self):
 

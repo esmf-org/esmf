@@ -2782,8 +2782,9 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ! Check units, but only if 2D
-    if (nodeDim==2) then 
+    ! Check units, and set the coordSys output, if nodeDim==3, normalize the height
+    ! field
+    !if (nodeDim==2) then 
        ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
        if (CDFCheckError (ncStatus, &
             ESMF_METHOD, &
@@ -2798,11 +2799,11 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        ! if len != 7, something is wrong, check the value.  If it starts 
        ! with Degres/degrees/Radians/radians, ignore the garbage after the
        ! word.  Otherwise, return the whole thing
-     if (units(len:len) .eq. achar(0)) len = len-1
+       if (units(len:len) .eq. achar(0)) len = len-1
        call ESMF_StringLowerCase(units(1:len), rc=rc)
        ! if the units is meters, kilometers, or km, make it Cartisian 2D
        if (units(1:len) .eq. "meters" .or. &
-           units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then
+           units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then	
            coordSysLocal = ESMF_COORDSYS_CART
        elseif (units(1:len) .eq. 'radians' .and. .not. convertToDegLocal) then
             coordSysLocal = ESMF_COORDSYS_SPH_RAD
@@ -2815,13 +2816,16 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        endif
 
        ! if units is "radians", convert it to degree
+       ! if nodeDim=3, only convert the first two dimensions, leave the 3rd dim unchanged
        if (convertToDegLocal) then
           if (units(1:len) .eq. "radians") then
-             nodeCoords(:,:) = &
-                 nodeCoords(:,:)*ESMF_COORDSYS_RAD2DEG
+             nodeCoords(1:2,:) = &
+                 nodeCoords(1:2,:)*ESMF_COORDSYS_RAD2DEG
           endif
        endif
-    endif
+
+       
+    !endif
     
     ! get nodeMask
     if (present(nodeMask)) then

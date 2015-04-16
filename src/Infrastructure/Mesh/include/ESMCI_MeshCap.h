@@ -236,6 +236,8 @@
      void xgrid_getfrac(Grid **gridpp,
                         ESMCI::Array **arraypp, int *staggerLoc,
                         int *rc);
+
+     static void destroy(MeshCap **mcpp,int *rc);
   };
 
 } // namespace 

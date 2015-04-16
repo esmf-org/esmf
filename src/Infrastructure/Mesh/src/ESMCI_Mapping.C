@@ -488,6 +488,13 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
       Throw() << "3D spherical mapping is only currently supported for hexahedrons";
     }
 
+    // Rough is outside precheck
+    if (is_outside_hex_sph3D_xyz(mdata, point)) {
+      //// Is outside, so just leave
+      pcoord[0]=0.0; pcoord[1]=0.0; pcoord[2]=0.0;
+      return false;
+    }
+
     // Calculate p in hex defined by mdata
     if (!calc_p_hex_sph3D_xyz(mdata, point, p)) {
       //// Didn't converge, so just leave...

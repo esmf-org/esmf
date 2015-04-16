@@ -6,8 +6,8 @@
 import ESMF
 import numpy
 
-# create a manager object with multiprocessor logging in debug mode
-ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
+# Start up ESMF, this call is only necessary to enable debug logging
+# esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll2.5deg_grid.nc"
 grid2 = "examples/data/T42_grid.nc"
@@ -123,5 +123,5 @@ if ESMF.local_pet() is 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
     print "ESMPy Ungridded Field Dimensions Example"
-    print "  interpolation mean relative error = {}".format(meanrelerr)
-    print "  mass conservation relative error  = {}".format(csrverr)
+    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print "  mass conservation relative error  = {0}".format(csrverr)

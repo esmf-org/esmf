@@ -40,11 +40,11 @@ program ESMF_RegridWeightGenApp
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(16)
+  integer            :: commandbuf2(17)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
-  logical 		 :: ignoreUnmapped, userAreaFlag
+  logical 		 :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcMissingValue, dstMissingValue
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
@@ -403,6 +403,12 @@ program ESMF_RegridWeightGenApp
       ignoreUnmapped=.true.
     endif
 
+    ignoreDegenerate=.false.
+    call ESMF_UtilGetArgIndex('--ignore_degenerate', argindex=ind, rc=rc)
+    if (ind /= -1) then
+      ignoreDegenerate=.true.
+    endif
+
     call ESMF_UtilGetArgIndex('-r', argindex=ind, rc=rc)
     if (ind /= -1) then
       srcIsRegional = .true.
@@ -577,6 +583,7 @@ program ESMF_RegridWeightGenApp
       if (netcdf4FileFlag) commandbuf2(14) = 1
       if (checkFlag) commandbuf2(15) = 1 
       commandbuf2(16) = normType%normtype
+      if (ignoreDegenerate) commandbuf2(17) = 1
     endif 
 
 
@@ -695,6 +702,11 @@ program ESMF_RegridWeightGenApp
       checkFlag = .false.
     endif
     normType%normtype=commandbuf2(16)
+    if (commandbuf2(17) == 1) then
+      ignoreDegenerate=.true.
+    else
+      ignoreDegenerate=.false.
+    endif
 
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -732,6 +744,7 @@ program ESMF_RegridWeightGenApp
   endif
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
+			    ignoreDegenerate = ignoreDegenerate, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
@@ -788,6 +801,7 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
+    print *, "                      [--ignore_degenerate]"
     print *, "                      [--src_type SCRIP|ESMF|UGRID|GRIDSPEC]" 
     print *, "                      [--dst_type SCRIP|ESMF|UGRID|GRIDSPEC]"
     print *, "                      [-t SCRIP|ESMF|UGRID|GRIDSPEC]"
@@ -822,6 +836,8 @@ contains
     print *, "--norm_type - an optional argument indicating the type of normalization to"
     print *, "              do when generating conserative weights. The default value is dstarea."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
+    print *, "                          the default is to stop with an error."
+    print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--src_type - an optional argument specifying the source grid file type."
     print *, "             The value could be one of SCRIP, GRIDSPEC, ESMF, or UGRID."
