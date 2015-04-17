@@ -345,11 +345,11 @@ The following Fortran subroutine has optional arguments.  Note that Fortran 77 s
 adjustable size array dimensioning is used for array b:
 
 \begin{verbatim}
-    subroutine f_ESMF_SomeProcedure (a, b_size, b, rc)
+    subroutine f_ESMF_SomeProcedure (a, b, b_size, rc)
       implicit none
-      real, intent(in),  optional :: a
-      integer, intent(in) :: b_size
-      real, intent(out), optional :: b(b_size)
+      real,    intent(in),  optional :: a
+      integer, intent(in)            :: b_size
+      real,    intent(out), optional :: b(b_size)
       integer, intent(out), optional :: rc
 
       if (present (a)) then
@@ -369,16 +369,18 @@ adjustable size array dimensioning is used for array b:
 When calling the above from C++, NULL can be used to indicate missing arguments:
 
 \begin{verbatim}
-extern "C" {
-    FTN_X(f_esmf_someprocedure)(float &a, int &b_size, float &b, int &rc);
-}
-...
+    extern "C" {
+        FTN_X(f_esmf_someprocedure)(float &a, float &b, int &b_size, int &rc);
+    }
+    ...
+    // array b not present, so use NULL.
     int b_size = 0;
-    FTN_X(f_esmf_someprocedure)(&a, &b_size, NULL, &rc);
-...
+    FTN_X(f_esmf_someprocedure)(&a, NULL, &b_size, &rc);
+    ...
+    // array b is present.  Pass size and address.
     float *b = new float[20];
     int b_size = 20;
-    FTN_X(f_esmf_someprocedure)(&a, &b_size, b, &rc);
+    FTN_X(f_esmf_someprocedure)(&a, b, &b_size, &rc);
 \end{verbatim}
 
 
