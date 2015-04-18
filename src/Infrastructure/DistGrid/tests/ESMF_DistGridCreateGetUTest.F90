@@ -70,6 +70,8 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_DistGridMatch_Flag):: matchResult
   logical:: arbSeqIndexFlag
   logical:: distgridBool
+  integer:: connectionCount
+  type(ESMF_DistGridConnection), allocatable:: connectionList(:)
 
 
   character, allocatable :: buffer(:)
@@ -160,10 +162,10 @@ program ESMF_DistGridCreateGetUTest
  
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - dimCount, tileCount, regDecompFlag, DELayout"
+  write(name, *) "DistGridGet() - dimCount, tileCount, deCount, regDecompFlag, DELayout"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridGet(distgrid, dimCount=dimCount, tileCount=tileCount, &
-    regDecompFlag=regDecompFlag, delayout=delayout, rc=rc)
+    deCount=deCount, regDecompFlag=regDecompFlag, delayout=delayout, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -178,6 +180,13 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "Verify tileCount"
   write(failMsg, *) "Wrong result"
   call ESMF_Test((tileCount == 1), &
+    name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify deCount"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((deCount == petCount), &
     name, failMsg, result, ESMF_SRCLINE)
     
   !------------------------------------------------------------------------
@@ -415,6 +424,29 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "DistGridGet() - connectionCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, connectionCount=connectionCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "verify connectionCount"
+  write(failMsg, *) "Did not match"
+  call ESMF_Test((connectionCount == 0), &
+    name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - connectionList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(connectionList(connectionCount))
+  call ESMF_DistGridGet(distgrid, connectionList=connectionList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(connectionList)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "DistGridMatch() - identical DistGrids"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   matchResult = ESMF_DistGridMatch(distgrid, distgrid, rc=rc)
@@ -546,11 +578,59 @@ program ESMF_DistGridCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridCreate() - 1D Single Tile Default"
+  write(name, *) "ESMF_DistGridConnectionSet() - Set a single connection"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid2 = ESMF_DistGridCreate(minIndex=(/0/), maxIndex=(/999/), rc=rc)
+  allocate(connectionList(1))
+  call ESMF_DistGridConnectionSet(connectionList(1), &
+    tileIndexA=1, tileIndexB=1, positionVector=(/1000/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridConnectionPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridConnectionPrint(connectionList(1), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Tile Default with connectionList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid2 = ESMF_DistGridCreate(minIndex=(/0/), maxIndex=(/999/), &
+    connectionList=connectionList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(connectionList)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - connectionCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid2, connectionCount=connectionCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "verify connectionCount"
+  write(failMsg, *) "Did not match"
+  call ESMF_Test((connectionCount == 1), &
+    name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - connectionList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(connectionList(connectionCount))
+  call ESMF_DistGridGet(distgrid2, connectionList=connectionList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridConnectionPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridConnectionPrint(connectionList(1), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(connectionList)
+    
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridMatch() - different DistGrids"

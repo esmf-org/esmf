@@ -32,8 +32,9 @@ module ESMF_F90InterfaceMod
   private
       
   public ESMF_InterfaceInt
-  public ESMF_InterfaceIntCreate, ESMF_InterfaceIntDestroy
-  
+  public ESMF_InterfaceIntCreate
+  public ESMF_InterfaceIntGet
+  public ESMF_InterfaceIntDestroy
   
 !------------------------------------------------------------------------------
 ! ESMF_InterfaceInt:
@@ -312,6 +313,60 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_InterfaceIntCreatePtr
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InterfaceIntGet()"
+!BOPI
+! !IROUTINE: ESMF_InterfaceIntGet - Get array pointer out of InterfaceInt
+
+! !INTERFACE:
+  subroutine ESMF_InterfaceIntGet(array, farray1D, farray2D, farray3D, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_InterfaceInt), intent(inout)         :: array
+    integer,                 pointer,     optional :: farray1D(:)
+    integer,                 pointer,     optional :: farray2D(:,:)
+    integer,                 pointer,     optional :: farray3D(:,:,:)
+    integer,                 intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!   Get pointer out of an {\tt ESMF\_InterfaceInt} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array]
+!     {\tt ESMF\_InterfaceInt} object.
+!   \item[{[farray1D]}]
+!     1D Fortran array.
+!   \item[{[farray2D]}]
+!     2D Fortran array.
+!   \item[{[farray3D]}]
+!     3D Fortran array.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: stat         ! Fortran return code
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    if (present(farray1D)) farray1D => array%farray1D
+    if (present(farray2D)) farray2D => array%farray2D
+    if (present(farray3D)) farray3D => array%farray3D
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_InterfaceIntGet
 !------------------------------------------------------------------------------
 
 

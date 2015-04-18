@@ -62,6 +62,8 @@ module ESMF_DistGridConnectionMod
 
   public ESMF_DistGridConnection
   public ESMF_DistGridConnectionSet
+  public ESMF_DistGridConnectionSetDirect
+  public ESMF_DistGridConnectionPrint
   public ESMF_InterfaceIntCreateDGConn
   
 
@@ -170,7 +172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridConnectionSet()"
 !BOP
-! !IROUTINE: ESMF_DistGridConnectionSet - Set DistGridConnetion
+! !IROUTINE: ESMF_DistGridConnectionSet - Set DistGridConnection
 ! !INTERFACE:
   subroutine ESMF_DistGridConnectionSet(connection, tileIndexA, tileIndexB, &
     positionVector, keywordEnforcer, orientationVector, rc)
@@ -247,6 +249,95 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConnectionSetDirect()"
+!BOPI
+! !IROUTINE: ESMF_DistGridConnectionSetDirect - Set DistGridConnection directly
+! !INTERFACE:
+  subroutine ESMF_DistGridConnectionSetDirect(connection, farray, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGridConnection),intent(out)         :: connection
+    integer,                     intent(in)           :: farray(:)
+    integer,                     intent(out), optional:: rc
+!         
+!
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[connection] 
+!     DistGridConnection object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: elementCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    connection%elementCount = size(farray)
+    connection%connection(1:size(farray)) = farray(1:size(farray))
+
+    ! mark output as successfully initialized
+    ESMF_INIT_SET_DEFINED(connection)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridConnectionSetDirect
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConnectionPrint()"
+!BOPI
+! !IROUTINE: ESMF_DistGridConnectionPrint - Print DistGridConnection
+! !INTERFACE:
+  subroutine ESMF_DistGridConnectionPrint(connection, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGridConnection),intent(in )         :: connection
+    integer,                     intent(out), optional:: rc
+!         
+!
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[connection] 
+!     DistGridConnection object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: elementCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    print *, "DistGridConnectionPrint - elementCount=", connection%elementCount
+    print *, "DistGridConnectionPrint - connection=", &
+      connection%connection(1:connection%elementCount)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridConnectionPrint
+!------------------------------------------------------------------------------
+
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InterfaceIntCreateDGConn()"
@@ -254,10 +345,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_InterfaceIntCreateDGConn - Create InterfaceInt from DistGrid Connection List
 
 ! !INTERFACE:
-  function ESMF_InterfaceIntCreateDGConn(connectionList, rc)
+  function ESMF_InterfaceIntCreateDGConn(connectionList, initFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    logical,                       intent(in),  optional :: initFlag
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
@@ -265,13 +357,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Create a compacted 2D {\tt ESMF\_InterfaceInt} from a list of 
-!   DistGridConnection objects. All of the DistGridConnetion objects in
+!   DistGridConnection objects. All of the DistGridConnection objects in
 !   {\tt connectionLis} must have the same elementCount.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[{[connectionList}]]
 !     List of DistGridConnection objects.
+!   \item[{[initFlag}]]
+!     Flag indicating initialization status of the {\tt connectionList}. A value
+!     of {\tt .true.} indicates that the {\tt connectionList} has been
+!     initialized, and the entries are valid for use. A value of {\tt .false.}
+!     inidicates that the {\tt connectionList} has not been initialized, and
+!     therefore an InterfaceInt with maximum size elementCount must be created.
+!     This option is for passing connection lists from the C++ layer back to the
+!     Fortran layer. The default is {\tt .true.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -282,30 +382,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: i, elementCount, stat, connectionListSize
     integer, pointer        :: farray(:,:)
     type(ESMF_InterfaceInt) :: array
+    logical                 :: initAux
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! set initAux
+    initAux = .true.  ! default
+    if (present(initFlag)) initAux = initFlag
+    
+    ! construction
     connectionListSize = 0
     if (present(connectionList)) connectionListSize = size(connectionList)
     if (connectionListSize > 0) then
+      ! determine elementCount
+      if (initAux) then
+        ! incoming connections are valid, and assume all connections have same
+        ! elementCount
+        elementCount = connectionList(1)%elementCount
+      else
+        ! incoming connections are not valid -> must assume larges possible case
+        elementCount = 2*7 + 2
+      endif
       ! allocate 2D Fortran array to hold connectionList in the internal format
-      elementCount = connectionList(1)%elementCount ! initialize
       allocate(farray(elementCount,size(connectionList)), stat=stat)
       if (ESMF_LogFoundAllocError(stat, msg="allocating farray", &
         ESMF_CONTEXT)) &
         return  ! bail out
-      do i=1, size(connectionList)
+      if (initAux) then
+        ! incoming connections are valid
+        do i=1, size(connectionList)
 ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DistGridConnectionGetInit, connectionList(i), rc)
-        if (connectionList(i)%elementCount /= elementCount) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-            msg="elementCount mismatch between DistGridConnection elements.", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-        farray(:,i) = connectionList(i)%connection(1:elementCount)
-      enddo
+          if (connectionList(i)%elementCount /= elementCount) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+              msg="elementCount mismatch between DistGridConnection elements.", &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
+          ! copy the connection information
+          farray(:,i) = connectionList(i)%connection(1:elementCount)
+        enddo
+      endif
       ! create InterfaceInt for farray and transfer ownership
       array = ESMF_InterfaceIntCreate(farray2D=farray, &
         transferOwnership=.true., rc=localrc)
