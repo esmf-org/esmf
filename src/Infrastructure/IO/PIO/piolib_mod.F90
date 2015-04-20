@@ -31,7 +31,7 @@ module piolib_mod
   use pionfread_mod, only : read_nf
   use pionfwrite_mod, only : write_nf
 #ifdef _COMPRESSION
-    use piovdc
+!esmf    use piovdc
     use C_interface_mod, only : F_C_STRING_DUP
 #endif
   use pio_mpi_utils, only : PIO_type_to_mpi_type 
