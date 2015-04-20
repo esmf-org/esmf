@@ -226,6 +226,82 @@ PIO library that is included and built with ESMF.
 
 \end{description}
 
+\subsubsection{Accelerator Software Stacks}
+\label{sec:netcdf}
+ESMF provides the ability to query various third party accelerator software
+stacks and gather information about the accelerator devices available in a
+system. The users can query the number of accelerator devices accessible
+from a PET using the OpenCL, OpenACC, Intel MIC and OpenMP software stacks.
+
+The following environment variables enable, and specify the name and location
+of the desired accelerator software stacks and associated header files:
+
+\begin{description}
+
+\item[ESMF\_ACC\_SOFTWARE\_STACK] Possible value: 
+{\it not set} (default), {\tt "opencl"}, {\tt "openacc"},
+{\tt "intelmic"}, {\tt "openmp4"}.
+
+\begin{description}
+\item[{\it not set}] (default) All accelerator software stack related features
+ will be disabled.
+The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE}, 
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH}, and
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBS} environment variables will be ignored.
+
+\item[{\tt "opencl"}] The ESMF library will use the OpenCL
+framework to query information about accelerator devices in the system.
+The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE},
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH} and
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBS} environment variables will be used
+to build and link the library.
+
+\item[{\tt "openacc"}] The ESMF library will use the interfaces defined
+in the OpenACC standard to query information about accelerator devices 
+in the system.
+The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE},
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH} and
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBS} environment variables are not typically
+defined since the standard is supported inherently by a OpenACC standard
+compliant compiler.
+
+\item[{\tt "intelmic"}] The ESMF library will use the interfaces defined
+by the Intel MIC software stack to query information about accelerator devices 
+in the system.
+The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE},
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH} and
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBS} environment variables are not typically
+defined since the standard is supported inherently by the Intel compiler.
+
+\item[{\tt "openmp4"}] The ESMF library will use the interfaces defined
+in the OpenMP v4.0 standard to query information about accelerator devices 
+in the system.
+The {\tt ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE},
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH} and
+{\tt ESMF\_ACC\_SOFTWARE\_STACK\_LIBS} environment variables are not typically
+defined since the standard is supported inherently by a standard compliant
+compiler.
+
+\end{description}
+
+\item[ESMF\_ACC\_SOFTWARE\_STACK\_INCLUDE] (no default)
+
+Specifies the path where the header files for the accelerator software
+stack is located. If not set, this environment variable is ignored.
+
+\item[ESMF\_ACC\_SOFTWARE\_STACK\_LIBPATH] (no default)
+
+Specifies the path where the libraries for the accelerator software
+stack is located. If not set, this environment variable is ignored.
+
+\item[ESMF\_ACC\_SOFTWARE\_STACK\_LIBS] (no default)
+
+Specifies the linker directives required to link the library with
+the accelerator software stack. If not set, this environment variable 
+is ignored.
+
+\end{description}
+
 
 \subsubsection{XERCES}
 \label{sec:xerces}
