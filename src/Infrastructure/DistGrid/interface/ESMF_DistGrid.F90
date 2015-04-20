@@ -2801,7 +2801,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! construct the DistGridConnections
       do i=1, size(connectionList)
-        call ESMF_DistGridConnectionSetDirect(connectionList(i), &
+        call ESMF_DistGridConnectionSetIntl(connectionList(i), &
           farray=farray2D(1:2*dimCountAux+2, i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

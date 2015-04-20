@@ -62,7 +62,7 @@ module ESMF_DistGridConnectionMod
 
   public ESMF_DistGridConnection
   public ESMF_DistGridConnectionSet
-  public ESMF_DistGridConnectionSetDirect
+  public ESMF_DistGridConnectionSetIntl
   public ESMF_DistGridConnectionPrint
   public ESMF_InterfaceIntCreateDGConn
   
@@ -251,11 +251,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridConnectionSetDirect()"
+#define ESMF_METHOD "ESMF_DistGridConnectionSetIntl()"
 !BOPI
-! !IROUTINE: ESMF_DistGridConnectionSetDirect - Set DistGridConnection directly
+! !IROUTINE: ESMF_DistGridConnectionSetIntl - Set DistGridConnection directly
 ! !INTERFACE:
-  subroutine ESMF_DistGridConnectionSetDirect(connection, farray, rc)
+  subroutine ESMF_DistGridConnectionSetIntl(connection, farray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGridConnection),intent(out)         :: connection
@@ -276,7 +276,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: elementCount
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -291,7 +290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DistGridConnectionSetDirect
+  end subroutine ESMF_DistGridConnectionSetIntl
 !------------------------------------------------------------------------------
 
 
@@ -321,7 +320,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: elementCount
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
