@@ -17,11 +17,11 @@ subroutine pio_cpp_read_darray_int(file, varDesc, ioDesc, array, shape,       &
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use esmfpio_kinds, only: i4
-  use esmfpio_types, only: file_desc_t, io_desc_t, var_desc_t
+  use pio_kinds, only: i4
+  use pio_types, only: file_desc_t, io_desc_t, var_desc_t
 
   !  import pio procedure signatures
-  use esmfpiodarray, only: pio_read_darray
+  use piodarray, only: pio_read_darray
 
   !  dummy arguments
   type(c_ptr),             value :: file

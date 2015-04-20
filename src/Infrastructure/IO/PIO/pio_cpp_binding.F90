@@ -21,16 +21,16 @@ subroutine pio_cpp_init_intracom_int(comp_rank, comp_comm, num_iotasks,      &
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr
 
   !  get the required utilities
-  use esmfpio_cpp_utils, only: new_pio_iosys_handles
+  use pio_cpp_utils, only: new_pio_iosys_handles
 
   !  import pio kinds
-  use esmfpio_kinds, only: i4
+  use pio_kinds, only: i4
 
   !  import pio types
-  use esmfpio_types, only: iosystem_desc_t
+  use pio_types, only: iosystem_desc_t
 
   !  import pio procedure signatures
-  use esmfpiolib_mod, only: pio_init
+  use piolib_mod, only: pio_init
 
   implicit none
 
