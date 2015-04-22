@@ -134,10 +134,12 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown above
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -204,10 +206,13 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown in {\tt ESMF\_MethodStateAdd}
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -428,10 +433,12 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown above
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -498,10 +505,12 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown in {\tt ESMF\_MethodGridCompAdd}
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -582,10 +591,12 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown above
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -652,10 +663,12 @@ module ESMF_AttachMethodsMod
 !   The subroutine must have the exact interface shown in {\tt ESMF\_MethodCplCompAdd}
 !   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must
-!   match.  The subroutine must be either a module scope procedure, or an
-!   external procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   match.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
