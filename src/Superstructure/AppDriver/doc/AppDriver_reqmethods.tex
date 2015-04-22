@@ -138,27 +138,28 @@ the issue:
     subroutine my_procs (...)
       integer :: my_setting
       :
-      call ESMF_GridCompSetEntryPoint(gridcomp, methodflag, &
-          my_init_proc, phase, rc)
+      call ESMF_GridCompSetEntryPoint(gridcomp, methodflag=ESMF_METHOD_INITIALIZE, &
+          userRoutine=my_grid_proc_init, rc=localrc)
       :
       my_setting = 42
 
     contains
 
-      subroutine my_grid_proc (gridcomp, importState, exportState, clock, rc)
+      subroutine my_grid_proc_init (gridcomp, importState, exportState, clock, rc)
         :
-      ! my_setting is possibly uninitialized when my_grid_proc is used as a call-back
+      ! my_setting is possibly uninitialized when my_grid_proc_init is used as a call-back
         something = my_setting
         :
-      end subroutine my_grid_proc
+      end subroutine my_grid_proc_init
     end subroutine my_procs
   end module my_procs_mod
 \end{verbatim}
 
-The Fortran standard does not specify whether {\it my\_setting} is a static or automatic
-variable, unless it is explicitly given the SAVE attribute.  The SAVE attribute is usually
-given to a variable via a SAVE attribute in its delaration.  However it could also be
-inferred by initializing the variable in the declaration:
+The Fortran standard does not specify whether variable {\it my\_setting} is statically or
+automatically allocated, unless it is explicitly given the SAVE attribute.  Thus there is no
+guarantee that its value will persist after {\it my\_procs} has finished.  The SAVE attribute
+is usually given to a variable via specifying a SAVE attribute in its delaration.  However it can
+also be inferred by initializing the variable in its declaration:
 
 \begin{verbatim}
       :
