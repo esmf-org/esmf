@@ -2866,7 +2866,7 @@ end subroutine ESMF_EsmfGetNode
 #define ESMF_METHOD "ESMF_EsmfGetElement"
 subroutine ESMF_EsmfGetElement (filename, elementConn, &
 				 elmtNums, startElmt, elementMask, &
-				 elementArea, rc)
+				 elementArea, centerCoords, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
     integer(ESMF_KIND_I4), pointer :: elementConn (:,:)
@@ -2874,6 +2874,8 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
+    real(ESMF_KIND_R8), pointer, optional :: centerCoords (:,:)
+    logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
     type(ESMF_VM) :: vm
@@ -2884,15 +2886,19 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: RecCnt (2)
 
     integer :: DimId
-    integer :: nodeCnt, ElmtCount, MaxNodePerElmt, NodeDim
+    integer :: nodeCnt, ElmtCount, MaxNodePerElmt, coordDim
     integer :: localCount, remain
 
     integer :: VarNo
     character(len=256)::errmsg
     character(len=80) :: units
     integer :: len
+    logical :: convertToDegLocal
+    integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
+    convertToDegLocal = .false.
+    if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -2952,7 +2958,8 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), count=(/MaxNodePerElmt, localcount/))
+    ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), &
+    	       	      count=(/MaxNodePerElmt, localcount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
@@ -3006,6 +3013,81 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
           rc)) return
     end if
 
+    ! check if centerCoords exist, if not, warning and return null pointer, do not return
+    ! error message
+    if (present(centerCoords)) then
+       ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
+       if (ncStatus /= nf90_noerror) then
+         errmsg = "Variable centerCoords in "//trim(filename)// " deos not exist"
+         call ESMF_LogWrite (msg=errmsg, logmsgFlag=ESMF_LOGMSG_WARNING, &
+               method=ESMF_METHOD)
+       else  
+       ! Get vertex dimension
+       ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
+       errmsg = "Dimension coordDim in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+       ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
+       if (CDFCheckError (ncStatus, &
+           ESMF_METHOD,  &
+           ESMF_SRCLINE, errmsg, &
+           rc)) return
+
+       allocate(centerCoords(coordDim, localcount))
+       ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
+       errmsg = "Variable centerCoords in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+       ncStatus = nf90_get_var (ncid, VarNo, centerCoords, start=(/1,startElmt/), &
+			        count=(/coordDim, localcount/))
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+       ! Check units, but only if 2D
+       if (coordDim==2) then 
+           ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,errmsg,&
+               rc)) return
+
+           ncStatus = nf90_get_att(ncid, VarNo, "units", units)
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,errmsg,&
+               rc)) return
+           ! if len != 7, something is wrong, check the value.  If it starts 
+           ! with Degres/degrees/Radians/radians, ignore the garbage after the
+           ! word.  Otherwise, return the whole thing
+           if (units(len:len) .eq. achar(0)) len = len-1
+           call ESMF_StringLowerCase(units(1:len), rc=rc)
+           if (units(1:len) .ne. 'degrees' .and. &
+                 units(1:len) .ne. 'radians') then
+              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                    msg="- units attribute is not degrees or radians", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+
+           ! if units is "radians", convert it to degree
+           if (convertToDegLocal) then
+              if (units(1:len) .eq. "radians") then
+                  centerCoords(:,:) = &
+                      centerCoords(:,:)*ESMF_COORDSYS_RAD2DEG
+              endif
+           endif
+           endif
+       endif
+    end if
+
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -3019,7 +3101,6 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
 #endif
 
 end subroutine ESMF_EsmfGetElement
-
 
 !
 !  Get the NodeCoords and ElementConn from the ESMF unstructured file and construct

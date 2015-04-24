@@ -30,7 +30,7 @@ module piodarray
 #endif
 
 #ifdef _COMPRESSION
-  use piovdc
+!esmf  use piovdc
 #endif
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf   !_EXTERNAL

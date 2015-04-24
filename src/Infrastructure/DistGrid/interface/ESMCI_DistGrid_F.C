@@ -222,7 +222,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
-    int *dimCount, int *tileCount,
+    int *dimCount, int *tileCount, int *deCount,
     ESMCI::InterfaceInt *minIndexPDimPTile,
     ESMCI::InterfaceInt *maxIndexPDimPTile,
     ESMCI::InterfaceInt *elementCountPTile,
@@ -232,7 +232,10 @@ extern "C" {
     ESMCI::InterfaceInt *tileListPDe,
     ESMCI::InterfaceInt *indexCountPDimPDe,
     ESMCI::InterfaceInt *collocationPDim,
-    ESMC_Logical *regDecompFlag, ESMCI::DELayout **delayout, int *rc){
+    ESMC_Logical *regDecompFlag, 
+    int *connectionCount,
+    ESMCI::InterfaceInt *connectionList,
+    ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
     // Initialize return code; assume routine not implemented
@@ -243,8 +246,12 @@ extern "C" {
       *delayout = (*ptr)->getDELayout();
     if (ESMC_NOT_PRESENT_FILTER(tileCount) != ESMC_NULL_POINTER)
       *tileCount = (*ptr)->getTileCount();
+    if (ESMC_NOT_PRESENT_FILTER(deCount) != ESMC_NULL_POINTER)
+      *deCount = (*ptr)->getDELayout()->getDeCount();
     if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
       *dimCount = (*ptr)->getDimCount();
+    if (ESMC_NOT_PRESENT_FILTER(connectionCount) != ESMC_NULL_POINTER)
+      *connectionCount = (*ptr)->getConnectionCount();
     if (ESMC_NOT_PRESENT_FILTER(regDecompFlag) != ESMC_NULL_POINTER){
       if ((*ptr)->getRegDecomp())
         *regDecompFlag = ESMF_TRUE;
@@ -469,8 +476,7 @@ extern "C" {
           "- collocationPDim array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
-      int dimCount = (*ptr)->getDimCount();
-      if ((collocationPDim)->extent[0] < dimCount){
+      if ((collocationPDim)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of collocationPDim array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
@@ -478,7 +484,35 @@ extern "C" {
       }
       // fill in values
       memcpy((collocationPDim)->array, (*ptr)->getCollocationPDim(),
-        sizeof(int)*dimCount);
+        sizeof(int)*((*ptr)->getDimCount()));
+    }
+    // fill connectionList
+    if (present(connectionList)){
+      // connectionList was provided -> do some error checking
+      if ((connectionList)->dimCount != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- connectionList array must be of rank 2", ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((connectionList)->extent[0] < 2*((*ptr)->getDimCount()) + 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of connectionList array must be of size '2*dimCount + 2'",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((connectionList)->extent[1] < (*ptr)->getConnectionCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 2nd dim of connectionList array must be of size 'connectionCount'",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      // fill in the values:
+      for (int i=0; i<(*ptr)->getConnectionCount(); i++){
+        memcpy(
+          &((connectionList)->array[i*((connectionList)->extent[0])]),
+          ((*ptr)->getConnectionList())[i], 
+          sizeof(int)*(2*((*ptr)->getDimCount())+2));
+      }
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

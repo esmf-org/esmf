@@ -576,15 +576,16 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! query Component for the internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
     ! driverClock
-    if (present(driverClock)) driverClock = is%wrap%driverClock
+    if (present(driverClock)) then
+      ! query Component for the internal State
+      nullify(is%wrap)
+      call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      driverClock = is%wrap%driverClock
+    endif
     
     ! remaining arguments
     call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, &

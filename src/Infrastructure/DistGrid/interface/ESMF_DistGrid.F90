@@ -135,6 +135,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridValidate
   
   public ESMF_DistGridConnectionSet ! implemented in ESMF_DistGridConnectionMod
+  public ESMF_DistGridConnectionPrint ! impl. in ESMF_DistGridConnectionMod
 
 ! - ESMF-internal methods:
   public ESMF_DistGridGetInit
@@ -714,11 +715,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    integer                 :: localrc            ! local return code
+    type(ESMF_DistGrid)     :: dg                 ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceInt) :: firstExtraAux      ! helper variable
+    type(ESMF_InterfaceInt) :: lastExtraAux       ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -728,13 +729,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    firstExtraArg = ESMF_InterfaceIntCreate(firstExtra, rc=localrc)
+    firstExtraAux = ESMF_InterfaceIntCreate(firstExtra, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lastExtraArg = ESMF_InterfaceIntCreate(lastExtra, rc=localrc)
+    lastExtraAux = ESMF_InterfaceIntCreate(lastExtra, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -743,19 +744,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
-      lastExtraArg, indexflag, connectionListArg, vm, localrc)
+    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
+      lastExtraAux, indexflag, connectionListAux, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(firstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(firstExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(lastExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -848,9 +849,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: firstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: lastExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: firstExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: lastExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -860,13 +861,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    firstExtraArg = ESMF_InterfaceIntCreate(farray2D=firstExtraPTile, rc=localrc)
+    firstExtraAux = ESMF_InterfaceIntCreate(farray2D=firstExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lastExtraArg = ESMF_InterfaceIntCreate(farray2D=lastExtraPTile, rc=localrc)
+    lastExtraAux = ESMF_InterfaceIntCreate(farray2D=lastExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -875,19 +876,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraArg, &
-      lastExtraArg, indexflag, connectionListArg, vm, localrc)
+    call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
+      lastExtraAux, indexflag, connectionListAux, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(firstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(firstExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(lastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(lastExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1000,16 +1001,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompAux ! helper variable
     type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
     type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1020,13 +1021,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
+    regDecompAux = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
@@ -1036,18 +1037,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    regDecompFirstExtraArg = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
+    regDecompFirstExtraAux = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraArg = ESMF_InterfaceIntCreate(regDecompLastExtra, &
+    regDecompLastExtraAux = ESMF_InterfaceIntCreate(regDecompLastExtra, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1056,33 +1057,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRD(distgrid, minIndexArg, maxIndexArg, &
-      regDecompArg, opt_decompflag, len_decompflag, regDecompFirstExtraArg, &
-      regDecompLastExtraArg, deLabelListArg, indexflag, &
-      connectionListArg, delayout, vm, localrc)
+    call c_ESMC_DistGridCreateRD(distgrid, minIndexAux, maxIndexAux, &
+      regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
+      regDecompLastExtraAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1190,11 +1191,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: deBlockListArg ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: deBlockListAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1205,19 +1206,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deBlockListArg = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=localrc)
+    deBlockListAux = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1226,26 +1227,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDB(distgrid, minIndexArg, maxIndexArg, &
-      deBlockListArg, deLabelListArg, indexflag, &
-      connectionListArg, delayout, vm, localrc)
+    call c_ESMC_DistGridCreateDB(distgrid, minIndexAux, maxIndexAux, &
+      deBlockListAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deBlockListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deBlockListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1350,16 +1351,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompAux ! helper variable
     type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
     type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1369,13 +1370,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    minIndexAux = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    maxIndexAux = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
+    regDecompAux = ESMF_InterfaceIntCreate(regDecomp, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
@@ -1385,16 +1386,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    regDecompFirstExtraArg = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
+    regDecompFirstExtraAux = ESMF_InterfaceIntCreate(regDecompFirstExtra, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraArg = ESMF_InterfaceIntCreate(regDecompLastExtra, &
+    regDecompLastExtraAux = ESMF_InterfaceIntCreate(regDecompLastExtra, &
       rc=localrc)
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1403,33 +1404,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-      regDecompArg, opt_decompflag, len_decompflag, regDecompFirstExtraArg, &
-      regDecompLastExtraArg, deLabelListArg, indexflag, &
-      connectionListArg, fastAxis, vm, localrc)
+    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+      regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
+      regDecompLastExtraAux, deLabelListAux, indexflag, &
+      connectionListAux, fastAxis, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1568,9 +1569,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, fastAxis, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1692,17 +1693,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexAux  ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompAux ! helper variable
     type(ESMF_Decomp_Flag), target :: dummyDf(0,0)  ! satisfy C interface
     type(ESMF_Decomp_Flag), pointer::  opt_decompflag(:,:) ! optional arg helper
     integer                 :: len1_decompflag ! helper variable
     integer                 :: len2_decompflag ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
-    type(ESMF_InterfaceInt) :: deLabelListArg ! helper variable
-    type(ESMF_InterfaceInt) :: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompFirstExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: regDecompLastExtraAux ! helper variable
+    type(ESMF_InterfaceInt) :: deLabelListAux ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1713,13 +1714,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndexPTile, rc=localrc)
+    minIndexAux = ESMF_InterfaceIntCreate(farray2D=minIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndexPTile, rc=localrc)
+    maxIndexAux = ESMF_InterfaceIntCreate(farray2D=maxIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecompPTile, rc=localrc)
+    regDecompAux = ESMF_InterfaceIntCreate(farray2D=regDecompPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflagPTile)) then
@@ -1731,18 +1732,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len2_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    regDecompFirstExtraArg = &
+    regDecompFirstExtraAux = &
       ESMF_InterfaceIntCreate(farray2D=regDecompFirstExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompLastExtraArg = &
+    regDecompLastExtraAux = &
       ESMF_InterfaceIntCreate(farray2D=regDecompLastExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
+    deLabelListAux = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    connectionListArg = ESMF_InterfaceIntCreateDGConn(connectionList, &
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1751,33 +1752,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDP(distgrid, minIndexArg, maxIndexArg, &
-      regDecompArg, opt_decompflag, len1_decompflag, len2_decompflag, &
-      regDecompFirstExtraArg, regDecompLastExtraArg, deLabelListArg, &
-      indexflag, connectionListArg, delayout, vm, localrc)
+    call c_ESMC_DistGridCreateRDP(distgrid, minIndexAux, maxIndexAux, &
+      regDecompAux, opt_decompflag, len1_decompflag, len2_decompflag, &
+      regDecompFirstExtraAux, regDecompLastExtraAux, deLabelListAux, &
+      indexflag, connectionListAux, delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompFirstExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompFirstExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(regDecompLastExtraArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(regDecompLastExtraAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deLabelListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(connectionListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1922,9 +1923,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(connectionList)) continue
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, fastAxis, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2070,9 +2071,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, fastAxis, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2212,9 +2213,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (fastaxis == fastaxis) continue
     
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexArg, maxIndexArg, &
-!      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
-!      connectionListArg, fastAxis, vm, localrc)
+!    call c_ESMC_DistGridCreateRDFA(distgrid, minIndexAux, maxIndexAux, &
+!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
+!      connectionListAux, fastAxis, vm, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2275,7 +2276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
-    type(ESMF_InterfaceInt) :: indicesArg   ! index helper
+    type(ESMF_InterfaceInt) :: indicesAux   ! index helper
     integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
@@ -2328,18 +2329,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_DistGridCreateDBAI1D = distgrid 
 
     ! prepare to set local arbitrary sequence indices
-    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
+    indicesAux = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set local arbitrary sequence indices in DistGrid object
     ! localDe=0, collocation=1
-    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, 0, 1, localrc)
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesAux, 0, 1, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(indicesArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(indicesAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -2421,7 +2422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
-    type(ESMF_InterfaceInt) :: indicesArg   ! index helper
+    type(ESMF_InterfaceInt) :: indicesAux   ! index helper
     integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
@@ -2515,18 +2516,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deallocate(collocationPDim)
 
     ! prepare to set local arbitrary sequence indices
-    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
+    indicesAux = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set local arbitrary sequence indices in DistGrid object
     ! localDe=0, collocation=1, i.e. arbDim's collocation
-    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, 0, 1, localrc)
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesAux, 0, 1, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(indicesArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(indicesAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -2608,10 +2609,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetDefault(distgrid, keywordEnforcer, delayout, dimCount, &
-    tileCount, minIndexPTile, maxIndexPTile, elementCountPTile, &
-    minIndexPDe, maxIndexPDe, elementCountPDe, deToTileMap, &
-    indexCountPDe, collocation, regDecompFlag, rc)
+  subroutine ESMF_DistGridGetDefault(distgrid, keywordEnforcer, delayout, &
+    dimCount, tileCount, deCount, minIndexPTile, maxIndexPTile, &
+    elementCountPTile, minIndexPDe, maxIndexPDe, elementCountPDe, &
+    deToTileMap, indexCountPDe, collocation, regDecompFlag, &
+    connectionCount, connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
@@ -2619,6 +2621,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),    intent(out), optional :: delayout
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: tileCount
+    integer,                intent(out), optional :: deCount
     integer,        target, intent(out), optional :: minIndexPTile(:,:)
     integer,        target, intent(out), optional :: maxIndexPTile(:,:)
     integer,        target, intent(out), optional :: elementCountPTile(:)
@@ -2629,15 +2632,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out), optional :: indexCountPDe(:,:)
     integer,        target, intent(out), optional :: collocation(:)
     logical,                intent(out), optional :: regDecompFlag
+    integer,                intent(out), optional :: connectionCount
+    type(ESMF_DistGridConnection), &
+                    target, intent(out), optional :: connectionList(:)
     integer,                intent(out), optional :: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt deCount} to simplify access to this variable.
+! \item[7.0.0] Added arguments {\tt connectionCount} and {\tt connectionList}
+!    to provide user access to the explicitly defined connections in a DistGrid.
+! \end{description}
 ! \end{itemize}
 !         
 ! !DESCRIPTION:
-!   Get internal DistGrid information.
+!   Access internal DistGrid information.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2649,37 +2661,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Number of dimensions (rank) of {\tt distgrid}.
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
+!   \item[{[deCount]}]
+!     Number of DEs in the DELayout in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
 !     \begin{sloppypar}
-!     Lower index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
+!     Lower index space corner per tile. Must enter
+!     allocated with {\tt shape(minIndexPTile) == (/dimCount, tileCount/)}.
 !   \item[{[maxIndexPTile]}]
-!     Upper index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
+!     Upper index space corner per tile. Must enter
+!     allocated with {\tt shape(maxIndexPTile) == (/dimCount, tileCount/)}.
 !   \item[{[elementCountPTile]}]
-!     Number of elements in exclusive region per tile, with
-!     {\tt size(elementCountPTile) == (/tileCount/)}
+!     Number of elements in the exclusive region per tile. Must enter
+!     allocated with {\tt shape(elementCountPTile) == (/tileCount/)}.
 !   \item[{[minIndexPDe]}]
-!     Lower index space corner per {\tt dim}, per {\tt De}, with
-!     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
+!     Lower index space corner per DE. Must enter
+!     allocated with {\tt shape(minIndexPDe) == (/dimCount, deCount/)}.
 !   \item[{[maxIndexPDe]}]
-!     Upper index space corner per {\tt dim}, per {\tt de}, with
-!     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
+!     Upper index space corner per DE. Must enter
+!     allocated with {\tt shape(maxIndexPDe) == (/dimCount, deCount/)}.
 !   \item[{[elementCountPDe]}]
-!     Number of elements in exclusive region per DE, with
-!     {\tt size(elementCountPDe) == (/deCount/)}
+!     Number of elements in the exclusive region per DE. Must enter
+!     allocated with {\tt shape(elementCountPDe) == (/deCount/)}.
 !   \item[{[deToTileMap]}]
-!     List of tile id numbers, one for each DE, with
-!     {\tt size(deToTileMap) == (/deCount/)}
+!     Map each DE uniquely to a tile. Must enter allocated with
+!     {\tt shape(deToTileMap) == (/deCount/)}.
 !   \item[{[indexCountPDe]}]
-!     Array of extents per {\tt dim}, per {\tt de}, with
-!     {\tt size(indexCountPDe) == (/dimCount, deCount/)}.
+!     Number of indices for each dimension per DE. Must enter
+!     allocated with {\tt shape(indexCountPDe) == (/dimCount, deCount/)}.
 !   \item[{[collocation]}]
-!     List of collocation id numbers, one for each dim, with
-!     {\tt size(collocation) == (/dimCount/)}
+!     Collocation identifier for each dimension. Must enter
+!     allocated with {\tt shape(collocation) == (/dimCount/)}.
 !   \item[{[regDecompFlag]}]
-!     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
-!     and equal to {\tt ESMF\_FALSE} otherwise.
+!     Decomposition scheme. A return value of {\tt .true.} indicates
+!     a regular decomposition, i.e. the decomposition is based on a 
+!     logically rectangular scheme with specific number of DEs along
+!     each dimension. A return value of {\tt .false.} indicates that the
+!     decomposition was {\em not} generated from a regular decomposition 
+!     description, e.g. a {\tt deBlockList} was used instead.
+!   \item[{[connectionCount]}]
+!     Number of explicitly defined connections in {\tt distgrid}.
+!   \item[{[connectionList]}]
+!     List of explicitly defined connections in {\tt distgrid}. Must enter
+!     allocated with {\tt shape(connectionList) == (/connectionCount/)}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{sloppypar}
@@ -2688,16 +2711,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc                ! local return code
-    type(ESMF_InterfaceInt) :: minIndexPTileArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexPTileArg  ! helper variable
-    type(ESMF_InterfaceInt) :: elementCountPTileArg  ! helper variable
-    type(ESMF_InterfaceInt) :: minIndexPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: deToTileMapArg        ! helper variable
-    type(ESMF_InterfaceInt) :: indexCountPDeArg   ! helper variable
-    type(ESMF_InterfaceInt) :: collocationArg     ! helper variable
-    type(ESMF_Logical)      :: regDecompFlagArg       ! helper variable
+    integer                 :: i                      ! helper variable
+    integer                 :: dimCountAux            ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPTileAux       ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPTileAux       ! helper variable
+    type(ESMF_InterfaceInt) :: elementCountPTileAux   ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPDeAux         ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPDeAux         ! helper variable
+    type(ESMF_InterfaceInt) :: elementCountPDeAux     ! helper variable
+    type(ESMF_InterfaceInt) :: deToTileMapAux         ! helper variable
+    type(ESMF_InterfaceInt) :: indexCountPDeAux       ! helper variable
+    type(ESMF_InterfaceInt) :: collocationAux         ! helper variable
+    type(ESMF_Logical)      :: regDecompFlagAux       ! helper variable
+    type(ESMF_InterfaceInt) :: connectionListAux      ! helper variable
+    integer, pointer        :: farray2D(:,:)          ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2707,51 +2734,56 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    minIndexPTileArg = &
+    minIndexPTileAux = &
       ESMF_InterfaceIntCreate(farray2D=minIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexPTileArg = &
+    maxIndexPTileAux = &
       ESMF_InterfaceIntCreate(farray2D=maxIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    elementCountPTileArg = ESMF_InterfaceIntCreate(elementCountPTile, &
+    elementCountPTileAux = ESMF_InterfaceIntCreate(elementCountPTile, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    minIndexPDeArg = &
+    minIndexPDeAux = &
       ESMF_InterfaceIntCreate(farray2D=minIndexPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexPDeArg = &
+    maxIndexPDeAux = &
       ESMF_InterfaceIntCreate(farray2D=maxIndexPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    elementCountPDeArg = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
+    elementCountPDeAux = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deToTileMapArg = ESMF_InterfaceIntCreate(deToTileMap, rc=localrc)
+    deToTileMapAux = ESMF_InterfaceIntCreate(deToTileMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    indexCountPDeArg = ESMF_InterfaceIntCreate(farray2D=indexCountPDe, &
+    indexCountPDeAux = ESMF_InterfaceIntCreate(farray2D=indexCountPDe, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    collocationArg = ESMF_InterfaceIntCreate(collocation, rc=localrc)
+    collocationAux = ESMF_InterfaceIntCreate(collocation, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+    connectionListAux = ESMF_InterfaceIntCreateDGConn(connectionList, &
+      initFlag=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGet(distgrid, dimCount, tileCount, &
-      minIndexPTileArg, maxIndexPTileArg, elementCountPTileArg, &
-      minIndexPDeArg, maxIndexPDeArg, elementCountPDeArg, &
-      deToTileMapArg, indexCountPDeArg, collocationArg, &
-      regDecompFlagArg, delayout, localrc)
+    call c_ESMC_DistGridGet(distgrid, dimCountAux, tileCount, deCount, &
+      minIndexPTileAux, maxIndexPTileAux, elementCountPTileAux, &
+      minIndexPDeAux, maxIndexPDeAux, elementCountPDeAux, &
+      deToTileMapAux, indexCountPDeAux, collocationAux, &
+      regDecompFlagAux, connectionCount, connectionListAux, &
+      delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (present (regDecompFlag)) &
-      regDecompFlag = regDecompFlagArg
+      regDecompFlag = regDecompFlagAux
     
     ! Set init code for deep C++ objects
     if (present(delayout)) then
@@ -2759,33 +2791,57 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+    
+    ! copy connectionList data
+    if (present(connectionList)) then
+      ! access the array inside of connectionListAux
+      call ESMF_InterfaceIntGet(connectionListAux, farray2D=farray2D, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! construct the DistGridConnections
+      do i=1, size(connectionList)
+        call ESMF_DistGridConnectionSetIntl(connectionList(i), &
+          farray=farray2D(1:2*dimCountAux+2, i), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    endif
+    
+    ! copy dimCount
+    if (present(dimCount)) then
+      dimCount = dimCountAux
+    endif
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexPTileArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexPTileAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexPTileArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexPTileAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(elementCountPTileArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(elementCountPTileAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexPDeAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexPDeAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(elementCountPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(elementCountPDeAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(deToTileMapArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deToTileMapAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(indexCountPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(indexCountPDeAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(collocationArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(collocationAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(connectionListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2815,7 +2871,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 !
 ! !DESCRIPTION:
-!   Get internal DistGrid information.
+!   Access internal DistGrid information.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2844,8 +2900,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! call into the C++ interface, which will sort out optional arguments
-!    call c_ESMC_DistGridGet(distgrid, delayout, tileCount, tileListArg, &
-!      dimCount, dimExtentArg, regDecompFlag, localrc)
+!    call c_ESMC_DistGridGet(distgrid, delayout, tileCount, tileListAux, &
+!      dimCount, dimExtentAux, regDecompFlag, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2883,7 +2939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Get internal DistGrid information.
+!   Access internal DistGrid information.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2900,7 +2956,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[seqIndexList]}]
 !     \begin{sloppypar}
 !     List of sequence indices for the elements on {\tt localDe}, with
-!     {\tt size(seqIndexList) == (/elementCountPDe(localDeToDeMap(localDe))/)}.
+!     {\tt shape(seqIndexList) == (/elementCountPDe(localDeToDeMap(localDe))/)}.
 !     \end{sloppypar}
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
@@ -2912,8 +2968,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc            ! local return code
-    type(ESMF_Logical)      :: arbSeqIndexFlagArg ! helper variable
-    type(ESMF_InterfaceInt) :: seqIndexListArg    ! helper variable
+    type(ESMF_Logical)      :: arbSeqIndexFlagAux ! helper variable
+    type(ESMF_InterfaceInt) :: seqIndexListAux    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2923,22 +2979,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    seqIndexListArg = ESMF_InterfaceIntCreate(seqIndexList, rc=localrc)
+    seqIndexListAux = ESMF_InterfaceIntCreate(seqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, collocation, &
-      arbSeqIndexFlagArg, seqIndexListArg, elementCount, localrc)
+      arbSeqIndexFlagAux, seqIndexListAux, elementCount, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! logicals
     if (present (arbSeqIndexFlag)) &
-      arbSeqIndexFlag = arbSeqIndexFlagArg
+      arbSeqIndexFlag = arbSeqIndexFlagAux
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(seqIndexListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(seqIndexListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2974,7 +3030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Get internal DistGrid information.
+!   Access internal DistGrid information.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2995,7 +3051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: indexListArg    ! helper variable
+    type(ESMF_InterfaceInt) :: indexListAux    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3005,18 +3061,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    indexListArg = ESMF_InterfaceIntCreate(indexList, rc=localrc)
+    indexListAux = ESMF_InterfaceIntCreate(indexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGetPLocalDePDim(distgrid, localDe, dim, indexListArg, &
+    call c_ESMC_DistGridGetPLocalDePDim(distgrid, localDe, dim, indexListAux, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(indexListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(indexListAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3190,7 +3246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: collocationPDimArg  ! helper variable
+    type(ESMF_InterfaceInt) :: collocationPDimAux  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3199,18 +3255,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    collocationPDimArg = &
+    collocationPDimAux = &
       ESMF_InterfaceIntCreate(collocationPDim, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridSet(distgrid, collocationPDimArg, localrc)
+    call c_ESMC_DistGridSet(distgrid, collocationPDimAux, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(collocationPDimArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(collocationPDimAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

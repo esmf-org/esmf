@@ -5,10 +5,11 @@ if [ $esmf_os = UNICOS/mp ]; then
 esmf_os=Unicos
 fi
 if [ $esmf_os = Linux ]; then
-find /usr/lib* > esmf_os.tmp 2>&1
-unicos_test=`ls /proc | grep -i cray``grep cray esmf_os.tmp`
+# determine if this is Linux on Cray, i.e. Unicos
+which ftn > esmf_os.tmp 2>&1
+ftn_test=`grep cray esmf_os.tmp`
 rm -f esmf_os.tmp
-if [ -n "$unicos_test" ]; then
+if [ -n "$ftn_test" ]; then
 esmf_os=Unicos
 fi
 fi

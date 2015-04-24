@@ -3705,6 +3705,10 @@ $(filter-out $(addsuffix .o,$(basename $(1))), \
             | sed 's/^ *use  *NUOPC/NUOPC/' \
             | sed 's/,.*$$//' \
        ) \
+      $(shell awk  '/^ *use  *pio/' $(1) \
+            | sed 's/^ *use  *pio/pio/' \
+            | sed 's/,.*$$//' \
+       ) \
      ) \
    ) \
   ) \

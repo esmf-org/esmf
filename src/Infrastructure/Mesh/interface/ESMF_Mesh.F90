@@ -1793,7 +1793,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
@@ -1813,7 +1812,7 @@ end function ESMF_MeshCreateFromFile
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
+    function ESMF_MeshCreateFromUnstruct(filename, convertToDual, filetype, meshname, &
 			addUserArea, maskFlag, varname, rc)
 !
 !
@@ -1821,6 +1820,7 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
+    logical, intent(in), optional               :: convertToDual
     type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
@@ -1834,6 +1834,9 @@ end function ESMF_MeshCreateFromFile
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
+!   \item[{[convertToDual]}] 
+!         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
+!         defaults to {\tt .false.}. 
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. 
@@ -1860,7 +1863,7 @@ end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
     integer                             :: localrc      ! local return code
     integer			        :: PetNo, PetCnt 
-    real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:)
+    real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:), faceCoords(:,:)
     integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
     integer                             :: startElmt
@@ -1888,9 +1891,6 @@ end function ESMF_MeshCreateFromFile
     integer                             :: sndBuf(1)
     type(ESMF_VM)                       :: vm
     type(ESMF_Mesh)                     :: Mesh
-    integer(ESMF_KIND_I4)               :: localSplitElems(1)
-    integer(ESMF_KIND_I4)               :: globalSplitElems(1)
-    logical                             :: existSplitElems
     integer                             :: numPoly
 #if 0
     integer, parameter                  :: maxNumPoly=20
@@ -1917,20 +1917,32 @@ end function ESMF_MeshCreateFromFile
     logical                             :: haveNodeMask, haveElmtMask
     logical                             :: haveMask
     logical 				:: localAddUserArea
+    logical 				:: localConvertToDual
     type(ESMF_MeshLoc)			:: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
     type(ESMF_CoordSys_Flag)            :: coordSys
-
+    integer                             :: maxEdges
+    logical                             :: hasFaceCoords
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! set faceCoords to null
+    faceCoords => NULL()
+    hasFaceCoords = .false.
+
     if (present(addUserArea)) then
 	localAddUserArea = addUserArea
     else
 	localAddUserArea = .false.
+    endif
+
+    if (present(convertToDual)) then
+	localConvertToDual = convertToDual
+    else
+	localConvertToDual = .false.
     endif
 
     if (present(maskFlag)) then
@@ -1964,16 +1976,24 @@ end function ESMF_MeshCreateFromFile
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! define default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
-       	    haveElmtMask=haveElmtMask, rc=localrc)
+       	    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Check maxEdges and convertToDual
+       if (localConvertToDual .and. maxEdges > 4) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
+               ESMF_CONTEXT, rcToReturn=rc)
+        return
+       endif
 
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
@@ -1982,38 +2002,57 @@ end function ESMF_MeshCreateFromFile
           convertToDeg = .false.
        endif
 
-       ! Get information from file    
+       ! Get information from file     
        ! Need to return the coordinate system for the nodeCoords 
        if (haveNodeMask) then
            call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
-	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
-	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        endif			      			       
-       if (haveElmtMask) then
-	if (localAddUserArea) then
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+
+       if (maxEdges <= 4) then
+         if (haveElmtMask .and. localAddUserArea) then 
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
+	 			 centerCoords=faceCoords, rc=localrc)
+         elseif (haveElmtMask) then
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, &
+	 			 centerCoords=faceCoords, rc=localrc)
+         elseif (localAddUserArea) then
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, elementArea=elementArea, &
+	 			 centerCoords=faceCoords, rc=localrc)
+         else
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
+                                 centerCoords=faceCoords, rc=localrc)
+        endif
+        if (associated(faceCoords)) then
+          hasFaceCoords = .true.
+        endif
+      else 
+         if (haveElmtMask .and. localAddUserArea) then 
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
 	 			 rc=localrc)
-	else
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+         elseif (haveElmtMask) then
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
 	 			 rc=localrc)
-	endif
-       else
-	if (localAddUserArea) then
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+         elseif (localAddUserArea) then
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-				 rc=localrc)
-	else
-           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, rc=localrc)
-	endif
-       endif
-
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+	 			 rc=localrc)
+         else
+              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
+                                 rc=localrc)
+         endif
+      endif
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
+      
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
        haveElmtMask = .false.
        haveNodeMask = .false.
@@ -2024,14 +2063,26 @@ end function ESMF_MeshCreateFromFile
        endif
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
-                                   elmtNum, startElmt, convertToDeg=.true., rc=localrc)
+                           elmtNum, startElmt, convertToDeg=.true., &
+			   faceCoords=faceCoords, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-
        ! Chenk if the grid is 3D or 2D
        coordDim = ubound(nodeCoords,1)
        nodeCnt = ubound(nodeCoords,2)
 
+       ! Check elementConn to find out the max edges
+       maxEdges = ubound(elementConn,1)
+       if (localConvertToDual .and. maxEdges > 4) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+       if (maxEdges <= 4 .and. associated(faceCoords)) then
+       	  hasFaceCoords = .true.
+       endif
+       	  
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
@@ -2082,8 +2133,6 @@ end function ESMF_MeshCreateFromFile
     else if (coordDim .eq. 3) then
        parametricDim = 3
        spatialDim = 3
-       ! Do not set the default coordinate system to CART 
-       ! coordSys=ESMF_COORDSYS_CART
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
@@ -2092,13 +2141,8 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! create the mesh
-    if (parametricDim == 2) then
-        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=coordSys,rc=localrc)
-    else
-        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-		coordSys=coordSys,rc=localrc)
-    endif    
+    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
+	       coordSys=coordSys, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2205,7 +2249,6 @@ end function ESMF_MeshCreateFromFile
     endif
 
     deallocate(nodeCoords)
-
     if (.not. haveNodeMask) then
        ! Add nodes
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
@@ -2225,7 +2268,7 @@ end function ESMF_MeshCreateFromFile
        deallocate(NodeMask)
        deallocate(glbNodeMask)		    
     endif 
-
+    
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2250,50 +2293,13 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
     if (localAddUserArea) allocate(ElemArea(TotalElements))
-    
+
     ! Allocate mask if the user wants one
     haveMask=.false.
     if (haveElmtMask) then 
        allocate (ElemMask(TotalElements))
        haveMask=.true.
     endif
-
-#if 0
-    ! figure out if there are split elements globally
-    !! Fake logical allreduce .or. with MAX
-    if (totalElements .gt. ElemCnt) then
-       localSplitElems(1)=1
-    else 
-       localSplitElems(1)=0
-    endif
-    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_REDUCE_MAX, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
-    if (globalSplitElems(1) .eq. 1) then
-       existSplitElems=.true.
-    else 
-       existSplitElems=.false.
-    endif
-#endif
-    ! Don't use split elements on this level anymore 
-    existSplitElems=.false.
-
-    ! Set split element info
-    if (existSplitElems) then    
-       Mesh%hasSplitElem=.true.
-       allocate(mesh%splitElemMap(TotalElements))
-       Mesh%splitElemStart=myStartElmt+1  ! position of first element
-       Mesh%splitElemCount=TotalElements
-       Mesh%origElemStart=startElmt  ! position of first element
-       Mesh%origElemCount=ElemCnt
-    endif
-
-    ! Allocate a mask even if the user doesn't want one, if we have split elements 
-    if (existSplitElems .and. .not. haveElmtMask) then
-       allocate (ElemMask(TotalElements))
-       haveMask=.true.
-       ElemMask(:)=1  ! default to nothing masked out
-    endif    
 
  ! XMRKX
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
@@ -2311,7 +2317,6 @@ end function ESMF_MeshCreateFromFile
              do i=1,3
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
-             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
@@ -2322,7 +2327,6 @@ end function ESMF_MeshCreateFromFile
              do i=1,4
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
-             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
@@ -2333,7 +2337,6 @@ end function ESMF_MeshCreateFromFile
              do i=1,elmtNum(j)
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
-             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
@@ -2369,36 +2372,56 @@ end function ESMF_MeshCreateFromFile
             PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
     end if
     ! Add elements
-    if (haveMask .and. localAddUserArea) then
+    
+    if (hasFaceCoords) then
+       if (haveMask .and. localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, elementArea=ElemArea, &
+			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+       elseif (haveMask) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, &
+			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+       elseif (localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementArea=ElemArea, &
+			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+       else
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+       end if
+    else 
+       if (haveMask .and. localAddUserArea) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
 			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
-    elseif (haveMask) then
+       elseif (haveMask) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
 			elementMask=ElemMask, rc=localrc)
-    elseif (localAddUserArea) then
+       elseif (localAddUserArea) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
 			elementArea=ElemArea, rc=localrc)
-    else
+       else
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
-    end if
+       end if
+    endif 
+
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
-    if (existSplitElems) then
-       Mesh%hasSplitElem=.true.
-    else
-       Mesh%hasSplitElem=.false.
-    endif
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
     if (haveElmtMask) deallocate(elementMask) 
     if (haveMask) deallocate(ElemMask) 
-     
+    if (associated(faceCoords)) deallocate(faceCoords)
     if (localAddUserArea) deallocate(elementArea, ElemArea)
-    ESMF_MeshCreateFromUnstruct = Mesh
 
+    if (localConvertToDual) then
+       	ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+        ESMF_MeshCreateFromUnstruct = Mesh
+    endif
     if (present(rc)) rc=ESMF_SUCCESS
     return
 end function ESMF_MeshCreateFromUnstruct

@@ -66,6 +66,38 @@ class TestField(TestBase):
         assert (not hasattr(self, 'maskedfield'))
 
     @attr('serial')
+    def test_numpy_funcs(self):
+        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+
+        field.data[...] = 4
+
+        assert ((field.T == 4).all())
+        assert ((field.flatten() == 4).all())
+        assert (type(np.empty_like(field)) == Field)
+
+        field.harden_mask()
+        field[0, 0, 0, 1] = 7
+        # hardened mask should silently fail unmasking values
+        assert (field.mask[0, 0, 0, 1] == True)
+
+        # this doesn't seem to work either
+        field.mask = ma.nomask
+        assert (field.mask[0, 0, 0, 1] == True)
+
+        # soften mask and unset all masked values
+        field.soften_mask()
+        field.mask = ma.nomask
+        assert (field.mask.all() == False)
+
+        # however, Field.harden_mask() does not protect from directly setting mask values
+        field.harden_mask()
+        field[0, 0, 0, 1].mask = True
+        assert (field.mask[0, 0, 0, 1] == True)
+
+        # the value of single masked element should be ma.masked
+        assert (field[0, 0, 0, 1] == ma.masked)
+
+    @attr('serial')
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
     def test_field_create_2d_grid(self):

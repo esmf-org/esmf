@@ -1928,10 +1928,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Component writer must supply a subroutine with the exact interface 
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
-!   The subroutine must be either a module scope procedure, or an external
-!   procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[phase]}] 
 !   The {\tt phase} number for multi-phase methods. For single phase 
 !   methods the {\tt phase} argument can be omitted. The default setting
@@ -2064,10 +2065,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  The Component writer must supply a subroutine with the exact interface 
 !  shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !  must not be declared as optional, and the types, intent and order must match.
-!  The subroutine must be either a module scope procedure, or an external
-!  procedure that has a matching interface block specified for it.
-!  It must not be an internal procedure which is contained
-!  within another procedure.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !  \begin{sloppypar}
 !  The {\tt userRoutine}, when called by the framework, must make successive calls to
@@ -2156,10 +2158,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Component writer must supply a subroutine with the exact interface 
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
-!   The subroutine must be either a module scope procedure, or an external
-!   procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   !INTERFACE:
 !     interface
@@ -2449,10 +2452,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Component writer must supply a subroutine with the exact interface 
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
-!   The subroutine must be either a module scope procedure, or an external
-!   procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   The subroutine, when called by the framework, is expected to use any of the
 !   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
@@ -2527,10 +2531,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Component writer must supply a subroutine with the exact interface 
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
-!   The subroutine must be either a module scope procedure, or an external
-!   procedure that has a matching interface block specified for it.
-!   It must not be an internal procedure which is contained
-!   within another procedure.
+!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified for it.
+!   An internal procedure which is contained within another procedure must not be used.
+!   From Fortran-2008 onwards, an internal procedure may be used subject to
+!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   !INTERFACE:
 !     interface
