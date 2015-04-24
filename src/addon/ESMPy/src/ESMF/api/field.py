@@ -169,16 +169,16 @@ class Field(MaskedArray):
                                            dtype=typekind, shape=ubounds-lbounds)
 
         # initialize field data
-        obj.struct = struct
-        obj.rank = rank
-        obj.xd = xd
+        obj.name = name
         obj.type = typekind
+        obj.rank = rank
+        obj.struct = struct
+        obj.xd = xd
         obj.staggerloc = staggerloc
         obj.lower_bounds = lbounds
         obj.upper_bounds = ubounds
         obj.ndbounds = local_ndbounds
         obj.grid = grid._preslice_(staggerloc)
-        obj.name = name
 
         # for arbitrary attributes
         obj.meta = {}
@@ -189,6 +189,21 @@ class Field(MaskedArray):
         obj._finalized = False
 
         return obj
+
+    def __array_finalize__(self, obj):
+        super(Field, self).__array_finalize__(obj)
+        if obj is None: return
+        self.name = getattr(obj, 'name', None)
+        self.type = getattr(obj, 'type', None)
+        self.rank = getattr(obj, 'rank', None)
+        self.struct = getattr(obj, 'struct', None)
+        self.xd = getattr(obj, 'xd', None)
+        self.staggerloc = getattr(obj, 'staggerloc', None)
+        self.lower_bounds = getattr(obj, 'lower_bounds', None)
+        self.upper_bounds = getattr(obj, 'upper_bounds', None)
+        self.ndbounds = getattr(obj, 'ndbounds', None)
+        self.grid = getattr(obj, 'grid', None)
+        self.meta = getattr(obj, 'meta', None)
 
     # manual destructor
     def destroy(self):
