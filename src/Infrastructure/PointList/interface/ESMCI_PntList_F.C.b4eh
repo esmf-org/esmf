@@ -1,0 +1,196 @@
+// $Id$
+//
+// Earth System Modeling Framework
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_PntList_F.C"
+//==============================================================================
+//
+// This file contains the Fortran interface code to link F90 and C++.
+//
+//------------------------------------------------------------------------------
+// INCLUDES
+//------------------------------------------------------------------------------
+#include "ESMCI_Macros.h"
+#include "ESMCI_PntList.h"
+#include "ESMCI_Grid.h"
+#include "ESMCI_GridToMesh.h"
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_DELayout.h"
+#include "ESMCI_LogErr.h"
+//------------------------------------------------------------------------------
+//BOP
+// !DESCRIPTION:
+//
+// The code in this file implements the inter-language code which
+//  allows F90 to call C++ for supporting {\tt PntList} class functions.
+//
+//EOP
+//------------------------------------------------------------------------------
+
+
+// the interface subroutine names MUST be in lower case
+extern "C" {
+
+  void FTN_X(c_esmc_pntlistcreatefrmgrid)(ESMCI::Grid **gptr, int *staggerLoc, ESMCI::PntList **plptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistcreatefrmgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    ESMCI::GridToPntList(**gptr, *staggerLoc, plptr, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistcreatefrmmesh)(ESMCI::Mesh **mptr, ESMCI::PntList **plptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistcreatefrmmesh()"
+    // Initialize return code; assume routine not implemented
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *plptr = (*mptr)->MeshToPntList(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistcreatefrminput)(int *maxpts, int *numdims, ESMCI::PntList **plptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistcreatefrminput()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    *plptr = ESMCI::PntList::create(maxpts,numdims,&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistdestroy)(ESMCI::PntList **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistdestroy()"
+    // Initialize return code; assume routine not implemented
+    // call into C++
+    //mvr    localrc = ESMCI::PntList::destroy(*ptr);
+    //try block here?
+    delete *ptr;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistgetnumpts)(ESMCI::PntList **ptr, int *numpts,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistgetnumpts()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *numpts = (*ptr)->get_curr_num_pts();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistgetmaxpts)(ESMCI::PntList **ptr, int *maxpts,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistgetmaxpts()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *maxpts = (*ptr)->get_max_num_pts();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistgetdims)(ESMCI::PntList **ptr, int *dims,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistgetdims()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *dims = (*ptr)->get_coord_dim();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistgetid)(ESMCI::PntList **ptr, int *loc, int *id,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistgetid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *id = (*ptr)->get_id(*loc);
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistgetcoords)(ESMCI::PntList **ptr, int *loc, double *_coords,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistgetcoords()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    (*ptr)->get_coord(*loc, _coords);
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistadd)(ESMCI::PntList **ptr, int *id, double *_coords,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistadd()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->add(*id,_coords);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_pntlistprint)(ESMCI::PntList **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_pntlistprint()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->diagprint();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
+};
+
+

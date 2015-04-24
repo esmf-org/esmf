@@ -1,0 +1,539 @@
+// $Id$
+//
+// Earth System Modeling Framework
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMF_FILENAME "ESMCI_PointList.C"
+//==============================================================================
+//
+// PointList class implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// Holds a list of points
+//
+// The code in this file implements the C++ PointList methods declared
+// in the companion file ESMCI_PointList.h
+//
+//-----------------------------------------------------------------------------
+
+// include associated header file
+#include <PointList/include/ESMCI_PointList.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+// include ESMF headers                                                                         
+#include "ESMCI_Macros.h"
+//#include "ESMCI_Array.h"
+//#include "ESMCI_ArrayBundle.h"
+
+// LogErr headers
+#include "ESMCI_LogErr.h"                  // for LogErr
+
+using namespace std;
+
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = 
+  "$Id$";
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PointList()"
+  //BOPI
+  // !IROUTINE:  PointList
+  //
+  // !INTERFACE:
+  PointList::PointList(
+  //
+  // !RETURN VALUE:
+  //    Pointer to a new PointList
+  //
+  // !ARGUMENTS:
+		   int _max_num_pts,
+		   int _coord_dim
+		   ){
+    //
+    // !DESCRIPTION:
+    //   Construct PointList
+    //EOPI
+    //-----------------------------------------------------------------------------
+    // Set values
+    coord_dim=_coord_dim;
+    max_num_pts=_max_num_pts;
+    curr_num_pts=0;
+
+    // allocate memory
+    coords=NULL;
+    ids=NULL;
+    if (max_num_pts>0) {
+      coords=new double [coord_dim*max_num_pts];
+      ids=new int [max_num_pts];
+    }
+
+    // return successfully
+  }
+
+
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::~PointList()"
+  //BOPI
+  // !IROUTINE:  ~PointList
+  //
+  // !INTERFACE:
+  PointList::~PointList(void){
+  //
+  // !RETURN VALUE:
+  //    none
+  //
+  // !ARGUMENTS:
+  // none
+  //
+  // !DESCRIPTION:
+  //  Destructor for PointList, deallocates all internal memory, etc.
+  //
+  //EOPI
+  //-----------------------------------------------------------------------------
+
+  // Reset default values
+
+    max_num_pts=0;
+    curr_num_pts=0;
+    coord_dim=0;
+
+    // Deallocate memory
+    if (coords!=NULL) delete [] coords;
+    coords=NULL;
+
+    if (ids!=NULL) delete [] ids;
+    ids=NULL;
+  }
+
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PointList::add()"
+  //BOP
+  // !IROUTINE:  add
+  //
+  // !INTERFACE:
+  int PointList::add(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+		    int _id,
+		    double *_coord
+		    ) {
+    //
+    // !DESCRIPTION:
+    // Add a point to the PointList.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    // Error check
+    if (curr_num_pts > max_num_pts-1) {
+      // Throw() << "PointList full";
+    }
+
+    // IF START EXTENDING POINT LIST WHEN OVER SIZE, THEN SWITCH TO VECTORS
+
+
+    // Add point id
+    ids[curr_num_pts]=_id;
+
+    // Add point coords
+    double *pnt_coord_base=coords+coord_dim*curr_num_pts;
+    for (int i=0; i<coord_dim; i++) {
+      pnt_coord_base[i]=_coord[i];
+    }
+
+    // Advance to next position
+    curr_num_pts++;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PointList::sort_by_id()"
+  //BOP
+  // !IROUTINE:  sort_by_id
+  //
+  // !INTERFACE:
+  int PointList::sort_by_id() {
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+    //  none
+    //
+    // !DESCRIPTION:
+    // Add a point to the PointList.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    int temp_int;
+    double temp_double;
+    double *pnt_coord_basei;
+    double *pnt_coord_basej;
+
+    for (int i=0; i<curr_num_pts-1; i++) {
+      for (int j=i+1; j<curr_num_pts; j++) {
+	if (ids[i] > ids[j]) {
+	  temp_int = ids[i];
+	  ids[i] = ids[j]; 
+	  ids[j] = temp_int;
+	  pnt_coord_basei = coords+coord_dim*i;
+	  pnt_coord_basej = coords+coord_dim*j;
+	  for (int k=0; k<coord_dim; k++) {
+	    temp_double = pnt_coord_basei[k];
+	    pnt_coord_basei[k] = pnt_coord_basej[k];
+	    pnt_coord_basej[k] = temp_double;
+	  }
+	}
+      }
+    }
+
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+  //mvr not currently getting used, may need some testing
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::operator=()"
+  //BOP
+  // !IROUTINE:  operator=
+  //
+  // !INTERFACE:
+  PointList &PointList::operator=(PointList &rhs)
+  {
+
+    // Deallocate memory
+    if (coords!=NULL) delete [] coords;
+    if (ids!=NULL) delete [] ids;
+
+    curr_num_pts=rhs.get_curr_num_pts();
+    max_num_pts=rhs.get_max_num_pts();
+    coord_dim=rhs.get_coord_dim();
+
+    coords=new double [coord_dim*max_num_pts];
+    ids=new int [max_num_pts];
+
+    int num_bytes=coord_dim*max_num_pts*sizeof(double);
+    memcpy(coords,rhs.get_coord_ptr(0),num_bytes);
+    num_bytes=max_num_pts*sizeof(int);
+    memcpy(ids,rhs.get_id_ptr(0),num_bytes);
+    return *this;
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::diagprint()"
+  //BOP
+  // !IROUTINE:  diagprint
+  //
+  // !INTERFACE:
+  int PointList::diagprint(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+			  ) {
+    //
+    // !DESCRIPTION:
+    // dump contents of PointList to stdout.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    for (int i=0; i<curr_num_pts; i++) {
+      printf("id= %d   coords= ",ids[i]);
+      for (int j=0; j<coord_dim; j++) {
+    	printf("%.4f  ",coords[i*coord_dim+j]);
+      }
+      printf("\n\n\n");
+    }
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_id_ptr()"
+  //BOP
+  // !IROUTINE:  get_id_ptr
+  //
+  // !INTERFACE:
+  const int *PointList::get_id_ptr(
+
+    //
+    // !RETURN VALUE:
+    //  int *
+    //
+    // !ARGUMENTS:
+    //
+				      int loc) const {
+    //
+    // !DESCRIPTION:
+    // return pointer to the id corresponding to given location.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location in PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    return ids+loc;
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_coord()"
+  //BOP
+  // !IROUTINE:  get_coord
+  //
+  // !INTERFACE:
+  void PointList::get_coord(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+			    int loc,double *_coord) const {
+    //
+    // !DESCRIPTION:
+    // copy coordinates corresponding to given location into a given array.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location in PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    if (_coord == NULL) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- provided array pointer is NULL ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    double *pnt_coord_base=coords+coord_dim*loc;
+    for (int i=0; i<coord_dim; i++) {
+      _coord[i]=pnt_coord_base[i];
+    }
+
+    return;
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_id()"
+  //BOP
+  // !IROUTINE:  get_id
+  //
+  // !INTERFACE:
+  int PointList::get_id(
+
+    //
+    // !RETURN VALUE:
+    //  int
+    //
+    // !ARGUMENTS:
+    //
+				      int loc) const {
+    //
+    // !DESCRIPTION:
+    // return the id corresponding to given location.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location in PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    return ids[loc];
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_id_ref()"
+  //BOP
+  // !IROUTINE:  get_id_ref
+  //
+  // !INTERFACE:
+  int &PointList::get_id_ref(
+
+    //
+    // !RETURN VALUE:
+    //  int &
+    //
+    // !ARGUMENTS:
+    //
+				      int loc) const {
+    //
+    // !DESCRIPTION:
+    // return a reference to the id corresponding to given location.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location in PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    return ids[loc];
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_coord_ptr()"
+  //BOP
+  // !IROUTINE:  get_coord_ptr
+  //
+  // !INTERFACE:
+  const double *PointList::get_coord_ptr(
+
+    //
+    // !RETURN VALUE:
+    //  double *
+    //
+    // !ARGUMENTS:
+    //
+				      int loc) const {
+    //
+    // !DESCRIPTION:
+    // return pointer to coordinates corresponding to given location.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location in PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    return coords+coord_dim*loc;
+  }
+
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_coord_ptr_from_id()"
+  //BOP
+  // !IROUTINE:  get_coord_ptr_from_id
+  //
+  // !INTERFACE:
+  const double *PointList::get_coord_ptr_from_id(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+				      int *id) const {
+    //
+    // !DESCRIPTION:
+    // return pointer to coordinates corresponding to given point id.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+
+    int loc = (&(*id)-ids);
+
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+				    "- invalid location derived from input id ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    return get_coord_ptr(loc);
+  }
+
+
+
+
+
+} // namespace ESMCI
