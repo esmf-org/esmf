@@ -706,6 +706,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 				                regridPoleNPnts, &
 				                normtype, &
                                 unmappedaction, &
+                                ignoreDegenerate, &
                                 srcFracField, &
                                 dstFracField, &
                                 rc)
@@ -731,6 +732,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       
       type(ESMF_NormType_Flag)       :: normtype
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
+      logical                        :: ignoreDegenerate
       type(ESMF_Field)               :: srcFracField
       type(ESMF_Field)               :: dstFracField
       integer                        :: rc 
@@ -751,6 +753,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                regridPoleNPnts=regridPoleNPnts, &
                                normType=normtype, &
                                unmappedaction=unmappedaction, &
+                               ignoreDegenerate=ignoreDegenerate, &
                                srcFracField=srcFracField, &
                                dstFracField=dstFracField, &
                                rc=localrc)

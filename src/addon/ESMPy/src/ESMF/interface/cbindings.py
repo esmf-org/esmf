@@ -99,6 +99,18 @@ class OptionalNumpyArrayInt32(object):
             else:
                 return param.ctypes
 
+# this class allows optional arguments to be passed in place of
+# booleans
+class OptionalBool(object):
+        @classmethod
+        def from_param(self, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_bool)
+                paramptr = ptr(ct.c_bool(param))
+                return paramptr
+
 
 #### INIT/FINAL ###################################################
 
@@ -1371,6 +1383,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalBool,
                                         OptionalField,
                                         OptionalField]
 @deprecated
@@ -1379,6 +1392,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           normType=None, unmappedaction=None,
+                          ignoreDegenerate=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1418,6 +1432,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
+        boolean (option)                    :: ignoreDegenerate\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -1451,6 +1466,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridPoleNPnts_ct,
                                      normType,
                                      unmappedaction,
+                                     ignoreDegenerate,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

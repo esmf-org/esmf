@@ -617,6 +617,7 @@ class TestRegrid(TestBase):
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
                                     norm_type=ESMF.NormType.FRACAREA,
                                     unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    ignore_degenerate=True,
                                     src_frac_field=srcfracfield,
                                     dst_frac_field=dstfracfield)
         dstfield = regridSrc2Dst(srcfield, dstfield)
