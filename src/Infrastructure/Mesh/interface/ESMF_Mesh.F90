@@ -1657,8 +1657,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
-!         defaults to {\tt .true.}. Converting to dual is only supported with
-!         file type {\tt ESMF\_FILEFORMAT\_SCRIP}.
+!         defaults to {\tt .false.}. Converting to dual is not supported when the 
+!         file type is {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
@@ -1703,7 +1703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(convertToDual)) then
 	localConvertToDual = convertToDual
     else
-	localConvertToDual = .true.
+	localConvertToDual = .false.
     endif
 
     if (present(addUserArea)) then
@@ -1727,6 +1727,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
 	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	   addUserArea=localAddUserArea, &
+           convertToDual=localConvertToDual, &
 	   filetype=filetypeflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1744,11 +1745,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (present(maskFlag)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     filetype=filetypeflag, meshname = meshname, &
+             convertToDual=localConvertToDual, &
 	     maskFlag=maskFlag, varname=varname, &
 	     rc=localrc)
 	else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     filetype=filetypeflag, meshname = meshname, &
+             convertToDual=localConvertToDual, &
 	     rc=localrc)
 	endif 
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2455,7 +2458,7 @@ end function ESMF_MeshCreateFromUnstruct
 !         The name of the grid file
 !   \item[convertToDual] 
 !         if {\tt .true.}, the mesh will be converted to it's dual. If not specified,
-!         defaults to true. 
+!         defaults to .false. 
 !   \item[addUserArea] 
 !         if {\tt .true.}, the grid_area defined in the grid file will be added into the mesh.
 !         If not specified, defaults to .false. 
@@ -2489,10 +2492,10 @@ end function ESMF_MeshCreateFromUnstruct
           dualflag=0
        endif
     else
-      dualflag=1
+      dualflag=0
     endif
 
-    ! If convertToDual is TRUE (as default), cannot use UserArea because the area defined
+    ! If convertToDual is TRUE, cannot use UserArea because the area defined
     ! in the grid file is not for the dual mesh
     if (present(addUserArea)) then
       if (addUserArea .and. dualflag==1) then
