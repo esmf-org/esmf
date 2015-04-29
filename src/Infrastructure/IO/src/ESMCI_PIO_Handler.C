@@ -830,6 +830,13 @@ void PIO_Handler::arrayWrite(
       &arrDims, &narrDims, &basepiotype, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
+  for (int i=0; i<narrDims; i++) {
+    if (arrDims[i] < 1) {
+      // std::cout << ESMC_METHOD << ": arraydim[" << i << "] = " << arrDims[i] << std::endl;
+      if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 1",
+            ESMC_CONTEXT, rc)) return;
+    }
+  }      
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
   if (!vardesc)
