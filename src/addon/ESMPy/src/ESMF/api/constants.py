@@ -40,13 +40,9 @@ _ESMF_VERSION = None
 #### NAMED CONSTANTS ##########################################################
 
 # CoordSys
-CoordSys = namedtuple('CoordSys', ['INVALID', 'UNINIT', 'CART', 'SPH_DEG',
-                                   'SPH_RAD'])
-CoordSys = CoordSys(INVALID=-2, UNINIT=-1, CART=0, SPH_DEG=1, SPH_RAD=2)
-
-# This is a dummy class object used for documentation purposes only
-class _CoordSys(object):
-    '''
+class _CoordSys(namedtuple('CoordSys', ['INVALID', 'UNINIT', 'CART', 'SPH_DEG',
+                                   'SPH_RAD'])):
+    """
     This flag indicates the coordinate system of a Grid. This value is
     useful both to indicate to other users the type of the coordinates,
     but also to control how the coordinates are interpreted in
@@ -75,16 +71,15 @@ class _CoordSys(object):
             Note, however, that Regrid() currently just supports longitude and
             latitude (i.e. with this system, only Grids of dimension 2 are
             supported in the regridding).\n
-    '''
+    """
+    pass
+
+CoordSys = _CoordSys(INVALID=-2, UNINIT=-1, CART=0, SPH_DEG=1, SPH_RAD=2)
 
 # DecompFlag
-DecompFlag = namedtuple('DecompFlag', ['DEFAULT', 'BALANCED', 'RESTFIRST', 'RESTLAST', 
-                                       'CYCLIC'])
-DecompFlag = DecompFlag(DEFAULT=0, BALANCED=1, RESTFIRST=2, RESTLAST=3, CYCLIC=4)
-
-# This is a dummy class object used for documentation purposes only
-class _DecompFlag(object):
-    '''
+class _DecompFlag(namedtuple('DecompFlag', ['DEFAULT', 'BALANCED', 'RESTFIRST', 'RESTLAST',
+                                       'CYCLIC'])):
+    """
     This flag indicates how object are distributed across the available computational
     resources.\n
     Values are:\n
@@ -100,17 +95,15 @@ class _DecompFlag(object):
             Divide elements over DEs. Assign the rest of this division to the last DE.\n
         CYCLIC = 4\n
             Decompose elements cyclically across DEs.\n
-    '''
+    """
+    pass
+
+DecompFlag = _DecompFlag(DEFAULT=0, BALANCED=1, RESTFIRST=2, RESTLAST=3, CYCLIC=4)
 
 # FileFormat
-FileFormat = namedtuple('FileFormat', ['UNDEFINED', 'VTK', 'SCRIP', 'ESMFMESH',
-                                       'ESMFGRID', 'UGRID', 'GRIDSPEC'])
-FileFormat = FileFormat(UNDEFINED=0, VTK=1, SCRIP=2, ESMFMESH=3, ESMFGRID=4,
-                        UGRID=5, GRIDSPEC=6)
-
-# This is a dummy class object used for documentation purposes only
-class _FileFormat(object):
-    '''
+class _FileFormat(namedtuple('FileFormat', ['UNDEFINED', 'VTK', 'SCRIP', 'ESMFMESH',
+                                       'ESMFGRID', 'UGRID', 'GRIDSPEC'])):
+    """
     The Grid and Mesh objects may be created from specifications in a NetCDF
     data file.  This flag indicates the format of the data file.\n
     Values are:\n
@@ -127,17 +120,16 @@ class _FileFormat(object):
         GRIDSPEC = 6\n
             Use a single tile grid file conforming with the proposed
             CF GRIDSPEC conventions.\n
-    '''
+    """
+    pass
 
+FileFormat = _FileFormat(UNDEFINED=0, VTK=1, SCRIP=2, ESMFMESH=3, ESMFGRID=4,
+                        UGRID=5, GRIDSPEC=6)
 
 # GridItem
-GridItem = namedtuple('GridItem', ['INVALID', 'UNINIT', 'MASK', 'AREA'])
-GridItem = GridItem(INVALID=-2, UNINIT=-1, MASK=0, AREA=1)
-
-# This is a dummy class object used for documentation purposes only
-class _GridItem(object):
-    '''
-    The Grid can contain other kinds of data besides coordinates. This 
+class _GridItem(namedtuple('GridItem', ['INVALID', 'UNINIT', 'MASK', 'AREA'])):
+    """
+    The Grid can contain other kinds of data besides coordinates. This
     data is referred to as Grid "items". Some items may be used
     for calculations involving the Grid.\n
     Values are:\n
@@ -147,35 +139,32 @@ class _GridItem(object):
             A grid item to represent a mask.\n
         AREA = 1\n
             A grid item to represent an area field for conservative regridding.\n
-    '''
+    """
+    pass
+
+GridItem = _GridItem(INVALID=-2, UNINIT=-1, MASK=0, AREA=1)
 
 # LogKind
-LogKind = namedtuple('LogKind', ['MULTI', 'NONE'])
-LogKind = LogKind(MULTI=2, NONE=3)
-
-# This is a dummy class object used for documentation purposes only
-class _LogKind(object):
-    '''
+class _LogKind(namedtuple('LogKind', ['MULTI', 'NONE'])):
+    """
     This flag is used to specify how much logging should be done.\n
     Values are:\n
         MULTI = 2\n
             Use multiple log files -- one per PET.\n
         NONE = 3\n
             Do not issue messages to a log file.\n
-    '''
+    """
+    pass
+
+LogKind = _LogKind(MULTI=2, NONE=3)
 
 # MeshElemType
-MeshElemType = namedtuple('MeshElemType', ['TRI', 'QUAD', 'TETRA', 'HEX'])
-#MeshElemType = MeshElemType(TRI=5, QUAD=9, TETRA=10, HEX=12)
-MeshElemType = MeshElemType(TRI=3, QUAD=4, TETRA=10, HEX=12)
-
-# This is a dummy class object used for documentation purposes only
-class _MeshElemType(object):
-    '''
+class _MeshElemType(namedtuple('MeshElemType', ['TRI', 'QUAD', 'TETRA', 'HEX'])):
+    """
     A Mesh can be constructed from a combination of different elements.
-    The type of elements that can be used in a Mesh depends on the 
-    parametric dimension of the Mesh, which is set during Mesh 
-    creation. The following are the valid Mesh element types for each 
+    The type of elements that can be used in a Mesh depends on the
+    parametric dimension of the Mesh, which is set during Mesh
+    creation. The following are the valid Mesh element types for each
     valid Mesh parametric dimension (2D or 3D).\n
     Values are:\n
         TRI = 3\n
@@ -186,30 +175,28 @@ class _MeshElemType(object):
             3D tetrahedral elements with 4 faces.\n
         HEX = 12\n
             3D hexahedral elements with 6 faces.\n
-    '''
+    """
+    pass
+
+MeshElemType = _MeshElemType(TRI=3, QUAD=4, TETRA=10, HEX=12)
 
 # MeshLoc
-MeshLoc = namedtuple('MeshLoc', ['NODE', 'ELEMENT'])
-MeshLoc = MeshLoc(NODE=1, ELEMENT=2)
-
-# This is a dummy class object used for documentation purposes only
-class _MeshLoc(object):
-    '''
+class _MeshLoc(namedtuple('MeshLoc', ['NODE', 'ELEMENT'])):
+    """
     The Mesh location used to hold Field data.\n
     Values are:\n
         NODE = 1\n
             The nodes of the Mesh.\n
         ELEMENT = 2\n
             The elements of the Mesh.\n
-    '''
+    """
+    pass
+
+MeshLoc = _MeshLoc(NODE=1, ELEMENT=2)
 
 # NormType
-NormType = namedtuple('NormType', ['DSTAREA', 'FRACAREA'])
-NormType = NormType(DSTAREA=0, FRACAREA=1)
-
-# This is a dummy class object used for documentation purposes only
-class _NormType(object):
-    '''
+class _NormType(namedtuple('NormType', ['DSTAREA', 'FRACAREA'])):
+    """
     When doing conservative regridding, this option allows the user
     to select the type of normalization used when producing the weights.\n
     Values are:\n
@@ -224,15 +211,14 @@ class _NormType(object):
             by the fraction that the destination cell overlaps with the entire source grid. In
             other words, the weight is the fraction of just the part of the destination cell that
             overlaps with the entire source mesh.\n
-    '''
+    """
+    pass
+
+NormType = _NormType(DSTAREA=0, FRACAREA=1)
 
 # PoleMethod
-PoleMethod = namedtuple('PoleMethod', ['NONE', 'ALLAVG', 'NPNTAVG', 'TEETH'])
-PoleMethod = PoleMethod(NONE=0, ALLAVG=1, NPNTAVG=2, TEETH=3)
-
-# This is a dummy class object used for documentation purposes only
-class _PoleMethod(object):
-    '''
+class _PoleMethod(namedtuple('PoleMethod', ['NONE', 'ALLAVG', 'NPNTAVG', 'TEETH'])):
+    """
     Indicates which type of artificial pole to construct on the source
     Grid for regridding.\n
     Values are:\n
@@ -265,15 +251,14 @@ class _PoleMethod(object):
             mismatch between the size of the destination and source
             pole holes, some destination points may still not be able
             to be mapped to the source Grid.\n
-    '''
+    """
+    pass
+
+PoleMethod = _PoleMethod(NONE=0, ALLAVG=1, NPNTAVG=2, TEETH=3)
 
 # Region
-Region = namedtuple('Region', ['TOTAL', 'SELECT', 'EMPTY'])
-Region = Region(TOTAL=0, SELECT=1, EMPTY=2)
-
-# This is a dummy class object used for documentation purposes only
-class _Region(object):
-    '''
+class _Region(namedtuple('Region', ['TOTAL', 'SELECT', 'EMPTY'])):
+    """
     Specify various regions in the data layout of a Field object.\n
     Values are:\n
         TOTAL = 0\n
@@ -285,41 +270,40 @@ class _Region(object):
             (as opposed to being initialized to 0).\n
         EMPTY = 2\n
             An operation does not apply any element in the domain.\n
-    '''
+    """
+    pass
+
+Region = _Region(TOTAL=0, SELECT=1, EMPTY=2)
 
 # RegridMethod
-RegridMethod = namedtuple('RegridMethod', ['BILINEAR', 'PATCH', 'CONSERVE', 
-                                           'NEAREST_STOD', 'NEAREST_DTOS'])
-RegridMethod = RegridMethod(BILINEAR=0, PATCH=1, CONSERVE=2, NEAREST_STOD=3, NEAREST_DTOS=4)
-
-# This is a dummy class object used for documentation purposes only
-class _RegridMethod(object):
-    '''
+class _RegridMethod(namedtuple('RegridMethod', ['BILINEAR', 'PATCH', 'CONSERVE',
+                                           'NEAREST_STOD', 'NEAREST_DTOS'])):
+    """
     Specify which interpolation method to use during regridding.\n
     Values are:\n
         BILINEAR = 0\n
             Bilinear interpolation. Destination value is a linear combination
-            of the source values in the cell which contains the destination 
-            point. The weights for the linear combination are based on the 
+            of the source values in the cell which contains the destination
+            point. The weights for the linear combination are based on the
             distance of the destination point from each source value.\n
         PATCH = 1\n
             Higher-order patch recovery interpolation. Destination value is a
-            weighted average of 2D polynomial patches constructed from cells 
-            surrounding the source cell which contains the destination point. 
-            This method typically results in better approximations to values 
-            and derivatives than bilinear.  However, because of its larger 
-            stencil, it also results in a much larger interpolation matrix than 
+            weighted average of 2D polynomial patches constructed from cells
+            surrounding the source cell which contains the destination point.
+            This method typically results in better approximations to values
+            and derivatives than bilinear.  However, because of its larger
+            stencil, it also results in a much larger interpolation matrix than
             the bilinear method.\n
         CONSERVE = 2\n
             First order conservative interpolation. Value of a destination cell
-            is the weighted sum of the values of the source cells that it 
-            overlaps. The weights are determined by the amount the source cell 
-            overlaps the destination cell. This method will typically give less 
-            accurate approximations to values than the other interpolation 
-            methods, however, it will do a much better job preserving the 
+            is the weighted sum of the values of the source cells that it
+            overlaps. The weights are determined by the amount the source cell
+            overlaps the destination cell. This method will typically give less
+            accurate approximations to values than the other interpolation
+            methods, however, it will do a much better job preserving the
             integral of the value between the source and destination. This
-            method requires the corner coordinate values to be provided in the 
-            Grid, and it currently only works for Fields created on the Grid 
+            method requires the corner coordinate values to be provided in the
+            Grid, and it currently only works for Fields created on the Grid
             center stagger (or the Mesh element location).\n
         NEAREST_STOD = 3\n
             Nearest neighbor interpolation where each destination
@@ -333,28 +317,22 @@ class _RegridMethod(object):
             source point may go to multiple destination points, but no
             destination point will receive input from more than one
             source point.\n
-    '''
+    """
+    pass
+
+RegridMethod = _RegridMethod(BILINEAR=0, PATCH=1, CONSERVE=2, NEAREST_STOD=3, NEAREST_DTOS=4)
 
 # StaggerLoc
-StaggerLoc = namedtuple('StaggerLoc', ['INVALID', 'UNINIT', 'CENTER', 'EDGE1',
+class _StaggerLoc(namedtuple('StaggerLoc', ['INVALID', 'UNINIT', 'CENTER', 'EDGE1',
                                        'EDGE2', 'CORNER',
                                        'CENTER_VCENTER', 'EDGE1_VCENTER',
                                        'EDGE2_VCENTER', 'CORNER_VCENTER',
                                        'CENTER_VFACE', 'EDGE1_VFACE',
-                                       'EDGE2_VFACE', 'CORNER_VFACE'])
-StaggerLoc = StaggerLoc(INVALID=-2, UNINIT=-1, CENTER=0, EDGE1=1,
-                        EDGE2=2, CORNER=3,
-                        CENTER_VCENTER=0, EDGE1_VCENTER=1,
-                        EDGE2_VCENTER=2, CORNER_VCENTER=3,
-                        CENTER_VFACE=4, EDGE1_VFACE=5,
-                        EDGE2_VFACE=6, CORNER_VFACE=7)
-
-# This is a dummy class object used for documentation purposes only
-class _StaggerLoc(object):
-    '''
-    In the Grid class, data can be located at different positions in a 
-    Grid cell. When setting or retrieving coordinate data the stagger 
-    location is specified to tell the Grid method from where in the 
+                                       'EDGE2_VFACE', 'CORNER_VFACE'])):
+    """
+    In the Grid class, data can be located at different positions in a
+    Grid cell. When setting or retrieving coordinate data the stagger
+    location is specified to tell the Grid method from where in the
     cell to get the data.\n
     Values are:\n
         2D STAGGER LOCATIONS:\n
@@ -385,15 +363,19 @@ class _StaggerLoc(object):
                 Second dimension edge stagger location of the top and bottom cell faces.\n
             CORNER_VFACE = 7\n
                 Corner stagger location of the top and bottom cell faces.\n
-    '''
+    """
+    pass
+
+StaggerLoc = _StaggerLoc(INVALID=-2, UNINIT=-1, CENTER=0, EDGE1=1,
+                        EDGE2=2, CORNER=3,
+                        CENTER_VCENTER=0, EDGE1_VCENTER=1,
+                        EDGE2_VCENTER=2, CORNER_VCENTER=3,
+                        CENTER_VFACE=4, EDGE1_VFACE=5,
+                        EDGE2_VFACE=6, CORNER_VFACE=7)
 
 # TypeKind
-TypeKind = namedtuple('TypeKind', ['I4', 'I8', 'R4', 'R8'])
-TypeKind = TypeKind(I4=3, I8=4, R4=5, R8=6)
-
-# This is a dummy class object used for documentation purposes only
-class _TypeKind(object):
-    '''
+class _TypeKind(namedtuple('TypeKind', ['I4', 'I8', 'R4', 'R8'])):
+    """
     This is used to indicate the type and kind of ESMPy types to the
     underlying ESMF library routines.
     Values are:\n
@@ -405,22 +387,23 @@ class _TypeKind(object):
             A four byte real, equivalent to numpy.float32.\n
         R8 = 6\n
             An eight byte real, equivalent to numpy.float64.\n
-    '''
+    """
+    pass
+
+TypeKind = _TypeKind(I4=3, I8=4, R4=5, R8=6)
 
 # UnmappedAction
-UnmappedAction = namedtuple('UnmappedAction', ['ERROR', 'IGNORE'])
-UnmappedAction = UnmappedAction(ERROR=0, IGNORE=1)
-
-# This is a dummy class object used for documentation purposes only
-class _UnmappedAction(object):
-    '''
+class _UnmappedAction(namedtuple('UnmappedAction', ['ERROR', 'IGNORE'])):
+    """
     This is used to indicate what action to take with respect to unmapped destination
-    points and the entries of the sparse matrix that correspond to 
+    points and the entries of the sparse matrix that correspond to
     these points.\n
     Values are:\n
         ERROR = 0\n
             Unmapped points result in an error code return.\n
         IGNORE = 1\n
             Unmapped points are ignored.\n
-    '''
+    """
+    pass
 
+UnmappedAction = _UnmappedAction(ERROR=0, IGNORE=1)
