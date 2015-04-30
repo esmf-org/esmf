@@ -19,17 +19,17 @@ grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
 #                  add_corner_stagger=True)
 
 # create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(grid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
+srcfield = ESMF.Field(grid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
 mesh = ESMF.Mesh(filename=grid2, filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the nodes of the destination mesh
-dstfield = ESMF.Field(mesh, 'dstfield', meshloc=ESMF.MeshLoc.NODE)
-xctfield = ESMF.Field(mesh, 'xctfield', meshloc=ESMF.MeshLoc.NODE)
+dstfield = ESMF.Field(mesh, name='dstfield', meshloc=ESMF.MeshLoc.NODE)
+xctfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.NODE)
 # NOTE: Field must be built on elements of Mesh for conservative regridding
-# dstfield = ESMF.Field(mesh, 'dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
-# xctfield = ESMF.Field(mesh, 'xctfield', meshloc=ESMF.MeshLoc.ELEMENT)
+# dstfield = ESMF.Field(mesh, name='dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
+# xctfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
 # initialize the fields
 [lon,lat] = [0, 1]

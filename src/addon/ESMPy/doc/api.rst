@@ -112,15 +112,10 @@ Meshes From File
 
 When creating a Mesh from a SCRIP format file, there are a number of
 options to control the output Mesh. The data is located at the center
-of the grid cell in a SCRIP grid; whereas the data is located at the
-corner of a cell in an ESMF Mesh object. Therefore, we create a Mesh
-object by default by constructing a "dual" mesh using the coordinates
-in the file. If the user wishes to not construct the dual mesh, the
-optional argument 'convert_to_dual' may be used to control this
-behavior. When 'convert_to_dual' is set to False, the Mesh constructed
-from the file will not be the dual. This is necessary when the Mesh is
-part of a conservative regridding operation, so the
-weights are properly generated for the cell centers in the file.
+of the grid cell in a SCRIP grid. Therefore, when the Mesh will be
+part of a conservative regridding operation, the 'convert_to_dual'
+flag must be set to True to properly generate coordinates at the the
+cell corners.
 
 A Mesh may also be created with boolean flags to specify whether or not to
 add an area property to the Mesh 'add_user_area', or to add a mask
@@ -222,7 +217,7 @@ See reference [3] for more information.
 Masking
 -------
 
-Masking is the process whereby parts of a grid can be marked to be
+Masking is the process whereby parts of an object can be marked to be
 ignored during an operation, such as regridding.  Masking can be
 used on a source grid to indicate that certain portions of the grid
 should not be used to generate regridded data.  This is useful, for
@@ -267,6 +262,25 @@ For example, if Fields built on StaggerLoc.CENTER are
 passed into the Regrid() call then the masking
 should also be set in StaggerLoc.CENTER.
 
+~~~~~~~~~~~~~
+Field Masking
+~~~~~~~~~~~~~
+
+The ESMPy Field is derived from
+`numpy.MaskedArray <http://docs.scipy.org/doc/numpy/reference/maskedarray.generic.html>`_.
+Therefor, it contains all of the associated functionality, advantages and pitfalls.
+Some specific things to keep in mind are:
+
+- Hardening and softening of masks do not apply when you specifically
+  set values of Field.mask, only when you make assignments to the more
+  general Field.
+
+- As with slices of MaskedArrays, Field masks
+  are a copy of the underlying Grid mask to avoid propagation of any
+  modification of the Field mask to the Grid mask (which may be shared
+  by multiple fields).
+
+
 ---------------------
 Spherical coordinates
 ---------------------
@@ -293,4 +307,21 @@ so the user can either not set the 'unmapped_action' argument or the user can se
 it to UnmappedAction.ERROR. At this point ESMPy does not support
 extrapolation to destination points outside the unmasked source Field.
 
+--------------------------
+Numpy Slicing and Indexing
+--------------------------
 
+Numpy arrays are used to represent Grid and Mesh coordinates and Field data
+and masks, among other things.  Standard numpy conventions for array indexing
+and slicing can be expected.  There are some exceptions when it comes to fancy
+indexing, index arrays, and multi-dimensional slicing.  Significant effort has
+been put into raising exceptions where inappropriate indexing or slicing
+operations are attempted.
+
+It is very important to remember that all indexing
+and slicing operations apply ONLY to the ESMPy level objects, and these operations
+do not propagate down to the lower-level Fortran- and C-based representations
+of the ESMF objects.  One example of where this could come up is when passing
+a Field slice into regridding.  The entire original Field will still be run
+through the ESMF regridding engine, and only the appropriate portion of
+the Field slice will be updated with the regridded values.
