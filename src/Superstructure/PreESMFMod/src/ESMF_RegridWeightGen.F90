@@ -97,6 +97,7 @@ contains
     dstMissingvalueFlag, dstMissingvalueVar, &
     useSrcCoordFlag, srcCoordinateVars, &
     useDstCoordFlag, dstCoordinateVars, &
+    useSrcCornerFlag, useDstCornerFlag, & 
     useUserAreaFlag, largefileFlag, &
     netcdf4fileFlag, verboseFlag, rc)
 
@@ -127,6 +128,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*),             intent(in),  optional :: srcCoordinateVars(:)
   logical,                      intent(in),  optional :: useDstCoordFlag
   character(len=*),             intent(in),  optional :: dstCoordinateVars(:)
+  logical,                      intent(in),  optional :: useSrcCornerFlag
+  logical,                      intent(in),  optional :: useDstCornerFlag
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
@@ -248,6 +251,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     latitude variables in the destination grid file to be used for the regrid.
 !     This argument is only used when the grid file is in GRIDSPEC format.
 !     {\tt dstCoordinateVars} should be a array of 2 elements.
+!   \item [{[useSrcCornerFlag]}]
+!     If {\tt useSrcCornerFlag} is .TRUE., the corner coordinates of the source file
+!     will be used for regridding. Otherwise, the center coordinates will be used.
+!     The default is .FALSE.
+!   \item [{[useDstCornerFlag]}]
+!     If {\tt useDstCornerFlag} is .TRUE., the corner coordinates of the destination file
+!     will be used for regridding. Otherwise, the center coordinates will be used.
+!     The default is .FALSE.
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.
 !     Only the SCRIP and ESMF format grid files have user specified areas. This flag
@@ -291,7 +302,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer   :: srcdims(:), dstdims(:)
     integer            :: srcrank, dstrank
     logical            :: isConserve, srcIsSphere, dstIsSphere
-    logical            :: addCorners,convertToDual
+    logical            :: addCorners
+    logical            :: convertSrcToDual,convertDstToDual
     type(ESMF_MeshLoc) :: meshloc
     logical            :: srcIsReg, dstIsReg
     logical            :: srcIsRegional, dstIsRegional, typeSetFlag
@@ -309,6 +321,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=256) :: argStr
     logical            :: useSrcCoordVar, useDstCoordVar
     logical            :: useSrcMask, useDstMask
+    logical            :: useSrcCorner, useDstCorner
     integer            :: commandbuf(6)
     !real(ESMF_KIND_R8) :: starttime, endtime
     type(ESMF_NormType_Flag):: localNormType
@@ -345,6 +358,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localUserAreaflag = .false.
     useSrcCoordVar = .false.
     useDstCoordVar = .false.
+    useSrcCorner = .false.
+    useDstCorner = .false.
     localPoleNPnts = 0
     localIgnoreDegenerate = .false.
 
@@ -517,6 +532,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(useUserAreaFlag)) then
 	    localUserAreaFlag = useUserAreaFlag
+    endif
+
+    if (present(useSrcCornerFlag)) then
+       useSrcCorner = useSrcCornerFlag
+    endif
+
+    if (present(useDstCornerFlag)) then
+       useDstCorner = useDstCornerFlag
     endif
 
     if (present(verboseFlag)) then
@@ -727,6 +750,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
 	 print *, "  Source Grid is an unstructured grid"
       endif
+      if (useSrcCorner) then
+         print *, "  Use the corner coordinates of the source grid to do the regrid"
+      else
+         print *, "  Use the center coordinates of the source grid to do the regrid"
+      endif
       if (localDstFileType == ESMF_FILEFORMAT_SCRIP) then 
         print *, "  Destination File is in SCRIP format"
       elseif (localDstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
@@ -756,6 +784,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	 print *, "  Destination Grid is a logically rectangular grid"
       else
 	 print *, "  Destination Grid is an unstructured grid"
+      endif
+      if (useDstCorner) then
+         print *, "  Use the corner coordinates of the destination grid to do the regrid"
+      else
+         print *, "  Use the center coordinates of the destination grid to do the regrid"
       endif
       if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
         print *, "  Regrid Method: bilinear"
@@ -801,15 +834,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set flags according to the regrid method
+    convertSrcToDual=.false.
+    convertDstToDual=.false.
     if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       isConserve=.true.
       addCorners=.true.
-      convertToDual=.false.
       meshloc=ESMF_MESHLOC_ELEMENT
     else
       isConserve=.false.
       addCorners=.false.
-      convertToDual=.true.
+      if (.not. useSrcCorner) then
+         convertSrcToDual=.true.
+      endif
+      if (.not. useDstCorner) then
+         convertDstToDual=.true.
+      endif
       meshloc=ESMF_MESHLOC_NODE
     endif
 
@@ -931,7 +970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
 	    else
         srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-          convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+          convertToDual=convertSrcToDual, addUserArea=localUserAreaFlag, &
 		      rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -942,29 +981,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	    endif
+	endif
     else
-	    ! if srcfile is not SCRIP, it is always unstructured
-	    if (srcMissingValue) then
-	      srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-          meshname = trim(srcMeshName), maskFlag =meshloc, &
-          addUserArea=localUserAreaFlag, &
-		      varname=trim(srcMissingvalueVar), rc=localrc)
-	    else
-	      srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-          addUserArea=localUserAreaFlag, &
-          meshname = trim(srcMeshName), rc=localrc)
+	! if srcfile is not SCRIP, it is always unstructured
+	if (srcMissingValue) then
+	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
+               meshname = trim(srcMeshName), maskFlag =meshloc, &
+               addUserArea=localUserAreaFlag, &
+               convertToDual=convertSrcToDual, &
+	       varname=trim(srcMissingvalueVar), rc=localrc)
+	else
+	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
+                addUserArea=localUserAreaFlag, &
+               convertToDual=convertSrcToDual, &
+                meshname = trim(srcMeshName), rc=localrc)
+	endif
         if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-	    endif
-      !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
-      if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-      srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1049,7 +1086,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
 	    else
         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-          convertToDual=convertToDual, addUserArea=localUserAreaFlag, rc=localrc)
+          convertToDual=convertDstToDual, addUserArea=localUserAreaFlag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1066,13 +1103,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    ! if dstfile is not SCRIP, it is always unstructured
 	    if (dstMissingValue) then
  	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-          meshname = trim(dstMeshName), maskFlag=meshloc, &
-          addUserArea=localUserAreaFlag, &
-		    varname=trim(dstMissingvalueVar), rc=localrc)
+                      meshname = trim(dstMeshName), maskFlag=meshloc, &
+                      addUserArea=localUserAreaFlag, &
+                      convertToDual=convertDstToDual, &
+		      varname=trim(dstMissingvalueVar), rc=localrc)
 	    else
 	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-          addUserArea=localUserAreaFlag, &
-          meshname = trim(dstMeshName), rc=localrc)
+	                addUserArea=localUserAreaFlag, &
+                        convertToDual=convertDstToDual, &
+          		meshname = trim(dstMeshName), rc=localrc)
       endif
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
