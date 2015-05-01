@@ -1931,8 +1931,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
 !   or an external procedure that has a matching interface block specified for it.
 !   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure may be used subject to
-!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   From Fortran-2008 onwards, an internal procedure contained within either a main program
+!   or a module procedure may be used.  If the internal procedure is contained within a
+!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
 ! \item[{[phase]}] 
 !   The {\tt phase} number for multi-phase methods. For single phase 
 !   methods the {\tt phase} argument can be omitted. The default setting
@@ -2068,8 +2069,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
 !   or an external procedure that has a matching interface block specified for it.
 !   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure may be used subject to
-!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   From Fortran-2008 onwards, an internal procedure contained within either a main program
+!   or a module procedure may be used.  If the internal procedure is contained within a
+!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !  \begin{sloppypar}
 !  The {\tt userRoutine}, when called by the framework, must make successive calls to
@@ -2161,8 +2163,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
 !   or an external procedure that has a matching interface block specified for it.
 !   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure may be used subject to
-!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   From Fortran-2008 onwards, an internal procedure contained within either a main program
+!   or a module procedure may be used.  If the internal procedure is contained within a
+!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   !INTERFACE:
 !     interface
@@ -2455,8 +2458,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
 !   or an external procedure that has a matching interface block specified for it.
 !   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure may be used subject to
-!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   From Fortran-2008 onwards, an internal procedure contained within either a main program
+!   or a module procedure may be used.  If the internal procedure is contained within a
+!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   The subroutine, when called by the framework, is expected to use any of the
 !   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
@@ -2534,8 +2538,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
 !   or an external procedure that has a matching interface block specified for it.
 !   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure may be used subject to
-!   initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   From Fortran-2008 onwards, an internal procedure contained within either a main program
+!   or a module procedure may be used.  If the internal procedure is contained within a
+!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
 !
 !   !INTERFACE:
 !     interface
