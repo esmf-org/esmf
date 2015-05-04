@@ -56,16 +56,16 @@ using namespace ESMCI;
 
 
 // prototypes from below
-bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
-bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
-void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
-void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
-void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
-void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
+static bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
+static bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
+static void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
+static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
+static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
+static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
                                       int *iientries);
-void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
+static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
                                       int *iientries, double *factors);
-void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
+static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors);
 
 
@@ -662,7 +662,7 @@ void ESMCI_regrid_getfrac(Grid **gridpp,
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
-void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids) {
+static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids) {
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
@@ -698,7 +698,7 @@ void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
-void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids) {
+static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids) {
 
   // Get mask Field
   MEField<> *mptr = mesh->GetField("elem_mask");
@@ -855,7 +855,7 @@ bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "cnsrv_check_for_mesh_errors()" 
-void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
+static void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -866,37 +866,33 @@ void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *conca
 
   int num_poly_nodes_orig;
   double poly_coords_orig[MAX_NUM_POLY_COORDS];
-  
-
-printf(" IN CONCAVE\n");
-
-
+   
   // Init variables
   *concave=false;
   *clockwise=false;
   *degenerate=false;
 
   // Get coord field
-  MEField<> *cfield = mesh->GetCoordField();
+  MEField<> *cfield = mesh.GetCoordField();
 
   // Get mask Field
-  MEField<> *mptr = mesh->GetField("elem_mask");  
+  MEField<> *mptr = mesh.GetField("elem_mask");  
 
   // Get dimensions
-  int sdim=mesh->spatial_dim();
-  int pdim=mesh->parametric_dim();
-    
+  int sdim=mesh.spatial_dim();
+   int pdim=mesh.parametric_dim();
+     
   // Compute area depending on dimensions
   if (pdim==2) {
     if (sdim==2) {
-      MeshDB::const_iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         // Get the element
         const MeshObj &elem = *ei; 
         
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-
+ 
         // Skip masked elements
         if (mptr != NULL) {
           double *m=mptr->data(elem);
@@ -916,7 +912,7 @@ printf(" IN CONCAVE\n");
         // Get rid of 0 len edges
         remove_0len_edges2D(&num_poly_nodes, poly_coords);
 
-        // If less than 3 nodes then is degenerate
+         // If less than 3 nodes then is degenerate
         if (num_poly_nodes <3) is_degenerate=true;
 
         // If is smashed quad then is degenerate
@@ -927,10 +923,10 @@ printf(" IN CONCAVE\n");
           if (ignore_degenerate) {
             continue;
           } else {
-            char msg[1024];
+             char msg[1024];
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
-            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
@@ -946,7 +942,9 @@ printf(" IN CONCAVE\n");
             return;
           }
         }
-        
+     
+        //// WE CAN NOW HANDLE CONCAVE CELLS, SO DON'T CHECK THIS ////
+#if 0
         // Get elem rotation
         bool left_turn;
         bool right_turn;
@@ -963,20 +961,21 @@ printf(" IN CONCAVE\n");
             ESMC_LogDefault.Write("  concave elem. coords ",ESMC_LOGMSG_ERROR);
             ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
-              double *pnt=poly_coords_orig+2*i;
+               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
-              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+               ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *concave=true;
             return;
           }
         }
+#endif
       }
     } else if (sdim==3) {
-      MeshDB::const_iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         // Get the element
         const MeshObj &elem = *ei; 
@@ -997,7 +996,7 @@ printf(" IN CONCAVE\n");
         // Get the coords
         get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
 
-        // Save original coords
+         // Save original coords
         std::copy(poly_coords,poly_coords+3*num_poly_nodes,poly_coords_orig);
         num_poly_nodes_orig=num_poly_nodes;
 
@@ -1010,13 +1009,13 @@ printf(" IN CONCAVE\n");
         if (num_poly_nodes <3) is_degenerate=true;
 
 
-        // If is smashed quad then is degenerate
+         // If is smashed quad then is degenerate
         if (is_smashed_quad3D(num_poly_nodes, poly_coords)) is_degenerate=true;
 
 
         // Check if degenerate
         if (is_degenerate) {
-          if (ignore_degenerate) {
+           if (ignore_degenerate) {
             continue;
           } else {
             char msg[1024];
@@ -1030,8 +1029,8 @@ printf(" IN CONCAVE\n");
               double *pnt=poly_coords_orig+3*i;
               
               double lon, lat, r;
-              convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
-                                      &lon, &lat, &r);
+               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
               ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
@@ -1043,11 +1042,13 @@ printf(" IN CONCAVE\n");
           }
         } 
 
+        //// WE CAN NOW HANDLE CONCAVE CELLS, SO DON'T CHECK THIS ////
+#if 0
         // Get elem rotation
         bool left_turn;
         bool right_turn;
         rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
-       
+        
         // Look for errors
         if (right_turn) {
           if (left_turn) { 
@@ -1060,34 +1061,32 @@ printf(" IN CONCAVE\n");
             ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
-              
+               
               double lon, lat, r;
               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
-              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+               ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
             ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
-
-#if 0
-            write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 
-#endif
 
             *concave=true;
             return;
           } 
         }
+#endif
       }
     }
   }
+
 
   // TODO: Check to see if 3D elements are in correct order.
 
 }
 
 #if 0
-void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
+static void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -1222,7 +1221,7 @@ void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *co
 
 #endif
 
-void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
+static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
                                       int *iientries) {
 
 
@@ -1312,7 +1311,7 @@ void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
 
 
 
-void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
+static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
                                       int *iientries, double *factors) {
 
   // Loop through weights modifying split dst elements
@@ -1338,7 +1337,7 @@ void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
 
 }
 
-void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
+static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors) {
 
 

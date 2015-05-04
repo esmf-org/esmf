@@ -482,8 +482,6 @@ int OTree::runon(
     if (search_code_2D==INTERSECTION_SEARCH_CODE_2D &&
 	search_code_1D==INTERSECTION_SEARCH_CODE_1D) {
 
-      int *temp = static_cast<int*>(node->data);
-
       int rc=ri->func(node->data,ri->func_data,ri->min,ri->max);
       if (rc) return rc;  // if return code is non-zero then return
     }
@@ -491,8 +489,6 @@ int OTree::runon(
     
     // Loop through children, searching them if necessary
     for (ONode *chn=node->children; chn!=NULL; chn=chn->next) {
-
-      int *n=static_cast<int*>(chn->data);
 
       // Calculate our search code based on search min-max and node min-max
       int search_code_2D=CALC_SEARCH_CODE_2D(ri->min,ri->max,node->min,node->max);
