@@ -28,6 +28,7 @@ class Regrid(object):
                  regrid_pole_npoints=None,
                  norm_type=None,
                  unmapped_action=None,
+                 ignore_degenerate=None,
                  src_frac_field=None,
                  dst_frac_field=None):
         """
@@ -75,6 +76,14 @@ class Regrid(object):
                 Argument values are : \n
                     (default) UnmappedAction.ERROR\n
                     UnmappedAction.IGNORE\n
+            ignore_degenerate: Ignore degenerate cells when checking the input
+                               Grids or Meshes for errors. If this is set to True,
+                               then the regridding proceeds, but degenerate cells
+                               will be skipped. If set to False, a degenerate cell
+                               produces an error. This currently only applies to
+                               RegridMethod.CONSERVE, other regrid methods currently
+                               always skip degenerate cells.  The default value is
+                               False.\n
             src_frac_field: return a numpy array of values containing 
                             weights corresponding to the amount of 
                             each Field value which contributes to the 
@@ -109,17 +118,17 @@ class Regrid(object):
         # else case handled by initialization to None
 
         # call into the ctypes layer
-        self.routehandle = ESMP_FieldRegridStore(srcfield,
-                                            dstfield,
-                                            srcMaskValues=local_src_mask_values,
-                                            dstMaskValues=local_dst_mask_values,
-                                            regridmethod=regrid_method,
-                                            polemethod=pole_method,
-                                            regridPoleNPnts=regrid_pole_npoints,
-                                            normType=norm_type,
-                                            unmappedaction=unmapped_action,
-                                            srcFracField=src_frac_field,
-                                            dstFracField=dst_frac_field)
+        self.routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
+                           srcMaskValues=local_src_mask_values,
+                           dstMaskValues=local_dst_mask_values,
+                           regridmethod=regrid_method,
+                           polemethod=pole_method,
+                           regridPoleNPnts=regrid_pole_npoints,
+                           normType=norm_type,
+                           unmappedaction=unmapped_action,
+                           ignoreDegenerate=ignore_degenerate,
+                           srcFracField=src_frac_field,
+                           dstFracField=dst_frac_field)
         
         self.srcfield = srcfield
         self.dstfield = dstfield
@@ -130,6 +139,7 @@ class Regrid(object):
         self.regrid_pole_npoints = regrid_pole_npoints
         self.norm_type = norm_type
         self.unmapped_action = unmapped_action
+        self.ignore_degenerate = ignore_degenerate
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
 

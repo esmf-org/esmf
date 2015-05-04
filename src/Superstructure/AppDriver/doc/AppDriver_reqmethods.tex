@@ -124,9 +124,12 @@ They are specified by using the CONTAINS statement.
 
 Prior to Fortran-2008 an internal procedure could not be used as a user-provided callback procedure.
 In Fortran-2008 this restriction was lifted.  It is important to note that if ESMF is passed an internal
-procedure, that the surrounding procedure be active whenever ESMF calls it.  This ensures that any
-local variables at the surrounding procedures scope are properly initialized.  The following outlines
-the issue:
+procedure, that the surrounding procedure be active whenever ESMF calls it.  This helps ensure that
+local variables at the surrounding procedures scope are properly initialized.
+
+When internal procedures contained within a main program unit are used for callbacks, there is no problem.
+This is because the main program unit is always active.  However when internal procedures are used within
+other program units, initialization could become a problem.  The following outlines the issue:
 
 \begin{verbatim}
   module my_procs_mod

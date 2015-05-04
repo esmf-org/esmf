@@ -383,6 +383,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 			                int *regridPoleNPnts,
 			                enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
+                            bool *ignoreDegenerate,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -405,7 +406,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
-      polemethod, regridPoleNPnts, normType, unmappedaction,
+      polemethod, regridPoleNPnts, normType, unmappedaction, ignoreDegenerate,
       srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out

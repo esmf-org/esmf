@@ -19,7 +19,7 @@ import ESMF.api.constants as constants
 class Field(MaskedArray):
 
     @initialize
-    def __new__(cls, grid, name,
+    def __new__(cls, grid, name=None,
                 typekind=None,
                 staggerloc=None,
                 meshloc=None,
@@ -30,8 +30,8 @@ class Field(MaskedArray):
         Required Arguments: \n
             grid: either a Grid or a Mesh with coordinates allocated on
                   at least one stagger location. \n
-            name: user friendly name for the Field. \n
         Optional Arguments: \n
+            name: user friendly name for the Field. \n
             typekind: the type of the Field data. \n
                 Argument values are: \n
                     TypeKind.I4 \n
@@ -61,7 +61,9 @@ class Field(MaskedArray):
                 Argument values are: \n
                     (default) MeshLoc.NODE \n
                     MeshLoc.ELEMENT \n
-            levels: the number of vertical layers on an extra field dimension. \n
+            ndbounds: the number of entries in an extra field dimension. This
+                      is represented as a single value, a list or a tuple containing
+                      a number of entries for each desired extra dimension of a field.\n
             mask_values: Python list of integer values to use for masking. \n
                 type: Python list \n
                 shape: [grid.shape, 1] \n

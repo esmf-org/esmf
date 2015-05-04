@@ -99,6 +99,18 @@ class OptionalNumpyArrayInt32(object):
             else:
                 return param.ctypes
 
+# this class allows optional arguments to be passed in place of
+# booleans
+class OptionalBool(object):
+        @classmethod
+        def from_param(self, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_bool)
+                paramptr = ptr(ct.c_bool(param))
+                return paramptr
+
 
 #### INIT/FINAL ###################################################
 
@@ -1046,7 +1058,7 @@ _ESMF.ESMC_FieldCreateGridTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_char_p, 
                                                ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_FieldCreateGrid(grid, name,
+def ESMP_FieldCreateGrid(grid, name=None,
                          typekind=constants.TypeKind.R8,
                          staggerloc=constants.StaggerLoc.CENTER,
                          gridToFieldMap=None,
@@ -1059,7 +1071,7 @@ def ESMP_FieldCreateGrid(grid, name,
     Arguments:\n
         :RETURN: ESMP_Field   :: field\n
         ESMP_Grid             :: grid\n
-        string                :: name\n
+        string (optional)     :: name\n
         TypeKind (optional)   :: typekind\n
             Argument Values:\n
                 TypeKind.I4\n
@@ -1132,7 +1144,7 @@ _ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_char_p, 
                                                ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_FieldCreate(mesh, name,
+def ESMP_FieldCreate(mesh, name=None,
                      typekind=constants.TypeKind.R8,
                      meshloc=constants.MeshLoc.NODE,
                      gridToFieldMap=None,
@@ -1145,7 +1157,7 @@ def ESMP_FieldCreate(mesh, name,
     Arguments:\n
         :RETURN: ESMP_Field   :: field\n
         ESMP_Mesh             :: mesh\n
-        string                :: name\n
+        string (optional)     :: name\n
         TypeKind (optional)   :: typekind\n
             Argument Values:\n
                 TypeKind.I4\n
@@ -1371,6 +1383,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalBool,
                                         OptionalField,
                                         OptionalField]
 @deprecated
@@ -1379,6 +1392,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           normType=None, unmappedaction=None,
+                          ignoreDegenerate=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1418,6 +1432,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
+        boolean (option)                    :: ignoreDegenerate\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -1451,6 +1466,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridPoleNPnts_ct,
                                      normType,
                                      unmappedaction,
+                                     ignoreDegenerate,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

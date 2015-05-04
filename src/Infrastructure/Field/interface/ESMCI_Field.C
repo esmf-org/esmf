@@ -135,16 +135,17 @@ void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
 void FTN_X(f_esmf_regridgetarea)(ESMCI::Field *fieldp, int *rc);
 
 void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  int *srcMaskValues, int *len1, //int *smv_present,
-  int *dstMaskValues, int *len2, //int *dmv_present,
-  ESMCI::RouteHandle **routehandlep, 
-  ESMC_RegridMethod_Flag *regridmethod, //int *rm_present,
-  ESMC_PoleMethod_Flag *polemethod, //int *pm_present,
-  int *regridPoleNPnts, //int *rpnp_present,
-  ESMC_NormType_Flag *normtype, //int *nt_present,
-  ESMC_UnmappedAction_Flag *unmappedaction, //int *ua_present,
-  ESMCI::Field *srcfracfieldp, //int *sff_present,
-  ESMCI::Field *dstfracfieldp, //int *dff_present,
+  int *srcMaskValues, int *len1,
+  int *dstMaskValues, int *len2,
+  ESMCI::RouteHandle **routehandlep,
+  ESMC_RegridMethod_Flag *regridmethod,
+  ESMC_PoleMethod_Flag *polemethod,
+  int *regridPoleNPnts,
+  ESMC_NormType_Flag *normtype,
+  ESMC_UnmappedAction_Flag *unmappedaction,
+  bool *ignoreDegenerate,
+  ESMCI::Field *srcfracfieldp,
+  ESMCI::Field *dstfracfieldp,
   int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
@@ -1281,6 +1282,7 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_NormType_Flag *normType,
     ESMC_UnmappedAction_Flag *unmappedAction,
+    bool *ignoreDegenerate,
     Field *srcFracField, 
     Field *dstFracField) {
 //
@@ -1345,6 +1347,7 @@ namespace ESMCI {
 			                  regridPoleNPnts,
                               normType,
                               unmappedAction,
+                              ignoreDegenerate,
                               srcFracField,
                               dstFracField,
                               &localrc);

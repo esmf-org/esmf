@@ -11,7 +11,7 @@ import ESMF
 grid = ESMF.Grid(filename="examples/data/so_Omon_GISS-E2.nc", filetype=ESMF.FileFormat.GRIDSPEC)
 
 # Create a field on the centers of the grid
-field = ESMF.Field(grid, "field", staggerloc=ESMF.StaggerLoc.CENTER)#, ndbounds=[2])
+field = ESMF.Field(grid, staggerloc=ESMF.StaggerLoc.CENTER)#, ndbounds=[2])
 
 
 # field.read does not work if ESMF is built with MPIUNI
@@ -24,7 +24,7 @@ mesh = ESMF.Mesh(filename="examples/data/mpas_uniform_10242_dual_counterclockwis
                  filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the nodes of the mesh
-field = ESMF.Field(mesh, "field", meshloc=ESMF.MeshLoc.NODE)
+field = ESMF.Field(mesh, meshloc=ESMF.MeshLoc.NODE)
 
 if ESMF.local_pet() == 0:
     print "Grid, Mesh and Field all created/read from file successfully :)"
