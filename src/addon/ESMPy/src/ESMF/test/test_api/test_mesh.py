@@ -155,12 +155,14 @@ class TestMesh(TestBase):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
             mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
-                                  filetype=FileFormat.SCRIP)
+                        filetype=FileFormat.SCRIP,
+                        convert_to_dual=True)
         except:
             raise NameError('mesh_create_from_file_scrip failed!')
 
         mesh2 = mesh[0:5]
 
+        print 'mesh.coords[0][0].shape = ',mesh.coords[0][0].shape
         assert mesh.coords[0][0].shape == (866,)
         assert mesh.size == [866,936]
         assert mesh.size_local == [866,936]

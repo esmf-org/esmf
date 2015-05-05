@@ -1058,7 +1058,7 @@ _ESMF.ESMC_FieldCreateGridTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_char_p, 
                                                ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_FieldCreateGrid(grid, name,
+def ESMP_FieldCreateGrid(grid, name=None,
                          typekind=constants.TypeKind.R8,
                          staggerloc=constants.StaggerLoc.CENTER,
                          gridToFieldMap=None,
@@ -1071,7 +1071,7 @@ def ESMP_FieldCreateGrid(grid, name,
     Arguments:\n
         :RETURN: ESMP_Field   :: field\n
         ESMP_Grid             :: grid\n
-        string                :: name\n
+        string (optional)     :: name\n
         TypeKind (optional)   :: typekind\n
             Argument Values:\n
                 TypeKind.I4\n
@@ -1144,7 +1144,7 @@ _ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_char_p, 
                                                ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_FieldCreate(mesh, name,
+def ESMP_FieldCreate(mesh, name=None,
                      typekind=constants.TypeKind.R8,
                      meshloc=constants.MeshLoc.NODE,
                      gridToFieldMap=None,
@@ -1157,7 +1157,7 @@ def ESMP_FieldCreate(mesh, name,
     Arguments:\n
         :RETURN: ESMP_Field   :: field\n
         ESMP_Mesh             :: mesh\n
-        string                :: name\n
+        string (optional)     :: name\n
         TypeKind (optional)   :: typekind\n
             Argument Values:\n
                 TypeKind.I4\n

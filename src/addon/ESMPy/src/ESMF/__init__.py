@@ -75,5 +75,6 @@ __author__ = "University Corporation for Atmospheric Research, " + \
              "NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
 __release__ = api.constants._ESMF_VERSION
+__version__ = api.constants._ESMF_VERSION
 
 

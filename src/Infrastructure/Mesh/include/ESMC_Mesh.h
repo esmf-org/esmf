@@ -264,7 +264,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //         for a list of valid options. 
 //   \item[{[convertToDual]}] 
 //         if 1, the mesh will be converted to its dual. If not specified,
-//         defaults to 1. Converting to dual is only supported with
+//         defaults to 0. Converting to dual is only supported with
 //         file type {\tt ESMF\_FILEFORMAT\_SCRIP}.
 //   \item[{[addUserArea]}] 
 //         if 1, the cell area will be read in from the GRID file.  This feature is
