@@ -831,9 +831,9 @@ void PIO_Handler::arrayWrite(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
   for (int i=0; i<narrDims; i++) {
-    if (arrDims[i] < 1) {
-      // std::cout << ESMC_METHOD << ": arraydim[" << i << "] = " << arrDims[i] << std::endl;
-      if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 1",
+    if (arrDims[i] < 0) {
+      std::cout << ESMC_METHOD << ": arraydim[" << i << "] = " << arrDims[i] << std::endl;
+      if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 0",
             ESMC_CONTEXT, rc)) return;
     }
   }      
