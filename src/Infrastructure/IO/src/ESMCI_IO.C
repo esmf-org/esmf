@@ -446,6 +446,9 @@ int IO::write(
   }
 
   localrc1 = write(timeslice);
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+  
   PRINTMSG("write returned " << localrc1);
   // Can't quit even if error; Have to close first
 
@@ -514,6 +517,8 @@ int IO::write(
       if (!need_redist)
         ioHandler->arrayWrite((*it)->getArray(),
                               (*it)->getName(), timeslice, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) return rc;  // bail out
       else {
         // Create a compatible temp Array with 1 DE per PET
         Array *temp_array_p;
