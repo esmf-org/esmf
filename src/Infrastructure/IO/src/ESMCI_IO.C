@@ -514,12 +514,12 @@ int IO::write(
         return rc;
       }
       // std::cout << ESMC_METHOD << ": need_redist = " << (need_redist?"y":"n") << std::endl;
-      if (!need_redist)
+      if (!need_redist) {
         ioHandler->arrayWrite((*it)->getArray(),
                               (*it)->getName(), timeslice, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) return rc;  // bail out
-      else {
+      } else {
         // Create a compatible temp Array with 1 DE per PET
         Array *temp_array_p;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redist_arraycreate1de" << std::endl;
