@@ -1094,6 +1094,14 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           return  ! bail out
         endif
 
+        if (verbose) then
+          call ESMF_LogWrite(trim(name)//&
+            ": done transferring underlying DistGrid", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -1370,6 +1378,14 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           return  ! bail out
         endif
           
+        if (verbose) then
+          call ESMF_LogWrite(trim(name)//&
+            ": done transferring the full Grid/Mesh", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
