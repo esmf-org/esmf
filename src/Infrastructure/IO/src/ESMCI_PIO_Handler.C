@@ -31,6 +31,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
@@ -1645,19 +1646,34 @@ bool PIO_Handler::CheckPIOError(
   }
 
   if (pioRetCode != PIO_noerr) {
-    char errmsg[512];
-    // Log the error
+    std::stringstream errmsg;
+#if defined(ESMF_PNETCDF)
+    // Log the error, assuming the error code was passed through PIO from PNetCDF
     if ((char *)NULL != fmtStr) {
-      sprintf(errmsg, " %s, (PIO error = %d)", fmtStr, pioRetCode);
+      errmsg << " " << fmtStr << ", (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
     } else {
-      sprintf(errmsg, " (PIO error = %d)", pioRetCode);
+      errmsg << " (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
     }
+#elif defined(ESMF_NETCDF)
+    // Log the error, assuming the error code was passed through PIO from NetCDF
+    if ((char *)NULL != fmtStr) {
+      errmsg << " " << fmtStr << ", (PIO/NetCDF error = " <<  nc_strerror (pioRetCode) << ")";
+    } else {
+      errmsg << " (PIO/NetCDF error = " <<  nc_strerror (pioRetCode) << ")";
+    }
+#else
+    if ((char *)NULL != fmtStr) {
+      errmsg << " " << fmtStr << ", (PIO error = " << pioRetCode << ")";
+    } else {
+      errmsg " (PIO error = " << pioRetCode << ")";
+    }
+#endif
     if (warn) {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, line, file, method);
+      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_WARN, line, file, method);
     } else {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, line, file, method);
+      ESMC_LogDefault.Write(errmsg.str(), ESMC_LOGMSG_ERROR, line, file, method);
     }
-    PRINTMSG("PIO ERROR: " << errmsg);
+    PRINTMSG("PIO ERROR: " << errmsg.str());
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -1838,15 +1854,12 @@ int PIO_IODescHandler::constructPioDecomp(
   PRINTMSG("(" << localPet << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
-    pioDofList = (int64_t *)malloc(pioDofCount * sizeof(int64_t));
-    if ((int64_t *)NULL == pioDofList) {
-      ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
-      return ESMF_RC_MEM_ALLOCATE;
-    }
+    pioDofList = new int64_t[pioDofCount];
+
     handle->io_descriptor = (pio_io_desc_t)calloc(PIO_SIZE_IO_DESC, 1);
     if ((pio_io_desc_t)NULL == handle->io_descriptor) {
       // Free the DofList!
-      free(pioDofList);
+      delete pioDofList;
       pioDofList = (int64_t *)NULL;
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
       return ESMF_RC_MEM_ALLOCATE;
@@ -1854,7 +1867,7 @@ int PIO_IODescHandler::constructPioDecomp(
   } catch(...) {
     if ((int64_t *)NULL != pioDofList) {
       // Free the DofList!
-      free(pioDofList);
+      delete pioDofList;
       pioDofList = (int64_t *)NULL;
     }
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
@@ -1869,7 +1882,7 @@ int PIO_IODescHandler::constructPioDecomp(
       &localrc)) {
     free(handle->io_descriptor);
     handle->io_descriptor = NULL;
-    free(pioDofList);
+    delete pioDofList;
     pioDofList = (int64_t *)NULL;
     return localrc;
   }
@@ -1906,7 +1919,7 @@ int PIO_IODescHandler::constructPioDecomp(
         &localrc)) {
       free(handle->io_descriptor);
       handle->io_descriptor = NULL;
-      free(pioDofList);
+      delete pioDofList;
       pioDofList = (int64_t *)NULL;
       return localrc;
     }
@@ -1975,7 +1988,7 @@ int PIO_IODescHandler::constructPioDecomp(
   }
   
   // Free the DofList!
-  free(pioDofList);
+  delete pioDofList;
   pioDofList = (int64_t *)NULL;
 
   return localrc;
