@@ -1665,7 +1665,7 @@ bool PIO_Handler::CheckPIOError(
     if ((char *)NULL != fmtStr) {
       errmsg << " " << fmtStr << ", (PIO error = " << pioRetCode << ")";
     } else {
-      errmsg " (PIO error = " << pioRetCode << ")";
+      errmsg << " (PIO error = " << pioRetCode << ")";
     }
 #endif
     if (warn) {
