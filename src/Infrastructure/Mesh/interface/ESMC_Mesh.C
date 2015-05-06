@@ -27,6 +27,7 @@
 #include "ESMCI_MeshCXX.h"
 #include "ESMC_Mesh.h"
 #include "ESMCI_VM.h"
+#include "ESMCI_CoordSys.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -51,7 +52,7 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
   mesh.ptr = NULL;
 
   // call into ESMCI method
-  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, &localrc);
+  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, ESMC_COORDSYS_CART, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 

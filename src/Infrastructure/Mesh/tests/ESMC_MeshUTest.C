@@ -39,7 +39,7 @@ int main(void){
 
   int num_elem, num_node;
   ESMC_Mesh mesh;
-  int pdim=2;
+   int pdim=2;
   int sdim=2;
 
   int localPet, petCount;
@@ -80,7 +80,7 @@ int main(void){
   //       0.0       1.0        2.0 
   //
   //      Node Ids at corners
-  //      Element Ids in centers
+   //      Element Ids in centers
   //
   //
   //      ( Everything owned by PET 0) 
@@ -121,7 +121,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddNodes(mesh, num_node, nodeId_s, nodeCoord_s, nodeOwner_s);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
+   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -162,7 +162,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
+   printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -203,7 +203,7 @@ int main(void){
   //NEX_UTest
   // Write out the internal mesh data
   strcpy(name, "MeshWrite");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshWrite(mesh, "MeshOutput");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

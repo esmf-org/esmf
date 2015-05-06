@@ -18,7 +18,7 @@
 !
 !------------------------------------------------------------------------------
 #define ESMF_FILENAME "ESMF_Mesh_C.F90"
-
+ 
 ! INCLUDES
 #include "ESMF.h"
 !==============================================================================
@@ -36,6 +36,9 @@
                                         meshname, mnpresent, &
                                         maskFlag, mfpresent, &
                                         varname, vnpresent, &
+                                        parametricDim, &
+                                        spatialDim, &
+                                        coordSys, &
                                         rc)
    use ESMF_UtilTypesMod
    use ESMF_LogErrMod
@@ -55,6 +58,9 @@
    character(len=*)               :: meshname
    type(ESMF_MeshLoc)             :: maskFlag
    character(len=*)               :: varname
+   integer, intent(out)           :: parametricDim
+   integer, intent(out)           :: spatialDim
+   type(ESMF_CoordSys_Flag), intent(out) :: coordSys
    integer, intent(out)           :: rc
 
    type(ESMF_Mesh) :: mesh
@@ -128,7 +134,7 @@
          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (auapresent == 1) then
-      	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
+       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	                        addUserArea=addUserArea, rc=rc)
          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -169,7 +175,7 @@
        	                        msg="- incorrect args for UGRID", & 
                                 ESMF_CONTEXT, rcToReturn=rc) 
  	  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-	      ESMF_CONTEXT, rcToReturn=rc)) return
+ 	      ESMF_CONTEXT, rcToReturn=rc)) return
        endif
    else
    endif
@@ -178,7 +184,16 @@
    call ESMF_MeshGetIntPtr(mesh, meshp, rc=rc)
    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
+   ! Get other information
+   call ESMF_MeshGet(mesh, &
+                   parametricDim=parametricDim, &
+                   spatialDim=spatialDim, &
+                   coordSys=coordSys, rc=rc)
+   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! Return success 
    rc = ESMF_SUCCESS
   
    end subroutine f_esmf_meshcreatefromfile
