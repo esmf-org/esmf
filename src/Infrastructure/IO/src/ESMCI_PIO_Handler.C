@@ -1859,7 +1859,7 @@ int PIO_IODescHandler::constructPioDecomp(
     handle->io_descriptor = (pio_io_desc_t)calloc(PIO_SIZE_IO_DESC, 1);
     if ((pio_io_desc_t)NULL == handle->io_descriptor) {
       // Free the DofList!
-      delete pioDofList;
+      delete[] pioDofList;
       pioDofList = (int64_t *)NULL;
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
       return ESMF_RC_MEM_ALLOCATE;
@@ -1867,7 +1867,7 @@ int PIO_IODescHandler::constructPioDecomp(
   } catch(...) {
     if ((int64_t *)NULL != pioDofList) {
       // Free the DofList!
-      delete pioDofList;
+      delete[] pioDofList;
       pioDofList = (int64_t *)NULL;
     }
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
@@ -1882,7 +1882,7 @@ int PIO_IODescHandler::constructPioDecomp(
       &localrc)) {
     free(handle->io_descriptor);
     handle->io_descriptor = NULL;
-    delete pioDofList;
+    delete[] pioDofList;
     pioDofList = (int64_t *)NULL;
     return localrc;
   }
@@ -1919,7 +1919,7 @@ int PIO_IODescHandler::constructPioDecomp(
         &localrc)) {
       free(handle->io_descriptor);
       handle->io_descriptor = NULL;
-      delete pioDofList;
+      delete[] pioDofList;
       pioDofList = (int64_t *)NULL;
       return localrc;
     }
@@ -1988,7 +1988,7 @@ int PIO_IODescHandler::constructPioDecomp(
   }
   
   // Free the DofList!
-  delete pioDofList;
+  delete[] pioDofList;
   pioDofList = (int64_t *)NULL;
 
   return localrc;
