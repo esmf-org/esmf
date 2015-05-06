@@ -608,7 +608,7 @@ int ESMC_FieldRegridStore(
     int *regridPoleNPnts,                          // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    bool *ignoreDegenerate,                        // in
+    ESMC_Logical *ignoreDegenerate,                        // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 

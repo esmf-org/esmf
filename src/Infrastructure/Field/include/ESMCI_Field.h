@@ -98,7 +98,7 @@ namespace ESMCI{
 			               int *regridPoleNPnts,
 			               ESMC_NormType_Flag *normType,
                            ESMC_UnmappedAction_Flag *unmappedAction,
-                           bool *ignoreDegenerate,
+                           ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst, 
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
