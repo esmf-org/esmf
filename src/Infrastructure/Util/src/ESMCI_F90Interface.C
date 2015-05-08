@@ -121,8 +121,10 @@ namespace ESMCI {
     array = arrayArg;
     dimCount = 1;
     extent[0]=lenArg;
-    for (int i=dimCount; i<7; i++)
-      extent[i]=0;
+    /*for (int i=dimCount; i<7; i++)
+      extent[i]=0;*/
+    //RLO: above line is causing a segfault in ESMPy, under investigation,
+    //     this is only to remain commented out until the shallow class handling in ESMPy has been resolved!!
 
     /*
     // this is a test to see if the data is passed in correctly
