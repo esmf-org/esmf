@@ -1,26 +1,37 @@
-# This example demonstrates how to create an ESMPy grid from file
-# The grid file is required, it can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
+# This example demonstrates how to create ESMPy Grid, Mesh and Field objects from file.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "so_Omon_GISS-E2.nc"))
+# cache_data_file(os.path.join(os.getcwd(), "data", "mpas_uniform_10242_dual_counterclockwise.nc"))
 
+import os
 import ESMF
 
-# Start up ESMF, this call is only necessary to enable debug logging
-# esmpy = ESMF.Manager(debug=True)
+# This call enables debug logging
+# ESMF.Manager(debug=True)
+
+# set up the DATADIR
+DATADIR = os.path.join(os.getcwd(), "data")
 
 # Create a uniform global latlon grid from a SCRIP formatted file
-grid = ESMF.Grid(filename="examples/data/so_Omon_GISS-E2.nc", filetype=ESMF.FileFormat.GRIDSPEC)
+grid = ESMF.Grid(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
+                 filetype=ESMF.FileFormat.GRIDSPEC)
 
 # Create a field on the centers of the grid
 field = ESMF.Field(grid, staggerloc=ESMF.StaggerLoc.CENTER)#, ndbounds=[2])
 
-
 # field.read does not work if ESMF is built with MPIUNI
 if ESMF.api.constants._ESMF_COMM is not ESMF.api.constants._ESMF_COMM_MPIUNI:
-    field.read(filename="examples/data/so_Omon_GISS-E2.nc", variable="so")
-
+    field.read(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
+               variable="so")
 
 # create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = ESMF.Mesh(filename="examples/data/mpas_uniform_10242_dual_counterclockwise.nc",
+mesh = ESMF.Mesh(filename=os.path.join(DATADIR, "mpas_uniform_10242_dual_counterclockwise.nc"),
                  filetype=ESMF.FileFormat.ESMFMESH)
 
 # create a field on the nodes of the mesh

@@ -14,7 +14,7 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
-from ESMF.util.helpers import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
+from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
 import warnings
 
