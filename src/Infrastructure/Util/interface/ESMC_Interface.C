@@ -43,28 +43,11 @@ extern "C" {
 int ESMC_InterfaceIntSet(ESMC_InterfaceInt *interfaceIntArg,
   int *arrayArg, int lenArg){
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  int rc = ESMC_RC_NOT_IMPL;
 
-  /*
-  // this is a test to see if the data is passed in correctly
-  printf("ESMC_InterfaceIntCreate - arrayArg = [");
-  for (int i=0; i<lenArg; ++i)
-    printf("%d,", arrayArg[i]);
-  printf("], length = %d\n", lenArg);
-  */
-  
-  ESMCI::InterfaceInt *ii = ((ESMCI::InterfaceInt *)(interfaceIntArg));
+  ESMCI::InterfaceInt *ii = ((ESMCI::InterfaceInt *)(interfaceIntArg->shallowMem));
   
   ii->set(arrayArg, lenArg);
-
-  /*
-  // this is a test to see if the data is passed in correctly
-  printf("ESMC_InterfaceIntCreate - arrayArg = [");
-  for (int i=0; i<ii->extent[0]; ++i)
-    printf("%d,", ii->array[i]);
-  printf("], length = %d\n", ii->extent[0]);
-  */
 
   // return successfully
   rc = ESMF_SUCCESS;

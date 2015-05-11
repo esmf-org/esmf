@@ -206,14 +206,17 @@ int setDefaultsLUA(int dimCount,
 
     ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)maxIndex;
   
-    /*
+
     // this is a test to see if the data is passed in correctly
-    printf("Grid::createnoperidim - arrayArg = [");
+    /*printf("Grid::createnoperidim - array = [");
     for (int i=0; i<mi->extent[0]; ++i)
       printf("%d,", mi->array[i]);
-    printf("], length = %d\n", mi->extent[0]);
-    printf("dimCount = %d\n", mi->dimCount);
-    */
+    printf("]\nextent = [");
+    for (int i=0; i<7; ++i)
+        printf("%d,", mi->extent[i]);
+    printf("]\nlength = %d\n", mi->extent[0]);
+    printf("dimCount = %d\n", mi->dimCount);*/
+
 
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
