@@ -24,6 +24,7 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
+#include <time.h>
 #include "ESMCI.h"
 #include "ESMC.h"
 
