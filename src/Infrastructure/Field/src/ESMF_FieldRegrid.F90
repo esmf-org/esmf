@@ -1098,7 +1098,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstPointList=ESMF_PointListCreate(dstLocStream, &
                                             maskValues=dstMaskValues, &
                                             rc=localrc)
-
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
           dst_pl_used=.true.

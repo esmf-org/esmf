@@ -129,7 +129,7 @@ extern "C" {
       if (*maxpts < 1) {
 	int localrc;
 	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	  "- size of Point List objest must be greater than zero",
+	  "- size of Point List object must be greater than zero",
 	  ESMC_CONTEXT, &localrc)) throw localrc;
       }
       if (*numdims < 1) {

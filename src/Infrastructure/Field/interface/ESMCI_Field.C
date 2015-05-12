@@ -1294,14 +1294,14 @@ namespace ESMCI {
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    bool smv_created, dmv_created;
     bool sff_created, dff_created;
-    smv_created = false;
-    dmv_created = false;
     sff_created = false;
     dff_created = false;
     ESMCI::InterfaceInt *smv, *dmv;
     ESMCI::Field *sff, *dff;
+    int *srcMaskArray,*dstMaskArray;
+    int srcMaskLen,dstMaskLen;
+
 
     smv = (ESMCI::InterfaceInt *)srcMaskValues;
     if (present(smv)) {
@@ -1310,9 +1310,11 @@ namespace ESMCI {
            "- srcMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
          return ESMC_NULL_POINTER;
       }
+      srcMaskArray=smv->array;
+      srcMaskLen=smv->extent[0];
     } else {
-      smv = new ESMCI::InterfaceInt();
-      smv_created = true;
+      srcMaskArray=NULL;
+      srcMaskLen=0;
     }
  
     dmv = (ESMCI::InterfaceInt *)dstMaskValues;
@@ -1320,12 +1322,13 @@ namespace ESMCI {
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- dstMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
-         if (smv_created) delete smv;
          return ESMC_NULL_POINTER;
       }
+      dstMaskArray=dmv->array;
+      dstMaskLen=dmv->extent[0];
     } else {
-      dmv = new ESMCI::InterfaceInt();
-      dmv_created = true;
+      dstMaskArray=NULL;
+      dstMaskLen=0;
     }
 
     if (srcFracField == NULL) {
@@ -1339,12 +1342,12 @@ namespace ESMCI {
     }
 
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
-                              smv->array, &smv->extent[0],
-                              dmv->array, &dmv->extent[0],
+                              srcMaskArray, &srcMaskLen,
+                              dstMaskArray, &dstMaskLen,
                               routehandlep,
                               regridMethod,
-			                  polemethod,
-			                  regridPoleNPnts,
+			      polemethod,
+			      regridPoleNPnts,
                               normType,
                               unmappedAction,
                               ignoreDegenerate,
@@ -1353,15 +1356,10 @@ namespace ESMCI {
                               &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
-      if (smv_created) delete smv;
-      if (dmv_created) delete dmv;
       if (sff_created) delete sff;
       if (dff_created) delete dff;
       return rc;
     }
-
-    if (smv_created) delete smv;
-    if (dmv_created) delete dmv;
     if (sff_created) delete sff;
     if (dff_created) delete dff;
     rc = ESMF_SUCCESS;

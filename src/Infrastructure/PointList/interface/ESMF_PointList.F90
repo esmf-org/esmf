@@ -354,7 +354,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListCreateFrmLocStream"
 !BOPI
-! !IROUTINE: ESMF_PointListCreateFrmGrid - Create a new PointList from input LocStream
+! !IROUTINE: ESMF_PointListCreateFrmLocStream - Create a new PointList from input LocStream
 
 ! !INTERFACE:
   function ESMF_PointListCreateFrmLocStream(locstream, maskValues, rc)

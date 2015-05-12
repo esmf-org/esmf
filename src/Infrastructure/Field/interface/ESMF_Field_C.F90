@@ -872,10 +872,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 srcMaskValues, len1, &
                                 dstMaskValues, len2, &
                                 routehandle, &
-				                regridmethod, &
-				                polemethod, &
-				                regridPoleNPnts, &
-				                normtype, &
+				regridmethod, &
+				polemethod, &
+				regridPoleNPnts, &
+				normtype, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
                                 srcFracField, &
@@ -891,22 +891,22 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     implicit none
 
-      type(ESMF_Field)               :: srcField
-      type(ESMF_Field)               :: dstField
-      integer                        :: len1, len2
-      integer                        :: srcMaskValues(1:len1), &
-                                        dstMaskValues(1:len2)
-      type(ESMF_RouteHandle)         :: routehandle
-      type(ESMF_RegridMethod_Flag)   :: regridmethod
-      type(ESMF_PoleMethod_Flag)     :: polemethod
-      integer                        :: regridPoleNPnts
+      type(ESMF_Field)                        :: srcField
+      type(ESMF_Field)                        :: dstField
+      integer                                 :: len1, len2
+      integer,optional                        :: srcMaskValues(len1), &
+                                                 dstMaskValues(len2)
+      type(ESMF_RouteHandle),optional         :: routehandle
+      type(ESMF_RegridMethod_Flag),optional   :: regridmethod
+      type(ESMF_PoleMethod_Flag),optional     :: polemethod
+      integer,optional                        :: regridPoleNPnts
       
-      type(ESMF_NormType_Flag)       :: normtype
-      type(ESMF_UnmappedAction_Flag) :: unmappedaction
-      logical                        :: ignoreDegenerate
-      type(ESMF_Field)               :: srcFracField
-      type(ESMF_Field)               :: dstFracField
-      integer                        :: rc 
+      type(ESMF_NormType_Flag),optional       :: normtype
+      type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+      logical,optional                        :: ignoreDegenerate
+      type(ESMF_Field),optional               :: srcFracField
+      type(ESMF_Field),optional               :: dstFracField
+      integer,optional                        :: rc 
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
