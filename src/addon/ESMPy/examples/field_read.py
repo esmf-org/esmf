@@ -15,7 +15,7 @@ gridfile = "data/ll1deg_grid.nc"
 srcgrid = ESMF.Grid(filename=datafile, filetype=ESMF.FileFormat.GRIDSPEC)
 
 # create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(srcgrid, 'srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
+srcfield = ESMF.Field(srcgrid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
 srcfield.read(filename=datafile, variable="tasmax", timeslice=1)
 
@@ -23,7 +23,7 @@ srcfield.read(filename=datafile, variable="tasmax", timeslice=1)
 dstgrid = ESMF.Grid(filename=gridfile, filetype=ESMF.FileFormat.SCRIP)
 
 # create fields on the center stagger locations of the tripole grid
-dstfield = ESMF.Field(dstgrid, 'dstfield', meshloc=ESMF.StaggerLoc.CENTER)
+dstfield = ESMF.Field(dstgrid, name='dstfield', meshloc=ESMF.StaggerLoc.CENTER)
 dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field

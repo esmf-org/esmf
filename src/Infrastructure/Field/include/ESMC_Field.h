@@ -460,8 +460,9 @@ void *ESMC_FieldGetPtr(
 int ESMC_FieldGetBounds(
   ESMC_Field field,      // in
   int *localDe,
-  ESMC_InterfaceInt *exclusiveLBound,
-  ESMC_InterfaceInt *exclusiveUBound
+  int *exclusiveLBound,
+  int *exclusiveUBound,
+  int rank
 );
 
 // !RETURN VALUE:
@@ -481,6 +482,8 @@ int ESMC_FieldGetBounds(
 //    The exclusive lower bounds of the {\tt ESMC\_Field}
 //  \item[exclusiveUBound]
 //    The exclusive upper bounds of the {\tt ESMC\_Field}
+//  \item[rank]
+//    The rank of the {\tt ESMC\_Field}, to size the bounds arrays
 //  \end{description}
 //
 //EOP
@@ -608,7 +611,7 @@ int ESMC_FieldRegridStore(
     int *regridPoleNPnts,                          // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    bool *ignoreDegenerate,                        // in
+    ESMC_Logical *ignoreDegenerate,                        // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 

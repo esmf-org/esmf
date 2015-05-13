@@ -122,16 +122,16 @@ enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
 			   ESMC_FILEFORMAT_GRIDSPEC};
 
 // File status flag (for IO write functions)
-enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
+typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
                             ESMC_FILESTATUS_OLD = 1,
                             ESMC_FILESTATUS_NEW = 2,
-                            ESMC_FILESTATUS_REPLACE = 3};
+                            ESMC_FILESTATUS_REPLACE = 3} ESMC_FileStatus_Flag;
 
 // io format type
-enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
+typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
                        ESMF_IOFMT_NETCDF,
                        ESMF_IOFMT_NETCDF4P,
-                       ESMF_IOFMT_NETCDF4C};
+                       ESMF_IOFMT_NETCDF4C} ESMC_IOFmt_Flag;
 
 enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
 		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,

@@ -66,7 +66,7 @@ class Mesh(object):
                             FileFormat.UGRID \n
                 Optional arguments for creating a Mesh from file: \n
                     convert_to_dual: a boolean value to specify if the dual
-                        Mesh should be calculated.  Defaults to True.  This
+                        Mesh should be calculated.  Defaults to False.  This
                         argument is only supported with filetype FileFormat.SCRIP.\n
                     add_user_area: a boolean value to specify if an area
                         property should be added to the mesh.  This argument is only
@@ -165,8 +165,7 @@ class Mesh(object):
 
             # link the coords here for meshes created from file, in add_elements for others
             self._link_coords_()
-
-        # TODO: parametric_dim and spatial_dim are not set for meshes from file
+            # NOTE: parametric_dim is set in the _link_coords_ call for meshes created from file
 
         # register with atexit
         import atexit; atexit.register(self.__del__)

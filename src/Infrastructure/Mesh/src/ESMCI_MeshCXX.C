@@ -23,6 +23,7 @@
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_VM.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
+#include "Mesh/include/ESMCI_Mesh_Glue.h"
 
 using std::cerr;
 using std::endl;
@@ -49,8 +50,9 @@ MeshCXX::~MeshCXX(){
 }
 
 
-
-MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
+  
+  MeshCXX* MeshCXX::create( int pdim, int sdim, 
+                            ESMC_CoordSys_Flag coordSys, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::create()"
 
@@ -85,13 +87,33 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
          ESMC_CONTEXT, rc)) return (MeshCXX *)NULL;
     }
 
+    // Create meshCXX
     meshCXXp = new MeshCXX();
+
+     // Set dimensions
+    meshCXXp->spatialDim=sdim;
+    meshCXXp->parametricDim=pdim; 
+
+    // Set CoordSys
+    meshCXXp->coordSys=coordSys; 
+    
+    // Create internal mesh
     meshp = new Mesh();
 
-    (meshp)->set_parametric_dimension(pdim);
-    (meshp)->set_spatial_dimension(sdim);
-
+    // Set internal mesh in meshCXX
     (meshCXXp)->meshPointer = meshp;
+
+    // Calculate internal Mesh dimensions
+    // Get cartesian dimension
+    int cart_sdim;
+    int localrc;
+    localrc=ESMCI_CoordSys_CalcCartDim(coordSys, sdim, &cart_sdim);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception    
+
+    // set internal mesh dimensions
+    (meshp)->set_parametric_dimension(pdim);
+    (meshp)->set_spatial_dimension(cart_sdim);
 
     // Set the number of nodes and elements
     ThrowAssert(meshp->num_elems() == 0);
@@ -171,7 +193,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
     int num=0;
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
-      
+       
       MeshObj &elem = *ei;
       
       // Only do owned elements      
@@ -199,6 +221,10 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 				 int *rc) {
    MeshCXX* meshCXXp;
    Mesh* meshp;
+   int parametricDim;
+   int spatialDim;
+   ESMC_CoordSys_Flag coordSys;
+
    try {
 
      // Initialize the parallel environment for mesh (if not already done)
@@ -208,11 +234,14 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
      }
-
+ 
     int localrc;
     meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
 					convertToDual, addUserArea, meshname, 
-					maskFlag, varname, &localrc);
+					maskFlag, varname, 
+                                        &parametricDim, &spatialDim, 
+                                        &coordSys,
+                                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
@@ -240,7 +269,14 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
   }
    meshCXXp = new MeshCXX();
    (meshCXXp)->meshPointer = meshp;
-
+   
+   // Set dimensions
+   meshCXXp->spatialDim=spatialDim;
+   meshCXXp->parametricDim=parametricDim;
+   
+   // Set CoordSys
+   meshCXXp->coordSys=coordSys; 
+   
    // Set the number of nodes and elements
    meshCXXp->numLElements = calc_num_local_elems(*meshp);
 
@@ -251,24 +287,6 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
    // Mark Mesh as finshed
    meshCXXp->level=MeshCXXLevel_Finished;
 
-
-   // Create distgrids and number of owned nodes
-   // TODO: I THINK THAT HOW THE DISTGRIDS ARE
-   //       CREATED AND PASSED AROUND IS WRONG, 
-   //       BUT I DON'T THINK THEY ARE ACTUALLY USED 
-   //       THROUGH C/PYTHON RIGHT NOW, SO I'll WAIT
-   //       AND FIX THE WHOLE THING WHEN I UNIFY THE MESH
-   // (THE PREVIOUS VERSION DIDN'T SET DISTGRIDS EITHER)
-   int tmpNDistgrid;
-   int tmpEDistgrid;
-   meshCXXp->createDistGrids(&tmpNDistgrid,
-                             &tmpEDistgrid,
-                             &meshCXXp->numOwnedNodes,
-                             &meshCXXp->numOwnedElements);
-
-
-   // NOW DONE ABOVE
-#if 0
    // Calc and set the number of owned nodes
    int num_owned_nodes=0;
    Mesh::iterator ni2 = meshp->node_begin(), ne2 = meshp->node_end();
@@ -284,11 +302,17 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
    Mesh::iterator ei = meshp->elem_begin(), ee = meshp->elem_end();
    for (; ei != ee; ++ei) {
      MeshObj &elem = *ei;
+
+     // Only do owned
      if (!GetAttr(elem).is_locally_owned()) continue;
+
+     // Don't do split elements
+     if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;  
+
      num_owned_elems++;
    }   
    meshCXXp->numOwnedElements=num_owned_elems;
-#endif
+
 
    // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -298,7 +322,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
   
 
   int MeshCXX::destroy(MeshCXX **meshpp) {
-    int localrc;
+     int localrc;
 
     if (meshpp==NULL || *meshpp == NULL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -1445,11 +1469,20 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
            &localrc)) throw localrc;
      }
 
+     // Call into Mesh glue to add nodes
+     ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId, 
+                        nodeCoord, nodeOwner, (InterfaceInt *)NULL,
+                        &coordSys, &spatialDim,
+                        &localrc); 
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
+
+     
      // Get petCount for error checking
      int petCount = VM::getCurrent(&localrc)->getPetCount();
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
      
      // Check node owners
      for (int n = 0; n < numNodes; ++n) {
@@ -1458,48 +1491,8 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
 	  "- Bad nodeOwner value ", ESMC_CONTEXT, &localrc)) throw localrc;
        }
      }
-     
-     Mesh &mesh = *meshPointer;
-     for (int n = 0; n < numNodes; ++n) {
-//fprintf(stderr, "ESMCI - adding node %d\n", nodeId[n]);
-       
-       MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
-       
-       node->set_owner(nodeOwner[n]);
-//Par::Out() << "node:" << node->get_id() << " has owner:" << nodeOwner[n] << std::endl;
-       
-      mesh.add_node(node, 0);
 
-    }
-
-    // Register the nodal coordinate field.
-    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
-
-    // Need this for split elements, put on Mesh for now
-    mesh.node_coord=node_coord;
-
-    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-    UInt sdim = mesh.spatial_dim();
-
-    for (UInt nc = 0; ni != ne; ++ni) {
-
-      MeshObj &node = *ni;
-
-      double *coord = node_coord->data(node);
-
-      for (UInt c = 0; c < sdim; ++c)
-        coord[c] = nodeCoord[nc+c];
-
-//fprintf(stderr, "ESMCI - node coord [%f,%f] \n", nodeCoord[nc+0], nodeCoord[nc+1]);       
-      nc += sdim;
-
-    }
-
-    // numNodes is input data from AddNodes
-    // numLNodes is what is returned to C interface
-    // what is mesh.num_nodes?  petlocal?  should it = numNodes?
-    ThrowAssert(mesh.num_nodes() == numNodes);
+     // Set some stuff needed by MeshCXX     
     numLNodes = numNodes;
 
     // Mark Mesh as having nodes added

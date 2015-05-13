@@ -16,6 +16,7 @@
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMCI_CommReg.h>
+#include "ESMCI_CoordSys.h"
 
 #include <map>
 #include <mpi.h>
@@ -46,6 +47,9 @@ Mesh();
 static Mesh *createfromfile(const char *filename, int fileTypeFlag,
 			    int *convertToDual, int *addUserArea, 
 			    const char *meshname, int *maskFlag, const char *varname, 
+                            int *parametricDim,
+                            int *spatialDim,
+                            ESMC_CoordSys_Flag *coordSys,
 			    int *rc);
 
 /**

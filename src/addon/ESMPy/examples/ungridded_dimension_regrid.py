@@ -25,25 +25,25 @@ dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP,
                  add_corner_stagger=True)
 
 # create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(srcgrid, 'srcfield',
+srcfield = ESMF.Field(srcgrid, name='srcfield',
                       staggerloc=ESMF.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # create a field on the center stagger locations of the destination grid
-dstfield = ESMF.Field(dstgrid, 'dstfield',
+dstfield = ESMF.Field(dstgrid, name='dstfield',
                       staggerloc=ESMF.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # create a field on the center stagger locations of the destination grid
-xctfield = ESMF.Field(dstgrid, 'xctfield',
+xctfield = ESMF.Field(dstgrid, name='xctfield',
                       staggerloc=ESMF.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # create fields needed to analyze accuracy of conservative regridding
-srcfracfield = ESMF.Field(srcgrid, 'srcfracfield')
-dstfracfield = ESMF.Field(dstgrid, 'dstfracfield')
-srcareafield = ESMF.Field(srcgrid, 'srcareafield')
-dstareafield = ESMF.Field(dstgrid, 'dstareafield')
+srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
+dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
+srcareafield = ESMF.Field(srcgrid, name='srcareafield')
+dstareafield = ESMF.Field(dstgrid, name='dstareafield')
 
 
 # get the coordinate pointers and set the coordinates

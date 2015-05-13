@@ -17,7 +17,7 @@ class TestField(TestBase):
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(grid_or_mesh, name)
+        field = ESMF.Field(grid_or_mesh, name=name)
 
         return field
 
@@ -52,7 +52,7 @@ class TestField(TestBase):
         mask[:] = 1
         mask[0,1] = 0
 
-        field = Field(grid, "name", ndbounds=[2,5], mask_values=[0])
+        field = Field(grid, ndbounds=[2,5], mask_values=[0])
 
         assert(np.all(field.mask[:,:,0,1] == True))
 
@@ -127,8 +127,8 @@ class TestField(TestBase):
                     for b in a.mask_values:
                         grid.mask[a.staggerloc][:, b] = b
 
-                field = Field(grid, "test_field_grid_2d", typekind=a.typekind_field, staggerloc=a.staggerloc,
-                              ndbounds=a.ndbounds, mask_values=a.mask_values)
+                field = Field(grid, name="test_field_grid_2d", typekind=a.typekind_field,
+                              staggerloc=a.staggerloc, ndbounds=a.ndbounds, mask_values=a.mask_values)
 
                 field2 = None
                 if a.ndbounds is not None:
@@ -180,8 +180,8 @@ class TestField(TestBase):
                     for b in a.mask_values:
                         grid.mask[a.staggerloc][:, :, b] = b
 
-                field = Field(grid, "test_field_grid_2d", typekind=a.typekind_field, staggerloc=a.staggerloc,
-                              ndbounds=a.ndbounds, mask_values=a.mask_values)
+                field = Field(grid, name="test_field_grid_2d", typekind=a.typekind_field,
+                              staggerloc=a.staggerloc, ndbounds=a.ndbounds, mask_values=a.mask_values)
                 self.examine_field_attributes(field)
                 field2 = None
                 if a.ndbounds is not None:
@@ -229,7 +229,8 @@ class TestField(TestBase):
                     mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                         mesh_create_50()
 
-                field = Field(mesh, "test_field_mesh_2d", typekind=a.typekind_field, meshloc=a.meshloc)
+                field = Field(mesh, name="test_field_mesh_2d",
+                              typekind=a.typekind_field, meshloc=a.meshloc)
                 self.examine_field_attributes(field)
                 field2 = field[2:10]
                 self.examine_field_attributes(field2)
@@ -251,7 +252,7 @@ class TestField(TestBase):
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(grid_or_mesh, name)
+        field = ESMF.Field(grid_or_mesh, name=name)
 
         return field
 
@@ -278,7 +279,7 @@ class TestField(TestBase):
                     mask[i, j] = 0
 
         # create a Field on the Grid, should inherit the mask
-        field = Field(grid, "FIELD!", mask_values=[2, 3])
+        field = Field(grid, mask_values=[2, 3])
         self.examine_field_attributes(field)
 
         if pet_count() == 0:
@@ -293,7 +294,7 @@ class TestField(TestBase):
         mask[:] = 1
         mask[0, 1] = 0
 
-        field = Field(grid, "name", ndbounds=[2, 5], mask_values=[0])
+        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
         self.examine_field_attributes(field)
 
         assert (np.all(field.mask[:, :, 0, 1]))
@@ -322,7 +323,7 @@ class TestField(TestBase):
                         mask[i, j, k] = 0
 
         # create a Field on the Grid, should inherit the mask
-        field = Field(grid, "FIELD!", mask_values=[2, 3])
+        field = Field(grid, mask_values=[2, 3])
         self.examine_field_attributes(field)
 
         assert (np.all(field.mask[1, :, :]))
@@ -336,7 +337,7 @@ class TestField(TestBase):
         mask[...] = 1
         mask[0, 1, 0] = 0
 
-        field = Field(grid, "name", ndbounds=[2, 5], mask_values=[0])
+        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
         self.examine_field_attributes(field)
 
         assert (np.all(field.mask[:, :, 0, 1, 0]))
@@ -357,14 +358,10 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = Field(mesh, 'Field!',
-                         TypeKind.I4,
-                         MeshLoc.NODE)
+        field = Field(mesh, typekind=TypeKind.I4, meshloc=MeshLoc.NODE)
         self.examine_field_attributes(field)
 
-        field2 = Field(mesh, 'Field!',
-                          typekind=TypeKind.I4,
-                          meshloc=MeshLoc.ELEMENT)
+        field2 = Field(mesh, typekind=TypeKind.I4, meshloc=MeshLoc.ELEMENT)
         self.examine_field_attributes(field2)
 
         for i in range(field.shape[0]):
@@ -384,11 +381,9 @@ class TestField(TestBase):
 
         gridtofieldmap = np.array([2, 1])
 
-        field = Field(grid, 'Field!', TypeKind.R8,
-                         ndbounds=gridtofieldmap)
+        field = Field(grid, typekind=TypeKind.R8, ndbounds=gridtofieldmap)
 
-        field2 = Field(grid, 'Field!',
-                          ndbounds=np.array([2, 1]))
+        field2 = Field(grid, ndbounds=np.array([2, 1]))
 
         field.data[...] = 10
         self.examine_field_attributes(field)
@@ -404,11 +399,9 @@ class TestField(TestBase):
                     staggerloc=[StaggerLoc.CENTER])
 
         gridtofieldmap = np.array([2, 5])
-        field = Field(grid, 'Field!', TypeKind.R8,
-                      ndbounds=gridtofieldmap)
+        field = Field(grid, typekind=TypeKind.R8, ndbounds=gridtofieldmap)
 
-        field2 = Field(grid, 'Field!',
-                      ndbounds=np.array([2, 5]))
+        field2 = Field(grid, ndbounds=np.array([2, 5]))
 
         field.data[...] = 10
         self.examine_field_attributes(field)
@@ -433,12 +426,8 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = Field(mesh, 'Field!',
-                         TypeKind.R8,
-                         MeshLoc.NODE)
-        field2 = Field(mesh, 'Field!',
-                          meshloc=MeshLoc.ELEMENT,
-                          ndbounds=np.array([2, 5]))
+        field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
+        field2 = Field(mesh, meshloc=MeshLoc.ELEMENT, ndbounds=np.array([2, 5]))
 
         field.data[...] = 10
         self.examine_field_attributes(field)
@@ -464,7 +453,7 @@ class TestField(TestBase):
         grid.add_item(GridItem.MASK)
         grid.add_item(GridItem.AREA)
 
-        field = Field(grid, "GRIDFIELD!", staggerloc=StaggerLoc.CENTER)
+        field = Field(grid, staggerloc=StaggerLoc.CENTER)
         self.examine_field_attributes(field)
 
         field2 = field[0:5, 0:5]
@@ -502,9 +491,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = Field(mesh, 'Field!',
-                      TypeKind.R8,
-                      MeshLoc.NODE)
+        field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
         self.examine_field_attributes(field)
 
         field2 = field[0:5]
@@ -538,7 +525,7 @@ class TestField(TestBase):
         grid_row[...] = row.reshape((row.size,1))
         grid_col[...] = row.reshape((1,row.size))
 
-        field = Field(grid, "GRIDFIELD!", ndbounds=[2, 5])
+        field = Field(grid, ndbounds=[2, 5])
         self.examine_field_attributes(field)
 
         for i in range(2):
@@ -580,9 +567,8 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50()
 
-        field = Field(mesh, 'Field!',
-                      TypeKind.R8,
-                      MeshLoc.NODE, ndbounds=[2, 5])
+        field = Field(mesh, typekind=TypeKind.R8,
+                      meshloc=MeshLoc.NODE, ndbounds=[2, 5])
         self.examine_field_attributes(field)
 
         for i in range(2):

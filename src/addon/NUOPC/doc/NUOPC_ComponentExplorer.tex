@@ -6,7 +6,7 @@
 The NUOPC Component Explorer is a run-time tool that can be used to gain insight into a NUOPC Layer compliant component, or to test a component's compliance. The Component Explorer is currently available as a separate download from the prototype repository:
 
 \begin{verbatim}
-https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/trunk/v7-ComponentExplorer/
+https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/trunk/ComponentExplorer/
 \end{verbatim}
 
 There are two parts to the Component Explorer. First the script {\tt nuopcExplorerScript} is used to compile and link the explorer application specifically against a specified component. This part of the explorer leverages and tests the standardized component dependencies discussed in section \ref{componentDep}. This step is initiated by calling the explorer script with the component's mk-file as an argument:
@@ -35,7 +35,7 @@ The second part of the Component Explorer is the explorer application itself. It
 make nuopcExplorerApp
 \end{verbatim}
 
-In the second case, the resulting {\tt nuopcExplorerApp} is not tied to a specific component, instead the executable expects a component in form of a shared object to be specified as a command line argument when executing {\tt nuopcExplorerApp}. In either case the explorer application needs to be started according to the execution requirements of the component it attempts to explore. This may mean that input files must be present, and that the executable be launched on a sufficient number of processes. In terms of the common {\tt mpirun} tool, launching of {\tt nuopcExplorerApp} may look like this
+In the second case the resulting {\tt nuopcExplorerApp} is not tied to a specific component, instead the executable expects a component in form of a shared object to be specified as a command line argument when executing {\tt nuopcExplorerApp}. In either case the explorer application needs to be started according to the execution requirements of the component it attempts to explore. This may mean that input files must be present, and that the executable be launched on a sufficient number of processes. In terms of the common {\tt mpirun} tool, launching of {\tt nuopcExplorerApp} may look like this
 \begin{verbatim}
 mpirun -np X ./nuopcExplorerApp
 \end{verbatim}
@@ -43,7 +43,36 @@ for an executable that was built against a specific component. Or like this
 \begin{verbatim}
 mpirun -np X ./nuopcExplorerApp <component-shared-object-file>
 \end{verbatim}
-for an executable that expects a the component in form of a shared object. In both cases the output of the {\tt nuopcExplorerApp} will report what it finds during the interaction with the component. The output will look similar to this:
+for an executable that expects a the component in form of a shared object. 
+
+The {\tt nuopcExplorerApp} expects to find a configuration file by the name of {\tt explorer.config} in the run directory. The configuration file contains several basic model parameter used to explore the component. An example configuration file is shown here:
+
+\begin{verbatim}
+### NUOPC Component Explorer configuration file ###
+
+start_year:               2009
+start_month:              12
+start_day:                01
+start_hour:               00
+start_minute:             0
+start_second:             0
+
+stop_year:                2009
+stop_month:               12
+stop_day:                 03
+stop_hour:                00
+stop_minute:              0
+stop_second:              0
+
+step_seconds:             21600
+
+filter_initialize_phases: no
+
+enable_run:               yes
+enable_finalize:          yes
+\end{verbatim}
+
+The {\tt nuopcExplorerApp} starts to interact with the specified component, using the information read in from the configuration file. During the interaction the finding are reported to stdout, with output that will look similar to this:
 
 \begin{verbatim}
  NUOPC Component Explorer App

@@ -279,8 +279,9 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 #define ESMC_METHOD "ESMC_FieldGetBounds()"
 int ESMC_FieldGetBounds(ESMC_Field field,
                           int *localDe,
-                          ESMC_InterfaceInt *exclusiveLBound,
-                          ESMC_InterfaceInt *exclusiveUBound){
+                          int *exclusiveLBound,
+                          int *exclusiveUBound,
+                          int rank){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -288,15 +289,25 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 
   // typecase into ESMCI type
   ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
-  ESMCI::InterfaceInt *exLB = reinterpret_cast<ESMCI::InterfaceInt *>
-                              (exclusiveLBound->shallowMem);
-  ESMCI::InterfaceInt *exUB = reinterpret_cast<ESMCI::InterfaceInt *>
-                              (exclusiveUBound->shallowMem);
+
+  // create InterfaceInts to pass into C++
+  ESMCI::InterfaceInt *exLB = new ESMCI::InterfaceInt(exclusiveLBound, rank);
+  ESMCI::InterfaceInt *exUB = new ESMCI::InterfaceInt(exclusiveUBound, rank);
 
   // Invoke the C++ interface
   localrc = ESMCI::Field::getbounds(fieldp, localDe, exLB, exUB);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
+
+  // copy from C++ to Python
+  for (int i=0; i<exLB->extent[0]; i++)
+    exclusiveLBound[i] = exLB->array[i];
+  for (int i=0; i<exUB->extent[0]; i++)
+    exclusiveUBound[i] = exUB->array[i];
+
+  // clean up
+  delete exLB;
+  delete exUB;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -383,7 +394,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 			                int *regridPoleNPnts,
 			                enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
-                            bool *ignoreDegenerate,
+                            ESMC_Logical *ignoreDegenerate,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -401,7 +412,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     if (dstFracField != NULL)
       dstfracp = reinterpret_cast<ESMCI::Field *>(dstFracField->ptr);
     ESMCI::RouteHandle *rhPtr;
-    rhPtr=NULL;   
+    rhPtr=NULL;
+
 
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 

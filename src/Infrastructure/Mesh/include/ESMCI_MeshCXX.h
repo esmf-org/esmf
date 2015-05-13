@@ -14,6 +14,7 @@
 #define ESMCI_MeshCXX_h
 
 #include "ESMCI_Mesh.h"
+#include "ESMCI_CoordSys.h"
 
 namespace ESMCI {
  int MeshVTKHeader(const char*, int*, int*, int*);
@@ -25,7 +26,7 @@ namespace ESMCI {
     MeshCXX();
     ~MeshCXX();
 
-    static MeshCXX* create(int, int, int*);
+    static MeshCXX* create(int, int, ESMC_CoordSys_Flag, int *);
     static MeshCXX* createFromFile(const char *, int, int *, int *, 
 				   const char *, int *, const char *, int *);
     void getLocalCoords(double *, int *, int *, int *);
@@ -58,6 +59,14 @@ namespace ESMCI {
     int numOwnedElements;
     int meshFreed;
     MeshCXXLevel level;
+
+    // Dimensions of mesh seen by user (may differ from internal mesh because
+    // of different coordinate system)
+    int spatialDim;
+    int parametricDim; 
+
+    // Coordinate System
+    ESMC_CoordSys_Flag coordSys;
 
   public:
     int isNodesAdded() {return (level>=MeshCXXLevel_NodesAdded);}

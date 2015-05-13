@@ -19,6 +19,7 @@
 #include "Mesh/include/ESMCI_ParEnv.h"
 #include "Mesh/include/ESMCI_GlobalIds.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_CoordSys.h"
 
 #include <bitset>
 #include <cstdio>
@@ -39,6 +40,9 @@ extern "C" {
 					const char *meshname, int *mnpresent,
  					int *maskFlag, int *mfpresent,
  					const char *varname, int *vnpresent,
+                                        int *parametricDim,
+                                        int *spatialDim,
+                                        ESMC_CoordSys_Flag *coordSys,
 					int *rc,
 					ESMCI_FortranStrLenArg len_filename,
 					ESMCI_FortranStrLenArg len_meshname,
@@ -73,6 +77,9 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
 			   const char *meshname,
 			   int *maskFlag,
 			   const char *varname,
+                           int *parametricDim,
+                           int *spatialDim,
+                           ESMC_CoordSys_Flag *coordSys,
 			   int *rc) {
 
     // Initialize return code. Assume routine not implemented
@@ -97,6 +104,9 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
 				     meshname, &mnpresent,
 				     maskFlag, &mfpresent,
 				     varname, &vnpresent,
+                                     parametricDim,
+                                     spatialDim,
+                                     coordSys,
 				     &localrc, strlen(filename),
 				     strlen(meshname), strlen(varname));
 

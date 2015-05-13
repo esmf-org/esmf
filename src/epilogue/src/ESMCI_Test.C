@@ -24,12 +24,14 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
+#include <time.h>
 #include "ESMCI.h"
 #include "ESMC.h"
 
 // associated class definition file
 #include "ESMCI_Test.h"
 
+double start_time;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -133,6 +135,7 @@ int TestEnd(
   int rc;
   char msgbuf[ESMF_MAXSTR];
   ESMCI::LogErr *whichLog;
+  double end_time, elapsed_time;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -159,6 +162,12 @@ int TestEnd(
       fprintf(stderr, "%s", msgbuf);
     return(rc);
   }
+
+  // Calculate & print test elapsed time.
+  end_time = clock();
+  elapsed_time = end_time - start_time;
+  sprintf(msgbuf, "Test Elapsed Time  %f \n", elapsed_time);
+  fprintf(stdout, "%s", msgbuf);
  
   return(ESMF_SUCCESS);
 
@@ -413,6 +422,9 @@ int TestStart(
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
+
+  // Get test start time
+  start_time = clock();
 
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "

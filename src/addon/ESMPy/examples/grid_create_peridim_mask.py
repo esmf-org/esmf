@@ -37,7 +37,7 @@ mask[...] = 0
 mask[numpy.where(numpy.sqrt(dx*dx+dy*dy) < 10.0)] = 2
 
 # Create a field on the centers of the source grid with the mask applied.
-srcfield = ESMF.Field(srcgrid, "srcfield", staggerloc=ESMF.StaggerLoc.CENTER,
+srcfield = ESMF.Field(srcgrid, name="srcfield", staggerloc=ESMF.StaggerLoc.CENTER,
                       mask_values=mask)
 
 srcfield.data[...] = 0
@@ -48,7 +48,7 @@ dstgrid = ESMF.Grid(filename="examples/data/ll2.5deg_grid.nc",
                     filetype=ESMF.FileFormat.SCRIP)
 
 # Create a field on the centers of the destination grid.
-dstfield = ESMF.Field(dstgrid, "dstfield", staggerloc=ESMF.StaggerLoc.CENTER)
+dstfield = ESMF.Field(dstgrid, name="dstfield", staggerloc=ESMF.StaggerLoc.CENTER)
 
 missing_val = 1000
 dstfield.data[...] = missing_val
