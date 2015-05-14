@@ -234,6 +234,17 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetElemCoord()"
+void ESMC_MeshGetElemCoord(ESMC_Mesh mesh_in,
+           double *elemCoord, int *num_elems, int *num_dims, int *rc){
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  mep->getLocalElemCoords(elemCoord, num_elems, num_dims, rc);
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
