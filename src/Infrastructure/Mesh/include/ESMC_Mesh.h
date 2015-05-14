@@ -334,6 +334,45 @@ void ESMC_MeshGetCoord(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetElemCoord - Get lat/lon element center coordinates from a Mesh \label{sec:mesh:capi:meshgetelemcoord}
+//
+// !INTERFACE:
+void ESMC_MeshGetElemCoord(
+			 ESMC_Mesh mesh_in, // in (required)
+			 double *elemCoord, // out
+			 int *num_elems,    // out
+			 int *num_dims,     // out
+			 int *rc            // out
+			 );
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+// This call returns the element coordinates of the given {\tt ESMC\_Mesh} 
+// in the provided {\tt elemCoord} buffer of doubles.  At completion, this
+// buffer is a 1-D array with the coordinates for a given element
+// in adjacent indices.  For example, for $d$-dimensional coordinates, the first
+// $d$ values in the returned array are the coordinates for the first element,
+// the second $d$ values are the coordinates for the second element, etc.
+// 
+// The arguments are:
+// \begin{description}
+// \item[mesh\_in] Mesh object.
+// \item[elemCoord] Pointer to doubles.  The element coordinates are returned here.
+// \item[num\_elems] Pointer to an integer.  The number of elements found in
+// the input Mesh is returned here.
+// \item[num\_dims] Pointer to an integer.  The number of coordinate dimensions 
+// is returned here.
+// \item[rc] Return code; equals {\tt ESMF\_SUCCESS} if there are no
+// errors.
+// \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //BOPI
 // !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
 //

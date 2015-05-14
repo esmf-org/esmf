@@ -30,6 +30,7 @@ namespace ESMCI {
     static MeshCXX* createFromFile(const char *, int, int *, int *, 
 				   const char *, int *, const char *, int *);
     void getLocalCoords(double *, int *, int *, int *);
+    void getLocalElemCoords(double *, int *, int *, int *);
     static int destroy(MeshCXX **);
 
     int addElements(int, int*, int*, int*, int*, double *);
