@@ -32,6 +32,7 @@
 #include "ESMCI_Test.h"
 
 double start_time;
+int PETnum;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -166,7 +167,7 @@ int TestEnd(
   // Calculate & print test elapsed time.
   end_time = clock();
   elapsed_time = end_time - start_time;
-  sprintf(msgbuf, "Test Elapsed Time  %f \n", elapsed_time);
+  sprintf(msgbuf, " PET %d Test Elapsed Time  %f \n", PETnum, elapsed_time);
   fprintf(stdout, "%s", msgbuf);
  
   return(ESMF_SUCCESS);
@@ -473,6 +474,7 @@ int TestStart(
   }
 
   numPETs = globalVM->getPetCount();
+  PETnum = globalVM->getLocalPet();
 
   sprintf(msgbuf, "Beginning Test, file %s, line %d\n", file, line);
   whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);

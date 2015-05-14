@@ -60,6 +60,7 @@
       
 !     ! Test start time
       real(ESMF_KIND_R8), save :: start_time
+      integer, save :: PETnum
 
       contains
 
@@ -235,7 +236,7 @@
 
       integer :: rc, localrc
       character(ESMF_MAXSTR) :: msg
-      real(ESMF_KIND_R8) :: end_time
+      real(ESMF_KIND_R8) :: end_time, elapsed_time
 
       write(msg, *) "Ending Test, file ", trim(file), ", line", line
       print *, trim(msg)
@@ -252,7 +253,8 @@
 
       ! Calculate & print out test elasped time
       call cpu_time(end_time)
-      write(msg, *) "Test Elapsed Time ", end_time-start_time
+      elapsed_time = end_time-start_time
+      write(msg, *) "PET", PETnum, " Test Elapsed Time ", elapsed_time
       print *, trim(msg)
 
       end subroutine ESMF_TestEnd
@@ -766,7 +768,7 @@ exclusion_loop:  &
       endif
 
 
-      call ESMF_VMGet(globalVM, petCount=numPETs, rc=localrc)
+      call ESMF_VMGet(globalVM, petCount=numPETs, localPet=PETnum, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) "FAIL  Unable to get number of PETs.  Error code ", localrc
           print *, trim(msg)
