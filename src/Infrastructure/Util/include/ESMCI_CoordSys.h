@@ -19,6 +19,10 @@
 // Definition of CoordSys flag and constants
 #include "ESMC_CoordSys.h"
 
+// Constants for converting between radians and degrees
+// (These need to match the ones in ESMF_UtilTypes.F90) 
+extern const double ESMC_CoordSys_Deg2Rad;
+extern const double ESMC_CoordSys_Rad2Deg;
 
 // Prototypes of CoordSys methods
 int ESMCI_CoordSys_CalcCartDim(
