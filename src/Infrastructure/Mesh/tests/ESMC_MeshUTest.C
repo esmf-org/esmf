@@ -201,6 +201,31 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "MeshGetElemCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  mesh = ESMC_MeshCreateFromFile("data/FVCOM_grid2d.nc", ESMC_FILEFORMAT_UGRID,
+                                 NULL, NULL, "fvcom_mesh", NULL, "", &rc);
+  rc = ESMC_MeshGetOwnedElementCount(mesh, &num_elem_owned_out);
+  double *elem_coords;
+  elem_coords = (double *)malloc(num_elem_owned_out*3*sizeof(double));
+  int num_elems;
+   ESMC_MeshGetElemCoord(mesh, elem_coords, &num_elems, &num_dims, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  printf("Found num_elems=%d, num_dims=%d\n", num_elems, num_dims);
+  /*
+  int ind = 0;
+  for (int i=0; i<num_elems; i++) {
+    for (int j=0; j<num_dims; j++) {
+      printf("%12.6lf", elem_coords[ind++]);
+    }
+    printf("\n");
+  }
+  */
+  free(elem_coords);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // Write out the internal mesh data
   strcpy(name, "MeshWrite");
    strcpy(failMsg, "Did not return ESMF_SUCCESS");
