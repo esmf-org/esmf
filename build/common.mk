@@ -509,6 +509,11 @@ endif
 ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENCHMARK_PREFIX))
 
 
+ifndef ESMF_BENCHMARK_VARIANCE
+ESMF_BENCHMARK_VARIANCE := 20%
+endif
+
+
 #-------------------------------------------------------------------------------
 # Set ESMF Version variables
 #-------------------------------------------------------------------------------
