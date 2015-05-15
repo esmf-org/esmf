@@ -1192,6 +1192,7 @@ void PIO_Handler::arrayWrite(
       free (vardesc);
       return;
     }
+  new_file = false;
 
   // Cleanup & return
   PRINTMSG("cleanup and return");
