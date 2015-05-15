@@ -374,30 +374,8 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalElemCoords()"
   void MeshCXX::getLocalElemCoords(double *ecoords, int *num_elems, int *num_dims, int *rc) {
-    Mesh &mesh = *meshPointer;
+    ESMCI_getlocalelemcoords(&meshPointer, ecoords, &spatialDim, rc);
 
-    // Get coords pointer and spatial dimension depending on existence
-    // of elem_coordinates field.
-    MEField<> *elem_coords = mesh.GetField("elem_orig_coordinates");
-    if (elem_coords) {
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-      int elemCoordPos = 0;
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        if (!GetAttr(elem).is_locally_owned()) continue;
-
-        // Set coordinate value to input array
-        double *coords=elem_coords->data(elem);
-        for (int i = 0; i < spatialDim; ++i) {
-          ecoords[elemCoordPos++] = coords[i];
-        }
-      }
-    } else {
-        int localrc;
-        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                          " - elem_coordinates not found in Mesh",
-                                          ESMC_CONTEXT, &localrc)) throw localrc;
-    }
     *num_elems = this->numOwnedElements;
     *num_dims = spatialDim;
 
