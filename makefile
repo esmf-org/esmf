@@ -212,7 +212,7 @@ script_info:
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF benchmark directory *"
 	-@echo "ESMF_BENCHMARK_PREFIX:    $(ESMF_BENCHMARK_PREFIX)"
-	-@echo " "
+	-@echo "ESMF_BENCHMARK_VARIANCE: $(ESMF_BENCHMARK_VARIANCE)"
 	-@echo " "
 
 #
