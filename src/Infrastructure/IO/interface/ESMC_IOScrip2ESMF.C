@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
- #include <string.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "ESMC_Conf.h"
