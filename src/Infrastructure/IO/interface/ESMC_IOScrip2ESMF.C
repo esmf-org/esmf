@@ -17,13 +17,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-#include <string.h>
+ #include <string.h>
 #include <ctype.h>
 
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
-#include "ESMC_CoordSys.h"
+#include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
 
 #ifdef ESMF_NETCDF

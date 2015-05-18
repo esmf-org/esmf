@@ -498,6 +498,22 @@ ifndef ESMFMKFILE
 export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 endif
 
+
+#-------------------------------------------------------------------------------
+# If BENCHMARK directory is not set give it a default value
+#-------------------------------------------------------------------------------
+
+ifndef ESMF_BENCHMARK_PREFIX
+ESMF_BENCHMARK_PREFIX := ./DEFAULTBENCHMARKDIR
+endif
+ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENCHMARK_PREFIX))
+
+
+ifndef ESMF_BENCHMARK_VARIANCE
+ESMF_BENCHMARK_VARIANCE := 20%
+endif
+
+
 #-------------------------------------------------------------------------------
 # Set ESMF Version variables
 #-------------------------------------------------------------------------------
@@ -2666,6 +2682,15 @@ clean_unit_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(UNIT_TESTS_CONFIG) $(TEST_HARNESS_LIST)
 	$(MAKE) ACTION=tree_cleanfiles tree
 
+#
+# install unit tests benchmark directory
+#
+install_unit_tests_benchmark: reqdir_tests
+	-@echo " "
+	-@echo "Installing unit tests benchmark directory"
+	-@echo " "
+	mkdir -p $(ESMF_BENCHMARK_PREFIX_ABSPATH)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+	cp -f $(ESMF_TESTDIR)/ESM*UTest.stdout $(ESMF_BENCHMARK_PREFIX_ABSPATH)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)/. 
 
 #
 # report statistics on tests

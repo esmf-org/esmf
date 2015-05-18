@@ -47,6 +47,11 @@ using namespace std;
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
+// Constants for converting between radians and degrees
+// (These need to match the ones in ESMF_UtilTypes.F90) 
+const double ESMC_CoordSys_Deg2Rad= 0.01745329251994329547437;
+const double ESMC_CoordSys_Rad2Deg=57.29577951308232286464772;
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_CoordSys_CalcCartDim"
