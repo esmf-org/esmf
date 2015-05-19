@@ -2118,6 +2118,9 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
     // Get coords pointer and spatial dimension depending on existence
     // of elem_coordinates field.
     MEField<> *elem_coords = mesh.GetField("elem_orig_coordinates");
+    if (!elem_coords) {
+      elem_coords = mesh.GetField("elem_coordinates");
+    }
     if (elem_coords) {
       int sdim=*_orig_sdim;
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
@@ -2133,7 +2136,6 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
         }
       }
     } else {
-      int localrc;
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                                         " - elem_coordinates not found in Mesh",
                                         ESMC_CONTEXT, &localrc)) throw localrc;

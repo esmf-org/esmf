@@ -250,6 +250,12 @@ extern "C" void FTN_X(c_esmc_getlocalcoords)(MeshCap **meshpp, double *nodeCoord
   (*meshpp)->getlocalcoords(nodeCoord, _orig_sdim, rc); 
 } 
 
+extern "C" void FTN_X(c_esmc_getlocalelemcoords)(MeshCap **meshpp, double *elemCoord, int *_orig_sdim, int *rc) 
+{
+
+  (*meshpp)->getlocalelemcoords(elemCoord, _orig_sdim, rc); 
+} 
+
 
 extern "C" void FTN_X(c_esmc_meshgetarea)(MeshCap **meshpp, int *num_elem, double *elem_areas, int *rc) {
 
