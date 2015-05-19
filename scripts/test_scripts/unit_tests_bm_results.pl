@@ -237,6 +237,7 @@ use File::Find
                         	}       
                 	}
                 	@file_lines = (); # Clear file lines
+			$total_test_count = $total_test_count + $test_count;
 
 			#Convert % to decimal
 			$d_var = $VARIANCE/100;
@@ -261,7 +262,7 @@ use File::Find
 				$rc =  run_benchmark($test_file, $TEST_DIR, $BM_DIR, $d_var);
 				#print "rc = $rc \n";
 				
-				$total_test_count = $total_test_count + 1;
+				$total_file_count = $total_file_count + 1;
 				if ( $rc == 0 ) {
 					# The BM test passed
 					$pass_count = $pass_count + 1;
@@ -281,7 +282,7 @@ use File::Find
 				}
 				
 			}
-			
+			$test_count =0;		
 				
         }
 
@@ -324,11 +325,11 @@ use File::Find
 		}
 	}
 
-	if ($total_test_count == 0) {
+	if ($total_file_count == 0) {
 		print "\n\nNOTE: Found no ";
 	}
 	else {
-        	print "\n\nFound $total_test_count ";
+        	print "\n\nFound $total_file_count ";
 	}
         if ($exhaustive == 0) {
                 print "non-exhaustive ";
@@ -342,12 +343,20 @@ use File::Find
         else {
                 print "multi-processor unit tests";
         }
-	if ($total_test_count == 0) {
+	if ($total_file_count == 0) {
 		print ".\n\n";
 	}
 	else {
-		print ", $pass_count passed the $VARIANCE benchmark test, $fail_count failed and $match_count could not be matched.\n\n";
+		print " files, $pass_count passed the $VARIANCE benchmark test, ";
 	}
+	if ($match_count == 0) {
+                print "and $fail_count failed.\n\n";
+        }
+	else {
+		print "$fail_count failed and $match_count could not be matched.\n\n";
+	}
+
+
 
         # Write test results to be read by regression tests scripts.
         $results_file="$TEST_DIR/unit_tests_bm_results";
