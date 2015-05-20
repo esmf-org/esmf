@@ -60,7 +60,7 @@
       real :: r1
       logical :: is_error
       character(ESMF_MAXSTR) :: msg_type
-      character(80) :: filename
+      character(ESMF_MAXPATHLEN) :: filename
       integer :: num_pets, my_pet, input_status, ran_num, rc2, k, i
       integer :: datetime_commbuf(8)
       integer, allocatable :: rndseed(:)  ! cannot be pointer b/c absoft bug
@@ -80,6 +80,7 @@
       logical :: was_found
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
+      character(2) :: tooshortstr
 #endif
 
 
@@ -98,6 +99,14 @@
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN, rc=rc)
+
+      ! Get the local PET number
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=my_pet, petCount=num_pets, rc=rc)
+      ! Convert PET to character
+      pet_char  = achar(my_pet + 48)
+      ! Append to "PET"
+      my_pet_char = "PET" // pet_char
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -473,6 +482,24 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test getting default Log file name
+      write (name, *) "LogGet get default Log file name"
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogGet (fileName=filename, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'default Log file name = ', trim (fileName)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test getting default Log file name with too short a string
+      write (name, *) "LogGet get default Log file name with short string"
+      write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
+      call ESMF_LogGet (fileName=tooshortstr, rc=rc)
+      call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test LogFlush of new unopened log
       write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
@@ -507,10 +534,25 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test getting Log file name
+      write (name, *) "LogGet get Log file name"
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogGet (log2, fileName=filename, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'Log file name = ', trim (fileName)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Check returned Log file name
+      write (name, *) "Check returned Log file name"
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, filename == my_pet_char // ".Log_Test_File_2")
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       print *, "Starting a no-op loop to wait before testing time and date"
-      ! Get the local PET number
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, localPet=my_pet, petCount=num_pets, rc=rc)
 
       call date_and_time(date=todays_date, time=todays_time, values=my_v)
 
@@ -556,10 +598,6 @@
       end do
       print *, "Random string is ", random_chars
 
-      ! Convert PET to character
-      pet_char  = achar(my_pet + 48)
-      ! Append to "PET"
-      my_pet_char = "PET" // pet_char
       random_string = my_pet_char // random_chars
 
       !EX_UTest

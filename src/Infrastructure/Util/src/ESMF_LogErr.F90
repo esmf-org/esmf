@@ -1313,17 +1313,18 @@ end function ESMF_LogFoundError
 ! !INTERFACE: 
       subroutine ESMF_LogGet(log, flush,    &
                              logmsgAbort, logkindflag, &
-                             maxElements, trace, rc)
+                             maxElements, trace, fileName, rc)
 !
 ! !ARGUMENTS:
 !      
-      type(ESMF_Log),optional, intent(in)        :: log
-      type(ESMF_Logical), intent(out), optional  :: flush       
-      type(ESMF_LogMsg_Flag), pointer, optional  :: logmsgAbort(:)
+      type(ESMF_Log),          intent(in),  optional :: log
+      type(ESMF_Logical),      intent(out), optional :: flush       
+      type(ESMF_LogMsg_Flag),  pointer,     optional :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag
-      integer, intent(out),optional              :: maxElements
-      logical, intent(out),optional              :: trace
-      integer, intent(out),optional              :: rc
+      integer,                 intent(out), optional :: maxElements
+      logical,                 intent(out), optional :: trace
+      character(*),            intent(out), optional :: fileName
+      integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !      This subroutine returns properties about a Log object.
@@ -1348,6 +1349,8 @@ end function ESMF_LogFoundError
 !            Maximum number of elements in the Log.
 !      \item [{[trace]}]
 !            Current setting of the Log call tracing flag.
+!      \item [{[fileName]}]
+!            Current file name.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1392,6 +1395,14 @@ end function ESMF_LogFoundError
         endif
         if (present(trace)) then
           trace=alog%traceFlag
+        endif
+        if (present(fileName)) then
+          fileName=alog%nameLogErrFile
+          if (len (fileName) < len_trim (alog%nameLogErrFile)) then
+            if (ESMF_LogFoundError (ESMF_RC_LONG_STR,   &
+                msg='fileName argument string too short', &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
         endif
 
       ! Return an array with the current values.  If the user has not
