@@ -602,9 +602,9 @@ program ESMF_RegridWeightGenApp
     if (ind /= -1) then
       call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
       if (trim(argStr) .eq. 'corner') then
-	   useDstCorner = .false.
+	   useDstCorner = .true.
       elseif (trim(argStr) .eq. 'center') then
-           useDstCorner = .true.
+           useDstCorner = .false.
       else
           write(*,*)
           print *, 'ERROR: Unknown --dst_loc: must be either center or corner'
