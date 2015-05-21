@@ -424,8 +424,6 @@ int TestStart(
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
 
-  // Get test start time
-  start_time = clock();
 
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
@@ -460,6 +458,9 @@ int TestStart(
       fprintf(stderr, "%s", msgbuf);
     return(rc);
   }
+
+  // Get test start time
+  start_time = clock();
 
   globalVM = ESMCI::VM::getGlobal(&rc);
   if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {
