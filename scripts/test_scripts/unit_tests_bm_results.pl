@@ -2,14 +2,14 @@
 # $Id$
 # This script runs when the user wants to compare the elapsed time of the current
 # elapsed time of the current uit tests to a previously benchmarked value.
-# The variance is provided by the user and is used to determine acceptability.
+# The tolerance is provided by the user and is used to determine acceptability.
 # The results are either complete results or a summary.
 
 sub unit_tests_bm_results($$$$$) {
 
         my $TEST_DIR    = $_[0];
 	my $BM_DIR	= $_[1];
-	my $VARIANCE	= $_[2];
+	my $TOLERANCE	= $_[2];
         my $ESMF_BOPT   = $_[3];
         my $SUMMARY     = $_[4];
 
@@ -51,9 +51,9 @@ sub run_benchmark {
         my $testfile = $_[0];
         my $test_dir = $_[1];
         my $bm_dir = $_[2];
-        my $variance = $_[3];
+        my $tolerance = $_[3];
 
-	#print "$variance \n";
+	#print "$tolerance \n";
         # open the testfile and read the elapsed time.
         $ok=open(F,"$test_dir/$testfile");
         if (!(defined $ok)) {
@@ -96,7 +96,7 @@ sub run_benchmark {
 	} else {
 		$ans=(($test_ET - $bm_ET)/$test_ET);
 		#print" ans = $ans \n";
-		if ((($test_ET - $bm_ET)/$test_ET) < $variance ) {
+		if ((($test_ET - $bm_ET)/$test_ET) < $tolerance ) {
 			#print "PASS \n";
 			return (0);
 		} else {
@@ -240,7 +240,7 @@ use File::Find
 			$total_test_count = $total_test_count + $test_count;
 
 			#Convert % to decimal
-			$d_var = $VARIANCE/100;
+			$d_tol = $TOLERANCE/100;
 
 			# Find the corresponding stdout file if the test count is not zero
 			if ($test_count != 0) {
@@ -259,7 +259,7 @@ use File::Find
 				# Open the Log file for this test and read how many processors it used
 				@file_lines = ();
 				chomp($test_file);
-				$rc =  run_benchmark($test_file, $TEST_DIR, $BM_DIR, $d_var);
+				$rc =  run_benchmark($test_file, $TEST_DIR, $BM_DIR, $d_tol);
 				#print "rc = $rc \n";
 				
 				$total_file_count = $total_file_count + 1;
@@ -308,11 +308,11 @@ use File::Find
 	if (!$SUMMARY) { # Print only if full output requested
         	# Print to the screen
 		if (@pass_list != ()){
-			print "\n\nThe following unit tests passed the $VARIANCE benchmark test:\n\n";
+			print "\n\nThe following unit tests passed the $TOLERANCE benchmark test:\n\n";
 			print @pass_list;
 		}
 		if (@fail_list != ()){
-			print "\n\nThe following unit test failed the $VARIANCE benchmark test:\n\n";
+			print "\n\nThe following unit test failed the $TOLERANCE benchmark test:\n\n";
 			print @fail_list;
 		}
 		if (@test_list != ()){
@@ -347,7 +347,7 @@ use File::Find
 		print ".\n\n";
 	}
 	else {
-		print " files, $pass_count passed the $VARIANCE benchmark test, ";
+		print " files, $pass_count passed the $TOLERANCE benchmark test, ";
 	}
 	if ($match_count == 0) {
                 print "and $fail_count failed.\n\n";

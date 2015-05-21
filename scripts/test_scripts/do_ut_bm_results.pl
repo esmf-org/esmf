@@ -20,7 +20,7 @@ getopts("h:d:e:f:g:", \%options);
 	$ESMF_TESTSCRIPTS = "$options{h}";
 	$TEST_DIR = "$options{d}"; 
 	$BM_DIR = "$options{e}";
-	$VARIANCE = "$options{f}";
+	$TOLERANCE = "$options{f}";
 	$ESMF_BOPT = "$options{g}";
 
 #
@@ -33,6 +33,6 @@ unshift (@INC, "$ESMF_TESTSCRIPTS");
 require "unit_tests_bm_results.pl";
 
 # Call unit_tests_bm_result with SUMMARY request turned off.
-&unit_tests_bm_results("$TEST_DIR","$BM_DIR","$VARIANCE","$ESMF_BOPT","0");
+&unit_tests_bm_results("$TEST_DIR","$BM_DIR","$TOLERANCE","$ESMF_BOPT","0");
 
 exit;
