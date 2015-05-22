@@ -53,15 +53,18 @@
       !LOCAL VARIABLES:
       type(ESMF_Log) :: log1, log5, log7
       type(ESMF_LogKind_Flag) :: logkindflag
+      character(4) :: my_pet_char
+      integer :: my_pet, num_pets
+      character(1) :: pet_char
+      type(ESMF_VM):: vm
 
 #ifdef ESMF_TESTEXHAUSTIVE
-      type(ESMF_VM):: vm
       character(ESMF_MAXSTR) :: pet_num
       real :: r1
       logical :: is_error
       character(ESMF_MAXSTR) :: msg_type
       character(ESMF_MAXPATHLEN) :: filename
-      integer :: num_pets, my_pet, input_status, ran_num, rc2, k, i
+      integer :: input_status, ran_num, rc2, k, i
       integer :: datetime_commbuf(8)
       integer, allocatable :: rndseed(:)  ! cannot be pointer b/c absoft bug
       type(ESMF_Log) :: log2, log4, log6, log8
@@ -72,8 +75,6 @@
       integer :: my_v(8), log_v(8)
       character(8) :: todays_date
       character(10) :: todays_time
-      character(4) :: my_pet_char
-      character(1) :: pet_char
       type(ESMF_TimeInterval) :: one_sec, zero, time_diff
       type(ESMF_Time) :: my_time, log_time
       integer :: log8unit
@@ -82,7 +83,6 @@
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
 #endif
-
 
 
 !------------------------------------------------------------------------------
