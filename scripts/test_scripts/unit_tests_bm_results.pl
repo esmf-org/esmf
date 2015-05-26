@@ -55,11 +55,14 @@ sub run_benchmark {
 
 	#print "$tolerance \n";
         # open the testfile and read the elapsed time.
+	chomp($test_file);
         $ok=open(F,"$test_dir/$testfile");
         if (!(defined $ok)) {
         # if the stdout file is not present return FAIL
         	return(2);
         }else { 
+		@ET_list = 0;
+		@BM_list = 0;
         	$test_string_found = 0;
         	while (<F>) { #read the file unitil "Test Elapsed Time" is found
         		($test_string,$test_ET) = split(/Time/, $_);
@@ -68,12 +71,19 @@ sub run_benchmark {
 				#print $testfile;
 				#print  $test_ET ;
 				$test_string_found = 1;
-				goto BM_FILE;
+				push(@ET_list,$test_ET);
 			} 
 		}
 	}
-	BM_FILE:
-        # open the testfile and read the elapsed time.
+	$sum=0;
+	$count=0;
+	foreach $test_ET (@ET_list) {
+		$sum=$sum + $test_ET;
+		$count=$count + 1;
+	}
+	$ET_ave = $sum/($count - 1);
+
+        # open the testfile and read the elapsed times.
         $ok=open(F,"$bm_dir/$testfile");
         if (!(defined $ok)) {
         	# if the stdout file is not present return FAIL
@@ -87,16 +97,24 @@ sub run_benchmark {
         			#print $testfile;
         			#print  $bm_ET ;
         			$test_string_found = 1;
-        			goto CALCULATE;
+				push(@BM_list,$bm_ET);
         		}
         	}
         }
-	CALCULATE:if (( $test_ET <= $bm_ET) ||  ( $test_ET == 0)) {
+        $sum=0;
+        $count=0;
+        foreach $bm_ET (@BM_list) {
+                $sum=$sum + $bm_ET;
+                $count=$count + 1;
+        }
+        $BM_ave = $sum/($count -1);
+	#print "ET_ave = $ET_ave, BM_ave = $BM_ave \n";
+	if (( $ET_ave <= $BM_ave) ||  ( $ET_ave == 0)) {
 		return (0);
 	} else {
-		$ans=(($test_ET - $bm_ET)/$test_ET);
+		$ans=(($ET_ave - $BM_ave)/$ET_ave);
 		#print" ans = $ans \n";
-		if ((($test_ET - $bm_ET)/$test_ET) < $tolerance ) {
+		if ((($ET_ave - $BM_ave)/$ET_ave) <= $tolerance ) {
 			#print "PASS \n";
 			return (0);
 		} else {
@@ -209,6 +227,7 @@ use File::Find
 	$fail_count = 0;
 	$pass_count = 0;
 	$match_count = 0;
+        @ut_files = sort(@ut_files);
         foreach $file ( @ut_files) {
                 	open(F,$file);
                 	foreach $line (<F>){
