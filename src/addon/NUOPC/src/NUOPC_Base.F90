@@ -78,7 +78,7 @@ module NUOPC_Base
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
   public NUOPC_TimePrint
-  
+  public NUOPC_Write
 
 !==============================================================================
 ! 
@@ -91,6 +91,10 @@ module NUOPC_Base
     module procedure NUOPC_FieldBundleIsCreated
     module procedure NUOPC_FieldIsCreated
     module procedure NUOPC_GridIsCreated
+  end interface
+  
+  interface NUOPC_Write
+    module procedure NUOPC_WriteWeights
   end interface
   
   !-----------------------------------------------------------------------------
@@ -2833,6 +2837,77 @@ module NUOPC_Base
           yy, mm, dd, h, m, s, ms
       endif
     endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write distributed weights into file
+! !INTERFACE:
+  subroutine NUOPC_WriteWeights(factorList, fileName, rc)
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), pointer               :: factorList(:)
+    character(*),       intent(in)            :: fileName
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Each PET calls with its local list of factors. The call then writes the
+!   distributed factors into a single file. The order of the factors in the file
+!   is first by PET, and within each PET the PET-local order is preserved. 
+!   Changing the number of PETs for the same regrid operation will likely change
+!   the order of factors across PETs, and therefore files written will differ.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
+    type(ESMF_VM)                   :: vm
+    type(ESMF_DistGrid)             :: dg
+    type(ESMF_Array)                :: array
+    integer                         :: localPet, petCount
+    integer                         :: j
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(weightsPerPet(petCount))
+    call ESMF_VMAllGather(vm, (/size(factorList)/), weightsPerPet, &
+      count=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(deBlockList(1,2,petCount))
+    do j=1, petCount
+      if (j==1) then
+        deBlockList(1,1,j) = 1
+        deBlockList(1,2,j) = weightsPerPet(1)
+      else
+        deBlockList(1,1,j) = deBlockList(1,2,j-1) + 1
+        deBlockList(1,2,j) = deBlockList(1,1,j) + weightsPerPet(j) - 1
+      endif
+    enddo
+    dg = ESMF_DistGridCreate(minIndex=(/1/), &
+      maxIndex=(/deBlockList(1,2,petCount)/), &
+      deBlockList=deBlockList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    array = ESMF_ArrayCreate(dg, factorList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayWrite(array, fileName, &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_DistGridDestroy(dg, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(weightsPerPet, deBlockList)
     
   end subroutine
   !-----------------------------------------------------------------------------
