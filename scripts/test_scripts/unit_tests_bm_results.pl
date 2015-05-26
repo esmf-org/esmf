@@ -331,7 +331,7 @@ use File::Find
 			print @pass_list;
 		}
 		if (@fail_list != ()){
-			print "\n\nThe following unit test failed the $TOLERANCE benchmark test:\n\n";
+			print "\n\nThe following unit tests failed the $TOLERANCE benchmark test:\n\n";
 			print @fail_list;
 		}
 		if (@test_list != ()){
