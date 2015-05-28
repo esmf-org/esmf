@@ -701,12 +701,13 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
 // The main routine
 // dst_pl is assumed to only contain non-masked points
-void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
-  Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
+  void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, std::vector<int> *revised_dst_loc, OTree *box_in) {
+    Trace __trace("OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_type, SearchResult &result, double stol, std::vector<const MeshObj*> *revised_dst_loc, OTree *box_in)");
 
+  if (dst_pl.get_curr_num_pts() == 0)
+    return;
 
   MEField<> &coord_field = *src.GetCoordField();
-
   MEField<> *src_mask_field_ptr = src.GetField("mask");
 
   // Set some parameters to control search
@@ -718,7 +719,6 @@ void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_
   if (sdim != dst_pl.get_coord_dim()) {
     Throw() << "Mesh and pointlist must have same spatial dim for search";
   }
-
 
   // Fill search box tree
   OTree *box;    
@@ -738,7 +738,6 @@ void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_
     // Commit
     box->commit();
   } else box = box_in;
-
 
   // Get list of destination points to look at. 
   std::vector<int> *dst_loc;  
@@ -865,7 +864,6 @@ void OctSearch(const Mesh &src, PointList &dst_pl, MAP_TYPE mtype, UInt dst_obj_
   }
 
   if (!box_in) delete box;
-
 }
 
 } // namespace

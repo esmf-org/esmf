@@ -545,10 +545,10 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
       buf[0]=pnt[0];
       buf[1]=pnt[1];
       if (sdim < 3)
-	buf[2]=this_id;  //mvr passing an int through a double...inefficient but ok?
+	buf[2]=this_id;  //passing an int through a double...inefficient but ok?
       else {
         buf[2]=pnt[2];
-        buf[3]=this_id;  //mvr passing an int through a double...inefficient but ok?
+        buf[3]=this_id;  //passing an int through a double...inefficient but ok?
       }
 
       // Push buf onto send struct
@@ -776,10 +776,10 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
       buf[0]=pnt[0];
       buf[1]=pnt[1];
       if (sdim < 3)
-	buf[2]=this_id;  //mvr passing an int through a double...inefficient but ok?
+	buf[2]=this_id;  //passing an int through a double...inefficient but ok?
       else {
         buf[2]=pnt[2];
-        buf[3]=this_id;  //mvr passing an int through a double...inefficient but ok?
+        buf[3]=this_id;  //passing an int through a double...inefficient but ok?
       }
 
       // Push buf onto send struct
@@ -800,7 +800,7 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 
   int plist_rend_size=dstplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
 
-  if (plist_rend_size > 0) {
+  if (plist_rend_size >= 0) {
 
     dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 

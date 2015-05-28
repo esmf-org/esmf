@@ -143,7 +143,7 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *regridPoleNPnts,
   ESMC_NormType_Flag *normtype,
   ESMC_UnmappedAction_Flag *unmappedaction,
-  bool *ignoreDegenerate,
+  ESMC_Logical *ignoreDegenerate,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc);
@@ -1282,7 +1282,7 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_NormType_Flag *normType,
     ESMC_UnmappedAction_Flag *unmappedAction,
-    bool *ignoreDegenerate,
+    ESMC_Logical *ignoreDegenerate,
     Field *srcFracField, 
     Field *dstFracField) {
 //

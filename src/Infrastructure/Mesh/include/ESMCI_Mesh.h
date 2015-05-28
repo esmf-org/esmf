@@ -19,6 +19,7 @@
 #include "Util/include/ESMCI_F90Interface.h"
 #include "PointList/include/ESMCI_PointList.h"
 #include "ESMCI_Field.h"
+#include "ESMCI_CoordSys.h"
 
 #include <map>
 #include <mpi.h>
@@ -49,6 +50,9 @@ Mesh();
 static Mesh *createfromfile(const char *filename, int fileTypeFlag,
 			    int *convertToDual, int *addUserArea, 
 			    const char *meshname, int *maskFlag, const char *varname, 
+                            int *parametricDim,
+                            int *spatialDim,
+                            ESMC_CoordSys_Flag *coordSys,
 			    int *rc);
 
 /**

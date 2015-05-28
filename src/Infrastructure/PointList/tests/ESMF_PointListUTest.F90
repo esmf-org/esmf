@@ -115,7 +115,6 @@ program ESMF_PointListUTest
 
 
 
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a PointList from existing mesh via nodes without masking"
@@ -129,8 +128,6 @@ program ESMF_PointListUTest
 
   ! return result
   call ESMF_TEST((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
 
 
   !------------------------------------------------------------------------
@@ -209,10 +206,22 @@ program ESMF_PointListUTest
   call ESMF_TEST((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-call ESMF_UtilIOUnitFlush (6)
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating a PointList from existing mesh via nodes without masking, empty proc"
+  write(failMsg, *) "Test unsuccessful"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! do test
+  call test_pointlist_from_mesh_nodes_nomask_empty_proc(rc)
+
+  ! return result
+  call ESMF_TEST((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-
+  call ESMF_UtilIOUnitFlush (6)
 
   call ESMF_TestEnd(ESMF_SRCLINE)
 
@@ -2571,11 +2580,11 @@ contains
        return
     endif
 
-    call ESMF_PointListPrint(pointlist)
-    if (localrc /= ESMF_SUCCESS) then
-       rc=ESMF_FAILURE
-       return
-    endif	
+!    call ESMF_PointListPrint(pointlist)
+!    if (localrc /= ESMF_SUCCESS) then
+!       rc=ESMF_FAILURE
+!       return
+!    endif	
 
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 3) then
@@ -2822,11 +2831,11 @@ contains
        return
     endif
 
-    call ESMF_PointListPrint(pointlist)
-    if (localrc /= ESMF_SUCCESS) then
-       rc=ESMF_FAILURE
-       return
-    endif	
+!    call ESMF_PointListPrint(pointlist)
+!    if (localrc /= ESMF_SUCCESS) then
+!       rc=ESMF_FAILURE
+!       return
+!    endif	
 
 
     if (local_pts .gt. 0) then
@@ -2868,5 +2877,293 @@ contains
 
     rc=ESMF_SUCCESS
   end subroutine test_pointlist_from_locStream_wmask
+
+  subroutine test_pointlist_from_mesh_nodes_nomask_empty_proc(rc)
+    integer, intent(out) :: rc
+
+    integer :: localrc
+
+    !LOCAL VARIABLES:
+    type(ESMF_PointList) :: pointlist
+    type(ESMF_VM) :: vm
+    integer :: maxpts, mydims, mypts, myid
+    type(ESMF_Mesh) :: myMesh
+    integer :: numNodes
+    integer :: numTriElems, numQuadElems, numTotElems
+    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, pointer :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer :: petCount,localPet
+    integer :: local_pts
+    real(ESMF_KIND_R8), dimension(2) :: test_coords
+    real(ESMF_KIND_R8) test_coordx,test_coordy
+
+    ! get global VM
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! If we don't have 1 or 4 PETS then exit successfully
+    if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
+      print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+      rc=ESMF_FAILURE
+      return
+    endif
+
+    ! setup source Mesh
+    if (petCount .eq. 1) then
+      ! Set number of nodes
+      numNodes=9
+
+      ! Allocate and fill the node id array.
+      allocate(nodeIds(numNodes))
+
+      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+      ! Allocate and fill node coordinate array.
+      ! Since this is a 2D Mesh the size is 2x the
+      ! number of nodes.
+      allocate(nodeCoords(2*numNodes))
+      nodeCoords=(/0.0,0.0, & ! node id 1
+                   1.0,0.0, & ! node id 2
+                   2.0,0.0, & ! node id 3
+                   0.0,1.0, & ! node id 4
+                   1.0,1.0, & ! node id 5
+                   2.0,1.0, & ! node id 6
+                   0.0,2.0, & ! node id 7
+                   1.0,2.0, & ! node id 8
+                   2.0,2.0 /) ! node id 9
+
+      allocate(nodeOwners(numNodes))
+      nodeOwners=0 ! everything on PET 0
+      local_pts=9
+      test_coordx=0.0
+      test_coordy=0.0
+
+      ! Set the number of each type of element, plus the total number.
+      numQuadElems=3
+      numTriElems=2
+      numTotElems=numQuadElems+numTriElems
+
+
+      ! Allocate and fill the element id array.
+      allocate(elemIds(numTotElems))
+      elemIds=(/1,2,3,4,5/) 
+
+      ! Allocate and fill the element topology type array.
+      allocate(elemTypes(numTotElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                  ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                  ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                  ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+      ! Allocate and fill the element connection type array.
+      ! Note that entries in this array refer to the 
+      ! positions in the nodeIds, etc. arrays and that
+      ! the order and number of entries for each element
+      ! reflects that given in the Mesh options 
+      ! section for the corresponding entry
+      ! in the elemTypes array. The number of 
+      ! entries in this elemConn array is the
+      ! number of nodes in a quad. (4) times the 
+      ! number of quad. elements plus the number
+      ! of nodes in a triangle (3) times the number
+      ! of triangle elements. 
+      allocate(elemConn(4*numQuadElems+3*numTriElems))
+      elemConn=(/1,2,5,4, &  ! elem id 1
+                 2,3,5,   &  ! elem id 2
+                 3,6,5,   &  ! elem id 3
+                 4,5,8,7, &  ! elem id 4
+                 5,6,9,8/)   ! elem id 5
+
+    else if (petCount .eq. 4) then
+      ! Setup mesh data depending on PET
+      if (localPET .eq. 0) then !!! This part only for PET 0
+
+        ! Set number of nodes
+        numNodes=9
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+
+        nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+        nodeCoords=(/0.0,0.0, & ! node id 1
+                     1.0,0.0, & ! node id 2
+                     2.0,0.0, & ! node id 3
+                     0.0,1.0, & ! node id 4
+                     1.0,1.0, & ! node id 5
+                     2.0,1.0, & ! node id 6
+                     0.0,2.0, & ! node id 7
+                     1.0,2.0, & ! node id 8
+                     2.0,2.0 /) ! node id 9
+
+        allocate(nodeOwners(numNodes))
+        nodeOwners=0 ! everything on PET 0
+        local_pts=9
+        test_coordx=0.0
+        test_coordy=0.0
+
+        ! Set the number of each type of element, plus the total number.
+        numQuadElems=3
+        numTriElems=2
+        numTotElems=numQuadElems+numTriElems
+
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/1,2,3,4,5/) 
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+        elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                    ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                    ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                    ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+                    ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+        ! Allocate and fill the element connection type array.
+        ! Note that entries in this array refer to the 
+        ! positions in the nodeIds, etc. arrays and that
+        ! the order and number of entries for each element
+        ! reflects that given in the Mesh options 
+        ! section for the corresponding entry
+        ! in the elemTypes array. The number of 
+        ! entries in this elemConn array is the
+        ! number of nodes in a quad. (4) times the 
+        ! number of quad. elements plus the number
+        ! of nodes in a triangle (3) times the number
+        ! of triangle elements. 
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+        elemConn=(/1,2,5,4, &  ! elem id 1
+                   2,3,5,   &  ! elem id 2
+                   3,6,5,   &  ! elem id 3
+                   4,5,8,7, &  ! elem id 4
+                   5,6,9,8/)   ! elem id 5
+
+
+      else if (localPET .gt. 0) then 
+
+
+        ! Set number of nodes
+        numNodes=0
+
+        local_pts=0
+
+        ! Allocate and fill the node id array.
+        allocate(nodeIds(numNodes))
+
+        ! Allocate and fill node coordinate array.
+        ! Since this is a 2D Mesh the size is 2x the
+        ! number of nodes.
+        allocate(nodeCoords(2*numNodes))
+
+        ! Allocate and fill the node owner array.
+        allocate(nodeOwners(numNodes))
+
+        ! Set the number of each type of element, plus the total number.
+         numQuadElems=0
+        numTriElems=0
+        numTotElems=numQuadElems+numTriElems
+
+        ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+
+        ! Allocate and fill the element topology type array.
+        allocate(elemTypes(numTotElems))
+
+        ! Allocate and fill the element connection type array.
+        allocate(elemConn(4*numQuadElems+3*numTriElems))
+      endif
+    endif
+
+
+    ! Create Mesh structure in 1 step
+    myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, &
+	 elementIds=elemIds, elementTypes=elemTypes, &
+	 elementConn=elemConn, rc=localrc)
+
+
+    if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR: trouble creating mesh'
+      rc=ESMF_FAILURE
+      return
+    endif
+
+    ! After the creation we are through with the arrays, so they may be
+    ! deallocated.
+    deallocate(nodeIds)
+    deallocate(nodeCoords)
+    deallocate(elemIds)
+    deallocate(elemTypes)
+    deallocate(elemConn)
+
+    maxpts=-99
+    mypts=-99
+    mydims=-99
+    myid=-99
+
+    pointlist=ESMF_PointListCreate(myMesh, ESMF_MESHLOC_NODE, rc=localrc)
+    if (localrc /= ESMF_SUCCESS) then
+      print*,'ERROR: trouble creating pointlist'
+      rc=ESMF_FAILURE
+      return
+    endif	
+
+    call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
+    if (localrc /= ESMF_SUCCESS) then
+       print*,'ERROR: trouble accessing pointlist data with get routine'
+       rc=ESMF_FAILURE
+       return
+    endif	
+
+    if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
+       print*,'ERROR:  unexpected values for newly created pointlist:'
+       print*,'maxpts should be: ',local_pts,' got: ',maxpts
+       print*,'numpts should be: ',local_pts,' got: ',mypts
+       print*,'dims should be: 2  got: ',mydims
+       rc=ESMF_FAILURE
+       return
+    endif	
+
+!    call ESMF_PointListPrint(pointlist)
+!    if (localrc /= ESMF_SUCCESS) then
+!       rc=ESMF_FAILURE
+!       return
+!    endif	
+
+
+    call ESMF_PointListDestroy(pointlist,rc=localrc)
+    if (localrc /= ESMF_SUCCESS) then
+       print*,'ERROR: trouble destroying pointlist'
+       rc=ESMF_FAILURE
+       return
+    endif	
+
+    call ESMF_MeshDestroy(myMesh, rc=localrc)
+    if (localrc /=ESMF_SUCCESS) then
+      print*,'ERROR: trouble destorying mesh'
+      rc=ESMF_FAILURE
+      return
+    endif
+
+    rc=ESMF_SUCCESS
+  end subroutine test_pointlist_from_mesh_nodes_nomask_empty_proc
+
 
 end program ESMF_PointListUTest

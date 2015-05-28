@@ -60,6 +60,8 @@ namespace ESMCI {
     // constructor
     array = NULL;
     dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   InterfaceInt::InterfaceInt(int *arrayArg, int lenArg){
@@ -67,6 +69,8 @@ namespace ESMCI {
     array = arrayArg;
     dimCount = 1;
     extent[0]=lenArg;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   InterfaceInt::InterfaceInt(std::vector<int> &arrayArg){
@@ -74,6 +78,8 @@ namespace ESMCI {
     array = &(arrayArg[0]);
     dimCount = 1;
     extent[0]=arrayArg.size();
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   InterfaceInt::InterfaceInt(int *arrayArg, int dimArg, const int *lenArg){
@@ -82,43 +88,33 @@ namespace ESMCI {
     dimCount = dimArg;
     for (int i=0; i<dimCount; i++)
       extent[i]=lenArg[i];
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   InterfaceInt::~InterfaceInt(void){
     // destructor
     array = NULL;
     dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
   
   void InterfaceInt::set(void){
     // set NULL
     array = NULL;
     dimCount = 0;
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   void InterfaceInt::set(int *arrayArg, int lenArg){
-    /*
-    // this is a test to see if the data is passed in correctly
-    printf("InterfaceInt::set - arrayArg = [");
-    for (int i=0; i<lenArg; ++i)
-      printf("%d,", arrayArg[i]);
-    printf("], length = %d\n", lenArg);
-    */
-
     // set special case 1d
     array = arrayArg;
     dimCount = 1;
     extent[0]=lenArg;
-
-    /*
-    // this is a test to see if the data is passed in correctly
-    printf("InterfaceInt::set - arrayArg = [");
-    for (int i=0; i<extent[0]; ++i)
-      printf("%d,", array[i]);
-    printf("], length = %d\n", extent[0]);
-    printf("dimCount = %d\n", dimCount);
-    */
-
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   void InterfaceInt::set(std::vector<int> &arrayArg){
@@ -126,6 +122,8 @@ namespace ESMCI {
     array = &(arrayArg[0]);
     dimCount = 1;
     extent[0]=arrayArg.size();
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
 
   void InterfaceInt::set(int *arrayArg, int dimArg, const int *lenArg){
@@ -134,6 +132,8 @@ namespace ESMCI {
     dimCount = dimArg;
     for (int i=0; i<dimCount; i++)
       extent[i]=lenArg[i];
+    for (int i=dimCount; i<7; i++)
+      extent[i]=0;
   }
   
   bool present(InterfaceInt *ptr){

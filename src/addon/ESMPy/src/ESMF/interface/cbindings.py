@@ -158,23 +158,15 @@ def ESMP_Finalize():
 #### INTERFACEINT #############################################################
 
 class ESMP_InterfaceInt(ct.Structure):
-    _fields_ = [("array", ct.POINTER(ct.c_int))]
+    _fields_ = [("shallowMem", ct.c_char*80)]
                 
     def __init__(self, arrayArg):
-        self.array = (ct.c_int*len(arrayArg))()
-        #self.array = arrayArg
-        self.extent = arrayArg.shape
-        self.arrayArg = arrayArg
         # initialize the InterfaceInt on the ESMF side
         ESMP_InterfaceIntSet(self, arrayArg, len(arrayArg))
-
-    def __repr__(self):
-        return 'ESMPyInterfaceInt [{}], length = {}'.format(
-            ','.join(str(self.array[i]) for i in range(self.extent[0])), 
-            self.extent[0])
+        super(ESMP_InterfaceInt, self).__init__()
 
 _ESMF.ESMC_InterfaceIntSet.restype = ct.c_int
-_ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt), 
+_ESMF.ESMC_InterfaceIntSet.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                        np.ctypeslib.ndpointer(dtype=np.int32),
                                        ct.c_int]
 def ESMP_InterfaceIntSet(iiptr, arrayArg, lenArg):
@@ -551,7 +543,7 @@ _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_GridGetCoordPtr(grid, coordDim, 
+def ESMP_GridGetCoordPtr(grid, coordDim,
                          staggerloc=constants.StaggerLoc.CENTER):
     """
     Preconditions: An ESMP_Grid has been created and coordinates have 
@@ -1250,8 +1242,9 @@ def ESMP_FieldGetPtr(field, localDe=0):
 
 _ESMF.ESMC_FieldGetBounds.restype = ct.c_int
 _ESMF.ESMC_FieldGetBounds.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
-                                      ct.POINTER(ESMP_InterfaceInt),
-                                      ct.POINTER(ESMP_InterfaceInt)]
+                                      np.ctypeslib.ndpointer(dtype=np.int32),
+                                      np.ctypeslib.ndpointer(dtype=np.int32),
+                                      ct.c_int]
 @deprecated
 def ESMP_FieldGetBounds(field, rank, localDe=0):
     """
@@ -1266,31 +1259,19 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
     """
     llde = ct.c_int(localDe)
 
-    exLB = ESMP_InterfaceInt(np.zeros(rank, dtype=np.int32))
-    exUB = ESMP_InterfaceInt(np.zeros(rank, dtype=np.int32))
+    exLB = np.zeros(rank, dtype=np.int32)
+    exUB = np.zeros(rank, dtype=np.int32)
 
-    rc = _ESMF.ESMC_FieldGetBounds(field.ptr, ct.byref(llde),
-                                   ct.byref(exLB),
-                                   ct.byref(exUB))
+    rc = _ESMF.ESMC_FieldGetBounds(field.ptr, ct.byref(llde), exLB, exUB, rank)
 
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldGetBounds failed! rc = \n' + str(rc) + '.    ' +
                      constants._errmsg)
 
-    exlbbuffer = np.core.multiarray.int_asbuffer(
-        ct.addressof(exLB.array.contents),
-        np.dtype(np.int32).itemsize * exLB.extent[0])
-    lbounds = np.frombuffer(exlbbuffer, np.int32)
-
-    exubbuffer = np.core.multiarray.int_asbuffer(
-        ct.addressof(exUB.array.contents),
-        np.dtype(np.int32).itemsize * exUB.extent[0])
-    ubounds = np.frombuffer(exubbuffer, np.int32)
-
     # adjust bounds to be 0 based
-    lbounds = lbounds - 1
+    exLB = exLB - 1
 
-    return lbounds.copy(), ubounds.copy()
+    return exLB, exUB
 
 _ESMF.ESMC_FieldPrint.restype = ct.c_int
 _ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]

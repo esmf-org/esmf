@@ -33,8 +33,8 @@ endif
 
 # --- Mesh tests
 
-RUN_ESMF_MeshUTest:
+RUN_ESMF_PointListUTest:
 	$(MAKE) TNAME=PointList NP=4 ftest
 
-RUN_ESMF_MeshUTestUNI:
+RUN_ESMF_PointListUTestUNI:
 	$(MAKE) TNAME=PointList NP=1 ftest

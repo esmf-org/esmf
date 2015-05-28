@@ -181,7 +181,7 @@
 !sandbox that did not include any of the PointList code (mvr)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_OFF_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid sphere with destination masks"
