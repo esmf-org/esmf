@@ -13,6 +13,7 @@ LOCDIR	  = src/Infrastructure/Mesh/examples
 .NOTPARALLEL:
 EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
+                      $(ESMF_EXDIR)/ESMC_RendEx \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
                       $(ESMF_EXDIR)/ESMC_RefineEx \
 
