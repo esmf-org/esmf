@@ -2098,6 +2098,69 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, int *rc) 
+{
+  try {
+    Mesh *meshp = *meshpp;
+    ThrowRequire(meshp);
+    Mesh &mesh = *meshp;
+
+    // Initialize the parallel environment for mesh (if not already done)
+    int localrc;
+    int rc;
+    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+
+    // Get coords pointer and spatial dimension depending on existence
+    // of elem_coordinates field.
+    MEField<> *elem_coords = mesh.GetField("elem_orig_coordinates");
+    if (!elem_coords) {
+      elem_coords = mesh.GetField("elem_coordinates");
+    }
+    if (elem_coords) {
+      int sdim=*_orig_sdim;
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      int elemCoordPos = 0;
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        if (!GetAttr(elem).is_locally_owned()) continue;
+
+        // Set coordinate value to input array
+        double *coords=elem_coords->data(elem);
+        for (int i = 0; i < sdim; ++i) {
+          ecoords[elemCoordPos++] = coords[i];
+        }
+      }
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                        " - elem_coordinates not found in Mesh",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+} 
+
 void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc) 
 {
    try {
@@ -2186,7 +2249,6 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 } 
-
 
 ////////////////
 

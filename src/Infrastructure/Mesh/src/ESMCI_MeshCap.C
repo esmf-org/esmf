@@ -847,6 +847,19 @@ void MeshCap::getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc)
   }
 } 
 
+void MeshCap::getlocalelemcoords(double *elemCoord, int *_orig_sdim, int *rc) 
+{
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_getlocalelemcoords(&mesh, elemCoord, _orig_sdim, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+} 
+
 
 void MeshCap::meshgetarea(int *num_elem, double *elem_areas, int *rc) {
 

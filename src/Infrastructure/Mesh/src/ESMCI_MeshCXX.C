@@ -372,6 +372,18 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
   }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "MeshCXX::getLocalElemCoords()"
+  void MeshCXX::getLocalElemCoords(double *ecoords, int *num_elems, int *num_dims, int *rc) {
+    ESMCI_getlocalelemcoords(&meshPointer, ecoords, &spatialDim, rc);
+
+    *num_elems = this->numOwnedElements;
+    *num_dims = spatialDim;
+
+    // Set return code
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalCoords()"
   void MeshCXX::getLocalCoords(double *nodeCoord, int *num_nodes, int *num_dims, int *rc) {
     Mesh &mesh = *meshPointer;

@@ -58,7 +58,9 @@ program ESMF_MeshUTest
   logical :: correct
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
   real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedElemCoords(:)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
   integer(ESMF_KIND_I4) :: localNumOwnedElems(1), globalNumOwnedElems(1)
   integer :: numElems,numOwnedElemsTst
@@ -177,6 +179,11 @@ program ESMF_MeshUTest
   allocate(elemIds(numElems))
   elemIds=(/1,2,3,4/) 
 
+  allocate(elemCoords(numElems*2))
+  elemCoords= (/0.5,0.5, &
+                1.5,0.5, &
+		0.5,1.5, &
+		1.5,1.5 /)
   !! elem types
   allocate(elemTypes(numElems))
   elemTypes=ESMF_MESHELEMTYPE_QUAD
@@ -194,6 +201,7 @@ program ESMF_MeshUTest
 
   ! Add Elements
   call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,&
+			    elementCoords=elemCoords, &
                             elementArea=elemAreas, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -202,6 +210,7 @@ program ESMF_MeshUTest
   deallocate(elemTypes)
   deallocate(elemConn)
   deallocate(elemAreas)
+  deallocate(elemCoords)
 
   !! Write mesh for debugging
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -397,6 +406,11 @@ program ESMF_MeshUTest
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
+
+       !! elem coords
+       allocate(elemCoords(numElems*2))
+       elemCoords=(/0.5,0.5/)
+     
      else if (localPet .eq. 1) then
         ! Fill in node data
         numNodes=4
@@ -431,6 +445,10 @@ program ESMF_MeshUTest
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
+
+       !! elem coords
+       allocate(elemCoords(numElems*2))
+       elemCoords=(/1.5,0.5/)
      else if (localPet .eq. 2) then
         ! Fill in node data
         numNodes=4
@@ -465,6 +483,10 @@ program ESMF_MeshUTest
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)  
+
+       !! elem coords
+       allocate(elemCoords(numElems*2))
+       elemCoords=(/1.5,0.5/)
      else 
         ! Fill in node data
         numNodes=4
@@ -499,6 +521,10 @@ program ESMF_MeshUTest
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)  
+
+       !! elem coords
+       allocate(elemCoords(numElems*2))
+       elemCoords=(/1.5,1.5/)
      endif
 
   ! Create Mesh structure in 1 step
@@ -506,18 +532,20 @@ program ESMF_MeshUTest
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
-         rc=localrc)
+         elementCoords=elemCoords, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! Allocate space for coords
   allocate(ownedNodeCoords(2*numOwnedNodes))
+  allocate(ownedElemCoords(2*numElems))
 
   ! Test Mesh Get
   call ESMF_MeshGet(mesh, parametricDim=parametricDim, spatialDim=spatialDim, &
                    nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, ownedNodeCoords=ownedNodeCoords, &
                    numOwnedElements=numOwnedElemsTst, &
+		   ownedElemCoords=ownedElemCoords, &
                    isMemFreed=isMemFreed, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -536,12 +564,17 @@ program ESMF_MeshUTest
          if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.    
          j=j+1
      endif
+  enddo  
+  do i=1,numElems
+     if (elemCoords(2*i-1) .ne. ownedElemCoords(2*i-1)) correct=.false.    
+     if (elemCoords(2*i) .ne. ownedElemCoords(2*i)) correct=.false.    
   enddo
 
   ! deallocate node data
   deallocate(nodeIds)
   deallocate(nodeCoords)
   deallocate(nodeOwners)
+  deallocate(elemCoords)
 
   ! deallocate elem data
   deallocate(elemIds)
@@ -550,6 +583,7 @@ program ESMF_MeshUTest
 
   ! deallocate owned node coords
   deallocate(ownedNodeCoords)
+  deallocate(ownedElemCoords)
 
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)

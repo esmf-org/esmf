@@ -23,11 +23,4 @@ enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_SPH_DEG,
                     ESMC_COORDSYS_SPH_RAD};
 
-// Constants for converting between radians and degrees
-// (These need to match the ones in ESMF_UtilTypes.F90) 
-
-const double ESMC_CoordSys_Deg2Rad= 0.01745329251994329547437;
-const double ESMC_CoordSys_Rad2Deg=57.29577951308232286464772;
-
-
 #endif  // ESMC_COORDSYS_H

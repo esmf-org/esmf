@@ -120,6 +120,8 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
 void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
                        double *pnts, int *pets, int *rc);
 
+void ESMCI_getlocalelemcoords(Mesh **meshpp, double *elemCoord, int *_orig_sdim, int *rc);
+
 void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc);
 
 

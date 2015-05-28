@@ -25,11 +25,19 @@ module NUOPC_Driver
   
   private
   
-  public SetServices
-  public type_PetList
-  public label_ModifyInitializePhaseMap
-  public label_SetModelServices, label_SetRunSequence, label_Finalize
-  public label_SetRunClock
+  public &
+    SetServices, &
+    routine_Run
+
+  public &
+    type_PetList
+    
+  public &
+    label_ModifyInitializePhaseMap, &
+    label_SetModelServices, &
+    label_SetRunSequence, &
+    label_Finalize, &
+    label_SetRunClock
   
   character(*), parameter :: &
     label_InternalState = "Driver_InternalState"
@@ -169,7 +177,7 @@ module NUOPC_Driver
     
     ! Run phases
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
-      phaseLabelList=(/"RunPhase1"/), userRoutine=Run, rc=rc)
+      phaseLabelList=(/"RunPhase1"/), userRoutine=routine_Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -651,6 +659,10 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! modelComps
+    call loopModelCompsS(phaseString="IPDv00p2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call loopModelCompsS(phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -693,10 +705,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     ! modelComps
-    call loopModelCompsS(phaseString="IPDv00p2", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
     call loopModelCompsS(phaseString="IPDv01p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1367,7 +1375,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine Run(gcomp, importState, exportState, clock, rc)
+  recursive subroutine routine_Run(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock

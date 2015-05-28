@@ -3441,7 +3441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodalDistgrid, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
-                   numOwnedElements, isMemFreed, coordSys, rc)
+                   numOwnedElements, ownedElemCoords, isMemFreed, coordSys, rc)
 !
 ! !RETURN VALUE:
 !
@@ -3454,6 +3454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: numOwnedNodes
     real(ESMF_KIND_R8),       intent(out), optional :: ownedNodeCoords(:)
     integer,                  intent(out), optional :: numOwnedElements
+    real(ESMF_KIND_R8),       intent(out), optional :: ownedElemCoords(:)
     logical,                  intent(out), optional :: isMemFreed
     type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     integer,                  intent(out), optional :: rc
@@ -3493,6 +3494,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The number of local elements which are owned by this PET. Note that every element is owned by 
 ! the PET it resides on, so unlike for nodes, {\tt numOwnedElements} is identical to the number of elements on
 ! the PET. It is also the number of PET local entries in the elementDistgrid. 
+! \item [{[ownedElemCoords]}]
+! The center coordinates for the local elements. These coordinates will be in the proper order to correspond
+! with the elements in the {\tt elementDistgrid} returned by this call, and hence with a Field built on the
+! center of {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times
+! {\tt numOwnedElements}.
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
@@ -3536,6 +3542,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        ! Get coords from C
        call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, &
+                                  mesh%spatialDim,localrc) 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(ownedElemCoords)) then
+       ! If mesh has been freed then exit
+       if (mesh%isCMeshFreed) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                msg="- the mesh internals have been freed", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       endif
+
+       ! Check array size
+       if (size(ownedElemCoords)<mesh%numOwnedElements*mesh%spatialDim) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+                msg="- owndedElemCoords too small to hold coordinates", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       endif
+
+       ! Get coords from C
+       call C_ESMC_GetLocalElemCoords(mesh, ownedElemCoords, &
                                   mesh%spatialDim,localrc) 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return

@@ -208,6 +208,13 @@ script_info:
 	-@echo "ESMF_INSTALL_BINDIR:    $(ESMF_INSTALL_BINDIR)"
 	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
 	-@echo " "
+	-@echo " "
+	-@echo "--------------------------------------------------------------"
+	-@echo " * ESMF benchmark directory *"
+	-@echo "ESMF_BENCHMARK_PREFIX:    $(ESMF_BENCHMARK_PREFIX)"
+	-@echo "ESMF_BENCHMARK_TOLERANCE: $(ESMF_BENCHMARK_TOLERANCE)"
+	-@echo " "
+
 #
 info:   script_info
 	-@echo "--------------------------------------------------------------"

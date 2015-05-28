@@ -74,6 +74,7 @@ module NUOPC
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
   public NUOPC_TimePrint
+  public NUOPC_Write
   
   ! defined in NUOPC_RunSequenceDef
   public NUOPC_RunElement
