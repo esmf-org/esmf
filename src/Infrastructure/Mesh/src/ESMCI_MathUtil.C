@@ -32,7 +32,7 @@
 // into the object file for tracking purposes.
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
-
+ 
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -66,7 +66,7 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
   // If det == 0.0 we can't invert
   if (!MU_IS_FINITE(det)) return false;
   if (det == 0.0) return false;
-
+ 
   const double deti = 1.0/det;
 
   m_inv[0] = (m[4]*m[8] - m[5]*m[7]) * deti;
@@ -100,7 +100,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 
   const double *q0=q;
   const double *q1=q+3;
-  const double *q2=q+6;
+   const double *q2=q+6;
   const double *q3=q+9;
 
 
@@ -134,7 +134,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
  for (int i=0; i<100; i++) {
 
     // Calculate Value of function at X
-    F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
+     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
     F[1]=X[0]*X[1]*A[1]+X[0]*B[1]+X[1]*C[1]+X[2]*D[1]+E[1];
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
@@ -168,7 +168,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   p[1]=X[1];
   *t=X[2];
 
-  //  if (mathutil_debug) {
+   //  if (mathutil_debug) {
   //  printf("Q: p=[%f %f] \n",p[0],p[1]);
   //}
 
@@ -202,7 +202,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
   // Invert M
   if (!invert_matrix_3x3(M,inv_M)) return false;
-
+ 
   // Set variable holding vector
   V[0]=l1[0]-tri0[0];
   V[1]=l1[1]-tri0[1];
@@ -1656,9 +1656,15 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
   //////// NEW STUFF /////
  /* XMRKX */
-
-
-  void sph_comb_pnts(const double *pnt0, const double *pnt1, double p, double *out_pnt) {
+  // INPUTS:
+  //   pnt0 - point at p=0 expressed in x,y,z Cartesian
+  //   pnt1 - point at p=1 expressed in x,y,z Cartesian
+  //   p    - parameter between pnt0 and pnt1
+  // OUTPUTS:
+  //   out_pnt - the point at p between pnt0 and pnt1 also expressed in x,y,z Cartesian
+  //   out_angle01 - the angle between pnt0 and pnt1
+  void sph_comb_pnts(const double *pnt0, const double *pnt1, double p,
+       double *out_pnt, double *out_angle01) {
 
   // Thought about doing a case here if the points are the same, but I think that 
   // the below will just work in that case, and this way I don't have to come up 
@@ -1680,10 +1686,11 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   u_pnt1[2] = pnt1[2]/len1;
 
   // Compute angle between 0 and 1
-  double dot01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
-  if (dot01 < -1.0) dot01=-1.0;
-  else if (dot01 > 1.0) dot01=1.0;
-  double angle01=acos(dot01);
+  // TODO: FIX THIS SO IT WORKS FOR ALL 360 DEG. 
+  double cos01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
+  if (cos01 < -1.0) cos01=-1.0;
+  else if (cos01 > 1.0) cos01=1.0;
+  double angle01=acos(cos01);
 
   // printf("angle01=%f\n",angle01);
  
@@ -1691,6 +1698,9 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   double cosp=cos(p*angle01);  // cos contribution
   double sinp=sin(p*angle01);  // sin contribution
   double radp=(1.0-p)*len0+p*len1; // radius linear between pnt0 and pnt1
+
+  // Clamp rad, so less than 0 doesn't count
+  if (radp < 0.0) radp=0.0;
 
   // printf("cosp=%f sinp=%f radp=%f\n",cosp,sinp,radp);
  
@@ -1709,6 +1719,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
     out_pnt[0]=radp*u_pnt0[0];
     out_pnt[1]=radp*u_pnt0[1];
     out_pnt[2]=radp*u_pnt0[2];
+    *out_angle01=angle01;
 
     return;
   }
@@ -1719,17 +1730,12 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   u_pntp[2]=pntp[2]/lenp;
  
  
-  // compute point
-#if 0
-  out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pnt1[0]);
-  out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pnt1[1]);
-  out_pnt[2]=radp*(cosp*u_pnt0[2]+sinp*u_pnt1[2]);
-#endif
-
+  // compute point and output
   out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pntp[0]);
   out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pntp[1]);
   out_pnt[2]=radp*(cosp*u_pnt0[2]+sinp*u_pntp[2]);
 
+  *out_angle01=angle01;
 }
 
 
@@ -1738,13 +1744,16 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 // Take in a spherical quad represented in Cartesian 3D and 
 // 2 parameter (p) values. Calculate a new point that is at the 
 // position described by the parameters in the quad.
-// quad_xyz - should be of size 12 (4 Cartesian 3D points)
-// p        - should be of size 2  (2 parameters)
-// o_pnt    - should be of size 3  (1 Cartesian 3D point)
-void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, double *o_pnt) {
+// quad_xyz    - should be of size 12 (4 Cartesian 3D points)
+// p           - should be of size 2  (2 parameters)
+// o_pnt       - should be of size 3  (1 Cartesian 3D point)
+// o_max_angle - the maximum angle for the cooresponding p values (2 values)
+  void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, 
+                               double *o_pnt, double *o_max_angle) {
   const double *q0, *q1, *q2, *q3;
   double pnt01[3];
   double pnt32[3];
+  double angle;
 
   // Grab points
   q0=quad_xyz;
@@ -1754,13 +1763,16 @@ void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, double *o_pnt) {
 
 
   // Side 0-1
-  sph_comb_pnts(q0, q1, p[0], pnt01);
+  sph_comb_pnts(q0, q1, p[0], pnt01, &angle);
+  o_max_angle[0]=angle;
 
   // Side 3-2
-  sph_comb_pnts(q3, q2, p[0], pnt32);
+  sph_comb_pnts(q3, q2, p[0], pnt32, &angle);
+  if (o_max_angle[0]>angle) o_max_angle[0]=angle;
 
   // Merge sides 0-1 and 3-2
-  sph_comb_pnts(pnt01, pnt32, p[1], o_pnt);
+  sph_comb_pnts(pnt01, pnt32, p[1], o_pnt, &angle);
+  o_max_angle[1]=angle;
 }
 
 
@@ -1770,20 +1782,24 @@ void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, double *o_pnt) {
 // hex_xyz - should be of size 24 (8 Cartesian 3D points)
 // p        - should be of size 3  (3 parameters)
 // o_pnt    - should be of size 3  (1 Cartesian 3D point)
-void calc_pnt_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt) {
+// o_max_angle - the maximum angle for the cooresponding p values (3 values)
+  void calc_pnt_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt, double *o_max_angle) {
   double pnt_btm[3];
   double pnt_top[3];
+  double max_angle2D[2];
 
   // calc the bottom quad
-  calc_pnt_quad_sph3D_xyz(hex_xyz, p, pnt_btm);
+  calc_pnt_quad_sph3D_xyz(hex_xyz, p, pnt_btm, o_max_angle);
 
   // calc the top quad
-  calc_pnt_quad_sph3D_xyz(hex_xyz+12, p, pnt_top);
+  calc_pnt_quad_sph3D_xyz(hex_xyz+12, p, pnt_top, max_angle2D);
+  if (max_angle2D[0] > o_max_angle[0]) o_max_angle[0]=max_angle2D[0];
+  if (max_angle2D[1] > o_max_angle[1]) o_max_angle[1]=max_angle2D[1];
 
   // printf("hex_xyz: pnt_btm=[%f %f %f] pnt_top=[%f %f %f] \n",pnt_btm[0],pnt_btm[1],pnt_btm[2],pnt_top[0],pnt_top[1],pnt_top[2]);
 
   // Merge the points
-  sph_comb_pnts(pnt_btm, pnt_top, p[2], o_pnt);
+  sph_comb_pnts(pnt_btm, pnt_top, p[2], o_pnt, o_max_angle+2);
 }
 
 
@@ -1793,10 +1809,11 @@ void calc_pnt_hex_sph3D_xyz(const double *hex_xyz, double *p, double *o_pnt) {
 // position described by the parameters in the quad.
 void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
   double delta=1.0E-10; // Small distance to use to estimate derivative
-   
+  double max_angle[3];   
+
   // Calculate Function with given p's
   double f[3];
-  calc_pnt_hex_sph3D_xyz(hex_xyz, p, f);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, p, f, max_angle);
 
   // Variable to hold info for computing derivatives
   double tmp_p[3];
@@ -1808,7 +1825,7 @@ void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
   tmp_p[1]=p[1];
   tmp_p[2]=p[2];
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
 
   jac[0]=(tmp_f[0]-f[0])/delta;
   jac[3]=(tmp_f[1]-f[1])/delta;
@@ -1819,7 +1836,7 @@ void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
   tmp_p[1]=p[1]+delta;
   tmp_p[2]=p[2];
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
 
   jac[1]=(tmp_f[0]-f[0])/delta;
   jac[4]=(tmp_f[1]-f[1])/delta;
@@ -1830,7 +1847,7 @@ void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
   tmp_p[1]=p[1];
   tmp_p[2]=p[2]+delta;
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
 
   jac[2]=(tmp_f[0]-f[0])/delta;
   jac[5]=(tmp_f[1]-f[1])/delta;
@@ -1863,6 +1880,8 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   // Best set of p's so far
   double best_dist_sq=std::numeric_limits<double>::max();
   double best_p[3];
+  double pi=M_PI;
+  double two_pi=2*M_PI;
 
 
   // Initial guess
@@ -1877,19 +1896,21 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
     // Calculate point at p
     double tmp_pnt[3];
-    calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt);    
+    double max_angle[3];
+    calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt, max_angle);    
     
     // Calculate function we're trying to 0
     // (point at p-pnt_xyz)
     double f[3];
-    MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
+     MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
 
     // calc squared distance from solution
     double dist_sq=f[0]*f[0]+f[1]*f[1]+f[2]*f[2];
 
-#if 0
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
-      printf("%d p=%f %f %f d=%f\n",i,p[0],p[1],p[2],dist_sq);
+      printf("%d AFTER DIST CALC    p=%f %f %f d=%E\n",i,p[0],p[1],p[2],dist_sq);
+      printf("%d AFTER DIST CALC  ang=%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
     }
 #endif
 
@@ -1902,9 +1923,9 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     }
 
     // If we're close enough then exit
-    if (best_dist_sq <1.0E-22) break;
+     if (best_dist_sq <1.0E-22) break;
 
-    // Construct Jacobian
+     // Construct Jacobian
     double jac[3*3];
     calc_jac_hex_sph3D_xyz(hex_xyz, p, jac);    
 
@@ -1919,7 +1940,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
         guess++;
       } else { //... if we've tried them all then continue with best so far.
         //// If the best_p leads to an un-invertable matrix, then we could be stuck in a loop, 
-        //// if that happens then just stop, so we don't have to go through all 1000 iterations
+         //// if that happens then just stop, so we don't have to go through all 1000 iterations
         if (stuck) break;
         stuck=true;
 
@@ -1935,21 +1956,146 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // We're not stuck
     stuck=false;
 
-    // Calculate change in p
-    double delta_p[3];
+     // Calculate change in p
+     double delta_p[3];
     MU_MAT_X_VEC3D(delta_p, inv_jac, f);
-  
+
+#define NEW_WAY 1
+#if NEW_WAY
+
+    // get length of change
+    double len_delta_p=MU_LEN_VEC3D(delta_p);
+
+    // If change is to big, make it smaller
+    if (len_delta_p > 1.0) {
+      delta_p[0] = delta_p[0]/len_delta_p;
+      delta_p[1] = delta_p[1]/len_delta_p;
+      delta_p[2] = delta_p[2]/len_delta_p;
+    }
+#endif
+
     // Move to next approximation of p
     MU_SUB_VEC3D(p,p,delta_p);    
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+       printf("%d AFTER P UPDATE new p=%f %f %f \n",i,p[0],p[1],p[2]);
+    }
+#endif
 
-    // TURNING OFF THE BELOW CAUSES AN ERROR IN THE GRID TO GRID TEST,
-    // REPLACE WITH ANGLE THING! 
-#if 1
+#if NEW_WAY
+    // Calculate half the max_angle to make things easier below
+    double half_max_angle[3];
+    half_max_angle[0]=0.5*max_angle[0];
+    half_max_angle[1]=0.5*max_angle[1];
+    half_max_angle[2]=0.5*max_angle[2];
 
+    // If p is wrapping around, then modify to be within range
+    if (p[0]*max_angle[0] > pi+half_max_angle[0]) {
+      // how many turns
+      double turns=trunc(p[0]*max_angle[0]/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf("       P[0] big p=%f angle=%f turns=%f -> ",p[0],p[0]*max_angle[0],turns);
+#endif
+       // subtract off all the complete turns
+      p[0]=p[0]-turns*two_pi/max_angle[0];
+
+       // If still too big one more turn to push to pos
+       if (p[0]*max_angle[0] > pi+half_max_angle[0]) {
+        p[0]=p[0]-two_pi/max_angle[0];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[0] big p=%f angle=%f \n",p[0],p[0]*max_angle[0]);
+#endif
+    } else if (p[0]*max_angle[0] < -pi+half_max_angle[0]) {
+      // how many complete turns
+      double turns=trunc(std::abs(p[0]*max_angle[0])/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf("       P[0] small p=%f angle=%f turns=%f -> ",p[0],p[0]*max_angle[0],turns);
+#endif
+      // Add on all the complete turns
+      p[0]=p[0]+turns*two_pi/max_angle[0];
+ 
+       // If still inside cell on neg. side add one more turn to push to pos
+      if (p[0]*max_angle[0] < -pi+half_max_angle[0]) {
+        p[0]=p[0]+two_pi/max_angle[0];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[0] small p=%f angle=%f \n",p[0],p[0]*max_angle[0]);
+#endif
+    }                             
+
+    if (p[1]*max_angle[1] > pi+half_max_angle[1]) {
+      // how many turns
+      double turns=trunc(p[1]*max_angle[1]/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+       if (mathutil_debug) printf("       P[1] big p=%f angle=%f turns=%f -> ",p[1],p[1]*max_angle[1],turns);
+#endif
+      // subtract off all the complete turns
+      p[1]=p[1]-turns*two_pi/max_angle[1];
+
+       // If still too big one more turn to push to pos
+      if (p[1]*max_angle[1] > pi+half_max_angle[1]) {
+        p[1]=p[1]-two_pi/max_angle[1];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[1] big p=%f angle=%f \n",p[1],p[1]*max_angle[1]);
+#endif
+    } else if (p[1]*max_angle[1] < -pi+half_max_angle[1]) {
+      // how many complete turns
+      double turns=trunc(std::abs(p[1]*max_angle[1])/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf("       P[1] small p=%f angle=%f turns=%f -> ",p[1],p[1]*max_angle[1],turns);
+#endif
+      // Add on all the complete turns
+      p[1]=p[1]+turns*two_pi/max_angle[1];
+  
+       // If still inside cell on neg. side add one more turn to push to pos
+      if (p[1]*max_angle[1] < -pi+half_max_angle[1]) {
+        p[1]=p[1]+two_pi/max_angle[1];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[1] small p=%f angle=%f \n",p[1],p[1]*max_angle[1]);
+#endif
+    } 
+
+    if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
+      // how many turns
+      double turns=trunc(p[2]*max_angle[2]/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf("       P[2] big p=%f angle=%f turns=%f -> ",p[2],p[2]*max_angle[2],turns);
+#endif
+      // subtract off all the complete turns
+      p[2]=p[2]-turns*two_pi/max_angle[2];
+
+       // If still too big one more turn to push to pos
+      if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
+        p[2]=p[2]-two_pi/max_angle[2];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[2] big p=%f angle=%f \n",p[2],p[2]*max_angle[2]);
+#endif
+    } else if (p[2]*max_angle[2] < -pi+half_max_angle[2]) {
+      // how many complete turns
+      double turns=trunc(std::abs(p[2]*max_angle[2])/two_pi);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf("       P[2] small p=%f angle=%f turns=%f -> ",p[2],p[2]*max_angle[2],turns);
+#endif
+       // Add on all the complete turns
+      p[2]=p[2]+turns*two_pi/max_angle[2];
+ 
+       // If still inside cell on neg. side add one more turn to push to pos
+      if (p[2]*max_angle[2] < -pi+half_max_angle[2]) {
+        p[2]=p[2]+two_pi/max_angle[2];
+      }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) printf(" AFTER P[2] small p=%f angle=%f \n",p[2],p[2]*max_angle[2]);
+#endif
+    }                             
+#else
     // If we're too far away then try something else
      // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
-    // TODO: calculate beter limits for p from hex and use here
+      // TODO: calculate beter limits for p from hex and use here
     if (guess < 9){
       if ((p[0]< -5.0) || (p[0]>4.0) ||
           (p[1]< -5.0) || (p[1]>4.0) ||
@@ -1964,15 +2110,15 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
           p[0]=best_p[0];
           p[1]=best_p[1];
           p[2]=best_p[2];
-          guess++;
+           guess++;
         }
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+        if (mathutil_debug) printf(" AFTER ADJ new p=%f %f %f \n",p[0],p[1],p[2]);
+#endif
       }
     }
 #endif
-
   }
-
-
 
   // Use the best p
   p[0]=best_p[0];
