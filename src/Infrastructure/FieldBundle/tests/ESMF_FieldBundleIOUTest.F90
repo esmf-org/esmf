@@ -209,6 +209,21 @@
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! FieldBundle Write to a single file Test with timeslice
+  call ESMF_FieldBundleWrite(bundleTst, file="single_ts.nc", timeslice=0,  &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Writing a FieldBundle to a single file with timeslice Test"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to multiple files Test
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to multiple files Test"

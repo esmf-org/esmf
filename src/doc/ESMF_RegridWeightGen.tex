@@ -253,6 +253,8 @@ ESMF_RegridWeightGen
 	[--dst_missingvalue var_name]
 	[--src_coordinates lon_name,lat_name]
 	[--dst_coordinates lon_name,var_name]
+        [--src_loc center|corner]
+        [--dst_loc center|corner]
         [--user_areas]
         [--check]
         [--no_log]
@@ -413,6 +415,22 @@ where
 			 in the file.  Without this argument, the offline regrid
 			 application will terminate with an error mesasge when
 			 multiple coordinate variables are found in the file.
+
+    --src_center      - an optional argument that specifies whether to use the 
+                        center coordinates or corner coordinates to do the regridding.
+                        Currently, this flag is only required for non-conservative
+                        regridding when the source grid is an unstructured grid in 
+                        ESMF or UGRID format.  For all other cases, only the center
+                        coordinates is supported and that is also the default value if
+                        this argument is not specified.
+
+    --dst_center      - an optional argument that specifies whether to use the 
+                        center coordinates or corner coordinates to do the regridding.
+                        Currently, this flag is only required for non-conservative
+                        regridding when the destination grid is an unstructured grid in 
+                        ESMF or UGRID format.  For all other cases, only the center
+                        coordinates is supported and that is also the default value if
+                        this argument is not specified.
 
     --user_areas      - an optional argument specifying that the conservation
                         is adjusted to hold for the user areas provided in

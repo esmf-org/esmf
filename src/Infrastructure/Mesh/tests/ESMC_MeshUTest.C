@@ -203,6 +203,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshGetElemCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
   mesh = ESMC_MeshCreateFromFile("data/FVCOM_grid2d.nc", ESMC_FILEFORMAT_UGRID,
                                  NULL, NULL, "fvcom_mesh", NULL, "", &rc);
   rc = ESMC_MeshGetOwnedElementCount(mesh, &num_elem_owned_out);
@@ -223,6 +224,10 @@ int main(void){
   }
   */
   free(elem_coords);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest

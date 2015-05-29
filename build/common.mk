@@ -509,8 +509,8 @@ endif
 ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENCHMARK_PREFIX))
 
 
-ifndef ESMF_BENCHMARK_VARIANCE
-ESMF_BENCHMARK_VARIANCE := 20%
+ifndef ESMF_BENCHMARK_TOLERANCE
+ESMF_BENCHMARK_TOLERANCE := 20%
 endif
 
 
@@ -596,6 +596,9 @@ ESMF_INTERNALINCDIRS  = -I$(ESMF_BUILD)/src/Infrastructure -I$(ESMF_BUILD)/src/S
 # documentation directory
 ESMF_DOCDIR	= $(ESMF_DIR)/doc
 
+# benchmark directory
+ESMF_UT_BM_DIR    = $(ESMF_BENCHMARK_PREFIX)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+
 # ???
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD)/build/doc
 
@@ -631,6 +634,7 @@ TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_UT_BM_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_bm_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_UT_BM_DIR) -f $(ESMF_BENCHMARK_TOLERANCE) -g $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
@@ -2691,6 +2695,12 @@ install_unit_tests_benchmark: reqdir_tests
 	-@echo " "
 	mkdir -p $(ESMF_BENCHMARK_PREFIX_ABSPATH)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 	cp -f $(ESMF_TESTDIR)/ESM*UTest.stdout $(ESMF_BENCHMARK_PREFIX_ABSPATH)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)/. 
+
+#
+# run unit test benchmarking
+# 
+run_unit_tests_benchmark:
+	@$(DO_UT_BM_RESULTS)
 
 #
 # report statistics on tests

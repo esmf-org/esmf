@@ -40,7 +40,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(17)
+  integer            :: commandbuf2(19)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -60,7 +60,7 @@ program ESMF_RegridWeightGenApp
   character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i
   type(ESMF_NormType_Flag) :: normType
-
+  logical            :: useSrcCorner, useDstCorner
   
   terminateProg = .false.
   
@@ -555,6 +555,91 @@ program ESMF_RegridWeightGenApp
       endif
     endif
 
+    useSrcCorner = .false.
+    useDstCorner = .false.
+    call ESMF_UtilGetArgIndex('--src_loc', argindex=ind, rc=rc)
+    ! the --src_loc is required if the file format is UGRID or ESMFMESH and
+    ! the regrid method is not conservative  (no default value to force user to specify
+    ! the location)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+      if (trim(argStr) .eq. 'corner') then
+	   useSrcCorner = .true.
+      elseif (trim(argStr) .eq. 'center') then
+           useSrcCorner = .false.
+      else
+          write(*,*)
+          print *, 'ERROR: Unknown --src_loc: must be either center or corner'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    else  ! the argument does not exist
+      if ((srcFileType == ESMF_FILEFORMAT_UGRID .or. srcFileType == ESMF_FILEFORMAT_ESMFMESH) &
+          .and. method /= 'conserve') then
+          write(*,*)
+          print *, 'ERROR: --src_loc is required for this source file type and regridding'
+	  print *, '       method.'
+          print *, '       Please specifiy either "center" or "corner"'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    ! deoes not support corner coordinates for SCRIP and GRIDSPEC files
+    if ((srcFileType == ESMF_FILEFORMAT_SCRIP .or. srcFileType == ESMF_FILEFORMAT_GRIDSPEC) &
+        .and. useSrcCorner ) then
+          write(*,*)
+          print *, 'ERROR: cannot use corner coordinates to do regridding for SCRIP or'
+	  print *, '       GRIDSPEC files.'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
+    call ESMF_UtilGetArgIndex('--dst_loc', argindex=ind, rc=rc)
+    ! the --dst_loc is required if the file format is UGRID or ESMFMESH and
+    ! the regrid method is not conservative  (no default value to force user to specify
+    ! the location)
+    if (ind /= -1) then
+      call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+      if (trim(argStr) .eq. 'corner') then
+	   useDstCorner = .true.
+      elseif (trim(argStr) .eq. 'center') then
+           useDstCorner = .false.
+      else
+          write(*,*)
+          print *, 'ERROR: Unknown --dst_loc: must be either center or corner'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    else  ! the argument does not exist
+      if ((dstFileType == ESMF_FILEFORMAT_UGRID .or. dstFileType == ESMF_FILEFORMAT_ESMFMESH) &
+          .and. method /= 'conserve') then
+          write(*,*)
+          print *, 'ERROR: --dst_loc is required for this source file type and regridding'
+	  print *, '       method.'
+          print *, '       Please specifiy either "center" or "corner"'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+    endif
+
+    ! deoes not support corner coordinates for SCRIP and GRIDSPEC files
+    if ((dstFileType == ESMF_FILEFORMAT_SCRIP .or. dstFileType == ESMF_FILEFORMAT_GRIDSPEC) &
+        .and. useDstCorner) then
+          write(*,*)
+          print *, 'ERROR: cannot use corner coordinates to do regridding for SCRIP or'
+	  print *, '       GRIDSPEC files.'
+          print *, "Use the --help argument to see an explanation of usage."
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
+    ! does not support corner coordinates for conservative regridding for any file types
+    if (method == 'conserve' .and. (useSrcCorner .or. useDstCorner)) then
+          write(*,*)
+          print *, 'ERROR: using corner coordinates for conservative regridding is not supported.'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
     checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
     if (ind /= -1) checkFlag = .true.   
@@ -584,6 +669,8 @@ program ESMF_RegridWeightGenApp
       if (checkFlag) commandbuf2(15) = 1 
       commandbuf2(16) = normType%normtype
       if (ignoreDegenerate) commandbuf2(17) = 1
+      if (useSrcCorner) commandbuf2(18) = 1
+      if (useDstCorner) commandbuf2(19) = 1
     endif 
 
 
@@ -707,7 +794,16 @@ program ESMF_RegridWeightGenApp
     else
       ignoreDegenerate=.false.
     endif
-
+    if (commandbuf2(18)==1) then
+      useSrcCorner=.true.
+    else
+      useSrcCorner=.false.
+    endif
+    if (commandbuf2(19)==1) then
+      useDstCorner=.true.
+    else
+      useDstCorner=.false.
+    endif
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
@@ -744,8 +840,8 @@ program ESMF_RegridWeightGenApp
   endif
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
-			    ignoreDegenerate = ignoreDegenerate, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
+			    ignoreDegenerate = ignoreDegenerate, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
@@ -754,7 +850,9 @@ program ESMF_RegridWeightGenApp
                             useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
                             srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
                             useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
-                            netcdf4FileFlag = netcdf4FileFlag, &
+                            netcdf4FileFlag = netcdf4FileFlag,  &
+			    useSrcCornerFlag = useSrcCorner, &
+			    useDstCornerFlag = useDstCorner, &
                             verboseFlag = .true., rc = rc)
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -817,6 +915,8 @@ contains
     print *, "                      [--src_coordinates lon_var_name,lat_var_name]"
     print *, "                      [--dst_coordinates lon_var_name,lat_var_name]"
     print *, "                      [--user_areas]"
+    print *, "                      [--src_loc center|corner]"
+    print *, "                      [--dst_loc center|corner]"
     print *, "                      [--no_log]"
     print *, "                      [--check]"
     print *, "                      [--help]"
@@ -890,6 +990,17 @@ contains
     print *, "             then the conservation will hold for the ESMF calculated (great circle)"
     print *, "             areas.  Whichever areas the conservation holds for are output to the"
     print *, "             weight file."
+    print *, "--src_loc   - an optional argument specifying which location is used to do the regridding"
+    print *, "            The location can be either 'center' or 'corner'.  Currently, this argument"
+    print *, "            is only required when the source grid file is an unstructured grid defined"
+    print *, "            in UGRID or ESMF format and the regridding method is non-conservative. For  "
+    print *, "            all other cases, the default location is 'center'."
+    print *, "--dst_loc   - an optional argument specifying which location is used to do the regridding"
+    print *, "            The location can be either 'center' or 'corner'.  Currently, this argument"
+    print *, "            is 'center'.  Currently, this argument will only be used when the"
+    print *, "            is only required when the destination grid file is an unstructured grid defined"
+    print *, "            in UGRID or ESMF format and the regridding method is non-conservative. For  "
+    print *, "            all other cases, the default location is 'center'."
     print *, "--no_log    - Turn off the ESMF logs."
     print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
     print *, "             is done by calling ESMF_Regrid() on an analytic source field using the weights"

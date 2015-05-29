@@ -123,7 +123,8 @@ namespace ESMCI {
     
     
     void getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc); 
-    
+
+    void getlocalelemcoords(double *elemCoord, int *_orig_sdim, int *rc); 
     
     void meshgetarea(int *num_elem, double *elem_areas, int *rc);
     

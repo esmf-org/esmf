@@ -743,8 +743,6 @@ exclusion_loop:  &
       type(ESMF_VM) :: globalVM
       integer :: numPETs, localrc, underScore, Period
 
-      ! get test start time
-      call cpu_time(start_time)
 
       ! create a file name for the log file
       ! find locations of the underscore and period
@@ -767,6 +765,8 @@ exclusion_loop:  &
           return
       endif
 
+      ! get test start time
+      call cpu_time(start_time)
 
       call ESMF_VMGet(globalVM, petCount=numPETs, localPet=PETnum, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
