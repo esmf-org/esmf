@@ -15,6 +15,8 @@
 !TODO: make this macros available through ESMF as parameter or find other way
 #define ESMF_INIT_CREATED 82949521
 
+#define PROFILE_off
+
 module NUOPC_Base
 
   !-----------------------------------------------------------------------------
@@ -56,13 +58,13 @@ module NUOPC_Base
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
-  public NUOPC_FieldWrite
+  public NUOPC_FieldWrite             ! mark deprecated, use NUOPC_Write
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_Nop
-  public NUOPC_StateAdvertiseField
-  public NUOPC_StateAdvertiseFields
+  public NUOPC_StateAdvertiseField    ! mark deprecated, use NUOPC_Advertise
+  public NUOPC_StateAdvertiseFields   ! mark deprecated, use NUOPC_Advertise
   public NUOPC_StateAttributeAdd
   public NUOPC_StateAttributeGet
   public NUOPC_StateAttributeSet
@@ -72,12 +74,17 @@ module NUOPC_Base
   public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsUpdated
   public NUOPC_StateNamespaceAdd
-  public NUOPC_StateRealizeField
+  public NUOPC_StateRealizeField      ! mark deprecated, use NUOPC_Realize
   public NUOPC_StateReconcile
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
-  public NUOPC_StateWrite
+  public NUOPC_StateWrite             ! mark deprecated, use NUOPC_Write
   public NUOPC_TimePrint
+  ! -- utility methods following the new v7 scheme
+  public NUOPC_Advertise
+  public NUOPC_FillData
+  public NUOPC_Realize
+  public NUOPC_UpdateTimestamp
   public NUOPC_Write
 
 !==============================================================================
@@ -86,6 +93,11 @@ module NUOPC_Base
 !
 !==============================================================================
 
+  interface NUOPC_Advertise
+    module procedure NUOPC_StateAdvertiseField
+    module procedure NUOPC_StateAdvertiseFields
+  end interface
+  
   interface NUOPC_IsCreated
     module procedure NUOPC_ClockIsCreated
     module procedure NUOPC_FieldBundleIsCreated
@@ -93,8 +105,22 @@ module NUOPC_Base
     module procedure NUOPC_GridIsCreated
   end interface
   
+  interface NUOPC_Realize
+    module procedure NUOPC_RealizeComplete
+    module procedure NUOPC_StateRealizeField
+  end interface
+  
+  interface NUOPC_UpdateTimestamp
+    module procedure NUOPC_UpdateFieldList
+    module procedure NUOPC_UpdateAcrossFieldLists
+    module procedure NUOPC_FieldBundleUpdateTime
+    module procedure NUOPC_StateUpdateTimestamp
+  end interface
+  
   interface NUOPC_Write
     module procedure NUOPC_WriteWeights
+    module procedure NUOPC_FieldWrite
+    module procedure NUOPC_StateWrite
   end interface
   
   !-----------------------------------------------------------------------------
@@ -711,10 +737,9 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field)              :: srcField, dstField
-    type(ESMF_Field), allocatable :: srcFieldList(:)
-    type(ESMF_Field), allocatable :: dstFieldList(:)
-    integer                       :: i, valueList(9), srcCount, dstCount
+    type(ESMF_Field), pointer     :: srcFieldList(:)
+    type(ESMF_Field), pointer     :: dstFieldList(:)
+    integer                       :: srcCount, dstCount
     
 !gjtdebug character(ESMF_MAXSTR)  :: tempString1, tempString2
 !gjtdebug character(5*ESMF_MAXSTR):: msgString
@@ -750,34 +775,13 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    do i=1, srcCount    
-      srcField = srcFieldList(i)
-      dstField = dstFieldList(i)
-      call ESMF_AttributeGet(srcField, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-        
-!gjtdebug call ESMF_FieldGet(srcField, name=tempString1)        
-!gjtdebug call ESMF_FieldGet(dstField, name=tempString2)        
-!gjtdebug write (msgString, *) "updating TimeStamp:", trim(tempString1), " -> ", trim(tempString2), srcField%ftypep%base
-!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-!gjtdebug write (msgString, *) valueList
-!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        
-      call ESMF_AttributeSet(dstField, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    enddo
+    
+    call NUOPC_UpdateTimestamp(srcFieldList, dstFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     deallocate(srcFieldList, dstFieldList)
 
   end subroutine
@@ -1856,7 +1860,7 @@ module NUOPC_Base
     stdItemNameList, stdConnectedList, namespaceList, stdFieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
-    character(ESMF_MAXSTR), pointer               :: stdAttrNameList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer, optional     :: stdItemNameList(:)
     character(ESMF_MAXSTR), pointer, optional     :: stdConnectedList(:)
     character(ESMF_MAXSTR), pointer, optional     :: namespaceList(:)
@@ -1864,12 +1868,12 @@ module NUOPC_Base
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Constructs lists containing the StandardName, Field name, and connected 
-!   status of the Fields in the {\tt state}. Returns this information in the
+!   status of the Fields in {\tt state}. Returns this information in the
 !   list arguments. Recursively parses through nested States.
 !
 !   All pointer arguments present must enter this method unassociated. On 
-!   return, the deallocation of an associated pointer becomes the user
-!   responsibility.
+!   return, the deallocation of an associated pointer becomes the responsibility
+!   of the caller.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1928,21 +1932,23 @@ module NUOPC_Base
         endif
       enddo
       
-      if (associated(stdAttrNameList)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="stdAttrNameList must enter unassociated", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      else
-        allocate(stdAttrNameList(fieldCount), stat=stat)
-        if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
-          line=__LINE__, &
-          file=FILENAME)) &
+      if (present(stdAttrNameList)) then
+        if (associated(stdAttrNameList)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stdAttrNameList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
           return  ! bail out
+        else
+          allocate(stdAttrNameList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
       endif
-
+      
       if (present(stdItemNameList)) then
         if (associated(stdItemNameList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -2027,12 +2033,14 @@ module NUOPC_Base
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          call NUOPC_FieldAttributeGet(field, name="StandardName", &
-            value=stdAttrNameList(fieldCount), rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+          if (present(stdAttrNameList)) then
+            call NUOPC_FieldAttributeGet(field, name="StandardName", &
+              value=stdAttrNameList(fieldCount), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          endif
           if (present(stdItemNameList)) then
             stdItemNameList(fieldCount)=itemNameList(item)
           endif
@@ -2073,7 +2081,9 @@ module NUOPC_Base
             return  ! bail out
           if (associated(l_stdAttrNameList)) then
             do i=1, size(l_stdAttrNameList)
-              stdAttrNameList(fieldCount) = l_stdAttrNameList(i)
+              if (present(stdAttrNameList)) then
+                stdAttrNameList(fieldCount) = l_stdAttrNameList(i)
+              endif
               if (present(stdItemNameList)) then
                 stdItemNameList(fieldCount) = l_stdItemNameList(i)
               endif
@@ -2621,28 +2631,50 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
     type(ESMF_Field),       pointer       :: stdFieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
     
+    real(ESMF_KIND_R8)        :: timeBase, time0, time
+    character(ESMF_MAXSTR)    :: msgString
+
 !gjtdebug character(ESMF_MAXSTR)  :: tempString1, msgString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    nullify(stdAttrNameList)
-    nullify(stdItemNameList)
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(timeBase)
+    time0=timeBase
+#endif
+
     nullify(stdFieldList)
 
-    call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "StateUpdateTimestamp Profile 01 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+    call NUOPC_StateBuildStdList(state, stdFieldList=stdFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "StateUpdateTimestamp Profile 02 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -2655,8 +2687,17 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
 
-    if (associated(stdItemNameList)) then
-      do i=1, size(stdItemNameList)
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "StateUpdateTimestamp Profile 03 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+    if (associated(stdFieldList)) then
+      do i=1, size(stdFieldList)
         field=stdFieldList(i)
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
@@ -2700,10 +2741,277 @@ module NUOPC_Base
       enddo
     endif
     
-    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-    if (associated(stdItemNameList)) deallocate(stdItemNameList)
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "StateUpdateTimestamp Profile 04 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     if (associated(stdFieldList)) deallocate(stdFieldList)
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "StateUpdateTimestamp Profile 05 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_UpdateTimestamp - Update the timestamp on all the Fields
+! !INTERFACE:
+  ! call using generic interface: NUOPC_UpdateTimestamp
+  subroutine NUOPC_UpdateFieldList(fieldList, rootPet, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), pointer               :: fieldList(:)
+    integer,          intent(in)            :: rootPet
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Updates the TimeStamp Attribute for all the Fields on all the PETs in the
+!   current VM to the TimeStamp Attribute held by the Field instance on the 
+!   {\tt rootPet}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)                      :: field
+    integer                 :: i, localPet, valueList(9)
+    type(ESMF_VM)           :: vm
+    
+    real(ESMF_KIND_R8)        :: timeBase, time0, time
+    character(ESMF_MAXSTR)    :: msgString
+    type(ESMF_AttPack)        :: attPack
+    
+!gjtdebug character(ESMF_MAXSTR)  :: tempString1, msgString
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(timeBase)
+    time0=timeBase
+#endif
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 01 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+    
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 02 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 03 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+    if (associated(fieldList)) then
+      do i=1, size(fieldList)
+        field=fieldList(i)
+#ifdef PROFILE_DETAILS_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 04a time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+        call ESMF_AttributeGet(field, &
+          name="TimeStamp", valueList=valueList, &
+          convention="NUOPC", purpose="General", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+
+#ifdef PROFILE_DETAILS_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 04b time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+    
+!print *, "NUOPC_UpdateFieldList BEFORE: ", valueList
+
+        call ESMF_VMBroadcast(vm, bcstData=valueList, count=size(valueList), &
+          rootPet=rootPet, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        
+#ifdef PROFILE_DETAILS_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 04c time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+    
+!print *, "NUOPC_UpdateFieldList AFTER:  ", valueList
+        
+        if (localPet /= rootPet) then
+        
+          call ESMF_AttributeSet(field, &
+            name="TimeStamp", valueList=valueList, &
+            convention="NUOPC", purpose="General", &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+!gjtdebug call ESMF_FieldGet(field, name=tempString1)        
+!gjtdebug write (msgString, *) "updating to broadcasted TimeStamp:", trim(tempString1), field%ftypep%base
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+!gjtdebug write (msgString, *) valueList
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+
+        endif
+        
+#ifdef PROFILE_DETAILS_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 04d time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+    
+      enddo
+    endif
+    
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 04 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "UpdateFieldList Profile 05 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_UpdateTimestamp - Propagate the time stamp from src to dst Fields
+! !INTERFACE:
+  ! call using generic interface: NUOPC_UpdateTimestamp
+  subroutine NUOPC_UpdateAcrossFieldLists(srcFieldList, dstFieldList, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), pointer               :: srcFieldList(:)
+    type(ESMF_Field), pointer               :: dstFieldList(:)
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Updates the time stamp on all Fields in the {\tt dstFieldList} to
+!   equal the time stamps of {\tt dstFieldList}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)              :: srcField, dstField
+    integer                       :: i, valueList(9), srcCount, dstCount
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (.not.associated(srcFieldList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="must be associated",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    srcCount=size(srcFieldList)
+    if (.not.associated(dstFieldList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="must be associated",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    dstCount=size(dstFieldList)
+    if (srcCount /= dstCount) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="count mismatch",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    do i=1, srcCount    
+      srcField = srcFieldList(i)
+      dstField = dstFieldList(i)
+      call ESMF_AttributeGet(srcField, &
+        name="TimeStamp", valueList=valueList, &
+        convention="NUOPC", purpose="General", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+!gjtdebug call ESMF_FieldGet(srcField, name=tempString1)        
+!gjtdebug call ESMF_FieldGet(dstField, name=tempString2)        
+!gjtdebug write (msgString, *) "updating TimeStamp:", trim(tempString1), " -> ", trim(tempString2), srcField%ftypep%base
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+!gjtdebug write (msgString, *) valueList
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        
+      call ESMF_AttributeSet(dstField, &
+        name="TimeStamp", valueList=valueList, &
+        convention="NUOPC", purpose="General", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    enddo
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -2843,8 +3151,196 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FillData - Fill data into a Field
+! !INTERFACE:
+  subroutine NUOPC_FillData(field, dataFillScheme, member, step, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout) :: field
+    character(len=*), intent(in)    :: dataFillScheme
+    integer, intent(in)             :: member
+    integer, intent(in)             :: step
+    integer, intent(out), optional  :: rc
+! !DESCRIPTION:
+!   Fill data into {\tt field} according to {\tt dataFillScheme}. Depending
+!   on the chosen fill scheme, the {\tt member} and {\tt step} arguments are
+!   used as to provide differing fill data patterns.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Grid)                 :: grid
+    real(ESMF_KIND_R8), pointer     :: dataPtr(:,:), lonPtr(:,:), latPtr(:,:)
+    integer                         :: i, j
+
+    if (trim(dataFillScheme)=="sincos") then
+      ! 2D sin*cos pattern
+      ! TODO: support Meshes
+      ! TODO: support nD, not just 2D
+      call ESMF_FieldGet(field, grid=grid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=lonPtr, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=latPtr, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_FieldGet(field, farrayPtr=dataPtr, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      do j=lbound(dataPtr,2),ubound(dataPtr,2)
+      do i=lbound(dataPtr,1),ubound(dataPtr,1)
+        dataPtr(i,j) = sin(real(member)*3.1416*(lonPtr(i,j)+real(step))/180.) &
+                     * cos(real(member)*3.1416*(latPtr(i,j)+real(step))/180.)
+      enddo
+      enddo
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unknown dataFillScheme requested.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Realize - Realize Fields inside a State on a single Grid with selection
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Realize
+  subroutine NUOPC_RealizeComplete(state, grid, selection, dataFillScheme, rc)
+! !ARGUMENTS:
+    type(ESMF_State)                :: state
+    type(ESMF_Grid)                 :: grid
+    character(len=*), optional      :: selection
+    character(len=*), optional      :: dataFillScheme    
+    integer, intent(out), optional  :: rc
+! !DESCRIPTION:
+!   Realize the Fields inside of {\tt state}. All of the Fields are created
+!   on the same {\tt grid} object. Fields are realized and/or removed from
+!   {\tt state} according to {\tt selection} argument. The options are:
+!   \begin{itemize}
+!   \item {\tt "realize_all"} (default)
+!   \item {\tt "realize_connected_remove_others"}
+!   \end{itemize}
+!
+!   Realized Fields are filled with data if {\tt dataFillScheme} is present.
+!   See {\tt NUOOC\_FillData()} for details about the available data fill 
+!   schemes.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(len=80), allocatable  :: fieldNameList(:)
+    integer                         :: i, itemCount, k
+    type(ESMF_Field)                :: field
+    character(len=80)               :: selectionOpt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    allocate(fieldNameList(itemCount))
+    call ESMF_StateGet(state, itemNameList=fieldNameList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    ! optional selection argument
+    if (present(selection)) then
+      selectionOpt=trim(selection)
+    else
+      selectionOpt="realize_all"
+    endif
+
+    k=1 ! initialize
+    do i=1, itemCount
+      if (trim(selectionOpt)=="realize_all") then
+        ! create a Field
+        field = ESMF_FieldCreate(grid, ESMF_TYPEKIND_R8, &
+          name=fieldNameList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! realize the connected Field using the just created Field
+        call NUOPC_StateRealizeField(state, field=field, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        if (present(dataFillScheme)) then
+          ! a data fill scheme was provided -> use it to initialize
+          call NUOPC_FillData(field, dataFillScheme, member=k, step=0, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          k=k+1 ! increment the member counter
+        endif
+      else if (trim(selectionOpt)=="realize_connected_remove_others") then
+        if (NUOPC_StateIsFieldConnected(state, fieldName=fieldNameList(i))) then
+          ! create a Field
+          field = ESMF_FieldCreate(grid, ESMF_TYPEKIND_R8, &
+            name=fieldNameList(i), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          ! realize the connected Field using the just created Field
+          call NUOPC_StateRealizeField(state, field=field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+          if (present(dataFillScheme)) then
+            ! a data fill scheme was provided -> use it to initialize
+            call NUOPC_FillData(field, dataFillScheme, member=k, step=0, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            k=k+1 ! increment the member counter
+          endif
+        else
+          ! remove a not connected Field from State
+          call ESMF_StateRemove(state, (/fieldNameList(i)/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+        endif
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unknown selection requested.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_Write - Write distributed weights into file
 ! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
   subroutine NUOPC_WriteWeights(factorList, fileName, rc)
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), pointer               :: factorList(:)

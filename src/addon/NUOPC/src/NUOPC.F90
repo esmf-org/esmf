@@ -74,6 +74,11 @@ module NUOPC
   public NUOPC_StateUpdateTimestamp
   public NUOPC_StateWrite
   public NUOPC_TimePrint
+  ! -- utility methods following the new v7 scheme
+  public NUOPC_Advertise
+  public NUOPC_FillData
+  public NUOPC_Realize
+  public NUOPC_UpdateTimestamp
   public NUOPC_Write
   
   ! defined in NUOPC_RunSequenceDef
