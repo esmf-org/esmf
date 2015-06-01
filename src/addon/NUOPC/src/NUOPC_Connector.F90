@@ -14,6 +14,8 @@
 
 #define RECONCILE_MEMORY_DEBUG_off
 
+#define PROFILE_off
+
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -45,6 +47,10 @@ module NUOPC_Connector
   type type_InternalStateStruct
     type(ESMF_FieldBundle)              :: srcFields
     type(ESMF_FieldBundle)              :: dstFields
+    type(ESMF_Field), pointer           :: srcFieldList(:)
+    type(ESMF_Field), pointer           :: dstFieldList(:)
+    integer                             :: srcFieldCount
+    integer                             :: dstFieldCount    
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_TermOrder_Flag), pointer  :: termOrders(:)
@@ -1638,7 +1644,28 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-
+    
+    ! populate remaining internal state members
+    call ESMF_FieldBundleGet(is%wrap%srcFields, &
+      fieldCount=is%wrap%srcFieldCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(is%wrap%srcFieldList(is%wrap%srcFieldCount))
+    call ESMF_FieldBundleGet(is%wrap%srcFields, &
+      fieldList=is%wrap%srcFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(is%wrap%dstFields, &
+      fieldCount=is%wrap%dstFieldCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    allocate(is%wrap%dstFieldList(is%wrap%dstFieldCount))
+    call ESMF_FieldBundleGet(is%wrap%dstFields, &
+      fieldList=is%wrap%dstFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! clean-up
     if (associated(cplList)) deallocate(cplList)
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
@@ -1723,13 +1750,30 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: name
 
+    real(ESMF_KIND_R8)        :: timeBase, time0, time
+
     rc = ESMF_SUCCESS
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(timeBase)
+    time0=timeBase
+#endif
 
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 01 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     ! determine verbosity
     verbose = .false. ! initialize
     call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
@@ -1737,10 +1781,28 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (trim(valueString)=="high") &
       verbose = .true.
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 02 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     ! get the compName and currentPhase
     call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 03 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
 
     ! query Component for its internal State
     nullify(is%wrap)
@@ -1748,6 +1810,15 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 04 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
@@ -1760,6 +1831,15 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         return  ! bail out
     endif
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 05 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     ! SPECIALIZE by calling into attached method to execute routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -1768,6 +1848,15 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 06 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -1778,6 +1867,15 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 07 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     ! Next update the TimeStamp metadata on the export Fields....
 
     ! get the rootPet attribute out of the importState
@@ -1785,10 +1883,28 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 08 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     call ESMF_CplCompGet(cplcomp, vm=vm, petCount=petCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 09 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     do rootPet=0, petCount-1
       call ESMF_VMGet(vm, rootPet, vas=vas, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1796,18 +1912,45 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (vas == rootVas) exit
     enddo
     
-    !TODO: bail out if rootPet not found
+#ifdef PROFILE_on
+     ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 10 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
+   !TODO: bail out if rootPet not found
 
     ! hand coded, specific AttributeUpdate
-    call NUOPC_StateUpdateTimestamp(importState, rootPet=rootPet, rc=rc)
+    call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, rootPet=rootPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 11 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
     ! update the timestamp on all of the dst fields to that on the src side
-    call NUOPC_FieldBundleUpdateTime(srcFields=is%wrap%srcFields, &
-      dstFields=is%wrap%dstFields, rc=rc)
+    call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, is%wrap%dstFieldList, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 12 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
 
     ! conditionally output diagnostic to Log file
     if (verbose) then
@@ -1818,6 +1961,15 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         return  ! bail out
     endif
     
+#ifdef PROFILE_on
+    ! PROFILE
+    call ESMF_VMWtime(time)
+    write (msgString, *) "ConnectorProfile 13 time=   ", &
+      time-time0, time-timeBase
+      time0=time
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+#endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1876,6 +2028,16 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       return  ! bail out
 
     ! deallocate and destroy remaining internal state members
+    deallocate(is%wrap%srcFieldList, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Deallocation of internal state srcFieldList member failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    deallocate(is%wrap%dstFieldList, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Deallocation of internal state dstFieldList member failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

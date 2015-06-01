@@ -408,25 +408,31 @@ module NUOPC_RunSequenceDef
 !BOP
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
-  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, rc)
+  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, loopFlag, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_RunSequenceIterate
 ! !ARGUMENTS:
-    type(NUOPC_RunSequence), pointer     :: runSeq(:)
-    integer,                 intent(in)  :: runSeqIndex
-    type(NUOPC_RunElement),  pointer     :: runElement
-    integer, optional,       intent(out) :: rc
+    type(NUOPC_RunSequence), pointer      :: runSeq(:)
+    integer,                 intent(in)   :: runSeqIndex
+    type(NUOPC_RunElement),  pointer      :: runElement
+    logical, optional,       intent(out)  :: loopFlag
+    integer, optional,       intent(out)  :: rc
 ! !DESCRIPTION:
 !   Iterate through the RunSequence that is in position {\tt runSeqIndex} in the
 !   {\tt runSeq} vector. If {\tt runElement} comes in {\em unassociated}, the
 !   iteration starts from the beginning. Otherwise this call takes one forward
 !   step relative to the incoming {\tt runElement}, returning the next
-!   RunElement in {\tt runElement}. In either case, 
-!   the logical function return value is {\tt .true.} if the end of iteration
-!   has not been reached by the forward step, and {\tt .false.} if the end of 
-!   iteration has been
-!   reached. The returned {\tt runElement} is only valid for a function return
-!   value of {\tt .true.}.
+!   RunElement in {\tt runElement}. 
+!
+!   In either case the logical function return value is {\tt .true.} if the end
+!   of iteration has not been reached by the forward step, and {\tt .false.} if
+!   the end of iteration has been reached. 
+!
+!   The returned {\tt runElement} is only valid for a function return value of 
+!   {\tt .true.}.
+!
+!   The {\tt loopFlag} argument is set to {\tt .true.} if the forward step 
+!   looped back to the beginning of the RunSequence, {\tt .false.} otherwise.
 !EOP
   !-----------------------------------------------------------------------------
     type(ESMF_Clock)  :: clock
@@ -492,7 +498,8 @@ module NUOPC_RunSequenceDef
     endif
     
     ! runElement may be a control element (either LINK or ENDDO)
-    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, rc=rc)
+    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, &
+      loopFlag=loopFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
@@ -622,11 +629,13 @@ module NUOPC_RunSequenceDef
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceCtrl - Recursive iterator through a RunSequence
 ! !INTERFACE:
-  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, rc) &
+  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, &
+    loopFlag, rc) &
 ! !ARGUMENTS:
     result(NUOPC_RunSequenceCtrlResult)
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
     type(NUOPC_RunElement),  pointer     :: runElement
+    logical, optional,       intent(out) :: loopFlag
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
 !EOP
@@ -636,10 +645,11 @@ module NUOPC_RunSequenceDef
     integer           :: i
     
     NUOPC_RunSequenceCtrlResult = .false. ! initialize to safe return value
+    if (present(loopFlag)) loopFlag=.false.
 
     ! sanity checks
     if (.not.associated(runSeq)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="runSeq must be associated",&
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="runSeq must be associated", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
@@ -675,6 +685,7 @@ module NUOPC_RunSequenceDef
     
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
+      if (present(loopFlag)) loopFlag=.true.
 !print *, "found ENDDO element"
       ! advance the clock and check for stop time
       call ESMF_ClockAdvance(clock, rc=rc)
