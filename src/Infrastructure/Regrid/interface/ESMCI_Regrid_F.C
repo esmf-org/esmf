@@ -49,10 +49,12 @@ using namespace ESMCI;
 extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                                             MeshCap **meshsrcpp, 
 					    ESMCI::Array **arraysrcpp,
-					    ESMCI::PointList **plsrcpp,
+ 					    ESMCI::PointList **plsrcpp,
+                                            int *src_pl_used, 
                                             MeshCap **meshdstpp, 
 					    ESMCI::Array **arraydstpp,
 					    ESMCI::PointList **pldstpp, 
+                                            int *dst_pl_used,
                                             int *regridMethod, 
                                             int *map_type,
                                             int *norm_type,
@@ -66,6 +68,19 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                                             int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
+
+  // Nullify Mesh or PointList based on usage
+  if (*src_pl_used==1) {
+    *meshsrcpp=NULL;
+  } else {
+    *plsrcpp=NULL;
+  }
+
+  if (*dst_pl_used==1) {
+    *meshdstpp=NULL;
+  } else {
+    *pldstpp=NULL;
+  }
 
 MeshCap::regrid_create(vmpp,
 		       meshsrcpp, arraysrcpp, plsrcpp,

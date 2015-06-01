@@ -1825,7 +1825,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateReg(name, &
-                 regDecomp, decompFlag, minIndex, maxIndex, indexflag, coordSys, rc )
+                 regDecomp, decompFlag, coordSys, minIndex, maxIndex, indexflag, rc )
 
 
 !

@@ -49,7 +49,7 @@
       use ESMF_MeshMod
       use ESMF_PointListMod
 
-      implicit none
+       implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id$'
+          '$Id$'
 
 !==============================================================================
 !
@@ -151,7 +151,7 @@ end function my_xor
                  regridmethod, &
                  lineType, &
                  normType, &
-                 polemethod, regridPoleNPnts, &
+                  polemethod, regridPoleNPnts, &
                  regridScheme, &
                  unmappedaction, &
                  ignoreDegenerate, &
@@ -188,10 +188,10 @@ end function my_xor
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
-!     The arguments are:
+ !     The arguments are:
 !     \begin{description}
-!     \item[srcGrid]
-!          The source grid.
+ !     \item[srcGrid]
+ !          The source grid.
 !     \item[srcArray]
 !          The source grid array.
 !     \item[dstGrid]
@@ -202,7 +202,7 @@ end function my_xor
 !          The interpolation method to use.
 !     \item[regridScheme]
 !          Whether to use 3d or native coordinates
-!     \item [{[regridConserve]}]
+ !     \item [{[regridConserve]}]
 !           Specifies whether to implement the mass conservation 
 !           correction or not.  Options are 
 !           {\tt ESMF\_REGRID_CONSERVE\_OFF} or 
@@ -234,12 +234,12 @@ end function my_xor
        type(ESMF_UnmappedAction_Flag) :: localunmappedaction
        logical :: isMemFreed
        integer :: localIgnoreDegenerate
-
+       integer :: src_pl_used_int, dst_pl_used_int
 
        ! Logic to determine if valid optional args are passed.  
 
-       ! First thing to check is that indices <=> weights
-       if (my_xor(present(indices), present(weights))) then
+        ! First thing to check is that indices <=> weights
+        if (my_xor(present(indices), present(weights))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -253,7 +253,7 @@ end function my_xor
        endif
 
        ! **************************************************
-       ! Tests passed, so proceed
+        ! Tests passed, so proceed
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -265,7 +265,7 @@ end function my_xor
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        has_rh = 0
-       has_iw = 0
+        has_iw = 0
        has_udl=0
        if (present(routehandle)) has_rh = 1
        if (present(indices)) has_iw = 1
@@ -286,10 +286,10 @@ end function my_xor
        if (.not. src_pl_used) then
          ! Make sure the srcMesh has its internal bits in place
          call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
-         if (isMemFreed)  then
+          if (isMemFreed)  then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                    msg="- source Mesh has had its coordinate and connectivity info freed", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
@@ -304,18 +304,28 @@ end function my_xor
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
-         if (isMemFreed)  then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+          if (isMemFreed)  then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                    msg="- dest Mesh has had its coordinate and connectivity info freed", & 
                    ESMF_CONTEXT, rcToReturn=rc) 
              return 
          endif
        endif
 
-       ! Call through to the C++ object that does the work
+       ! Make used ints
+       src_pl_used_int=0
+       if (src_pl_used) then
+          src_pl_used_int=1
+       endif
 
-       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList%this, &
-                   dstMesh%this, dstArray, dstPointList%this, &
+       dst_pl_used_int=0
+       if (dst_pl_used) then
+          dst_pl_used_int=1
+       endif
+
+        ! Call through to the C++ object that does the work
+        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
+                   dstMesh%this, dstArray, dstPointList, dst_pl_used_int, &
                    regridmethod,  &
                    lineType, &
                    normType, &
@@ -355,7 +365,7 @@ end function my_xor
       endif
 
       rc = ESMF_SUCCESS
-      end subroutine ESMF_RegridStore
+       end subroutine ESMF_RegridStore
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
