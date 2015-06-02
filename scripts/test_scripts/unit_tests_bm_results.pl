@@ -111,10 +111,11 @@ sub run_benchmark {
 		return($ET_ave, $BM_ave, $ans, 0);
 	}
 	$ans=(($ET_ave - $BM_ave)/$ET_ave);
+	$ans = sprintf("%0.4f", $ans);
 	if ( $ET_ave <= $BM_ave ) {
 		return($ET_ave, $BM_ave, $ans, 0);
 	} else {
-		if ((($ET_ave - $BM_ave)/$ET_ave) <= $tolerance ) {
+		if ($ans <= $tolerance ) {
 			return($ET_ave, $BM_ave, $ans, 0);
 		} else {
 			return($ET_ave, $BM_ave, $ans, 1);
@@ -285,11 +286,12 @@ use File::Find
 					# The BM test passed
 					$pass_count = $pass_count + 1;
 					push(@pass_list, $file);
+					$file =~ s/\.\/// ;
                                         $PC=$ans*100;
                                         chomp($file);
                                         system ("echo 'PASS: $file' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Test elapsed time = $test_ET' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Benchmark elapsed time = $bm_ET' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Test elapsed time: $test_ET sec.' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Benchmark elapsed time: $bm_ET sec.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '' >> $TEST_DIR/bm_pass_info ");
 				} elsif ( $rc == 1 ) {
@@ -300,8 +302,8 @@ use File::Find
 					$PC=$ans*100;
 					chomp($file);
 					system ("echo 'FAIL: $file' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Test elapsed time = $test_ET' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Benchmark elapsed time = $bm_ET' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Test elapsed time: $test_ET sec.' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Benchmark elapsed time: $bm_ET sec.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '' >> $TEST_DIR/bm_fail_info ");
 				} elsif ( $rc == 2 ) {
@@ -388,6 +390,9 @@ use File::Find
 	else {
 		print "$fail_count failed and $match_count could not be matched.\n\n";
 	}
+	print "Benchmark install date: ";
+	system("cat $BM_DIR/bm_timestamp");
+	print "\n\n";
 
 
 

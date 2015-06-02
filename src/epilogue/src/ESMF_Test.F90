@@ -253,7 +253,7 @@
 
       ! Calculate & print out test elasped time
       call cpu_time(end_time)
-      elapsed_time = end_time-start_time
+      elapsed_time = (end_time-start_time)
       write(msg, *) "PET", PETnum, " Test Elapsed Time ", elapsed_time
       print *, trim(msg)
 
