@@ -167,8 +167,7 @@ int TestEnd(
 
   // Calculate & print test elapsed time.
   gettimeofday(&end_time, NULL);
-  elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000.0;      // sec to ms
-  elapsed_time += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
+  elapsed_time = (end_time.tv_sec - start_time.tv_sec) ;
   sprintf(msgbuf, " PET %d Test Elapsed Time  %f \n", PETnum, elapsed_time);
   fprintf(stdout, "%s", msgbuf);
  
