@@ -57,6 +57,8 @@
       ! initialize 
       rc=ESMF_SUCCESS
 
+
+
       ! do test
       call test_csrvregrid(itrp, csrv, rc)
 
@@ -224,6 +226,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -3784,7 +3787,8 @@ contains
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -5706,7 +5710,8 @@ contains
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -6371,7 +6376,8 @@ contains
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -8270,7 +8276,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -9391,7 +9398,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 
@@ -10382,7 +10390,8 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
-    rc=ESMF_SUCCESS
+    print*,'ERROR:  test must be run using exactly 1 or 4 PETS - detected ',petCount
+    rc=ESMF_FAILURE
     return
   endif
 

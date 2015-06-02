@@ -37,7 +37,7 @@
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Regrid_Helper.h"
-
+#include "ESMCI_PointList.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -50,19 +50,19 @@ using namespace ESMCI;
 
  
 void ESMCI_regrid_create(ESMCI::VM **vmpp,
-                          Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                          Mesh **meshdstpp, ESMCI::Array **arraydstpp,
-                          int *regridMethod, 
-                          int *map_type,
-                          int *norm_type,
-                          int *regridPoleType, int *regridPoleNPnts,  
-                          int *regridScheme, 
-                          int *unmappedaction, int *_ignoreDegenerate,
-                          int *srcTermProcessing, int *pipelineDepth, 
-                          ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                          int *nentries, ESMCI::TempWeights **tweights,
-                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                          int*rc);
+			 Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+			 Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+			 int *regridMethod, 
+			 int *map_type,
+			 int *norm_type,
+			 int *regridPoleType, int *regridPoleNPnts,  
+			 int *regridScheme, 
+			 int *unmappedaction, int *_ignoreDegenerate,
+			 int *srcTermProcessing, int *pipelineDepth, 
+			 ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+			 int *nentries, ESMCI::TempWeights **tweights,
+			 int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+			 int*rc);
 
 void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

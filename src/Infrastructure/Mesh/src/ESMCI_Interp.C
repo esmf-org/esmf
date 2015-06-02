@@ -24,7 +24,7 @@
 #include <Mesh/include/ESMCI_ConserveInterp.h>
 #include <Mesh/include/ESMCI_Sintdnode.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
-
+#include "PointList/include/ESMCI_PointList.h"
 
 #include <iostream>
 #include <fstream>
@@ -259,7 +259,8 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 /*
  * Patch interpolation, where destination and source fields are nodal.
  */
-void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, const std::vector<Interp::FieldPair> &fpairs, SearchResult &sres, Mesh &srcmesh) {
+
+void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, SearchResult &sres, Mesh *srcmesh, int imethod) {
    Trace __trace("patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>* const* _sfields, _field* const *_dfields, int *iflag, SearchResult &sres)");
 
 
@@ -269,7 +270,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
   if (_nfields == 0) return;
 
   // Get mask field pointer
-  MEField<> *src_mask_ptr = srcmesh.GetField("mask");
+  MEField<> *src_mask_ptr = srcmesh->GetField("mask");
 
 
   std::vector<MEField<>* > fields;
@@ -280,14 +281,16 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
   for (UInt i = 0; i < _nfields; i++) {
   
     // Only process interp_patch  
-    if (fpairs[i].idata != Interp::INTERP_PATCH) continue;
+    if (imethod != Interp::INTERP_PATCH) continue;
    
-    pdeg_set.insert(fpairs[i].patch_order);
+    int patch_order=2;
+    pdeg_set.insert(patch_order);
 
     //ThrowRequire(_sfields[i]->is_nodal());
   
     fields.push_back(_sfields[i]); dfields.push_back(_dfields[i]);
-    orders.push_back(fpairs[i].patch_order);
+
+    orders.push_back(patch_order);
     
     ThrowRequire(_sfields[i]->dim() == _dfields[i]->dim());
 
@@ -401,64 +404,7 @@ void patch_serial_transfer(MEField<> &src_coord_field, UInt _nfields, MEField<>*
   } // for searchresult
   
 }
-  
-void point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres) {
-  Trace __trace("point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
-  
 
-  if (num_fields == 0) return;
-
-  SearchResult::iterator sb = sres.begin(), se = sres.end();
-
-  for (; sb != se; sb++) {
-
-    Search_result &sres = **sb;
-
-    // Trick:  Gather the data from the source field so we may call interpolate point
-    const MeshObj &elem = *(*sb)->elem;
-
-    UInt pdim = GetMeshObjTopo(elem)->parametric_dim;
-
-    // Inner loop through fields
-    for (UInt i = 0; i < num_fields; i++) {
-
-      if (iflag[i] != Interp::INTERP_STD) continue;
-
-      MEField<> &sfield = *sfields[i];
-      _field &dfield = *dfields[i];
-
-      MEValues<> mev(sfield.GetMEFamily());
-
-      if (dfield.dim() != sfield.dim())
-        Throw() << "dest and source fields have incompatible dimensions";
-
-     // Load Parametric coords
-     UInt npts = sres.nodes.size(); // number of points to interpolate
-     std::vector<double> pcoord(pdim*npts);
-     for (UInt np = 0; np < npts; np++) {
-       for (UInt pd = 0; pd < pdim; pd++)
-         pcoord[np*pdim+pd] = sres.nodes[np].pcoord[pd];
-     }
-
-     arbq pintg(pdim, npts, &pcoord[0]);
-     mev.Setup(elem, MEV::update_sf, &pintg);
-     mev.ReInit(elem);
-
-     std::vector<double> ires(npts*dfield.dim());
-     mev.GetFunctionValues(sfield, &ires[0]);
-
-     // Copy data to nodes
-     for (UInt n = 0; n < npts; n++) {
-       const MeshObj &node = *sres.nodes[n].node;
-       for (UInt d = 0; d < dfield.dim(); d++)
-         ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d];
-     }
-
-    } // for fields
-
-  } // for searchresult
-}
- 
 
 struct dof_add_col {
 
@@ -491,19 +437,19 @@ double *sens;
 UInt fdim;
 
 };
- 
+
+
 /** Matrix patch transfer **/
-void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _field &_dfield, SearchResult &sres,  Mesh &srcmesh, IWeights &iw) {
-  Trace __trace("mat_patch_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw)");
-    
+void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, SearchResult &sres,  Mesh *srcmesh, IWeights &iw, PointList *dstpointlist) {
+  Trace __trace("mat_patch_serial_transfer(MEField<> &sfield, SearchResult &sres, IWeights &iw, PointList *dstpointlist)");
+
   const int pdeg = 2; // TODO: deduce this.  For instance, deg source + 1 is reasonable
 
   // Get mask field pointer
-  MEField<> *src_mask_ptr = srcmesh.GetField("mask");
+  MEField<> *src_mask_ptr = srcmesh->GetField("mask");
     
   MEField<>* field = &_sfield;
   MEField<> &sfield = _sfield;
-  _field* dfield = &_dfield;
   UInt nrhs = field->dim();
   
   
@@ -513,6 +459,8 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
   
   // Create the  recovery field
   SearchResult::iterator sb = sres.begin(), se = sres.end();
+
+  int dstpointlist_dim=dstpointlist->get_coord_dim();
 
   for (; sb != se; sb++) {
     
@@ -570,61 +518,52 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
     // Now copy data into fields and save sensitivies
     for (UInt n = 0; n < npts; n++) {
     
-      const MeshObj &snode = *sres.nodes[n].node;
-    
       // DEBUG printf(">>>> snode=%d# elem=%d \n",snode.get_id(),elem.get_id());
 
-
-        if (dfield->OnObj(snode)) {
-          
-     //     UInt fdim = dfield->dim();
-          double *data = dfield->data(snode);
+      //     UInt fdim = dfield->dim();
     
-          //for (UInt d = 0; d < fdim; d++) {
-          for (UInt d = 0; d < 1; d++) { // weights are redundant per entry
+      //for (UInt d = 0; d < fdim; d++) {
+      for (UInt d = 0; d < 1; d++) { // weights are redundant per entry
             
-            // DON'T ACTUALLY DO REGRID BECAUSE WE DON'T USE IT
-            // data[d] = result[n*nrhs+d].val();
+	// DON'T ACTUALLY DO REGRID BECAUSE WE DON'T USE IT
+	// data[d] = result[n*nrhs+d].val();
         
-            IWeights::Entry row(snode.get_id(), d, 0.0, elem.get_id());
+	IWeights::Entry row(sres.nodes[n].dst_gid, d, 0.0, elem.get_id());
         
-            std::vector<IWeights::Entry> col;
-            col.reserve(nlocal_dof);
-#ifdef CHECK_SENS       
-Par::Out() << "sens=" << result[n*nrhs+d] << std::endl;
+	std::vector<IWeights::Entry> col;
+	col.reserve(nlocal_dof);
 
-double sval = 0;
+#ifdef CHECK_SENS       
+	Par::Out() << "sens=" << result[n*nrhs+d] << std::endl;
+	double sval = 0;
 #endif
 
-            double *sens = &(result[n*nrhs+d].fastAccessDx(0));
+        double *sens = &(result[n*nrhs+d].fastAccessDx(0));
             
-            dof_add_col addc(col, dfield->dim(), sens);
+	dof_add_col addc(col, dstpointlist_dim, sens);
             
-            sF.dof_iterator(addc);
+	sF.dof_iterator(addc);
             
-            iw.InsertRow(row, col);
+	iw.InsertRow(row, col);
             
 #ifdef CHECK_SENS
-            int dof_div_dim = nlocal_dof/dfield->dim();
-            for (UInt s = 0; s < dof_div_dim; s++) {
-          
-  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
-            } // for s
+	int dof_div_dim = nlocal_dof/dstpointlist_dim;
+	for (UInt s = 0; s < dof_div_dim; s++) {
+	  sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
+	} // for s
         
-double diff = sval - result[n*nrhs+d].val();
-Par::Out() << "**diff=" << diff << std::endl;
-if (std::abs(diff) > 1e-4) {
-for (UInt s = 0; s < nlocal_dof/dfield->dim(); s++) {
-  Par::Out() << fads[s*nrhs+d].val() << " ";
-}
-Par::Out() << std::endl;
-}
-  
+	double diff = sval - result[n*nrhs+d].val();
+	Par::Out() << "**diff=" << diff << std::endl;
+	if (std::abs(diff) > 1e-4) {
+
+	  for (UInt s = 0; s < nlocal_dof/dstpointlist_dim; s++) {
+	    Par::Out() << fads[s*nrhs+d].val() << " ";
+	  }
+	  Par::Out() << std::endl;
+	}
 #endif
 
-        } // for d
-
-      } // if data on node
+      } // for d
 
     } // for np
 
@@ -1085,7 +1024,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 }
 
 
-
 void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, 
                                         IWeights &iw, IWeights &src_frac, IWeights &dst_frac, 
                                         struct Zoltan_Struct * zz) {
@@ -1334,15 +1272,11 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, Searc
 
 
 
-void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
 
-  // both meshes have to have the same dimensions
-  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
-    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
-  }
 
-  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
+  if (srcpointlist->get_coord_dim() != dstpointlist->get_coord_dim()) {
     Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
   }
 
@@ -1370,11 +1304,9 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
   } // for searchresult
 }
 
- 
- /* Matrix version of point serial transfer */
- void mat_point_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw) {
-  Trace __trace("mat_point_serial_transfer(UInt num_fields, MEField<> *const *sfields, _field *const *dfields, int *iflag, SearchResult &sres)");
-  
+
+ void mat_point_serial_transfer(MEField<> &sfield, SearchResult &sres, IWeights &iw, PointList *dstpointlist) {
+  Trace __trace("mat_point_serial_transfer(UInt num_fields, MEField<> *const *sfields, int *iflag, SearchResult &sres)");
 
   SearchResult::iterator sb = sres.begin(), se = sres.end();
 
@@ -1382,8 +1314,9 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
   
   MEField<SField> sF(sfield);
 
-  for (; sb != se; sb++) {
+  int dstpointlist_dim=dstpointlist->get_coord_dim();
 
+  for (; sb != se; sb++) {
 
     Search_result &sres = **sb;
  
@@ -1407,12 +1340,11 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
     for (UInt i = 0; i < nlocal_dof; i++) {
       fads[i].diff(i, nlocal_dof);
     }
-    
 
     // Inner loop through fields
     MEValues<METraits<fad_type,double>,MEField<SField> > mev(sfield.GetMEFamily());
 
-    if (dfield.dim() != sfield.dim())
+    if (dstpointlist_dim != sfield.dim())
       Throw() << "dest and source fields have incompatible dimensions";
 
     // Load Parametric coords
@@ -1427,21 +1359,18 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
     mev.Setup(elem, MEV::update_sf, &pintg);
     mev.ReInit(elem);
 
-    std::vector<fad_type> ires(npts*dfield.dim());
+    std::vector<fad_type> ires(npts*dstpointlist_dim);
     mev.GetFunctionValues(sF, &ires[0]);
  
     // Copy data to nodes
     for (UInt n = 0; n < npts; n++) {
-      
-      const MeshObj &node = *sres.nodes[n].node;
-      
       
       for (UInt d = 0; d < 1; d++) {
         
         // DON'T ACTUALLY DO REGRID BECAUSE WE DON'T USE IT
         // ((double*)dfield.data(node))[d] = ires[n*dfield.dim()+d].val();
         
-        IWeights::Entry row(node.get_id(), d, 0.0, elem.get_id());
+        IWeights::Entry row(sres.nodes[n].dst_gid, d, 0.0, elem.get_id());
         
         std::vector<IWeights::Entry> col;
         col.reserve(nlocal_dof);
@@ -1453,14 +1382,14 @@ double sval = 0;
 
         double *sens = &(ires[n*nrhs+d].fastAccessDx(0));
 
-        dof_add_col addc(col, dfield.dim(), sens);
+        dof_add_col addc(col, dstpointlist_dim, sens);
         
         sF.dof_iterator(addc);
         
         iw.InsertRow(row, col);       
         
 #ifdef CHECK_SENS
-        for (UInt s = 0; s < nlocal_dof/dfield.dim(); s++) {
+        for (UInt s = 0; s < nlocal_dof/dstpointlist_dim; s++) {
           
   sval += fads[s*nrhs+d].val()*sens[s*nrhs+d];
         } // for s
@@ -1472,49 +1401,41 @@ std::cout << "**diff=" << sval - ires[n*nrhs+d].val() << std::endl;
         
     }
 
-  } // for searchresult
+  } // for searchresul
 
 }
  
-static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::FieldPair> &fpairs) {
+static GeomRend::DstConfig get_dst_config(int imethod) {
   
   // Determine the rendezvous destination configuration.  Use Field 0 for the info.  
   // All other fields must have compatability with the first.
   
-  ThrowRequire(fpairs.size() > 0);
-  
-  MEField<> &repF = *fpairs[0].second;
-  
+
   // Figure out the type of object to gather values for (i.e. nodes, interp, etc...)
-  UInt otype;
-  if (repF.is_elemental()) {
-    otype = MeshObj::ELEMENT;
-  } else if (repF.is_nodal()) {
-    otype = MeshObj::NODE;
-  } else {
-    otype = MeshObj::NODE | MeshObj::INTERP;
-  }
-  
+  UInt otype=MeshObj::NODE;
+
   // Loop fieldpairs.  If any have INTERP_PATCH, collect nieghbors
   bool nbor = false;
   bool cnsrv = false;
-  for (UInt i = 0; i < fpairs.size() && nbor == false; i++) {
-    if (fpairs[i].idata == Interp::INTERP_PATCH) nbor = true;
-    if (fpairs[i].idata == Interp::INTERP_CONSERVE) cnsrv = true;
-  }
+
+  if (imethod == Interp::INTERP_PATCH) nbor = true;
+  else if (imethod == Interp::INTERP_CONSERVE) cnsrv = true;
+
+  Context default_context;
+  default_context.flip();
   
   // TODO: make this more general
   if (cnsrv) {
-    return GeomRend::DstConfig(MeshObj::ELEMENT,MeshObj::ELEMENT, repF.GetContext(), nbor);
+    return GeomRend::DstConfig(MeshObj::ELEMENT,MeshObj::ELEMENT, default_context, nbor);
   } else {
-    return GeomRend::DstConfig(repF.ObjType(), otype, repF.GetContext(), nbor);
+    return GeomRend::DstConfig(MeshObj::ELEMENT, MeshObj::NODE, default_context, nbor);
   }
 }
   
-Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_src_, const std::vector<FieldPair> &_fpairs, MAP_TYPE mtype, int unmappedaction) :
+
+Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, bool freeze_src_, int imethod, MAP_TYPE mtype, int unmappedaction) :
 sres(),
-grend(src, dest, get_dst_config(dest, _fpairs), freeze_src_),
-fpairs(_fpairs),
+grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_),
 is_parallel(Par::Size() > 1),
 srcF(),
 dstF(),
@@ -1525,56 +1446,56 @@ has_nearest_src_to_dst(false),
 has_nearest_dst_to_src(false),
 srcmesh(src),
 dstmesh(dest),
+dstpointlist(dstplist),
+srcpointlist(srcplist),
 midmesh(midmesh),
-zz(0)
+zz(0),
+interp_method(imethod)
 {
-
 
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
-  
-     
-  for (UInt i = 0; i < fpairs.size(); i++) {
-    srcF.push_back(fpairs[i].first);
-    dstF.push_back(fpairs[i].second);
-    
-    ThrowRequire(fpairs[i].second->is_nodal() || fpairs[i].second->GetInterp());
-    
-    dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
-    iflag.push_back(fpairs[i].idata);
+
+  if (srcmesh != NULL) 
+    srcF.push_back(srcmesh->GetCoordField());
+
+  iflag.push_back(interp_method);
+
+  if (interp_method == Interp::INTERP_STD) has_std = true;
+  else if (interp_method == Interp::INTERP_PATCH) has_patch = true;
+  else if (interp_method == Interp::INTERP_CONSERVE) has_cnsrv = true;
+  else if (interp_method == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
+  else if (interp_method == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
+
+  if (dstmesh != NULL) {
+    //must get dst info from mesh
+    dstF.push_back(dstmesh->GetCoordField());
   }
 
-
-  // Update interpolation flags
-  for (UInt j = 0; j < fpairs.size(); j++) {
-    if (fpairs[j].idata == Interp::INTERP_STD) has_std = true;
-    if (fpairs[j].idata == Interp::INTERP_PATCH) has_patch = true;
-    if (fpairs[j].idata == Interp::INTERP_CONSERVE) has_cnsrv = true;
-   if (fpairs[j].idata == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
-   if (fpairs[j].idata == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
-  }
-
-  
   if (is_parallel) {
    
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
+
+
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
-    
+
     if (has_nearest_dst_to_src) {
-      ParSearchNearestDstToSrc(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+      Throw() << "unable to proceed with interpolation method dst_to_src";
+
     } else if (has_nearest_src_to_dst) {
-      ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
-        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), mtype, grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+	OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-        if(freeze_src_)
-          OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
-        else
+	if(freeze_src_) {
+          OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+        } else {
           OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+	}
       }
     }
     
@@ -1589,32 +1510,30 @@ zz(0)
     // the subset of the mesh for interpolating??)
 
     if (has_nearest_dst_to_src) {
-        SearchNearestDstToSrc(src, dest, unmappedaction, sres);
+      Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
-        SearchNearestSrcToDst(src, dest, unmappedaction, sres);
+        SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres);
     } else {
+
       if (search_obj_type == MeshObj::NODE) {
-        OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
+	OctSearch(*src, *dstpointlist, mtype, search_obj_type, unmappedaction, sres, 1e-8);
+	//OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
-        OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
+        OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
       }
     }
 
      //PrintSearchResult(sres);
   }
-  
+
+  //dstpointlist->diagprint();
   
 }
+
+
   
 Interp::~Interp() {
   DestroySearchResult(sres);
-}
-
-void Interp::operator()() {
-  Trace __trace("Interp::operator()()");  
-  
-  if (is_parallel) transfer_parallel(); else transfer_serial();
-  
 }
 
 /*
@@ -1623,9 +1542,6 @@ void Interp::operator()() {
 void Interp::operator()(int fpair_num, IWeights &iw) {
   Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
   
-
-  ThrowRequire((UInt) fpair_num < fpairs.size());
-
   IWeights src_frac,dst_frac; // Use IW to get out source and dst frac and to migrate it to the correct procs
                               // eventually make a dedicated class for migrating values associated with mesh
 
@@ -1654,119 +1570,109 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
   // (use node or elem migration depending on interpolation)
   if (!has_cnsrv) {
     if (is_parallel) {
-      iw.Migrate(dstmesh);
+
+      if (dstpointlist == NULL ) 
+	iw.Migrate(*dstmesh);
+      else
+	iw.Migrate(*dstpointlist);
+
     }
   } else {
     if (is_parallel) {
-      iw.MigrateToElem(dstmesh);
-      dst_frac.MigrateToElem(dstmesh);
+      iw.MigrateToElem(*dstmesh);
+      dst_frac.MigrateToElem(*dstmesh);
     }
   }
 
   // Migrate src_frac to source mesh decomp
   if (has_cnsrv) {
     if (is_parallel) {
-      src_frac.MigrateToElem(srcmesh);
+      src_frac.MigrateToElem(*srcmesh);
     }
   }
-
-
-  // Dectect if we should use explicit dst_frac or just sum weights
-  bool use_dst_frac=false;
-  {
-    MEField<> *dst_area_field = dstmesh.GetField("elem_area");
-    MEField<> *src_area_field = srcmesh.GetField("elem_area");
-
-    // if users have set their own areas then need to use dst_frac variable
-    if (dst_area_field || src_area_field) use_dst_frac=true;
-  }
-
 
   //  printf("%d# M1\n",Par::Rank());
 
   // Set destination fractions
   if (has_cnsrv) {
+    // Dectect if we should use explicit dst_frac or just sum weights
+    bool use_dst_frac=false;
+    {
+      MEField<> *dst_area_field = dstmesh->GetField("elem_area");
+      MEField<> *src_area_field = srcmesh->GetField("elem_area");
+
+      // if users have set their own areas then need to use dst_frac variable
+      if (dst_area_field || src_area_field) use_dst_frac=true;
+    }
+
     // get frac pointer for destination mesh
-   MEField<> *elem_frac=dstmesh.GetField("elem_frac");
-   if (!elem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
+    MEField<> *elem_frac=dstmesh->GetField("elem_frac");
+    if (!elem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
 
-   // Set everything to 0.0 in case a destination element is masked
-   // and doesn't show up in weight matrix
-   Mesh::iterator ei=dstmesh.elem_begin(),ee=dstmesh.elem_end();
-   for (;ei!=ee; ei++) {
-    MeshObj &elem = *ei;
-    double *f=elem_frac->data(elem);
-    *f=0.0;
-   }
+    // Set everything to 0.0 in case a destination element is masked
+    // and doesn't show up in weight matrix
+    Mesh::iterator ei=dstmesh->elem_begin(),ee=dstmesh->elem_end();
+    for (;ei!=ee; ei++) {
+      MeshObj &elem = *ei;
+      double *f=elem_frac->data(elem);
+      *f=0.0;
+    }
 
-  // Dectect if we should use explicit dst_frac or just sum weights
-  bool use_dst_frac=false;
-  {
-    MEField<> *dst_area_field = dstmesh.GetField("elem_area");
-    MEField<> *src_area_field = srcmesh.GetField("elem_area");
+    // Go through weights calculating and setting dst frac
+    WMat::WeightMap::iterator wi, we;
+    if (use_dst_frac) {
+      wi = dst_frac.begin_row();
+      we = dst_frac.end_row();
+    }
+    else {
+      wi = iw.begin_row();
+      we = iw.end_row();
+    }
 
-    // if users have set their own areas then need to use dst_frac variable
-    if (dst_area_field || src_area_field) use_dst_frac=true;
+    for (; wi != we; ++wi) {
+      const WMat::Entry &w = wi->first;
+      std::vector<WMat::Entry> &wcol = wi->second;
+     
+      // total weights
+      double tot=0.0;
+      for (UInt j = 0; j < wcol.size(); ++j) {
+	WMat::Entry &wc = wcol[j];
+	tot += wc.value;
+      } // for j
+     
+      // find element corresponding to destination point
+      Mesh::MeshObjIDMap::iterator mi =  dstmesh->map_find(MeshObj::ELEMENT, w.id);
+      if (mi ==dstmesh->map_end(MeshObj::ELEMENT)) {
+	Throw() << "Wmat entry not in dstmesh";
+      }
+
+      // Get the element
+      const MeshObj &dst_elem = *mi; 
+     
+      // Get frac data
+      double *frac=elem_frac->data(dst_elem);
+     
+      // Init in case is not locally owned
+      *frac=0.0;
+     
+      // Only put it in if it's locally owned
+      if (!GetAttr(dst_elem).is_locally_owned()) continue;
+
+      // Since weights with no mask should add up to 1.0
+      // fraction is tot
+      *frac=tot;
+    } // for wi
   }
-
-
-
-  // Go through weights calculating and setting dst frac
-  WMat::WeightMap::iterator wi, we;
-  if (use_dst_frac) {
-    wi = dst_frac.begin_row();
-    we = dst_frac.end_row();
-  }
-  else {
-    wi = iw.begin_row();
-    we = iw.end_row();
-  }
-
-   for (; wi != we; ++wi) {
-     const WMat::Entry &w = wi->first;
-     std::vector<WMat::Entry> &wcol = wi->second;
-     
-     // total weights
-     double tot=0.0;
-     for (UInt j = 0; j < wcol.size(); ++j) {
-       WMat::Entry &wc = wcol[j];
-       tot += wc.value;
-     } // for j
-     
-     // find element corresponding to destination point
-     Mesh::MeshObjIDMap::iterator mi =  dstmesh.map_find(MeshObj::ELEMENT, w.id);
-     if (mi ==dstmesh.map_end(MeshObj::ELEMENT)) {
-       Throw() << "Wmat entry not in dstmesh";
-     }
-
-     // Get the element
-     const MeshObj &dst_elem = *mi; 
-     
-     // Get frac data
-     double *frac=elem_frac->data(dst_elem);
-     
-     // Init in case is not locally owned
-     *frac=0.0;
-     
-     // Only put it in if it's locally owned
-     if (!GetAttr(dst_elem).is_locally_owned()) continue;
-
-     // Since weights with no mask should add up to 1.0
-     // fraction is tot
-     *frac=tot;
-   } // for wi
-  }
-
 
   // Set source fractions
   if (has_cnsrv) {
     // get frac pointer for destination mesh
-   MEField<> *elem_frac=srcmesh.GetField("elem_frac");
+   MEField<> *elem_frac=srcmesh->GetField("elem_frac");
    if (!elem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
 
    // Set everything to 0.0 in case a destination element is masked
    // and doesn't show up in weight matrix
-   Mesh::iterator ei=srcmesh.elem_begin(),ee=srcmesh.elem_end();
+   Mesh::iterator ei=srcmesh->elem_begin(),ee=srcmesh->elem_end();
    for (;ei!=ee; ei++) {
     MeshObj &elem = *ei;
     double *f=elem_frac->data(elem);
@@ -1787,8 +1693,8 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
      } // for j
      
      // find element corresponding to destination point
-     Mesh::MeshObjIDMap::iterator mi =  srcmesh.map_find(MeshObj::ELEMENT, w.id);
-     if (mi ==srcmesh.map_end(MeshObj::ELEMENT)) {
+     Mesh::MeshObjIDMap::iterator mi =  srcmesh->map_find(MeshObj::ELEMENT, w.id);
+     if (mi ==srcmesh->map_end(MeshObj::ELEMENT)) {
        Throw() << "Wmat entry not in srcmesh";
      }
 
@@ -1808,100 +1714,40 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
      // fraction is tot
      *frac=tot;
    } // for wi
+
   }
-}
 
-
-void Interp::transfer_serial() {
-  Trace __trace("Interp::transfer_serial()");
-  
-  // Standard interpolation
-  if (fpairs[0].second->is_nodal() && has_std) {
-
-    point_serial_transfer(srcF.size(), &(*srcF.begin()), &(*dstf.begin()), &iflag[0], sres);
-  
-  } else if (!fpairs[0].second->is_nodal()) {
-  
-    Throw() << "Non nodal serial not yet implemented";
-  
-  }
-  
-  // Patch interpolation
-  if (has_patch) {
-    
-    patch_serial_transfer(*srcmesh.GetCoordField(), srcF.size(), &(*srcF.begin()), &(*dstf.begin()), fpairs, sres,srcmesh);
-  
-  } else {
-  
-  
-  }
-  
-}
-
-void Interp::transfer_parallel() {
-  Trace __trace("Interp::transfer_parallel()");
-  
-  // Send source data to rendezvous decomp
-  const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
-  
-  ThrowRequire(src_rend_Fields.size() == fpairs.size());
-  
-  grend.GetSrcComm().SendFields(src_rend_Fields.size(), &(*srcF.begin()), &(*src_rend_Fields.begin()));
-  
-  // Perform the interpolation
-  const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
-  
-  ThrowRequire(dst_rend_fields.size() == src_rend_Fields.size());
-  
-  if (has_std) point_serial_transfer(dst_rend_fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), &iflag[0], sres);
-  if (has_patch) patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), src_rend_Fields.size(), &(*src_rend_Fields.begin()), &(*dst_rend_fields.begin()), fpairs, sres,srcmesh);
-  
-  // Retrieve the interpolated data
-  CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
-
-  // Send the data back (comm has been transposed in GeomRend::Build)
-  ThrowRequire(dstf.size() == dst_rend_fields.size());
-  dst_node_rel.send_fields(dstf.size(), &(*dst_rend_fields.begin()), &(*dstf.begin()));
-  
-  // TODO:Process interpolation (if needed).  This means, for instance, collecting the values 
-  // received above and asking the master element to manufacture coefficients.
-  
 }
 
 void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
   Trace __trace("Interp::mat_transfer_serial(int fpair_num)");
 
-  FieldPair &fpair = fpairs[fpair_num];
-  
-  // Only implemented for nodal to nodal.  Higher interpolation must
-  // use the full interpolation framework.
-  ThrowRequire(fpair.first->is_nodal() && fpair.second->is_nodal());
-  
-  if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
-  else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
-  else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
-  else if (fpair.idata == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
-  else if (fpair.idata == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
-    
+
+  if (interp_method == INTERP_STD) mat_point_serial_transfer(*srcF[fpair_num], sres, iw, dstpointlist);
+  else if (interp_method == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh->GetCoordField(), *srcF[fpair_num], sres, srcmesh, iw, dstpointlist);
+  else if (interp_method == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
+  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+
 }
 
 void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac) {
     
   // By all rights, here we don't HAVE to actually perform the interpolation.
   // However, we actually do it as a cross check.
-    
-  if (fpairs[fpair_num].idata == INTERP_CONSERVE) {
+
+  if (interp_method == INTERP_CONSERVE) {
     calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
  midmesh, sres, iw, src_frac, dst_frac, zz);
-  } else if (fpairs[fpair_num].idata == INTERP_NEAREST_SRC_TO_DST) {
-    calc_nearest_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
-  } else if (fpairs[fpair_num].idata == INTERP_NEAREST_DST_TO_SRC) {
-    calc_nearest_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
+  } else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
+    calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
+    calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   } else {
     // Send source data to rendezvous decomp
     const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
     
-    MEField<> *sFR = src_rend_Fields[fpair_num], *sF = srcF[fpair_num];
+    MEField<> *sFR = src_rend_Fields[fpair_num];
 
     // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM. VALUES    
     // grend.GetSrcComm().SendFields(1, &sF, &sFR);
@@ -1909,14 +1755,16 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     // Get fields for bilinear and patch calc.
     // TODO: think about pulling these out of subroutines below 
     const std::vector<_field*> &dst_rend_fields = grend.GetDstRendfields();
-    _field *dfR = dst_rend_fields[fpair_num], *df = dstf[fpair_num]; 
     
     // Calc. Matrix for bilinear and patch
-    if (fpairs[fpair_num].idata == INTERP_STD)
-      mat_point_serial_transfer(*sFR, *dfR, sres, iw);
-    else if (fpairs[fpair_num].idata == INTERP_PATCH)
-      mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, grend.GetSrcRend(), iw);
-    
+
+    PointList &plist_rend = grend.GetDstPlistRend();
+
+  if (interp_method == INTERP_STD) {
+      mat_point_serial_transfer(*sFR, sres, iw, &plist_rend);
+  } else if (interp_method == INTERP_PATCH) {
+      mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, sres, &grend.GetSrcRend(), iw, dstpointlist);
+  }    
     // WE ARE ONLY USING MATRIX HERE, SO DON'T NEED TO COMM VALUES    
     // Retrieve the interpolated data
     //CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
@@ -1949,8 +1797,8 @@ void Interp::interpL2csrvM_serial(const IWeights &iw, IWeights *iw2,
 
   int idx = 0;
 
-  Mesh &smesh = dstmesh;
-  Mesh &dmesh = srcmesh;
+  Mesh &smesh = *dstmesh;
+  Mesh &dmesh = *srcmesh;
 
   // sparse matrix multiply transpose
   IWeights::WeightMap::const_iterator wi = iw.begin_row(), we = iw.end_row();
@@ -2054,8 +1902,8 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
     const std::vector<IWeights::Entry> &_col = wi->second;
     // look for source node id matching _row.id
     MeshDB::MeshObjIDMap::iterator nsi =
-      dstmesh.map_find(MeshObj::NODE, _row.id);
-    ThrowRequire(nsi != dstmesh.map_end(MeshObj::NODE));
+      dstmesh->map_find(MeshObj::NODE, _row.id);
+    ThrowRequire(nsi != dstmesh->map_end(MeshObj::NODE));
     double *Sdata = src_iwts->data(*nsi);
     for (UInt c = 0; c < _col.size(); ++c) {
       // now we have the index and the data, multiply
@@ -2114,8 +1962,9 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
 
 
   // now migrate to the destination mesh decomposition (srcmesh in here)
-  iw2->Migrate(srcmesh);
-  iw2->Prune(srcmesh, 0);
+  iw2->Migrate(*srcmesh);
+  iw2->Prune(*srcmesh, 0);
+
 
   // OK, now we should have the weights matrix in the destination mesh decomposition
   // combine the Entries of duplicate rows
@@ -2183,8 +2032,8 @@ void Interp::interpL2csrvM_parallel(IWeights &iw, IWeights *iw2,
     const IWeights::Entry &_row = wi2->first;
     std::vector<IWeights::Entry> &_col = wi2->second;
     MeshDB::MeshObjIDMap::iterator nsi =
-      srcmesh.map_find(MeshObj::NODE, _row.id);
-    ThrowRequire(nsi != srcmesh.map_end(MeshObj::NODE));
+      srcmesh->map_find(MeshObj::NODE, _row.id);
+    ThrowRequire(nsi != srcmesh->map_end(MeshObj::NODE));
     double *Ddata = dst_iwts->data(*nsi);
     for (UInt c = 0; c < _col.size(); ++c) 
       _col[c].value = (_col[c].value)/(*Ddata);

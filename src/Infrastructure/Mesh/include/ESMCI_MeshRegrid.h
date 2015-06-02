@@ -13,6 +13,7 @@
 #define ESMCI_MeshRegrid_h
 
 #include <Mesh/include/ESMCI_Mesh.h>
+#include <PointList/include/ESMCI_PointList.h>
 #include <Mesh/include/ESMCI_Extrapolation.h>
 #include <Mesh/include/ESMCI_Integrate.h>
 #include <Mesh/include/ESMCI_Interp.h>
@@ -53,7 +54,7 @@ enum {ESMC_REGRID_CONSERVE_OFF = 0, ESMC_REGRID_CONSERVE_ON = 1};
 enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_POLETYPE_NPNT = 2, ESMC_REGRID_POLETYPE_TEETH = 3};
 
 // offline
- int regrid(Mesh &, Mesh &, Mesh *, IWeights &, int *, int *, int *, int *, int *, int *);
+ int regrid(Mesh *, PointList *, Mesh *, PointList *, Mesh *, IWeights &, int *, int *, int *, int *, int *, int *);
 int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *, 
          int *, int *, int *, int *, int *);
 
@@ -63,7 +64,7 @@ int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, c
 #else
 int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
 #endif
-int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
+ int online_regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, IWeights &wts,
                   int *regridConserve, int *regridMethod,
                   int *regridPoleType, int *regridPoleNPnts, 
                   int *regridScheme, int *map_type, int *unmappedaction);

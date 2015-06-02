@@ -56,17 +56,18 @@ using namespace ESMCI;
 
 
 // prototypes from below
-static bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
-static bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
-static void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
- static void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
-static void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
-static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
+static bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
+static bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
+static void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
+static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
+static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
+static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
                                       int *iientries);
-static void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
+static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
                                       int *iientries, double *factors);
-static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
+static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors);
+
 
 // external C functions
  extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -82,8 +83,8 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 
 void ESMCI_regrid_create(ESMCI::VM **vmpp,
-                     Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                       Mesh **meshdstpp, ESMCI::Array **arraydstpp,
+                     Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+                     Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod, 
                       int *map_type,
                      int *norm_type,
@@ -98,16 +99,22 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+
+
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
-   int localPet = vm->getLocalPet();
+  int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
-  Mesh &srcmesh = **meshsrcpp;
-  Mesh &dstmesh = **meshdstpp;
-  
+  Mesh *srcmesh = *meshsrcpp;
+
+
+  Mesh *dstmesh = *meshdstpp;
+  PointList *dstpointlist = *pldstpp;
+  PointList *srcpointlist = *plsrcpp;
+
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
@@ -126,7 +133,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
-      if (*_ignoreDegenerate) ignoreDegenerate=true;
+    if (*_ignoreDegenerate) ignoreDegenerate=true;
     else ignoreDegenerate=false;
 
 
@@ -159,7 +166,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
     // Clockwise
     if (clockwise) {
       int localrc;
-       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell whose corners are clockwise", ESMC_CONTEXT,
         &localrc)) throw localrc;
     }
@@ -170,7 +177,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell that has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
-     }
+    }
 
     // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
     // matter what the cell looks like
@@ -179,7 +186,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
       //  Turned off until ignoreDegenerate available through R.W.G and Python
       //   cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
-       // Concave
+      // Concave
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -210,36 +217,34 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
-  // Declare output structure in which weights are to be put
-  int num_entries;
-  int *iientries; 
-  double *factors;
-
-  // Declare vector to hold unmapped destination points
-  std::vector<int> unmappedDstList;
-
-  { //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
-
     // Compute Weights matrix
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
-     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
+    // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
+
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod, 
-                        regridPoleType, regridPoleNPnts, 
-                        regridScheme, map_type, &temp_unmappedaction))
+
+      if(!online_regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, wts, &regridConserve, 
+			regridMethod, regridPoleType, regridPoleNPnts, 
+                        regridScheme, map_type, &temp_unmappedaction)) {
         Throw() << "Online regridding error" << std::endl;
+      }
+
+
+
+
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod, 
-                        regridPoleType, regridPoleNPnts, 
+
+      if(!online_regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, wts, &regridConserve, 
+			&tempRegridMethod, regridPoleType, regridPoleNPnts, 
                         regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
- #ifdef PROGRESSLOG_on
+#ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
 #endif
 
@@ -248,6 +253,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #endif
 
     // If requested get list of unmapped destination points
+    std::vector<int> unmappedDstList;
     if (*has_udl) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
@@ -256,8 +262,9 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #if 0
         get_mesh_node_ids_not_in_wmat(srcmesh, wts, &unmappedDstList);
 #endif
+
       } else { // Non-conservative
-        get_mesh_node_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+        get_mesh_node_ids_not_in_wmat(dstpointlist, wts, &unmappedDstList);
       }
     }
 #ifdef PROGRESSLOG_on
@@ -280,7 +287,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
- #if 0
+#if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -288,9 +295,11 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
             "destination point", ESMC_CONTEXT, &localrc)) throw localrc;
         }
 #endif
+
       } else { // bilinear, patch, ...
         int missing_id;
-        if (!all_mesh_node_ids_in_wmat(dstmesh, wts, &missing_id)) {
+
+	if (!all_mesh_node_ids_in_wmat(dstpointlist, wts, &missing_id)) {
           int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
@@ -308,17 +317,23 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
   VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
-    /////// Translate the internal weight representation to rep. to be output or passed to arraysmm /////
+    /////// We have the weights, now set up the sparsemm object /////
 
-    // Allocated output format to put weights into
+    // Firstly, the index list
     std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
-    num_entries = iisize.first;
-    iientries = new int[2*iisize.first]; 
-    factors = new double[iisize.first];
+    int num_entries = iisize.first;
+    int *iientries = new int[2*iisize.first]; 
+    int larg[2] = {2, iisize.first};
+    // Gather the list
+    ESMCI::InterfaceInt ii(iientries, 2, larg);
+    ESMCI::InterfaceInt *iiptr = &ii;
+
+    double *factors = new double[iisize.first];
+
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-        UInt i = 0;
+      UInt i = 0;
       WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
@@ -333,7 +348,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-             
+          
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
@@ -361,7 +376,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
         
         std::vector<WMat::Entry> &wcol = wi->second;
         
-          // Construct factor index list
+        // Construct factor index list
         for (UInt j = 0; j < wcol.size(); ++j) {
           UInt twoi = 2*i;
           const WMat::Entry &wc = wcol[j];
@@ -376,16 +391,12 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
           i++;
         } // for j
       } // for wi
-       }
-
-  } //// Put weight computation in a a block, so that weight structure gets destroyed when it's not needed ///
-
-
+    }
 
     ///// If conservative, translate split element weights to non-split //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      if (srcmesh.is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
-      if (dstmesh.is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
+      if (srcmesh->is_split) translate_split_src_elems_in_wts(srcmesh, num_entries, iientries);
+      if (dstmesh->is_split) translate_split_dst_elems_in_wts(dstmesh, num_entries, iientries, factors);
     }
 
 
@@ -404,25 +415,17 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 #ifdef MEMLOG_on
   VM::logMemInfo(std::string("RegridCreate5.0"));
 #endif
- 
+
     // Build the ArraySMM
     if (*has_rh != 0) {
-      // Wrap weigts in a Structure to pass into arraysmm
-      int larg[2] = {2, num_entries};
-      ESMCI::InterfaceInt ii(iientries, 2, larg);
-      ESMCI::InterfaceInt *iiptr = &ii;
-      
-      // Setup to call arraysmm
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
-
-      // Call arraysmm
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-                                   &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
-                                  pipelineDepth, &localrc);
+            &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing, 
+            pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
 #ifdef PROGRESSLOG_on
@@ -454,7 +457,6 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 	*tweights = NULL;
       }
     }
-
 
     // Setup structure to transfer unmappedDstList 
     *_num_udl=0;
@@ -507,7 +509,6 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
 
 void ESMCI_regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
@@ -661,62 +662,52 @@ void ESMCI_regrid_getfrac(Grid **gridpp,
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
-static void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids) {
-
-  // Get mask Field
-  MEField<> *mptr = mesh.GetField("mask");
+static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids) {
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
 
-  // Get mesh node iterator that goes through in order of id
-  Mesh::MeshObjIDMap::const_iterator ni=mesh.map_begin(MeshObj::NODE), ne=mesh.map_end(MeshObj::NODE);
-
+  wi=wts.begin_row();
+  int id;
+  int curr_num_pts = pointlist->get_curr_num_pts();
   // Loop checking that all nodes have weights
-  for (; ni != ne; ++ni) {
-    const MeshObj &node=*ni;
+  for (int i=0; i<curr_num_pts; i++) {
 
     // Skip non local nodes
-    if (!GetAttr(node).is_locally_owned()) continue;
-
-    // Skip masked elements
-    if (mptr != NULL) {
-      double *m=mptr->data(node);
-       if (*m > 0.5) continue;
-    }
+    // ??
 
     // get node id
-    int node_id=node.get_id();
+    id = pointlist->get_id(i);
 
     // get weight id
     int wt_id=wi->first.id;
 
     // Advance weights until not less than node id
-    while ((wi != we) && (wi->first.id <node_id)) {
+    while ((wi != we) && (wi->first.id < id)) {
       wi++;
     }
 
     // If teh current weight is not equal to the node id, then we must have passed it, so add it to the list
-    if (wi->first.id != node_id) {
-      missing_ids->push_back(node_id);
+    if (wi->first.id != id) {
+      missing_ids->push_back(id);
     }
   }
-}
 
+}
 
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
-static void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids) {
+static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids) {
 
   // Get mask Field
-  MEField<> *mptr = mesh.GetField("elem_mask");
+  MEField<> *mptr = mesh->GetField("elem_mask");
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
 
   // Get mesh node iterator that goes through in order of id
-  Mesh::MeshObjIDMap::const_iterator ei=mesh.map_begin(MeshObj::ELEMENT), ee=mesh.map_end(MeshObj::ELEMENT);
+  Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
 
   // Loop checking that all nodes have weights
   for (; ei != ee; ++ei) {
@@ -732,7 +723,7 @@ static void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int
     }
 
     // get node id
-     int elem_id=elem.get_id();
+    int elem_id=elem.get_id();
 
     // get weight id
     int wt_id=wi->first.id;
@@ -750,76 +741,69 @@ static void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int
 }
 
  
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
-  // Get mask Field
-  MEField<> *mptr = mesh.GetField("mask");
+bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id) {
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
 
-  // Get mesh node iterator that goes through in order of id
-  Mesh::MeshObjIDMap::const_iterator ni=mesh.map_begin(MeshObj::NODE), ne=mesh.map_end(MeshObj::NODE);
+  wi=wts.begin_row();
+  int id;
+  int curr_num_pts = pointlist->get_curr_num_pts();
 
-  // Loop checking that all nodes have weights
-  for (; ni != ne; ++ni) {
-    const MeshObj &node=*ni;
+  for (int i=0; i<curr_num_pts; i++) {
 
     // Skip non local nodes
-    if (!GetAttr(node).is_locally_owned()) continue;
-
-    // Skip masked elements
-    if (mptr != NULL) {
-      double *m=mptr->data(node);
-      if (*m > 0.5) continue;
-    }
+    // ??
 
     // get node id
-    int node_id=node.get_id();
+    id = pointlist->get_id(i);
 
     // get weight id
     int wt_id=wi->first.id;
 
     // Advance weights until not less than node id
-    while ((wi != we) && (wi->first.id <node_id)) {
-       wi++;
+    while ((wi != we) && (wi->first.id < id)) {
+      wi++;
     }
 
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
     if (wi==we) { 
-      *missing_id=node_id;
+      *missing_id=id;
       char msg[1024];
-      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",id);
       ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
 
     // If we're not equal to the node id then we must have passed it
-    if (wi->first.id != node_id) { 
-      *missing_id=node_id;
+    if (wi->first.id != id) { 
+      *missing_id=id;
       char msg[1024];
-      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",id);
       ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
+
   }
 
-   // Still here, so must have found them all
+
+  // Still here, so must have found them all
   return true;
 
 }
 
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
+bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
 
   // Get mask Field
-  MEField<> *mptr = mesh.GetField("elem_mask");
+  MEField<> *mptr = mesh->GetField("elem_mask");
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
 
   // Get mesh node iterator that goes through in order of id
-  Mesh::MeshObjIDMap::const_iterator ei=mesh.map_begin(MeshObj::ELEMENT), ee=mesh.map_end(MeshObj::ELEMENT);
+  Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
 
   // Loop checking that all elems have weights
   for (; ei != ee; ++ei) {
@@ -832,14 +816,14 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
     if (mptr != NULL) {
       double *m=mptr->data(elem);
       if (*m > 0.5) continue;
-     }
+    }
 
     // get elem id
     int elem_id=elem.get_id();
 
     // get weight id
     int wt_id=wi->first.id;
- 
+
     // Advance weights until not less than elem id
     while ((wi != we) && (wi->first.id <elem_id)) {
       wi++;
@@ -1102,7 +1086,7 @@ static void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool
 }
 
 #if 0
-static void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
+static void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -1117,21 +1101,21 @@ static void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, b
   *degenerate=false;
 
   // Get coord field
-  MEField<> *cfield = mesh.GetCoordField();
+  MEField<> *cfield = mesh->GetCoordField();
 
   // Get mask Field
-  MEField<> *mptr = mesh.GetField("mask");  
+  MEField<> *mptr = mesh->GetField("mask");  
 
   // Get dimensions
-  int sdim=mesh.spatial_dim();
-  int pdim=mesh.parametric_dim();
+  int sdim=mesh->spatial_dim();
+  int pdim=mesh->parametric_dim();
     
   // Compute area depending on dimensions
   if (pdim==2) {
     if (sdim==2) {
-      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      MeshDB::const_iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
       for (; ei != ee; ++ei) {
-         // Get the element
+        // Get the element
         const MeshObj &elem = *ei; 
         
         // Only put it in if it's locally owned
@@ -1178,10 +1162,10 @@ static void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, b
         }
       }
     } else if (sdim==3) {
-      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      MeshDB::const_iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
       for (; ei != ee; ++ei) {
         // Get the element
-         const MeshObj &elem = *ei; 
+        const MeshObj &elem = *ei; 
         
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
@@ -1231,13 +1215,13 @@ static void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, b
     }
   }
 
-   // TODO: Check to see if 3D elements are in correct order.
+  // TODO: Check to see if 3D elements are in correct order.
 
 }
 
 #endif
 
-static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
+static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
                                       int *iientries) {
 
 
@@ -1247,7 +1231,7 @@ static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
   UInt *gids_orig=NULL;
 
   // Get number of split points
-  num_gids=srcmesh.split_to_orig_id.size();
+  num_gids=srcmesh->split_to_orig_id.size();
 
   // Allocate space
   if (num_gids>0) {
@@ -1255,8 +1239,8 @@ static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
     gids_orig= new UInt[num_gids];
     
     // Loop and get split-orig id pairs
-    std::map<UInt,UInt>::iterator mi=srcmesh.split_to_orig_id.begin();
-    std::map<UInt,UInt>::iterator me=srcmesh.split_to_orig_id.end();
+    std::map<UInt,UInt>::iterator mi=srcmesh->split_to_orig_id.begin();
+    std::map<UInt,UInt>::iterator me=srcmesh->split_to_orig_id.end();
     
     int pos=0;
     for ( ; mi != me; mi++) {
@@ -1281,7 +1265,7 @@ static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
   }
 
 
-   // Gather list of spit src ids
+  // Gather list of spit src ids
   //// TODO: Maybe use a std::set instead to reduce the amount of communication??
   std::vector<UInt> src_split_gids;
   std::vector<int> src_split_gids_idx;
@@ -1293,7 +1277,7 @@ static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
      UInt src_id=iientries[2*i];
 
      // If a split id then add to list
-     if (src_id > srcmesh.max_non_split_id) {
+     if (src_id > srcmesh->max_non_split_id) {
        src_split_gids.push_back(src_id);
        src_split_gids_idx.push_back(2*i);
      }      
@@ -1327,25 +1311,25 @@ static void translate_split_src_elems_in_wts(Mesh &srcmesh, int num_entries,
 
 
 
-static void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
+static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
                                       int *iientries, double *factors) {
 
   // Loop through weights modifying split dst elements
-   for (int i=0; i<num_entries; i++) {
+  for (int i=0; i<num_entries; i++) {
     int dst_id=iientries[2*i+1];
 
     // See if the element is part of a larger polygon
-    std::map<UInt,double>::iterator mi =  dstmesh.split_id_to_frac.find(dst_id);
+    std::map<UInt,double>::iterator mi =  dstmesh->split_id_to_frac.find(dst_id);
 
     // It is part of a larger polygon, so process
-    if (mi != dstmesh.split_id_to_frac.end()) {
+    if (mi != dstmesh->split_id_to_frac.end()) {
 
       // Modify weight by fraction of orig polygon
       factors[i] *= mi->second;        
 
       // See if the id needs to be translated, if so then translate
-      std::map<UInt,UInt>::iterator soi =  dstmesh.split_to_orig_id.find(dst_id);
-      if (soi != dstmesh.split_to_orig_id.end()) {
+      std::map<UInt,UInt>::iterator soi =  dstmesh->split_to_orig_id.find(dst_id);
+      if (soi != dstmesh->split_to_orig_id.end()) {
         iientries[2*i+1]=soi->second;
       }
     }
@@ -1353,23 +1337,23 @@ static void translate_split_dst_elems_in_wts(Mesh &dstmesh, int num_entries,
 
 }
 
-static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
+static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors) {
 
 
   // Get frac field
-  MEField<> *elem_frac = mesh.GetField("elem_frac");
+  MEField<> *elem_frac = mesh->GetField("elem_frac");
   if (!elem_frac) Throw() << "Trying to get elem_frac when it doesn't exist";
 
   // Process differently if mesh is split
-  if (!mesh.is_split) {
+  if (!mesh->is_split) {
     // Loop through weights dividing by dst_fraction
     for (int i=0; i<num_entries; i++) {
       int dst_id=iientries[2*i+1];
       
       //  Find the corresponding Mesh element
-      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, dst_id);
-      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, dst_id);
+      if (mi == mesh->map_end(MeshObj::ELEMENT)) {
         Throw() << " destination id not found in destination mesh.";
       }
       
@@ -1381,7 +1365,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
       double frac=*f;
       
       // If not 0.0 divide
-       if (frac != 0.0) {
+      if (frac != 0.0) {
         factors[i] = factors[i]/frac;
       }
     }
@@ -1390,7 +1374,7 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
     std::map<int,double> id_to_frac;
 
     // Iterate through elements constucting id_to_frac list
-    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
       
@@ -1405,10 +1389,10 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
       double frac=*f;
 
       // See if the element is part of a larger polygon
-      std::map<UInt,double>::iterator mi =  mesh.split_id_to_frac.find(eid);
+      std::map<UInt,double>::iterator mi =  mesh->split_id_to_frac.find(eid);
         
       // Not part of something larger, so just stick in map
-      if (mi == mesh.split_id_to_frac.end()) {
+      if (mi == mesh->split_id_to_frac.end()) {
         id_to_frac[eid] = frac;
         continue;
       } 
@@ -1418,8 +1402,8 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
 
       // Translate id if necessary
       int orig_id;
-      std::map<UInt,UInt>::iterator soi =  mesh.split_to_orig_id.find(eid);
-      if (soi == mesh.split_to_orig_id.end()) {
+      std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(eid);
+      if (soi == mesh->split_to_orig_id.end()) {
         orig_id=eid;
       } else {
         orig_id=soi->second;
@@ -1454,7 +1438,6 @@ static void change_wts_to_be_fracarea(Mesh &mesh, int num_entries,
     }
   }
 }
-
 
   // Only works for scalar data right now, but would be pretty easy to add more dimensions 
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
@@ -1816,4 +1799,3 @@ void ESMCI_xgrid_getfrac2(Grid **gridpp,
 }
 
 #undef  ESMC_METHOD
-

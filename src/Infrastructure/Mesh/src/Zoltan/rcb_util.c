@@ -43,6 +43,7 @@ int i, ierr = 0;
    * the other fields can be reused.
    */
 
+
   if (zz->LB.Data_Structure == NULL) {
     rcb = (RCB_STRUCT *) ZOLTAN_MALLOC(sizeof(RCB_STRUCT));
     if (rcb == NULL) {

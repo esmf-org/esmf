@@ -108,6 +108,7 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
                                   localCount=numLocationsOnThisPet, &
+                                  coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -119,7 +120,7 @@ program ESMF_LocStreamEx
    ! user data may also be set.  
    !-------------------------------------------------------------------
    call ESMF_LocStreamAddKey(locstream,              &
-                             keyName="Lat",          &
+                             keyName="ESMF:Lat",     &
                              farray=lat,             &
                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
@@ -129,7 +130,7 @@ program ESMF_LocStreamEx
 !BOC
 
    call ESMF_LocStreamAddKey(locstream,              &
-                             keyName="Lon",          &
+                             keyName="ESMF:Lon",     &
                              farray=lon,             &
                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
@@ -193,8 +194,9 @@ program ESMF_LocStreamEx
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
                                   localCount=numLocationsOnThisPet, &
+                                  coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -205,7 +207,7 @@ program ESMF_LocStreamEx
    ! Add key data (internally allocating memory).
    !-------------------------------------------------------------------
    call ESMF_LocStreamAddKey(locstream,                    &
-                             keyName="Lat",                &
+                             keyName="ESMF:Lat",           &
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Latitude", rc=rc)
@@ -214,7 +216,7 @@ program ESMF_LocStreamEx
 !BOC
 
    call ESMF_LocStreamAddKey(locstream,                    &
-                             keyName="Lon",                &
+                             keyName="ESMF:Lon",           &
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Longitude", rc=rc)
@@ -228,7 +230,7 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
-                             keyName="Lat",                &
+                             keyName="ESMF:Lat",           &
                              farray=lat,                   &
                              rc=rc)
 !EOC
@@ -237,7 +239,7 @@ program ESMF_LocStreamEx
 
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
-                             keyName="Lon",                &
+                             keyName="ESMF:Lon",           &
                              farray=lon,                   &
                              rc=rc)
 !EOC
@@ -297,8 +299,9 @@ program ESMF_LocStreamEx
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
                                   localCount=numLocationsOnThisPet, &
+                                  coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -308,7 +311,7 @@ program ESMF_LocStreamEx
    ! Add key data (internally allocating memory).
    !-------------------------------------------------------------------
    call ESMF_LocStreamAddKey(locstream,                    &
-                             keyName="Lon",                &
+                             keyName="ESMF:Lon",           &
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Longitude", rc=rc)
@@ -318,7 +321,7 @@ program ESMF_LocStreamEx
 !BOC
 
    call ESMF_LocStreamAddKey(locstream,                    &
-                             keyName="Lat",                &
+                             keyName="ESMF:Lat",           &
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Latitude", rc=rc)
@@ -334,7 +337,7 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
-                             keyName="Lon",                &
+                             keyName="ESMF:Lon",           &
                              farray=lon,                   &
                              rc=rc)
 !EOC
@@ -344,7 +347,7 @@ program ESMF_LocStreamEx
 
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
-                             keyName="Lat",                &
+                             keyName="ESMF:Lat",           &
                              farray=lat,                   &
                              rc=rc)
 
@@ -371,8 +374,8 @@ program ESMF_LocStreamEx
    ! Note that here the points are treated as cartesian.
    !-------------------------------------------------------------------
    grid=ESMF_GridCreateNoPeriDim(maxIndex=(/GridLonSize,GridLatSize/), &
-                                 coordSys=ESMF_COORDSYS_CART, &
-                                 indexflag=ESMF_INDEX_GLOBAL, &
+                                 coordSys=ESMF_COORDSYS_SPH_DEG,       &
+                                 indexflag=ESMF_INDEX_GLOBAL,          &
                                  rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -430,7 +433,7 @@ program ESMF_LocStreamEx
    ! locstream. The entries in newLocstream with coordinates (lon,lat)
    ! are on the same PET as the piece of grid which contains (lon,lat). 
    !-------------------------------------------------------------------
-   newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="Lon:Lat", &
+   newLocstream=ESMF_LocStreamCreate(locstream, &
                   background=grid, rc=rc)
 
 

@@ -151,6 +151,8 @@ int Zoltan_RCB(
   int **export_to_part          /* Not computed. */
 )
 {
+
+
     /* Wrapper routine to set parameter values and call the real rcb. */
     double overalloc;         /* amount to overallocate by when realloc
                                  of dot array must be done.     
@@ -286,6 +288,8 @@ static int rcb_fn(
                                    to be assigned to each partition.    */
 )
 {
+
+
   const char yo[] = "rcb_fn";
   int     proc,nprocs;              /* my proc id, total # of procs */
   struct Dot_Struct *dotpt;         /* temporary pointer to rcb->Dots. */

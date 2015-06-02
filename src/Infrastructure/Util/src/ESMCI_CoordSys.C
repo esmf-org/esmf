@@ -129,6 +129,7 @@ template <class TYPE>
   } else if (cs==ESMC_COORDSYS_SPH_DEG) {
     double lon = in_coord[0];
     double lat = in_coord[1];
+
     const double ninety = 90.0;
     double theta = lon*ESMC_CoordSys_Deg2Rad;
     double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
@@ -142,6 +143,7 @@ template <class TYPE>
       cart_coord[1] *= in_coord[2];
       cart_coord[2] *= in_coord[2];
     }
+    
   } else if (cs==ESMC_COORDSYS_SPH_RAD) {
     const double half_pi = 0.5*M_PI;
     double theta = in_coord[0];

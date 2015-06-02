@@ -300,7 +300,6 @@ struct SearchData {
 
 
 
-
 struct CommData {
   double closest_dist;
   int closest_dst_gid;

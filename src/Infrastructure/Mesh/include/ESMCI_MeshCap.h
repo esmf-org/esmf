@@ -26,7 +26,7 @@
 
 
 
-namespace ESMCI {
+ namespace ESMCI {
 
   class MeshCap {
 
@@ -35,12 +35,10 @@ namespace ESMCI {
   private:    
     MeshCap();
  
+  public:
     bool is_esmf_mesh;
     Mesh *mesh;     // Make 1 void pointer here for both
     void *mbmesh;
-
-  public:
-    // Inline functions
 
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
@@ -53,6 +51,9 @@ namespace ESMCI {
       }
     }
 
+    void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
+                                   ESMCI::InterfaceInt *maskValuesArg, PointList **out_pl,
+                                   int *rc);
 
     static MeshCap *create_from_ptr(void **_mesh, 
                              bool _is_esmf_mesh, int *rc);
@@ -181,25 +182,20 @@ namespace ESMCI {
 
     static MeshCap *meshcreatedual(MeshCap **src_meshpp, int *rc);
 
-#ifdef PNTLIST
-    // This method converts a Mesh to a PntList
-    void meshtopntlist(PntList **plpp, int *rc);
-#endif
-
     static void regrid_create(ESMCI::VM **vmpp,
-                         MeshCap **meshsrcpp, ESMCI::Array **arraysrcpp,
-                         MeshCap **meshdstpp, ESMCI::Array **arraydstpp,
-                         int *regridMethod, 
-                         int *map_type,
-                         int *norm_type,
-                         int *regridPoleType, int *regridPoleNPnts,  
-                         int *regridScheme, 
-                         int *unmappedaction, int *_ignoreDegenerate,
-                         int *srcTermProcessing, int *pipelineDepth, 
-                         ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                         int *nentries, ESMCI::TempWeights **tweights,
-                         int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                         int*rc);
+	      MeshCap **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+	      MeshCap **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+              int *regridMethod, 
+	      int *map_type,
+              int *norm_type,
+              int *regridPoleType, int *regridPoleNPnts,  
+              int *regridScheme, 
+              int *unmappedaction, int *_ignoreDegenerate,
+              int *srcTermProcessing, int *pipelineDepth, 
+              ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+              int *nentries, ESMCI::TempWeights **tweights,
+              int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+              int*rc);
 
     static void regrid_getiwts(ESMCI::VM **vmpp, Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

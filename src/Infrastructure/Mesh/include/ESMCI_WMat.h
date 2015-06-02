@@ -13,6 +13,7 @@
 #define ESMCI_WMat_h
 
 #include <Mesh/include/ESMCI_Migrator.h>
+#include "PointList/include/ESMCI_PointList.h"
 
 #include <ostream>
 
@@ -105,6 +106,7 @@ public:
    * mesh.
    */
   void Migrate(Mesh &mesh);
+  void Migrate(PointList &plist);
   void MigrateToElem(Mesh &mesh);
   
   // Return the number of rows that use this id

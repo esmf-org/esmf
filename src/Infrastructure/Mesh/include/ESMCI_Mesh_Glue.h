@@ -44,9 +44,6 @@
 #include "Mesh/include/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
-#ifdef PNTLIST
-#include "Mesh/include/ESMCI_PntList.h"
-#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -206,10 +203,5 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
                         int *rc);
 
 void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc);
-
-#ifdef PNTLIST
-// This method converts a Mesh to a PntList
-void ESMCI_meshtopntlist(Mesh **meshpp, PntList **plpp, int *rc);
-#endif
 
 #endif // ESMCI_Mesh_Glue_h

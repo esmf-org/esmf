@@ -1,0 +1,264 @@
+// $Id$
+//
+// Earth System Modeling Framework
+// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMF_FILENAME "ESMCI_PntList.C"
+//==============================================================================
+//
+// PntList class implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// Holds a list of points
+//
+// The code in this file implements the C++ PntList methods declared
+// in the companion file ESMCI_PntList.h
+//
+//-----------------------------------------------------------------------------
+
+// include associated header file
+#include <PntList/include/ESMCI_PntList.h>
+
+#include <stdlib.h>
+
+// include ESMF headers                                                                         
+#include "ESMCI_Macros.h"
+//#include "ESMCI_Array.h"
+//#include "ESMCI_ArrayBundle.h"
+
+// LogErr headers
+#include "ESMCI_LogErr.h"                  // for LogErr
+
+using namespace std;
+
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = 
+  "$Id$";
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PntList()"
+  //BOPI
+  // !IROUTINE:  PntList
+  //
+  // !INTERFACE:
+  PntList::PntList(
+  //
+  // !RETURN VALUE:
+  //    Pointer to a new PntList
+  //
+  // !ARGUMENTS:
+		   int _max_num_pts,
+		   int _coord_dim
+		   ){
+    //
+    // !DESCRIPTION:
+    //   Construct PntList
+    //EOPI
+    //-----------------------------------------------------------------------------
+    // Set values
+    coord_dim=_coord_dim;
+    max_num_pts=_max_num_pts;
+    curr_num_pts=0;
+
+    // allocate memory
+    coords=NULL;
+    ids=NULL;
+    if (max_num_pts>0) {
+      coords=new double [coord_dim*max_num_pts];
+      ids=new int [max_num_pts];
+    }
+
+    // return successfully
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::~PntList()"
+  //BOPI
+  // !IROUTINE:  ~PntList
+  //
+  // !INTERFACE:
+  PntList::~PntList(void){
+  //
+  // !RETURN VALUE:
+  //    none
+  //
+  // !ARGUMENTS:
+  // none
+  //
+  // !DESCRIPTION:
+  //  Destructor for PntList, deallocates all internal memory, etc.
+  //
+  //EOPI
+  //-----------------------------------------------------------------------------
+
+  // Reset default values
+
+    max_num_pts=0;
+    curr_num_pts=0;
+    coord_dim=0;
+
+    // Deallocate memory
+    if (coords!=NULL) delete [] coords;
+    coords=NULL;
+
+    if (ids!=NULL) delete [] ids;
+    ids=NULL;
+  }
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PntList::create()"
+//BOP
+// !IROUTINE:  ESMCI::PntList::create - Create a new PntList
+//
+// !INTERFACE:
+PntList *PntList::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated PntList
+//
+// !ARGUMENTS:
+			 int *maxpts,
+			 int *numdims,
+			 int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Allocate memory for a new PntList object and initialize it. 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  
+  PntList *pntlist;
+  try{
+
+    pntlist = new PntList(*maxpts,*numdims);
+
+  } catch(...) {
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::PntList.", ESMC_CONTEXT, rc);  
+    return NULL;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return pntlist;
+}
+//-----------------------------------------------------------------------------
+
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PntList::add()"
+  //BOP
+  // !IROUTINE:  add
+  //
+  // !INTERFACE:
+  int PntList::add(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+		    int _id,
+		    double *_coord
+		    ) {
+    //
+    // !DESCRIPTION:
+    // Add a point to the PntList.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    // Error check
+    if (curr_num_pts > max_num_pts-1) {
+      // Throw() << "PntList full";
+    }
+
+    // IF START EXTENDING POINT LIST WHEN OVER SIZE, THEN SWITCH TO VECTORS
+
+    // Add point id
+    ids[curr_num_pts]=_id;
+
+    // Add point coords
+    double *pnt_coord_base=coords+coord_dim*curr_num_pts;
+    for (int i=0; i<coord_dim; i++) {
+      pnt_coord_base[i]=_coord[i];
+    }
+
+    // Advance to next position
+    curr_num_pts++;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PntList::diagprint()"
+  //BOP
+  // !IROUTINE:  diagprint
+  //
+  // !INTERFACE:
+  int PntList::diagprint(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+			  ) {
+    //
+    // !DESCRIPTION:
+    // Add a point to the PntList.
+    //
+    //EOP
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    for (int i=0; i<curr_num_pts; i++) {
+      printf("id= %d   coords= ",ids[i]);
+      for (int j=0; j<coord_dim; j++) {
+    	printf("%.4f  ",coords[i*coord_dim+j]);
+      }
+      printf("\n\n\n");
+    }
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+
+
+
+
+} // namespace ESMCI

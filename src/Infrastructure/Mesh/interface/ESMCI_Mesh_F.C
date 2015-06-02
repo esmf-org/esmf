@@ -29,9 +29,6 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
-#ifdef PNTLIST
-#include "Mesh/include/ESMCI_PntList.h"
-#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.

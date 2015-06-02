@@ -24,14 +24,14 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
-#include <time.h>
+#include <sys/time.h>
 #include "ESMCI.h"
 #include "ESMC.h"
 
 // associated class definition file
 #include "ESMCI_Test.h"
 
-double start_time;
+timeval  start_time;
 int PETnum;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -136,7 +136,8 @@ int TestEnd(
   int rc;
   char msgbuf[ESMF_MAXSTR];
   ESMCI::LogErr *whichLog;
-  double end_time, elapsed_time;
+  timeval  end_time;
+  double  elapsed_time;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -165,8 +166,8 @@ int TestEnd(
   }
 
   // Calculate & print test elapsed time.
-  end_time = clock();
-  elapsed_time = end_time - start_time;
+  gettimeofday(&end_time, NULL);
+  elapsed_time = (end_time.tv_sec - start_time.tv_sec) ;
   sprintf(msgbuf, " PET %d Test Elapsed Time  %f \n", PETnum, elapsed_time);
   fprintf(stdout, "%s", msgbuf);
  
@@ -460,7 +461,7 @@ int TestStart(
   }
 
   // Get test start time
-  start_time = clock();
+  gettimeofday(&start_time, NULL);
 
   globalVM = ESMCI::VM::getGlobal(&rc);
   if ((globalVM == NULL) || (rc != ESMF_SUCCESS)) {

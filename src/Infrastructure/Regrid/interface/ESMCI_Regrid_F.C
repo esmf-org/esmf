@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
+// Copyright 2002-2015, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -24,6 +24,7 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_PointList.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h"
@@ -32,7 +33,6 @@
 #include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
-
 
 //------------------------------------------------------------------------------
 //BOP
@@ -47,8 +47,14 @@ using namespace ESMCI;
 
 
 extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
-                                            MeshCap **meshsrcpp, ESMCI::Array **arraysrcpp,
-                                            MeshCap **meshdstpp, ESMCI::Array **arraydstpp,
+                                            MeshCap **meshsrcpp, 
+					    ESMCI::Array **arraysrcpp,
+ 					    ESMCI::PointList **plsrcpp,
+                                            int *src_pl_used, 
+                                            MeshCap **meshdstpp, 
+					    ESMCI::Array **arraydstpp,
+					    ESMCI::PointList **pldstpp, 
+                                            int *dst_pl_used,
                                             int *regridMethod, 
                                             int *map_type,
                                             int *norm_type,
@@ -63,21 +69,33 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
 
-MeshCap::regrid_create(vmpp,
-                       meshsrcpp, arraysrcpp,
-                       meshdstpp, arraydstpp,
-                       regridMethod, 
-                       map_type,
-                       norm_type,
-                       regridPoleType, regridPoleNPnts,  
-                       regridScheme, 
-                       unmappedaction, _ignoreDegenerate,
-                       srcTermProcessing, pipelineDepth, 
-                       rh, has_rh, has_iw,
-                       nentries, tweights,
-                       has_udl, _num_udl, _tudl, 
-                       rc);
+  // Nullify Mesh or PointList based on usage
+  if (*src_pl_used==1) {
+    *meshsrcpp=NULL;
+  } else {
+    *plsrcpp=NULL;
+  }
 
+  if (*dst_pl_used==1) {
+    *meshdstpp=NULL;
+  } else {
+    *pldstpp=NULL;
+  }
+
+MeshCap::regrid_create(vmpp,
+		       meshsrcpp, arraysrcpp, plsrcpp,
+		       meshdstpp, arraydstpp, pldstpp, 
+		       regridMethod, 
+		       map_type,
+		       norm_type,
+		       regridPoleType, regridPoleNPnts,  
+		       regridScheme, 
+		       unmappedaction, _ignoreDegenerate,
+		       srcTermProcessing, pipelineDepth, 
+		       rh, has_rh, has_iw,
+		       nentries, tweights,
+		       has_udl, _num_udl, _tudl, 
+		       rc);
 }
 
 extern "C" void FTN_X(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
@@ -85,12 +103,9 @@ extern "C" void FTN_X(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()" 
-
   MeshCap::regrid_getiwts(vmpp, gridpp,
-                          meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
-
-
+			  meshpp, arraypp, staggerLoc,
+			  regridScheme, rc);
 }
 
 
@@ -99,25 +114,20 @@ extern "C" void FTN_X(c_esmc_regrid_getarea)(Grid **gridpp,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()" 
-
-
   MeshCap::regrid_getarea(gridpp,
-                          meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
-
-
+			  meshpp, arraypp, staggerLoc,
+			  regridScheme, rc);
 }
+
 
 extern "C" void FTN_X(c_esmc_regrid_getfrac)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getfrac()" 
-
-
   MeshCap::regrid_getfrac(gridpp,
-                          meshpp, arraypp, staggerLoc,
-                          rc);
+			  meshpp, arraypp, staggerLoc,
+			  rc);
 }
 
 

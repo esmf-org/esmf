@@ -18,11 +18,16 @@
 #include "Mesh/include/ESMCI_SparseMsg.h"
 #include "Mesh/include/ESMCI_ParEnv.h"
 #include "Mesh/include/ESMCI_GlobalIds.h"
+#include "PointList/include/ESMCI_PointList.h"
+#include "Util/include/ESMC_Util.h"
+#include "Util/include/ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
 #include <bitset>
 #include <cstdio>
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -1805,5 +1810,173 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
   crel.swap_op<MeshObj::OwnerType, ActField<OwnerAction> >(1, &afp, CommRel::OP_MIN);
   
 }
+
+// This method converts a Mesh to a PointList
+ ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Mesh::MeshToPointList()"
+
+   ESMCI::PointList *plp = NULL;
+
+   int localrc;
+   MEField<> *cfield;
+   MEField<> *src_mask_val;
+   Mesh::MeshObjIDMap::const_iterator mb,mi,me;
+
+   // Initialize the parallel environment for mesh (if not already done)
+   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
+     throw localrc;  // bail out with exception
+
+
+   if (meshLoc == ESMC_MESHLOC_NODE) {
+
+     //     cfield = GetCoordField();
+     cfield = GetField("coordinates");
+     if (cfield == NULL) {
+       int localrc;
+       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+					"- mesh node coordinates unavailable",
+					ESMC_CONTEXT, &localrc)) throw localrc;
+     }
+     mb = map_begin(MeshObj::NODE);
+     me = map_end(MeshObj::NODE);
+
+     src_mask_val = GetField("node_mask_val");
+
+   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+
+     //need check here to see that elem coordinates are set
+     cfield = GetField("elem_coordinates");
+     if (cfield == NULL) {
+
+
+       cfield = GetField("coordinates");
+
+       int localrc;
+       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+					"- mesh element coordinates unavailable",
+					ESMC_CONTEXT, &localrc)) throw localrc;
+     }
+     mb = map_begin(MeshObj::ELEMENT);
+     me = map_end(MeshObj::ELEMENT);
+
+     src_mask_val = GetField("elem_mask_val");
+
+   } else {
+     //unknown meshLoc
+     int localrc;
+     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+				      "- illegal value specified for mesh location",
+				      ESMC_CONTEXT, &localrc)) throw localrc;
+   }
+
+   int numMaskValues;
+   int *ptrMaskValues;
+
+   if (src_mask_val==NULL) {         //no masking info in mesh
+     //if (maskValuesArg!=NULL) {
+     //  int localrc;
+     //  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+     //				"- mask values provided but no mask info in mesh",
+     //				ESMC_CONTEXT, &localrc)) throw localrc;
+     //}
+
+     int num_local_pts=0;
+     for (mi=mb; mi != me; ++mi) {
+       const MeshObj &obj = *mi;
+
+       if (GetAttr(obj).is_locally_owned()) {
+	 num_local_pts++;
+       }
+     }
+   
+     // Create PointList
+     plp = new PointList(num_local_pts,spatial_dim());
+
+     // Loop through adding local nodes
+     for (mi=mb; mi != me; ++mi) {
+       const MeshObj &obj = *mi;
+
+       if (GetAttr(obj).is_locally_owned()) {
+	 double *coords=cfield->data(obj);
+	 plp->add(obj.get_id(),coords);
+       }
+     }
+
+
+   } else {
+
+     if (present(maskValuesArg)) {
+       numMaskValues=maskValuesArg->extent[0];
+       ptrMaskValues=&(maskValuesArg->array[0]);
+     } else {
+       numMaskValues=0;
+       ptrMaskValues = NULL;
+     }
+
+     int num_local_pts=0;
+     for (mi=mb; mi != me; ++mi) {
+       const MeshObj &obj = *mi;
+
+       if (GetAttr(obj).is_locally_owned()) {
+	 double *mv=src_mask_val->data(*mi);
+         int mv_int = (int)((*mv)+0.5);
+
+	 // Only put objects in if they're not masked
+	 bool mask=false;
+	 for (int i=0; i<numMaskValues; i++) {
+	   int mvi=ptrMaskValues[i];
+
+           if (mv_int == mvi) {
+	     mask=true;
+	     break;
+	   }
+	 }
+	 if (!mask)
+	   num_local_pts++;
+       }
+     }
+   
+     // Create PointList
+     plp = new PointList(num_local_pts,spatial_dim());
+
+     // Loop through adding local nodes
+     for (mi=mb; mi != me; ++mi) {
+       const MeshObj &obj = *mi;
+
+       if (GetAttr(obj).is_locally_owned()) {
+	 double *mv=src_mask_val->data(*mi);
+	 int mv_int = (int)((*mv)+0.5);
+       
+	 // Only put objects in if they're not masked
+	 bool mask=false;
+	 for (int i=0; i<numMaskValues; i++) {
+	   int mvi=ptrMaskValues[i];
+	     
+	   if (mv_int == mvi) {
+	     mask=true;
+	     break;
+	   }
+	 }
+	 if (!mask) {
+	   double *coords=cfield->data(obj);
+	   plp->add(obj.get_id(),coords);
+	 }
+       }
+     }
+   }
+
+
+   //delete iterator
+   //delete ni;
+   //delete ne;
+
+   if (rc!=NULL) *rc=ESMF_SUCCESS;
+   return plp;
+
+}
+
+
 
 } // namespace

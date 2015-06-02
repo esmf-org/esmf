@@ -27,6 +27,7 @@
 // include associated header file
 // For ESMF
 #include <Mesh/include/ESMCI_OTree.h>
+#include <stdio.h>
 
 // For testing
 //#include "ESMCI_OTree.h"
@@ -472,6 +473,7 @@ int OTree::runon(
     //  BECAUSE THERE IS NO THROW IN THIS FUNC, COMMENT THIS OUT FOR EFFICIENCY
     //  Trace __trace("OTree::_runon_onode()");
 
+
     // Calculate our search code based on search min-max and node min-max
     int search_code_2D=CALC_SEARCH_CODE_2D(ri->min,ri->max,node->min,node->max);
     int search_code_1D=CALC_SEARCH_CODE_1D(ri->min[2],ri->max[2],node->min[2],node->max[2]);
@@ -479,6 +481,7 @@ int OTree::runon(
     // if this node intersects, run function on data
     if (search_code_2D==INTERSECTION_SEARCH_CODE_2D &&
 	search_code_1D==INTERSECTION_SEARCH_CODE_1D) {
+
       int rc=ri->func(node->data,ri->func_data,ri->min,ri->max);
       if (rc) return rc;  // if return code is non-zero then return
     }
@@ -535,6 +538,8 @@ int OTree::runon_mm_chng(
 //-----------------------------------------------------------------------------
   Trace __trace("OTree::runon()");
 
+
+
   RUNON_INFO_MM_CHNG ri;
 
   // Make sure that this has been committed
@@ -564,13 +569,3 @@ int OTree::runon_mm_chng(
 
 } // END ESMCI name space
 //-----------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-

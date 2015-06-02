@@ -16,6 +16,9 @@
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMCI_CommReg.h>
+#include "Util/include/ESMCI_F90Interface.h"
+#include "PointList/include/ESMCI_PointList.h"
+#include "ESMCI_Field.h"
 #include "ESMCI_CoordSys.h"
 
 #include <map>
@@ -107,6 +110,8 @@ void proxy_build_sym_comm_rel(UInt obj_type);
  * The spec is left unchanged.
  */
 void resolve_cspec_delete_owners(UInt obj_type);
+
+ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc);
 
   public: 
 // STUFF FOR SPLIT MESH

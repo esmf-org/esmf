@@ -29,6 +29,7 @@
 #include <Mesh/include/ESMCI_Search.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <ESMCI_VM.h>
+#include <PointList/include/ESMCI_PointList.h>
  
 #include <algorithm>
 #include <iterator>
@@ -116,9 +117,7 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   // No need to compute rendezvous meshes running uni. Make sure things are scoped correctly.
   if(npet > 1){
     // Build the rendezvous meshes and compute search result
-    std::vector<Interp::FieldPair> fpairs;
-    fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_CONSERVE));
-    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, MAP_TYPE_CART_APPROX, unmappedaction);
+    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, MAP_TYPE_CART_APPROX, unmappedaction);
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());
@@ -304,9 +303,7 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   // No need to compute rendezvous meshes running uni. Make sure things are scoped correctly.
   if(npet > 1){
     // Build the rendezvous meshes and compute search result
-    std::vector<Interp::FieldPair> fpairs;
-    fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_CONSERVE));
-    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, MAP_TYPE_CART_APPROX, unmappedaction);
+    interp = new Interp(&dstmesh, NULL, &srcmesh, NULL, NULL, true, Interp::INTERP_CONSERVE, MAP_TYPE_CART_APPROX, unmappedaction);
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());

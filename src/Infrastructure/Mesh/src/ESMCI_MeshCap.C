@@ -26,7 +26,7 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Mesh.h"
-#include "ESMCI_VM.h"
+   #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
@@ -35,14 +35,11 @@
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
- #ifdef PNTLIST
-#include "Mesh/include/ESMCI_PntList.h"
-#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
 // static const char *const version = "$Id$";
-//-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
 
 
 using namespace ESMCI;
@@ -54,7 +51,30 @@ using namespace ESMCI;
 // Private constructor
  MeshCap::MeshCap() : is_esmf_mesh(false), mesh(NULL) {
 
-} 
+  } 
+
+
+// This method converts a Mesh to a PointList
+void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc, 
+                                   ESMCI::InterfaceInt *maskValuesArg, PointList **out_pl,
+                                   int *rc) {
+ 
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    int localrc;
+    *out_pl=mesh->MeshToPointList(meshLoc, 
+                                  maskValuesArg, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+
+    } else {
+     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 
  
 // returns NULL if unsuccessful
@@ -81,7 +101,7 @@ MeshCap *MeshCap::create_from_ptr(void **_mesh,
   if (rc) *rc=ESMF_SUCCESS;
 
   // Output new MeshCap
-  return mc;
+   return mc;
 } 
 
 void MeshCap::xgrid_getfrac(Grid **gridpp,
@@ -109,7 +129,7 @@ void MeshCap::xgrid_getfrac2(Grid **gridpp,
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     ESMCI_xgrid_getfrac2(gridpp,
-                         &mesh, arraypp, staggerLoc,
+                           &mesh, arraypp, staggerLoc,
                          rc);
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -363,58 +383,121 @@ void MeshCap::regrid_getfrac(Grid **gridpp,
 
                            
 void MeshCap::regrid_create(ESMCI::VM **vmpp,
-                       MeshCap **meshsrcpp, ESMCI::Array **arraysrcpp,
-                       MeshCap **meshdstpp, ESMCI::Array **arraydstpp,
-                       int *regridMethod, 
-                       int *map_type,
-                       int *norm_type,
-                       int *regridPoleType, int *regridPoleNPnts,  
-                       int *regridScheme, 
-                       int *unmappedaction, int *_ignoreDegenerate,
-                       int *srcTermProcessing, int *pipelineDepth, 
-                       ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                       int *nentries, ESMCI::TempWeights **tweights,
-                       int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                       int*rc) {
+		    MeshCap **mcapsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
+		    MeshCap **mcapdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+		    int *regridMethod, 
+                    int *map_type,
+                    int *norm_type,
+                    int *regridPoleType, int *regridPoleNPnts,  
+                    int *regridScheme, 
+                    int *unmappedaction, int *_ignoreDegenerate,
+                    int *srcTermProcessing, int *pipelineDepth, 
+                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                    int *nentries, ESMCI::TempWeights **tweights,
+                    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                    int*rc) {
 
-  // Can only do if the same kind
-  if ((*meshsrcpp)->is_esmf_mesh != (*meshdstpp)->is_esmf_mesh) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- can't do this operation with different mesh types",
-                                  ESMC_CONTEXT, rc);
-    return;
+
+  // Variables needed below
+  bool is_esmf_mesh;
+  //void **mesh_src_pp=NULL;
+  //void **mesh_dst_pp=NULL;
+  void *mesh_src_p;
+  void *mesh_dst_p;
+
+   
+  // Handle case where incoming meshes are null
+  if (*mcapsrcpp != NULL) {
+    if (*mcapdstpp != NULL) {
+      // Can only do if the same kind
+      if ((*mcapsrcpp)->is_esmf_mesh != (*mcapdstpp)->is_esmf_mesh) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+            " - can't do this operation with different mesh types",
+                                      ESMC_CONTEXT, rc);
+        return;
+      }
+
+      // Get mesh type
+      is_esmf_mesh=(*mcapsrcpp)->is_esmf_mesh;
+
+      // Get Mesh **
+      if (is_esmf_mesh) {
+        mesh_src_p=(void *)(*mcapsrcpp)->mesh;
+        mesh_dst_p=(void *)(*mcapdstpp)->mesh;     
+      } else {
+        mesh_src_p=&((*mcapsrcpp)->mbmesh);
+        mesh_dst_p=&((*mcapdstpp)->mbmesh);     
+      }
+    } else {
+      // Get mesh type
+      is_esmf_mesh=(*mcapsrcpp)->is_esmf_mesh;
+
+      // Get Mesh **
+      if (is_esmf_mesh) {
+        mesh_src_p=(void *)(*mcapsrcpp)->mesh;
+      } else {
+        mesh_src_p=&((*mcapsrcpp)->mbmesh);
+      }
+      //mesh_dst_pp=NULL;
+      mesh_dst_p=NULL;
+    } 
+  } else {
+    if (*mcapdstpp != NULL) {
+      // Get mesh type
+      is_esmf_mesh=(*mcapdstpp)->is_esmf_mesh;
+
+      // Get Mesh **
+      //mesh_src_pp=NULL;
+      mesh_src_p=NULL;
+      if (is_esmf_mesh) {
+        mesh_dst_p=(void *)(*mcapdstpp)->mesh;     
+      } else {
+        mesh_dst_p=&((*mcapdstpp)->mbmesh);     
+      }
+    } else {
+      // Get mesh type
+      is_esmf_mesh=true; // ESMF MESH CAN HANDLE, SO USE THAT
+
+     // Get Mesh **
+      //mesh_src_pp=NULL;
+      //mesh_dst_pp=NULL;  
+      mesh_src_p=NULL;
+      mesh_dst_p=NULL;
+     } 
   }
-  
-  // Get mesh type
-  bool is_esmf_mesh=(*meshsrcpp)->is_esmf_mesh;
+
+
+
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
     int localrc;
     ESMCI_regrid_create(vmpp,
-                     &((*meshsrcpp)->mesh), arraysrcpp,
-                     &((*meshdstpp)->mesh), arraydstpp,
-                     regridMethod, 
-                     map_type,
-                     norm_type,
-                     regridPoleType, regridPoleNPnts,  
-                     regridScheme, 
-                     unmappedaction, _ignoreDegenerate,
-                     srcTermProcessing, pipelineDepth, 
-                     rh, has_rh, has_iw,
-                     nentries, tweights,
-                     has_udl, _num_udl, _tudl, 
-                     &localrc);
+			//                        &(Mesh *)mesh_src_p, arraysrcpp, plsrcpp,
+                        //&(Mesh *)mesh_dst_p, arraydstpp, pldstpp,
+                        (Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
+                        (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
+                        regridMethod, 
+                        map_type,
+                        norm_type,
+                        regridPoleType, regridPoleNPnts,  
+                        regridScheme, 
+                        unmappedaction, _ignoreDegenerate,
+                        srcTermProcessing, pipelineDepth, 
+                        rh, has_rh, has_iw,
+                        nentries, tweights,
+                        has_udl, _num_udl, _tudl, 
+                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
 #ifdef ESMF_MOAB 
     int localrc;
     MBMesh_regrid_create(vmpp,
-                         &((*meshsrcpp)->mbmesh), arraysrcpp,
-                         &((*meshdstpp)->mbmesh), arraydstpp,
+                         &mesh_src_p, arraysrcpp,
+                         &mesh_dst_p, arraydstpp,
                          regridMethod, 
-                         map_type,
+                          map_type,
                          norm_type,
                          regridPoleType, regridPoleNPnts,  
                          regridScheme, 
@@ -450,7 +533,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
                      pdim, sdim, 
                      coordSys, &localrc);    
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                      ESMC_CONTEXT, rc)) return NULL;
+                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
 #ifdef ESMF_MOAB 
     MBMesh_create(&mbmesh,
@@ -1192,25 +1275,6 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   // Output new MeshCap
   return mc;
 }
-
-
-#ifdef PNTLIST
-// This method converts a Mesh to a PntList
-void MeshCap::meshtopntlist(PntList **plpp, int *rc) {
-
-  // Call into func. depending on mesh type
-  if (is_esmf_mesh) {
-    ESMCI_meshtopntlist(mesh, plpp, rc);
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
-  }
-
-
-}
-#endif
 
 void MeshCap::destroy(MeshCap **mcpp,int *rc) {
 

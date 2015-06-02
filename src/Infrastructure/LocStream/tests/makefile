@@ -6,12 +6,18 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/LocStream/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LocStreamUTest
+TESTS_BUILD   = \
+	$(ESMF_TESTDIR)/ESMF_LocStreamUTest \
+	$(ESMF_TESTDIR)/ESMC_LocStreamUTest
 
 
-TESTS_RUN     = RUN_ESMF_LocStreamUTest 
+TESTS_RUN     = \
+	RUN_ESMF_LocStreamUTest \
+	RUN_ESMC_LocStreamUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_LocStreamUTestUNI 
+TESTS_RUN_UNI = \
+	RUN_ESMF_LocStreamUTestUNI \
+	RUN_ESMC_LocStreamUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -33,7 +39,8 @@ RUN_ESMF_LocStreamUTest:
 RUN_ESMF_LocStreamUTestUNI:
 	$(MAKE) TNAME=LocStream NP=1 ftest
 
+RUN_ESMC_LocStreamUTest:
+	$(MAKE) TNAME=LocStream NP=4 ctest
 
-
-
-
+RUN_ESMC_LocStreamUTestUNI:
+	$(MAKE) TNAME=LocStream NP=1 ctest

@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
   // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
   srcmesh.CreateGhost();
   
-  Interp interp(srcmesh, dstmesh, 0, false, fpairs);
+  Interp interp(&srcmesh, NULL, &dstmesh, NULL, 0, false, Interp::INTERP_PATCH);
   
 
   UInt nstep = 0;

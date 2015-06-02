@@ -56,6 +56,7 @@ module ESMF
 
     use ESMF_GridMod
     use ESMF_GridUtilMod
+!    use ESMF_PntListMod
     use ESMF_StaggerLocMod
 
     use ESMF_LocStreamMod

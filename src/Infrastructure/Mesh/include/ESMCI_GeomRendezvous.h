@@ -17,9 +17,9 @@
 #include <Mesh/include/ESMCI_CommReg.h>
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MEField.h>
+#include "PointList/include/ESMCI_PointList.h"
 
 #include <Mesh/src/Zoltan/zoltan.h>
-
 namespace ESMCI {
 
 class BBox;
@@ -44,7 +44,9 @@ public:
          double geom_tol;
   };
 
-  GeomRend(Mesh &srcmesh, Mesh &dstmesh, const DstConfig &config, bool freeze_src_=false);
+  GeomRend(Mesh *srcmesh, PointList *_srcplist, 
+	   Mesh *dstmesh, PointList *_dstplist,
+	   const DstConfig &config, bool freeze_src_=false);
   ~GeomRend();
 
   /*
@@ -60,15 +62,19 @@ public:
   void Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp);
 
   struct ZoltanUD {
-  ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,bool _iter_is_obj) :
+  ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,PointList *_src_pointlist, PointList *_dst_pointlist, bool _iter_is_obj) :
       coord_src(_coord_src),
       coord_dst(_coord_dst),
+	src_pointlist(_src_pointlist),
+	dst_pointlist(_dst_pointlist),
 	sdim(_sdim), 
 	iter_is_obj(_iter_is_obj) {}
     std::vector<MeshObj*> srcObj;
     std::vector<MeshObj*> dstObj;
     MEField<> *coord_src;
     MEField<> *coord_dst;
+    PointList *src_pointlist;
+    PointList *dst_pointlist;
     UInt sdim;
     bool iter_is_obj;
   };
@@ -76,7 +82,10 @@ public:
   Mesh &GetSrcRend() { return srcmesh_rend; }
   
   Mesh &GetDstRend() { return dstmesh_rend; } 
-  
+
+  PointList &GetDstPlistRend() { return *dstplist_rend; }
+  PointList &GetSrcPlistRend() { return *srcplist_rend; }
+
   CommReg &GetSrcComm() { return srcComm; }
   CommReg &GetDstComm() { return dstComm; }
   
@@ -94,6 +103,7 @@ private:
 
   // Build up the set of destination points and the coordinate box.
   void build_dest(double cmin[], double cmax[], ZoltanUD &zud);
+  void build_dest_plist(double cmin[], double cmax[], PointList *dstpointlist);
 
   // Build the source elements
   void build_src(const BBox &dstBound, ZoltanUD &zud);
@@ -103,19 +113,33 @@ private:
 
   void build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud);
 
+  void build_src_mig_plist(ZoltanUD &zud, int numExport,
+			   ZOLTAN_ID_PTR exportGids, 
+			   int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids);
+
+
   void build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
                 ZOLTAN_ID_PTR exportLids, ZOLTAN_ID_PTR exportGids, int *exportProcs);
+
+  void build_dst_mig_plist(ZoltanUD &zud, int numExport,
+			   ZOLTAN_ID_PTR exportGids, 
+			   int *exportProcs, int numImport, ZOLTAN_ID_PTR importGids);
                 
   void prep_meshes();
   
   void migrate_meshes();
 
   // Data
-  Mesh &srcmesh;
-  Mesh &dstmesh;
+  Mesh *srcmesh;
+  PointList *srcplist;
+  Mesh *dstmesh;
+  PointList *dstplist;
 
   Mesh srcmesh_rend;
   Mesh dstmesh_rend;
+
+  PointList *srcplist_rend;
+  PointList *dstplist_rend;
   
   DstConfig dcfg;
   
