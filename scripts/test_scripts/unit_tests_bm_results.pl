@@ -290,8 +290,8 @@ use File::Find
                                         $PC=$ans*100;
                                         chomp($file);
                                         system ("echo 'PASS: $file' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Test elapsed time: $test_ET sec.' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Benchmark elapsed time: $bm_ET sec.' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '' >> $TEST_DIR/bm_pass_info ");
 				} elsif ( $rc == 1 ) {
@@ -302,8 +302,8 @@ use File::Find
 					$PC=$ans*100;
 					chomp($file);
 					system ("echo 'FAIL: $file' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Test elapsed time: $test_ET sec.' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Benchmark elapsed time: $bm_ET sec.' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '' >> $TEST_DIR/bm_fail_info ");
 				} elsif ( $rc == 2 ) {
