@@ -2607,16 +2607,15 @@ contains
         return
       endif
 
-      my_err1 = abs(test_coords(1) - .5) 
-      my_err2 = abs(test_coords(2) - .866) 
-      my_err3 = abs(test_coords(3) - 0) 
+      my_err1 = abs(test_coords(1) - 0.5) 
+      my_err2 = abs(test_coords(2) - 0.866) 
+      my_err3 = abs(test_coords(3) - 0.0) 
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001 .or. my_err3 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
         print*,'expected ( 0.5 , 0.866 , 0 )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
         rc=ESMF_FAILURE
         return
       endif
-
     endif
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
@@ -2848,9 +2847,9 @@ contains
         return
       endif
 
-      my_err1 = abs(test_coords(1) - 0.5) 
-      my_err2 = abs(test_coords(2) - 0.866) 
-      my_err3 = abs(test_coords(3) - 0.0) 
+      my_err1 = abs(test_coords(1) - (-0.5)) 
+      my_err2 = abs(test_coords(2) - (-0.866)) 
+      my_err3 = abs(test_coords(3) - (-0.0)) 
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001 .or. my_err3 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
         print*,'expected ( 0.5 , 0.866 , 0 )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'

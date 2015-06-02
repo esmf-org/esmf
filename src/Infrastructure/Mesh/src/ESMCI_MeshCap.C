@@ -400,8 +400,6 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
 
   // Variables needed below
   bool is_esmf_mesh;
-  //void **mesh_src_pp=NULL;
-  //void **mesh_dst_pp=NULL;
   void *mesh_src_p;
   void *mesh_dst_p;
 
@@ -425,8 +423,8 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
         mesh_src_p=(void *)(*mcapsrcpp)->mesh;
         mesh_dst_p=(void *)(*mcapdstpp)->mesh;     
       } else {
-        mesh_src_p=&((*mcapsrcpp)->mbmesh);
-        mesh_dst_p=&((*mcapdstpp)->mbmesh);     
+        mesh_src_p=(*mcapsrcpp)->mbmesh;
+        mesh_dst_p=(*mcapdstpp)->mbmesh;     
       }
     } else {
       // Get mesh type
@@ -436,7 +434,7 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
       if (is_esmf_mesh) {
         mesh_src_p=(void *)(*mcapsrcpp)->mesh;
       } else {
-        mesh_src_p=&((*mcapsrcpp)->mbmesh);
+        mesh_src_p=(*mcapsrcpp)->mbmesh;
       }
       //mesh_dst_pp=NULL;
       mesh_dst_p=NULL;
@@ -452,15 +450,13 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
       if (is_esmf_mesh) {
         mesh_dst_p=(void *)(*mcapdstpp)->mesh;     
       } else {
-        mesh_dst_p=&((*mcapdstpp)->mbmesh);     
+        mesh_dst_p=(*mcapdstpp)->mbmesh;     
       }
     } else {
       // Get mesh type
       is_esmf_mesh=true; // ESMF MESH CAN HANDLE, SO USE THAT
 
      // Get Mesh **
-      //mesh_src_pp=NULL;
-      //mesh_dst_pp=NULL;  
       mesh_src_p=NULL;
       mesh_dst_p=NULL;
      } 
@@ -473,8 +469,6 @@ void MeshCap::regrid_create(ESMCI::VM **vmpp,
   if (is_esmf_mesh) {
     int localrc;
     ESMCI_regrid_create(vmpp,
-			//                        &(Mesh *)mesh_src_p, arraysrcpp, plsrcpp,
-                        //&(Mesh *)mesh_dst_p, arraydstpp, pldstpp,
                         (Mesh **)&mesh_src_p, arraysrcpp, plsrcpp,
                         (Mesh **)&mesh_dst_p, arraydstpp, pldstpp,
                         regridMethod, 
