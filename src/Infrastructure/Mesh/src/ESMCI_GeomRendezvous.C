@@ -488,7 +488,8 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
 
   std::vector<int> proc_counts;
   proc_counts.resize(num_procs,0);
-  std::vector<int> idx_list[num_procs];
+  std::vector< std::vector<int> > idx_list;
+  idx_list.resize(num_procs);
   int num_snd_pts=0;
   for (int i=0; i<numExport; i++) {
     if (exportGids[i*2]==0) {
@@ -719,7 +720,8 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 
   std::vector<int> proc_counts;
   proc_counts.resize(num_procs,0);
-  std::vector<int> idx_list[num_procs];
+  std::vector< std::vector<int> > idx_list;
+  idx_list.resize(num_procs);
   int num_snd_pts=0;
   for (int i=0; i<numExport; i++) {
     if (exportGids[i*2]==1) {
