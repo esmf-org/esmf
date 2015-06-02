@@ -1,4 +1,4 @@
 #!/bin/sh
 # this script expects the icpc command (or a wrapper to icpc, e.g. mpiCC)
 # and returns the required libraries to link against
-$1 -dryrun $ESMF_DIR/scripts/hello.C 2>&1 | sed 's/^ \{1,\}//g'| grep "^\-l" | grep -v "\-dryrun" | grep -v "\-linker" | grep -v "\-linux" | grep -v "mpi" | grep -v "\-lc " | sed 's/\\//g' | xargs
+$1 -dryrun $ESMF_DIR/scripts/hello.C 2>&1 | sed 's/^ \{1,\}//g'| grep "^\-l" | grep -v "\-dryrun" | grep -v "\-linker" | grep -v "\-linux" | grep -v "mpi" | grep -v "\-lc " | grep -v "\-lifcore" | sed 's/\\//g' | xargs
