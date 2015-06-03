@@ -23,7 +23,7 @@ module NUOPC
 
   use ESMF
   use NUOPC_Base
-  use NUOPC_RunSequenceDef
+!TODO: completely remove after CSC okay:  use NUOPC_RunSequenceDef
   use NUOPC_Comp
 
   implicit none
@@ -81,14 +81,14 @@ module NUOPC
   public NUOPC_UpdateTimestamp
   public NUOPC_Write
   
-  ! defined in NUOPC_RunSequenceDef
-  public NUOPC_RunElement
-  public NUOPC_RunElementAdd, NUOPC_RunElementAddComp, NUOPC_RunElementAddLink
-  public NUOPC_RunElementPrint
-  public NUOPC_RunSequence
-  public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
-  public NUOPC_RunSequenceDeallocate
-  public NUOPC_RunSequenceIterate
+!TODO: completely remove after CSC okay:  ! defined in NUOPC_RunSequenceDef
+!TODO: completely remove after CSC okay:  public NUOPC_RunElement
+!TODO: completely remove after CSC okay:  public NUOPC_RunElementAdd, NUOPC_RunElementAddComp, NUOPC_RunElementAddLink
+!TODO: completely remove after CSC okay:  public NUOPC_RunElementPrint
+!TODO: completely remove after CSC okay:  public NUOPC_RunSequence
+!TODO: completely remove after CSC okay:  public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
+!TODO: completely remove after CSC okay:  public NUOPC_RunSequenceDeallocate
+!TODO: completely remove after CSC okay:  public NUOPC_RunSequenceIterate
   
   ! defined in NUOPC_Comp
   public NUOPC_CompAreServicesSet  

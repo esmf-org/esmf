@@ -20,7 +20,8 @@ module NUOPC_Driver
 
   use ESMF
   use NUOPC
-
+  use NUOPC_RunSequenceDef
+  
   implicit none
   
   private

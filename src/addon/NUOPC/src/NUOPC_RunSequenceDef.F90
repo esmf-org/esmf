@@ -77,7 +77,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunElementAdd - Add a RunElement to the end of a RunSequence
 ! !INTERFACE:
   subroutine NUOPC_RunElementAdd(runSeq, i, j, phase, rc)
@@ -88,7 +88,7 @@ module NUOPC_RunSequenceDef
 ! !DESCRIPTION:
 !   Add a new RunElement at the end of an existing RunSequence. The RunElement
 !   is set to the values provided for {\tt i}, {\tt j}, {\tt phase}.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer                                :: stat
     type(NUOPC_RunElement), pointer        :: runElement
@@ -136,7 +136,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunElementAddComp - Add a RunElement for a Component to the end of a RunSequence
 ! !INTERFACE:
   subroutine NUOPC_RunElementAddComp(runSeq, i, j, phase, rc)
@@ -167,7 +167,7 @@ module NUOPC_RunSequenceDef
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer                                :: jLocal, pLocal
     
@@ -201,7 +201,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunElementAddLink - Add a RunElement for a Link to the end of a RunSequence
 ! !INTERFACE:
   subroutine NUOPC_RunElementAddLink(runSeq, slot, rc)
@@ -222,7 +222,7 @@ module NUOPC_RunSequenceDef
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -242,7 +242,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunElementPrint - Print info about a RunElement object
 ! !INTERFACE:
   subroutine NUOPC_RunElementPrint(runElement, logflag, rc)
@@ -254,7 +254,7 @@ module NUOPC_RunSequenceDef
 !   Write information about {\tt runElement}. If {\tt logflag} is set to 
 !   {\tt .true.}, the output goes to the default log file. By default the 
 !   output goes to stdout.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)    :: msgString
     logical                   :: logflagL
@@ -278,7 +278,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequenceAdd - Add more RunSequences to a RunSequence vector
 ! !INTERFACE:
   subroutine NUOPC_RunSequenceAdd(runSeq, addCount, rc)
@@ -290,7 +290,7 @@ module NUOPC_RunSequenceDef
 !   The incoming RunSequence vector {\tt runSeq} is extended by {\tt addCount}
 !   more RunSequence objects. The existing RunSequence objects are copied to the
 !   front of the new vector before the old vector is deallocated.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer :: i, sizeIn, stat
     type(NUOPC_RunSequence), pointer :: runSeqNew(:)
@@ -345,7 +345,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequenceDeallocate - Deallocate an entire RunSequence vector
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequenceDeallocate()
@@ -356,7 +356,7 @@ module NUOPC_RunSequenceDef
 ! !DESCRIPTION:
 !   Deallocate all of the RunElements in all of the RunSequence defined in the
 !   {\tt runSeq} vector.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer :: i
     
@@ -378,7 +378,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequenceDeallocate - Deallocate a single RunSequence object
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequenceDeallocate()
@@ -388,7 +388,7 @@ module NUOPC_RunSequenceDef
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
 !   Deallocate all of the RunElements in the RunSequence defined by {\tt runSeq}.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     type(NUOPC_RunElement), pointer :: searchElement
 
@@ -405,7 +405,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
   function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, loopFlag, rc)
@@ -433,7 +433,7 @@ module NUOPC_RunSequenceDef
 !
 !   The {\tt loopFlag} argument is set to {\tt .true.} if the forward step 
 !   looped back to the beginning of the RunSequence, {\tt .false.} otherwise.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     type(ESMF_Clock)  :: clock
     logical           :: clockIsStopTime
@@ -507,7 +507,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequencePrint - Print info about a single RunSequence object
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequencePrint()
@@ -520,7 +520,7 @@ module NUOPC_RunSequenceDef
 !   Write information about {\tt runSeq}. If {\tt logflag} is set to 
 !   {\tt .true.}, the output goes to the default log file. By default the 
 !   output goes to stdout.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)          :: msgString
     logical                         :: logflagL
@@ -565,7 +565,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequencePrint - Print info about a RunSequence vector
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequencePrint()
@@ -578,7 +578,7 @@ module NUOPC_RunSequenceDef
 !   Write information about the whole {\tt runSeq} vector. If {\tt logflag} is
 !   set to {\tt .true.}, the output goes to the default log file. By default
 !   the output goes to stdout.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)          :: msgString
     logical                         :: logflagL
@@ -606,7 +606,7 @@ module NUOPC_RunSequenceDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_RunSequenceSet - Set values inside a RunSequence object
 ! !INTERFACE:
   subroutine NUOPC_RunSequenceSet(runSeq, clock, rc)
@@ -616,7 +616,7 @@ module NUOPC_RunSequenceDef
     integer, optional,       intent(out)   :: rc
 ! !DESCRIPTION:
 !   Set the Clock member in {\tt runSeq}.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
     
