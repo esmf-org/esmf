@@ -35,7 +35,7 @@ class Grid(object):
                  add_corner_stagger=None,
                  add_user_area=None,
                  add_mask=None,
-                 varname="",
+                 varname=None,
                  coord_names=None):
         """
         Create a logically rectangular Grid object and optionally 
@@ -102,8 +102,7 @@ class Grid(object):
                          derived from the first 2D values of this variable even 
                          if this data is a 3D, or 4D array.  This 
                          argument is only supported with filetype 
-                         FileFormat.GRIDSPEC.  Defaults to the 
-                         empty string. \n
+                         FileFormat.GRIDSPEC.  Defaults to None. \n
                 coord_names:  A two-element array containing the longitude and 
                              latitude variable names in a GRIDSPEC file if there 
                              are multiple coordinates defined in the file. This 
@@ -159,7 +158,7 @@ class Grid(object):
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
                 warnings.warn("add_mask is only used for grids created from file, this argument will be ignored.")
-            if varname is not "":
+            if varname is not None:
                 warnings.warn("varname is only used for grids created from file, this argument will be ignored.")
             if coord_names:
                 warnings.warn("coord_names is only used for grids created from file, this argument will be ignored.")
@@ -244,7 +243,8 @@ class Grid(object):
                                                   isSphere=is_sphere,
                                                   addCornerStagger=add_corner_stagger,
                                                   addUserArea=add_user_area,
-                                                  addMask=add_mask, varname=varname,
+                                                  addMask=add_mask, 
+                                                  varname=varname,
                                                   coordNames=coord_names)
             # grid rank and dims
             if filetype == FileFormat.SCRIP:

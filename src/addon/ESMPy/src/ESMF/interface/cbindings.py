@@ -63,7 +63,7 @@ class OptionalArrayOfStrings(object):
             else:
                 lparam = None
             return lparam
-        
+
 # this class allows optional Fields to be passed in place of pointers to
 # ctypes structures
 class OptionalField(object):
@@ -400,7 +400,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
                             decompflag=None, isSphere=None, 
 			    addCornerStagger=None, addUserArea=None,
-                            addMask=None, varname="", coordNames=None):
+                            addMask=None, varname=None, coordNames=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_GridStruct has been created.\n
