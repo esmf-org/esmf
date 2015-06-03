@@ -1348,8 +1348,8 @@ contains
         idx_cart = (i-1) * regrid_dims + 1
         call c_ESMC_PointListSph2CartCoord(coordSysLocal, pntDim, &
                    pntList(idx),pntList_cart(idx_cart),localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-                               rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
 

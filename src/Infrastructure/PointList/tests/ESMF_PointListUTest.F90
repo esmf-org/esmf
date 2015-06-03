@@ -378,6 +378,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -504,12 +505,14 @@ contains
        return
     endif	
 
-    if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-       print*,'ERROR:  unexpected value for queried pointlist location:'
-       print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
-       rc=ESMF_FAILURE
-       return
-    endif	
+    my_err1 = abs(test_coordx - test_coords(1)) 
+    my_err2 = abs(test_coordy - test_coords(2)) 
+    if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+      print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      rc=ESMF_FAILURE
+      return
+    endif
 
     call ESMF_GridDestroy(myGrid, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -550,6 +553,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
 
     ! get global VM
@@ -705,12 +709,15 @@ contains
        return
     endif	
 
-    if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-       print*,'ERROR:  unexpected value for queried pointlist location:'
-       print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
-       rc=ESMF_FAILURE
-       return
-    endif	
+    my_err1 = abs(test_coordx - test_coords(1)) 
+    my_err2 = abs(test_coordy - test_coords(2)) 
+    if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+      print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      rc=ESMF_FAILURE
+      return
+    endif
+
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
@@ -758,6 +765,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -1098,13 +1106,14 @@ contains
        return
     endif
 
-    if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-       print*,'ERROR:  unexpected value for queried pointlist location:'
-       print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
-       rc=ESMF_FAILURE
-       return
+    my_err1 = abs(test_coordx - test_coords(1)) 
+    my_err2 = abs(test_coordy - test_coords(2)) 
+    if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+      print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      rc=ESMF_FAILURE
+      return
     endif
-
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -1146,6 +1155,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -1528,13 +1538,14 @@ contains
        return
     endif
 
-    if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-       print*,'ERROR:  unexpected value for queried pointlist location:'
-       print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
-       rc=ESMF_FAILURE
-       return
+    my_err1 = abs(test_coordx - test_coords(1)) 
+    my_err2 = abs(test_coordy - test_coords(2)) 
+    if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+      print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      rc=ESMF_FAILURE
+      return
     endif
-
     
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -1575,6 +1586,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
 
     ! get global VM
@@ -1938,13 +1950,14 @@ contains
        return
     endif
 
-    if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-       print*,'ERROR:  unexpected value for queried pointlist location:'
-       print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
-       rc=ESMF_FAILURE
-       return
+    my_err1 = abs(test_coordx - test_coords(1)) 
+    my_err2 = abs(test_coordy - test_coords(2)) 
+    if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+      print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      rc=ESMF_FAILURE
+      return
     endif
-
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
@@ -1992,6 +2005,7 @@ contains
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
     real(ESMF_KIND_R8) test_coordx,test_coordy
+    real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -2394,12 +2408,16 @@ contains
         return
       endif
 
-      if (test_coordx .ne. test_coords(1) .or. test_coordy .ne. test_coords(2)) then
-        print*,'ERROR:  unexpected value for queried pointlist location:'
-        print*,'expected (',test_coordx,',',test_coordy,')  got  (',test_coords(1),',',test_coords(2),')'
+      my_err1 = abs(test_coordx - test_coords(1)) 
+      my_err2 = abs(test_coordy - test_coords(2)) 
+      if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
+        print*,'ERROR:  unexpected coordinates for queried pointlist location:'
+        print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
         rc=ESMF_FAILURE
         return
       endif
+
+
     endif
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
