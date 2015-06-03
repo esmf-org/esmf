@@ -3230,8 +3230,8 @@ module NUOPC_Base
 !   on the same {\tt grid} object. Fields are realized and/or removed from
 !   {\tt state} according to {\tt selection} argument. The options are:
 !   \begin{itemize}
-!   \item {\tt "realize_all"} (default)
-!   \item {\tt "realize_connected_remove_others"}
+!   \item {\tt "realize\_all"} (default)
+!   \item {\tt "realize\_connected\_remove\_others"}
 !   \end{itemize}
 !
 !   Realized Fields are filled with data if {\tt dataFillScheme} is present.
