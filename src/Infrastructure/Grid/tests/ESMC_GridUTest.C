@@ -136,7 +136,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc",
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, NULL, NULL, NULL, NULL, 
-					   NULL, "", NULL, &rc);
+					   NULL, NULL, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   if (rc == ESMF_SUCCESS) {
@@ -159,7 +159,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -233,7 +233,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -282,7 +282,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -306,7 +306,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -332,7 +332,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -357,7 +357,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -381,7 +381,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -405,7 +405,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag, 
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -431,7 +431,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -458,7 +458,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -484,7 +484,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -510,7 +510,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -536,7 +536,7 @@ int main(void){
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
 					   regDecomp, decompflag,
-					   NULL, NULL, NULL, NULL, "", NULL, 
+					   NULL, NULL, NULL, NULL, NULL, NULL, 
 					   &rc);
   ESMC_Test((rc==ESMF_RC_ARG_OUTOFRANGE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

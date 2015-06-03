@@ -66,8 +66,8 @@ program ESMF_NUOPC_UTest
   integer                 :: i, j
   real(ESMF_KIND_R8),      pointer  :: xPtr(:,:), yPtr(:,:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
-  type(NUOPC_RunSequence), pointer  :: runSeq(:)
-  type(NUOPC_RunElement),  pointer  :: runE
+!TODO: completely remove after CSC okay:  type(NUOPC_RunSequence), pointer  :: runSeq(:)
+!TODO: completely remove after CSC okay:  type(NUOPC_RunElement),  pointer  :: runE
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -549,12 +549,15 @@ program ESMF_NUOPC_UTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+
+!TODO: completely remove after CSC okay:
+#if 0
   !------------------------------------------------------------------------
   ! -> NUOPC RunSequence methods
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequenceAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(runSeq)
@@ -563,7 +566,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunElementAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunElementAdd(runSeq(1), i=2, j=1, phase=1, rc=rc)
@@ -571,7 +574,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunElementAddComp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunElementAddComp(runSeq(1), i=2, rc=rc)
@@ -579,7 +582,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunElementAddLink() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunElementAddLink(runSeq(1), slot=1, rc=rc)
@@ -587,7 +590,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunElementPrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunElementPrint(runSeq(1)%first, rc=rc)
@@ -595,7 +598,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequenceSet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunSequenceSet(runSeq(1), clockA, rc=rc)
@@ -603,7 +606,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequenceIterate() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(runE)
@@ -612,7 +615,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequencePrint() single element Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunSequencePrint(runSeq(1), rc=rc)
@@ -620,7 +623,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequencePrint() entire vector Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunSequencePrint(runSeq, rc=rc)
@@ -628,7 +631,7 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequenceSingleDeall() single element Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunSequenceDeallocate(runSeq(1), rc=rc)
@@ -636,12 +639,13 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disabled_UTest
   write(name, *) "NUOPC_RunSequenceSingleDeall() entire vector Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunSequenceDeallocate(runSeq, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
+#endif
 
   !------------------------------------------------------------------------
   ! clean-ups

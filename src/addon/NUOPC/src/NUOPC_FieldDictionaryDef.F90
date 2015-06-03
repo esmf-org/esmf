@@ -19,7 +19,10 @@ module NUOPC_FieldDictionaryDef
   implicit none
   
   private
-  
+
+  ! public types
+  public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
+
   type NUOPC_FieldDictionaryEntryS
     character(ESMF_MAXSTR)          :: standardName
     character(ESMF_MAXSTR)          :: canonicalUnits
@@ -30,9 +33,6 @@ module NUOPC_FieldDictionaryDef
   type NUOPC_FieldDictionaryEntry
     type(NUOPC_FieldDictionaryEntryS), pointer :: wrap
   end type
-
-  ! public types
-  public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI

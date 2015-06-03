@@ -734,17 +734,17 @@ void PIO_Handler::arrayRead(
   case PIO_int:
     pio_cpp_read_darray_int(pioFileDesc, vardesc, iodesc,
                             (int *)baseAddress,
-                            arrDims, narrDims, &localrc);
+                            arrDims, narrDims, &piorc);
     break;
   case PIO_real:
     pio_cpp_read_darray_real(pioFileDesc, vardesc, iodesc,
                              (float *)baseAddress,
-                             arrDims, narrDims, &localrc);
+                             arrDims, narrDims, &piorc);
     break;
   case PIO_double:
     pio_cpp_read_darray_double(pioFileDesc, vardesc, iodesc,
                                (double *)baseAddress,
-                               arrDims, narrDims, &localrc);
+                               arrDims, narrDims, &piorc);
     break;
   default:
     PRINTMSG(" Attempt to read basepiotype = " << basepiotype);
@@ -754,6 +754,13 @@ void PIO_Handler::arrayRead(
       return;
     }
   }
+  if (!CHECKPIOERROR(piorc, "Error reading array data", localrc))
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      free (vardesc);
+      vardesc = NULL;
+      return;
+    }
 
   // Cleanup
   if ((pio_var_desc_t)NULL != vardesc) {

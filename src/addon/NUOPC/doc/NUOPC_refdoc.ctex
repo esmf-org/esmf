@@ -219,33 +219,18 @@
 \newpage
 
 \subsection{General Generic Component Methods}
-
 #ifdef STANDALONE
 \input{NUOPC_Comp_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Comp_fapi}
 #endif
 
-\subsection{Utility Class: NUOPC\_RunSequence}
-
-The {\tt NUOPC\_RunSequence} class provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
-
-Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\tt NUOPC\_RunSequence}, starting with the InternalState of the {\tt NUOPC\_Driver} generic component.
-\begin{figure}
-\begin{center}
-\scalebox{0.6}{\includegraphics{NUOPC_RunSequence}}
-\end{center}
-\caption{NUOPC\_RunSequence class as it relates to the surrounding data structures.}
-\label{fig:NUOPCRunSequence}
-\end{figure}
-
+\subsection{Field Dictionary Methods}
 #ifdef STANDALONE
-\input{NUOPC_RunSequenceDef_fapi}
+\input{NUOPC_FieldDictionaryApi_fapi}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_RunSequenceDef_fapi}
+\input{../addon/NUOPC/doc/NUOPC_FieldDictionaryApi_fapi}
 #endif
-
-\newpage
 
 \subsection{Utility Routines}
 #ifdef STANDALONE
@@ -286,6 +271,24 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ComponentExplorer}
 #endif
+
+\newpage
+
+\section{Appendix A: Run Sequence}
+
+The NUOPC Driver utilizes an internal class to parametrize the run sequence. The {\tt NUOPC\_RunSequence} provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
+
+Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\tt NUOPC\_RunSequence}, starting with the InternalState of the {\tt NUOPC\_Driver} generic component.
+\begin{figure}[h]
+\begin{center}
+\scalebox{0.6}{\includegraphics{NUOPC_RunSequence}}
+\end{center}
+\caption{NUOPC\_RunSequence class as it relates to the surrounding data structures.}
+\label{fig:NUOPCRunSequence}
+\end{figure}
+
+\newpage
+
 
 %#ifdef STANDALONE
 %\section{Bibliography}
