@@ -34,8 +34,10 @@ def nc_is_mesh(filename, filetype):
     return is_mesh
     
 
-def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_dual=None,
-                                  isSphere=None, add_corner_stagger=False, missingvalue=""):
+def create_grid_or_mesh_from_file(filename, filetype, meshname=None, 
+                                  convert_to_dual=None,
+                                  isSphere=None, add_corner_stagger=False, 
+                                  missingvalue=None):
     is_mesh = False
     if nc_is_mesh(filename, filetype):
         print "Creating ESMF.Mesh object"
@@ -47,7 +49,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         add_mask = None
     else:
         print "Creating ESMF.Grid object"
-        add_mask = len(missingvalue) > 0
+        add_mask = (missingvalue is not None) and (len(missingvalue) > 0)
         grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype, 
                                  add_corner_stagger=add_corner_stagger,
                                  is_sphere=isSphere, add_mask=add_mask, 
