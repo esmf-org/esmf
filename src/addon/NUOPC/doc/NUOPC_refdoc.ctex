@@ -225,6 +225,13 @@
 \input{../addon/NUOPC/doc/NUOPC_Comp_fapi}
 #endif
 
+\subsection{Field Dictionary Methods}
+#ifdef STANDALONE
+\input{NUOPC_FieldDictionaryApi_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldDictionaryApi_fapi}
+#endif
+
 \subsection{Utility Routines}
 #ifdef STANDALONE
 \input{NUOPC_Base_fapi}
