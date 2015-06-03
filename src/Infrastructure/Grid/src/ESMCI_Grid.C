@@ -378,6 +378,8 @@ int setDefaultsLUA(int dimCount,
     int ampresent=0, vnpresent=0, cnpresent=0;
     int dfpresent=0;
     int *df_loc = NULL;
+    char *vn_loc = "";
+    int vn_len = 0;
 
     if (decompflag != NULL) {
       df_loc = decompflag;
@@ -403,7 +405,14 @@ int setDefaultsLUA(int dimCount,
       am_loc = *addMask;
       ampresent = 1;
     }
-    vnpresent = strlen(varname) > 0;
+    if (varname != NULL) {
+      vn_len = strlen(varname);
+      vnpresent = vn_len > 0;
+      if (vnpresent) {
+        vn_loc = (char *)malloc(vn_len);
+        strcpy(vn_loc, varname);
+      }
+    }
 
     // Create Fortran-style buffer to pass coordNames to Fortran if coordNames are present.
     int cn_len = 0;
@@ -431,9 +440,12 @@ int setDefaultsLUA(int dimCount,
 				     regDecomp, df_loc, &dfpresent,
 				     &is_loc, &ispresent, 
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
-				     &am_loc, &ampresent, varname, &vnpresent, 
+				     &am_loc, &ampresent, vn_loc, &vnpresent, 
 				     cn_buf, &cnpresent, &localrc,
-				     strlen(filename), strlen(varname), cn_len);
+				     strlen(filename), vn_len, cn_len);
+    if (vn_loc && (vn_len > 0)) {
+      free(vn_loc);
+    }
     if (cn_buf) {
       free(cn_buf);
     }
