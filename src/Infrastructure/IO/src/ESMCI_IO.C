@@ -285,6 +285,7 @@ int IO::read(
   }
     
   // return
+  rc = ESMF_SUCCESS;
   return (rc);
 }  // end IO::read
 //-------------------------------------------------------------------------
@@ -333,10 +334,12 @@ int IO::read(
         return rc;
       }
       // std::cout << ESMC_METHOD << ": need_redist = " << (need_redist?"y":"n") << std::endl;
-      if (!need_redist)
+      if (!need_redist) {
         ioHandler->arrayRead((*it)->getArray(),
                              (*it)->getName(), timeslice, &localrc);
-      else {
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc)) return rc;  // bail out
+      } else {
         // Create a compatible temp Array with 1 DE per PET
         Array *temp_array_p;
         // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
@@ -385,7 +388,8 @@ int IO::read(
     case IO_MESH:
     default:
       localrc = ESMF_STATUS_INVALID;
-      break;
+      if (ESMC_LogDefault.MsgFoundError(localrc, "Unhandled read case type", ESMC_CONTEXT, &rc))
+          return rc;
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
@@ -464,6 +468,7 @@ int IO::write(
   }
     
   // return
+  rc = ESMF_SUCCESS;
   return (rc);
 
 }  // end IO::write
@@ -566,7 +571,8 @@ int IO::write(
     case IO_MESH:
     default:
       localrc = ESMF_STATUS_INVALID;
-      break;
+      if (ESMC_LogDefault.MsgFoundError(localrc, "Unhandled write case type", ESMC_CONTEXT, &rc))
+          return rc;
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
@@ -948,6 +954,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
   temp_arr_p->setName (src_array_p->getName());
 
   *dest_array_p = temp_arr_p;
+  if (rc) *rc = ESMF_SUCCESS;
 
 }  // end IO::redist_arraycreate1de
 //-------------------------------------------------------------------------
