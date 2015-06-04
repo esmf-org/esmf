@@ -14,35 +14,8 @@ sub unit_tests_bm_results($$$$$) {
         my $SUMMARY     = $_[4];
 
 
-# This subroutine reads the number of pets from the *UTest.Log files.
-sub get_pet_count {
 
-        my @logFile    = @_;
-
-        # Find # of processors string
-        $count=grep ( /NUMBER_OF_PROCESSORS/, @logFile);
-        if (($count == "") || ($count == 0)){
-                # Did not find the # of processors string
-                return(0);
-        }
-         # Create list of processor count strings
-        @num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines);
-        $pet_count_found = 0;
-        foreach (@num_procs){
-                # remove all white spaces
-                s/ //g;
-                $pet_count = 0;
-                ($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
-                if ($pet_count != 0) {
-                        # Read the number of pets from log file.
-                        return($pet_count);
-                }
-        }
-        #Could not read the number of pets from log file.
-        return(0);
-}
-
-# This subroutine compare the PET 0 test elapsed times of the
+# This subroutine compare the average test elapsed times of the
 # unit test to the benchmark and returns PASS/FAIL
 # and test_ET, BM_ET, percent.
 sub run_benchmark {
@@ -57,17 +30,18 @@ sub run_benchmark {
 	$ET_ave = 0;
 	$BM_ave = 0;
 	$ans = 0;
-        # open the testfile and read the elapsed time.
+        # open the testfile and read the elapsed times.
 	chomp($test_file);
         $ok=open(F,"$test_dir/$testfile");
         if (!(defined $ok)) {
         # if the stdout file is not present return FAIL
 		return($ET_ave, $BM_ave, $ans, 2);
         }else { 
-		@ET_list = 0;
-		@BM_list = 0;
+		@ET_list = ();
+		@BM_list = ();
         	$test_string_found = 0;
         	while (<F>) { #read the file unitil "Test Elapsed Time" is found
+			s/ msec.$//;
         		($test_string,$test_ET) = split(/Time/, $_);
 			$count = grep ( /Test Elapsed/, $test_string);
 			if ($count != 0 ){
@@ -82,7 +56,7 @@ sub run_benchmark {
 		$sum=$sum + $test_ET;
 		$count=$count + 1;
 	}
-	$ET_ave = $sum/($count - 1);
+	$ET_ave = $sum/$count;
 
         # open the testfile and read the elapsed times.
         $ok=open(F,"$bm_dir/$testfile");
@@ -92,6 +66,7 @@ sub run_benchmark {
         }else {
         	$test_string_found = 0;
         	while (<F>) { #read the file unitil "Test Elapsed Time" is found
+			s/ msec.$//;
         		($test_string,$bm_ET) = split(/Time/, $_);
         		$count = grep ( /Test Elapsed/, $test_string);
         		if ($count != 0 ){
@@ -106,11 +81,11 @@ sub run_benchmark {
                 $sum=$sum + $bm_ET;
                 $count=$count + 1;
         }
-        $BM_ave = $sum/($count -1);
+        $BM_ave = $sum/$count;
 	if ( $ET_ave == 0) {
 		return($ET_ave, $BM_ave, $ans, 0);
 	}
-	$ans=(($ET_ave - $BM_ave)/$ET_ave);
+	$ans=(($ET_ave - $BM_ave)/$BM_ave);
 	$ans = sprintf("%0.4f", $ans);
 	if ( $ET_ave <= $BM_ave ) {
 		return($ET_ave, $BM_ave, $ans, 0);
@@ -292,7 +267,7 @@ use File::Find
                                         system ("echo 'PASS: $file' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Difference = $PC%.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '' >> $TEST_DIR/bm_pass_info ");
 				} elsif ( $rc == 1 ) {
 					# The BM test failed
@@ -304,7 +279,7 @@ use File::Find
 					system ("echo 'FAIL: $file' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Tolerance = $PC%.' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Increase = $PC%.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '' >> $TEST_DIR/bm_fail_info ");
 				} elsif ( $rc == 2 ) {
 					# The stdout file 1n test_dir not found
@@ -343,11 +318,11 @@ use File::Find
 	if (!$SUMMARY) { # Print only if full output requested
         	# Print to the screen
 		if (@pass_list != ()){
-			print "\n\nThe following unit tests passed the $TOLERANCE benchmark test:\n\n";
+			print "\n\nThe following unit tests passed the $TOLERANCE toloerance benchmark test:\n\n";
 			print @pass_list;
 		}
 		if ($fail_count != 0){
-			print "\n\nThe following unit tests failed the $TOLERANCE benchmark test:\n\n";
+			print "\n\nThe following unit tests failed the $TOLERANCE toloerance benchmark test:\n\n";
 			system("cat $TEST_DIR/bm_fail_info");
 		}
 		if (@test_list != ()){
@@ -382,7 +357,7 @@ use File::Find
 		print ".\n\n";
 	}
 	else {
-		print " files, $pass_count passed the $TOLERANCE benchmark test, ";
+		print " files, $pass_count passed the $TOLERANCE tolerance benchmark test, ";
 	}
 	if ($match_count == 0) {
                 print "and $fail_count failed.\n\n";
