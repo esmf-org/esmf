@@ -253,8 +253,8 @@
 
       ! Calculate & print out test elasped time
       call cpu_time(end_time)
-      elapsed_time = (end_time-start_time)/1000.0  ! msec
-      write(msg, *) "PET", PETnum, " Test Elapsed Time ", elapsed_time
+      elapsed_time = (end_time-start_time) * 1000.0  ! msec
+      write(msg, *) "PET", PETnum, " Test Elapsed Time ", elapsed_time, " msec."
       print *, trim(msg)
 
       end subroutine ESMF_TestEnd
