@@ -2173,4 +2173,22 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #undef TOL
   }
 
+  // Calculate the counter-clockwise angle from a to b 
+  // a, b, un should be arrays of the correct size for the geometry
+  // un is a unit normal pointing out of the surface 
+  //      (e.g. away from the center of the sphere)
+  // un isn't used in all cases (e.g. with GEOM_CART2D) 
+  template <>
+  double calc_angle<GEOM_CART2D>(double *a, double *b, double *un) {
+    double dot = a[0]*b[0] + a[1]*b[1];
+    double det = a[0]*b[1] - a[1]*b[0];
+    return atan2(det, dot);
+  }
+
+  template <>
+  double calc_angle<GEOM_SPH2D3D>(double *a, double *b, double *un) {
+    double dot = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    double det = a[0]*b[1]*un[2] + b[0]*un[1]*a[2] + un[0]*a[1]*b[2] - a[2]*b[1]*un[0] - b[2]*un[1]*a[0] - un[2]*a[1]*b[0];
+    return atan2(det, dot);
+  }
 } // namespace

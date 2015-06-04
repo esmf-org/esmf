@@ -118,6 +118,12 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out_v[2]=m[6]*v[0]+m[7]*v[1]+m[8]*v[2];
 
 
+#define MU_DIV_BY_SCALAR_VEC3D(out,a,s) \
+  out[0]=a[0]/(s);                      \
+  out[1]=a[1]/(s);                      \
+  out[2]=a[2]/(s);
+
+
 #define MU_EQUAL_PNT3D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
                                   (std::abs(p1[1]-p2[1]) < tol) && \
                                   (std::abs(p1[2]-p2[2]) < tol))
@@ -181,6 +187,9 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
 template <class TYPE>
 bool is_pnt_in_poly(int num_p, double *p, double *pnt);
+
+template <class GEOM>
+double calc_angle(double *v1, double *v2, double *norm);
 
 } // namespace
 
