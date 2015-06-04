@@ -169,7 +169,7 @@ int TestEnd(
   gettimeofday(&end_time, NULL);
   elapsed_time = (end_time.tv_sec - start_time.tv_sec) ;
   elapsed_time += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
-  sprintf(msgbuf, " PET %d Test Elapsed Time  %f \n", PETnum, elapsed_time);
+  sprintf(msgbuf, " PET %d Test Elapsed Time  %f msec. \n", PETnum, elapsed_time);
   fprintf(stdout, "%s", msgbuf);
  
   return(ESMF_SUCCESS);
