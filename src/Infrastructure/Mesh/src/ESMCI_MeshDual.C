@@ -51,6 +51,33 @@ namespace ESMCI {
   void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
 
+  void get_num_elems_around_node(MeshObj *node, int *_num_ids);
+
+
+  struct MDSS {
+    double angle;
+    UInt id;
+
+    MDSS() {
+      angle=0.0;
+      id=0;
+    }
+
+    MDSS &operator= (const MDSS &rhs) {
+      angle=rhs.angle;
+      id=rhs.id;
+    }
+
+    bool operator< (const MDSS &rhs) const {
+      return angle < rhs.angle;
+    }
+
+  };
+
+  void get_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
+                                int *_num_ids, UInt *ids);
+
+
 
   // Create a dual of the input Mesh 
   void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
@@ -161,36 +188,42 @@ namespace ESMCI {
   // Sizes
   int num_elems=0;
   int num_elemConn=0;
+  int max_num_node_elems=0;
 
   // Iterate through src nodes counting sizes
+
   MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
   for (; ni != ne; ++ni) {
     MeshObj &node=*ni;
     
     // Only do local nodes
     if (!GetAttr(node).is_locally_owned()) continue;
-    
-    // Count elems attached to node
-    int num_conn=0;
-    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
-    while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-      // Count connection for this node
-      num_conn++;
-      
-      // Next element
-      ++el;
-    }
+
+    // Get number of elems
+    int num_node_elems=0;
+    get_num_elems_around_node(&node, &num_node_elems);    
     
     // If less than 3 (a triangle) then don't make an element
-    if (num_conn < 3) continue;
+    if (num_node_elems < 3) continue;
     
+    // maximum number of elems per node
+    if (num_node_elems > max_num_node_elems) max_num_node_elems = num_node_elems;
+
     // Count number of elements
     num_elems++;
 
     // Count number of connections
-    num_elemConn += num_conn;
+    num_elemConn += num_node_elems;
   }
 
+
+  // Create temp arrays for getting ordered elem ids
+  MDSS *tmp_mdss=NULL;
+  UInt *elems_around_node_ids=NULL;
+  if (max_num_node_elems > 0) {
+    tmp_mdss=new MDSS[max_num_node_elems];
+    elems_around_node_ids=new UInt[max_num_node_elems];
+  }
 
   // Create element lists
   int *elemType=NULL;
@@ -214,22 +247,18 @@ namespace ESMCI {
     // Only do local nodes
     if (!GetAttr(node).is_locally_owned()) continue;
     
-    // Count elems attached to node
-    int num_conn=0;
-    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
-    while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-      // Count connection for this node
-      num_conn++;
-      
-      // Next element
-      ++el;
-    }
+
+    // Get list of element ids
+    int num_elems_around_node_ids=0;
+    get_elems_around_node(&node, src_mesh, tmp_mdss,
+                          &num_elems_around_node_ids,
+                          elems_around_node_ids);
     
     // If less than 3 (a triangle) then don't make an element
-    if (num_conn < 3) continue;
+    if (num_elems_around_node_ids < 3) continue;
     
     // Save elemType/number of connections 
-    elemType[elem_pos]=num_conn;
+    elemType[elem_pos]=num_elems_around_node_ids;
     
     // Save elemId
     elemId[elem_pos]=node.get_id();
@@ -239,16 +268,16 @@ namespace ESMCI {
     // Next elem
     elem_pos++;
 
-
+    //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
 
     // Loop elements attached to node and build connection list
-    el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
-    while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-      MeshObj *elem=el->obj;
-      
+    for (int i=0; i<num_elems_around_node_ids; i++) {
+
       // Get elem id
-      UInt elem_id=elem->get_id();
+      UInt elem_id=elems_around_node_ids[i];
       
+      // printf(" %d ",elem_id);
+
       // Get index of this element
       int node_index=id_to_index[elem_id];
       
@@ -263,11 +292,14 @@ namespace ESMCI {
   
       // Next connection
       conn_pos++;
-    
-      // Next element
-      ++el;
     }
+
+    // printf("\n");
   }
+
+  // Free tmp arrays
+  if (tmp_mdss != NULL) delete [] tmp_mdss;
+  if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
   // Iterate through all src elements creating nodes
@@ -729,6 +761,237 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     return;
 }
 
-  
-} // namespace
 
+
+  // Get the number of element ids around a node
+  // Useful for precalculating size for get_elem_ids_around_node()
+  void get_num_elems_around_node(MeshObj *node, int *_num_ids) {
+    
+    // Loop elements attached to node and build connection list
+    int num_ids=0;
+    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
+    while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      MeshObj *elem=el->obj;
+      
+      // Get elem id
+      UInt elem_id=elem->get_id();      
+
+      // increase size
+      num_ids++;
+     
+      // Next element
+      ++el;
+    }
+
+    // Output
+    *_num_ids=num_ids;
+
+  }
+
+
+  // Get the element ids around a node
+  // the ids should be in order around the node
+  // Right now the algorithm that this uses for the ordering of the nodes is to 
+  // calculate the angle around the center and then to sort by that. This could fail for 
+  // for some very rare concave cases. Another method would be to walk through the mesh 
+  // around the node. The problem is this fails for some more common cases. E.g. where
+  // there aren't elems completely surrounding the node. Eventually, maybe some comb. of
+  // the methods could be used?
+  // tmp_mdss = temporary list of structures used to sort elems (needs to be allocated large enough to hold all the ids)
+  // _num_ids = the number of ids
+  // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
+  void get_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
+                                int *_num_ids, UInt *ids) {
+
+    // Get useful info
+    int sdim=mesh->spatial_dim();
+    int pdim=mesh->parametric_dim();
+
+    MEField<> *elem_coords=mesh->GetField("elem_coordinates"); 
+    if (!elem_coords) {
+      Throw() <<" Creation of a dual mesh requires element coordinates. \n";
+    }
+
+    MEField<> *node_coords=mesh->GetCoordField();
+    if (!node_coords) {
+      Throw() <<" Creation of a dual mesh requires node coordinates. \n";
+    }
+
+ /* XMRKX */
+    // Center coordinates
+    // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
+    double center[3];
+    double *nc=node_coords->data(*node);
+    center[0]=nc[0];
+    center[1]=nc[1];
+    center[2]= sdim > 2 ? nc[2]:0.0;
+
+    // Normalized vector through center and out of sphere
+    // For 2D don't do norm to prevent div by 0.0
+    double center_norm[3];
+    if (sdim > 2) {
+      double len_center=MU_LEN_VEC3D(center);
+      MU_DIV_BY_SCALAR_VEC3D(center_norm,center,len_center);
+    }
+
+    // Get interator for looping elements around node
+    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
+    // No elements so leave
+    if (el == node->Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
+      *_num_ids=0;
+      return;
+    }
+
+    // Get vector to first element 
+    // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
+    double v1[3];
+    double *ec=elem_coords->data(*(el->obj));
+    v1[0]=ec[0];
+    v1[1]=ec[1];
+    v1[2]= sdim > 2 ? ec[2]:0.0;
+    MU_SUB_VEC3D(v1,v1,center);
+
+    // If this is a zero length vector complain
+    if ((v1[0] == 0.0) &&
+        (v1[1] == 0.0) &&
+         (v1[2] == 0.0)) {
+      Throw() << " Can't order points in dual creation using a 0-vector";
+    }
+
+    // Put this first into the list
+    int num_ids=0;
+    tmp_mdss[num_ids].id=el->obj->get_id();
+    tmp_mdss[num_ids].angle=0.0;
+    num_ids++;
+    
+    // Next element
+    ++el;
+
+    // Loop the rest of the elements 
+    while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      MeshObj *elem=el->obj;
+
+      // Get vector to current element 
+      // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
+      double vcurr[3];
+      double *ec=elem_coords->data(*elem);
+      vcurr[0]=ec[0];
+      vcurr[1]=ec[1];
+      vcurr[2]= sdim > 2 ? ec[2]:0.0;
+      MU_SUB_VEC3D(vcurr,vcurr,center);
+
+      // Calculate angle 
+      // Do differentiate between 2D and 3D here to prevent inaccuracies
+      double angle;
+      if (sdim==2) {
+        angle=calc_angle<GEOM_CART2D>(v1, vcurr, center_norm);
+      } else if (sdim==3) {
+        angle=calc_angle<GEOM_SPH2D3D>(v1, vcurr, center_norm);
+      } else {
+        Throw() <<" angle calc can't be used for vecs with spatial dimension not equal to 2 or 3";
+      }
+
+      // Put this first into the list
+      tmp_mdss[num_ids].id=elem->get_id();
+      tmp_mdss[num_ids].angle=angle;
+      num_ids++;
+      
+      // Next element
+      ++el;
+    }
+
+    // Sort by angle
+    std::sort(tmp_mdss, tmp_mdss+num_ids);
+
+    // Output
+    *_num_ids=num_ids;
+    for (int i=0; i< num_ids; i++) {
+      ids[i]=tmp_mdss[i].id;
+    }
+  }
+
+
+#if 0
+  // MAYBE DO THE BELOW FIRST AND IF IT DOESN'T WORK THEN GO TO JUST THE ANGLE
+
+  // Get the element ids around a node
+  // the ids should be in order around the node
+  // _num_ids = the number of ids
+  // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
+  void get_elem_ids_around_node(MeshObj *node, int max_size_ids, int *_num_ids, UInt *ids) {
+    
+    // Get beginning element 
+    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
+    if (el == node.Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
+      Throw() << "No element attached to node!";
+    }
+    MeshObj *beg_elem=el->obj;
+
+
+    // Set current element
+    MeshObj *curr_elem=beg_elem;
+    int curr_elem_pos=0;
+ 
+    // Loop nodes attached to element to find the next element
+    do {      
+
+      // Save element id to list
+      if (curr_elem_pos > max_size_ids) Throw() << "number of ids bigger than maximum array size";
+      ids[curr_elem_pos]=curr_elem->get_id();
+      curr_elem_pos++;
+
+      // Loop nodes around element
+      MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(curr_elem, MeshObj::NODE);
+      while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
+	MeshObj *curr_elem_node = nl->ob;
+
+        // Skip input node
+        if (curr_elem_node == node) continue;
+
+        // Loop elements attached to curr_elem_node to find the next element
+        MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(curr_elem_node, MeshObj::ELEMENT);
+        while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+          MeshObj *elem=el->obj;
+        
+          // Skip current elem
+          if (curr_elem == elem) continue;
+
+          // See if this elem contains the original node
+          bool on_orig_node=false;
+          MeshObjRelationList::const_iterator tmp_nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
+          while (tmp_nl != elem.Relations.end() && tmp_nl->obj->get_type() == MeshObj::NODE){
+            MeshObj *tmp_node = tmp_nl->ob;
+            
+            // See if this is still attached to original node
+            if (tmp_node == node) {
+              on_orig_node=true;
+              break;
+            }
+          }
+
+          // 
+          if (on_orig_node) {
+
+          }
+
+          // Next element
+          ++el;
+        }
+
+
+	++nl;
+      }
+
+      // STOPPED HERE
+
+
+
+
+    } while (curr_elem != beg_elem); 
+
+  // Output
+  *_num_ids=num_ids;
+  
+  }
+#endif
+  } // namespace

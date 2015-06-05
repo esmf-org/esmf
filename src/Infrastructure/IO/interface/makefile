@@ -21,7 +21,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/IO/interface
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
