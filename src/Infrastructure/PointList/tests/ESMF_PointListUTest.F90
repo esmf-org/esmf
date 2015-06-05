@@ -509,7 +509,7 @@ contains
     my_err2 = abs(test_coordy - test_coords(2)) 
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
@@ -713,7 +713,7 @@ contains
     my_err2 = abs(test_coordy - test_coords(2)) 
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
@@ -1110,7 +1110,7 @@ contains
     my_err2 = abs(test_coordy - test_coords(2)) 
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
@@ -1542,7 +1542,7 @@ contains
     my_err2 = abs(test_coordy - test_coords(2)) 
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
@@ -1954,7 +1954,7 @@ contains
     my_err2 = abs(test_coordy - test_coords(2)) 
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+      print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
@@ -2412,7 +2412,7 @@ contains
       my_err2 = abs(test_coordy - test_coords(2)) 
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
-        print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
+        print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
         rc=ESMF_FAILURE
         return
       endif
