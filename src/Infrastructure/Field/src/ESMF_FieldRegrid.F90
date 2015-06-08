@@ -252,8 +252,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Once the compilation order is sorted out, 
         ! Should be able to call into Field SMM directly.
@@ -620,7 +620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorIndexList' " // &
                 "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if (present(weights)) then
@@ -628,7 +628,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorList' " //  &
                 "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ! global vm for now
@@ -644,7 +644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (srcgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridStore on XGrid is not supported in this overloaded method", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
                 
@@ -655,7 +655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (dstgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridStore on XGrid is not supported in this overloaded method",  & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
 
@@ -698,8 +698,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (present(polemethod)) then
               if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                      msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
-                      ESMF_CONTEXT, rcToReturn=rc) 
+                   msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
                  return
 	      else
   	         localpolemethod = polemethod
@@ -719,12 +719,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (.not. present(regridPoleNPnts)) then
                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridPoleNPnts must be specified if polemethod is ESMF_POLEMETHOD_NPNTAVG", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
             return
            else 
              if (regridPoleNPnts < 1) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- RegridPoleNPnts must be >=1 ", & 
+                 msg="- RegridPoleNPnts must be >=1 ", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
             endif
@@ -806,7 +806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
 
@@ -838,13 +838,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! check grid
             call checkGridLite(srcGrid,srcStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerlocG2M, &
                                               maskValues=srcMaskValues, &
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_PointListSort(srcPointList)
 	    src_pl_used=.true.
 
@@ -853,7 +853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! check grid
             call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! Convert Grid to Mesh
             srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
@@ -872,8 +872,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
              if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                     msg="- can currently only do conservative regridding on a mesh built on elements", & 
-                     ESMF_CONTEXT, rcToReturn=rc) 
+                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
              endif
 
@@ -881,7 +881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              if (present(srcMaskValues)) then
                 call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=srcMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
              endif
              srcMesh=tempMesh
 
@@ -894,7 +894,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ! Create a dual of the Mesh
                    srcMeshDual=ESMF_MeshCreateDual(tempMesh, rc)
                    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
+                     ESMF_CONTEXT, rcToReturn=rc)) return
                    
                    ! Use the dual as the srcMesh
                    tempMesh=srcMeshDual
@@ -904,7 +904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 else
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                     msg="- S can currently only do non-conservative  on a mesh built on nodes or elements", & 
-                        ESMF_CONTEXT, rcToReturn=rc) 
+                    ESMF_CONTEXT, rcToReturn=rc) 
                    return	  
                 endif
              endif
@@ -913,7 +913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              if (present(srcMaskValues)) then
                 call ESMF_MeshTurnOnNodeMask(tempMesh, maskValues=srcMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
              endif
              srcMesh=tempMesh
           else
@@ -931,7 +931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                                maskValues=srcMaskValues, &
                                                rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
              src_pl_used=.true.
 
 
@@ -959,7 +959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                             rc=localrc)
 
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           src_pl_used=.true.
 
 
@@ -985,7 +985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+              ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
 
@@ -994,28 +994,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_GridGet(grid=dstGrid, &
                    dimCount=gridDimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .eq. 2) then
                dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
             else if (gridDimCount .eq. 3) then
                dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
             else
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-              return
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+               msg="- can currently only do conservative regridding on 2D or 3D grids", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+               return
             endif
 
             ! check grid
             call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! Convert Grid to Mesh
             dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
                         maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
@@ -1024,14 +1024,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! check grid
             call checkGridLite(dstGrid,dstStaggerlocG2M,rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 	    dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
                                               maskValues=dstMaskValues, &
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_PointListSort(dstPointList)
 
             dst_pl_used=.true.
@@ -1058,7 +1058,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (present(dstMaskValues)) then
                 call ESMF_MeshTurnOnCellMask(tempMesh, maskValues=dstMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               endif
               dstMesh=tempMesh
 
@@ -1067,7 +1067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
-                     ESMF_CONTEXT, rcToReturn=rc) 
+                   ESMF_CONTEXT, rcToReturn=rc) 
                    return	  
                 endif
              endif
@@ -1076,7 +1076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                                maskValues=dstMaskValues, &
                                                rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
 	     dst_pl_used=.true.
 
           endif
@@ -1099,7 +1099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                             maskValues=dstMaskValues, &
                                             rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           dst_pl_used=.true.
 
         else
@@ -1132,8 +1132,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   tmp_indices, tmp_weights, unmappedDstList, localrc)
 
            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! attach sparse matrix to appropriate output variable
            if (present(weights)) weights=>tmp_weights
@@ -1162,19 +1162,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   rc=localrc)
 
            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if (dst_pl_used) then
           call ESMF_PointListDestroy(dstPointList,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
         if (src_pl_used) then
           call ESMF_PointListDestroy(srcPointList,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
 
 
@@ -1185,13 +1185,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_FieldGet(srcFracField, array=fracArray, staggerloc=fracStaggerloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                  ! Make sure the staggerlocs match
                  if (srcStaggerloc .ne. fracStaggerloc) then
                     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                         msg="- srcFracField staggerloc must match srcField staggerloc", &
-                         ESMF_CONTEXT, rcToReturn=rc)
+                      msg="- srcFracField staggerloc must match srcField staggerloc", &
+                      ESMF_CONTEXT, rcToReturn=rc)
                     return
                  endif
 
@@ -1199,31 +1199,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_RegridGetFrac(srcGrid, mesh=srcMesh, array=fracArray, &
                       staggerloc=srcStaggerLocG2M, rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
                  call ESMF_FieldGet(srcFracField, meshloc=fracMeshloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                  ! Make sure the locs match
                  if (srcMeshLoc .ne. fracMeshLoc) then
                     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                         msg="- srcFracField staggerloc must match srcField staggerloc", &
-                         ESMF_CONTEXT, rcToReturn=rc)
+                      msg="- srcFracField staggerloc must match srcField staggerloc", &
+                      ESMF_CONTEXT, rcToReturn=rc)
                     return
                  endif
 
                  ! get frac pointer
                  call ESMF_FieldGet(srcFracField, localDE=0, farrayPtr=fracFptr,  rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
 
                  ! Get Frac info
                  call ESMF_MeshGetElemFrac(srcMesh, fracList=fracFptr, rc=localrc)     
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
 
@@ -1232,43 +1232,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_FieldGet(dstFracField, array=fracArray, staggerloc=fracStaggerloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                  ! Make sure the staggerlocs match
                  if (dstStaggerloc .ne. fracStaggerloc) then
                     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                         msg="- dstFracField Field staggerloc must match dstField staggerloc", &
-                         ESMF_CONTEXT, rcToReturn=rc)
+                      msg="- dstFracField Field staggerloc must match dstField staggerloc", &
+                      ESMF_CONTEXT, rcToReturn=rc)
                     return
                  endif
 
                  call ESMF_RegridGetFrac(dstGrid, mesh=dstMesh, array=fracArray, &
                       staggerloc=dstStaggerLocG2M, rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
                  call ESMF_FieldGet(dstFracField, meshloc=fracMeshloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                  ! Make sure the locs match
                  if (dstMeshLoc .ne. fracMeshLoc) then
                     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                         msg="- srcFracField staggerloc must match srcField staggerloc", &
-                         ESMF_CONTEXT, rcToReturn=rc)
+                      msg="- srcFracField staggerloc must match srcField staggerloc", &
+                      ESMF_CONTEXT, rcToReturn=rc)
                     return
                  endif
 
                  ! get frac pointer
                  call ESMF_FieldGet(dstFracField, localDE=0, farrayPtr=fracFptr,  rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                  ! Get Frac info
                  call ESMF_MeshGetElemFrac(dstMesh, fracList=fracFptr, rc=localrc)     
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
         endif
@@ -1278,8 +1278,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (.not. src_pl_used) then
             call ESMF_MeshDestroy(srcMesh,rc=localrc)
             if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           endif
            
         else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
@@ -1291,11 +1291,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                  call ESMF_MeshTurnOffCellMask(srcMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               else
                  call ESMF_MeshTurnOffNodeMask(srcMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
 
@@ -1305,8 +1305,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (srcDual) then
               call ESMF_MeshDestroy(srcMeshDual,rc=localrc)
               if (ESMF_LogFoundError(localrc, &
-                   ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
            endif
         endif
 
@@ -1314,8 +1314,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (.not. dst_pl_used) then
              call ESMF_MeshDestroy(dstMesh,rc=localrc)
              if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
            endif           
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
            if (.not. dst_pl_used) then
@@ -1325,11 +1325,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                  call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               else
                  call ESMF_MeshTurnOffNodeMask(dstMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
 
@@ -1495,12 +1495,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid, global=.true.)&
                   >=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
-                        ! TODO: maybe we should attach standard attibute
-                        ! to differentiate src and dst side for regridding
-                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                           msg="- duplication of Grid found in XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                        return
+                      ! TODO: maybe we should attach standard attibute
+                      ! to differentiate src and dst side for regridding
+                      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                        msg="- duplication of Grid found in XGrid", &
+                        ESMF_CONTEXT, rcToReturn=rc) 
+                      return
                     endif
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_B
@@ -1534,10 +1534,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_b
                 if(ESMF_MeshMatch(srcMesh, gridB(i)%gbcp%mesh)) then
                     if(found) then
-                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                           msg="- duplication of Mesh found in XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                        return
+                      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                        msg="- duplication of Mesh found in XGrid", &
+                        ESMF_CONTEXT, rcToReturn=rc) 
+                      return
                     endif
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_B
@@ -1568,14 +1568,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 srcIdx = 1
             else
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                       msg="- XGrid in srcField doesn't match the input XGrid", &
-                       ESMF_CONTEXT, rcToReturn=rc) 
+                  msg="- XGrid in srcField doesn't match the input XGrid", &
+                  ESMF_CONTEXT, rcToReturn=rc) 
                 return
             endif
         else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                   msg="- src Field is not built on Grid, Mesh, or XGrid", &
-                   ESMF_CONTEXT, rcToReturn=rc) 
+              msg="- src Field is not built on Grid, Mesh, or XGrid", &
+              ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
 
@@ -1606,10 +1606,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid, global=.true.)&
                   >=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
-                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                           msg="- duplication of Grid found in XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                        return
+                      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                        msg="- duplication of Grid found in XGrid", &
+                        ESMF_CONTEXT, rcToReturn=rc) 
+                      return
                     endif
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_B
@@ -1643,10 +1643,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_b
                 if(ESMF_MeshMatch(dstMesh, gridB(i)%gbcp%mesh)) then
                     if(found) then
-                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                           msg="- duplication of Mesh found in XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                        return
+                      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                        msg="- duplication of Mesh found in XGrid", &
+                        ESMF_CONTEXT, rcToReturn=rc) 
+                      return
                     endif
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_B
@@ -1677,14 +1677,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 dstIdx = 1
             else
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                       msg="- XGrid in dstField doesn't match the input XGrid", &
-                       ESMF_CONTEXT, rcToReturn=rc) 
+                  msg="- XGrid in dstField doesn't match the input XGrid", &
+                  ESMF_CONTEXT, rcToReturn=rc) 
                 return
             endif
         else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                   msg="- src Field is not built on Grid or XGrid", &
-                   ESMF_CONTEXT, rcToReturn=rc) 
+              msg="- src Field is not built on Grid or XGrid", &
+              ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
 
@@ -1702,42 +1702,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_FieldGet(srcFracField, staggerloc=fracFieldStaggerloc, &
                  array=srcFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field staggerloc must match interpField staggerloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field staggerloc must match interpField staggerloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else if(srcgeomtype == ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(srcFracField, meshloc=fracFieldMeshloc, &
                  array=srcFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(srcField, meshloc=interpFieldMeshloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldMeshloc .ne. fracFieldMeshloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field Meshloc must match interpField Meshloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field Meshloc must match interpField Meshloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                 msg="- src Field has unrecognized geom type", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+              msg="- src Field has unrecognized geom type", &
+              ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
 
@@ -1752,42 +1752,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_FieldGet(dstFracField, staggerloc=fracFieldStaggerloc, &
                  array=dstFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field staggerloc must match interpField staggerloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field staggerloc must match interpField staggerloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else if(dstgeomtype == ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(dstFracField, meshloc=fracFieldMeshloc, &
                  array=dstFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(dstField, meshloc=interpFieldMeshloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldMeshloc .ne. fracFieldMeshloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field Meshloc must match interpField Meshloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field Meshloc must match interpField Meshloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                 msg="- dst Field has unrecognized geom type", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+              msg="- dst Field has unrecognized geom type", &
+              ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
 
@@ -1803,42 +1803,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_FieldGet(srcMergeFracField, staggerloc=fracFieldStaggerloc, &
                  array=srcFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field staggerloc must match interpField staggerloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field staggerloc must match interpField staggerloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else if(srcgeomtype == ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(srcFracField, meshloc=fracFieldMeshloc, &
                  array=srcFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(srcField, meshloc=interpFieldMeshloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldMeshloc .ne. fracFieldMeshloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field Meshloc must match interpField Meshloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field Meshloc must match interpField Meshloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                 msg="- src Field has unrecognized geom type", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+              msg="- src Field has unrecognized geom type", &
+              ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
 
@@ -1853,42 +1853,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_FieldGet(dstMergeFracField, staggerloc=fracFieldStaggerloc, &
                  array=dstFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field staggerloc must match interpField staggerloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field staggerloc must match interpField staggerloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else if(dstgeomtype == ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(dstFracField, meshloc=fracFieldMeshloc, &
                  array=dstFracArray, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(dstField, meshloc=interpFieldMeshloc, &
                  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
       
             ! Make sure the staggerlocs match
             if (interpFieldMeshloc .ne. fracFieldMeshloc) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                    msg="- fracField Field Meshloc must match interpField Meshloc", &
-                    ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- fracField Field Meshloc must match interpField Meshloc", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                 msg="- dst Field has unrecognized geom type", &
-                 ESMF_CONTEXT, rcToReturn=rc)
+              msg="- dst Field has unrecognized geom type", &
+              ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
 
@@ -2024,7 +2024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_GridGet(grid=Grid, &
                    dimCount=gridDimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .eq. 2) then
                staggerlocG2M=ESMF_STAGGERLOC_CORNER
             else if (gridDimCount .eq. 3) then
@@ -2041,7 +2041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call checkGrid(Grid, staggerlocG2M, rc=localrc)
 
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, staggerlocG2M, isSphere, isLatLonDeg, &
@@ -2052,8 +2052,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	  ! call into the Regrid GetareaField interface
           call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, lregridScheme, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call ESMF_FieldGet(areaField, mesh=Mesh, meshloc=meshloc, &
                  localDECount=localDECount, rc=localrc)
@@ -2082,8 +2082,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Get Area
 	  call ESMF_MeshGetElemArea(mesh, areaList=areaFptr, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
 
@@ -2091,8 +2091,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(Mesh,rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if(present(rc)) rc = ESMF_SUCCESS
@@ -2182,7 +2182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! check grid
           call checkGrid(Grid,staggerloc,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, staggerLoc, isSphere, &
@@ -2199,15 +2199,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! call into the Regrid GetIwts interface
         call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, lregridScheme, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! destroy Mesh, if they were created here
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(Mesh,rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if(present(rc)) rc = ESMF_SUCCESS
@@ -2232,21 +2232,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Make sure Grid isn't arbitrarily distributed
         call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Error if decompType is ARBITRARY
        if (decompType .eq. ESMF_GRID_ARBITRARY) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can't currently regrid an arbitrarily distributed Grid", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-              return
+               msg="- can't currently regrid an arbitrarily distributed Grid", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+             return
        endif        
 
        ! Make sure Grid doesn't contain width 1 DEs
        call ESMF_GridGet(grid,localDECount=localDECount, dimCount=dimCount, &
               rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
        
        ! loop through checking DEs
        do lDE=0,localDECount-1
@@ -2255,7 +2255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            call ESMF_GridGet(grid,staggerloc=staggerloc, localDE=lDE, &
                   exclusivecount=ec,rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! loop and make sure they aren't too small in any dimension
            do i=1,dimCount
@@ -2287,14 +2287,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Make sure Grid isn't arbitrarily distributed
         call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Error if decompType is ARBITRARY
        if (decompType .eq. ESMF_GRID_ARBITRARY) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can't currently regrid an arbitrarily distributed Grid", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-              return
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+           msg="- can't currently regrid an arbitrarily distributed Grid", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
+         return
        endif        
 
        if(present(rc)) rc = ESMF_SUCCESS
