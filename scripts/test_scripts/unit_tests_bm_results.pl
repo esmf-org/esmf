@@ -56,8 +56,11 @@ sub run_benchmark {
 		$sum=$sum + $test_ET;
 		$count=$count + 1;
 	}
-	$ET_ave = $sum/$count;
-
+	if ($count != 0 ){
+		$ET_ave = $sum/$count;
+	} else {
+		$ET_ave = 0;
+	}
         # open the testfile and read the elapsed times.
         $ok=open(F,"$bm_dir/$testfile");
         if (!(defined $ok)) {
