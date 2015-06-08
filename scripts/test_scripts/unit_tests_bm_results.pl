@@ -270,7 +270,7 @@ use File::Find
                                         system ("echo 'PASS: $file' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_pass_info ");
-                                        system ("echo '      Difference = $PC%.' >> $TEST_DIR/bm_pass_info ");
+                                        system ("echo '      Difference: $PC%' >> $TEST_DIR/bm_pass_info ");
                                         system ("echo '' >> $TEST_DIR/bm_pass_info ");
 				} elsif ( $rc == 1 ) {
 					# The BM test failed
@@ -282,7 +282,7 @@ use File::Find
 					system ("echo 'FAIL: $file' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Test elapsed time: $test_ET msec.' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '      Benchmark elapsed time: $bm_ET msec.' >> $TEST_DIR/bm_fail_info ");
-					system ("echo '      Increase = $PC%.' >> $TEST_DIR/bm_fail_info ");
+					system ("echo '      Increase: $PC%' >> $TEST_DIR/bm_fail_info ");
 					system ("echo '' >> $TEST_DIR/bm_fail_info ");
 				} elsif ( $rc == 2 ) {
 					# The stdout file 1n test_dir not found
