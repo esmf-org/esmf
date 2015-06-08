@@ -80,6 +80,8 @@ namespace ESMCI {
 
 
   // Create a dual of the input Mesh 
+  // This adds ghostcells to the input mesh, 
+  // it also creates ghostcells for the dual mesh
   void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
   Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
@@ -197,7 +199,10 @@ namespace ESMCI {
     MeshObj &node=*ni;
     
     // Only do local nodes
-    if (!GetAttr(node).is_locally_owned()) continue;
+    // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
+    // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
+    // A NODE THAT'S NEEDED ON ANOTHER PROC
+    //if (!GetAttr(node).is_locally_owned()) continue;
 
     // Get number of elems
     int num_node_elems=0;
@@ -228,9 +233,11 @@ namespace ESMCI {
   // Create element lists
   int *elemType=NULL;
   UInt *elemId=NULL;
+  UInt *elemOwner=NULL;
   if (num_elems>0) {
     elemType=new int[num_elems];
     elemId=new UInt[num_elems];
+    elemOwner=new UInt[num_elems];
   }
   int *elemConn=NULL;
   if (num_elemConn >0) {
@@ -245,7 +252,10 @@ namespace ESMCI {
     MeshObj &node=*ni;
     
     // Only do local nodes
-    if (!GetAttr(node).is_locally_owned()) continue;
+    // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
+    // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
+    // A NODE THAT'S NEEDED ON ANOTHER PROC
+    //  if (!GetAttr(node).is_locally_owned()) continue;
     
 
     // Get list of element ids
@@ -262,6 +272,9 @@ namespace ESMCI {
     
     // Save elemId
     elemId[elem_pos]=node.get_id();
+
+    // Save owner
+    elemOwner[elem_pos]=node.get_owner();
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[elem_pos],elemType[elem_pos]);
     
@@ -458,6 +471,8 @@ namespace ESMCI {
   int *elemConn_wsplit=NULL;
   int *elemType_wsplit=NULL;
   UInt *elemId_wsplit=NULL;
+  UInt *elemOwner_wsplit=NULL;
+
   //  int *elemMaskIIArray_wsplit=NULL;
   //InterfaceInt *elemMaskII_wsplit=NULL;
 
@@ -469,7 +484,7 @@ namespace ESMCI {
     elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
     elemType_wsplit=new int[num_elems_wsplit];
     elemId_wsplit=new UInt[num_elems_wsplit];
-
+    elemOwner_wsplit=new UInt[num_elems_wsplit];
 
 #if 0
       //// Setup for split mask
@@ -539,6 +554,9 @@ namespace ESMCI {
               curr_extra_id++;
             }
 
+            // Owner is the same
+            elemOwner_wsplit[split_elem_pos]=elemOwner[e];
+
             // Type is triangle
             elemType_wsplit[split_elem_pos]=3; 
 
@@ -564,6 +582,7 @@ namespace ESMCI {
 
         } else { // just copy
           elemId_wsplit[split_elem_pos]=elemId[e];
+          elemOwner_wsplit[split_elem_pos]=elemOwner[e];
           elemType_wsplit[split_elem_pos]=elemType[e];
           // if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
           split_elem_pos++;
@@ -587,6 +606,7 @@ namespace ESMCI {
       // Delete original element information
     if (elemType !=NULL) delete [] elemType;
     if (elemId !=NULL) delete [] elemId;
+    if (elemOwner !=NULL) delete [] elemOwner;
     if (elemConn !=NULL) delete [] elemConn;
 
       // Use the new split list for the connection lists below
@@ -594,6 +614,7 @@ namespace ESMCI {
       elemConn=elemConn_wsplit;
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
+      elemOwner=elemOwner_wsplit;
 
 #if 0
       if (elemMaskII != NULL) { 
@@ -619,6 +640,7 @@ namespace ESMCI {
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
+      elem->set_owner(elemOwner[e]);
 
       for (int n = 0; n < nnodes; ++n) {
       
@@ -633,12 +655,15 @@ namespace ESMCI {
       }
 
       dual_mesh->add_element(elem, nconnect, topo->number, topo);
+
+
     } // for e
 
     // Clean up
     if (nodes_used !=NULL) delete [] nodes_used;
     if (elemType !=NULL) delete [] elemType;
     if (elemId !=NULL) delete [] elemId;
+    if (elemOwner !=NULL) delete [] elemOwner;
     if (elemConn !=NULL) delete [] elemConn;
     if (nodes !=NULL) delete [] nodes;
 
