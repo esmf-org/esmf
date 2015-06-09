@@ -546,12 +546,20 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY) .or. &
-             (dimcount .eq. 3 .and. size(farrayPtrZ) .ne. size(farrayPtrX))) then
+          if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
               msg='- coord arrays must be equal in size and greater than size 0', &
               ESMF_CONTEXT, rcToReturn=rc)
             return
+          endif
+
+          if (dimcount .eq. 3 ) then
+	    if (size(farrayPtrZ) .ne. size(farrayPtrX)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                msg='- coord arrays must be equal in size and greater than size 0', &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return
+            endif
           endif
 
           call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
@@ -621,12 +629,20 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY) .or. &
-           (dimcount .eq. 3 .and. size(farrayPtrZ) .ne. size(farrayPtrX))) then
+        if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg='- coord arrays must be equal in size and greater than size 0', &
             ESMF_CONTEXT, rcToReturn=rc)
           return
+        endif
+
+        if (dimcount .eq. 3 ) then
+          if (size(farrayPtrZ) .ne. size(farrayPtrX)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+              msg='- coord arrays must be equal in size and greater than size 0', &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
         endif
 
         call  ESMF_LocStreamGet(locstream, localDE=lDE, &
