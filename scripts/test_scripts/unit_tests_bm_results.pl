@@ -321,11 +321,11 @@ use File::Find
 	if (!$SUMMARY) { # Print only if full output requested
         	# Print to the screen
 		if (@pass_list != ()){
-			print "\n\nThe following unit tests passed the $TOLERANCE toloerance benchmark test:\n\n";
+			print "\n\nThe following unit tests passed the $TOLERANCE tolerance benchmark test:\n\n";
 			print @pass_list;
 		}
 		if ($fail_count != 0){
-			print "\n\nThe following unit tests failed the $TOLERANCE toloerance benchmark test:\n\n";
+			print "\n\nThe following unit tests failed the $TOLERANCE tolerance benchmark test:\n\n";
 			system("cat $TEST_DIR/bm_fail_info");
 		}
 		if (@test_list != ()){
