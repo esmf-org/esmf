@@ -1565,6 +1565,46 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist with no distgrids"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMesh3x3(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+ 
+  ! Create redisted mesh
+  mesh2=ESMF_MeshCreate(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, numOwnedElements=localNumOwnedElems(1), &
+                   rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Sum across procs
+  call ESMF_VMAllReduce(vm,localNumOwnedElems, globalNumOwnedElems, 1, &
+                       ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure the global number of elements is still the same
+  if (globalNumOwnedElems(1) .ne. 10) correct=.false.
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
