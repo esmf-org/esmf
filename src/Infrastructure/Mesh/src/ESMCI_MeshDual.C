@@ -842,7 +842,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       Throw() <<" Creation of a dual mesh requires node coordinates. \n";
     }
 
- /* XMRKX */
     // Center coordinates
     // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
     double center[3];
@@ -861,38 +860,51 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
     // Get interator for looping elements around node
     MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
+
     // No elements so leave
     if (el == node->Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
       *_num_ids=0;
       return;
     }
 
+    // Get coords from elem with max id to make things consistent
+    // on different processors
+    // Loop the rest of the elements 
+    UInt max_elem_id=0;
+    double max_elem_coords[3];
+    while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      MeshObj *elem=el->obj;
+
+      // Check if max id if so switch max id and coordinates 
+      if (elem->get_id() > max_elem_id) {
+        max_elem_id=elem->get_id();
+        double *ec=elem_coords->data(*elem);
+        max_elem_coords[0]=ec[0];
+        max_elem_coords[1]=ec[1];
+        max_elem_coords[2]= sdim > 2 ? ec[2]:0.0;
+      }
+            
+      // Next element
+      ++el;
+    }
+
+
     // Get vector to first element 
     // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
     double v1[3];
-    double *ec=elem_coords->data(*(el->obj));
-    v1[0]=ec[0];
-    v1[1]=ec[1];
-    v1[2]= sdim > 2 ? ec[2]:0.0;
-    MU_SUB_VEC3D(v1,v1,center);
+    MU_SUB_VEC3D(v1,max_elem_coords,center);
 
     // If this is a zero length vector complain
     if ((v1[0] == 0.0) &&
         (v1[1] == 0.0) &&
-         (v1[2] == 0.0)) {
+        (v1[2] == 0.0)) {
       Throw() << " Can't order points in dual creation using a 0-vector";
     }
 
-    // Put this first into the list
-    int num_ids=0;
-    tmp_mdss[num_ids].id=el->obj->get_id();
-    tmp_mdss[num_ids].angle=0.0;
-    num_ids++;
-    
-    // Next element
-    ++el;
 
-    // Loop the rest of the elements 
+    // Start over looping through elems attached to node, calculating angles
+    int num_ids=0;
+    el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
 
@@ -934,7 +946,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       ids[i]=tmp_mdss[i].id;
     }
   }
-
 
 #if 0
   // MAYBE DO THE BELOW FIRST AND IF IT DOESN'T WORK THEN GO TO JUST THE ANGLE
