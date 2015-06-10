@@ -870,24 +870,42 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     // Get coords from elem with max id to make things consistent
     // on different processors
     // Loop the rest of the elements 
-    UInt max_elem_id=0;
+    UInt max_elem_id=0; // Init to 0 to watch for nothing ever being selected
     double max_elem_coords[3];
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
 
       // Check if max id if so switch max id and coordinates 
       if (elem->get_id() > max_elem_id) {
-        max_elem_id=elem->get_id();
         double *ec=elem_coords->data(*elem);
-        max_elem_coords[0]=ec[0];
-        max_elem_coords[1]=ec[1];
-        max_elem_coords[2]= sdim > 2 ? ec[2]:0.0;
+        double tmp_coords[3];
+        tmp_coords[0]=ec[0];
+        tmp_coords[1]=ec[1];
+        tmp_coords[2]= sdim > 2 ? ec[2]:0.0;
+  
+        // If at the center, so would be a zero vector skip...
+        if ((tmp_coords[0]==center[0]) &&
+            (tmp_coords[1]==center[1]) &&
+            (tmp_coords[2]==center[2])) continue;
+
+        // Otherwise make this the new point
+        max_elem_id=elem->get_id();
+        max_elem_coords[0]=tmp_coords[0];
+        max_elem_coords[1]=tmp_coords[1];
+        max_elem_coords[2]=tmp_coords[2];
       }
             
       // Next element
       ++el;
     }
 
+    // If this is a  cell with everything at the center, then just use the center
+    // this'll result in a degenerate cell which'll be handled later in the regridding with the flag. 
+    if (max_elem_id==0) {
+      max_elem_coords[0]=center[0];
+      max_elem_coords[1]=center[1];
+      max_elem_coords[2]=center[2];
+    }
 
     // Get vector to first element 
     // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
@@ -895,12 +913,12 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     MU_SUB_VEC3D(v1,max_elem_coords,center);
 
     // If this is a zero length vector complain
-    if ((v1[0] == 0.0) &&
-        (v1[1] == 0.0) &&
-        (v1[2] == 0.0)) {
-      Throw() << " Can't order points in dual creation using a 0-vector";
-    }
-
+    // DON'T COMPLAIN JUST LEAVE IT BE DEGENERATE AND HANDLE IT LATER WITH DEGENERATE FLAG...
+    //if ((v1[0] == 0.0) &&
+    //    (v1[1] == 0.0) &&
+    //    (v1[2] == 0.0)) {
+    //  Throw() << " Can't order points in dual creation using a 0-vector";
+    //}
 
     // Start over looping through elems attached to node, calculating angles
     int num_ids=0;
