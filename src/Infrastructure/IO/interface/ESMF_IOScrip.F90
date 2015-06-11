@@ -591,6 +591,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcmeshname, dstmeshname, & 
 			              srcMissingValue, dstMissingValue, &
 				      srcvarname, dstvarname, &
+				      useSrcCorner, useDstCorner, &
 				      srccoordnames, dstcoordnames, rc)
 !
 ! !ARGUMENTS:
@@ -611,6 +612,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical, optional, intent(in) :: srcMissingValue, dstMissingValue
       character(len=*), optional, intent(in) :: srcvarname, dstvarname
       character(len=*), optional, intent(in) :: srccoordnames(:), dstcoordnames(:)
+      logical, optional, intent(in) :: useSrcCorner, useDstCorner
       integer, optional :: rc
 
       type(ESMF_VM):: vm
@@ -655,6 +657,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_Logical) :: netcdf4FileFlaglocal
       logical            :: faceCoordFlag
       logical            :: srchasbound, dsthasbound
+      logical            :: useSrcCornerlocal, useDstCornerlocal
       type(ESMF_NormType_Flag):: localNormType
 
 #ifdef ESMF_NETCDF
@@ -691,6 +694,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          localNormType=normType
       else     
          localNormType=ESMF_NORMTYPE_DSTAREA
+      endif
+
+      if (present(useSrcCorner)) then
+         useSrcCornerlocal=useSrcCorner
+      else
+         useSrcCornerlocal=.false.
+      endif
+
+      if (present(useDstCorner)) then
+         useDstCornerlocal=useDstCorner
+      else
+         useDstCornerlocal=.false.
       endif
 
       call ESMF_VMGetCurrent(vm, rc=rc)
@@ -893,10 +908,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	  ! If bilinear, we have to switch node and elment, so the nodeCount became srcDim and
           ! elementCount becomes srcNodeDim. Hard code src_grid_corner to 3.  The xv_a and xv_b
           ! will be empty   
-	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. & 
+	  if (useSrcCornerlocal .and. &
+	      (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. & 
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. & 
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. & 
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_EsmfInq(srcFile, nodeCount=srcDim,  &
 	        coordDim = srcCoordDim, elementCount=srcNodeDim, rc=status)
                 src_grid_corner =3
@@ -909,10 +925,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           src_grid_dims(1)=srcDim
           src_grid_rank = 1    
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
-	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
+	  if (useSrcCornerlocal .and. &
+	      (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(srcFile, srcmeshname, nodeCount=srcDim,  &
 	        elementCount=srcNodeDim, units=srcunits, rc=status)
                 src_grid_corner =3
@@ -957,10 +974,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	  ! If bilinear, we have to switch node and elment, so the nodeCount became dstDim and
           ! elementCount becomes dstNodeDim. Hard code dst_grid_corner to 3.  The xv_a and xv_b
           ! will be empty   
-	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
+	  if (useDstCornerlocal .and. &
+	      (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_EsmfInq(dstFile, nodeCount=dstDim,  &
 	        coordDim = dstCoordDim, elementCount=dstNodeDim, rc=status)
                 dst_grid_corner =3
@@ -973,10 +991,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           dst_grid_dims(1)=dstDim   
           dst_grid_rank = 1
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
-	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
+	  if (useDstCornerlocal .and. &
+	      (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(dstFile, dstmeshname, nodeCount=dstDim,  &
 	        elementCount=dstNodeDim, units=dstunits, rc=status)
                 dst_grid_corner =3
@@ -1552,10 +1571,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
 	     trim(srcFile),&
              rc)) return
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
+  	   if (useSrcCornerlocal .and. (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"
@@ -1602,9 +1621,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            endif
 
            ! only write out xv_a and yv_a when the regrid method is conserve
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
-           ! elementConn and construct the the latitudes nd longitudes for
+           ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
              allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
              call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
@@ -1630,7 +1649,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              deallocate(latBuffer2, lonBuffer2) 
            endif
            allocate(mask(srcDim))         
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useSrcCornerlocal .and. &
+	       methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
 	     if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -1663,7 +1683,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
            ! ESMF unstructured grid
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
 	      call ESMF_UGridInq(srcfile, srcmeshname, faceCoordFlag=faceCoordFlag)
 	      allocate(latBuffer2(src_grid_corner,srcDim),&
@@ -1967,10 +1987,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
          rc)) return
            ! only write out xv_a and yv_a when the regrid method is conserve
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
+  	   if (useDstCornerlocal .and. (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"
@@ -2016,7 +2036,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! output xv_b and yv_b is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useDstCornerlocal .or. &
+	      methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))         
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
@@ -2042,7 +2063,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            endif
            ! Write mask_b
            allocate(mask(dstDim))         
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useDstCornerlocal .or. &
+	      methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
 	     if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -2075,7 +2097,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(dstFile),&
              rc)) return
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
-  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+  	   if (.not. useDstCornerlocal .or. &
+	     methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
 	     ! check if faceCoords exit
 	      call ESMF_UGridInq(dstfile, dstmeshname, faceCoordFlag=faceCoordFlag)
 	        allocate(latBuffer2(dst_grid_corner,dstDim),&
