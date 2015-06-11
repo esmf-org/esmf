@@ -11,17 +11,19 @@
 #  -d   TEST_DIR
 #  -e   BM_DIR
 #  -f   VARIANCE
-#  -g   ESMF_BOPT
+#  -g   THRESHOLD
+#  -i   ESMF_BOPT
 
 use Getopt::Std;
 
-getopts("h:d:e:f:g:", \%options);
+getopts("h:d:e:f:g:i:", \%options);
 
 	$ESMF_TESTSCRIPTS = "$options{h}";
 	$TEST_DIR = "$options{d}"; 
 	$BM_DIR = "$options{e}";
 	$TOLERANCE = "$options{f}";
-	$ESMF_BOPT = "$options{g}";
+	$THRESHOLD = "$options{g}";
+	$ESMF_BOPT = "$options{i}";
 
 #
 # Define location of test scripts.
@@ -33,6 +35,6 @@ unshift (@INC, "$ESMF_TESTSCRIPTS");
 require "unit_tests_bm_results.pl";
 
 # Call unit_tests_bm_result with SUMMARY request turned off.
-&unit_tests_bm_results("$TEST_DIR","$BM_DIR","$TOLERANCE","$ESMF_BOPT","0");
+&unit_tests_bm_results("$TEST_DIR","$BM_DIR","$TOLERANCE","$THRESHOLD","$ESMF_BOPT","0");
 
 exit;

@@ -500,7 +500,7 @@ endif
 
 
 #-------------------------------------------------------------------------------
-# If BENCHMARK directory is not set give it a default value
+# If BENCHMARK directory, Tolerance, Threshold are  not set give them a default value
 #-------------------------------------------------------------------------------
 
 ifndef ESMF_BENCHMARK_PREFIX
@@ -510,9 +510,12 @@ ESMF_BENCHMARK_PREFIX_ABSPATH := $(shell $(ESMF_DIR)/scripts/abspath $(ESMF_BENC
 
 
 ifndef ESMF_BENCHMARK_TOLERANCE
-ESMF_BENCHMARK_TOLERANCE := 20%
+ESMF_BENCHMARK_TOLERANCE := 3%
 endif
 
+ifndef ESMF_BENCHMARK_THRESHOLD
+ESMF_BENCHMARK_THRESHOLD_MSEC := 500
+endif
 
 #-------------------------------------------------------------------------------
 # Set ESMF Version variables
@@ -634,7 +637,7 @@ TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_UT_BM_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_bm_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_UT_BM_DIR) -f $(ESMF_BENCHMARK_TOLERANCE) -g $(ESMF_BOPT)
+DO_UT_BM_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_bm_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_UT_BM_DIR) -f $(ESMF_BENCHMARK_TOLERANCE) -g $(ESMF_BENCHMARK_THRESHOLD_MSEC) -i $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 

@@ -30,10 +30,6 @@ module ESMF_ArrayGetMod
 ! INCLUDES
 ^include "ESMF.h"
 
-! The following macro is used to get around the first pass preprocessing,
-! which treats the string concatenation operator // as an inline comment.
-^define CONCAT /
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_ArrayGetMod - Provide TKR overloading for ESMF_ArrayGet()
@@ -548,9 +544,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! extra code to deal with deprecated arguments -> will be removed eventually
     if (present(localDeList)) then
-      call ESMF_LogWrite("The use of argument 'localDeList' in call " CONCAT/ &
-        "ESMF_ArrayGet() is DEPRECATED! Use argument 'localDeToDeMap' " CONCAT/ &
-        "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+      call ESMF_LogWrite("The use of DEPRECATED argument 'localDeList' in call ESMF_ArrayGet()!",  &
+          ESMF_LOGMSG_WARNING, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite("Use argument 'localDeToDeMap' instead.",  &
+          ESMF_LOGMSG_WARNING, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(localDeToDeMap)) then
