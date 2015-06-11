@@ -23,10 +23,6 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ^include "ESMF.h"
 
-! The following macro is used to get around the first pass preprocessing,
-! which treats the string concatenation operator // as an inline comment.
-^define CONCAT /
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateRemRepMod - Data exchange between components
@@ -40,9 +36,10 @@ module ESMF_StateRemRepMod
 ! !USES:
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
-      use ESMF_UtilTypesMod
       use ESMF_ContainerMod
-      
+      use ESMF_UtilMod
+      use ESMF_UtilTypesMod
+
       use ESMF_ArrayMod
       use ESMF_ArrayBundleMod
       use ESMF_FieldMod
@@ -307,7 +304,8 @@ contains
           localrc = ESMF_SUCCESS
           cycle
 	else
-          errmsg = "could not find " CONCAT/ trim (itemNameList(i)) CONCAT/ " for removal"
+          errmsg = ESMF_StringConcat ("could not find ",  &
+                   ESMF_StringConcat (trim (itemNameList(i)), " for removal"))
           if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
         	ESMF_CONTEXT, rcToReturn=rc)) return
 	end if

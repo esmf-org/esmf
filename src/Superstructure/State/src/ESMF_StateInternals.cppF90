@@ -24,9 +24,6 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ^include "ESMF.h"
 
-! The following macro is used to get around the first pass preprocessing,
-! which treats the string concatenation operator // as an inline comment.
-^define CONCAT /
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateMod - Data exchange between components
@@ -38,11 +35,14 @@ module ESMF_StateInternalsMod
 !
 !
 ! !USES:
-      use ESMF_UtilTypesMod
-      use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_ContainerMod
+      use ESMF_InitMacrosMod
+      use ESMF_LogErrMod
+      use ESMF_UtilMod
+      use ESMF_UtilTypesMod
       use ESMF_VMMod
+
       use ESMF_ArrayMod
       use ESMF_ArrayBundleMod
       use ESMF_FieldMod
@@ -52,8 +52,7 @@ module ESMF_StateInternalsMod
       use ESMF_StateTypesMod
       use ESMF_StateContainerMod
       use ESMF_StateVaMod
-      use ESMF_InitMacrosMod
-      
+
       implicit none
       
 !------------------------------------------------------------------------------
@@ -638,7 +637,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
             if (localrelaxedflag) then @\
               cycle @\
             else @\
-              errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not replacable" @\
+              errmsg = ESMF_StringConcat ("existing item ",  & @\
+                       ESMF_StringConcat (trim (itemname), " not replacable")) @\
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
                 ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -656,7 +656,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
             if (localrelaxedflag) then @\
               cycle @\
             else @\
-              errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not found" @\
+              errmsg = ESMF_StringConcat ("existing item ",  & @\
+                       ESMF_StringConcat (trim (itemname), " not found")) @\
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
                 ESMF_CONTEXT, rcToReturn=rc)) return @\
