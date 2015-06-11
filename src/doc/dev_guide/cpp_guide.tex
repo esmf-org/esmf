@@ -119,6 +119,10 @@ end module ESMF_Example_mod
 
 \end{verbatim}
 
+Character string concatenation via the Fortran concatenation operator {\tt //}
+can be problematic due to the first pass preprocessing treating it as a C++ inline
+comment.  An alternative is to use the {\tt ESMF\_StringConcat} function.
+
 \subsubsection{System Dependent Strategy Using Preprocessor} Since the code
 must compile across different platforms, a stategy must be adopted to
 handle the system differences. Examples of system differences are: the
