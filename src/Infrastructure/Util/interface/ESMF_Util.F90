@@ -87,6 +87,7 @@
 !  Misc methods
       public :: ESMF_Array2String
       public :: ESMF_String2Array
+      public :: ESMF_StringConcat
       public :: ESMF_StringLowerCase
       public :: ESMF_StringUpperCase
 
@@ -796,6 +797,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_String2Array = transfer (string, mold=ESMF_String2Array)
 
       end function ESMF_String2Array
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StringConcat"
+!BOPI
+!  !IROUTINE:  ESMF_StringConcat - concatenate two strings
+!  
+! !INTERFACE: 
+    function ESMF_StringConcat (string1, string2) 
+!
+! !ARGUMENTS:
+      character(len=*), intent(in) :: string1
+      character(len=*), intent(in) :: string2
+!
+! !RETURN VALUE:
+      character(len=len (string1) + len (string2)) :: ESMF_StringConcat
+
+!
+! !DESCRIPTION:
+!   Concatenates two strings.  Useful for .cppF90 files where the first pass preprocessing
+!   may treat the Fortran // operator to be a C++ inline comment.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string1]
+!       A character string.
+!     \item[string2]
+!       A character string.
+!     \end{description}
+!
+!
+!EOPI
+
+      ESMF_StringConcat(:len (string1))    = string1
+      ESMF_StringConcat( len (string1)+1:) = string2
+
+    end function ESMF_StringConcat
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

@@ -104,6 +104,8 @@
 
       character(ESMF_MAXPATHLEN) :: pathname
       character(1) :: pathname_tooshort
+
+      character(ESMF_MAXSTR) :: str
 #endif
 
 !-------------------------------------------------------------------------------
@@ -648,6 +650,36 @@
     write (failMsg, *) "did not return failure"
     call ESMF_UtilIOGetCWD (pathname_tooshort, rc=rc)
     call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+! Internal string utilities (NOT part of the external ESMF API)
+!==============================================================
+
+    !EX_UTest
+    ! Test concatenating strings
+    write (name, *) "Testing concatenating strings"
+    write (failMsg, *) "comparison failure"
+    str = ESMF_StringConcat ("1234", "abcdefg")
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == '1234abcdefg')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test converting string to UPPER case
+    write (name, *) "Testing converting string to UPPER case"
+    write (failMsg, *) "conversion failure"
+    str = "aBcDeFg123+-*/"
+    call ESMF_StringUpperCase (str)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'ABCDEFG123+-*/')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+
+    !EX_UTest
+    ! Test converting string to lower case
+    write (name, *) "Testing converting string to lower case"
+    write (failMsg, *) "conversion failure"
+    str = "aBcDeFg123+-*/"
+    call ESMF_StringLowerCase (str)
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'abcdefg123+-*/')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
