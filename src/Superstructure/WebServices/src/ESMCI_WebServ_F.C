@@ -27,14 +27,19 @@
 
 #include "ESMCI_WebServ.h"
 
-#include <stdio.h>
+#include <iostream>
 #include <string>
+#include <sstream>
 using namespace std;
 
 #if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
+#include <limits.h>
 #else
 #include <Winsock.h>
+#if !defined (HOST_NAME_MAX)
+#define HOST_NAME_MAX 64
+#endif
 #endif
 
 #include "ESMCI_WebServComponentSvr.h"
@@ -93,20 +98,15 @@ void FTN_X(c_esmc_componentsvcloop)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("Port Number: %d\n", *portNum);
-	printf("Client ID: %d\n", atoi(clientId));
-   printf("Registrar Host: %s\n", registrarHost);
-	int	localrc = 0;
 
-   char  registrarHostStr[ESMF_MAXSTR];
-   strncpy(registrarHostStr, registrarHost, registrarHostLen);
-   registrarHostStr[registrarHostLen] = '\0';
-   string   registrarHostString(registrarHostStr);
-   size_t   found = registrarHostString.find_last_not_of(' ');
-   if (found != string::npos)
-      registrarHostString.erase(found + 1);
-   else
-      registrarHostString.clear();
+   int localrc = 0;
+
+   string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
+   string registrarHostStr = string (registrarHost, ESMC_F90lentrim (registrarHost, registrarHostLen));
+
+   cout << "Port Number   : " << *portNum << endl;
+   cout << "Client ID     : " << atoi (clientIdStr.c_str()) << endl;
+   cout << "Registrar Host: " << registrarHostStr << endl;
 
    //***
    // This loop should not return until either an "exit" message has been
@@ -114,8 +114,8 @@ void FTN_X(c_esmc_componentsvcloop)(
    //***
 	theComponentServer = 
       new ESMCI::ESMCI_WebServComponentSvr(*portNum,
-                                           atoi(clientId),
-                                           registrarHostString);
+                                           atoi(clientIdStr.c_str()),
+                                           registrarHostStr);
 
 	if (theComponentServer->requestLoop(comp, 
                                        importState, 
@@ -171,20 +171,14 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("Port Number: %d\n", *portNum);
-	printf("Client ID: %d\n", atoi(clientId));
-   printf("Registrar Host: %s\n", registrarHost);
-	int	localrc = 0;
+   int localrc = 0;
 
-   char  registrarHostStr[ESMF_MAXSTR];
-   strncpy(registrarHostStr, registrarHost, registrarHostLen);
-   registrarHostStr[registrarHostLen] = '\0';
-   string   registrarHostString(registrarHostStr);
-   size_t   found = registrarHostString.find_last_not_of(' ');
-   if (found != string::npos)
-      registrarHostString.erase(found + 1);
-   else
-      registrarHostString.clear();
+   string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
+   string registrarHostStr = string (registrarHost, ESMC_F90lentrim (registrarHost, registrarHostLen));
+
+   cout << "Port Number   : " << *portNum << endl;
+   cout << "Client ID     : " << atoi (clientIdStr.c_str()) << endl;
+   cout << "Registrar Host: " << registrarHostStr << endl;
 
    //***
    // This loop should not return until either an "exit" message has been
@@ -193,8 +187,8 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
 //	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
 	theComponentServer = 
       new ESMCI::ESMCI_WebServComponentSvr(*portNum,
-                                           atoi(clientId),
-                                           registrarHostString);
+                                           atoi(clientIdStr.c_str()),
+                                           registrarHostStr);
 
 printf("Component Server Request Loop\n");
 	if (theComponentServer->cplCompRequestLoop(comp, 
@@ -251,68 +245,32 @@ void FTN_X(c_esmc_registercomponent)(
 {
 	int	localrc = 0;
 
-	char	nameStr[ESMF_MAXSTR];
-	char	descStr[ESMF_MAXSTR];
-	char	clientIdStr[ESMF_MAXSTR];
-   char  registrarHostStr[ESMF_MAXSTR];
-	char	portStr[ESMF_MAXSTR];
-	char	hostStr[ESMF_MAXSTR];
+	string nameStr = string (compName, ESMC_F90lentrim (compName, compNameLen));
+	string descStr = string (compDesc, ESMC_F90lentrim (compDesc, compDescLen));
+	string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
+        string registrarHostStr = string (registrarHost, ESMC_F90lentrim (registrarHost, registrarHostLen));
+	stringstream portStr;
+	char	hostStr[HOST_NAME_MAX];
 
-	strncpy(descStr, compDesc, compDescLen);
-	descStr[compDescLen] = '\0';
-	string	descString(descStr);
-	size_t	found = descString.find_last_not_of(' ');
-	if (found != string::npos)
-		descString.erase(found + 1);
-	else
-		descString.clear();
+	theClientId = clientIdStr;
 
-	strncpy(nameStr, compName, compNameLen);
-	nameStr[compNameLen] = '\0';
-	string	nameString(nameStr);
-	found = nameString.find_last_not_of(' ');
-	if (found != string::npos)
-		nameString.erase(found + 1);
-	else
-		nameString.clear();
+	portStr << *portNum;
+	gethostname(hostStr, HOST_NAME_MAX);
 
-	strncpy(clientIdStr, clientId, clientIdLen);
-	clientIdStr[clientIdLen] = '\0';
-	string	clientIdString(clientIdStr);
-	found = clientIdString.find_last_not_of(' ');
-	if (found != string::npos)
-		clientIdString.erase(found + 1);
-	else
-		clientIdString.clear();
-
-	theClientId = clientIdString;
-
-   strncpy(registrarHostStr, registrarHost, registrarHostLen);
-   registrarHostStr[registrarHostLen] = '\0';
-   string   registrarHostString(registrarHostStr);
-   found = registrarHostString.find_last_not_of(' ');
-   if (found != string::npos)
-      registrarHostString.erase(found + 1);
-   else
-      registrarHostString.clear();
-
-	sprintf(portStr, "%d", *portNum);
-	gethostname(hostStr, ESMF_MAXSTR);
-
-	printf("Name: %s\n", nameString.c_str());
-	printf("Desc: %s\n", descString.c_str());
-	printf("Port: %s\n", portStr);
-	printf("Client ID: %s\n", clientIdString.c_str());
-   printf("RegistrarHost: %s\n", registrarHostString.c_str());
-	printf("Host: %s\n", hostStr);
+	cout << "Name: " << nameStr << endl;
+	cout << "Desc: " << descStr << endl;
+	cout << "Port: " << portStr.str() << " (currently unused)" << endl;
+	cout << "Client ID: " << clientIdStr << endl;
+        cout << "RegistrarHost: " << registrarHostStr << endl;
+	cout << "Host: " << hostStr << endl;
 
 //	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
-   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostString.c_str(),
+   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostStr.c_str(),
                                               REGISTRAR_PORT);
 
-	if (client.compStarted(clientIdString.c_str(), 
-                          nameString.c_str(), 
-                          descString.c_str(), 
+	if (client.compStarted(clientIdStr.c_str(), 
+                          nameStr.c_str(), 
+                          descStr.c_str(), 
                           hostStr) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.MsgFoundError(
@@ -322,7 +280,7 @@ void FTN_X(c_esmc_registercomponent)(
 
 		*rc = localrc;
 	}
-printf("Successfully notified Registrar of component ready.\n");
+   cout << "Successfully notified Registrar of component ready." << endl;
 
    *rc = ESMF_SUCCESS;
 
@@ -360,37 +318,20 @@ void FTN_X(c_esmc_unregistercomponent)(
 	//printf("unregisterComponent()\n");
 
 	int	localrc = 0;
-	char	clientIdStr[ESMF_MAXSTR];
-   char  registrarHostStr[ESMF_MAXSTR];
 
-	strncpy(clientIdStr, clientId, clientIdLen);
-	clientIdStr[clientIdLen] = '\0';
-	string	clientIdString(clientIdStr);
-	size_t	found = clientIdString.find_last_not_of(' ');
-	if (found != string::npos)
-		clientIdString.erase(found + 1);
-	else
-		clientIdString.clear();
 
-	printf("Client ID: %s\n", clientIdStr);
+   string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
+   string registrarHostStr = string (registrarHost, ESMC_F90lentrim (registrarHost, registrarHostLen));
 
-   strncpy(registrarHostStr, registrarHost, registrarHostLen);
-   registrarHostStr[registrarHostLen] = '\0';
-   string   registrarHostString(registrarHostStr);
-   found = registrarHostString.find_last_not_of(' ');
-   if (found != string::npos)
-      registrarHostString.erase(found + 1);
-   else
-      registrarHostString.clear();
-
-   printf("Registrar Host: %s\n", registrarHostString.c_str());
+   cout << "Client ID     : " << atoi (clientIdStr.c_str()) << endl;
+   cout << "Registrar Host: " << registrarHostStr << endl;
 
 //	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
-   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostString.c_str(),
+   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostStr.c_str(),
                                               REGISTRAR_PORT);
 
 	char	response[1024];
-	if (client.setStatus(clientIdString.c_str(), 
+	if (client.setStatus(clientIdStr.c_str(), 
                         client.getStateStr(NET_ESMF_STAT_DONE)) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.MsgFoundError(
@@ -460,15 +401,12 @@ void FTN_X(c_esmc_addoutputfilename)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	localrc = 0;
-   char  filenameStr[ESMF_MAXSTR];
+   int	localrc = 0;
+   string filenameStr = string (filename, ESMC_F90lentrim (filename, filenameLen));
 
    // TODO: everything
    if (theComponentServer != NULL)
-	{
-      strncpy(filenameStr, filename, filenameLen);
-		theComponentServer->addOutputFilename(filenameStr);
-	}
+       theComponentServer->addOutputFilename(filenameStr);
 
    *rc = ESMF_SUCCESS;
 }
