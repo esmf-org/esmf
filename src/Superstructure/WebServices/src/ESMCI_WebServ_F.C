@@ -37,9 +37,11 @@ using namespace std;
 #include <limits.h>
 #else
 #include <Winsock.h>
-#if !defined (HOST_NAME_MAX)
-#define HOST_NAME_MAX 64
 #endif
+// HOST_NAME_MAX is supposed to be in <limits.h>, but apparently some systems
+// (e.g., MacOS) don't have it there...
+#if !defined (HOST_NAME_MAX)
+#define HOST_NAME_MAX 255
 #endif
 
 #include "ESMCI_WebServComponentSvr.h"
