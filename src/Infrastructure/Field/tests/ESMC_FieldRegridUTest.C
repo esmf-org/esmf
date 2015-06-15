@@ -54,9 +54,11 @@ int main(void){
   int ls_size=16;
   char *keyNameX="ESMF:X";
   char *keyNameY="ESMF:Y";
+  char *keyNameM="ESMF:Mask";
   ESMC_Array keyArray;
   double *farray;
   double *farray2;
+  int *farray3;
 
 
   //----------------------------------------------------------------------------
@@ -380,7 +382,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Validation of regrid operation()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double x,y;
+  double x,y,should_be;
   int i;
   bool correct = true;
   // 2. check destination field against source field
@@ -412,8 +414,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  free(maskValues);
-
 
   //----------------------------------------------------------------------------
   //NEX_UTest 
@@ -427,7 +427,7 @@ int main(void){
   //NEX_UTest  
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameX);
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameX,ESMC_TYPEKIND_R8);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 
@@ -458,7 +458,7 @@ int main(void){
   //NEX_UTest  
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameY);
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameY,ESMC_TYPEKIND_R8);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 
@@ -486,6 +486,37 @@ int main(void){
   farray2[15]=2.0;
   
   //---------------------------------------------------------------------------- 
+  //NEX_UTest  
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameM,ESMC_TYPEKIND_I4);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+
+  //---------------------------------------------------------------------------- 
+  //NEX_UTest 
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray3 = (int *) ESMC_LocStreamGetKeyPtr(dstlocstream,keyNameM,0,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  farray3[0]=0;
+  farray3[1]=0;
+  farray3[2]=0;
+  farray3[3]=1;
+  farray3[4]=0;
+  farray3[5]=2;
+  farray3[6]=0;
+  farray3[7]=0;
+  farray3[8]=0;
+  farray3[9]=0;
+  farray3[10]=0;
+  farray3[11]=0;
+  farray3[12]=0;
+  farray3[13]=0;
+  farray3[14]=0;
+  farray3[15]=0;
+
+  //---------------------------------------------------------------------------- 
   //NEX_UTest 
   strcpy(name, "Create ESMC_Field object on LocStream");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -506,15 +537,17 @@ int main(void){
   {
     int i;
     for(i=0;i<ls_size;++i)
-      dstfieldptr[i] = 0.0;
+      dstfieldptr[i] = -9999.0;
   }
+
+  //----------------------------------------------------------------------------                  
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
-                             NULL, NULL,
+                             NULL, &i_maskValues,
                              &routehandle,
                              NULL, NULL, NULL,
                              NULL, NULL, NULL,
@@ -526,7 +559,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  ESMC_Region_Flag zeroregion = ESMC_REGION_SELECT;
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -559,9 +593,17 @@ int main(void){
   for(i=0;i<ls_size;++i) {
     x=nodeCoord_d[2*i];
     y=nodeCoord_d[2*i+1];
+
+    // if masked, should be unchanged
+    if (farray3[i] == 1) {
+      should_be = -9999.0;
+    } else {
+      should_be = x+y+20.0;
+    }
+
     // if error is too big report an error
-    if (ESMC_dabs(dstfieldptr[i]-(x+y+20.0)) > 0.0001) {
-      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
+    if (ESMC_dabs(dstfieldptr[i]-should_be) > 0.0001) {
+      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], should_be);
       correct=false;
     }
   }
@@ -601,6 +643,8 @@ int main(void){
   rc = ESMC_LocStreamDestroy(&dstlocstream);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
+
+  free(maskValues);
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

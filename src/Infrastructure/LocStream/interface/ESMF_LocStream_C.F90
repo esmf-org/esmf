@@ -90,7 +90,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_locstreamaddkeyalloc"
-  subroutine f_esmf_locstreamaddkeyalloc(locstream, keyName, rc)
+  subroutine f_esmf_locstreamaddkeyalloc(locstream, keyName, typekind, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -101,12 +101,13 @@
 
     type(ESMF_LocStream)         :: locstream
     character(len=*),intent(in)  :: keyName
+    type(ESMF_TypeKind_Flag)     :: typekind
     integer, intent(out)         :: rc
 
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LocStreamAddKey(locstream, keyName=keyName, rc=rc)
+    call ESMF_LocStreamAddKey(locstream, keyName=keyName, keyTypeKind=typekind, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

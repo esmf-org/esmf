@@ -44,7 +44,7 @@ int main(void){
   // LocStream variables
   ESMC_LocStream srclocstream;
   int ls_size=9;
-  char *keyName="hellothere";
+  char *keyName="AnyNameHere";
   int cLBound,cUBound;
   double *farray;
   double *farray2;
@@ -66,7 +66,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(srclocstream,keyName);
+  rc = ESMC_LocStreamAddKeyAlloc(srclocstream,keyName,ESMC_TYPEKIND_R8);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

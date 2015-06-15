@@ -67,7 +67,8 @@ namespace ESMCI{
     static LocStream *create(int ls_size, int *rc); 
     static int getbounds(LocStream *locstream, int localDe,
 			 int *cLBound, int *cUBound);
-    static int addKeyAlloc(LocStream *locstream, const char *keyName);
+    static int addKeyAlloc(LocStream *locstream, const char *keyName, 
+			   ESMC_TypeKind_Flag typekind);
     ESMC_Array getKeyArray(const char *keyName, int *rc);
     static int destroy(LocStream *locstream);
   }; 

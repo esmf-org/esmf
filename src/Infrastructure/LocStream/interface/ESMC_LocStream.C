@@ -85,7 +85,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamAddKeyAlloc()"
   int ESMC_LocStreamAddKeyAlloc(ESMC_LocStream locstream,
-				const char *keyName){
+				const char *keyName,
+				ESMC_TypeKind_Flag keyTypeKind){
 
     // initialize return code; assume routine not implemented 
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -95,7 +96,7 @@ extern "C" {
     ESMCI::LocStream *locstreamp = reinterpret_cast<ESMCI::LocStream *>(locstream.ptr);
 
     // Invoke the C++ interface
-    localrc = ESMCI::LocStream::addKeyAlloc(locstreamp, keyName);
+    localrc = ESMCI::LocStream::addKeyAlloc(locstreamp, keyName, keyTypeKind);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &rc)) return rc;  // bail out 
 

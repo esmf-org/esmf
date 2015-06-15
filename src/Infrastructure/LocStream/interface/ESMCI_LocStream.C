@@ -63,6 +63,7 @@ extern "C" {
   void FTN_X(f_esmf_locstreamgetbounds)(ESMCI::LocStream *locstreamp, int *localDe,
 				        int *cLBound, int *cUBound, int *rc);
   void FTN_X(f_esmf_locstreamaddkeyalloc)(ESMCI::LocStream *locstreamp, char *keyName, 
+                                          ESMC_TypeKind_Flag *typekind,
 					  int *rc, ESMCI_FortranStrLenArg nlen);
   void FTN_X(f_esmf_locstreamgetkeyarray)(ESMCI::LocStream *locstreamp, char *keyName,
 				          void *array_pointer, int *rc, 
@@ -205,7 +206,8 @@ namespace ESMCI {
 
 // !ARGUMENTS:
 		       LocStream *locstream,
-		       const char *keyName){
+		       const char *keyName,
+                       ESMC_TypeKind_Flag typekind){
 
 // !DESCRIPTION:
 //      ESMF routine to add a key to the LocStream.
@@ -234,7 +236,7 @@ namespace ESMCI {
 	}
       }
 
-      FTN_X(f_esmf_locstreamaddkeyalloc)(locstream, fName, &localrc, slen);
+      FTN_X(f_esmf_locstreamaddkeyalloc)(locstream, fName, &typekind, &localrc, slen);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 	if (fName) delete[] fName;
 	return rc;
@@ -274,7 +276,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::LocStream::getKeyArray()"
 //BOP
-// !IROUTINE:  ESMCI::LocStream::addKeyAlloc - add key array
+// !IROUTINE:  ESMCI::LocStream::getKeyArray - get key array
 //
 // !INTERFACE:
   ESMC_Array LocStream::getKeyArray(

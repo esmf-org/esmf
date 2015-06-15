@@ -121,7 +121,8 @@ int ESMC_LocStreamGetBounds(
 // !INTERFACE:
 int ESMC_LocStreamAddKeyAlloc(
   ESMC_LocStream locstream,      // in
-  const char *keyName
+  const char *keyName,
+  ESMC_TypeKind_Flag keyTypeKind
 );
 
 // !RETURN VALUE:
