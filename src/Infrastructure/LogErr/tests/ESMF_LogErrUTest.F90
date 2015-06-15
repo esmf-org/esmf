@@ -1094,6 +1094,14 @@ if (time_diff < zero) stop 1
       call ESMF_LogClose (log=log9_alias, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test opening the default log under a different name when it is already open
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Opening unclosed default log Test"
+      call ESMF_LogOpen ('new_log', rc=rc)
+      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 100   continue
       call ESMF_TestEnd(ESMF_SRCLINE)
