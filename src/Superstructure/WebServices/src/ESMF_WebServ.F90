@@ -585,11 +585,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)        :: comp
-    integer                    :: portNum
-    character(len=ESMF_MAXSTR) :: clientId
-    character(len=ESMF_MAXSTR) :: registrarHost
-    integer, intent(out)       :: rc
+    type(ESMF_GridComp)          :: comp
+    integer, intent(in)          :: portNum
+    character(len=*), intent(in) :: clientId
+    character(len=*), intent(in) :: registrarHost
+    integer, intent(out)         :: rc
 !
 !
 ! !DESCRIPTION:
@@ -645,11 +645,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp)         :: comp
-    integer                    :: portNum
-    character(len=ESMF_MAXSTR) :: clientId
-    character(len=ESMF_MAXSTR) :: registrarHost
-    integer, intent(out)       :: rc
+    type(ESMF_CplComp)           :: comp
+    integer, intent(in)          :: portNum
+    character(len=*), intent(in) :: clientId
+    character(len=*), intent(in) :: registrarHost
+    integer, intent(out)         :: rc
 !
 !
 ! !DESCRIPTION:
@@ -704,9 +704,9 @@ contains
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR) :: clientId
-    character(len=ESMF_MAXSTR) :: registrarHost
-    integer, intent(out)       :: rc
+    character(len=*), intent(in) :: clientId
+    character(len=*), intent(in) :: registrarHost
+    integer, intent(out)         :: rc
 !
 !
 ! !DESCRIPTION:
@@ -751,15 +751,15 @@ contains
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR)                          :: clientId
+    character(len=*),           intent(in)              :: clientId
     type(ESMF_GridComp)                                 :: comp
-    integer                                             :: portNum
+    integer,                    intent(in)              :: portNum
     type(ESMF_State),           intent(inout), optional :: importState
     type(ESMF_State),           intent(inout), optional :: exportState
     type(ESMF_Clock),           intent(inout), optional :: clock
     type(ESMF_Sync_Flag),       intent(in),    optional :: syncflag
     integer,                    intent(in),    optional :: phase
-    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
+    character(len=*),           intent(in),    optional :: registrarHost
     integer,                    intent(out),   optional :: rc
 !
 !
@@ -810,15 +810,15 @@ contains
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR)                          :: clientId
+    character(len=*),           intent(in)              :: clientId
     type(ESMF_CplComp)                                  :: comp
-    integer                                             :: portNum
+    integer,                    intent(in)              :: portNum
     type(ESMF_State),           intent(inout), optional :: importState
     type(ESMF_State),           intent(inout), optional :: exportState
     type(ESMF_Clock),           intent(inout), optional :: clock
     type(ESMF_Sync_Flag),       intent(in),    optional :: syncflag
     integer,                    intent(in),    optional :: phase
-    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
+    character(len=*),           intent(in),    optional :: registrarHost
     integer,                    intent(out),   optional :: rc
 !
 !
@@ -910,11 +910,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                                 :: comp
-    integer,                    intent(inout), optional :: portNum
-    character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
-    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
-    integer,                    intent(out),   optional :: rc
+    type(ESMF_GridComp)                         :: comp
+    integer,            intent(inout), optional :: portNum
+    character(len=*),   intent(in),    optional, target :: clientId
+    character(len=*),   intent(in),    optional, target :: registrarHost
+    integer,            intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -951,6 +951,39 @@ contains
 !------------------------------------------------------------------------------
 
     integer                    :: localrc
+
+    character, target          :: clientIdDefault = ''
+    character, target          :: registrarHostDefault = ''
+    integer                    :: clientIdlen, registrarHostlen
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    if (present (clientId)) then
+      clientIdlen = len (clientID)
+    else
+      clientIdlen = len (clientIdDefault)
+    end if
+
+    if (present (registrarHost)) then
+      registrarHostLen = len (registrarHost)
+    else
+      registrarHostLen = len (registrarHostDefault)
+    end if
+
+    ! Make nested call so we can get character string lengths right
+    call ESMF_WebServicesLoop1 (clientIdLen, registrarHostLen)
+
+  contains
+
+  subroutine ESMF_WebServicesLoop1 (clIdlen, regHostlen)
+    integer, intent(in) :: clIdlen
+    integer, intent(in) :: regHostlen
+
+    character(len=clIdlen), pointer :: clientIdVal
+    character(len=regHostLen), pointer :: registrarHostVal
+
     integer                    :: registrarrc
     integer                    :: localPet, petCount
     type(ESMF_VM)              :: vm
@@ -959,24 +992,17 @@ contains
     type(ESMF_Clock)           :: clock
     type(ESMF_Sync_Flag)       :: syncflag
     integer                    :: phase
-    character(len=ESMF_MAXSTR) :: clientIdVal
-    character(len=ESMF_MAXSTR) :: registrarHostVal
-
-
-    ! Initialize return code
-    rc = ESMF_SUCCESS
-    localrc = ESMF_SUCCESS
 
     if (present(clientId)) then
-      clientIdVal = clientId
+      clientIdVal => clientId
     else
-      clientIdVal = ""
+      clientIdVal => clientIdDefault
     end if
 
     if (present(registrarHost)) then
-      registrarHostVal = registrarHost
+      registrarHostVal => registrarHost
     else
-      registrarHostVal = ""
+      registrarHostVal => registrarHostDefault
     end if
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
@@ -1073,6 +1099,8 @@ contains
 
     rc = localrc
 
+   end subroutine
+
   end subroutine
 !------------------------------------------------------------------------------
 
@@ -1089,11 +1117,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                                  :: comp
-    integer,                    intent(inout), optional :: portNum
-    character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
-    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
-    integer,                    intent(out),   optional :: rc
+    type(ESMF_CplComp)                         :: comp
+    integer,           intent(inout), optional :: portNum
+    character(len=*),  intent(in),    optional, target :: clientId
+    character(len=*),  intent(in),    optional, target :: registrarHost
+    integer,           intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1130,6 +1158,39 @@ contains
 !------------------------------------------------------------------------------
 
     integer                    :: localrc
+
+    character, target          :: clientIdDefault = ''
+    character, target          :: registrarHostDefault = ''
+    integer                    :: clientIdlen, registrarHostlen
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    if (present (clientId)) then
+      clientIdlen = len (clientID)
+    else
+      clientIdlen = len (clientIdDefault)
+    end if
+
+    if (present (registrarHost)) then
+      registrarHostLen = len (registrarHost)
+    else
+      registrarHostLen = len (registrarHostDefault)
+    end if
+
+    ! Make nested call so we can get character string lengths right
+    call ESMF_WebServicesCplCompLoop1 (clientIdLen, registrarHostLen)
+
+  contains
+
+    subroutine ESMF_WebServicesCplCompLoop1 (clIdLen, regHostLen)
+    integer, intent(in) :: clIdlen
+    integer, intent(in) :: regHostlen
+
+    character(len=clIdlen), pointer :: clientIdVal
+    character(len=regHostLen), pointer :: registrarHostVal
+
     integer                    :: registrarrc
     integer                    :: localPet, petCount
     type(ESMF_VM)              :: vm
@@ -1138,24 +1199,17 @@ contains
     type(ESMF_Clock)           :: clock
     type(ESMF_Sync_Flag)       :: syncflag
     integer                    :: phase
-    character(len=ESMF_MAXSTR) :: clientIdVal
-    character(len=ESMF_MAXSTR) :: registrarHostVal
-
-
-    ! Initialize return code
-    rc = ESMF_SUCCESS
-    localrc = ESMF_SUCCESS
 
     if (present(clientId)) then
-      clientIdVal = clientId
+      clientIdVal => clientId
     else
-      clientIdVal = ""
+      clientIdVal => clientIdDefault
     end if
 
     if (present(registrarHost)) then
-      registrarHostVal = registrarHost
+      registrarHostVal => registrarHost
     else
-      registrarHostVal = ""
+      registrarHostVal => registrarHostDefault
     end if
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
@@ -1252,6 +1306,8 @@ contains
 
     rc = localrc
 
+   end subroutine
+
   end subroutine
 !------------------------------------------------------------------------------
 
@@ -1310,12 +1366,12 @@ contains
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR), intent(in)              :: varNames
-    integer,                    intent(in)              :: numLatValues
-    real(ESMF_KIND_R8),         intent(in)              :: latValues(*)
-    integer,                    intent(in)              :: numLonValues
-    real(ESMF_KIND_R8),         intent(in)              :: lonValues(*)
-    integer,                    intent(out),   optional :: rc
+    character(len=*),   intent(in)            :: varNames
+    integer,            intent(in)            :: numLatValues
+    real(ESMF_KIND_R8), intent(in)            :: latValues(*)
+    integer,            intent(in)            :: numLonValues
+    real(ESMF_KIND_R8), intent(in)            :: lonValues(*)
+    integer,            intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1357,10 +1413,10 @@ contains
 
 !
 ! !ARGUMENTS:
-    real(ESMF_KIND_R8),         intent(in)              :: timestamp
-    character(len=ESMF_MAXSTR), intent(in)              :: varName
-    real(ESMF_KIND_R8),         intent(in)              :: data(*)
-    integer,                    intent(out),   optional :: rc
+    real(ESMF_KIND_R8), intent(in)            :: timestamp
+    character(len=*),   intent(in)            :: varName
+    real(ESMF_KIND_R8), intent(in)            :: data(*)
+    integer,            intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:

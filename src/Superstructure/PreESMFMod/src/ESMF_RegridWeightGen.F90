@@ -1413,6 +1413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
  	 	  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
 	  elseif (useSrcCoordVar) then
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1424,6 +1425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
  	 	  srccoordnames = srcCoordinateVars, rc=localrc)
 	  elseif (useDstCoordVar) then
              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1435,6 +1437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
  	 	  dstcoordnames = dstCoordinateVars, rc=localrc)
 	  else
             call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
@@ -1445,6 +1448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		  netcdf4FileFlag = localNetcdf4FileFlag, &
 		  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+		  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
 	          srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
           endif
           if (ESMF_LogFoundError(localrc, &

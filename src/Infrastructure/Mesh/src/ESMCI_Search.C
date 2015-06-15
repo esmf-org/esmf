@@ -241,10 +241,10 @@ static int found_func(void *c, void *y) {
   MeshObj &elem = *static_cast<MeshObj*>(c);
   OctSearchNodesData &si = *static_cast<OctSearchNodesData*>(y);
 
-
+  
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-  if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Checking node=%d vs. elem id=%d\n",si.snr.node->get_id(),elem.get_id());
+  if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("Checking dst pnt id=%d vs. elem id=%d\n",si.snr.dst_gid,elem.get_id());
   }
 #endif
 
@@ -300,7 +300,7 @@ static int found_func(void *c, void *y) {
     
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-  if (si.snr.node->get_id()==ESMF_REGRID_DEBUG_MAP_NODE) {
+  if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
      mathutil_debug=true;
   }
 #endif
@@ -310,7 +310,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Mapping node=%d in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
+    printf("Mapping dst pnt id=%d in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
 
     double coords[3*40];
     int num_nds;

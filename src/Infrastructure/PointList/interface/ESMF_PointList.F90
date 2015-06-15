@@ -58,7 +58,9 @@ module ESMF_PointListMod
 ! !  MUST STAY IN SYNC WITH C++ header file
 !
   type ESMF_PointList
+#ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
     private
     type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
     ESMF_INIT_DECLARE

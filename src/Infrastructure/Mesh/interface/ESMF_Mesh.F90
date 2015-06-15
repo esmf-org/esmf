@@ -1333,8 +1333,8 @@ num_elems, &
 !   \begin{description}
 !   \item [distgrid]
 !         The elemental distgrid.
-!   \item [{[distgrid]}]
-!         The nodal distgrid.
+!   \item [{[nodalDistgrid]}]
+!         The nodal distgrid, if not specified is set to distgrid (i.e. the elemental distgrid).
 !   \item [{[parametricDim]}]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
@@ -1377,6 +1377,8 @@ num_elems, &
     ESMF_MeshCreateFromDG%element_distgrid = distgrid
     if (present(nodalDistgrid)) then
       ESMF_MeshCreateFromDG%nodal_distgrid = nodalDistgrid
+    else 
+      ESMF_MeshCreateFromDG%nodal_distgrid = distgrid
     endif
 
     ESMF_MeshCreateFromDG%isCMeshFreed = .true. ! helps problems in reconcile
