@@ -29,7 +29,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_locstreamcreate"
-  subroutine f_esmf_locstreamcreate(locstream, ls_size, rc)
+  subroutine f_esmf_locstreamcreate(locstream, ls_size, coordSys, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -41,6 +41,7 @@
     ! arguments
     type(ESMF_LocStream)               :: locstream
     integer, intent(in)           :: ls_size
+    type(ESMF_CoordSys_Flag),optional     :: coordSys
     integer, intent(out)           :: rc              
   
     ! local variables  
@@ -49,7 +50,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     locstream=ESMF_LocStreamCreate(localCount=ls_size, &
-                                     rc=rc)
+                                   coordSys=coordSys, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                            ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -101,7 +102,7 @@
 
     type(ESMF_LocStream)         :: locstream
     character(len=*),intent(in)  :: keyName
-    type(ESMF_TypeKind_Flag)     :: typekind
+    type(ESMF_TypeKind_Flag),optional     :: typekind
     integer, intent(out)         :: rc
 
   ! initialize return code; assume routine not implemented

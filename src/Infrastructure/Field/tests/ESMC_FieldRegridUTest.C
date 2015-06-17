@@ -419,7 +419,8 @@ int main(void){
   //NEX_UTest 
   strcpy(name, "LocStreamCreateLocal");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  dstlocstream = ESMC_LocStreamCreateLocal(ls_size,&rc);
+  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
+  dstlocstream = ESMC_LocStreamCreateLocal(ls_size, &local_coordSys, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 
@@ -427,7 +428,8 @@ int main(void){
   //NEX_UTest  
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameX,ESMC_TYPEKIND_R8);
+  ESMC_TypeKind_Flag local_typeKind = ESMC_TYPEKIND_R8;
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameX,&local_typeKind);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 
@@ -458,7 +460,7 @@ int main(void){
   //NEX_UTest  
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameY,ESMC_TYPEKIND_R8);
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameY,&local_typeKind);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 
@@ -489,7 +491,8 @@ int main(void){
   //NEX_UTest  
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameM,ESMC_TYPEKIND_I4);
+  local_typeKind = ESMC_TYPEKIND_I4;
+  rc = ESMC_LocStreamAddKeyAlloc(dstlocstream,keyNameM,&local_typeKind);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 

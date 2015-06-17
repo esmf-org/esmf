@@ -64,11 +64,11 @@ namespace ESMCI{
     }
 
     // TODO: ESMC objects should be cast to ESMCI objects in the ESMC layer
-    static LocStream *create(int ls_size, int *rc); 
+    static LocStream *create(int ls_size, ESMC_CoordSys_Flag *coordSys, int *rc); 
     static int getbounds(LocStream *locstream, int localDe,
 			 int *cLBound, int *cUBound);
     static int addKeyAlloc(LocStream *locstream, const char *keyName, 
-			   ESMC_TypeKind_Flag typekind);
+			   ESMC_TypeKind_Flag *typekind);
     ESMC_Array getKeyArray(const char *keyName, int *rc);
     static int destroy(LocStream *locstream);
   }; 

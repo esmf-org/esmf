@@ -57,6 +57,7 @@ typedef struct{
 // !INTERFACE:
 ESMC_LocStream ESMC_LocStreamCreateLocal(
 				    int ls_size,   //size of the location stream
+				    ESMC_CoordSys_Flag *coordSys,
 				    int *rc                                   // out
 );
 
@@ -122,7 +123,7 @@ int ESMC_LocStreamGetBounds(
 int ESMC_LocStreamAddKeyAlloc(
   ESMC_LocStream locstream,      // in
   const char *keyName,
-  ESMC_TypeKind_Flag keyTypeKind
+  ESMC_TypeKind_Flag *keyTypeKind
 );
 
 // !RETURN VALUE:

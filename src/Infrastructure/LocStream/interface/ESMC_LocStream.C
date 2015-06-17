@@ -37,14 +37,16 @@ extern "C" {
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamCreateLocal()"
-  ESMC_LocStream ESMC_LocStreamCreateLocal(int ls_size, int *rc){
+  ESMC_LocStream ESMC_LocStreamCreateLocal(int ls_size, ESMC_CoordSys_Flag *coordSys, 
+					   int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMF_RC_NOT_IMPL;
 
     ESMC_LocStream locstream;
 
-    locstream.ptr = reinterpret_cast<void *>(ESMCI::LocStream::create(ls_size, &localrc));
+    locstream.ptr = reinterpret_cast<void *>(ESMCI::LocStream::create(ls_size, coordSys,
+								      &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc)){
       locstream.ptr = NULL;
       return locstream; 
@@ -86,7 +88,7 @@ extern "C" {
 #define ESMC_METHOD "ESMC_LocStreamAddKeyAlloc()"
   int ESMC_LocStreamAddKeyAlloc(ESMC_LocStream locstream,
 				const char *keyName,
-				ESMC_TypeKind_Flag keyTypeKind){
+				ESMC_TypeKind_Flag *keyTypeKind){
 
     // initialize return code; assume routine not implemented 
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
