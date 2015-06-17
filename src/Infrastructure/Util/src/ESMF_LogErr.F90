@@ -736,7 +736,7 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This routine closes the user log file(s) associated with {\tt log}.
+!      This routine closes the log file(s) associated with {\tt log}.
 !      If the log is not explicitly closed, it will be closed by
 !      {\tt ESMF\_Finalize}.
 !
@@ -1322,7 +1322,7 @@ end function ESMF_LogFoundError
 !--------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogGet()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
 ! !INTERFACE: 
@@ -1365,12 +1365,14 @@ end function ESMF_LogFoundError
 !      \item [{[trace]}]
 !            Current setting of the Log call tracing flag.
 !      \item [{[fileName]}]
-!            Current file name.
+!            Current file name.  When the log has been opened with
+!            {\tt ESMF\_LOGKIND\_MULTI}, the filename has a PET number
+!            prefix.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOPI
+!EOP
 
         type(ESMF_LogPrivate),pointer          :: alog
         integer :: localrc
