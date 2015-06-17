@@ -246,7 +246,14 @@ end interface
 interface operator (>)
    module procedure ESMF_lmtgt
 end interface
-!EOPI  
+
+! Additional overloaded methods
+
+interface ESMF_LogOpen
+  module procedure ESMF_LogOpen
+  module procedure ESMF_LogOpenDefault
+end interface
+!EOPI
 
 type(ESMF_Log),SAVE,target::ESMF_LogDefault
 integer, parameter :: ESMF_LogTableMax=1000            ! Max # of files allowed to open
@@ -718,7 +725,7 @@ end function
       subroutine ESMF_LogClose(log, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Log), intent(inout)         :: log
+      type(ESMF_Log), intent(inout), optional :: log
 type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       integer,        intent(out), optional :: rc
 
@@ -736,8 +743,8 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [log]
-!            An {\tt ESMF\_Log} object.
+!      \item [{[log]}]
+!            An {\tt ESMF\_Log} object.  If not specified, the default log is closed.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -752,18 +759,26 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       rc=ESMF_FAILURE
     endif
 
+    alog => null ()
+    if (present(log)) then
+      if(log%logTableIndex>0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      endif
+    else
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
-    if(log%logTableIndex>0) then
-      alog => ESMF_LogTable(log%logTableIndex)
+    if(associated (alog)) then
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
         if (alog%FileIsOpen == ESMF_TRUE) then
           call ESMF_LogFlush(log,rc=rc2)
-          CLOSE(UNIT=alog%unitNumber)
+          CLOSE (UNIT=alog%unitNumber)
           alog%FileIsOpen=ESMF_FALSE
-          deallocate(alog%LOG_ENTRY,stat=status)
+          deallocate (alog%LOG_ENTRY,stat=status)
         endif
       endif
     
@@ -1488,28 +1503,34 @@ end subroutine ESMF_LogInitialize
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, logkindflag, rc)
+    subroutine ESMF_LogOpen(log, filename, append, logkindflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Log),          intent(inout)         :: log   
-    character(len=*),        intent(in)            :: filename   
+    character(len=*),        intent(in)            :: filename
+    logical,                 intent(in),  optional :: append
     type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
     integer,                 intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      This routine opens a file named {\tt filename} and associates
-!      it with the {\tt ESMF\_Log}.  If the incoming log is already a
+!      it with the {\tt ESMF\_Log}.  When {\tt logkindflag} is set to
+!      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
+!      number identification.  If the incoming log is already a
 !      valid Log object, no new Log is opened and the Log argument remains
 !      unchanged.
 !
 !      The arguments are:
 !      \begin{description}
-! 
 !      \item [log]
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
 !            Name of log file to be opened.
+!      \item [{[append]}]
+!            If the log file exists, setting to {\tt .false.} will set the file position
+!            to the beginning of the file.  Otherwise, new records will be appended to the
+!            end of the file.  If not specified, defaults to {\tt .true.}.  
 !      \item [{[logkindflag]}]
 !            Set the logkindflag. See section \ref{const:logkindflag} for a list of
 !            valid options.
@@ -1528,10 +1549,12 @@ end subroutine ESMF_LogInitialize
 
     integer :: localrc, rc2
     integer :: iostat, memstat
+    logical                                                :: append_local
     integer                                                :: i
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=ESMF_MAXPATHLEN)                         :: fname
     character(ESMF_MAXSTR)                                 :: petNumChar
+    character(8)                                           :: position
 
     type(ESMF_LogPrivate),pointer     :: alog
 
@@ -1541,6 +1564,11 @@ end subroutine ESMF_LogInitialize
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
+
+    append_local = .true.
+    if (present (append)) then
+      append_local = append
+    end if
 
     if(log%logTableIndex>0) then
       alog => ESMF_LogTable(log%logTableIndex)
@@ -1620,19 +1648,21 @@ end subroutine ESMF_LogInitialize
         return
     endif
 
+    position = merge ("append", "rewind", append_local)
+
     ! open the file, with retries
     do i=1, ESMF_LOG_MAXTRYOPEN
 #if !defined (ESMF_OS_MinGW)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,& 
-             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #else
 #if defined (__INTEL_COMPILER)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", &
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", &
              SHARE="DENYNONE", IOSTAT=iostat)
 #else
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
+             POSITION=position, ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #endif
 #endif
         if (iostat == 0) then
@@ -1677,6 +1707,68 @@ end subroutine ESMF_LogInitialize
     endif
     
 end subroutine ESMF_LogOpen
+
+!--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogOpenDefault()"
+!BOP
+! !IROUTINE: ESMF_LogOpen - Open Default Log file(s)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LogOpen ()
+    subroutine ESMF_LogOpenDefault (filename, append, logkindflag, rc)
+!
+! !ARGUMENTS:
+    character(len=*),        intent(in)            :: filename
+    logical,                 intent(in),  optional :: append
+    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
+    integer,                 intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      This routine opens a file named {\tt filename} and associates
+!      it with the default log.  When {\tt logkindflag} is set to
+!      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
+!      number identification.
+!
+!      The arguments are:
+!      \begin{description}
+!      \item [filename]
+!            Name of DEFAULT log file to be opened.
+!      \item [{[append]}]
+!            If the log file exists, setting to {\tt .false.} will set the file position
+!            to the beginning of the file.  Otherwise, new records will be appended to the
+!            end of the file.  If not specified, defaults to {\tt .true.}.  
+!      \item [{[logkindflag]}]
+!            Set the logkindflag. See section \ref{const:logkindflag} for a list of
+!            valid options.
+!            If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+
+  integer                :: localrc
+  character(ESMF_MAXSTR) :: errmsg
+  integer                :: errmsg_len
+
+  ! Initialize return code; assume routine not implemented
+  if (present (rc)) then
+    rc=ESMF_FAILURE
+  endif
+
+  call ESMF_LogOpen (ESMF_LogDefault, filename, append=append, logkindflag=logkindflag, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) then
+    call ESMF_LogRc2Msg (localrc, msg=errmsg, msglen=errmsg_len)
+    write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ', errmsg(:errmsg_len)
+  end if
+
+  if (present (rc)) then
+    rc = localrc
+  end if
+
+end subroutine ESMF_LogOpenDefault
 
 !--------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2126,7 +2218,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     select case (argcase)
     case (0)
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ": Add required logmsgFlag arument."
+          ": Add required logmsgFlag argument."
       if (present(rc)) then
         rc=ESMF_RC_ARG_INCOMP
       end if

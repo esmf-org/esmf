@@ -434,7 +434,7 @@ module NUOPC_Driver
         ! dependencies have been removed
         if (i==0) then
           ! driver itself: for now use the name as the compLabel
-         call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+          call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
