@@ -86,9 +86,9 @@ module NUOPC
   public NUOPC_Get
   public NUOPC_IsAtTime
   public NUOPC_IsConnected
-  public NUOPC_IsCreated
+!  public NUOPC_IsCreated
   public NUOPC_IsUpdated
-  public NUOPC_Nop
+!  public NUOPC_Nop
   public NUOPC_Print
   public NUOPC_Realize
   public NUOPC_Reconcile
