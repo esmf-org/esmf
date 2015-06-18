@@ -58,7 +58,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "LocStreamCreateLocal");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  srclocstream = ESMC_LocStreamCreateLocal(ls_size,&rc);
+  srclocstream = ESMC_LocStreamCreateLocal(ls_size,NULL,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "LocStreamAddKeyAlloc");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_LocStreamAddKeyAlloc(srclocstream,keyName,ESMC_TYPEKIND_R8);
+  rc = ESMC_LocStreamAddKeyAlloc(srclocstream,keyName,NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
