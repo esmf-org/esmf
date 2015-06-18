@@ -15,7 +15,7 @@
 // This file contains the Fortran interface code to link F90 and C++.
 //
 //------------------------------------------------------------------------------
-// INCLUDES
+ // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
@@ -34,7 +34,7 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
- #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
+  #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 
 #include <iostream>
@@ -53,12 +53,12 @@
 using namespace ESMCI;
 
 
-
+ 
 
 // prototypes from below
 static bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
 static bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
-static void cnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
+static bool any_cells_in_mesh_degenerate(Mesh *mesh);
 static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
 static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
 static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
@@ -138,77 +138,41 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
 
     //// Precheck Meshes for errors
-    bool concave=false;
-    bool clockwise=false;
     bool degenerate=false;
  
-    // Check source mesh elements 
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      // Check cells for conservative
-      //  Turned off until ignoreDegenerate available through R.W.G and Python
-      //     cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
-    } else {
-#if 0
-      // STILL NEED TO FINISH THIS
-      // Check cell nodes for non-conservative
-      noncnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
-#endif     
-    }
-
-
-    // Concave
-    if (concave) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Src contains a concave cell", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-
-    // Clockwise
-    if (clockwise) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Src contains a cell whose corners are clockwise", ESMC_CONTEXT,
-        &localrc)) throw localrc;
-    }
-
-    // Degenerate
-    if (degenerate) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Src contains a cell that has corners close enough that the cell "
-        "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-
-    // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
-    // matter what the cell looks like
-    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      // Check mesh elements 
-      //  Turned off until ignoreDegenerate available through R.W.G and Python
-      //   cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
-      
-      // Concave
-      if (concave) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "- Dst contains a concave cell", ESMC_CONTEXT, &localrc)) throw localrc;
-      }
-      
-      // Clockwise
-      if (clockwise) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "- Dst contains a cell whose corners are clockwise", ESMC_CONTEXT,
-          &localrc)) throw localrc;
+    // If not ignoring, check for degenerate elements
+    if (!ignoreDegenerate) {
+      // Check source mesh elements 
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) ||
+          (*regridMethod==ESMC_REGRID_METHOD_PATCH)) {
+        degenerate=any_cells_in_mesh_degenerate(srcmesh);
       }
 
       // Degenerate
       if (degenerate) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "- Dst contains a cell which has corners close enough that the cell "
-          "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
+        "- Src contains a cell that has corners close enough that the cell "
+        "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
+      // matter what the cell looks like
+      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+        // Check mesh elements 
+        degenerate=any_cells_in_mesh_degenerate(dstmesh);
+
+        // Degenerate
+        if (degenerate) {
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "- Dst contains a cell which has corners close enough that the cell "
+        "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
+        }
       }
     }
+
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -853,6 +817,166 @@ bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
   return true;
 }
 
+
+
+
+// OLD VERSION, BUT NOW WE SUPPORT clockwise and concave
+#undef  ESMC_METHOD
+#define ESMC_METHOD "any_cells_in_mesh_degenerate(Mesh &mesh)" 
+static bool any_cells_in_mesh_degenerate(Mesh *meshp) {
+  
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+
+  int num_poly_nodes_orig;
+  double poly_coords_orig[MAX_NUM_POLY_COORDS];
+   
+  // Translate to mesh
+  Mesh &mesh=*meshp;
+
+  // Get coord field
+  MEField<> *cfield = mesh.GetCoordField();
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("elem_mask");  
+
+  // Get dimensions
+  int sdim=mesh.spatial_dim();
+  int pdim=mesh.parametric_dim();
+     
+  // Compute area depending on dimensions
+  if (pdim==2) {
+    if (sdim==2) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+ 
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
+        
+        // Init. Degenerate
+        bool is_degenerate=false;
+
+        // Get the coords
+        get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+
+        // Save original coords
+        std::copy(poly_coords,poly_coords+2*num_poly_nodes,poly_coords_orig);
+        num_poly_nodes_orig=num_poly_nodes;
+        
+        // Get rid of 0 len edges
+        remove_0len_edges2D(&num_poly_nodes, poly_coords);
+
+         // If less than 3 nodes then is degenerate
+        if (num_poly_nodes <3) is_degenerate=true;
+
+        // If is smashed quad then is degenerate
+        if (is_smashed_quad2D(num_poly_nodes, poly_coords)) is_degenerate=true;
+
+        // Check if degenerate
+        if (is_degenerate) {
+             char msg[1024];
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
+             ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+2*i;
+              
+              sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            }
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
+            return true;
+        }     
+      }
+    } else if (sdim==3) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
+
+
+        // Init. Degenerate
+        bool is_degenerate=false;
+
+        // Get the coords
+        get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+
+         // Save original coords
+        std::copy(poly_coords,poly_coords+3*num_poly_nodes,poly_coords_orig);
+        num_poly_nodes_orig=num_poly_nodes;
+
+
+        // Get rid of 0 len edges
+        remove_0len_edges3D(&num_poly_nodes, poly_coords);
+
+
+        // If less than 3 nodes then is degenerate
+        if (num_poly_nodes <3) is_degenerate=true;
+
+
+         // If is smashed quad then is degenerate
+        if (is_smashed_quad3D(num_poly_nodes, poly_coords)) is_degenerate=true;
+
+
+        // Check if degenerate
+        if (is_degenerate) {
+            char msg[1024];
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  degenerate elem. id=%ld",elem.get_id());
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+3*i;
+              
+              double lon, lat, r;
+               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                                       &lon, &lat, &r);
+
+              sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            }
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
+            return true;
+        }
+      }
+    }
+  }
+
+  // TODO: Check to see if 3D elements are in correct order.
+
+  // output no degenerate elems found
+  return false;
+}
+
+// OLD VERSION, BUT NOW WE SUPPORT clockwise and concave
 #undef  ESMC_METHOD
 #define ESMC_METHOD "cnsrv_check_for_mesh_errors()" 
 static void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
