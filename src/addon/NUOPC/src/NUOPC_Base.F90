@@ -3303,7 +3303,7 @@ module NUOPC_Base
     array = ESMF_ArrayCreate(dg, factorList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_ArrayWrite(array, fileName, &
+    call ESMF_ArrayWrite(array, fileName, variableName="weights", &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
