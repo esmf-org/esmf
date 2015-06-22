@@ -55,8 +55,6 @@ module NUOPC
   public NUOPC_FieldWrite
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
-  public NUOPC_IsCreated
-  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateAttributeAdd
@@ -86,9 +84,9 @@ module NUOPC
   public NUOPC_Get
   public NUOPC_IsAtTime
   public NUOPC_IsConnected
-!  public NUOPC_IsCreated
+  public NUOPC_IsCreated
   public NUOPC_IsUpdated
-!  public NUOPC_Nop
+  public NUOPC_Nop
   public NUOPC_Print
   public NUOPC_Realize
   public NUOPC_Reconcile
