@@ -125,7 +125,8 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 #define ESMC_METHOD "ESMC_MeshAddElements()"
 int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                          int *elementTypes, int *elementConn, 
-                         int *elementMask, double *elementArea){
+                         int *elementMask, double *elementArea,
+                         double *elementCoords){
    
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -136,7 +137,8 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   
   // call into ESMCI method
   localrc = mep->addElements(elementCount, elementIds, elementTypes, 
-                             elementConn, elementMask, elementArea);
+                             elementConn, elementMask, elementArea, 
+                             elementCoords);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
