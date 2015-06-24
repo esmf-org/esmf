@@ -130,7 +130,7 @@ int main(void){
                             elemConn_s, elemMask, NULL, NULL);
 #else
   rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, 
-                            elemConn_s, NULL, NULL NULL);
+                            elemConn_s, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
