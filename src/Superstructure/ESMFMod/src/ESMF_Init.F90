@@ -95,7 +95,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalKind, &
-        defaultLogFileName, logkindflag, mpiCommunicator,  &
+        defaultLogFileName, logappend, logkindflag, mpiCommunicator,  &
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
@@ -103,6 +103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
+      logical,                 intent(in),  optional :: logappend
       type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
@@ -167,6 +168,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
+!     \item [{[logappend]}]
+!           If the default log file already exists, a value of {\tt .false.}
+!           will set the file position to the beginning of the file.  A value
+!           of [\tt .true.} sets the position to the end of the file.
+!           If not specified, defaults to {\tt .true.}.
 !     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           See section \ref{const:logkindflag} for a list of valid options.
@@ -198,21 +204,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
       integer       :: localrc                        ! local return code
       type(ESMF_VM) :: localvm
+      type(ESMF_Logical) :: logappend_local
 
       ! assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      
+
+      logappend_local = ESMF_TRUE
+      if (present (logappend)) then
+        logappend_local = logappend
+      end if
+
       ! initialize the framework
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
-        defaultConfigFileName=defaultConfigFileName, &
-        defaultCalKind=defaultCalKind, defaultLogFileName=defaultLogFileName,&
+        defaultConfigFileName=defaultConfigFileName, defaultCalKind=defaultCalKind,  &
+        defaultLogFileName=defaultLogFileName, logappend=logappend_local,  &
         logkindflag=logkindflag, mpiCommunicator=mpiCommunicator, &
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound,  &
         rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
-        print *, "Error initializing framework"
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
         return 
       endif 
       ! on success LogErr is assumed to be functioning
@@ -239,7 +251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-        defaultCalKind, defaultLogFileName, logkindflag, &
+        defaultCalKind, defaultLogFileName, logappend, logkindflag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, rc)
 !
 ! !ARGUMENTS:
@@ -247,6 +259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind     
       character(len=*),        intent(in),  optional :: defaultLogFileName
+      type(ESMF_Logical),      intent(in),  optional :: logappend
       type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag  
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
@@ -270,6 +283,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to "ESMF_ErrorLog".
+!     \item [{[logappend]}]
+!           If the default log file already exists, a value of {\tt .false.}
+!           will set the file position to the beginning of the file.  A value
+!           of [\tt .true.} sets the position to the end of the file.
+!           If not specified, defaults to {\tt .true.}.
 !     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           If not specified, defaults to "ESMF\_LOGKIND\_MULTI".
@@ -293,6 +311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical :: rcpresent                       ! Return code present   
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
+      logical :: logappend_local
       type(ESMF_LogKind_Flag) :: logkindflagUse
       logical :: openflag
 
@@ -315,7 +334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_UtilIOUnitInit (lower=ioUnitLBound, upper=ioUnitUBound, rc=status)
           if (status /= ESMF_SUCCESS) then
               if (rcpresent) rc = status
-              print *, "Error setting unit number bounds"
+              write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error setting unit number bounds"
               return
           end if
       end if
@@ -342,7 +361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, rc=status)
       ! error handling without LogErr because it's not initialized yet
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing VM"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing VM"
           return
       endif
 
@@ -360,17 +379,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logkindflagUse = ESMF_LOGKIND_MULTI
       endif
 
+      logappend_local = .false.
+      if (present (logappend)) then
+        logappend_local = logappend
+      end if
+
       if (present(defaultLogFileName)) then
          if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName, logkindflag=logkindflagUse, &
-                                  rc=status)
+           call ESMF_LogInitialize(defaultLogFileName,  &
+               logappend=logappend_local, logkindflag=logkindflagUse, &
+               rc=status)
          else
-           call ESMF_LogInitialize("ESMF_LogFile", logkindflag=logkindflagUse, &
-                                     rc=status)
+           call ESMF_LogInitialize("ESMF_LogFile",  &
+               logappend=logappend_local, logkindflag=logkindflagUse, &
+               rc=status)
          endif
       else
-         call ESMF_LogInitialize("ESMF_LogFile", logkindflag=logkindflagUse, &
-                                   rc=status)
+         call ESMF_LogInitialize("ESMF_LogFile",  &
+               logappend=logappend_local, logkindflag=logkindflagUse, &
+               rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the default log/error manager"
@@ -382,7 +409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         "Running with ESMF Version " // ESMF_VERSION_STRING, &
         ESMF_LOGMSG_INFO, rc=status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error writing into the default log"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
           return
       endif
 
@@ -392,7 +419,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=status)
       if (status .ne. ESMF_SUCCESS) then
-         print *, "Error initializing the default time manager calendar"
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+             ": Error initializing the default time manager calendar"
       return
       endif
 
@@ -403,7 +431,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             !call ESMF_ConfigInitialize(defaultConfigFileName, status)
             status = ESMF_SUCCESS
             if (status .ne. ESMF_SUCCESS) then
-              print *, "Error opening the default config file"
+              write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+                  ": Error opening the default config file"
               return
             endif
          endif
@@ -502,7 +531,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! call ESMF_ConfigFinalize(status)
       status = ESMF_SUCCESS
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing config file"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing config file"
           return
       endif
 
@@ -511,14 +541,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ': Finalizing Calendar (if needed)'
       call ESMF_CalendarFinalize(rc=status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing the time manager calendars"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing the time manager calendars"
           return
       endif
 
       ! Flush log to avoid lost messages
       call ESMF_LogFlush (rc=status)
       if (status /= ESMF_SUCCESS) then
-          print *, "Error flushing log file"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error flushing log file"
       end if
 
       abortFlag = .false.
@@ -534,7 +566,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ': calling ESMF_VMAbort'
         call ESMF_VMAbort(rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Error aborting VM"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error aborting VM"
           return
         endif
       else
@@ -543,7 +576,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ': calling ESMF_VMFinalize'
         call ESMF_VMFinalize(keepMpiFlag=keepMpiFlag, rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing VM"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing VM"
           return
         endif
       endif
@@ -553,7 +587,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ': Finalizing Log'
       call ESMF_LogFinalize(status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing log file"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing log file"
           return
       endif
 
