@@ -714,7 +714,8 @@ module NUOPC_Base
 
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Namespace"           ! namespace of this State
-    attrList(2) = "FieldAcceptancePolicy"   ! one of acceptNone, acceptAll
+    attrList(2) = "FieldTransferPolicy" ! indicates to connectors to transfer/mirror fields:
+                                        !    one of transferNone, transferAll
     
     ! add Attribute packages
     call ESMF_AttributeAdd(state, convention="NUOPC", purpose="General", &
@@ -723,7 +724,7 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! set Attributes to defaults
-    call ESMF_AttributeSet(state, attrList(2), "acceptNone", &
+    call ESMF_AttributeSet(state, attrList(2), "transferNone", &
         convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out

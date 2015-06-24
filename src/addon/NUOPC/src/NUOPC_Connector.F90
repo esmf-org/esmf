@@ -99,6 +99,11 @@ module NUOPC_Connector
     ! InitializePhaseMap.
 
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv05p1"/), &
+      userRoutine=InitializeP1FieldTransfer, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
       userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -182,14 +187,29 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! filter all other entries but those of type IPDv04
+    ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
-      acceptStringList=(/"IPDv04p"/), rc=rc)
+      acceptStringList=(/"IPDv05p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
+   !-----------------------------------------------------------------------------
+
+  subroutine InitializeP1FieldTransfer(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+
+    print *, "Inside InitializeP1FieldTransfer"
+
+  end subroutine
+
+
   !-----------------------------------------------------------------------------
   
   subroutine InitializeP1a(cplcomp, importState, exportState, clock, rc)

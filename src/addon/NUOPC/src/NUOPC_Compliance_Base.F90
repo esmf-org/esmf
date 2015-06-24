@@ -29,6 +29,8 @@ module NUOPC_Compliance_Base
 
     private
 
+
+    public NUOPC_CheckComponentMetadata
     public NUOPC_CheckComponentMetadataCIM
     public NUOPC_CheckComponentAttribute
     public NUOPC_CheckState
@@ -39,7 +41,231 @@ module NUOPC_Compliance_Base
     public NUOPC_CheckInternalClock
     public NUOPC_CheckComponentStatistics
 
+    interface NUOPC_CheckComponentMetadata
+        module procedure NUOPC_CheckGridComponentMetadata
+        module procedure NUOPC_CheckCplComponentMetadata
+    end interface
+
+    interface NUOPC_CheckComponentAttribute
+        module procedure NUOPC_CheckGridComponentAttribute
+        module procedure NUOPC_CheckCplComponentAttribute
+    end interface
+
+    !interface NUOPC_CompSearchPhaseMapByIndex
+    !    module procedure NUOPC_GridCompSearchPhaseMapByIndex
+    !    module procedure NUOPC_CplCompSearchPhaseMapByIndex
+    !end interface
+
 contains
+
+    recursive subroutine NUOPC_CheckGridComponentMetadata(prefix, comp, rc)
+        character(*), intent(in)              :: prefix
+        type(ESMF_GridComp)                   :: comp
+        integer,      intent(out), optional   :: rc
+
+        type(ESMF_CompType_Flag)              :: comptype
+        character(ESMF_MAXSTR)                :: attributeName
+        character(ESMF_MAXSTR)                :: convention
+        character(ESMF_MAXSTR)                :: purpose
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        ! get Component type and branch on it
+!        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
+!        if (ESMF_LogFoundError(rc, &
+!            line=__LINE__, &
+!            file=FILENAME)) &
+!            return  ! bail out
+
+
+        ! set NUOPC convention and purpose specifiers
+        convention = "NUOPC"
+        purpose = "General"
+
+        call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
+            "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+            ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "Verbosity"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "InitializePhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        ! Applies only to NUOPC Drivers
+        attributeName = "InternalInitializePhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "RunPhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "FinalizePhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "NestingGeneration"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "Nestling"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "InitializeDataComplete"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "InitializeDataProgress"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+
+    end subroutine
+
+
+    recursive subroutine NUOPC_CheckCplComponentMetadata(prefix, comp, rc)
+        character(*), intent(in)              :: prefix
+        type(ESMF_CplComp)                    :: comp
+        integer,      intent(out), optional   :: rc
+
+        type(ESMF_CompType_Flag)              :: comptype
+        character(ESMF_MAXSTR)                :: attributeName
+        character(ESMF_MAXSTR)                :: convention
+        character(ESMF_MAXSTR)                :: purpose
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        ! get Component type and branch on it
+!        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
+!        if (ESMF_LogFoundError(rc, &
+!            line=__LINE__, &
+!            file=FILENAME)) &
+!            return  ! bail out
+!
+
+        ! set NUOPC convention and purpose specifiers
+        convention = "NUOPC"
+        purpose = "General"
+
+        call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
+            "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+            ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+!            attributeName = "ComponentLongName"
+!            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+!                attributeName=attributeName, convention=convention, purpose=purpose, &
+!                rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
+
+        attributeName = "Verbosity"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "InitializePhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "RunPhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "FinalizePhaseMap"
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        ! moved to phase-specific check
+!        attributeName = "CplList"
+!        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+!            attributeName=attributeName, convention=convention, purpose=purpose, &
+!            rc=rc)
+!        if (ESMF_LogFoundError(rc, &
+!            line=__LINE__, &
+!            file=FILENAME)) &
+!            return  ! bail out
+
+    end subroutine
+
+
 
     recursive subroutine NUOPC_CheckComponentMetadataCIM(prefix, comp, rc)
         character(*), intent(in)              :: prefix
@@ -221,88 +447,6 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            attributeName = "Verbosity"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "InitializePhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-             ! Applies only to NUOPC Drivers
-            !            attributeName = "InternalInitializePhaseMap"
-            !            call checkComponentAttribute(prefix, comp=comp, &
-            !                attributeName=attributeName, convention=convention, purpose=purpose, &
-            !                rc=rc)
-            !            if (ESMF_LogFoundError(rc, &
-            !                line=__LINE__, &
-            !                file=FILENAME)) &
-            !                return  ! bail out
-
-            attributeName = "RunPhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "FinalizePhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "NestingGeneration"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "Nestling"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "InitializeDataComplete"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "InitializeDataProgress"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
         elseif (comptype == ESMF_COMPTYPE_CPL) then
 
             ! set NUOPC convention and purpose specifiers
@@ -326,51 +470,6 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            attributeName = "Verbosity"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "InitializePhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "RunPhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "FinalizePhaseMap"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            attributeName = "CplList"
-            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-                attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
         else
           ! currently there is no other type by GridComp or CplComp
         endif
@@ -378,141 +477,7 @@ contains
     end subroutine
 
 
-    recursive subroutine NUOPC_CheckComponentAttribute(prefix, comp, attributeName, &
-        convention, purpose, rc)
-        character(*), intent(in)              :: prefix
-        type(ESMF_GridComp)                   :: comp
-        character(*), intent(in)              :: attributeName
-        character(*), intent(in)              :: convention
-        character(*), intent(in)              :: purpose
-        integer,      intent(out), optional   :: rc
 
-        type(ESMF_AttPack)                    :: attpack
-        type(ESMF_TypeKind_Flag)              :: typekind
-        integer                               :: itemCount, i
-        logical                               :: isPresent
-        character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
-        character(ESMF_MAXSTR)                :: iStr, vStr
-        integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
-
-        call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        if (.not.isPresent) then
-            ! attpack not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
-                "convention: '"//trim(convention)//"', "// &
-                "purpose: '"//trim(purpose)//"'> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-        endif
-        call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
-            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-        if (.not.isPresent) then
-            ! attribute not present
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-                trim(attributeName)//"> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-        else if (itemCount == 0) then
-            ! attribute present but not set
-            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-                trim(attributeName)//"> present but NOT set!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-        else
-            ! attribute present and set
-            if (typekind == ESMF_TYPEKIND_CHARACTER) then
-                allocate(valueStringList(itemCount))
-                call ESMF_AttributeGet(comp, name=attributeName, &
-                    valueList=valueStringList, &
-                    convention=convention, purpose=purpose, rc=rc)
-                if (itemCount == 1) then
-                    ! single valued
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-                        trim(attributeName)//"> "// &
-                        "present and set: "// trim(valueStringList(1)), &
-                        ESMF_LOGMSG_INFO, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                else
-                    ! multi valued -> requires loop
-                    do i=1, itemCount
-                        write(iStr,*) i
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-                            "present and set: "// trim(valueStringList(i)), &
-                            ESMF_LOGMSG_INFO, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
-                            line=__LINE__, &
-                            file=FILENAME)) &
-                            return  ! bail out
-                    enddo
-                endif
-                deallocate(valueStringList)
-            else if (typekind == ESMF_TYPEKIND_I4) then
-                allocate(valueI4List(itemCount))
-                call ESMF_AttributeGet(comp, name=attributeName, &
-                    valueList=valueI4List, &
-                    convention=convention, purpose=purpose, rc=rc)
-                if (itemCount == 1) then
-                    ! single valued
-                    write(vStr,*) valueI4List(1)
-                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-                        trim(attributeName)//"> "// &
-                        "present and set: "// vStr, &
-                        ESMF_LOGMSG_INFO, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                else
-                    ! multi valued -> requires loop
-                    do i=1, itemCount
-                        write(iStr,*) i
-                        write(vStr,*) valueI4List(i)
-                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-                            "present and set: "// vStr, &
-                            ESMF_LOGMSG_INFO, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
-                            line=__LINE__, &
-                            file=FILENAME)) &
-                            return  ! bail out
-                    enddo
-                endif
-                deallocate(valueI4List)
-            else
-                call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-                    trim(attributeName)//"> "// &
-                    "present and set: <unsupported data type>", &
-                    ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, &
-                    file=FILENAME)) &
-                    return  ! bail out
-            endif
-        endif
-
-    end subroutine
 
     recursive subroutine NUOPC_CheckState(prefix, referenceName, state, rc)
         character(*), intent(in)              :: prefix
@@ -737,6 +702,279 @@ contains
                 deallocate(itemNameList)
             endif
         endif
+    end subroutine
+
+    recursive subroutine NUOPC_CheckGridComponentAttribute(prefix, comp, attributeName, &
+        convention, purpose, rc)
+        character(*), intent(in)              :: prefix
+        type(ESMF_GridComp)                   :: comp
+        character(*), intent(in)              :: attributeName
+        character(*), intent(in)              :: convention
+        character(*), intent(in)              :: purpose
+        integer,      intent(out), optional   :: rc
+
+        type(ESMF_AttPack)                    :: attpack
+        type(ESMF_TypeKind_Flag)              :: typekind
+        integer                               :: itemCount, i
+        logical                               :: isPresent
+        character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
+        character(ESMF_MAXSTR)                :: iStr, vStr
+        integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+
+        call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (.not.isPresent) then
+            ! attpack not present
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+                "convention: '"//trim(convention)//"', "// &
+                "purpose: '"//trim(purpose)//"'> is NOT present!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+        call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (.not.isPresent) then
+            ! attribute not present
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+                trim(attributeName)//"> is NOT present!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        else if (itemCount == 0) then
+            ! attribute present but not set
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+                trim(attributeName)//"> present but NOT set!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        else
+            ! attribute present and set
+            if (typekind == ESMF_TYPEKIND_CHARACTER) then
+                allocate(valueStringList(itemCount))
+                call ESMF_AttributeGet(comp, name=attributeName, &
+                    valueList=valueStringList, &
+                    convention=convention, purpose=purpose, rc=rc)
+                if (itemCount == 1) then
+                    ! single valued
+                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        trim(attributeName)//"> "// &
+                        "present and set: "// trim(valueStringList(1)), &
+                        ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                        line=__LINE__, &
+                        file=FILENAME)) &
+                        return  ! bail out
+                else
+                    ! multi valued -> requires loop
+                    do i=1, itemCount
+                        write(iStr,*) i
+                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                            "present and set: "// trim(valueStringList(i)), &
+                            ESMF_LOGMSG_INFO, rc=rc)
+                        if (ESMF_LogFoundError(rc, &
+                            line=__LINE__, &
+                            file=FILENAME)) &
+                            return  ! bail out
+                    enddo
+                endif
+                deallocate(valueStringList)
+            else if (typekind == ESMF_TYPEKIND_I4) then
+                allocate(valueI4List(itemCount))
+                call ESMF_AttributeGet(comp, name=attributeName, &
+                    valueList=valueI4List, &
+                    convention=convention, purpose=purpose, rc=rc)
+                if (itemCount == 1) then
+                    ! single valued
+                    write(vStr,*) valueI4List(1)
+                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        trim(attributeName)//"> "// &
+                        "present and set: "// vStr, &
+                        ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                        line=__LINE__, &
+                        file=FILENAME)) &
+                        return  ! bail out
+                else
+                    ! multi valued -> requires loop
+                    do i=1, itemCount
+                        write(iStr,*) i
+                        write(vStr,*) valueI4List(i)
+                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                            "present and set: "// vStr, &
+                            ESMF_LOGMSG_INFO, rc=rc)
+                        if (ESMF_LogFoundError(rc, &
+                            line=__LINE__, &
+                            file=FILENAME)) &
+                            return  ! bail out
+                    enddo
+                endif
+                deallocate(valueI4List)
+            else
+                call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    trim(attributeName)//"> "// &
+                    "present and set: <unsupported data type>", &
+                    ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+            endif
+        endif
+
+    end subroutine
+
+    ! unfortunately identical to above except for the ESMF_CplComp parameter
+    recursive subroutine NUOPC_CheckCplComponentAttribute(prefix, comp, attributeName, &
+        convention, purpose, rc)
+        character(*), intent(in)              :: prefix
+        type(ESMF_CplComp)                    :: comp
+        character(*), intent(in)              :: attributeName
+        character(*), intent(in)              :: convention
+        character(*), intent(in)              :: purpose
+        integer,      intent(out), optional   :: rc
+
+        type(ESMF_AttPack)                    :: attpack
+        type(ESMF_TypeKind_Flag)              :: typekind
+        integer                               :: itemCount, i
+        logical                               :: isPresent
+        character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
+        character(ESMF_MAXSTR)                :: iStr, vStr
+        integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+
+        call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (.not.isPresent) then
+            ! attpack not present
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+                "convention: '"//trim(convention)//"', "// &
+                "purpose: '"//trim(purpose)//"'> is NOT present!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        endif
+        call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        if (.not.isPresent) then
+            ! attribute not present
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+                trim(attributeName)//"> is NOT present!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        else if (itemCount == 0) then
+            ! attribute present but not set
+            call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+                trim(attributeName)//"> present but NOT set!", &
+                ESMF_LOGMSG_WARNING, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+        else
+            ! attribute present and set
+            if (typekind == ESMF_TYPEKIND_CHARACTER) then
+                allocate(valueStringList(itemCount))
+                call ESMF_AttributeGet(comp, name=attributeName, &
+                    valueList=valueStringList, &
+                    convention=convention, purpose=purpose, rc=rc)
+                if (itemCount == 1) then
+                    ! single valued
+                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        trim(attributeName)//"> "// &
+                        "present and set: "// trim(valueStringList(1)), &
+                        ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                        line=__LINE__, &
+                        file=FILENAME)) &
+                        return  ! bail out
+                else
+                    ! multi valued -> requires loop
+                    do i=1, itemCount
+                        write(iStr,*) i
+                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                            "present and set: "// trim(valueStringList(i)), &
+                            ESMF_LOGMSG_INFO, rc=rc)
+                        if (ESMF_LogFoundError(rc, &
+                            line=__LINE__, &
+                            file=FILENAME)) &
+                            return  ! bail out
+                    enddo
+                endif
+                deallocate(valueStringList)
+            else if (typekind == ESMF_TYPEKIND_I4) then
+                allocate(valueI4List(itemCount))
+                call ESMF_AttributeGet(comp, name=attributeName, &
+                    valueList=valueI4List, &
+                    convention=convention, purpose=purpose, rc=rc)
+                if (itemCount == 1) then
+                    ! single valued
+                    write(vStr,*) valueI4List(1)
+                    call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                        trim(attributeName)//"> "// &
+                        "present and set: "// vStr, &
+                        ESMF_LOGMSG_INFO, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                        line=__LINE__, &
+                        file=FILENAME)) &
+                        return  ! bail out
+                else
+                    ! multi valued -> requires loop
+                    do i=1, itemCount
+                        write(iStr,*) i
+                        write(vStr,*) valueI4List(i)
+                        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+                            "present and set: "// vStr, &
+                            ESMF_LOGMSG_INFO, rc=rc)
+                        if (ESMF_LogFoundError(rc, &
+                            line=__LINE__, &
+                            file=FILENAME)) &
+                            return  ! bail out
+                    enddo
+                endif
+                deallocate(valueI4List)
+            else
+                call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+                    trim(attributeName)//"> "// &
+                    "present and set: <unsupported data type>", &
+                    ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+            endif
+        endif
+
     end subroutine
 
     recursive subroutine NUOPC_CheckStateAttribute(prefix, state, attributeName, &
@@ -1390,7 +1628,7 @@ end module NUOPC_Compliance_Base
 !
 
 !BOP
-! !IROUTINE: NUOPC_CompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
+! !IROUTINE: NUOPC_GridCompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
 ! !INTERFACE:
 ! Private name; call using NUOPC_CompSearchPhaseMapByIndex()
 subroutine NUOPC_GridCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
@@ -1480,3 +1718,93 @@ subroutine NUOPC_GridCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
 
 end subroutine
 
+!BOP
+! !IROUTINE: NUOPC_CplCompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
+! !INTERFACE:
+! Private name; call using NUOPC_CompSearchPhaseMapByIndex()
+subroutine NUOPC_CplCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
+    phaseLabel, rc)
+
+    ! remove these when put into NUOPC_Comp module
+    use ESMF
+    use NUOPC_Base, only : NUOPC_PhaseMapStringLength
+    implicit none
+
+    ! !ARGUMENTS:
+    type(ESMF_CplComp)                           :: comp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
+    integer,                intent(in)            :: phaseIndex
+    character(*),           intent(out)           :: phaseLabel
+    integer,                intent(out), optional :: rc
+    !
+    ! !DESCRIPTION:
+    ! Return the {\tt phaseLabel} associated with a {\tt methodFlag} and
+    ! {\tt phaseIndex}.  If a matching {\tt methodFlag} and {\tt phaseIndex}
+    ! are not found, {\tt phaseLabel} is set to an empty string. If multiple
+    ! matching {\tt phaseLabel}s are found, the first is returned.
+    !EOP
+
+    !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: i
+    integer                   :: itemCount, stat, ind, max, tempPhaseIndex
+    character(ESMF_MAXSTR)    :: name
+    character(len=40)         :: attributeName
+    character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine which phaseMap to deal with
+    attributeName = "UnknownPhaseMap" ! initialize to something obvious
+    if (methodflag == ESMF_METHOD_INITIALIZE) then
+        attributeName = "InitializePhaseMap"
+    elseif (methodflag == ESMF_METHOD_RUN) then
+        attributeName = "RunPhaseMap"
+    elseif (methodflag == ESMF_METHOD_FINALIZE) then
+        attributeName = "FinalizePhaseMap"
+    endif
+
+    phaseLabel = "none"
+
+    ! access phaseMap info
+    call ESMF_AttributeGet(comp, name=trim(attributeName), &
+        itemCount=itemCount, &
+        convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! search the phaseMap
+    if (itemCount > 0) then
+        allocate(phases(itemCount), stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+            msg="Allocation of temporary data structure.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+            convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        do i=1, itemCount
+            !print *, "PHASES(i) = " // phases(i)
+            ind = index(phases(i), trim("="))
+            if (ind==0) cycle
+            max = len(phases(i))
+            read (phases(i)(ind+1:max), "(i4)") tempPhaseIndex
+            !print *, "tempPhaseIndex = ", tempPhaseIndex
+            if (tempPhaseIndex==phaseIndex) then
+                phaseLabel = (phases(i)(1:ind-1))
+                exit ! just take first one
+            endif
+        enddo
+
+        ! clean-up
+        deallocate(phases)
+    endif
+
+end subroutine
