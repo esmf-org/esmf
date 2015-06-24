@@ -31,11 +31,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <algorithm>
 
 // include ESMF headers                                                                         
 #include "ESMCI_Macros.h"
-//#include "ESMCI_Array.h"
-//#include "ESMCI_ArrayBundle.h"
+//#include "ESMCI_VM.h"
 
 // LogErr headers
 #include "ESMCI_LogErr.h"                  // for LogErr
@@ -78,11 +78,9 @@ namespace ESMCI {
     curr_num_pts=0;
 
     // allocate memory
-    coords=NULL;
-    ids=NULL;
+    points = NULL;
     if (max_num_pts>0) {
-      coords=new double [coord_dim*max_num_pts];
-      ids=new int [max_num_pts];
+      points=new point [max_num_pts];
     }
 
     // return successfully
@@ -118,11 +116,8 @@ namespace ESMCI {
     coord_dim=0;
 
     // Deallocate memory
-    if (coords!=NULL) delete [] coords;
-    coords=NULL;
-
-    if (ids!=NULL) delete [] ids;
-    ids=NULL;
+    if (points!=NULL) delete [] points;
+    points=NULL;
   }
 
 
@@ -156,20 +151,23 @@ namespace ESMCI {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     // Error check
-    if (curr_num_pts > max_num_pts-1) {
-      // Throw() << "PointList full";
+    if (curr_num_pts >= max_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    "- attempting to add to a full PointList ",
+				    ESMC_CONTEXT, &localrc);
+      throw localrc;
     }
 
     // IF START EXTENDING POINT LIST WHEN OVER SIZE, THEN SWITCH TO VECTORS
 
 
     // Add point id
-    ids[curr_num_pts]=_id;
+    points[curr_num_pts].id = _id;
 
     // Add point coords
-    double *pnt_coord_base=coords+coord_dim*curr_num_pts;
     for (int i=0; i<coord_dim; i++) {
-      pnt_coord_base[i]=_coord[i];
+      points[curr_num_pts].coords[i] = _coord[i];
     }
 
     // Advance to next position
@@ -213,23 +211,12 @@ namespace ESMCI {
     double *pnt_coord_basei;
     double *pnt_coord_basej;
 
-    for (int i=0; i<curr_num_pts-1; i++) {
-      for (int j=i+1; j<curr_num_pts; j++) {
-	if (ids[i] > ids[j]) {
-	  temp_int = ids[i];
-	  ids[i] = ids[j]; 
-	  ids[j] = temp_int;
-	  pnt_coord_basei = coords+coord_dim*i;
-	  pnt_coord_basej = coords+coord_dim*j;
-	  for (int k=0; k<coord_dim; k++) {
-	    temp_double = pnt_coord_basei[k];
-	    pnt_coord_basei[k] = pnt_coord_basej[k];
-	    pnt_coord_basej[k] = temp_double;
-	  }
-	}
-      }
-    }
-
+    //    double tbeg,tend;
+    //    VMK::wtime(&tbeg);
+    std::sort(points,points+curr_num_pts);
+    //    VMK::wtime(&t65);
+    //    printf("sort time= %.4f\n",tend-tbeg);
+    //    fflush(stdout);
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -237,6 +224,8 @@ namespace ESMCI {
 
 
   }
+
+#if 0  //mvr
 
   //mvr not currently getting used, may need some testing
   #undef  ESMC_METHOD
@@ -266,6 +255,7 @@ namespace ESMCI {
     return *this;
   }
 
+#endif   //mvr
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::diagprint()"
@@ -294,10 +284,12 @@ namespace ESMCI {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     for (int i=0; i<curr_num_pts; i++) {
-      printf("id= %d   coords= ",ids[i]);
+
+      printf("id= %d  coords= ",points[i].id);
       for (int j=0; j<coord_dim; j++) {
-    	printf("%.4f  ",coords[i*coord_dim+j]);
+        printf("%.4f  ",points[i].coords[j]);
       }
+
       printf("\n\n\n");
     }
 
@@ -322,7 +314,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-				      int loc) const {
+                                   int loc) const {
     //
     // !DESCRIPTION:
     // return pointer to the id corresponding to given location.
@@ -334,12 +326,12 @@ namespace ESMCI {
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location in PointList ",
+                                    "- invalid location in PointList ",
 				    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
-    return ids+loc;
+    return &points[loc].id;
   }
 
 
@@ -382,9 +374,8 @@ namespace ESMCI {
       throw localrc;
     }
 
-    double *pnt_coord_base=coords+coord_dim*loc;
     for (int i=0; i<coord_dim; i++) {
-      _coord[i]=pnt_coord_base[i];
+      _coord[i]=points[loc].coords[i];
     }
 
     return;
@@ -422,8 +413,9 @@ namespace ESMCI {
       throw localrc;
     }
 
-    return ids[loc];
+    return points[loc].id;
   }
+
 
 
   #undef  ESMC_METHOD
@@ -457,7 +449,7 @@ namespace ESMCI {
       throw localrc;
     }
 
-    return ids[loc];
+    return points[loc].id;
   }
 
 
@@ -492,7 +484,7 @@ namespace ESMCI {
       throw localrc;
     }
 
-    return coords+coord_dim*loc;
+    return points[loc].coords;
   }
 
 
@@ -519,21 +511,17 @@ namespace ESMCI {
     //-----------------------------------------------------------------------------
 
 
-    int loc = (&(*id)-ids);
-
+    int loc = ((point*)&(*id)-points);
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location derived from input id ",
-				    ESMC_CONTEXT, &localrc);
+    				    "- invalid location derived from input id ",
+    				    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
     return get_coord_ptr(loc);
   }
-
-
-
 
 
 } // namespace ESMCI
