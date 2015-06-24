@@ -728,13 +728,14 @@ _ESMF.ESMC_MeshAddElements.argtypes = [ct.c_void_p, ct.c_int,
                                        np.ctypeslib.ndpointer(dtype=np.int32),
                                        np.ctypeslib.ndpointer(dtype=np.int32),
                                        OptionalNumpyArrayInt32,
+                                       OptionalNumpyArrayFloat64,
                                        OptionalNumpyArrayFloat64]
 @deprecated
 def ESMP_MeshAddElements(mesh, elementCount,
                          elementIds, elementTypes,
                          elementConn,
                          elementMask=None,
-                         elementArea=None):
+                         elementArea=None, elementCoords=None):
     """
     Preconditions: An ESMP_Mesh has been created.  'elementIds' holds 
                    the IDs of the elements, 'elementTypes' holds the 
@@ -755,13 +756,15 @@ def ESMP_MeshAddElements(mesh, elementCount,
         Numpy.array(dtype=int32)              :: elementConn\n
         Numpy.array(dtype=int32) (optional)   :: elementMask\n
         Numpy.array(dtype=float64) (optional) :: elementArea\n
+        Numpy.array(dtype=float64) (optional) :: elementCoords\n
     """
     lec = ct.c_int(elementCount)
     # ESMC expects the elementConn array to be 1 based..
     elementConn = elementConn + 1
     rc = _ESMF.ESMC_MeshAddElements(mesh.struct.ptr, lec,
                                     elementIds, elementTypes,
-                                    elementConn, elementMask, elementArea)
+                                    elementConn, elementMask, elementArea,
+                                    elementCoords)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddElement() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
@@ -943,6 +946,41 @@ def ESMP_MeshGetCoordPtr(mesh):
         raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
     return nodeCoords, num_nodes, num_dims
+
+_ESMF.ESMC_MeshGetElemCoord.restype = None
+_ESMF.ESMC_MeshGetElemCoord.argtypes = [ct.c_void_p,
+                                    np.ctypeslib.ndpointer(dtype=np.float64),
+                                    ct.POINTER(ct.c_int),
+                                    ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
+@deprecated
+def ESMP_MeshGetElemCoordPtr(mesh):
+    """
+    Preconditions: An ESMP_Mesh has been created with element coordinates 
+                   specified.\n
+    Postconditions: An array containing Mesh element coordinate data has been
+                    returned into 'elemCoords', number of elements in
+                    'num_elems', and number of dimensions in 'num_dims'.\n
+    Arguments:\n
+        :RETURN: Numpy.array(dtype=float64) :: elemCoords\n
+        :RETURN: int             :: num_elems\n
+        :RETURN: int             :: num_dims\n
+        ESMP_Mesh                :: mesh\n
+    """
+    lrc = ct.c_int(0)
+    lnum_elems = ct.c_int(0)
+    lnum_dims = ct.c_int(0)
+    num_elems = ESMP_MeshGetLocalElementCount(mesh)
+    elemCoords = np.array(np.zeros(num_elems*3),dtype=np.float64)
+    _ESMF.ESMC_MeshGetElemCoord(mesh.struct.ptr, elemCoords,
+                            ct.byref(lnum_elems), 
+                            ct.byref(lnum_dims), ct.byref(lrc))
+    num_elems = lnum_elems.value
+    num_dims = lnum_dims.value
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    return elemCoords, num_elems, num_dims
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p, 

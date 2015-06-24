@@ -346,9 +346,11 @@ int main(void){
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef meshmasking
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, elemMask, NULL);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, 
+                            elemMask, NULL, NULL);
 #else
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, NULL);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, 
+                            NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

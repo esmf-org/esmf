@@ -13,7 +13,7 @@ a Field or FieldBundle created using the LocStream.
 
 In the data assimilation world, LocStreams can
 be thought of as a set of observations.  Their locations are generally
-described using Cartesian (x, y, z), or (lat, lon, height) coordinates.
+described using Cartesian (x, y, z), or (lat, lon, radius) coordinates.
 There is no assumption of any regularity in the positions of the points.
 To make the concept more general, the locations for each data point are
 represented using a construct called {\it keys}.  Keys can include other
@@ -35,18 +35,20 @@ In data assimilation, for example, there is an immediate need to:
 
 \begin{enumerate}
 \item Create a Field or FieldBundle on a LocStream
+\item Regrid data in Fields defined on LocStreams
 \item Redistribute data between Fields defined on LocStreams
 \item Gather or scatter a FieldBundle defined on a LocStream from/to a root DE
 \item Halo region exchange for a Field defined by a haloed LocStream
 \item Extract Fortran array from Field which was defined by a LocStream
 \end{enumerate}
 
-The operations on the Fortran arrays underlying LocStreams are usually simple numerical ones. However,
-it is necessary to sort them in place, and access only portions of the them. It would
-not be efficient to continually create new LocStreams to reflect this sorting. Instead,
-the sorting is managed by the application through permutation arrays while keeping
-the data in place. Locations can become inactive, e.g., if the quality control asserts that
-observation is invalid. This can be managed again by the application through masks.
+
+%The operations on the Fortran arrays underlying LocStreams are usually simple numerical ones. However,
+%it is necessary to sort them in place, and access only portions of the them. It would
+%not be efficient to continually create new LocStreams to reflect this sorting. Instead,
+%the sorting is managed by the application through permutation arrays while keeping
+%the data in place. Locations can become inactive, e.g., if the quality control asserts that
+%observation is invalid. This can be managed again by the application through masks.
 
 A LocStream differs from a Grid in that no topological structure is
 maintained between the points

@@ -69,7 +69,8 @@ int ESMC_MeshAddElements(
   int *elementTypes,        // in
   int *elementConn,         // in
   int *elementMask,         // in
-  double *elementArea       // in
+  double *elementArea,      // in
+  double *elementCoords     // in
 );
 
 // !RETURN VALUE:
@@ -132,6 +133,15 @@ int ESMC_MeshAddElements(
 //          An array containing element areas.  This input consists of a 1D array 
 //          the size of the number of elements on this PET. If not specified (i.e. NULL is passed in), the 
 //          element areas are internally calculated.
+//   \item[{[elementCoords]}] 
+//          An array containing the physical coordinates of the elements to be created on this
+//          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+//          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+//          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+//          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
+//          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
+//          etc.). 
+//   
 //   \end{description}
 //
 //EOP
