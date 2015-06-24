@@ -101,12 +101,13 @@ int main(void){
                       ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD};
+  int elemMask_s [] ={1,1,1,1};
   double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
   int elemConn_s [] ={1,2,5,4,
               2,3,6,5,
               4,5,8,7,
               5,6,9,8};
-
+  double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "MeshCreate");
@@ -127,7 +128,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s, NULL, elemArea_s);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s, 
+                            elemMask_s, elemArea_s, elemCoord_s);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -203,31 +205,22 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshGetElemCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#ifdef ESMF_NETCDF
-  mesh = ESMC_MeshCreateFromFile("data/FVCOM_grid2d.nc", ESMC_FILEFORMAT_UGRID,
-                                 NULL, NULL, "fvcom_mesh", NULL, "", &rc);
   rc = ESMC_MeshGetOwnedElementCount(mesh, &num_elem_owned_out);
   double *elem_coords;
   elem_coords = (double *)malloc(num_elem_owned_out*3*sizeof(double));
   int num_elems;
-   ESMC_MeshGetElemCoord(mesh, elem_coords, &num_elems, &num_dims, &rc);
+  ESMC_MeshGetElemCoord(mesh, elem_coords, &num_elems, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   printf("Found num_elems=%d, num_dims=%d\n", num_elems, num_dims);
-  /*
   int ind = 0;
   for (int i=0; i<num_elems; i++) {
     for (int j=0; j<num_dims; j++) {
-      printf("%12.6lf", elem_coords[ind++]);
+      printf("%.1f ", elem_coords[ind++]);
     }
     printf("\n");
   }
-  */
   free(elem_coords);
-#else
-  // No NetCDF, so just PASS this test.
-  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
-#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest
