@@ -113,8 +113,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add element information to the mesh
-  *rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, 
-                             NULL, NULL, NULL);
+  *rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, NULL);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // garbage collection of temporary variables used to create Mesh object
