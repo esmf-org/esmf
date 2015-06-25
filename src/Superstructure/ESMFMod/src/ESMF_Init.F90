@@ -171,7 +171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[logappend]}]
 !           If the default log file already exists, a value of {\tt .false.}
 !           will set the file position to the beginning of the file.  A value
-!           of [\tt .true.} sets the position to the end of the file.
+!           of {\tt .true.} sets the position to the end of the file.
 !           If not specified, defaults to {\tt .true.}.
 !     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
