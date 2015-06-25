@@ -380,10 +380,10 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef areas
   rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, 
-                            NULL, cellAreas, NULL);
+                            NULL, cellAreas);
 #else
   rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, 
-                            NULL, NULL, NULL);
+                            NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

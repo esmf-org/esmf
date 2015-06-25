@@ -126,8 +126,7 @@ int main(void){
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, 
-                            NULL, NULL);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------

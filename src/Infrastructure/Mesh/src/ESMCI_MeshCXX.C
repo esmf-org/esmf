@@ -584,87 +584,871 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     return;
 }
 
+
+
+
+// TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
 int MeshCXX::addElements(int num_elems, int *elemId, 
                          int *elemType, int *elemConn, 
-                         int *elemMask, double *elemArea,
-                         double *elemCoords){
+                         int *elemMask, double *elemArea){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshCXX::addElements()"
 
-  //Initialize localrc; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+   
+   try{
+     // Initialize the parallel environment for mesh (if not already done)
+     {
+       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+     }
+     
+      Mesh &mesh = *meshPointer;
 
-  // Set flags for presence of elemArea and elemCoords arguments
-  int areaPresent = (elemArea != NULL);
-  int coordsPresent = (elemCoords != NULL);
+     // Make sure that we're at the correct level to do this
+     if (level >= MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Can't add elements twice to a Mesh. ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+     }
 
-  // Get parametric dimension
-  int parametric_dim=meshPointer->parametric_dim();
-  int spatial_dim=meshPointer->spatial_dim();
-  
-  // Check size of connectivity list
-  int expected_conn_size=0;
-  if (parametric_dim==2) {
+     if (level < MeshCXXLevel_NodesAdded) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Need to add nodes before adding elements. ", ESMC_CONTEXT,
+           &localrc)) throw localrc;
+     }
+
+
+
+    // Get parametric dimension
+    int parametric_dim=mesh.parametric_dim();
+
+    // Error check input
+    //// Check element type
     for (int i=0; i< num_elems; i++) {
-      expected_conn_size += elemType[i];
+      if (parametric_dim==2) {
+      // DONT DO THE CHECK BECAUSE WE NOW SUPPORT 
+      // ANY NUMBER OF CORNERS WITH PDIM=2
+#if 0
+        if ((elemType[i] != 5) && (elemType[i] != 9)) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 2 element types must be "
+           "either triangles or quadrilaterals ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+        }
+#endif
+      } else if (parametric_dim==3) {
+        if ((elemType[i] != 10) && (elemType[i] != 12)) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 3 element types must be "
+           "either tetrahedron or hexahedron ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+        }
+
+      }
     }
-  } else if (parametric_dim==3) {
-    for (int i=0; i< num_elems; i++) {
-      if (elemType[i]==10) expected_conn_size += 4;   
-      else if (elemType[i]==12) expected_conn_size += 8;   
+
+
+
+
+    //// Check size of connectivity list
+    int expected_conn_size=0;
+    if (parametric_dim==2) {
+      for (int i=0; i< num_elems; i++) {
+        expected_conn_size += elemType[i];
+      }
+    } else if (parametric_dim==3) {
+      for (int i=0; i< num_elems; i++) {
+        if (elemType[i]==10) expected_conn_size += 4;   
+        else if (elemType[i]==12) expected_conn_size += 8;   
+      }
     }
-  }
-  
-  // num_elemConn doesn't come in, so can't check, instead assign. 
+
+    // num_elemConn doesn't come in, so can't check, instead assign. 
 #if 0      
-  if (expected_conn_size != num_elemConn) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                     "- element connectivity list doesn't contain the right number of entries ",
-                                     ESMC_CONTEXT, &localrc)) throw localrc;
-  }
+    if (expected_conn_size != num_elemConn) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- element connectivity list doesn't contain the right number of entries ",
+                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    }
 #else
-  int num_elemConn=expected_conn_size;   
+    int num_elemConn=expected_conn_size;   
 #endif
 
-  int regridConserve = 0; // what default to set?
 
-  InterfaceInt *elemMaskII = NULL;
-  if (elemMask) {
-    int extent[1];
-    extent[0] = num_elems;
-    elemMaskII = new InterfaceInt(elemMask, 1, extent);
-  }
-  ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
-                        &areaPresent, elemArea, &coordsPresent, elemCoords, 
-                        &num_elemConn, elemConn, &regridConserve, 
-                        &coordSys, &spatial_dim, &localrc);
+    // Count the number of extra elements we need for splitting
+    int num_extra_elem=0;
+    int max_num_conn=0;
+    if (parametric_dim==2) {
+      for (int e = 0; e < num_elems; ++e) {
+        if (elemType[e] >4) {
+          num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
+        }
 
-  // Set the local number of nodes and elements
-  numLNodes = meshPointer->num_nodes();
-  numLElements = calc_num_local_elems(*meshPointer);
+        if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
+      }
 
- // Calc and set the number of owned nodes
-  int num_owned_nodes=0;
-  // NEW MESH iterator because the one above has probably been trashed by
-  // changes in the commit, etc. 
-  Mesh::iterator ni2 = meshPointer->node_begin(), ne2 = meshPointer->node_end();
-  for (ni2; ni2 != ne2; ++ni2) {
-    MeshObj &node = *ni2;
+      int tot_num_extra_elem=0;
+      MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,Par::Comm());
+
+      // If there's num_extra_elem than it's a split mesh
+      if (tot_num_extra_elem>0) {
+        mesh.is_split=true;
+      } else {
+        mesh.is_split=false;
+      }
+    } else {
+      mesh.is_split=false;
+    }
+
+    // Compute the extra element ranges
+    int beg_extra_ids=0;
+    if (mesh.is_split) {      
+      // get maximum local elem id      
+      int max_id=0;
+      for (int e = 0; e < num_elems; ++e) {
+        if (elemId[e] > max_id) {
+          max_id=elemId[e];
+        }
+      }
+
+      // Calc global max id
+      int global_max_id=0;
+      MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,Par::Comm());
+      
+      // Set maximum of non-split ids
+      mesh.max_non_split_id=global_max_id;
+
+      // Calc our range of extra elem ids
+      beg_extra_ids=0;
+      MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,Par::Comm());
+
+      // Remove this processor's number from the sum to get the beginning
+      beg_extra_ids=beg_extra_ids-num_extra_elem;
+
+      // Start 1 up from max
+      beg_extra_ids=beg_extra_ids+global_max_id+1;
+
+      // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+    }
+
+    // Get number of nodes
+    int num_nodes = mesh.num_nodes();
+
+    // Allocate array to make sure that there are no local nodes without a home
+    std::vector<int> node_used;
+    node_used.resize(num_nodes, 0);
+
+    // Error check elemConn array
+    int c = 0;
+    for (int e = 0; e < num_elems; ++e) {
+      int nnodes = ElemType2NumNodesCXX(mesh.parametric_dim(),
+                                     mesh.spatial_dim(), 
+                                     elemType[e]);
+
+      for (int n = 0; n < nnodes; ++n) {
+
+        // Get 0-based node index
+        int node_index=elemConn[c]-1;
+
+        // Check elemConn
+        if (node_index < 0) {
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+	   "- elemConn entries should not be less than 1 ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+	}
+
+        if (node_index > num_nodes-1) {
+
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+	   "- elemConn entries should not be greater than number of nodes on processor ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+	}
+
+        // Mark as used
+        node_used[node_index]=1;
+
+        // Advance to next
+        c++;
+      }
+    } // for e
+
+    // Make sure every node used
+    bool every_node_used=true;
+    for (int i=0; i<num_nodes; i++) {
+      if (node_used[i] == 0) {
+        every_node_used=false;
+        break;
+      }
+    }
     
-    if (!GetAttr(node).is_locally_owned()) continue;
+    if (!every_node_used) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "- there are nodes on this PET that were not used in the element connectivity list ",
+          ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+
+
+    // We must first store all nodes in a flat array since element
+    // connectivity will index into this array.
+    std::vector<MeshObj*> all_nodes;
     
-    num_owned_nodes++;
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      if (seq >= num_nodes){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- seq is larger or equal to num_nodes", ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+
+      all_nodes[seq] = &*ni;
+
+    }
+
+    // Generate connectivity list with split elements
+    // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
+    int num_elems_wsplit=0;
+    int *elemConn_wsplit=NULL;
+    int *elemType_wsplit=NULL;
+    int *elemId_wsplit=NULL;
+    double *elemArea_wsplit=NULL;
+    int *elemMask_wsplit=NULL;
+
+
+ /* XMRKX */
+
+    if (mesh.is_split) {
+      // New number of elements
+      num_elems_wsplit=num_elems+num_extra_elem;
+
+      // Allocate arrays to hold split lists
+      elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
+      elemType_wsplit=new int[num_elems_wsplit];
+      elemId_wsplit=new int[num_elems_wsplit];
+      if (elemArea != NULL) elemArea_wsplit=new double[num_elems_wsplit];
+      if (elemMask != NULL) elemMask_wsplit=new int[num_elems_wsplit];
+
+      // Allocate some temporary variables for splitting
+      double *polyCoords=new double[3*max_num_conn];
+      double *polyDblBuf=new double[3*max_num_conn];
+      int    *polyIntBuf=new int[max_num_conn];
+      int    *triInd=new int[3*(max_num_conn-2)];
+      double *triFrac=new double[max_num_conn-2];
+
+      // new id counter
+      int curr_extra_id=beg_extra_ids;
+
+      // Get some useful information
+      int sdim = mesh.spatial_dim(); 
+
+      // Loop through elems generating split elems if necessary
+      int conn_pos = 0;
+      int split_conn_pos = 0;
+      int split_elem_pos = 0;
+      for (int e = 0; e < num_elems; ++e) {
+        
+        // More than 4 side, split
+        if (elemType[e]>4) {
+
+          // Get coordinates
+          int crd_pos=0;
+          for (int i=0; i<elemType[e]; i++) {
+            MeshObj *node=all_nodes[elemConn[conn_pos+i]-1];
+            double *crd=mesh.node_coord->data(*node);
+            
+            for (int j=0; j<sdim; j++) {
+              polyCoords[crd_pos]=crd[j];
+              crd_pos++;
+            }
+
+            // printf("id=%d coord=%f %f \n",elemId[e],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
+          }
+
+          // Triangulate polygon
+          triangulateCXX(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+                      triInd, triFrac); 
+          
+
+          // Create split element list
+          int tI_pos=0;
+          for (int i=0; i<elemType[e]-2; i++) {
+            // First id is same, others are from new ids
+            if (i==0) {
+              elemId_wsplit[split_elem_pos]=elemId[e];
+              mesh.split_id_to_frac[elemId[e]]=triFrac[i];
+            } else {
+              elemId_wsplit[split_elem_pos]=curr_extra_id;
+              mesh.split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+              mesh.split_id_to_frac[curr_extra_id]=triFrac[i];
+              curr_extra_id++;
+            }
+
+            // Type is triangle
+            elemType_wsplit[split_elem_pos]=3; 
+
+            // Set area to fraction of original area
+            if (elemArea != NULL) elemArea_wsplit[split_elem_pos]=elemArea[e]*triFrac[i];
+
+            // Set mask (if it exists)
+            if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
+
+            // Next split element
+            split_elem_pos++;
+
+            // Set triangle corners based on triInd
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
+            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
+            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+
+            // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+            split_conn_pos +=3;
+            tI_pos +=3;
+
+          }
+
+          // Advance to next elemConn position 
+          conn_pos +=elemType[e];
+
+        } else { // just copy
+          elemId_wsplit[split_elem_pos]=elemId[e];
+          elemType_wsplit[split_elem_pos]=elemType[e];
+          if (elemArea != NULL) elemArea_wsplit[split_elem_pos]=elemArea[e];
+          if (elemMask != NULL) elemMask_wsplit[split_elem_pos]=elemMask[e];
+          split_elem_pos++;
+          for (int i=0; i<elemType[e]; i++) {
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
+            split_conn_pos++;
+            conn_pos++;
+          }
+        }
+      }
+      
+      
+      // Allocate some temporary variables for splitting
+      delete [] polyCoords;
+      delete [] polyDblBuf;
+      delete [] polyIntBuf;
+      delete [] triInd;
+      delete [] triFrac;
+
+      // Use the new split list for the connection lists below
+      num_elems=num_elems_wsplit;
+      elemConn=elemConn_wsplit;
+      elemType=elemType_wsplit;
+      elemId=elemId_wsplit;
+      if (elemArea != NULL) elemArea=elemArea_wsplit;
+      if (elemMask != NULL) elemMask=elemMask_wsplit;
+    }   
+
+    // Now loop the elements and add them to the mesh.
+    int cur_conn = 0;
+    for (int e = 0; e < num_elems; ++e) {
+
+      // Get/deduce the element topology
+      const MeshObjTopo *topo = ElemType2TopoCXX(mesh.parametric_dim(),
+                                                 mesh.spatial_dim(), 
+                                                 elemType[e]);
+
+    int nnodes = topo->num_nodes;
+
+    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+
+      // The object
+      long eid = elemId[e];
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
+
+      for (int n = 0; n < nnodes; ++n) {
+      
+        // Get 0-based node index
+        int node_index=elemConn[cur_conn]-1;
+
+        // Setup connectivity list
+        nconnect[n] = all_nodes[node_index];
+
+        // Advance to next
+        cur_conn++;
+      }
+
+      mesh.add_element(elem, nconnect, topo->number, topo);
+
+    } // for e
+
+
+    // required to add frac fields to the mesh for conservative regridding
+    Context ctxt; ctxt.flip();
+    MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+  // Handle element masking
+  bool has_elem_mask=false;
+  if (elemMask != NULL) { // if masks exist
+
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask values field
+    MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Add element mask field
+    MEField<> *elem_mask = mesh.RegisterField("elem_mask",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_mask=true;
   }
-  numOwnedNodes=num_owned_nodes;
-  
-  // Calc and set the number of owned elements
-  numOwnedElements=calc_num_owned_elems(*meshPointer);
-  
-  // Mark Mesh as finshed
-  level=MeshCXXLevel_Finished;
-  
-  return localrc;
-}
+
+
+  // Handle element area
+  bool has_elem_area=false;
+  if (elemArea != NULL) { // if areas exist
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask field
+    MEField<> *elem_area = mesh.RegisterField("elem_area",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_area=true;   
+  } 
+
+
+    // Perhaps commit will be a separate call, but for now commit the mesh here.
+    mesh.build_sym_comm_rel(MeshObj::NODE);
+    mesh.Commit();
+
+
+  // Set Mask values
+  if (has_elem_mask) {
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
+
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *mv=elem_mask_val->data(elem);
+      int data_index = elem.get_data_index();
+      *mv=(double)elemMask[data_index];
+      // Init mask to 0.0
+      double *m=elem_mask->data(elem);
+      *m=0.0;
+    }
+  }
+
+
+  // Set area values
+  if (has_elem_area) {
+    // Get Fields
+    MEField<> *elem_area=mesh.GetField("elem_area"); 
+    
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *av=elem_area->data(elem);
+      int data_index = elem.get_data_index();
+      *av=(double)elemArea[data_index];
+    }
+  }
+
+   // Set the local number of nodes and elements
+   numLNodes = mesh.num_nodes();
+   numLElements = calc_num_local_elems(mesh);
+
+    // Calc and set the number of owned nodes
+    int num_owned_nodes=0;
+    // NEW MESH iterator because the one above has probably been trashed by
+    // changes in the commit, etc. 
+    Mesh::iterator ni2 = mesh.node_begin(), ne2 = mesh.node_end();
+    for (ni2; ni2 != ne2; ++ni2) {
+      MeshObj &node = *ni2;
+   
+      if (!GetAttr(node).is_locally_owned()) continue;
+      
+      num_owned_nodes++;
+    }
+    numOwnedNodes=num_owned_nodes;
+
+    // Calc and set the number of owned elements
+    numOwnedElements=calc_num_owned_elems(mesh);
+
+    // Mark Mesh as finshed
+    level=MeshCXXLevel_Finished;
+
+#ifdef ESMF_PARLOG
+  mesh.Print(Par::Out());
+#endif
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, &localrc);
+      return localrc;
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &localrc);
+    return localrc;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // Return SUCCESS
+  return ESMF_SUCCESS;
+
+} // MeshCXX::addElements
+
+#else
+// TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
+int MeshCXX::addElements(int numElems, int *elemId, 
+                         int *elemType, int *elemConn, 
+                         int *elemMask, double *elemArea){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::addElements()"
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+   
+   try{
+     // Initialize the parallel environment for mesh (if not already done)
+     {
+       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+     }
+     
+      Mesh &mesh = *meshPointer;
+
+     // Make sure that we're at the correct level to do this
+     if (level >= MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Can't add elements twice to a Mesh. ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+     }
+
+     if (level < MeshCXXLevel_NodesAdded) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Need to add nodes before adding elements. ", ESMC_CONTEXT,
+           &localrc)) throw localrc;
+     }
+
+
+
+    // Get parametric dimension
+    int parametric_dim=mesh.parametric_dim();
+
+     // Error check input
+    //// Check element type
+    for (int i=0; i< numElems; i++) {
+      if (parametric_dim==2) {
+        if ((elemType[i] != 5) && (elemType[i] != 9)) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 2 element types must be "
+           "either triangles or quadrilaterals ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+        }
+      } else if (parametric_dim==3) {
+        if ((elemType[i] != 10) && (elemType[i] != 12)) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 3 element types must be "
+           "either tetrahedron or hexahedron ", ESMC_CONTEXT, &localrc))
+           throw localrc;
+        }
+
+      }
+    }
+
+
+    // Get number of nodes
+    int num_nodes = mesh.num_nodes();
+
+    // Allocate array to make sure that there are no local nodes without a home
+    std::vector<int> node_used;
+    node_used.resize(num_nodes, 0);
+
+
+    // We must first store all nodes in a flat array since element
+    // connectivity will index into this array.
+    std::vector<MeshObj*> all_nodes;
+    
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      if (seq >= num_nodes){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- seq is larger or equal to num_nodes", ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+
+      all_nodes[seq] = &*ni;
+
+    }
+
+    // Now loop the elements and add them to the mesh.
+    int cur_conn = 0;
+
+    for (int e = 0; e < numElems; ++e) {
+
+    // Get/deduce the element topology
+    const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
+
+    int nnodes = topo->num_nodes;
+
+ 
+    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+
+      // The object
+      long eid = elemId[e];
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
+
+      for (int n = 0; n < nnodes; ++n) {
+
+        // Get 0-based node index
+        int node_index=elemConn[cur_conn]-1;
+
+        // Check elemConn
+        if ((node_index < 0) || (node_index > num_nodes-1)) {
+	  int localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- bad elementConn value",
+            ESMC_CONTEXT, &localrc)) throw localrc;
+	}
+
+
+        // Setup connectivity list
+        nconnect[n] = all_nodes[node_index];
+
+        // Mark as used
+        node_used[node_index]=1;
+
+        // Advance to next
+        cur_conn++;
+      }
+
+      mesh.add_element(elem, nconnect, topo->number, topo);
+
+    
+    } // for e
+
+    // Make sure every node used
+    bool every_node_used=true;
+    for (int i=0; i<num_nodes; i++) {
+      if (node_used[i] == 0) {
+        every_node_used=false;
+        break;
+      }
+    }
+    
+    if (!every_node_used) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- there are nodes on this PET that were not used in the element "
+        "connectivity list ", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // numElems is input data from AddElements
+    // numLElements is what is returned to C interface
+    // what is mesh.num_elems?  petlocal?  should it = numElems?
+    ThrowAssert(mesh.num_elems() == numElems);
+    numLElements = numElems;
+
+    // required to add frac fields to the mesh for conservative regridding
+    Context ctxt; ctxt.flip();
+    MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+   // Handle element masking
+  bool has_elem_mask=false;
+  if (elemMask != NULL) { // if masks exist
+
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask values field
+    MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Add element mask field
+    MEField<> *elem_mask = mesh.RegisterField("elem_mask",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_mask=true;
+  }
+
+
+  // Handle element area
+  bool has_elem_area=false;
+  if (elemArea != NULL) { // if areas exist
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask field
+    MEField<> *elem_area = mesh.RegisterField("elem_area",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_area=true;   
+  } 
+
+
+    // Perhaps commit will be a separate call, but for now commit the mesh here.
+    mesh.build_sym_comm_rel(MeshObj::NODE);
+    mesh.Commit();
+
+
+
+  // Set Mask values
+  if (has_elem_mask) {
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
+
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *mv=elem_mask_val->data(elem);
+      int data_index = elem.get_data_index();
+      *mv=(double)elemMask[data_index];
+      // Init mask to 0.0
+      double *m=elem_mask->data(elem);
+      *m=0.0;
+     }
+  }
+
+
+  // Set area values
+  if (has_elem_area) {
+    // Get Fields
+    MEField<> *elem_area=mesh.GetField("elem_area"); 
+    
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *av=elem_area->data(elem);
+      int data_index = elem.get_data_index();
+      *av=(double)elemArea[data_index];
+    }
+  }
+
+
+    // Mark Mesh as finshed
+    level=MeshCXXLevel_Finished;
+
+    // Calc and set the number of owned nodes
+    int num_owned_nodes=0;
+    // NEW MESH interator because the one above has probably been trashed by
+    // changes in the commit, etc. 
+    Mesh::iterator ni2 = mesh.node_begin(), ne2 = mesh.node_end();
+    for (ni2; ni2 != ne2; ++ni2) {
+      MeshObj &node = *ni2;
+   
+      if (!GetAttr(node).is_locally_owned()) continue;
+      
+      num_owned_nodes++;
+    }
+    numOwnedNodes=num_owned_nodes;
+
+    //    printf(" num_owned_nodes=%d num_nodes=%d\n",num_owned_nodes, mesh.num_nodes());
+
+
+    // Calc and set the number of owned elements
+    int num_owned_elems=0;
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+   
+      if (!GetAttr(elem).is_locally_owned()) continue;
+      
+      num_owned_elems++;
+    }   
+    numOwnedElements=num_owned_elems;
+
+
+
+
+#ifdef ESMF_PARLOG
+  mesh.Print(Par::Out());
+ #endif
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, &localrc);
+      return localrc;
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &localrc);
+    return localrc;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // Return SUCCESS
+  return ESMF_SUCCESS;
+
+} // MeshCXX::addElements
 #endif
 
 int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
