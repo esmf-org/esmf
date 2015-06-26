@@ -378,7 +378,7 @@ int setDefaultsLUA(int dimCount,
     int ampresent=0, vnpresent=0, cnpresent=0;
     int dfpresent=0;
     int *df_loc = NULL;
-    char *vn_loc = "";
+    char *vn_loc = (char *)"";
     int vn_len = 0;
 
     if (decompflag != NULL) {
@@ -410,7 +410,7 @@ int setDefaultsLUA(int dimCount,
       vnpresent = vn_len > 0;
       if (vnpresent) {
         vn_loc = (char *)malloc(vn_len);
-        strcpy(vn_loc, varname);
+        strncpy(vn_loc, varname, vn_len);
       }
     }
 
@@ -430,8 +430,8 @@ int setDefaultsLUA(int dimCount,
       cnpresent = 1;
       cn_buf = (char *)malloc(fortran_buf_size);
       memset(cn_buf, ' ', fortran_buf_size);
-      strcpy(&cn_buf[0], coordNames[0]);
-      strcpy(&cn_buf[cn_len], coordNames[1]);
+      strncpy(&cn_buf[0], coordNames[0], cn_len);
+      strncpy(&cn_buf[cn_len], coordNames[1], cn_len);
     }
 
     // allocate the grid object

@@ -40,18 +40,30 @@
 
 namespace ESMCI {
 
+  struct point {
+    int id;
+    double coords[3];
+
+    point() {
+      id=0;
+      coords[0] = coords[1] = coords[2] = 0.0;
+    }
+
+    bool operator< (const point &rhs) const {
+      return id < rhs.id;
+    }
+  };
 
 // class definition
   class PointList {
 
   private:
+
     int max_num_pts;
     int curr_num_pts;
     int coord_dim;                  // Number of dimensions for point coordinates
 
-    double *coords;                 // of size coord_dim*max_num_pts
-
-    int *ids;                       // of size max_num_pts
+    point *points;
 
   public:
     // Construct

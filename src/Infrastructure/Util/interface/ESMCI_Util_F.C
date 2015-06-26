@@ -333,6 +333,7 @@ extern "C" {
   int winrt = GetCurrentDirectory (pathname_l, pathname)
   if (winrt == 0 || winrt > pathname_l)
     *rc = ESMF_FAILURE;
+    return;
   else
     *rc = ESMF_SUCCESS;
 #endif

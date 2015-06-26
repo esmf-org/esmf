@@ -1464,10 +1464,11 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, logkindflag, rc)
+      subroutine ESMF_LogInitialize(filename, logappend, logkindflag, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in)           :: filename
+      logical,                 intent(in), optional :: logappend
       type(ESMF_LogKind_Flag), intent(in), optional :: logkindflag
       integer,                 intent(out),optional :: rc
 
@@ -1483,6 +1484,11 @@ end subroutine ESMF_LogGet
 !            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 64 characters.
+!     \item [{[logappend]}]
+!           If the log file already exists, a value of {\tt .false.}
+!           will set the file position to the beginning of the file.  A value
+!           of [\tt .true.} sets the position to the end of the file.
+!           If not specified, defaults to {\tt .true.}.
 !      \item [{[logkindflag]}]
 !            Specifies {\tt ESMF\_LOGKIND\_SINGLE}, {\tt ESMF\_LOGKIND\_MULTI} or
 !            {\tt ESMF\_LOGKIND\_NONE}.
@@ -1494,7 +1500,8 @@ end subroutine ESMF_LogGet
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogOpen(ESMF_LogDefault, filename, logkindflag=logkindflag, rc=rc)
+    call ESMF_LogOpen(ESMF_LogDefault, filename,  &
+        append=logappend, logkindflag=logkindflag, rc=rc)
 
 end subroutine ESMF_LogInitialize
 

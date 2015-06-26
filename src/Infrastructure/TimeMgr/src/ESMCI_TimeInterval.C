@@ -772,7 +772,7 @@ namespace ESMCI{
       }
       if (d_r8 != ESMC_NULL_POINTER) {
         if (tiToConvert.calendar->secondsPerDay == 0) {
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[2*ESMF_MAXSTR];
           sprintf(logMsg, "; can't get d_r8; must specify a calendar or "
              "calkindflag which defines days (non-zero seconds per day), "
              "e.g. ESMC_CALKIND_GREGORIAN, ESMC_CALKIND_JULIAN, "
