@@ -675,23 +675,24 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    ! warning - this ordering only works if we prevent mixing
-    ! IPD versions in the same connector
-    call loopConnectorCompsS(phaseString="IPDv05p1a", rc=rc)
+    ! warning - this ordering only works (with the two above) if we
+    ! prevent mixing IPD versions in the same connector
+    call loopConnectorCompsS(phaseString="IPDv05p2a", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopConnectorCompsS(phaseString="IPDv05p1b", rc=rc)
+    call loopConnectorCompsS(phaseString="IPDv05p2b", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
 
     ! modelComps
-    call loopModelCompsS(phaseString="IPDv00p2", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
+    ! this one moved down a block to its equivalent init phases
+    !call loopModelCompsS(phaseString="IPDv00p2", rc=rc)
+    !if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    !  line=__LINE__, file=trim(name)//":"//FILENAME)) &
+    !  return  ! bail out
     call loopModelCompsS(phaseString="IPDv01p2", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -744,6 +745,10 @@ module NUOPC_Driver
 
 
     ! modelComps
+    call loopModelCompsS(phaseString="IPDv00p2", rc=rc) ! moved down from above
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
     call loopModelCompsS(phaseString="IPDv01p3", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1241,18 +1246,14 @@ module NUOPC_Driver
         do i=0, is%wrap%modelCount
           write (iString, *) i
           do j=0, is%wrap%modelCount
-            !print *, "loop phaseString=", trim(phaseString), " i=", i, " j=", j
             write (jString, *) j
             if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
               ! translate NUOPC logical phase to ESMF actual phase
-              print *, "services set for ", i, j
               phase = 0 ! zero is reserved, use it here to see if need to skip
               do k=1, connectorPhaseMap(i,j)%phaseCount
-                !print *, "Considering phaseKey == ", trim(connectorPhaseMap(i,j)%phaseKey(k))
                 if (trim(connectorPhaseMap(i,j)%phaseKey(k)) == trim(phaseString)) &
                   phase = connectorPhaseMap(i,j)%phaseValue(k)
               enddo
-              !print *, "phase==", phase
               if (phase == 0) cycle ! skip to next j
               write (pString, *) phase
               if (i==0) then

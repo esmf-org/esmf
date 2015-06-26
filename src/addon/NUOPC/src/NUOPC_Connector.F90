@@ -109,37 +109,37 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
+      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2", "IPDv05p3"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
+      phaseLabelList=(/"IPDv03p3", "IPDv04p3", "IPDv05p4"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p4", "IPDv04p4"/), &
+      phaseLabelList=(/"IPDv03p4", "IPDv04p4", "IPDv05p5"/), &
       userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
+      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a", "IPDv05p6a"/), &
       userRoutine=InitializeP5a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
+      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b", "IPDv05p6b"/), &
       userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1a"/), &
+      phaseLabelList=(/"IPDv04p1a", "IPDv05p2a"/), &
       userRoutine=InitializeP1a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1b"/), &
+      phaseLabelList=(/"IPDv04p1b", "IPDv05p2b"/), &
       userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -203,9 +203,72 @@ module NUOPC_Connector
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
+    character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
+    integer                :: itemCount, i, stat
+    character (ESMF_MAXSTR), allocatable :: itemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
+
     rc = ESMF_SUCCESS
 
-    print *, "Inside InitializeP1FieldTransfer"
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! get transfer policy for both states
+    call NUOPC_AttributeGet(importState, name="FieldTransferPolicy", &
+        value=importXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call NUOPC_AttributeGet(exportState, name="FieldTransferPolicy", &
+        value=exportXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+!    print *, "importState xferPolicy = ", importXferPolicy
+!    print *, "exportState xferPolicy = ", exportXferPolicy
+
+    if (trim(exportXferPolicy)=="transferAll") then
+
+      call ESMF_StateGet(exportState, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      allocate(itemNameList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      allocate(itemTypeList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      call ESMF_StateGet(exportState, itemNameList=itemNameList, &
+        itemTypeList=itemTypeList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      ! WARNING: does not currently deal with nested states or field bundles
+      do i=lbound(itemNameList,1), ubound(itemNameList,1)
+        !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
+        if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
+
+          ! transfer to import state
+          call NUOPC_Advertise(importState, StandardName=itemNameList(i), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        end if
+     end do
+
+     deallocate(itemNameList)
+     deallocate(itemTypeList)
+
+    end if
 
   end subroutine
 
