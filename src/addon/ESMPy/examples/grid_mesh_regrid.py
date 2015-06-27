@@ -1,12 +1,18 @@
-# This example demonstrates how to regrid between a grid and a mesh.
-# The grid and mesh files are required, they can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/ll1deg_grid.nc
-#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+# This example demonstrates how to regrid between a Grid and a Mesh.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
+# cache_data_file(os.path.join(os.getcwd(), "data", "mpas_uniform_10242_dual_counterclockwise.nc"))
 
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to enable debug logging
+# This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll1deg_grid.nc"

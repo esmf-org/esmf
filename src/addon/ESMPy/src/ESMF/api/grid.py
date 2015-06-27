@@ -12,7 +12,7 @@ from copy import copy
 from ESMF.api.esmpymanager import *
 from ESMF.api.array import *
 import ESMF.api.constants as constants
-from ESMF.util.helpers import get_formatted_slice, get_none_or_slice, get_none_or_bound, get_none_or_ssslice
+from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound, get_none_or_ssslice
 
 
 #### Grid class #########################################################
