@@ -16,13 +16,16 @@ def copy_struct(src):
     ct.pointer(dst)[0] = src
     return dst
 
-class ESMP_GridStruct(ct.Structure):
-    _fields_ = [("ptr", ct.c_void_p)]
-
 class ESMP_Field(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
+class ESMP_GridStruct(ct.Structure):
+    _fields_ = [("ptr", ct.c_void_p)]
+
 class ESMP_Mesh(ct.Structure):
+    _fields_ = [("ptr", ct.c_void_p)]
+
+class ESMP_LocStream(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_VM(ct.Structure):
@@ -1040,6 +1043,140 @@ def ESMP_MeshWrite(mesh, filename):
         raise ValueError('ESMC_MeshWrite() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+#### LOCSTREAM #####################################################
+
+_ESMF.ESMC_LocStreamCreateLocal.restype = ESMP_LocStream
+_ESMF.ESMC_LocStreamCreateLocal.argtypes = [ct.c_int,
+                                            OptionalNamedConstant,
+                                            ct.POINTER(ct.c_int)]
+def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_LocStream has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_LocStream  :: locstream\n
+        Integer                  :: localCount \n
+        CoordSys (optional)      :: coordSys\n
+            Argument Values:\n
+                (default) CoordSys.CART\n
+                CoordSys.SPH_DEG\n
+                CoordSys.SPH_RAD\n
+
+    """
+    lrc = ct.c_int(0)
+
+    # create the ESMF Grid and retrieve a ctypes pointer to it
+    locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, coordSys, ct.byref(lrc))
+
+    # check the return code from ESMF
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LocStreamCreateLocal() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    # create the ESMP LocStream object from ctypes pointer
+    return locstream
+
+_ESMF.ESMC_LocStreamGetBounds.restype = ct.c_int
+_ESMF.ESMC_LocStreamGetBounds.argtypes = [ct.c_void_p,
+                                          ct.c_int,
+                                          np.ctypeslib.ndpointer(dtype=np.int32),
+                                          np.ctypeslib.ndpointer(dtype=np.int32)]
+def ESMP_LocStreamGetBounds(locstream, localDe=0):
+    """
+    Preconditions: An ESMP_LocStream has been created.\n
+    Postconditions: .\n
+    Arguments:\n
+        :RETURN: Numpy.array  :: \n
+        :RETURN: Numpy.array  :: \n
+        ESMP_LocStream        :: locstream\n
+    """
+    llde = ct.c_int(localDe)
+
+    # locstream rank is always one
+    locstreamrank = 1
+
+    exLB = np.zeros(locstreamrank, dtype=np.int32)
+    exUB = np.zeros(locstreamrank, dtype=np.int32)
+
+    rc = _ESMF.ESMC_LocStreamGetBounds(locstream.ptr, llde, exLB, exUB)
+
+    # adjust bounds to be 0 based
+    exLB = exLB - 1
+
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LocStreamGetBounds() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    return exLB, exUB
+
+_ESMF.ESMC_LocStreamAddKeyAlloc.restype = ct.c_int
+_ESMF.ESMC_LocStreamAddKeyAlloc.argtypes = [ct.c_void_p, ct.c_char_p,
+                                            OptionalNamedConstant]
+def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
+    """
+    Preconditions: An ESMP_LocStream has been created.\n
+    Postconditions: .\n
+    Arguments:\n
+        :RETURN: integer      :: \n
+        ESMP_LocStream        :: locstream\n
+        String                :: keyName\n
+        TypeKind (optional)   :: keyTypeKind\n
+            Argument Values:\n
+                TypeKind.I4\n
+                TypeKind.I8\n
+                TypeKind.R4\n
+                (default) TypeKind.R8\n
+
+    """
+
+    rc = _ESMF.ESMC_LocStreamAddKeyAlloc(locstream.ptr, keyName, keyTypeKind)
+
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LocStreamAddKeyAlloc() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+_ESMF.ESMC_LocStreamGetKeyPtr.restype = ct.POINTER(ct.c_void_p)
+_ESMF.ESMC_LocStreamGetKeyPtr.argtypes = [ct.c_void_p,
+                                          ct.c_char_p,
+                                          ct.c_int,
+                                          ct.POINTER(ct.c_int)]
+def ESMP_LocStreamGetKeyPtr(locstream, keyName, localDe=0):
+    """
+    Preconditions: An ESMP_LocStream has been created.\n
+    Postconditions: .\n
+    Arguments:\n
+        ESMP_LocStream        :: locstream\n
+    """
+    lrc = ct.c_int(0)
+    llde = ct.c_int(localDe)
+
+    keyPtr = _ESMF.ESMC_LocStreamGetKeyPtr(locstream.ptr, keyName, llde, lrc)
+
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LocStreamGetKeyPtr() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+    return keyPtr
+
+_ESMF.ESMC_LocStreamDestroy.restype = ct.c_int
+_ESMF.ESMC_LocStreamDestroy.argtypes = [ct.c_void_p]
+def ESMP_LocStreamDestroy(locstream):
+    """
+    Preconditions: An ESMP_LocStream has been created.\n
+    Postconditions: The 'locstream' has been destroyed.\n
+    Arguments:\n
+        ESMP_LocStream :: locstream\n
+    """
+    ptr = ct.POINTER(ct.c_void_p)
+    locstreamptr = ptr(ct.c_void_p(locstream.struct.ptr))
+    rc = _ESMF.ESMC_LocStreamDestroy(locstreamptr)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LocStreamDestroy() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+
 #### Field #####################################################
 
 _ESMF.ESMC_FieldCreateGridTypeKind.restype = ESMP_Field
@@ -1127,23 +1264,89 @@ def ESMP_FieldCreateGrid(grid, name=None,
 
     return field
 
+_ESMF.ESMC_FieldCreateLocStreamTypeKind.restype = ESMP_Field
+_ESMF.ESMC_FieldCreateLocStreamTypeKind.argtypes = [ct.c_void_p,
+                                                    ct.c_uint,
+                                                    OptionalStructPointer,
+                                                    OptionalStructPointer,
+                                                    OptionalStructPointer,
+                                                    ct.c_char_p,
+                                                    ct.POINTER(ct.c_int)]
+def ESMP_FieldCreateLocStream(locstream, name=None,
+                     typekind=constants.TypeKind.R8,
+                     gridToFieldMap=None,
+                     ungriddedLBound=None,
+                     ungriddedUBound=None):
+    """
+    Preconditions: ESMP has been initialized and an ESMP_LocStream has
+                   been created.\n
+    Postconditions: An ESMP_Field has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_Field   :: field\n
+        ESMP_LocStream        :: locstream\n
+        string (optional)     :: name\n
+        TypeKind (optional)   :: typekind\n
+            Argument Values:\n
+                TypeKind.I4\n
+                TypeKind.I8\n
+                TypeKind.R4\n
+                (default) TypeKind.R8\n
+        Numpy.array(dtype=int32) (optional) :: gridToFieldMap\n
+        Numpy.array(dtype=int32) (optional) :: ungriddedLBound\n
+        Numpy.array(dtype=int32) (optional) :: ungriddedUBound\n
+    """
+    lrc = ct.c_int(0)
+
+    # InterfaceInt requires int32 type numpy arrays
+    gridToFieldMap_i = gridToFieldMap
+    if (gridToFieldMap is not None):
+        if (gridToFieldMap.dtype != np.int32):
+            raise TypeError('gridToFieldMap must have dtype=int32')
+        gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
+
+    # InterfaceInt requires int32 type numpy arrays
+    ungriddedLBound_i = ungriddedLBound
+    if (ungriddedLBound is not None):
+        if (ungriddedLBound.dtype != np.int32):
+            raise TypeError('ungriddedLBound must have dtype=int32')
+        ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
+
+    # InterfaceInt requires int32 type numpy arrays
+    ungriddedUBound_i = ungriddedUBound
+    if (ungriddedUBound is not None):
+        if (ungriddedUBound.dtype != np.int32):
+            raise TypeError('ungriddedUBound must have dtype=int32')
+        ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
+
+    # call into the FieldCreate C interface
+    field = _ESMF.ESMC_FieldCreateLocStreamTypeKind(locstream.struct.ptr, typekind,
+                                               gridToFieldMap_i,
+                                               ungriddedLBound_i,
+                                               ungriddedUBound_i, name,
+                                               ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldCreateLocStreamTK() failed with rc = ' + \
+                        str(rc) + '.    ' + constants._errmsg)
+
+    return field
+
 _ESMF.ESMC_FieldCreateMeshTypeKind.restype = ESMP_Field
-_ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint, 
-                                               ct.c_uint, 
+_ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
+                                               ct.c_uint,
                                                OptionalStructPointer,
-                                               OptionalStructPointer, 
                                                OptionalStructPointer,
-                                               ct.c_char_p, 
+                                               OptionalStructPointer,
+                                               ct.c_char_p,
                                                ct.POINTER(ct.c_int)]
-@deprecated
-def ESMP_FieldCreate(mesh, name=None,
+def ESMP_FieldCreateMesh(mesh, name=None,
                      typekind=constants.TypeKind.R8,
                      meshloc=constants.MeshLoc.NODE,
                      gridToFieldMap=None,
                      ungriddedLBound=None,
                      ungriddedUBound=None):
     """
-    Preconditions: ESMP has been initialized and an ESMP_Mesh has 
+    Preconditions: ESMP has been initialized and an ESMP_Mesh has
                    been created.\n
     Postconditions: An ESMP_Field has been created.\n
     Arguments:\n
@@ -1188,9 +1391,9 @@ def ESMP_FieldCreate(mesh, name=None,
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
 
     # call into the FieldCreate C interface
-    field = _ESMF.ESMC_FieldCreateMeshTypeKind(mesh.struct.ptr, typekind, 
+    field = _ESMF.ESMC_FieldCreateMeshTypeKind(mesh.struct.ptr, typekind,
                                                meshloc,
-                                               gridToFieldMap_i, 
+                                               gridToFieldMap_i,
                                                ungriddedLBound_i,
                                                ungriddedUBound_i, name,
                                                ct.byref(lrc))

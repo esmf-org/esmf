@@ -48,8 +48,6 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
     def test_mesh_50_ngons(self):
-
-        Manager(debug=True)
         parallel = False
         if pet_count() > 1:
             if pet_count() > 4:
@@ -114,6 +112,25 @@ class TestMesh(TestBase):
                                   filetype=FileFormat.ESMFMESH)
         except:
             raise NameError('mesh_create_from_file_scrip failed!')
+
+    def test_mesh_copy(self):
+        parallel = False
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_ngons()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner)
+
+        mesh2 = mesh._copy_()
+        self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
     @attr('serial')
     def test_mesh_slicing(self):

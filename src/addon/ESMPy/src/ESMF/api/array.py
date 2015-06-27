@@ -99,6 +99,43 @@ class MaskedArray(ma.MaskedArray):
         self.contents = getattr(obj, 'contents', None)
         super(MaskedArray, self).__array_finalize__(obj)
 
+class Array1D(np.ndarray):
+
+    def __new__(cls, data, dtype, size):
+        '''
+        :param cls: Array class type
+        :param data: buffer of fortran allocated ESMF array
+        :type data: ctypes void_p
+        :param dtype: the type of the esmf buffer
+        :type dtype: ESMF.TypeKind
+        :param size: size of the the 1D ESMF allocation
+        :type size: integer
+        :return: Array object
+
+        :attribute contents: esmf array pointer
+        '''
+
+        # create a numpy array to point to the ESMF data allocation
+        buffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(data.contents),
+            np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
+        npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+
+        # create the new Field instance
+        obj = super(Array1D, cls).__new__(cls, size,
+                                         dtype=constants._ESMF2PythonType[dtype],
+                                         buffer=npdata)
+        # save objectwide metadata
+        obj.contents = data.contents
+
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        # set instance metadata
+        self.contents = getattr(obj, 'contents', None)
+        super(Array1D, self).__array_finalize__(obj)
+
 # class Array(np.ndarray):
 #
 #     def __new__(cls, data, dtype, shape):
@@ -143,42 +180,3 @@ class MaskedArray(ma.MaskedArray):
 #     def __array_wrap__(self, out_arr):
 #         return np.ndarray.__array_wrap__(self, out_arr)
 #
-# class Array1D(np.ndarray):
-#
-#     def __new__(cls, data, dtype, size):
-#         '''
-#         :param cls: Array class type
-#         :param data: buffer of fortran allocated ESMF array
-#         :type data: ctypes void_p
-#         :param dtype: the type of the esmf buffer
-#         :type dtype: ESMF.TypeKind
-#         :param size: size of the the 1D ESMF allocation
-#         :type size: integer
-#         :return: Array object
-#
-#         :attribute contents: esmf array pointer
-#         '''
-#
-#         # create a numpy array to point to the ESMF data allocation
-#         buffer = np.core.multiarray.int_asbuffer(
-#             ct.addressof(data.contents),
-#             np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
-#         npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
-#
-#         # create the new Field instance
-#         obj = super(Array1D, cls).__new__(cls, size,
-#                                          dtype=constants._ESMF2PythonType[dtype],
-#                                          buffer=npdata)
-#         # save objectwide metadata
-#         obj.contents = data.contents
-#
-#         return obj
-#
-#     def __array_finalize__(self, obj):
-#         if obj is None: return
-#         # set instance metadata
-#         self.contents = getattr(obj, 'contents', None)
-#         self.arraydata = getattr(obj, 'arraydata', None)
-#
-#     def __array_wrap__(self, out_arr):
-#         return np.ndarray.__array_wrap__(self, out_arr)

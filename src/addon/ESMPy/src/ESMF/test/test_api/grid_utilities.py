@@ -328,14 +328,14 @@ def initialize_field_grid_3d(field, domask=False):
 
     return field
 
-def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None, 
+def compute_mass_grid(valuefield, areafield, dofrac=False, fracfield=None,
                       uninitval=422397696.):
     '''
-    PRECONDITIONS: Two Fields have been created and initialized.  
-                   'valuefield' contains data values of a field built 
-                   on the cells of a grid, 'areafield' contains the 
-                   areas associated with the grid cells, and 
-                   'fracfield' contains the fractions of each cell 
+    PRECONDITIONS: Two Fields have been created and initialized.
+                   'valuefield' contains data values of a field built
+                   on the cells of a grid, 'areafield' contains the
+                   areas associated with the grid cells, and
+                   'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n

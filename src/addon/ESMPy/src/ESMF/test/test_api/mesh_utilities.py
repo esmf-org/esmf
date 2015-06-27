@@ -1376,10 +1376,10 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
 def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     '''
-    PRECONDITIONS: Two Fields have been created and initialized.  
-                   'valuefield' contains data values of a field built 
-                   on the cells of a mesh, 'areafield' contains the 
-                   areas associated with the mesh cells, and 
+    PRECONDITIONS: Two Fields have been created and initialized.
+                   'valuefield' contains data values of a field built
+                   on the cells of a mesh, 'areafield' contains the
+                   areas associated with the mesh cells, and
                    'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
                    'valuefield.  'dofrac' is a boolean value that gives 

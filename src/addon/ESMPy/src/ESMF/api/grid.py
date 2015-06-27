@@ -191,6 +191,9 @@ class Grid(object):
         # ctypes stuff
         self.struct = None
 
+        # for ocgis compatibility
+        self._ocgis = {}
+
         # type, kind, rank, etc.
         self.type = TypeKind.R8
         self.areatype = TypeKind.R8
@@ -199,7 +202,6 @@ class Grid(object):
         self.pole_dim = pole_dim
         self.coord_sys = coord_sys
         self.ndims = None # Applies to Gridspec only
-
 
         if num_peri_dims is None:
             self.num_peri_dims = 0
@@ -228,9 +230,6 @@ class Grid(object):
         self.mask = np.zeros(None)
         self.area = np.zeros(None)
         self.item_done = [None]
-
-        # create the correct grid
-        self.struct = None
 
         if from_file:
             # create default reg_decomp if it is not passed as an argument
@@ -390,8 +389,7 @@ class Grid(object):
                   "    mask = %r \n"
                   "    area = %r \n"
                   %
-                  (
-                   self.type,
+                  (self.type,
                    self.areatype,
                    self.rank,
                    self.num_peri_dims,

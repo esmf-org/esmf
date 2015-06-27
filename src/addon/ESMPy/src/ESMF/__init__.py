@@ -53,6 +53,7 @@ between interpolation weights and data values.
 from api.esmpymanager import *
 from api.grid import *
 from api.mesh import *
+from api.locstream import *
 from api.field import *
 from api.regrid import *
 from api.constants import _ESMF_VERSION

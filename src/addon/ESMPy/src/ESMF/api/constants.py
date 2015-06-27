@@ -9,6 +9,14 @@ _errmsg = 'Please check the log files (named "*ESMF_LogFile").'
 _ESMP_SUCCESS = 0
 # ESMF TYPEKINDS mapped to Python types
 _ESMF2PythonType = (0,0,0, np.int32, np.int64, np.float32, np.float64)
+_Python2ESMFType = {\
+                    int:3,
+                    np.int32:3,
+                    np.int64:4,
+                    float:5,
+                    np.float32:5,
+                    np.float64:6,
+                    }
 
 #### CONSTANTS ################################################################
 

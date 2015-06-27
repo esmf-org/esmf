@@ -10,6 +10,7 @@ from copy import copy
 
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
+from ESMF.api.locstream import *
 from ESMF.api.array import *
 import ESMF.api.constants as constants
 
@@ -28,7 +29,7 @@ class Field(MaskedArray):
         """
         Create a Field from a Grid or Mesh. \n
         Required Arguments: \n
-            grid: either a Grid or a Mesh with coordinates allocated on
+            grid: a Grid, Mesh or LocStream with coordinates allocated on
                   at least one stagger location. \n
         Optional Arguments: \n
             name: user friendly name for the Field. \n
@@ -140,13 +141,22 @@ class Field(MaskedArray):
                 raise MeshLocationNotSupported
 
             # call into ctypes layer
-            struct = ESMP_FieldCreate(grid, name, typekind, meshloc,
+            struct = ESMP_FieldCreateMesh(grid, name, typekind, meshloc,
                                       grid_to_field_map,
                                       ungridded_lower_bound,
                                       ungridded_upper_bound)
 
             # No masking on a Mesh
             mask = None
+        elif isinstance(grid, LocStream):
+            # call into ctypes layer
+            struct = ESMP_FieldCreateLocStream(grid, name, typekind,
+                                      grid_to_field_map,
+                                      ungridded_lower_bound,
+                                      ungridded_upper_bound)
+
+            if "ESMF:Mask" in grid:
+                mask = grid["ESMF:Mask"]
         else:
             raise FieldDOError
 
@@ -180,7 +190,8 @@ class Field(MaskedArray):
         obj.lower_bounds = lbounds
         obj.upper_bounds = ubounds
         obj.ndbounds = local_ndbounds
-        obj.grid = grid._preslice_(staggerloc)
+        if not isinstance(grid, LocStream):
+            obj.grid = grid._preslice_(staggerloc)
 
         # for arbitrary attributes
         obj.meta = {}
