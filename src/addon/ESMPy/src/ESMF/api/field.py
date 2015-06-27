@@ -181,20 +181,20 @@ class Field(MaskedArray):
                                            dtype=typekind, shape=ubounds-lbounds)
 
         # initialize field data
-        obj.name = name
-        obj.type = typekind
-        obj.rank = rank
-        obj.struct = struct
-        obj.xd = xd
-        obj.staggerloc = staggerloc
-        obj.lower_bounds = lbounds
-        obj.upper_bounds = ubounds
-        obj.ndbounds = local_ndbounds
+        obj._name = name
+        obj._type = typekind
+        obj._rank = rank
+        obj._struct = struct
+        obj._xd = xd
+        obj._staggerloc = staggerloc
+        obj._lower_bounds = lbounds
+        obj._upper_bounds = ubounds
+        obj._ndbounds = local_ndbounds
         if not isinstance(grid, LocStream):
-            obj.grid = grid._preslice_(staggerloc)
+            obj._grid = grid._preslice_(staggerloc)
 
-        # for arbitrary attributes
-        obj.meta = {}
+        # for arbitrary metadata
+        obj._meta = {}
 
         # register function with atexit
         import atexit
@@ -206,17 +206,65 @@ class Field(MaskedArray):
     def __array_finalize__(self, obj):
         super(Field, self).__array_finalize__(obj)
         if obj is None: return
-        self.name = getattr(obj, 'name', None)
-        self.type = getattr(obj, 'type', None)
-        self.rank = getattr(obj, 'rank', None)
-        self.struct = getattr(obj, 'struct', None)
-        self.xd = getattr(obj, 'xd', None)
-        self.staggerloc = getattr(obj, 'staggerloc', None)
-        self.lower_bounds = getattr(obj, 'lower_bounds', None)
-        self.upper_bounds = getattr(obj, 'upper_bounds', None)
-        self.ndbounds = getattr(obj, 'ndbounds', None)
-        self.grid = getattr(obj, 'grid', None)
-        self.meta = getattr(obj, 'meta', None)
+        self._name = getattr(obj, 'name', None)
+        self._type = getattr(obj, 'type', None)
+        self._rank = getattr(obj, 'rank', None)
+        self._struct = getattr(obj, 'struct', None)
+        self._xd = getattr(obj, 'xd', None)
+        self._staggerloc = getattr(obj, 'staggerloc', None)
+        self._lower_bounds = getattr(obj, 'lower_bounds', None)
+        self._upper_bounds = getattr(obj, 'upper_bounds', None)
+        self._ndbounds = getattr(obj, 'ndbounds', None)
+        self._grid = getattr(obj, 'grid', None)
+        self._meta = getattr(obj, 'meta', None)
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def rank(self):
+        return self._rank
+
+    @property
+    def xd(self):
+        return self._xd
+
+    @property
+    def staggerloc(self):
+        return self._staggerloc
+
+    @property
+    def lower_bounds(self):
+        return self._lower_bounds
+
+    @property
+    def upper_bounds(self):
+        return self._upper_bounds
+
+    @property
+    def ndbounds(self):
+        return self._ndbounds
+
+    @property
+    def grid(self):
+        return self._grid
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def finalized(self):
+        return self._finalized
 
     # manual destructor
     def destroy(self):
@@ -289,16 +337,16 @@ class Field(MaskedArray):
 
     def _merge_(self, obj):
         # initialize field data
-        obj.struct = self.struct
-        obj.name = self.name
-        obj.rank = self.rank
-        obj.xd = self.xd
-        obj.type = self.type
-        obj.staggerloc = self.staggerloc
-        obj.lower_bounds = self.lower_bounds
-        obj.upper_bounds = self.upper_bounds
-        obj.ndbounds = self.ndbounds
-        obj.meta = self.meta
+        obj._struct = self.struct
+        obj._name = self.name
+        obj._rank = self.rank
+        obj._xd = self.xd
+        obj._type = self.type
+        obj._staggerloc = self.staggerloc
+        obj._lower_bounds = self.lower_bounds
+        obj._upper_bounds = self.upper_bounds
+        obj._ndbounds = self.ndbounds
+        obj._meta = self.meta
 
         # set slice to be finalized so it doesn't call the ESMF garbage collector
         obj._finalized = True
@@ -320,10 +368,10 @@ class Field(MaskedArray):
             slc_grid = [slc_field[-1*x] for x in range(self.rank-self.xd, 0, -1)]
         else:
             slc_grid = slc_field
-        ret.grid = self.grid._slice_onestagger_(slc_grid)
+        ret._grid = self.grid._slice_onestagger_(slc_grid)
 
         # upper bounds are "sliced" by taking the shape of the data
-        ret.upper_bounds = np.array(ret.data.shape, dtype=np.int32)
+        ret._upper_bounds = np.array(ret.data.shape, dtype=np.int32)
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
         return ret

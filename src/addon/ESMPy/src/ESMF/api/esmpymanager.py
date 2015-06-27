@@ -106,12 +106,19 @@ class Manager(object):
 
             # set information related to the ESMF Virtual Machine
             vm = ESMP_VMGetGlobal()
-            self.local_pet, self.pet_count = ESMP_VMGet(vm)
+            self._local_pet, self._pet_count = ESMP_VMGet(vm)
 
             # Increase frequency of log buffering upon user request
             ESMP_LogSet(debug)
         return
 
+    @property
+    def local_pet(self):
+        return self._local_pet
+
+    @property
+    def pet_count(self):
+        return self._pet_count
 
     def __del__(self):
         '''

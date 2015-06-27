@@ -130,22 +130,82 @@ class Regrid(object):
                            srcFracField=src_frac_field,
                            dstFracField=dst_frac_field)
         
-        self.srcfield = srcfield
-        self.dstfield = dstfield
-        self.src_mask_values = src_mask_values
-        self.dst_mask_values = dst_mask_values
-        self.regrid_method = regrid_method
-        self.pole_method = pole_method
-        self.regrid_pole_npoints = regrid_pole_npoints
-        self.norm_type = norm_type
-        self.unmapped_action = unmapped_action
-        self.ignore_degenerate = ignore_degenerate
-        self.src_frac_field = src_frac_field
-        self.dst_frac_field = dst_frac_field
+        self._srcfield = srcfield
+        self._dstfield = dstfield
+        self._src_mask_values = src_mask_values
+        self._dst_mask_values = dst_mask_values
+        self._regrid_method = regrid_method
+        self._pole_method = pole_method
+        self._regrid_pole_npoints = regrid_pole_npoints
+        self._norm_type = norm_type
+        self._unmapped_action = unmapped_action
+        self._ignore_degenerate = ignore_degenerate
+        self._src_frac_field = src_frac_field
+        self._dst_frac_field = dst_frac_field
+
+        # for arbitrary metadata
+        self._meta = {}
 
         # regist with atexit
         import atexit; atexit.register(self.__del__)
         self._finalized = False
+
+    @property
+    def srcfield(self):
+        return self._srcfield
+
+    @property
+    def dstfield(self):
+        return self._dstfield
+
+    @property
+    def src_mask_values(self):
+        return self._src_mask_values
+
+    @property
+    def dst_mask_values(self):
+        return self._dst_mask_values
+
+    @property
+    def regrid_method(self):
+        return self._regrid_method
+
+    @property
+    def pole_method(self):
+        return self._pole_method
+
+    @property
+    def regrid_pole_npoints(self):
+        return self._regrid_pole_npoints
+
+    @property
+    def norm_type(self):
+        return self._norm_type
+
+    @property
+    def unmapped_action(self):
+        return self._unmapped_action
+
+    @property
+    def ignore_degenerate(self):
+        return self._ignore_degenerate
+
+    @property
+    def src_frac_field(self):
+        return self._src_frac_field
+
+    @property
+    def dst_frac_field(self):
+        return self._dst_frac_field
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def finalized(self):
+        return self._finalized
+
 
     def __call__(self, srcfield, dstfield,
                  zero_region=None):
@@ -225,4 +285,3 @@ class Regrid(object):
                    self.dstfield))
 
         return string
-    
