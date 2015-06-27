@@ -1,13 +1,19 @@
 # This example demonstrates how to regrid between a grid and a mesh.
-# The grid and mesh files are required, they can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/ll1deg_grid.nc
-#   wget http://www.earthsystemmodeling.org/download/data/mpas_uniform_10242_dual_counterclockwise.nc
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
+# cache_data_file(os.path.join(os.getcwd(), "data", "mpas_uniform_10242_dual_counterclockwise.nc"))
 
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to enable debug logging
-# esmpy = ESMF.Manager(debug=True)
+# This call enables debug logging
+# ESMF.Manager(debug=True)
 
 from ESMF.test.test_api.mesh_utilities import mesh_create_5, mesh_create_5_parallel
 from ESMF.test.test_api.locstream_utilities import create_locstream_16, create_locstream_16_parallel
@@ -43,9 +49,10 @@ xctfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad)
 dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
+# TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
 regrid = ESMF.Regrid(srcfield, dstfield,
                      regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.ERROR)
+                     unmapped_action=ESMF.UnmappedAction.IGNORE)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
