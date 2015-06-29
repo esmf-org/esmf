@@ -10,7 +10,7 @@ from ESMF.api.esmpymanager import *
 from ESMF.api.array import Array1D
 import ESMF.api.constants as constants
 from copy import copy
-from ESMF.util.helpers import get_formatted_slice
+from ESMF.util.slicing import get_formatted_slice
 
 
 #### LocStream class #########################################################
