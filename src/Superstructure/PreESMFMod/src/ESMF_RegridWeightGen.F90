@@ -80,6 +80,8 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!#define DOBENCHMARK
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridWeightGenFile"
@@ -323,7 +325,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: useSrcMask, useDstMask
     logical            :: useSrcCorner, useDstCorner
     integer            :: commandbuf(6)
-    !real(ESMF_KIND_R8) :: starttime, endtime
+#ifdef DOBENCHMARK
+    real(ESMF_KIND_R8) :: starttime, endtime, totaltime
+    real(ESMF_KIND_R8), pointer :: sendbuf(:), recvbuf(:)
+    type(ESMF_RouteHandle) :: rhandle
+    real(ESMF_KIND_R8), pointer :: fptr1D(:), fptr2D(:,:)
+#endif
     type(ESMF_NormType_Flag):: localNormType
     logical            :: localIgnoreDegenerate
 
@@ -1126,6 +1133,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+#ifdef DOBENCHMARK
+    call ESMF_VMLogMemInfo('Before ESMF_FieldRegridStore',rc=rc)
+#endif
+
     ! Create Frac Fields if conservative
     if (isConserve) then
       if (srcIsReg) then
@@ -1169,8 +1180,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    !call ESMF_VMBarrier(vm)
-    !call ESMF_VMWtime(starttime, rc=localrc)
+#ifdef DOBENCHMARK
+    call ESMF_VMBarrier(vm)
+    call ESMF_VMWtime(starttime, rc=localrc)
+#endif
     maskvals(1) = 0
     if (localPoleNPnts <= 0) localPoleNPnts = 1
 
@@ -1246,6 +1259,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+#ifdef DOBENCHMARK
+    call ESMF_VMBarrier(vm)
+    call ESMF_VMWtime(endtime, rc=localrc)
+    call ESMF_VMLogMemInfo('After ESMF_FieldRegridStore',rc=rc)
+    ! collect all the timing information at PET0
+    allocate(sendbuf(1))
+    sendbuf(1)=endtime-starttime
+    if (PetNo == 0) then
+      allocate(recvbuf(PetCnt))
+    endif
+    call ESMF_VMGather(vm, sendBuf, recvBuf, 1, 0, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (PetNo==0) then
+       print *, "Time for ESMF_FieldRegridStore(max/avg): ", MAXVAL(recvbuf), SUM(recvbuf)/PetCnt, "seconds"
+    endif
+#endif
+    !print *, "Time for ESMF_FieldFieldRegridStore: ", (endtime-starttime)*1000.0, "msecs"
     ! print *, PetNo, size(factorList), factorIndexList(1,1), factorIndexList(2,1)
     ! Compute areas if conservative
     ! Area only valid on PET 0 right now, when parallel Array
@@ -1462,8 +1494,117 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    !call ESMF_VMBarrier(vm)
-    !call ESMF_VMWtime(endtime, rc=localr
+#ifdef DOBENCHMARK
+    call ESMF_VMLogMemInfo('2nd Before ESMF_FieldRegridStore',rc=rc)
+    call ESMF_VMBarrier(vm)
+    call ESMF_VMWtime(starttime, rc=localrc)
+    if (useSrcMask .and. useDstMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
+	      routehandle=rhandle, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (useSrcMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      srcMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
+	      routehandle=rhandle, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (useDstMask) then
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      dstMaskValues = maskvals, &
+	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
+	      routehandle=rhandle, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else	
+      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	      unmappedaction=localUnmappedaction, &
+	      ignoreDegenerate=localIgnoreDegenerate, &
+	      routehandle=rhandle, &
+        regridmethod = localRegridMethod, &
+        polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+        normType=localNormType, &
+	      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    call ESMF_VMBarrier(vm)
+    call ESMF_VMWtime(endtime, rc=localrc)
+    call ESMF_VMLogMemInfo('2nd After ESMF_FieldRegridStore',rc=rc)
+    ! collect all the timing information at PET0
+    sendbuf(1)=endtime-starttime
+    call ESMF_VMGather(vm, sendBuf, recvBuf, 1, 0, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (PetNo==0) then
+       print *, "Time for ESMF_FieldRegridStore with rhandle(max/avg): ", MAXVAL(recvbuf), SUM(recvbuf)/PetCnt, "seconds"
+    endif
+
+    ! Now, do 10 runs of FieldRegrid and find average timing (exclude the first one)
+    do i=1,10
+        if (srcIsReg) then
+           call ESMF_FieldGet(srcField, farrayptr=fptr2D, rc=localrc)            
+  	   if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	   ! assign random value
+           fptr2D=i*257.4
+        else
+           call ESMF_FieldGet(srcField, farrayptr=fptr1D, rc=localrc)
+  	   if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+	   ! assign random value
+           call random_seed(PUT=(/i+PetNo/))
+           call random_number(fptr1d(1))
+           fptr1d=i*257.4
+        endif
+        call ESMF_VMWtime(starttime, rc=localrc)
+	call ESMF_FieldRegrid(srcField,dstField,rhandle,rc=localrc)
+	if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_VMWtime(endtime, rc=localrc)
+	if (i==1) then
+	  totaltime=0
+        else
+          totaltime=totaltime+endtime-starttime
+        endif
+     enddo	
+    sendbuf(1)=totaltime/9
+    call ESMF_VMGather(vm, sendBuf, recvBuf, 1, 0, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (PetNo==0) then
+       print *, "Time for ESMF_FieldRegrid(max/avg): ", MAXVAL(recvbuf)*1000, SUM(recvbuf)*1000/PetCnt, "mseconds"
+    deallocate(sendbuf, recvbuf)         
+    endif
+#endif
+    
     ! Get rid of conservative arrays
     if (isConserve) then
       if (PetNo == 0) then
