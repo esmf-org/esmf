@@ -114,22 +114,33 @@ class Field(MaskedArray):
                                           ungridded_upper_bound)
 
             # set the grid mask
-            if (grid.item_done[staggerloc][GridItem.MASK]):
+            domask = False
+            if grid._singlestagger:
+                if (grid.mask is not None):
+                    domask = True
+            else:
+                if (grid.mask[staggerloc] is not None):
+                    domask = True
+
+            if domask:
                 lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
                 # verify that grid mask is the same shape as the extra field dimensions
-                if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd + rank] - lbounds[xd:xd + rank])):
-                    # initialize the mask to all unmasked values
-                    mask = np.ones(ubounds - lbounds, dtype=np.int32)
-                    # reset the mask with integer values according to what is in the grid mask,
-                    # taking care to propagate masked values through the extra field dimensions
-                    if grid.rank == 2:
-                        mask[..., :, :] = grid.mask[staggerloc]
-                    elif grid.rank == 3:
-                        mask[..., :, :, :] = grid.mask[staggerloc]
-                    else:
-                        raise IndexError("Grid with rank less than 2 or greater than 3 is not allowed")
+                # if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd + rank] - lbounds[xd:xd + rank])):
+                # initialize the mask to all unmasked values
+                mask = np.ones(ubounds - lbounds, dtype=np.int32)
+                # reset the mask with integer values according to what is in the grid mask,
+                # taking care to propagate masked values through the extra field dimensions
+                if grid.rank == 2:
+                    mask[..., :, :] = grid.mask[staggerloc]
+                elif grid.rank == 3:
+                    mask[..., :, :, :] = grid.mask[staggerloc]
                 else:
-                    raise IndexError("grid mask bounds do not match field bounds")
+                    raise IndexError("Grid with rank less than 2 or greater than 3 is not allowed")
+                # else:
+                #     raise IndexError(
+                #         "grid mask bounds do not match field bounds: grid.mask.shape != ubounds - lbounds (" \
+                #         + str(grid.mask[staggerloc].shape) + " != "
+                #         + str(ubounds[xd:xd + rank] - lbounds[xd:xd + rank]) + ")")
 
         elif isinstance(grid, Mesh):
             # deal with the wacky ESMF node/element convention
@@ -190,8 +201,10 @@ class Field(MaskedArray):
         obj._lower_bounds = lbounds
         obj._upper_bounds = ubounds
         obj._ndbounds = local_ndbounds
-        if not isinstance(grid, LocStream):
+        if not grid.singlestagger:
             obj._grid = grid._preslice_(staggerloc)
+        else:
+            obj._grid = grid
 
         # for arbitrary metadata
         obj._meta = {}

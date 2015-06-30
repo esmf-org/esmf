@@ -55,6 +55,9 @@ class LocStream(dict):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
+        # set the single stagger flag
+        self._singlestagger = True
+
         super(LocStream, self).__init__()
 
     # manual destructor
@@ -213,3 +216,8 @@ class LocStream(dict):
     @property
     def upper_bounds(self):
         return self._upper_bounds
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+

@@ -218,10 +218,6 @@ class TestRegrid(TestBase):
         dstfield = ESMF.Field(dstgrid, name='dstfield')
         exactfield = ESMF.Field(dstgrid, name='exactfield')
 
-        # create the area fields
-        srcareafield = ESMF.Field(srcgrid, name='srcareafield')
-        dstareafield = ESMF.Field(dstgrid, name='dstareafield')
-
         # create the fraction fields
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
@@ -240,9 +236,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_grid(srcfield, srcareafield,
+        srcmass = compute_mass_grid(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, exact_field, 10E-2, 10e-15, parallel=parallel,
@@ -265,10 +261,8 @@ class TestRegrid(TestBase):
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
-        srcareafield = ESMF.Field(srcgrid, name='srcareafield')
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
-        dstareafield = ESMF.Field(dstgrid, name='dstareafield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
         exactfield = ESMF.Field(dstgrid, name='exactfield')
 
@@ -285,9 +279,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_grid(srcfield, srcareafield,
+        srcmass = compute_mass_grid(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 10E-03, 10E-16, parallel=parallel,
@@ -309,10 +303,8 @@ class TestRegrid(TestBase):
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
-        srcareafield = ESMF.Field(srcgrid, name='srcareafield')
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
-        dstareafield = ESMF.Field(dstgrid, name='dstareafield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
         exactfield = ESMF.Field(dstgrid, name='exactfield')
 
@@ -330,9 +322,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_grid(srcfield, srcareafield,
+        srcmass = compute_mass_grid(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
@@ -357,10 +349,8 @@ class TestRegrid(TestBase):
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
-        srcareafield = ESMF.Field(srcgrid, name='srcareafield')
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
-        dstareafield = ESMF.Field(dstgrid, name='dstareafield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
         exactfield = ESMF.Field(dstgrid, name='exactfield')
 
@@ -378,9 +368,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_grid(srcfield, srcareafield,
+        srcmass = compute_mass_grid(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, dstfield2, 10E-3, 10E-16, parallel=parallel,
@@ -410,13 +400,11 @@ class TestRegrid(TestBase):
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
         srcfracfield = ESMF.Field(mesh, name='srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, name='srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # make gridded fields
         exactfield = ESMF.Field(grid, name='exactfield')
         dstfield = ESMF.Field(grid, name='dstfield')
         dstfracfield = ESMF.Field(grid, name='dstfracfield')
-        dstareafield = ESMF.Field(grid, name='dstareafield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn,
@@ -433,9 +421,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+        srcmass = compute_mass_mesh(srcfield, dofrac=True,
                                     fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
@@ -464,10 +452,8 @@ class TestRegrid(TestBase):
 
         # create Fields
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, name='srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
         srcfracfield = ESMF.Field(mesh, name='srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
         dstfield = ESMF.Field(grid, name='dstfield')
-        dstareafield = ESMF.Field(grid, name='dstareafield')
         dstfracfield = ESMF.Field(grid, name='dstfracfield')
         exactfield = ESMF.Field(grid, name='exactfield')
 
@@ -485,9 +471,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield,
+        srcmass = compute_mass_mesh(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield,
+        dstmass = compute_mass_grid(dstfield,
                                     dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
@@ -599,10 +585,8 @@ class TestRegrid(TestBase):
 
         # create ESMP_Field objects on the Meshes
         srcfield = ESMF.Field(srcmesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(srcmesh, name='srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
         srcfracfield = ESMF.Field(srcmesh, name='srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
         dstfield = ESMF.Field(dstmesh, name='dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        dstareafield = ESMF.Field(dstmesh, name='dstareafield', meshloc=ESMF.MeshLoc.ELEMENT)
         dstfracfield = ESMF.Field(dstmesh, name='dstfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
         exactfield = ESMF.Field(dstmesh, name='exactfield', meshloc=ESMF.MeshLoc.ELEMENT)
 
@@ -623,9 +607,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield,
+        srcmass = compute_mass_mesh(srcfield,
                                     dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass_mesh(dstfield, dstareafield,
+        dstmass = compute_mass_mesh(dstfield,
                                     dofrac=True, fracfield=dstfracfield)
 
         # compare results and output PASS or FAIL
@@ -656,13 +640,11 @@ class TestRegrid(TestBase):
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
         srcfracfield = ESMF.Field(mesh, name='srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, name='srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # make gridded fields
         exactfield = ESMF.Field(grid, name='exactfield')
         dstfield = ESMF.Field(grid, name='dstfield')
         dstfracfield = ESMF.Field(grid, name='dstfracfield')
-        dstareafield = ESMF.Field(grid, name='dstareafield')
 
         # initialize the Fields to an analytic function
         # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -680,9 +662,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+        srcmass = compute_mass_mesh(srcfield, dofrac=True,
                                     fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15, parallel=parallel,
@@ -706,13 +688,11 @@ class TestRegrid(TestBase):
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
         srcfracfield = ESMF.Field(mesh, name='srcfracfield', meshloc=ESMF.MeshLoc.ELEMENT)
-        srcareafield = ESMF.Field(mesh, name='srcareafield', meshloc=ESMF.MeshLoc.ELEMENT)
 
         # make gridded fields
         exactfield = ESMF.Field(grid, name='exactfield')
         dstfield = ESMF.Field(grid, name='dstfield')
         dstfracfield = ESMF.Field(grid, name='dstfracfield')
-        dstareafield = ESMF.Field(grid, name='dstareafield')
 
         # initialize the Fields to an analytic function
         # srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)
@@ -730,9 +710,9 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield)
 
         # compute the mass
-        srcmass = compute_mass_mesh(srcfield, srcareafield, dofrac=True,
+        srcmass = compute_mass_mesh(srcfield, dofrac=True,
                                     fracfield=srcfracfield)
-        dstmass = compute_mass_grid(dstfield, dstareafield)
+        dstmass = compute_mass_grid(dstfield)
 
         # compare results and output PASS or FAIL
         meanrel, csrvrel = compare_fields_grid(dstfield, exactfield, 80E-1, 10E-15,
