@@ -46,7 +46,7 @@ class TestField(TestBase):
         :type array: np.array of dtype=np.int32
         '''
 
-        grid = Grid(array, coord_sys=CoordSys.CART)
+        grid = Grid(array, coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
 
         mask = grid.add_item(GridItem.MASK)
         mask[:] = 1
@@ -245,6 +245,21 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
     # TODO: 3d Field mesh?
+
+    # copy constructorish
+    def test_field_create_from_gridfield(self):
+        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        self.examine_field_attributes(field)
+        data = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
+        field.data[...] = data
+
+        field2 = Field(field.grid)
+        self.examine_field_attributes(field2)
+        # field1 was created with ungridded dimensions, but field2 was not
+        field2.data[...] = data[0,0,...]
+
+        assert np.all(field.grid.coords == field2.grid.coords)
+        assert np.all(field.data[0,0,...] == field2.data)
 
     def test_field_grid_copy(self):
         field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
