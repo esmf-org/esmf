@@ -626,7 +626,8 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int num_elemConn=expected_conn_size;   
 #endif
 
-  int regridConserve = 0; // what default to set?
+  int regridConserve = 1; // Set this to 1 to force the frac field to be 
+                          // added (required for conservative regridding.
 
   InterfaceInt *elemMaskII = NULL;
   if (elemMask) {
