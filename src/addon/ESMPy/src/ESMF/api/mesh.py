@@ -14,7 +14,7 @@ from ESMF.util.decorators import initialize
 
 from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
-from ESMF.util.helpers import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
+from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
 import warnings
 
@@ -121,51 +121,52 @@ class Mesh(object):
                 warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
         
         # ctypes stuff
-        self.struct = None
+        self._struct = None
     
         # bookkeeping
-        self.size = [None, None]
-        self.size_local = [None, None]
-        self.parametric_dim = None
-        self.spatial_dim = None
-        self.rank = 1
-
-        # for arbitrary attributes
-        self.meta = {}
-
+        self._size = [None, None]
+        self._size_local = [None, None]
+        self._parametric_dim = None
+        self._spatial_dim = None
+        self._rank = 1
+        
         if not fromfile:
             # initialize not fromfile variables
-            self.element_count = None
-            self.element_ids = None
-            self.element_types = None 
-            self.element_conn = None
-            self.element_mask = None
-            self.element_area = None
-            self.node_count = None
-            self.node_ids = None
-            self.node_coords = None
-            self.node_owners = None
+            self._element_count = None
+            self._element_ids = None
+            self._element_types = None
+            self._element_conn = None
+            self._element_mask = None
+            self._element_area = None
+            self._element_coords = None
+            self._node_count = None
+            self._node_ids = None
+            self._node_coords = None
+            self._node_owners = None
             
             # call into ctypes layer
-            self.struct = ESMP_MeshCreate(parametricDim=parametric_dim, 
+            self._struct = ESMP_MeshCreate(parametricDim=parametric_dim,
                                           spatialDim=spatial_dim)
-            self.parametric_dim = parametric_dim
-            self.spatial_dim = spatial_dim
+            self._parametric_dim = parametric_dim
+            self._spatial_dim = spatial_dim
         else:
             # call into ctypes layer
-            self.struct = ESMP_MeshCreateFromFile(filename, filetype,
+            self._struct = ESMP_MeshCreateFromFile(filename, filetype,
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 
                                                   mask_flag, varname)
             # get the sizes
-            self.size[node] = ESMP_MeshGetLocalNodeCount(self)
-            self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
-            self.size[element] = ESMP_MeshGetLocalElementCount(self)
-            self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
+            self._size[node] = ESMP_MeshGetLocalNodeCount(self)
+            self._size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+            self._size[element] = ESMP_MeshGetLocalElementCount(self)
+            self._size_local[element] = ESMP_MeshGetOwnedElementCount(self)
 
             # link the coords here for meshes created from file, in add_elements for others
             self._link_coords_()
             # NOTE: parametric_dim is set in the _link_coords_ call for meshes created from file
+
+        # for arbitrary metadata
+        self._meta = {}
 
         # register with atexit
         import atexit; atexit.register(self.__del__)
@@ -173,6 +174,95 @@ class Mesh(object):
 
         # set the single stagger flag
         self._singlestagger = False
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def size_local(self):
+        return self._size_local
+
+    @property
+    def parametric_dim(self):
+        return self._parametric_dim
+
+    @property
+    def spatial_dim(self):
+        return self._spatial_dim
+
+    @property
+    def rank(self):
+        return self._rank
+
+    @property
+    def element_count(self):
+        return self._element_count
+
+    @property
+    def element_ids(self):
+        return self._element_ids
+
+    @property
+    def element_types(self):
+        return self._element_types
+
+    @property
+    def element_conn(self):
+        return self._element_conn
+
+    @property
+    def element_mask(self):
+        return self._element_mask
+
+    @property
+    def element_area(self):
+        return self._element_area
+
+    @property
+    def element_coords(self):
+        return self._element_coords
+
+    @property
+    def node_count(self):
+        return self._node_count
+
+    @property
+    def node_ids(self):
+        return self._node_ids
+
+    @property
+    def node_coords(self):
+        return self._node_coords
+
+    @property
+    def node_owners(self):
+        return self._node_owners
+
+    @property
+    def coords(self):
+        return self._coords
+
+    @property
+    def coords_done(self):
+        return self._coords_done
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
 
     # manual destructor
     def destroy(self):
@@ -239,23 +329,23 @@ class Mesh(object):
         ret = self._copy_()
 
         # TODO: cannot get element coordinates, so the slice has them set to None
-        ret.coords = [[get_none_or_slice(get_none_or_slice(get_none_or_slice(self.coords, 0), coorddim), slc) for
+        ret._coords = [[get_none_or_slice(get_none_or_slice(get_none_or_slice(self.coords, 0), coorddim), slc) for
                        coorddim in range(self.parametric_dim)], [None for x in range(self.parametric_dim)]]
 
         # size is "sliced" by taking the shape of the coords
-        ret.size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
-        ret.size_local = ret.size
+        ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
+        ret._size_local = ret.size
 
         return ret
 
     def _preslice_(self, meshloc):
         # to be used to slice off one stagger location of a grid for a specific field
         ret = self._copy_()
-        ret.coords = get_none_or_slice(self.coords, meshloc)
+        ret._coords = get_none_or_slice(self.coords, meshloc)
 
         # preslice the size to only return the meshloc of this field
-        ret.size = get_none_or_slice(self.size, meshloc)
-        ret.size_local = ret.size
+        ret._size = get_none_or_slice(self.size, meshloc)
+        ret._size_local = ret.size
 
         ret._singlestagger = True
 
@@ -269,11 +359,11 @@ class Mesh(object):
         slc = get_formatted_slice(slc, self.rank)
         ret = self._copy_()
 
-        ret.coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.parametric_dim)]
+        ret._coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.parametric_dim)]
 
         # size is "sliced" by taking the shape of the coords
-        ret.size = get_none_or_bound_list(ret.coords, 0)
-        ret.size_local = ret.size
+        ret._size = get_none_or_bound_list(ret.coords, 0)
+        ret._size_local = ret.size
 
         return ret
 
@@ -282,7 +372,8 @@ class Mesh(object):
                      element_types,
                      element_conn,
                      element_mask=None,
-                     element_area=None):
+                     element_area=None,
+                     element_coords=None):
         """
         Add elements to a Mesh, this must be done after adding nodes. \n
         Required Arguments: \n
@@ -322,39 +413,50 @@ class Mesh(object):
                 elements. \n
                     type: numpy.array \n
                     shape: (element_count, 1) \n
+            element_coords: a numpy array (internally cast to 
+                dtype=numpy.float64) to specify the coordinates of the
+                elements. \n
+                    type: numpy.array \n
+                    shape: (element_count, 1) \n
         Returns: \n
             None \n
         """
 
         # initialize not fromfile variables
-        self.element_count = element_count
+        self._element_count = element_count
         if element_ids.dtype is not np.int32:
-            self.element_ids = np.array(element_ids, dtype=np.int32)
+            self._element_ids = np.array(element_ids, dtype=np.int32)
         else:
-            self.element_ids = element_ids
+            self._element_ids = element_ids
         if element_types.dtype is not np.int32:
-            self.element_types = np.array(element_types, dtype=np.int32)
+            self._element_types = np.array(element_types, dtype=np.int32)
         else:
-            self.element_types = element_types
+            self._element_types = element_types
         if element_conn.dtype is not np.int32:
-            self.element_conn = np.array(element_conn, dtype=np.int32)
+            self._element_conn = np.array(element_conn, dtype=np.int32)
         else:
-            self.element_conn = element_conn
+            self._element_conn = element_conn
         if element_mask is not None:
             if element_mask.dtype is not np.int32:
-                self.element_mask = np.array(element_mask, dtype=np.int32)
+                self._element_mask = np.array(element_mask, dtype=np.int32)
             else:
-                self.element_mask = element_mask
+                self._element_mask = element_mask
         if element_area is not None:
             if element_area.dtype is not np.float64:
-                self.element_area = np.array(element_area, dtype=np.float64)
+                self._element_area = np.array(element_area, dtype=np.float64)
             else:
-                self.element_area = element_area
+                self._element_area = element_area
+        if element_coords is not None:
+            if element_coords.dtype is not np.float64:
+                self.element_coords = np.array(element_coords, dtype=np.float64)
+            else:
+                self.element_coords = element_coords
 
         # call into ctypes layer
         ESMP_MeshAddElements(self, self.element_count, self.element_ids, 
                              self.element_types, self.element_conn, 
-                             self.element_mask, self.element_area)
+                             self.element_mask, self.element_area,
+                             self.element_coords)
         
         # get the sizes
         self.size[node] = ESMP_MeshGetLocalNodeCount(self)
@@ -395,19 +497,19 @@ class Mesh(object):
             None \n
         """
 
-        self.node_count = node_count
+        self._node_count = node_count
         if node_ids.dtype is not np.int32:
-            self.node_ids = np.array(node_ids, dtype=np.int32)
+            self._node_ids = np.array(node_ids, dtype=np.int32)
         else:
-            self.node_ids = node_ids
+            self._node_ids = node_ids
         if node_coords.dtype is not np.float64:
-            self.node_coords = np.array(node_coords, dtype=np.float64)
+            self._node_coords = np.array(node_coords, dtype=np.float64)
         else:
-            self.node_coords = node_coords
+            self._node_coords = node_coords
         if node_owners.dtype is not np.int32:
-            self.node_owners = np.array(node_owners, dtype=np.int32)
+            self._node_owners = np.array(node_owners, dtype=np.int32)
         else:
-            self.node_owners = node_owners
+            self._node_owners = node_owners
  
         # call into ctypes layer
         ESMP_MeshAddNodes(self, self.node_count, self.node_ids, 
@@ -489,13 +591,13 @@ class Mesh(object):
         coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
 
         if not self.parametric_dim:
-            self.parametric_dim = num_dims
+            self._parametric_dim = num_dims
 
         # initialize the coordinates structures
         # index order is [meshloc][coord_dim]
-        self.coords = [[None for a in range(num_dims)] \
+        self._coords = [[None for a in range(num_dims)] \
                         for b in range(2)]
-        self.coords_done = [[False for a in range(num_dims)] \
+        self._coords_done = [[False for a in range(num_dims)] \
                              for b in range(2)]
 
         dim1 = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
@@ -505,13 +607,13 @@ class Mesh(object):
             dim3 = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
 
         # alias the coordinates to a grid property
-        self.coords[meshloc][0] = dim1.view()
-        self.coords[meshloc][1] = dim2.view()
+        self._coords[meshloc][0] = dim1.view()
+        self._coords[meshloc][1] = dim2.view()
         if num_dims == 3:
-            self.coords[meshloc][2] = dim3.view()
+            self._coords[meshloc][2] = dim3.view()
 
         # set flag to tell these coordinate has been aliased
-        self.coords_done[meshloc][0] = True
-        self.coords_done[meshloc][1] = True
+        self._coords_done[meshloc][0] = True
+        self._coords_done[meshloc][1] = True
         if num_dims == 3:
-            self.coords_done[meshloc][2] = True
+            self._coords_done[meshloc][2] = True

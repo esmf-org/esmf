@@ -1374,13 +1374,9 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     return field
 
-def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
+def compute_mass_mesh(valuefield, dofrac=False, fracfield=None):
     '''
-    PRECONDITIONS: Two Fields have been created and initialized.  
-                   'valuefield' contains data values of a field built 
-                   on the cells of a mesh, 'areafield' contains the 
-                   areas associated with the mesh cells, and 
-                   'fracfield' contains the fractions of each cell
+    PRECONDITIONS: 'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
@@ -1388,6 +1384,9 @@ def compute_mass_mesh(valuefield, areafield, dofrac=False, fracfield=None):
     RETURN VALUES: float :: mass \n
     '''
     mass = 0.0
+    # mesh area field must be built on elements
+    areafield = ESMF.Field(valuefield.grid, name='areafield',
+                           meshloc=ESMF.MeshLoc.ELEMENT)
     areafield.get_area()
     if dofrac:
         mass = np.sum(areafield.data * valuefield.data * fracfield.data)

@@ -17,7 +17,7 @@ class TestField(TestBase):
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(grid_or_mesh, name=name)
+        field = Field(grid_or_mesh, name=name)
 
         return field
 
@@ -46,15 +46,17 @@ class TestField(TestBase):
         :type array: np.array of dtype=np.int32
         '''
 
-        grid = Grid(array, coord_sys=CoordSys.CART)
+        grid = Grid(array, coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
 
         mask = grid.add_item(GridItem.MASK)
         mask[:] = 1
-        mask[0,1] = 0
+        mask[0, 1] = 0
 
-        field = Field(grid, ndbounds=[2,5], mask_values=[0])
+        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
 
-        assert(np.all(field.mask[:,:,0,1] == True))
+        assert(np.all(field.mask[:, :, 0, 1]))
+
+        field.data[...] = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
 
         return field
 
@@ -244,6 +246,31 @@ class TestField(TestBase):
 
     # TODO: 3d Field mesh?
 
+    # copy constructorish
+    def test_field_create_from_gridfield(self):
+        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        self.examine_field_attributes(field)
+        data = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
+        field.data[...] = data
+
+        field2 = Field(field.grid)
+        self.examine_field_attributes(field2)
+        # field1 was created with ungridded dimensions, but field2 was not
+        field2.data[...] = data[0,0,...]
+
+        assert np.all(field.grid.coords == field2.grid.coords)
+        assert np.all(field.data[0,0,...] == field2.data)
+
+    def test_field_grid_copy(self):
+        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        self.examine_field_attributes(field)
+
+        field2 = field._copy_()
+        self.examine_field_attributes(field2)
+
+        assert np.all(field.grid.coords == field2.grid.coords)
+        assert np.all(field.data == field2.data)
+
     # don't change this function, it's used in the documentation
     def create_field(grid_or_mesh, name):
         '''
@@ -371,6 +398,21 @@ class TestField(TestBase):
             field2.data[i] = 10
 
         assert (field.struct.ptr != field2.struct.ptr)
+
+    def test_field_locstream_mask(self):
+        # LocStream creation and simple validation
+        locstream = LocStream(5, name="Test LocStream")
+        assert locstream.size == 5
+
+        locstream["ESMF:X"] = [1, 2, 3, 4, 5]
+        locstream["ESMF:Y"] = [7, 7, 7, 7, 7]
+        locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
+
+        field = Field(locstream, mask_values=[1])
+        field.data[...] = 7
+        self.examine_field_attributes(field)
+
+        print field
 
     def test_field_switchedindices_grid(self):
         # create grid

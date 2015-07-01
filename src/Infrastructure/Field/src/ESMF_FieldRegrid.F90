@@ -610,6 +610,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_LocStream) :: dstLocStream, srcLocStream
 
+!        real(ESMF_KIND_R8) :: beg_time, end_time
+!        call ESMF_VMWtime(beg_time)
+
+
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1026,7 +1030,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-
 	    dstPointList=ESMF_PointListCreate(dstGrid,dstStaggerlocG2M, &
                                               maskValues=dstMaskValues, &
                                               rc=localrc)
@@ -1337,6 +1340,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         if(present(rc)) rc = ESMF_SUCCESS
+
+!        call ESMF_VMWtime(end_time)
+!        print*,'regrid store time= ',end_time-beg_time
 
     end subroutine ESMF_FieldRegridStoreNX
 

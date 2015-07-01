@@ -24,6 +24,26 @@ Regridding from Grid to Mesh
 
     .. literalinclude:: ../examples/grid_mesh_regrid.py
 
+---------------------------------
+Regridding from Mesh to LocStream
+---------------------------------
+
+    .. literalinclude:: ../examples/mesh_locstream_regrid.py
+
+~~~~~~~~~~~~~~~~
+LocStream Create
+~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
+        :pyobject: create_locstream_16
+
+~~~~~~~~~~~~~~~~~~~~~~~~~
+LocStream Create Parallel
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
+        :pyobject: create_locstream_16_parallel
+
 ----------------------
 Field Regridding Tools
 ----------------------

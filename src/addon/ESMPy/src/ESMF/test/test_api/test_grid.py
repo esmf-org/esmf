@@ -396,6 +396,15 @@ class TestGrid(TestBase):
         assert grid2.coords[0][0].shape == (5, 5)
         assert grid2.upper_bounds[0].tolist() == [5, 5]
 
+    def test_grid_copy(self):
+        grid = self.make_grid_2d()
+        self.examine_grid_attributes(grid)
+
+        grid2 = grid._copy_()
+        self.examine_grid_attributes(grid2)
+
+        assert np.all(grid.coords == grid2.coords)
+
     def test_grid_coords(self):
 
         max_index = np.array([12, 20])

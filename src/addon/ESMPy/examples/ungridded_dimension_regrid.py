@@ -1,12 +1,19 @@
-# This example demonstrates how to regrid a field with extra dimensions, such as time and vertical layers.
-# The grid files are required, they can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/ll2.5deg_grid.nc
-#   wget http://www.earthsystemmodeling.org/download/data/T42_grid.nc
+# This example demonstrates how to regrid a field with extra dimensions,
+# such as time and vertical layers.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "ll2.5deg_grid.nc"))
+# cache_data_file(os.path.join(os.getcwd(), "data", "T42_grid.nc"))
 
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to enable debug logging
+# This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
 grid1 = "examples/data/ll2.5deg_grid.nc"
