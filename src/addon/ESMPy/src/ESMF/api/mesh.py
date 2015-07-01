@@ -129,11 +129,7 @@ class Mesh(object):
         self._parametric_dim = None
         self._spatial_dim = None
         self._rank = 1
-#        self.element_coords = None
         
-        # for arbitrary attributes
-        self.meta = {}
-
         if not fromfile:
             # initialize not fromfile variables
             self._element_count = None
@@ -142,6 +138,7 @@ class Mesh(object):
             self._element_conn = None
             self._element_mask = None
             self._element_area = None
+            self._element_coords = None
             self._node_count = None
             self._node_ids = None
             self._node_coords = None
@@ -225,6 +222,10 @@ class Mesh(object):
     @property
     def element_area(self):
         return self._element_area
+
+    @property
+    def element_coords(self):
+        return self._element_coords
 
     @property
     def node_count(self):
@@ -371,8 +372,8 @@ class Mesh(object):
                      element_types,
                      element_conn,
                      element_mask=None,
-                     element_area=None):
-#                     element_coords=None):
+                     element_area=None,
+                     element_coords=None):
         """
         Add elements to a Mesh, this must be done after adding nodes. \n
         Required Arguments: \n
@@ -445,17 +446,17 @@ class Mesh(object):
                 self._element_area = np.array(element_area, dtype=np.float64)
             else:
                 self._element_area = element_area
-#       if element_coords is not None:
-#            if element_coords.dtype is not np.float64:
-#                self.element_coords = np.array(element_coords, dtype=np.float64)
-#            else:
-#                self.element_coords = element_coords
+        if element_coords is not None:
+            if element_coords.dtype is not np.float64:
+                self.element_coords = np.array(element_coords, dtype=np.float64)
+            else:
+                self.element_coords = element_coords
 
         # call into ctypes layer
         ESMP_MeshAddElements(self, self.element_count, self.element_ids, 
                              self.element_types, self.element_conn, 
-                             self.element_mask, self.element_area)
-#                             self.element_coords)
+                             self.element_mask, self.element_area,
+                             self.element_coords)
         
         # get the sizes
         self.size[node] = ESMP_MeshGetLocalNodeCount(self)
