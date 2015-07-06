@@ -230,9 +230,21 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
 #define ESMC_METHOD "ESMC_MeshGetCoord()"
 void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
            double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
+  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
 }
 //-----------------------------------------------------------------------------
 
@@ -241,9 +253,21 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
 #define ESMC_METHOD "ESMC_MeshGetElemCoord()"
 void ESMC_MeshGetElemCoord(ESMC_Mesh mesh_in,
            double *elemCoord, int *num_elems, int *num_dims, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalElemCoords(elemCoord, num_elems, num_dims, rc);
+  mep->getLocalElemCoords(elemCoord, num_elems, num_dims, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
 }
 //-----------------------------------------------------------------------------
 

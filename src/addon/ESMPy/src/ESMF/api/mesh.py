@@ -579,12 +579,17 @@ class Mesh(object):
         Returns: \n
             None \n
         """
+        elemcoords = True
 
         # get the pointer to the underlying ESMF data array for coordinates
         coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
-        coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
+        try:
+            coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
+            assert num_dims == num_dims_e
+        except:
+            warnings.warn("Mesh element coordinates are not available")
+            elemcoords = False
 
-        assert num_dims == num_dims_e
         if not self.parametric_dim:
             self._parametric_dim = num_dims
 
@@ -599,8 +604,8 @@ class Mesh(object):
         if num_dims == 3:
             self._coords[node][2] = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
 
-        # alias the coordinates to the mesh
-        self._coords[element][0] = np.array([coords_elem[2 * i] for i in range(num_elems)])
-        self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
-        if num_dims == 3:
-            self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])
+        if elemcoords:
+            self._coords[element][0] = np.array([coords_elem[2 * i] for i in range(num_elems)])
+            self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
+            if num_dims == 3:
+                self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])

@@ -2100,14 +2100,13 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
 
 void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, int *rc) 
 {
+  int localrc;
   try {
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
 
     // Initialize the parallel environment for mesh (if not already done)
-    int localrc;
-    int rc;
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
@@ -2140,21 +2139,26 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      localrc = ESMC_RC_INTNRL_BAD;
+      ESMC_LogDefault.MsgFoundError(localrc,
    					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      localrc = ESMC_RC_INTNRL_BAD;
+      ESMC_LogDefault.MsgFoundError(localrc,
    					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
-
+    if (rc!=NULL) *rc = localrc;
     return;
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    if (rc!=NULL) *rc = localrc;
     return;
   } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+    localrc = ESMC_RC_INTNRL_BAD;
+    ESMC_LogDefault.MsgFoundError(localrc,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
+    if (rc!=NULL) *rc = localrc;
     return;
   }
   // Set return code
