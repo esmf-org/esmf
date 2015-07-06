@@ -12,6 +12,7 @@ from ESMF.test.base import TestBase, attr
 from ESMF.test.test_api.mesh_utilities import *
 
 class TestMesh(TestBase):
+    Manager(debug=True)
     def check_mesh(self, mesh, nodeCoord, nodeOwner):
 
         xcoords = mesh.get_coords(0)

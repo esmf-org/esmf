@@ -248,10 +248,6 @@ class Mesh(object):
         return self._coords
 
     @property
-    def coords_done(self):
-        return self._coords_done
-
-    @property
     def meta(self):
         return self._meta
 
@@ -551,10 +547,10 @@ class Mesh(object):
         ret = None
         # only nodes for now
         if not self._singlestagger:
-            assert(self.coords_done[meshloc][coord_dim])
+            assert(self.coords[meshloc][coord_dim] is not None)
             ret = self.coords[meshloc][coord_dim]
         else:
-            assert(self.coords_done[coord_dim])
+            assert(self.coords[coord_dim] is not None)
             ret = self.coords[coord_dim]
 
         return ret
@@ -573,23 +569,22 @@ class Mesh(object):
         # call into ctypes layer
         ESMP_MeshWrite(self, filename)
 
-    def _link_coords_(self, meshloc=node):
+    def _link_coords_(self):
         """
         Link Python Mesh to ESMC Mesh coordinates.
         Required Arguments: \n
            None \n
         Optional Arguments: \n
-             meshloc: the mesh location of the coordinates. \n
-                Argument values are: \n
-                    node=0 (default) \n
-                    element=1 (not implemented) \n
+             None \n
         Returns: \n
             None \n
         """
 
         # get the pointer to the underlying ESMF data array for coordinates
         coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
+        coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
 
+        assert num_dims == num_dims_e
         if not self.parametric_dim:
             self._parametric_dim = num_dims
 
@@ -597,23 +592,15 @@ class Mesh(object):
         # index order is [meshloc][coord_dim]
         self._coords = [[None for a in range(num_dims)] \
                         for b in range(2)]
-        self._coords_done = [[False for a in range(num_dims)] \
-                             for b in range(2)]
 
-        dim1 = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
-        dim2 = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
-        dim3 = None
+        # alias the coordinates to the mesh
+        self._coords[node][0] = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
+        self._coords[node][1] = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
         if num_dims == 3:
-            dim3 = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
+            self._coords[node][2] = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
 
-        # alias the coordinates to a grid property
-        self._coords[meshloc][0] = dim1.view()
-        self._coords[meshloc][1] = dim2.view()
+        # alias the coordinates to the mesh
+        self._coords[element][0] = np.array([coords_elem[2 * i] for i in range(num_elems)])
+        self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
         if num_dims == 3:
-            self._coords[meshloc][2] = dim3.view()
-
-        # set flag to tell these coordinate has been aliased
-        self._coords_done[meshloc][0] = True
-        self._coords_done[meshloc][1] = True
-        if num_dims == 3:
-            self._coords_done[meshloc][2] = True
+            self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])
