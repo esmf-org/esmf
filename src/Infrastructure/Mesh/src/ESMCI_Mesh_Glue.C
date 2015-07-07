@@ -2127,9 +2127,12 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
 
         // Set coordinate value to input array
         double *coords=elem_coords->data(elem);
+        printf("ESMCI:getlocalelemcoords, coords = [");
         for (int i = 0; i < sdim; ++i) {
           ecoords[elemCoordPos++] = coords[i];
+          printf("%f, ", coords[i]);
         }
+        printf("]\n");
       }
     } else {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
