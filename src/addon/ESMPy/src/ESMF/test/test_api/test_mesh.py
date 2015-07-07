@@ -38,7 +38,6 @@ class TestMesh(TestBase):
             yelems2 = np.array([elemCoord[2 * i + 1] for i in range(mesh.size[element])])
 
             # TODO: no concept of owned elements yet?
-            print xelems, yelems
             assert (np.all(xelems == xelems2))
             assert (np.all(yelems == yelems2))
 
