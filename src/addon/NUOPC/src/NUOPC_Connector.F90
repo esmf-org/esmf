@@ -100,7 +100,7 @@ module NUOPC_Connector
 
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv05p1"/), &
-      userRoutine=InitializeP1FieldTransfer, rc=rc)
+      userRoutine=Initialize05P1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
@@ -197,17 +197,19 @@ module NUOPC_Connector
   
    !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1FieldTransfer(cplcomp, importState, exportState, clock, rc)
+  subroutine Initialize05P1(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
     character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
     character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
     integer                :: itemCount, i, stat
     character (ESMF_MAXSTR), allocatable :: itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
+    type(ESMF_Field)       :: field
 
     rc = ESMF_SUCCESS
 
@@ -230,7 +232,9 @@ module NUOPC_Connector
 !    print *, "importState xferPolicy = ", importXferPolicy
 !    print *, "exportState xferPolicy = ", exportXferPolicy
 
-    if (trim(exportXferPolicy)=="transferAll") then
+    ! States on both sides must accept transfer
+    if (trim(exportXferPolicy)=="transferAll" .and. &
+        trim(importXferPolicy)=="transferAll") then
 
       call ESMF_StateGet(exportState, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -257,8 +261,32 @@ module NUOPC_Connector
         !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
         if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
 
+          ! reverse TransferOfferGeomObject attribute, e.g., if a component
+          ! providing a field wants to provide a grid, then the accepting
+          ! component should not try to provide its own grid
+          call ESMF_StateGet(exportState, &
+            itemNameList(i), field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          call NUOPC_FieldAttributeGet(field, name="TransferOfferGeomObject", &
+             value=oldTransferGeom, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! default
+          newTransferGeom = "cannot provide"
+          if (trim(oldTransferGeom)=="will provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="can provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="cannot provide") then
+            newTransferGeom = "will provide"
+          end if
+
           ! transfer to import state
-          call NUOPC_Advertise(importState, StandardName=itemNameList(i), rc=rc)
+          call NUOPC_Advertise(importState, StandardName=itemNameList(i), &
+            TransferOfferGeomObject=newTransferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

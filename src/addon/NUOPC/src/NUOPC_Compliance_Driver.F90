@@ -953,7 +953,7 @@ contains
 
         rc = ESMF_SUCCESS
 
-        print *, "checkPhaseEpilogue_AllFieldsRealized()"
+        !print *, "checkPhaseEpilogue_AllFieldsRealized()"
 
         importFieldCount = 0
         exportFieldCount = 0
