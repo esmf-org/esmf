@@ -142,7 +142,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_node==num_node_out,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
+  //printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -153,7 +153,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem==num_elem_out,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_elem = %d\nnum_elem_out=%d\n", num_elem, num_elem_out);
+  //printf("num_elem = %d\nnum_elem_out=%d\n", num_elem, num_elem_out);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -164,7 +164,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-   printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
+  //printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -183,7 +183,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem==num_elem_owned_out,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
+  //printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -195,10 +195,10 @@ int main(void){
    ESMC_MeshGetCoord(mesh, coords, &num_nodes, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("Found num_nodes=%d, num_dims=%d\n", num_nodes, num_dims);
+  /*printf("Found num_nodes=%d, num_dims=%d\n", num_nodes, num_dims);
   for (int i=0; i< num_nodes; i++) {
     printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
-  }
+  }*/
   free(coords);
 
   //----------------------------------------------------------------------------
@@ -212,14 +212,14 @@ int main(void){
   ESMC_MeshGetElemCoord(mesh, elem_coords, &num_elems, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("Found num_elems=%d, num_dims=%d\n", num_elems, num_dims);
+  /*printf("Found num_elems=%d, num_dims=%d\n", num_elems, num_dims);
   int ind = 0;
   for (int i=0; i<num_elems; i++) {
     for (int j=0; j<num_dims; j++) {
       printf("%.1f ", elem_coords[ind++]);
     }
     printf("\n");
-  }
+  }*/
   free(elem_coords);
 
   //----------------------------------------------------------------------------
