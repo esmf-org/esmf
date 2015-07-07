@@ -382,7 +382,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.I4, meshloc=MeshLoc.NODE)
@@ -465,7 +465,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
@@ -530,7 +530,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)

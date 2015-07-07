@@ -87,7 +87,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
         dstfield = Field(mesh, meshloc=MeshLoc.ELEMENT)
 
@@ -130,7 +130,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         # create a field on the mesh
@@ -175,7 +175,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         # create grid
@@ -444,7 +444,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         # create a grid
@@ -498,7 +498,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         # create Field objects
@@ -539,7 +539,7 @@ class TestRegrid(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         # create Field objects
@@ -578,9 +578,9 @@ class TestRegrid(TestBase):
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
                 mesh_create_10_parallel()
         else:
-            srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
+            srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc, _ = \
                 mesh_create_50()
-            dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
+            dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst, _ = \
                 mesh_create_10()
 
         # create ESMP_Field objects on the Meshes

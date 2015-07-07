@@ -129,7 +129,8 @@ class Mesh(object):
         self._parametric_dim = None
         self._spatial_dim = None
         self._rank = 1
-        
+        self._coords = None
+
         if not fromfile:
             # initialize not fromfile variables
             self._element_count = None
@@ -444,9 +445,9 @@ class Mesh(object):
                 self._element_area = element_area
         if element_coords is not None:
             if element_coords.dtype is not np.float64:
-                self.element_coords = np.array(element_coords, dtype=np.float64)
+                self._element_coords = np.array(element_coords, dtype=np.float64)
             else:
-                self.element_coords = element_coords
+                self._element_coords = element_coords
 
         # call into ctypes layer
         ESMP_MeshAddElements(self, self.element_count, self.element_ids, 
