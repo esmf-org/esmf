@@ -28,6 +28,7 @@ module NUOPC_RunSequenceDef
   public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
+!  public NUOPC_RunSequenceIngest, NUOPC_RunSequenceEgest
   
 !==============================================================================
 ! 
