@@ -654,8 +654,61 @@ module NUOPC_Comp
 !   Ingest the component attributes from a FreeFormat object.
 !EOP
   !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+
     if (present(rc)) rc = ESMF_SUCCESS
 
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      ! process the configuration line
+      if (tokenCount == 3) then
+        if (trim(tokenList(2)) /= "=") then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Free format Attribute line incorrectly formatted.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+        call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
+          value=trim(tokenList(3)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Free format Attribute line incorrectly formatted.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)
+        return  ! bail out
+      endif
+      
+      ! clean-up
+      deallocate(tokenList)
+    enddo
     
   end subroutine
   !-----------------------------------------------------------------------------
