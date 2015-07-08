@@ -30,6 +30,7 @@ module NUOPC_FreeFormatDef
   public NUOPC_FreeFormatCreate
   public NUOPC_FreeFormatDestroy
   public NUOPC_FreeFormatGet
+  public NUOPC_FreeFormatGetLine
   public NUOPC_FreeFormatPrint
   
   
@@ -192,6 +193,93 @@ module NUOPC_FreeFormatDef
 
     if (present(stringList)) then
       stringList => freeFormat%stringList
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FreeFormatGetLine - Get line info from a FreeFormat object
+! !INTERFACE:
+  subroutine NUOPC_FreeFormatGetLine(freeFormat, line, lineString, tokenCount, &
+    tokenList, rc)
+! !ARGUMENTS:
+    type(NUOPC_FreeFormat),                       intent(in)  :: freeFormat
+    integer,                                      intent(in)  :: line
+    character(len=NUOPC_FreeFormatLen), optional, intent(out) :: lineString
+    integer,                            optional, intent(out) :: tokenCount
+    character(len=NUOPC_FreeFormatLen), optional, intent(out) :: tokenList(:)
+    integer,                            optional, intent(out) :: rc
+! !DESCRIPTION:
+!   Get information about a specific line in a FreeFormat object.
+!EOP
+  !-----------------------------------------------------------------------------
+    integer                               :: i, count, last
+    character(len=NUOPC_FreeFormatLen)    :: string
+    logical                               :: spaceFlag
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! error checking
+    if (line>freeFormat%count) then
+      ! error condition
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The line index cannot be larger than the string count", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! access the line string
+    string = trim(freeFormat%stringList(line))
+
+    ! ouput: lineString
+    if (present(lineString)) then
+      lineString = string
+    endif
+    
+    if (present(tokenCount) .or. present(tokenList)) then
+      ! count tokens
+      count = 0 ! reset
+      spaceFlag = (string(1:1) == ' ')
+      do i=2, len(string)
+        if ((string(i:i)==' ') .and. .not.spaceFlag) then
+          count = count+1
+        endif
+        spaceFlag = (string(i:i) == ' ')
+      enddo
+    
+      ! output: tokenCount
+      if (present(tokenCount)) then
+        tokenCount = count
+      endif
+    endif
+    
+    if (present(tokenList)) then
+      if (size(tokenList) /= count) then
+        ! error condition
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="tokenList must have exactly as many elements as there are tokens", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+      
+      count = 0 ! reset
+      spaceFlag = (string(1:1) == ' ')
+      last = 1  ! reset
+      do i=2, len(string)
+        if ((string(i:i)==' ') .and. .not.spaceFlag) then
+          count = count+1
+          tokenList(count) = adjustl(string(last:i))
+          last = i+1
+        endif
+        spaceFlag = (string(i:i) == ' ')
+      enddo
+      
     endif
 
   end subroutine

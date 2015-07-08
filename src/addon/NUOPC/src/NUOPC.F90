@@ -40,6 +40,7 @@ module NUOPC
   public NUOPC_FreeFormatCreate
   public NUOPC_FreeFormatDestroy
   public NUOPC_FreeFormatGet
+  public NUOPC_FreeFormatGetLine
   public NUOPC_FreeFormatPrint
 
   ! public FieldDictionary API
