@@ -816,9 +816,9 @@ void PIO_Handler::arrayWrite(
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
   int ncDims[8];                          // To hold NetCDF dimensions
-  int unlim;                              // Unlimited dimension ID
+  int unlim = -1;                         // Unlimited dimension ID
   int timeFrame = -1;                     // ID of time dimension (>0 if used)
-  int timesliceVal = -1;                  // Used time value (from timeslice)
+  int timesliceVal = 0;                   // Used time value (from timeslice)
   bool varExists = false;                 // true if varname is defined in file
   const char *varname;                    // Variable name
   if (rc != NULL) {

@@ -122,6 +122,8 @@ class VMK{
     // comm_type specific parts
     int comm_type;      // comm_type for this communication status
     MPI_Status mpi_s;
+
+    status() : mpi_s() {}
   };
   
   
