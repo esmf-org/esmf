@@ -375,7 +375,7 @@ module NUOPC_Base
           return  ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provoide a valid string for TransferOfferGeomObject", &
+          msg="must provide a valid string for TransferOfferGeomObject", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)
