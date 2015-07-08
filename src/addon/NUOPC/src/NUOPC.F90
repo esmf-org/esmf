@@ -118,6 +118,7 @@ module NUOPC
   public NUOPC_CompAreServicesSet  
   public NUOPC_CompAttributeAdd
   public NUOPC_CompAttributeGet
+  public NUOPC_CompAttributeIngest
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive

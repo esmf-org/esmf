@@ -2919,14 +2919,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Ingest the run sequence from a FreeFormat object. It is the
-! caller's responsibility to destroy the created freeFormat object.
+! Ingest the run sequence from a FreeFormat object.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)                          :: name
     type(type_InternalState)                        :: is
-    character(len=NUOPC_FreeFormatLen), pointer     :: stringList(:)
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     integer, allocatable                            :: slotStack(:)
@@ -2951,9 +2949,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! access the FreeFormat stringList
-    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, &
-      stringList=stringList, rc=rc)
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
