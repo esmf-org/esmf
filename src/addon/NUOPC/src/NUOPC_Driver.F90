@@ -1618,14 +1618,14 @@ module NUOPC_Driver
           write (jString, *) j
           write (pString, *) phase
           if (i==0) then
-            ! connect to the drivers import State
-            imState=importState
+            ! connect to the driver's export State
+            imState=exportState
           else
             imState=is%wrap%modelES(i)
           endif
           if (j==0) then
-            ! connect to the drivers export State
-            exState=exportState
+            ! connect to the driver's import State
+            exState=importState
           else
             exState=is%wrap%modelIS(j)
           endif
@@ -2597,7 +2597,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    do iComp=1, is%wrap%modelCount
+    ! iComp below should start with 0 in case driver itself is match
+    do iComp=0, is%wrap%modelCount
       if (is%wrap%modelComp(iComp)==comp) exit  ! match found
     enddo
     if (iComp > is%wrap%modelCount) then
