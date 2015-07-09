@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/src/NUOPC_FieldDictionary.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_FieldDictionaryApi.F90"
 !==============================================================================
 
 module NUOPC_FieldDictionaryApi

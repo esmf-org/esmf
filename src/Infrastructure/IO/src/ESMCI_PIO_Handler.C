@@ -818,7 +818,7 @@ void PIO_Handler::arrayWrite(
   int ncDims[8];                          // To hold NetCDF dimensions
   int unlim = -1;                         // Unlimited dimension ID
   int timeFrame = -1;                     // ID of time dimension (>0 if used)
-  int timesliceVal = 0;                   // Used time value (from timeslice)
+  int timesliceVal = -1;                  // Used time value (from timeslice)
   bool varExists = false;                 // true if varname is defined in file
   const char *varname;                    // Variable name
   if (rc != NULL) {
@@ -840,7 +840,6 @@ void PIO_Handler::arrayWrite(
       ESMC_CONTEXT, rc)) return;
   for (int i=0; i<narrDims; i++) {
     if (arrDims[i] < 0) {
-      std::cout << ESMC_METHOD << ": arraydim[" << i << "] = " << arrDims[i] << std::endl;
       if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 0",
             ESMC_CONTEXT, rc)) return;
     }
@@ -909,8 +908,8 @@ void PIO_Handler::arrayWrite(
   }
 
   // Check consistency of time dimension with timeslice
+  bool hasTimeDim;
   if (getFormat() != ESMF_IOFMT_BIN) {
-    bool hasTimeDim;
     int dimidTime;
     int timeLen;
     PRINTMSG("Checking time dimension");
@@ -1105,16 +1104,27 @@ void PIO_Handler::arrayWrite(
     PRINTMSG("finished defining space dims, timeFrame = " << timeFrame);
 
     if (timeFrame > -1) {
-      PRINTMSG("Defining time dinension");
-      piorc = pio_cpp_def_dim(pioFileDesc, "time",
-                              PIO_unlimited, &ncDims[nioDims]);
-      if (PIO_noerr != piorc)
-        if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE,
-            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-            rc)) {
-          free (vardesc);
-          return;
-        }
+      if (hasTimeDim) {
+        piorc = pio_cpp_inq_dimid (pioFileDesc, "time", &ncDims[nioDims]);
+        if (PIO_noerr != piorc)
+          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE,
+              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              rc)) {
+            free (vardesc);
+            return;
+          }
+      } else {
+        PRINTMSG("Defining time dimension");
+        piorc = pio_cpp_def_dim(pioFileDesc, "time",
+                                PIO_unlimited, &ncDims[nioDims]);
+        if (PIO_noerr != piorc)
+          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_WRITE,
+              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+              rc)) {
+            free (vardesc);
+            return;
+          }
+      }
       nioDims++;
     }
   }
