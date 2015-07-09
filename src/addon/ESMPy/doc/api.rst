@@ -280,6 +280,18 @@ Some specific things to keep in mind are:
   modification of the Field mask to the Grid mask (which may be shared
   by multiple fields).
 
+- When setting the values of a Field, the mask will be overridden if care is not taken
+  to only set the _data_ of the Field.  For instance:
+
+  field[...] = 7
+
+  will set all field data values to 7 regardless of whether they have been masked
+  or not, but:
+
+  field.data[...] = 7
+
+  will only set the unmasked data points of the Field.
+
 
 ---------------------
 Spherical coordinates

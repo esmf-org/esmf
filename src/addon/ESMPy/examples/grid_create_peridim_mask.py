@@ -3,7 +3,7 @@
 import ESMF
 import numpy
 
-# Start up ESMF, this call is only necessary to enable debug logging
+# This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
 # Create the source grid from memory with periodic dimension specified.
@@ -12,8 +12,7 @@ import numpy
 lats  = numpy.arange(  0, 360, 360./70.)
 lons = numpy.arange(-90., 90.1, 180./140.)
 max_index = numpy.array([lons.size, lats.size])
-# TODO: commented out coord_typekind demonstrates the source mask/zero region bug in ticket #3613699
-srcgrid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.SPH_DEG, #coord_typekind=ESMF.TypeKind.R4,
+srcgrid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.SPH_DEG, coord_typekind=ESMF.TypeKind.R4,
                     num_peri_dims=1, periodic_dim=1, pole_dim=0)
 
 # Add coordinates to the source grid.

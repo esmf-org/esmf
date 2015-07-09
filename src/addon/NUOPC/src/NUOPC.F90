@@ -22,6 +22,7 @@ module NUOPC
   !-----------------------------------------------------------------------------
 
   use ESMF
+  use NUOPC_FreeFormatDef
   use NUOPC_Base
 !TODO: completely remove after CSC okay:  use NUOPC_RunSequenceDef
   use NUOPC_Comp
@@ -30,10 +31,28 @@ module NUOPC
   
   private
 
-  ! public module variables  
-  public NUOPC_FieldDictionary
-  public NUOPC_PhaseMapStringLength
+  ! public
+  public NUOPC_PhaseMapStringLength       ! parameter
   
+  ! public FreeFormat API
+  public NUOPC_FreeFormat                 ! type
+  public NUOPC_FreeFormatLen              ! parameter
+  public NUOPC_FreeFormatCreate
+  public NUOPC_FreeFormatDestroy
+  public NUOPC_FreeFormatGet
+  public NUOPC_FreeFormatGetLine
+  public NUOPC_FreeFormatPrint
+
+  ! public FieldDictionary API
+  public NUOPC_FieldDictionary            ! variable
+  public NUOPC_FieldDictionaryAddEntry
+  public NUOPC_FieldDictionaryGetEntry
+  public NUOPC_FieldDictionaryHasEntry
+  public NUOPC_FieldDictionaryMatchSyno  
+  public NUOPC_FieldDictionarySetSyno  
+  public NUOPC_FieldDictionarySetup
+  public NUOPC_FieldDictionarySetAutoAdd
+
   ! public module interfaces
   public NUOPC_ClockCheckSetClock
   public NUOPC_ClockInitialize
@@ -44,19 +63,10 @@ module NUOPC
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
-  public NUOPC_FieldDictionaryAddEntry
-  public NUOPC_FieldDictionaryGetEntry
-  public NUOPC_FieldDictionaryHasEntry
-  public NUOPC_FieldDictionaryMatchSyno  
-  public NUOPC_FieldDictionarySetSyno  
-  public NUOPC_FieldDictionarySetup
-  public NUOPC_FieldDictionarySetAutoAdd
   public NUOPC_FieldIsAtTime
   public NUOPC_FieldWrite
   public NUOPC_GridCreateSimpleSph
   public NUOPC_GridCreateSimpleXY
-  public NUOPC_IsCreated
-  public NUOPC_Nop
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
   public NUOPC_StateAttributeAdd
@@ -86,9 +96,9 @@ module NUOPC
   public NUOPC_Get
   public NUOPC_IsAtTime
   public NUOPC_IsConnected
-!  public NUOPC_IsCreated
+  public NUOPC_IsCreated
   public NUOPC_IsUpdated
-!  public NUOPC_Nop
+  public NUOPC_Nop
   public NUOPC_Print
   public NUOPC_Realize
   public NUOPC_Reconcile
@@ -108,6 +118,7 @@ module NUOPC
   public NUOPC_CompAreServicesSet  
   public NUOPC_CompAttributeAdd
   public NUOPC_CompAttributeGet
+  public NUOPC_CompAttributeIngest
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive

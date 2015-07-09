@@ -232,6 +232,13 @@
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryApi_fapi}
 #endif
 
+\subsection{Free Format Methods}
+#ifdef STANDALONE
+\input{NUOPC_FreeFormatDef_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FreeFormatDef_fapi}
+#endif
+
 \subsection{Utility Routines}
 #ifdef STANDALONE
 \input{NUOPC_Base_fapi}

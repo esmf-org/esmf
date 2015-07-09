@@ -1,11 +1,18 @@
-# This example demonstrates how to regrid between a GRIDSPEC grid and a tripole grid, both grids use masking.
-# The grid files are required, they can be retrieved from the ESMF data repository:
-#   wget http://www.earthsystemmodeling.org/download/data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc
-#   wget http://www.earthsystemmodeling.org/download/data/ll1deg_grid.nc
+# This example demonstrates how to regrid between a GRIDSPEC grid and a tripole grid,
+# both grids use masking.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"))
+# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
 
 import ESMF
 
-# Start up ESMF, this call is only necessary to enable debug logging
+# This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
 datafile = "data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"

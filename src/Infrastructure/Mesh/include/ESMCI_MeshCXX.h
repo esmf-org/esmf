@@ -33,7 +33,7 @@ namespace ESMCI {
     void getLocalElemCoords(double *, int *, int *, int *);
     static int destroy(MeshCXX **);
 
-    int addElements(int, int*, int*, int*, int*, double *);
+    int addElements(int, int*, int*, int*, int*, double *, double *);
     int addNodes(int, int*, double*, int*);
     std::vector<int> getNodeGIDS();
     int createDistGrids(int*, int*, int*, int*);

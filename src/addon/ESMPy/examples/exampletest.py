@@ -26,3 +26,6 @@ class TestExamples(TestBase):
 
     def test_gridcreateperimask(self):
         import grid_create_peridim_mask
+
+    def test_meshlocstreamregrid(self):
+        import mesh_locstream_regrid
