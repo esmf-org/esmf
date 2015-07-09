@@ -274,6 +274,30 @@ void ESMC_MeshGetElemCoord(ESMC_Mesh mesh_in,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetConnectivity()"
+void ESMC_MeshGetConnectivity(ESMC_Mesh mesh_in, double *connCoord,
+		                   int *numNodesPerElem, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  mep->getConnectivity(connCoord, numNodesPerElem, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetLocalNodeCount()"
 int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
   

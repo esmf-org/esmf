@@ -2293,64 +2293,94 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
             throw localrc;
 
         // Get some info
+        int sdim=*_orig_sdim;
+        int num_elems = mesh.num_elems();
         int num_nodes = mesh.num_nodes();
 
         // Choose which coords field and dimension to use
         // try orig_coordinates first, if it doesn't exist
         // then go with coordinates
         MEField<> *coords=mesh.GetField("orig_coordinates");
-        int sdim=*_orig_sdim;
         if (!coords) {
             coords = mesh.GetCoordField();
             sdim=mesh.spatial_dim();
         }
 
-        // Make a map between data index and associated node pointer
-        std::vector<std::pair<int,MeshObj *> > index_to_node;
-        index_to_node.reserve(num_nodes);
+        // Make a map between data index and associated elem pointer
+        std::vector<std::pair<int,MeshObj *> > index_to_elem;
+        index_to_elem.reserve(num_elems);
 
         // iterate through local nodes collecting indices and node pointers
-        int npePos = 0;
         Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
         for (; ei != ee; ++ei) {
             MeshObj &elem = *ei;
 
             if (!GetAttr(elem).is_locally_owned()) continue;
 
-			// iterate through local nodes collecting indices and node pointers
-			int npe, cpPos;
-			npe = 0, cpPos = 0;
-            Mesh::iterator ni = elem.node_begin(), ne = elem.node_end();
-			for (; ni != ne; ++ni) {
-				npe++;
-				MeshObj &node = *ni;
-
-				if (!GetAttr(node).is_locally_owned()) continue;
-
-                for (int j = 0; j < sdim; ++j) {
-                	double *indCoords=coords->data(node);
-                	connCoord[cpPos++] = indCoords[j];
-                }
-			}
-			nodesPerElem[npePos++] = npe;
+            int idx = elem.get_data_index();
+            index_to_elem.push_back(std::make_pair(idx,&elem));
         }
 
-        /*
         // Sort by data index
-        std::sort(index_to_node.begin(), index_to_node.end());
+        std::sort(index_to_elem.begin(), index_to_elem.end());
 
-        // Load coords in order of index
-        int nodeCoordPos=0;
-        for (UInt i = 0; i < index_to_node.size(); ++i) {
-            MeshObj &node = *(index_to_node[i].second);
+        // iterate through local elements
+        int npePos = 0, cpPos = 0;
+        for (UInt i = 0; i < index_to_elem.size(); ++i) {
+            MeshObj &elem = *(index_to_elem[i].second);
 
-            // Copy coords into output array
-            double *c = coords->data(node);
-            for (int j=0; j<sdim; j++) {
-	            nodeCoord[nodeCoordPos]=c[j];
-	            nodeCoordPos++;
-            }
-        }*/
+            // Get number of nodes in element
+            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+
+            // iterate through local nodes collecting coordinates and counting
+			for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+
+				const MeshObj &node = *(elem.Relations[s].obj);
+
+				// NOTE: we are iterating all nodes on this element to put
+				//       together a connectivity list of node coordinates
+				//if (!GetAttr(node).is_locally_owned()) continue;
+
+				double *c=coords->data(node);
+                for (int j = 0; j < sdim; ++j) {
+                	double *indCoords=coords->data(node);
+                	connCoord[cpPos++] = c[j];
+                }
+    			// NOTE: must implement sort if we want IDs
+                //nodeIDs[s]=node.get_id();
+			}
+			// NOTE: must implement sort if we want IDs
+			//elemIDs[npePos] = elem.get_id();
+			nodesPerElem[npePos++] = topo->num_nodes;
+        }
+
+
+        /*
+         void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids) {
+
+             // Get number of nodes in element
+             const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+             // make sure that we're not bigger than max size
+             if (topo->num_nodes > max_num_nodes) {
+       	Throw() << "Element exceeds maximum poly size";
+             }
+
+             // Get coords of element
+             int k=0;
+             for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+       	const MeshObj &node = *(elem->Relations[s].obj);
+       	double *c = cfield->data(node);
+               for (int i=0; i<sdim; i++) {
+       	  coords[k]=c[i];
+                 k++;
+       	}
+               ids[s]=node.get_id();
+             }
+
+             // Get number of nodes
+             *num_nodes=topo->num_nodes;
+         }*/
 
 
     } catch(std::exception &x) {

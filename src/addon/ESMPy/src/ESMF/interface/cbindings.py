@@ -955,7 +955,6 @@ _ESMF.ESMC_MeshGetElemCoord.argtypes = [ct.c_void_p,
                                     np.ctypeslib.ndpointer(dtype=np.float64),
                                     ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
-@deprecated
 def ESMP_MeshGetElemCoordPtr(mesh):
     """
     Preconditions: An ESMP_Mesh has been created with element coordinates 
@@ -984,6 +983,36 @@ def ESMP_MeshGetElemCoordPtr(mesh):
         raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
     return elemCoords, num_elems, num_dims
+
+_ESMF.ESMC_MeshGetConnectivity.restype = None
+_ESMF.ESMC_MeshGetConnectivity.argtypes = [ct.c_void_p,
+                                    np.ctypeslib.ndpointer(dtype=np.float64),
+                                    np.ctypeslib.ndpointer(dtype=np.int32),
+                                    ct.POINTER(ct.c_int)]
+def ESMP_MeshGetConnectivity(mesh):
+    """
+    Preconditions: An ESMP_Mesh has been created.\n
+    Postconditions: Two arrays containing the Mesh connectivity and number
+                    of nodes per element has been
+                    returned into 'connCoord', and 'numNodesPerElem'.\n
+    Arguments:\n
+        :RETURN: Numpy.array(dtype=float64) :: connCoord\n
+        :RETURN: Numpy.array(dtype=int32)   :: numNodesPerElem\n
+        ESMP_Mesh                           :: mesh\n
+    """
+    lrc = ct.c_int(0)
+    num_elems = ESMP_MeshGetLocalElementCount(mesh)
+    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    connCoord = np.array(np.zeros(num_nodes*3+num_elems*9),dtype=np.float64)
+    numNodesPerElem = np.array(np.zeros(num_elems),dtype=np.int32)
+    _ESMF.ESMC_MeshGetConnectivity(mesh.struct.ptr, connCoord,
+                                   numNodesPerElem, ct.byref(lrc))
+
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    return connCoord, numNodesPerElem
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p, 

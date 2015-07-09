@@ -591,6 +591,8 @@ class Mesh(object):
             warnings.warn("Mesh element coordinates are not available")
             elemcoords = False
 
+        self._connectivity, self._num_nodes_per_elem = ESMP_MeshGetConnectivity(self)
+
         if not self.parametric_dim:
             self._parametric_dim = num_dims
 

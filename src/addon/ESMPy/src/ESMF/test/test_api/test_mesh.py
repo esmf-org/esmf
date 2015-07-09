@@ -60,6 +60,7 @@ class TestMesh(TestBase):
                 mesh_create_5()
 
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+        import ipdb; ipdb.set_trace()
 
     def test_mesh_10(self):
         parallel = False
