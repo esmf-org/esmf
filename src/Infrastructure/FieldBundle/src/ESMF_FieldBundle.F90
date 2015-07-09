@@ -2035,7 +2035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
+!     \item Only single tile Arrays within Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -4941,7 +4941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only 1 DE per PET supported.
+!     \item Only single tile Arrays within Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -5081,20 +5081,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       ! Get and read the fields in the Bundle
       do i=1,fieldCount
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
-      if (.not. errorFound) then
+
       call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-      endif
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
     else
       do i=1,fieldCount
         ! Clear the IO object (only need to do this for i > 1)
@@ -5102,20 +5101,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         write(cnum,"(i3.3)") i
         filename = trim (file) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
-        if (.not. errorFound) then
-          call ESMF_IOWrite(io, trim(filename),                         &
-              overwrite=opt_overwriteflag, status=opt_status,           &
-              timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
-          errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
-              ESMF_CONTEXT, rcToReturn=rc)
-        endif
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_IOWrite(io, trim(filename),                         &
+             overwrite=opt_overwriteflag, status=opt_status,           &
+             timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
 
