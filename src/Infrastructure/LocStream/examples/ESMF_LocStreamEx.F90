@@ -45,7 +45,6 @@ program ESMF_LocStreamEx
       integer,parameter :: GridLatSize=20
       integer,parameter :: GridLonSize=20
       integer :: i1,i2
-      integer :: lDE, localDECount
       real(ESMF_KIND_R8), pointer :: farrayPtrLonC(:,:)
       real(ESMF_KIND_R8), pointer :: farrayPtrLatC(:,:)
       real(ESMF_KIND_R8), pointer :: farrayPtr1D(:)
@@ -520,7 +519,7 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Get access to the Fortran array pointers that hold the Field data.
    !-------------------------------------------------------------------
-   call ESMF_FieldGet(srcField, lDE, farrayPtr, rc=rc)
+   call ESMF_FieldGet(srcField, 0, farrayPtr, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
