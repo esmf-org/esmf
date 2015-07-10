@@ -1,25 +1,34 @@
-# This example demonstrates how to regrid between a mesh and a locstream.
+# This example demonstrates how to regrid between a grid and a mesh.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# if not os.path.isdir("data"):
+#     os.makedirs("data")
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
 
 import ESMF
 import numpy
 
 # This call enables debug logging
-# ESMF.Manager(debug=True)
+ESMF.Manager(debug=True)
 
-from ESMF.test.test_api.mesh_utilities import mesh_create_5, mesh_create_5_parallel
-from ESMF.test.test_api.locstream_utilities import create_locstream_16, create_locstream_16_parallel
+from ESMF.test.test_api.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
+coord_sys=ESMF.CoordSys.SPH_DEG
 if ESMF.pet_count() == 1:
-    mesh, _, _, _, _, _ = mesh_create_5()
-    locstream = create_locstream_16()
+    locstream = create_locstream_spherical_16(coord_sys=coord_sys)
 else:
     if ESMF.pet_count() is not 4:
         raise ValueError("processor count must be 4 or 1 for this example")
     else:
-        mesh, _, _, _, _ = mesh_create_5_parallel()
-        locstream = create_locstream_16_parallel()
+        locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys)
+
+grid1 = "examples/data/ll1deg_grid.nc"
+grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
 
 # create a field
-srcfield = ESMF.Field(mesh, name='srcfield')#, meshloc=ESMF.MeshLoc.ELEMENT)
+srcfield = ESMF.Field(grid, name='srcfield')
 
 # create a field on the locstream
 dstfield = ESMF.Field(locstream, name='dstfield')
@@ -33,9 +42,14 @@ gridXCoord = srcfield.grid.get_coords(x)
 gridYCoord = srcfield.grid.get_coords(y)
 srcfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
 
-gridXCoord = locstream["ESMF:X"]
-gridYCoord = locstream["ESMF:Y"]
-xctfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
+gridXCoord = locstream["ESMF:Lon"]
+gridYCoord = locstream["ESMF:Lat"]
+if coord_sys == ESMF.CoordSys.SPH_DEG:
+    xctfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (gridYCoord * deg2rad) ** 2
+elif coord_sys == ESMF.CoordSys.SPH_RAD:
+    xctfield.data[...] = 10.0 + (gridXCoord) ** 2 + (gridYCoord) ** 2
+else:
+    raise ValueError("coordsys value not supported")
 
 dstfield.data[...] = 1e20
 

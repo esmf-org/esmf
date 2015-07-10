@@ -2501,9 +2501,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: lu, loop, ls, ptr
+      integer :: i, ls, ptr
+      integer :: lu, nrecs
+      integer :: iostat
       character(len=LSZ) :: line
       integer :: localrc
+      character(LSZ), allocatable :: line_buffer(:)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2525,15 +2528,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="error opening text file: " // trim (filename), &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+!     Count records, then read them into a local buffer
+      nrecs = 0
+      do
+        read (lu, *, iostat=iostat)
+        if (iostat /= 0) exit
+        nrecs = nrecs + 1
+      end do
+
+      rewind (lu)
+
+      allocate (line_buffer(nrecs))
+      do, i = 1, nrecs
+        read (lu, '(a)') line_buffer(i)
+      end do
+
 !     Read to end of file
 !     -------------------
       config%cptr%buffer(1:1) = EOL
       ptr = 2                         ! next buffer position
-      do loop = 1, NBUF_MAX
+      do, i = 1, nrecs
 
 !        Read next line
 !        --------------
-         read(lu,'(a)', end=11) line  ! read next line
+         line = line_buffer(i)            ! copy next line
          call ESMF_Config_trim ( line )      ! remove trailing white space
          call ESMF_Config_pad ( line )       ! Pad with # from end of line
 
@@ -2550,16 +2568,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          end if
 
       end do
-      
-      ! good chance config%cptr%buffer is not big enough 
-      localrc = ESMF_RC_MEM
-      if ( present (rc )) then
-        rc = localrc
-      endif
-
-      return
-      
-11    continue
 
 !     All done
 !     --------

@@ -478,7 +478,7 @@ int ArrayBundle::write(
       }
     }
     if (ESMF_SUCCESS == localrc) {
-      // Call the IO read function
+      // Call the IO write function
       localrc = newIO->write(file, localiofmt, localoverwrite,
                              localstatus, timeslice);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

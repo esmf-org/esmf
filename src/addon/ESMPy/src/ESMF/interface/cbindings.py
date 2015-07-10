@@ -955,7 +955,6 @@ _ESMF.ESMC_MeshGetElemCoord.argtypes = [ct.c_void_p,
                                     np.ctypeslib.ndpointer(dtype=np.float64),
                                     ct.POINTER(ct.c_int),
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
-@deprecated
 def ESMP_MeshGetElemCoordPtr(mesh):
     """
     Preconditions: An ESMP_Mesh has been created with element coordinates 
@@ -981,9 +980,38 @@ def ESMP_MeshGetElemCoordPtr(mesh):
     num_dims = lnum_dims.value
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
+        raise ValueError('ESMC_MeshGetElemCoord() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
     return elemCoords, num_elems, num_dims
+
+_ESMF.ESMC_MeshGetConnectivity.restype = None
+_ESMF.ESMC_MeshGetConnectivity.argtypes = [ct.c_void_p,
+                                    np.ctypeslib.ndpointer(dtype=np.float64),
+                                    np.ctypeslib.ndpointer(dtype=np.int32),
+                                    ct.POINTER(ct.c_int)]
+def ESMP_MeshGetConnectivityPtr(mesh):
+    """
+    Preconditions: An ESMP_Mesh has been created.\n
+    Postconditions: An array containing the Mesh connectivity is
+                    returned into 'connCoord'.\n
+    Arguments:\n
+        :RETURN: Numpy.array(dtype=float64) :: connCoord\n
+        ESMP_Mesh                           :: mesh\n
+    """
+    lrc = ct.c_int(0)
+    num_elems = ESMP_MeshGetLocalElementCount(mesh)
+    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    # NOTE: the size of the connectivity array is hardcoded way too big to handle the GIS data case until we can
+    #       pull the correct info from file (nMaxMesh2_face_nodes*faces)
+    connCoord = np.zeros(num_nodes*num_elems*3, dtype=np.float64)
+    nodesPerElem = np.zeros(num_elems*num_nodes, dtype=np.int32)
+    _ESMF.ESMC_MeshGetConnectivity(mesh.struct.ptr, connCoord, nodesPerElem, ct.byref(lrc))
+
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetConnectivity() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    return connCoord, nodesPerElem
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p, 

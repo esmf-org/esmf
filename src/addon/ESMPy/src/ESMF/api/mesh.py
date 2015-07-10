@@ -594,6 +594,11 @@ class Mesh(object):
         if not self.parametric_dim:
             self._parametric_dim = num_dims
 
+        try:
+            self._connectivity, self._nodes_per_elem = ESMP_MeshGetConnectivityPtr(self)
+        except:
+            warnings.warn("Mesh connectivity could not be read")
+
         # initialize the coordinates structures
         # index order is [meshloc][coord_dim]
         self._coords = [[None for a in range(num_dims)] \
