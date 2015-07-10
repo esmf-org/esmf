@@ -58,18 +58,18 @@ struct SearchData {
   double closest_dist2;  // closest distance squared  
   MEField<> *src_coord;
 
-  int *closest_src_id;
+  int closest_src_id;
   const PointList *srcpointlist;
 };
 
   static int nearest_func(void *n, void *y, double *min, double *max) {
 
-    int *this_id = static_cast<int*>(n);
+    point *this_pt = static_cast<point*>(n);
 
     SearchData *sd = static_cast<SearchData*>(y);
 
     // Get source node coords
-    const double *c=sd->srcpointlist->get_coord_ptr_from_id(this_id);  
+    const double *c=this_pt->coords;  
 
     // Convert to 3D point
     double src_pnt[3];
@@ -83,9 +83,9 @@ struct SearchData {
       (sd->dst_pnt[1]-src_pnt[1])*(sd->dst_pnt[1]-src_pnt[1])+
       (sd->dst_pnt[2]-src_pnt[2])*(sd->dst_pnt[2]-src_pnt[2]);
 
-    // If this node is closer than make it the closest node
+    // If this node is closer then make it the closest node
     if (dist2 < sd->closest_dist2) {
-      sd->closest_src_id=this_id;
+      sd->closest_src_id=this_pt->id;
       sd->closest_dist2=dist2;
 
       // compute a new min-max box
@@ -104,11 +104,12 @@ struct SearchData {
       if (sd->closest_src_id != NULL) {
 	// If exactly the same distance chose the point with the smallest id
 	// (To make things consistent when running on different numbers of procs)
-	if (*this_id < *(sd->closest_src_id)) {
-	  sd->closest_src_id=this_id;
+        //mvr	if (*this_id < *(sd->closest_src_id)) {
+	if (this_pt->id < sd->closest_src_id) {
+	  sd->closest_src_id=this_pt->id;
 	}
       } else { // If there is no closest yet, then just use the one you found. 
-	sd->closest_src_id=this_id;
+	sd->closest_src_id=this_pt->id;
       }
 
       // Don't need to change the closest_dist2  because at exactly the same dist 
@@ -143,15 +144,14 @@ struct SearchData {
   double pnt[3];
   for (UInt p = 0; p < num_nodes_to_search; ++p) {
 
-    const double *pnt_crd=src_pl.get_coord_ptr(p);
-    const int &pnt_id=src_pl.get_id_ref(p);
+    const point *point_ptr=src_pl.get_point(p);
 
     // Set coord value in 3D point
-    pnt[0] = pnt_crd[0];
-    pnt[1] = pnt_crd[1];
-    pnt[2] = sdim == 3 ? pnt_crd[2] : 0.0;
+    pnt[0] = point_ptr->coords[0];
+    pnt[1] = point_ptr->coords[1];
+    pnt[2] = sdim == 3 ? point_ptr->coords[2] : 0.0;
 
-    tree->add(pnt, pnt, (void*)&pnt_id);
+    tree->add(pnt, pnt, (void*)point_ptr);
   }
 
   // Commit tree
@@ -207,7 +207,7 @@ struct SearchData {
     if (sd.closest_src_id != NULL) {
       Search_result *sr=new Search_result();       
       sr->dst_gid=pnt_id;
-      sr->src_gid=*sd.closest_src_id;
+      sr->src_gid=sd.closest_src_id;
       result.push_back(sr);
     } else { // ...otherwise deal with the unmapped point
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
@@ -284,15 +284,14 @@ struct CommData {
   // Add unmasked nodes to search tree
   for (UInt p = 0; p < num_nodes_to_search; ++p) {
 
-    const double *pnt_crd=src_pl.get_coord_ptr(p);
-    const int &pnt_id=src_pl.get_id_ref(p);
+    const point *point_ptr=src_pl.get_point(p);
 
     // Set coord value in 3D point
-    pnt[0] = pnt_crd[0];
-    pnt[1] = pnt_crd[1];
-    pnt[2] = sdim == 3 ? pnt_crd[2] : 0.0;
+    pnt[0] = point_ptr->coords[0];
+    pnt[1] = point_ptr->coords[1];
+    pnt[2] = sdim == 3 ? point_ptr->coords[2] : 0.0;
 
-    tree->add(pnt, pnt, (void*)&pnt_id);
+    tree->add(pnt, pnt, (void*)point_ptr);
 
     // compute proc min max
     if (pnt[0] < proc_min[0]) proc_min[0]=pnt[0];
@@ -325,7 +324,6 @@ struct CommData {
   for (UInt p = 0; p < dst_size; ++p) {
     
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
-    int pnt_id=dst_pl.get_id(p);
 
     // Setup search structure
     SearchData sd;
@@ -345,7 +343,7 @@ struct CommData {
     
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_src_id != NULL) {
-      closest_src_gid[p]=*sd.closest_src_id;
+      closest_src_gid[p]=sd.closest_src_id;
       closest_dist[p]=sqrt(sd.closest_dist2);
     }
   }
@@ -599,7 +597,7 @@ struct CommData {
       CommData cd;
       if (sd.closest_src_id != NULL) {
         cd.closest_dist=sqrt(sd.closest_dist2);
-        cd.closest_src_gid=*sd.closest_src_id;
+        cd.closest_src_gid=sd.closest_src_id;
 
 	//	printf("#%d c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
 
