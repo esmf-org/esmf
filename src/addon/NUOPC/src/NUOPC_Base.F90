@@ -1364,39 +1364,185 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Grid)                 :: grid
-    real(ESMF_KIND_R8), pointer     :: dataPtr(:,:), lonPtr(:,:), latPtr(:,:)
-    integer                         :: i, j
+    type(ESMF_TypeKind_Flag)        :: typekind
+    integer                         :: rank
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D3(:,:,:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D1(:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D2(:,:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: coord2PtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
+    integer                         :: i, j, k
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_FieldGet(field, typekind=typekind, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     if (trim(dataFillScheme)=="sincos") then
-      ! 2D sin*cos pattern
-      ! TODO: support Meshes
-      ! TODO: support nD, not just 2D
-      call ESMF_FieldGet(field, grid=grid, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=lonPtr, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=latPtr, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      call ESMF_FieldGet(field, farrayPtr=dataPtr, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      do j=lbound(dataPtr,2),ubound(dataPtr,2)
-      do i=lbound(dataPtr,1),ubound(dataPtr,1)
-        dataPtr(i,j) = sin(real(member)*3.1416*(lonPtr(i,j)+real(step))/180.) &
-                     * cos(real(member)*3.1416*(latPtr(i,j)+real(step))/180.)
-      enddo
-      enddo
+      if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+        ! 1D sin pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+          dataPtrR8D1(i) = &
+            sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.)
+        enddo
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+        ! 2D sin*cos pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+        do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+          dataPtrR8D2(i,j) = &
+            sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
+            cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+        enddo
+        enddo
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+        ! 3D sin*cos*sin pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=3, farrayPtr=coord3PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        do k=lbound(dataPtrR8D3,3),ubound(dataPtrR8D3,3)
+        do j=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
+        do i=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
+          dataPtrR8D3(i,j,k) = &
+            sin(real(member)*3.1416*(coord1PtrR8D3(i,j,k)+real(step))/180.) * &
+            cos(real(member)*3.1416*(coord2PtrR8D3(i,j,k)+real(step))/180.) * &
+            sin(real(member)*3.1416*(coord3PtrR8D3(i,j,k)+real(step))/180.)
+        enddo
+        enddo
+        enddo
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported typekind-rank and scheme combination requested.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    else if (trim(dataFillScheme)=="one") then
+      if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+        ! 1D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D1 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+        ! 1D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D1 = 1._ESMF_KIND_R4
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+        ! 2D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D2 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+        ! 2D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D2 = 1._ESMF_KIND_R4
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+        ! 3D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D3 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+        ! 3D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D3 = 1._ESMF_KIND_R4
+      endif
     else
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unknown dataFillScheme requested.", &
