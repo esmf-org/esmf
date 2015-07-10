@@ -53,6 +53,15 @@ program ESMF_ArrayIOUTest
   type(ESMF_Array)                        :: array_withhalo3
   type(ESMF_Array)                        :: array_diff
   type(ESMF_Array)                        :: array_2DE, array_2DE_r
+  type(ESMF_Array)                        :: array
+  type(ESMF_DistGrid)                     :: distgrid_tmp
+  type(ESMF_Array)                        :: array_tmp
+  integer                                 :: rank, tileCount, dimCount, jj
+  integer, allocatable                    :: arrayToDistGridMap(:), regDecomp(:)
+  integer, allocatable                    :: minIndexPTile(:,:), maxIndexPTile(:,:)
+  integer, allocatable                    :: minIndexNew(:), maxIndexNew(:)
+  integer, allocatable                    :: undistLBound(:), undistUBound(:)
+  real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4(:,:,:,:)
   type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
@@ -808,6 +817,129 @@ program ESMF_ArrayIOUTest
   write(name, *) "Destroy 2 DE DistGrid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridDestroy(distgrid_2DE, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! Array with undistributed dimension(s)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create 1 DE/Pet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), &
+              maxIndex=(/5,10/), regDecomp=(/petCount,1/),  rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
+          indexflag=ESMF_INDEX_GLOBAL, distgridToArrayMap=(/1,3/), &
+          undistLBound=(/2,3/), undistUBound=(/8,5/), &
+          name="myData", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  
+!!!! Calling ArrayWrite on array directly does not work because it has 
+!!!! undistributed dimensions!!  
+
+!!!! The way to solve this is to create a new Array on a new DistGrid, that
+!!!! has all distributed dims, and still results in exactly the same memory
+!!!! allocation. This new Array can then use the original arrayPtr to access
+!!!! the original memory.
+
+  ! get some basic information out of the Array
+  call ESMF_ArrayGet(array, rank=rank, tileCount=tileCount, dimCount=dimCount, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  if (tileCount /= 1) then
+    ! code below, and I/O only supports single tile case for now.
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+  
+  ! get more info out of the Array
+  allocate(minIndexPTile(dimCount,1), maxIndexPTile(dimCount,1))
+  allocate(arrayToDistGridMap(rank))
+  allocate(undistLBound(rank), undistUBound(rank))
+  call ESMF_ArrayGet(array, arrayToDistGridMap=arrayToDistGridMap, &
+    undistLBound=undistLBound, undistUBound=undistUBound, &
+    minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! construct the new minIndex and maxIndex
+  allocate(minIndexNew(rank), maxIndexNew(rank))
+  jj=0  ! reset
+  do i=1, rank
+    j = arrayToDistGridMap(i)
+    if (j>0) then
+      ! valid DistGrid dimension
+      minIndexNew(i) = minIndexPTile(j,1)
+      maxIndexNew(i) = maxIndexPTile(j,1)
+    else
+      ! undistributed dimension
+      jj=jj+1
+      minIndexNew(i) = undistLBound(jj)
+      maxIndexNew(i) = undistUBound(jj)
+    endif
+  enddo
+  
+  ! general dimensionality of regDecomp
+  allocate(regDecomp(rank))
+  regDecomp = 1 ! default all dims to 1
+  regDecomp(1) = petCount ! first element petCount for default distribution
+  
+  ! now create the fixed up DistGrid
+  distgrid_tmp = ESMF_DistGridCreate(minIndex=minIndexNew, &
+    maxIndex=maxIndexNew, regDecomp=regDecomp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! access the pointer to the allocated memory on each DE
+  call ESMF_ArrayGet(array, farrayPtr=arrayPtrR8D4, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  ! initialize data
+  arrayPtrR8D4 = 12345._ESMF_KIND_R8
+
+  ! finally create the fixed up Array, passing in same memory allocation ptr
+  array_tmp = ESMF_ArrayCreate(distgrid=distgrid_tmp, &
+    farrayPtr=arrayPtrR8D4, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!!!! Now array_tmp is an Array that references the exact same data allocation 
+!!!! as the oritional array object did, however, array_tmp only has distributed
+!!!! dimensions, and therefore will work in the ArrayWrite() call below...
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, write the netCDF file.
+  write(name, *) "Write ESMF_Array to NetCDF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LogSet (trace = .true.)
+  call ESMF_ArrayWrite(array_tmp, file="Array_myData.nc",         &
+      status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  call ESMF_LogSet (trace = .false.)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy DistGrid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
