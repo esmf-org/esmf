@@ -384,13 +384,13 @@ void ESMC_MeshGetElemCoord(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetElemCoord - Get lat/lon element center coordinates from a Mesh \label{sec:mesh:capi:meshgetelemcoord}
+// !IROUTINE: ESMC_MeshGetConnectivity - Get Mesh connectivity
 //
 // !INTERFACE:
 void ESMC_MeshGetConnectivity(
 			 ESMC_Mesh mesh_in,     // in (required)
 			 double *connCoord,     // out
-			 int *numNodesPerElem,  // out
+			 int *nodesPerElem,  // out
 			 int *rc                // out
 			 );
 // !RETURN VALUE:
@@ -398,21 +398,21 @@ void ESMC_MeshGetConnectivity(
 //
 // !DESCRIPTION:
 //
-//  NOTE: At this time the connectivity that is return from this call is
+//  NOTE: At this time the connectivity that is returned from this call is
 //        not necessarily in the same format as how it was passed into the
 //        creation routine.
 //
 // This call returns the connectivity of the given {\tt ESMC\_Mesh}
 // in the provided {\tt connCoord} buffer of doubles.  At completion, this
 // buffer is a 1-D array with the coordinates for the nodes of a given element
-// in counterclockwise order.  The {/tt numNodesPerElem} buffer of integers
+// in counterclockwise order.  The {/tt nodesPerElem} buffer of integers
 // contains the number of nodes to expect per element.
 //
 // The arguments are:
 // \begin{description}
 // \item[mesh\_in] Mesh object.
 // \item[connCoord] Pointer to doubles.  The connectivity is returned here.
-// \item[numNodesPerElem] Pointer to integers.  The number of nodes in each
+// \item[nodesPerElem] Pointer to integers.  The number of nodes in each
 //    element.
 // \item[rc] Return code; equals {\tt ESMF\_SUCCESS} if there are no
 // errors.

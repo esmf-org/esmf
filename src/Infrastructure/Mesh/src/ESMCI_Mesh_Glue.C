@@ -2342,18 +2342,17 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 				//if (!GetAttr(node).is_locally_owned()) continue;
 
 				double *c=coords->data(node);
-                for (int j = 0; j < sdim; ++j) {
-                	double *indCoords=coords->data(node);
+                for (int j = 0; j < sdim; ++j)
                 	connCoord[cpPos++] = c[j];
-                }
+
     			// NOTE: must implement sort if we want IDs
                 //nodeIDs[s]=node.get_id();
 			}
 			// NOTE: must implement sort if we want IDs
 			//elemIDs[npePos] = elem.get_id();
+
 			nodesPerElem[npePos++] = topo->num_nodes;
         }
-
 
         /*
          void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids) {
