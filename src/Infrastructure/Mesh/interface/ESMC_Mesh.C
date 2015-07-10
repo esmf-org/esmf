@@ -125,7 +125,8 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 #define ESMC_METHOD "ESMC_MeshAddElements()"
 int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                          int *elementTypes, int *elementConn, 
-                         int *elementMask, double *elementArea){
+                         int *elementMask, double *elementArea,
+                         double *elementCoords){
    
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -136,7 +137,8 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   
   // call into ESMCI method
   localrc = mep->addElements(elementCount, elementIds, elementTypes, 
-                             elementConn, elementMask, elementArea);
+                             elementConn, elementMask, elementArea, 
+                             elementCoords);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
@@ -228,9 +230,21 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
 #define ESMC_METHOD "ESMC_MeshGetCoord()"
 void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
            double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
+  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
 }
 //-----------------------------------------------------------------------------
 
@@ -239,9 +253,45 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh_in,
 #define ESMC_METHOD "ESMC_MeshGetElemCoord()"
 void ESMC_MeshGetElemCoord(ESMC_Mesh mesh_in,
            double *elemCoord, int *num_elems, int *num_dims, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  mep->getLocalElemCoords(elemCoord, num_elems, num_dims, rc);
+  mep->getLocalElemCoords(elemCoord, num_elems, num_dims, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetConnectivity()"
+void ESMC_MeshGetConnectivity(ESMC_Mesh mesh_in, double *connCoord,
+		                   int *numNodesPerElem, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  mep->getConnectivity(connCoord, numNodesPerElem, &localrc);
+
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if(rc!=NULL) *rc = ESMF_SUCCESS;
+  return;
 }
 //-----------------------------------------------------------------------------
 

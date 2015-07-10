@@ -124,6 +124,8 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *elemCoord, int *_orig_sdim,
 
 void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc);
 
+void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
+		                   int *_orig_sdim, int *rc);
 
 void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc);
 

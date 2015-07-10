@@ -12,7 +12,8 @@ from ESMF.test.base import TestBase, attr
 from ESMF.test.test_api.mesh_utilities import *
 
 class TestMesh(TestBase):
-    def check_mesh(self, mesh, nodeCoord, nodeOwner):
+    Manager(debug=True)
+    def check_mesh(self, mesh, nodeCoord, nodeOwner, elemCoord=None):
 
         xcoords = mesh.get_coords(0)
         ycoords = mesh.get_coords(1)
@@ -25,14 +26,27 @@ class TestMesh(TestBase):
         xcoords3 = xcoords2[np.where(nodeOwner == local_pet())]
         ycoords3 = ycoords2[np.where(nodeOwner == local_pet())]
 
-        assert (all(xcoords == xcoords3))
-        assert (all(ycoords == ycoords3))
+        assert (np.all(xcoords == xcoords3))
+        assert (np.all(ycoords == ycoords3))
+
+        if elemCoord is not None:
+            xelems = mesh.get_coords(0, 1)
+            yelems = mesh.get_coords(1, 1)
+
+            # use size here because elemCoord has all nodes (owned and non-owned)
+            xelems2 = np.array([elemCoord[2 * i] for i in range(mesh.size[element])])
+            yelems2 = np.array([elemCoord[2 * i + 1] for i in range(mesh.size[element])])
+
+            # TODO: no concept of owned elements yet?
+            assert (np.all(xelems == xelems2))
+            assert (np.all(yelems == yelems2))
 
         # this call fails if nodes and elements have not been added first
         # mesh.free_memory()
 
     def test_mesh_5(self):
         parallel = False
+        elemCoord = None
         if pet_count() > 1:
             if pet_count() > 4:
                 raise NameError('MPI rank must be 4 in parallel mode!')
@@ -42,10 +56,44 @@ class TestMesh(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_5_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
                 mesh_create_5()
 
-        self.check_mesh(mesh, nodeCoord, nodeOwner)
+        self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+
+    def test_mesh_10(self):
+        parallel = False
+        elemCoord = None
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_10_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
+                mesh_create_10()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+
+    def test_mesh_50(self):
+        parallel = False
+        elemCoord = None
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
+                mesh_create_50()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
     def test_mesh_50_ngons(self):
         parallel = False
@@ -60,38 +108,6 @@ class TestMesh(TestBase):
         else:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_ngons()
-
-        self.check_mesh(mesh, nodeCoord, nodeOwner)
-
-    def test_mesh_10(self):
-        parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
-
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_10_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_10()
-
-        self.check_mesh(mesh, nodeCoord, nodeOwner)
-
-    def test_mesh_50(self):
-        parallel = False
-        if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
-            parallel = True
-
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_50_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_50()
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
@@ -198,13 +214,40 @@ class TestMesh(TestBase):
             mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
                                   filetype=FileFormat.ESMFMESH)
         except:
-            raise NameError('mesh_create_from_file_scrip failed!')
+            raise NameError('mesh_create_from_file_esmfmesh failed!')
 
         mesh2 = mesh[0:5]
 
         assert mesh.coords[0][0].shape == (866,)
         assert mesh.size == [866, 936]
         assert mesh.size_local == [866, 936]
+
+        del mesh
+
+        assert mesh2.coords[0][0].shape == (5,)
+        assert mesh2.size == [5, None]
+        assert mesh2.size_local == [5, None]
+
+
+    @attr('data')
+    @attr('serial')
+    @expected_failure
+    #TODO: remove expected failure once we have a smaller data file with mesh element coordinates to use
+    # TODO: have to define slicing for mesh element coordinates as well..
+    def test_slice_mesh_created_from_file_elem_coords(self):
+        try:
+            esmfdir = os.path.dirname(inspect.getfile(ESMF))
+            mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne30np4-t2.nc"),
+                        filetype=FileFormat.SCRIP)
+        except:
+            raise NameError('mesh_create_from_file_elem_coords failed!')
+
+        mesh2 = mesh[0:5]
+
+        assert mesh.coords[node][0].shape == (48600,)
+        assert mesh.coords[element][0].shape == (48602,)
+        assert mesh.size == [48600, 48602]
+        assert mesh.size_local == [48600, 48602]
 
         del mesh
 

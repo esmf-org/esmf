@@ -532,22 +532,30 @@ module NUOPC_RunSequenceDef
     if (present(logflag)) logflagL = logflag
 
     if (.not.associated(runSeq%first)) then
-      write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint: no runElements"
+      write (msgString,"(A)") "runSeq::"
       if (logflagL) then
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        print *, msgString
+        write (*,"(A)") msgString
+      endif
+      write (msgString,"(A)") "::"
+      if (logflagL) then
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+        write (*,"(A)") msgString
       endif
     else
-      write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint:"
+      write (msgString,"(A)") "runSeq::"
       if (logflagL) then
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        print *, msgString
+        write (*,"(A)") msgString
       endif
       searchElement => runSeq%first
       do while (associated(searchElement%next))
@@ -559,6 +567,14 @@ module NUOPC_RunSequenceDef
       call NUOPC_RunElementPrint(searchElement, logflag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      write (msgString,"(A)") "::"
+      if (logflagL) then
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+        write (*,"(A)") msgString
+      endif
     endif
 
   end subroutine
@@ -597,7 +613,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        print *, msgString
+        write (*,"(A)") msgString
       endif
       call NUOPC_RunSequenceSinglePrint(runSeq(i), logflag)
     enddo

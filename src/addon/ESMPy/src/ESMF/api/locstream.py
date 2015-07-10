@@ -10,7 +10,7 @@ from ESMF.api.esmpymanager import *
 from ESMF.api.array import Array1D
 import ESMF.api.constants as constants
 from copy import copy
-from ESMF.util.helpers import get_formatted_slice
+from ESMF.util.slicing import get_formatted_slice
 
 
 #### LocStream class #########################################################
@@ -54,6 +54,9 @@ class LocStream(dict):
         # regist with atexit
         import atexit; atexit.register(self.__del__)
         self._finalized = False
+
+        # set the single stagger flag
+        self._singlestagger = True
 
         super(LocStream, self).__init__()
 
@@ -213,3 +216,8 @@ class LocStream(dict):
     @property
     def upper_bounds(self):
         return self._upper_bounds
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+

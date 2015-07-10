@@ -15,6 +15,7 @@
 module NUOPC_Comp
 
   use ESMF
+  use NUOPC_FreeFormatDef
   use NUOPC_Base
 
   implicit none
@@ -25,6 +26,7 @@ module NUOPC_Comp
   public NUOPC_CompAreServicesSet
   public NUOPC_CompAttributeAdd
   public NUOPC_CompAttributeGet
+  public NUOPC_CompAttributeIngest
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
@@ -54,6 +56,11 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompAttributeGetI
     module procedure NUOPC_GridCompAttributeGetSL
     module procedure NUOPC_CplCompAttributeGetSL
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeIngest
+    module procedure NUOPC_GridCompAttributeIng
+    module procedure NUOPC_CplCompAttributeIng
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeSet
@@ -556,6 +563,152 @@ module NUOPC_Comp
         file=FILENAME)) &
         return  ! bail out
     endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest free format NUOPC GridComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_GridCompAttributeIng(comp, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),    intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Ingest the component attributes from a FreeFormat object.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      ! process the configuration line
+      if (tokenCount == 3) then
+        if (trim(tokenList(2)) /= "=") then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Free format Attribute line incorrectly formatted.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+        call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
+          value=trim(tokenList(3)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Free format Attribute line incorrectly formatted.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)
+        return  ! bail out
+      endif
+      
+      ! clean-up
+      deallocate(tokenList)
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest free format NUOPC CplComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_CplCompAttributeIng(comp, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp),     intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Ingest the component attributes from a FreeFormat object.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      ! process the configuration line
+      if (tokenCount == 3) then
+        if (trim(tokenList(2)) /= "=") then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Free format Attribute line incorrectly formatted.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+        call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
+          value=trim(tokenList(3)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Free format Attribute line incorrectly formatted.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)
+        return  ! bail out
+      endif
+      
+      ! clean-up
+      deallocate(tokenList)
+    enddo
     
   end subroutine
   !-----------------------------------------------------------------------------

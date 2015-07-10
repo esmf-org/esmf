@@ -375,7 +375,7 @@ module NUOPC_Base
           return  ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provoide a valid string for TransferOfferGeomObject", &
+          msg="must provide a valid string for TransferOfferGeomObject", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)
@@ -3303,7 +3303,7 @@ module NUOPC_Base
     array = ESMF_ArrayCreate(dg, factorList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_ArrayWrite(array, fileName, &
+    call ESMF_ArrayWrite(array, fileName, variableName="weights", &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out

@@ -191,8 +191,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable   :: srcdims(:), dstdims(:)
     integer            :: srcRank, dstRank, srccoordim, dstcoordim
     logical            :: isConserve, srcIsSphere, dstIsSphere
-    logical            :: addCorners,convertToDual
-    type(ESMF_MeshLoc) :: meshloc
+    logical            :: addCorners
+    type(ESMF_MeshLoc) :: srcmeshloc, dstmeshloc
     logical            :: srcIsReg, dstIsReg
     logical            :: srcIsRegional, dstIsRegional, typeSetFlag
     character(len=256) :: methodStr
@@ -208,7 +208,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=256) :: argStr
     logical            :: useSrcCoordVar, useDstCoordVar
     logical            :: useSrcMask, useDstMask
-    integer            :: commandbuf(22)
+    logical            :: useSrcCorner, useDstCorner
+    integer            :: commandbuf(24)
     real(ESMF_KIND_R8)   :: commandbuf2(2)
     character(len=MAXNAMELEN*2) :: commandbuf1(2)
     character(len=MAXNAMELEN) :: srcLocStr, dstLocStr
@@ -338,20 +339,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
     
-    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
-       srcLocStr = 'face'
-       dstLocStr = 'face'
-    else
-       srcLocStr = 'node'
-       dstLocStr = 'node'
-    endif
+!    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+!       srcLocStr = 'face'
+!       dstLocStr = 'face'
+!    else
+!       srcLocStr = 'node'
+!       dstLocStr = 'node'
+!    endif
 
+    ! by default, variables are located at the center of the grid
+    useSrcCorner = .FALSE.
+    useDstCorner = .FALSE.
+    srcmeshloc=ESMF_MESHLOC_ELEMENT
+    dstmeshloc=ESMF_MESHLOC_ELEMENT
     ! Find out the grid dimension at the root processor and broadcast to the rest
     if (PetNo == 0) then
       ! find file type
-      call checkFileType(trim(srcFile), trim(srcVarName), srcLocStr, srcVarExist, &
+      call checkFileType(trim(srcFile), trim(srcVarName), srcVarExist, &
       		  localsrcFileType, srcVarStr, useSrcMask, srcMissingVal,  &
-		  srcVarRank, srcVarDims, srcDimids, vartype=srcVarType,  rc=localrc)
+		  srcVarRank, srcVarDims, srcDimids, locStr=srcLocStr, &
+		  vartype=srcVarType,  rc=localrc)
       if (.not. srcVarExist) localrc = ESMF_FAILURE
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) then
@@ -365,14 +372,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            terminateProg = .TRUE.
            goto 1110
       endif
-	      
-      call checkFileType(trim(dstFile), trim(dstVarName), dstLocStr, dstVarExist, &
+
+      if (srcLocStr .eq. 'node' .and. (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+          localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+  	        msg = " The source variable has to be located at the center of the grid ", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           terminateProg = .TRUE.
+           goto 1110
+      endif
+      if (localsrcFileType == ESMF_FILEFORMAT_UGRID .and.  &
+          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE .and. srcLocStr .eq. 'node') then	      
+	   useSrcCorner = .TRUE.
+           dstLocStr = 'node'  !in case the dest variable is not defined
+	   srcmeshloc=ESMF_MESHLOC_NODE
+      else
+           dstLocStr = 'face'
+      endif
+      call checkFileType(trim(dstFile), trim(dstVarName), dstVarExist, &
       		   localdstFileType, dstVarStr, useDstMask, dstMissingVal, &
-		   dstVarRank, dstVarDims, dstDimids, rc=localrc)
+		   dstVarRank, dstVarDims, dstDimids, locStr=dstLocStr, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) then
            terminateProg = .TRUE.
            goto 1110
+      endif
+    if (dstLocStr .eq. 'node' .and. (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+          localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+  	        msg = " The source variable has to be located at the center of the grid ", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           terminateProg = .TRUE.
+           goto 1110
+      endif
+      if (localdstFileType == ESMF_FILEFORMAT_UGRID .and.  &
+          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE .and. dstLocStr .eq. 'node') then	      
+	   useDstCorner = .TRUE.
+	   dstmeshloc=ESMF_MESHLOC_NODE
       endif
       !print *, trim(dstLocStr), ' ', trim(dstVarStr)
       if (localsrcfiletype == ESMF_FILEFORMAT_GRIDSPEC) then
@@ -473,13 +509,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  	   commandbuf(10) = 1
 	   commandbuf2(2)=dstMissingVal
         endif
-        commandbuf(11) = srcVarRank
+        if (useSrcCorner) then 
+           commandbuf(11)=1
+        endif
+        if (useDstCorner) then 
+           commandbuf(12)=1
+        endif
+        commandbuf(13) = srcVarRank
         do i=1,srcVarRank
-          commandbuf(11+i) = srcVarDims(i)
+          commandbuf(13+i) = srcVarDims(i)
         enddo
-        commandbuf(12+srcVarRank) = dstVarRank
+        commandbuf(14+srcVarRank) = dstVarRank
         do i=1,dstVarRank
-          commandbuf(12+srcVarRank+i) = dstVarDims(i)
+          commandbuf(14+srcVarRank+i) = dstVarDims(i)
         enddo
         commandbuf1(1) = srcVarStr
         commandbuf1(2) = dstVarStr
@@ -536,13 +578,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (commandbuf(10) == 1) then
          useDstMask = .true.
       endif        
-      srcVarRank = commandbuf(11)
+      if (commandbuf(11) == 1) then
+         useSrcCorner = .true.
+         srcmeshloc = ESMF_MESHLOC_NODE
+      endif
+      if (commandbuf(12) == 1) then
+         useDstCorner = .true.
+         dstmeshloc = ESMF_MESHLOC_NODE
+      endif
+      srcVarRank = commandbuf(13)
       do i=1, srcVarRank
-         srcVarDims(i)=commandbuf(11+i)
+         srcVarDims(i)=commandbuf(13+i)
       enddo  
-      dstVarRank = commandbuf(12+srcVarRank)
+      dstVarRank = commandbuf(14+srcVarRank)
       do i=1, dstVarRank
-         dstVarDims(i)=commandbuf(12+srcVarRank+i)
+         dstVarDims(i)=commandbuf(14+srcVarRank+i)
       enddo  
       call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
       if (ESMF_LogFoundError(localrc, &
@@ -643,13 +693,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       isConserve=.true.
       addCorners=.true.
-      convertToDual=.false.
-      meshloc=ESMF_MESHLOC_ELEMENT
     else
       isConserve=.false.
       addCorners=.false.
-      convertToDual=.true.
-      meshloc=ESMF_MESHLOC_NODE
     endif
 
     if (srcIsRegional .and. dstIsRegional) then
@@ -735,12 +781,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if srcfile is not GRIDSPEC, it is UGRID 
       if (useSrcMask) then 
         srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-            meshname = trim(srcVarStr), maskFlag =meshloc, &
+            meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
             addUserArea=localUserAreaFlag, &
+	    convertToDual= .not. useSrcCorner, &
   	    varname=trim(srcVarName), rc=localrc)
       else
         srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
             meshname = trim(srcVarStr), &
+	    convertToDual=.not. useSrcCorner, &
             addUserArea=localUserAreaFlag, &
   	    rc=localrc)
       endif
@@ -752,7 +800,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+      srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=srcmeshloc,rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -806,12 +854,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! dstfile is UGRID
       if (useDstMask) then
         dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
-          meshname = trim(dstVarStr), maskFlag=meshloc, &
+          meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
+	  convertToDual= .not. useDstCorner, &
           addUserArea=localUserAreaFlag, &
           varname=trim(dstVarName), rc=localrc)
       else  
         dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
           meshname = trim(dstVarStr), &
+	  convertToDual=.not. useDstCorner, &
           addUserArea=localUserAreaFlag, &
           rc=localrc)
       endif
@@ -823,7 +873,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+      dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=dstmeshloc,rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -906,7 +956,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else 
           !! UGRID file
           srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
-			  meshloc = meshloc, & 
+			  meshloc =srcmeshloc, & 
 			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
 			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
       endif
@@ -921,7 +971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else 
           !! UGRID file
           srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
-			  meshloc = meshloc, & 
+			  meshloc = srcmeshloc, & 
 			  rc=localrc)
       endif
       if (ESMF_LogFoundError(localrc, &
@@ -1021,7 +1071,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-       if (meshloc == ESMF_MESHLOC_NODE) then
+       if (srcmeshloc == ESMF_MESHLOC_NODE) then
        	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1200,7 +1250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        else 
            !! UGRID file
            dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
-			  meshloc = meshloc, & 
+			  meshloc = dstmeshloc, & 
 			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
 			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
        endif
@@ -1215,14 +1265,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else 
            !! UGRID file
            dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
-			  meshloc = meshloc, rc=localrc)
+			  meshloc = dstmeshloc, rc=localrc)
       endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-   if (useDstMask) then
+!   if (useDstMask) then
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
@@ -1253,7 +1303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ESMF_CONTEXT, rcToReturn=rc)) return
 		fptr4d(:,:,:,:)=dstMissingVal
         endif
-    endif
+!    endif
 
     !! Call regird   
     call ESMF_FieldRegrid(srcField, dstField, routehandle, zeroregion=ESMF_REGION_SELECT, &
@@ -1358,7 +1408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-       if (meshloc == ESMF_MESHLOC_NODE) then
+       if (dstmeshloc == ESMF_MESHLOC_NODE) then
        	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1530,13 +1580,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CheckFileType"
-  subroutine CheckFileType(filename, varname, locstr, varexist, filetype, attstr, &
-   haveMask, missingval, ndims, dims, dimids, vartype, coordnames, rc)
+  subroutine CheckFileType(filename, varname, varexist, filetype, attstr, &
+   haveMask, missingval, ndims, dims, dimids, locstr, vartype, coordnames, rc)
 
 ! ARGUMENTS:  
     character(len=*),  intent(in) :: filename
     character(len=*),  intent(in) :: varname
-    character(len=*),  intent(in):: locstr
     logical, intent(out) :: varexist
     type(ESMF_Fileformat_Flag), intent(out) :: filetype
     character(len=*),  intent(out):: attstr
@@ -1545,6 +1594,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: ndims
     integer, intent(out) :: dims(:)
     integer, intent(out) :: dimids(:)
+    character(len=*),  intent(inout), optional :: locstr
     integer, intent(out), optional :: vartype
     character(len=*), intent(in), optional :: coordnames(:)
     integer, intent(out), optional :: rc
@@ -1584,17 +1634,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	 ncStatus = nf90_inquire_attribute(gridid, varid, "location", len=len)
          if (ncStatus == nf90_noerror) then
    	    ncStatus = nf90_get_att(gridid, varid, "location", locallocstr)
-            !locstr(len+1)=''
 	    if (ncStatus /= nf90_noerror) then
       	       print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
                return
 	    endif
-	    if (locallocstr .ne. locstr) then
+	    if (present(locstr)) then
+	       locstr = locallocstr
+            endif      
+!	    if (locallocstr .ne. locstr) then
+!              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+!  	        msg = " var did not locate at the correct location for the regridding method", &
+!                ESMF_CONTEXT, rcToReturn=rc)
+!	      return
+!	    endif
+	 else 
               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-  	        msg = " var did not locate at the correct location for the regridding method", &
+  	        msg = " location attribute not defined for the variable", &
                 ESMF_CONTEXT, rcToReturn=rc)
 	      return
-	    endif
          endif
        else 
          !  otherwise, check if coordinates attribute is defined 
@@ -1642,7 +1699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          endif
        enddo
      else !the variable does not exist, -- need to find the file type w/o var
-         !Seach for a variable with standard_name = 'mesh_topology'
+         !Seach for a variable with cf_role or standard_name = 'mesh_topology'
          !find out how many variables are in the file
          ncStatus = nf90_inquire(gridid, nVariables=nvars)
          if (ncStatus /= nf90_noerror) then
@@ -1654,6 +1711,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    ncStatus=nf90_get_att(gridid, i, 'cf_role', attvalue)
 	    if (ncStatus == nf90_noerror) then
                ncStatus = nf90_inquire_attribute(gridid, i, 'cf_role', len=len)
+            else
+               ncStatus = nf90_get_att (gridid, i, "standard_name", attvalue)
+	       if (ncStatus == nf90_noerror) then
+                  ncStatus = nf90_inquire_attribute(gridid, i, 'standard_name', len=len)
+               endif
+            endif 
+	    if (ncStatus == nf90_noerror) then
                if (attvalue(len:len) .eq. achar(0)) len = len-1
 	       if (attvalue(1:len) .eq. 'mesh_topology') then
 	         fileType=ESMF_FILEFORMAT_UGRID
@@ -1671,22 +1735,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          enddo
 	 ! if UGRID, use the mesh variable to find the coordinates, either face of
 	 ! or node depending on the regrid method
+         ! use locStr to determine whether the variable should be on the node or on the face
          if (fileType == ESMF_FILEFORMAT_UGRID) then
-	    if (locStr .eq. 'face') then
-	       ncStatus=nf90_get_att(gridid, meshid, 'face_coordinates', locallocstr)
-	       if (ncStatus /= nf90_noerror) then
+	    if (present(locStr)) then
+	       if (locStr .eq. 'face') then
+	          ncStatus=nf90_get_att(gridid, meshid, 'face_coordinates', locallocstr)
+	          if (ncStatus /= nf90_noerror) then
        	             print '("NETCDF Error: " A " face_coordinates atrribute does not exist")', &
 		     trim(nf90_strerror(ncStatus))
             	     return
-	       endif
-	    else !default non-conservative
-	       ncStatus=nf90_get_att(gridid, meshid, 'node_coordinates', locallocstr)
-               if (ncStatus /= nf90_noerror) then
+	          endif
+	       else !default non-conservative
+	          ncStatus=nf90_get_att(gridid, meshid, 'node_coordinates', locallocstr)
+                  if (ncStatus /= nf90_noerror) then
        	             print '("NETCDF Error: " A " node_coordinates atrribute does not exist")', &
 		     trim(nf90_strerror(ncStatus))
             	     return
-	       endif
+	          endif
+               endif
+            else
+               ! signal an error if the variable does not exist and locStr is not present
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+     	          msg = " locStr is not present when the variable is not defined", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+	      return
 	    endif
+	    
 	    ! split the locallocstr to find the coordinate var name
 	    pos = INDEX(locallocstr, ' ')
             varnames(1)=locallocstr(1:pos-1)

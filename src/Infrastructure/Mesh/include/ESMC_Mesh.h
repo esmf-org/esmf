@@ -69,7 +69,8 @@ int ESMC_MeshAddElements(
   int *elementTypes,        // in
   int *elementConn,         // in
   int *elementMask,         // in
-  double *elementArea       // in
+  double *elementArea,      // in
+  double *elementCoords     // in
 );
 
 // !RETURN VALUE:
@@ -132,6 +133,15 @@ int ESMC_MeshAddElements(
 //          An array containing element areas.  This input consists of a 1D array 
 //          the size of the number of elements on this PET. If not specified (i.e. NULL is passed in), the 
 //          element areas are internally calculated.
+//   \item[{[elementCoords]}] 
+//          An array containing the physical coordinates of the elements to be created on this
+//          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+//          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+//          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+//          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
+//          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
+//          etc.). 
+//   
 //   \end{description}
 //
 //EOP
@@ -371,6 +381,46 @@ void ESMC_MeshGetElemCoord(
 //
 //EOP
 //-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetElemCoord - Get lat/lon element center coordinates from a Mesh \label{sec:mesh:capi:meshgetelemcoord}
+//
+// !INTERFACE:
+void ESMC_MeshGetConnectivity(
+			 ESMC_Mesh mesh_in,     // in (required)
+			 double *connCoord,     // out
+			 int *numNodesPerElem,  // out
+			 int *rc                // out
+			 );
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  NOTE: At this time the connectivity that is return from this call is
+//        not necessarily in the same format as how it was passed into the
+//        creation routine.
+//
+// This call returns the connectivity of the given {\tt ESMC\_Mesh}
+// in the provided {\tt connCoord} buffer of doubles.  At completion, this
+// buffer is a 1-D array with the coordinates for the nodes of a given element
+// in counterclockwise order.  The {/tt numNodesPerElem} buffer of integers
+// contains the number of nodes to expect per element.
+//
+// The arguments are:
+// \begin{description}
+// \item[mesh\_in] Mesh object.
+// \item[connCoord] Pointer to doubles.  The connectivity is returned here.
+// \item[numNodesPerElem] Pointer to integers.  The number of nodes in each
+//    element.
+// \item[rc] Return code; equals {\tt ESMF\_SUCCESS} if there are no
+// errors.
+// \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 //BOPI
