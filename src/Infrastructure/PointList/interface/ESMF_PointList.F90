@@ -85,7 +85,6 @@ module ESMF_PointListMod
   public ESMF_PointListAdd
  
   public ESMF_PointListPrint
-  public ESMF_PointListSort
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -208,7 +207,6 @@ contains
   end subroutine ESMF_PointListSetInitCreated
 !------------------------------------------------------------------------------
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListCreateFrmGrid"
@@ -261,6 +259,11 @@ contains
 
     ! Call C++ create code
     call c_ESMC_PointListCreateFrmGrid(grid, staggerLoc%staggerloc, maskValuesArg, pointlist, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_PointListSort(pointlist, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -675,6 +678,11 @@ contains
       enddo
     endif 
 
+    call c_ESMC_PointListSort(pointlist, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     deallocate(mycoords, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1052,54 +1060,6 @@ contains
   end subroutine ESMF_PointListPrint
 !------------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_PointListSort"
-!BOP
-! !IROUTINE: ESMF_PointListSort - Sort the contents of a PointList by ID
-
-! !INTERFACE:
-  subroutine ESMF_PointListSort(pointlist, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_PointList),     intent(in)            :: pointlist
-    integer,                intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!   Print information about an {\tt ESMF\_PointList}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[pointlist] 
-!     {\tt ESMF\_PointList} to sort contents of.
-!   \item[{[rc]}] 
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_PointListGetInit,pointlist,rc)
-
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_PointListSort(pointlist, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set return values
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_PointListSort
-!------------------------------------------------------------------------------
 
 
 end module ESMF_PointListMod

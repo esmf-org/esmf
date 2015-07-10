@@ -84,15 +84,12 @@ namespace ESMCI {
     // Get a pointer to the id for a particular location
     const int *get_id_ptr(int loc) const;
 
-    // Get a pointer to the coordinates for a given id
-    const double *get_coord_ptr_from_id(int *id) const;
-
     void get_coord(int loc, double *_coord) const;
 
     // Get id for a particular location
     int get_id(int loc) const;
 
-    int &get_id_ref(int loc) const;
+    point *get_point(int loc) const;
 
     // Get current number of points
     int get_curr_num_pts() const {
