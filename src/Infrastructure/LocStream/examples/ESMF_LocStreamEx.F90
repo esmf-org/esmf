@@ -485,8 +485,7 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Get access to the Fortran array pointers that hold the Grid 
    ! coordinate information.
-   !-------------------------------------------------------------------
- 
+   !------------------------------------------------------------------- 
    ! Longitudes 
    call ESMF_GridGetCoord(grid,                                  &
                           staggerLoc=ESMF_STAGGERLOC_CENTER,     &
@@ -522,38 +521,37 @@ program ESMF_LocStreamEx
    call ESMF_FieldGet(srcField, 0, farrayPtr, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+   DEG2RAD = 3.14159265/180.0
 !BOC
    !-------------------------------------------------------------------
    ! Set the Grid coordinates to be uniformly distributed around the globe. 
    !-------------------------------------------------------------------
-     DEG2RAD = 3.14159265/180.0
-     do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-       ! Set Grid longitude coordinates as 0 to 360
-       farrayPtrLonC(i1,i2) = REAL(i1-1)*360.0/REAL(GridLonSize)
+   do i1=clbnd(1),cubnd(1)
+   do i2=clbnd(2),cubnd(2)
+      ! Set Grid longitude coordinates as 0 to 360
+      farrayPtrLonC(i1,i2) = REAL(i1-1)*360.0/REAL(GridLonSize)
 
-       ! Set Grid latitude coordinates as -90 to 90
-       farrayPtrLatC(i1,i2) = -90. + REAL(i2-1)*180.0/REAL(GridLatSize) + &
+      ! Set Grid latitude coordinates as -90 to 90
+      farrayPtrLatC(i1,i2) = -90. + REAL(i2-1)*180.0/REAL(GridLatSize) + &
                                        0.5*180.0/REAL(GridLatSize)
 !EOC
-       ! Arbitrarily set the source data to be a function of the x,y,z coordinates
-       ! (something relatively smooth, that varies everywhere)
-       theta = DEG2RAD*(farrayPtrLonC(i1,i2))
-       phi = DEG2RAD*(90.-farrayPtrLatC(i1,i2))
-       x = cos(theta)*sin(phi)
-       y = sin(theta)*sin(phi)
-       z = cos(phi)
+      ! Arbitrarily set the source data to be a function of the x,y,z coordinates
+      ! (something relatively smooth, that varies everywhere)
+      theta = DEG2RAD*(farrayPtrLonC(i1,i2))
+      phi = DEG2RAD*(90.-farrayPtrLatC(i1,i2))
+      x = cos(theta)*sin(phi)
+      y = sin(theta)*sin(phi)
+      z = cos(phi)
 
-       farrayPtr(i1,i2) = x+y+z+15.0
+      farrayPtr(i1,i2) = x+y+z+15.0
 !BOC
-     enddo
-     enddo
+   enddo
+   enddo
 
    !-------------------------------------------------------------------
-   ! Create a LocStream to use as the regridding destination. The 
-   ! LocStream size is the number of points on this PET. 
+   ! Set the number of points the destination LocStream will have
+   ! depending on the PET. 
    !-------------------------------------------------------------------
-   ! Setup Dst LocStream
    if (petCount .eq. 1) then
      numLocationsOnThisPet=7
    else
@@ -602,19 +600,19 @@ program ESMF_LocStreamEx
    ! Get access to the Fortran array pointers that hold the key data.
    !-------------------------------------------------------------------
    ! Longitudes
-   call ESMF_LocStreamGetKey(locstream,                      &
-                             localDE=0,                         &
-                             keyName="ESMF:Lon",                &
-                             farray=lonArray,                   &
+   call ESMF_LocStreamGetKey(locstream,           &
+                             localDE=0,           &
+                             keyName="ESMF:Lon",  &
+                             farray=lonArray,     &
                              rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
    ! Latitudes
-   call ESMF_LocStreamGetKey(locstream,                      &
-                             localDE=0,                         &
-                             keyName="ESMF:Lat",                &
-                             farray=latArray,                   &
+   call ESMF_LocStreamGetKey(locstream,           &
+                             localDE=0,           &
+                             keyName="ESMF:Lat",  &
+                             farray=latArray,     &
                              rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -678,7 +676,6 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Regrid from srcField to dstField
    !-------------------------------------------------------------------
-
    ! Can loop here regridding from srcField to dstField as src data changes
    ! do i=1,...
 
@@ -696,7 +693,6 @@ program ESMF_LocStreamEx
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-
    !-------------------------------------------------------------------
    ! Now that we are done, release the RouteHandle freeing its memory. 
    !-------------------------------------------------------------------
