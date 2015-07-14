@@ -214,11 +214,25 @@ class Field(MaskedArray):
         atexit.register(obj.__del__)
         obj._finalized = False
 
+        # load all metadata into _optinfo to appease np.MaskedArray
+        obj._optinfo["_name"] = obj._name
+        obj._optinfo["_type"] = obj._type
+        obj._optinfo["_rank"] = obj._rank
+        obj._optinfo["_struct"] = obj._struct
+        obj._optinfo["_xd"] = obj._xd
+        obj._optinfo["_staggerloc"] = obj._staggerloc
+        obj._optinfo["_lower_bounds"] = obj._lower_bounds
+        obj._optinfo["_upper_bounds"] = obj._upper_bounds
+        obj._optinfo["_ndbounds"] = obj._ndbounds
+        obj._optinfo["_grid"] = obj._grid
+        obj._optinfo["_meta"] = obj._meta
+        obj._optinfo["_finalized"] = obj._finalized
+
         return obj
 
     def __array_finalize__(self, obj):
-        super(Field, self).__array_finalize__(obj)
         if obj is None: return
+        super(Field, self).__array_finalize__(obj)
         self._name = getattr(obj, 'name', None)
         self._type = getattr(obj, 'type', None)
         self._rank = getattr(obj, 'rank', None)
@@ -230,6 +244,21 @@ class Field(MaskedArray):
         self._ndbounds = getattr(obj, 'ndbounds', None)
         self._grid = getattr(obj, 'grid', None)
         self._meta = getattr(obj, 'meta', None)
+
+    def flatten(self, *args, **kwargs):
+        flattened = super(Field, self).flatten(*args, **kwargs)
+        flattened._finalized = True
+        return flattened
+
+    def reshape(self, *args, **kwargs):
+        reshaped = super(Field, self).reshape(*args, **kwargs)
+        reshaped._finalized = True
+        return reshaped
+
+    def transpose(self, *args, **kwargs):
+        transposed = super(Field, self).transpose(*args, **kwargs)
+        transposed._finalized = True
+        return transposed
 
     @property
     def struct(self):
