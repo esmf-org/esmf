@@ -87,12 +87,31 @@
 #endif
 
 \subsection{Metadata}
+#ifdef STANDALONE
+\input{NUOPC_Metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Metadata}
+#endif
 
-\subsubsection{Model and Mediator Component Metadata}
+\subsubsection{Driver Component Metadata}
+#ifdef STANDALONE
+\input{NUOPC_DriverComponent_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_DriverComponent_metadata}
+#endif
+
+\subsubsection{Model Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ModelComponent_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ModelComponent_metadata}
+#endif
+
+\subsubsection{Mediator Component Metadata}
+#ifdef STANDALONE
+\input{NUOPC_MediatorComponent_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_MediatorComponent_metadata}
 #endif
 
 \subsubsection{Connector Component Metadata}
@@ -230,6 +249,13 @@
 \input{NUOPC_FieldDictionaryApi_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryApi_fapi}
+#endif
+
+\subsection{Free Format Methods}
+#ifdef STANDALONE
+\input{NUOPC_FreeFormatDef_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FreeFormatDef_fapi}
 #endif
 
 \subsection{Utility Routines}

@@ -129,7 +129,8 @@ class Mesh(object):
         self._parametric_dim = None
         self._spatial_dim = None
         self._rank = 1
-        
+        self._coords = None
+
         if not fromfile:
             # initialize not fromfile variables
             self._element_count = None
@@ -444,9 +445,9 @@ class Mesh(object):
                 self._element_area = element_area
         if element_coords is not None:
             if element_coords.dtype is not np.float64:
-                self.element_coords = np.array(element_coords, dtype=np.float64)
+                self._element_coords = np.array(element_coords, dtype=np.float64)
             else:
-                self.element_coords = element_coords
+                self._element_coords = element_coords
 
         # call into ctypes layer
         ESMP_MeshAddElements(self, self.element_count, self.element_ids, 
@@ -579,14 +580,24 @@ class Mesh(object):
         Returns: \n
             None \n
         """
+        elemcoords = True
 
         # get the pointer to the underlying ESMF data array for coordinates
         coords_interleaved, num_nodes, num_dims = ESMP_MeshGetCoordPtr(self)
-        coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
+        try:
+            coords_elem, num_elems, num_dims_e = ESMP_MeshGetElemCoordPtr(self)
+            assert num_dims == num_dims_e
+        except:
+            warnings.warn("Mesh element coordinates are not available")
+            elemcoords = False
 
-        assert num_dims == num_dims_e
         if not self.parametric_dim:
             self._parametric_dim = num_dims
+
+        try:
+            self._connectivity, self._nodes_per_elem = ESMP_MeshGetConnectivityPtr(self)
+        except:
+            warnings.warn("Mesh connectivity could not be read")
 
         # initialize the coordinates structures
         # index order is [meshloc][coord_dim]
@@ -599,8 +610,8 @@ class Mesh(object):
         if num_dims == 3:
             self._coords[node][2] = np.array([coords_interleaved[2*i+2] for i in range(num_nodes)])
 
-        # alias the coordinates to the mesh
-        self._coords[element][0] = np.array([coords_elem[2 * i] for i in range(num_elems)])
-        self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
-        if num_dims == 3:
-            self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])
+        if elemcoords:
+            self._coords[element][0] = np.array([coords_elem[2 * i] for i in range(num_elems)])
+            self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
+            if num_dims == 3:
+                self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])

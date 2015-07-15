@@ -372,9 +372,86 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
   }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "MeshCXX::getConnectivity()"
+
+  void MeshCXX::getConnectivity(double *connCoord, int *nodesPerElem, int *rc) {
+    int localrc;
+    try {
+      ESMCI_getconnectivity(&meshPointer, connCoord, nodesPerElem,
+    		                &spatialDim, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;  // bail out with exception
+
+    } catch(std::exception &x) {
+      // catch Mesh exception return code
+      if (x.what()) {
+        localrc = ESMC_RC_INTNRL_BAD;
+	    ESMC_LogDefault.MsgFoundError(localrc,
+				      x.what(), ESMC_CONTEXT, rc);
+	    if (rc!=NULL) *rc = localrc;
+	    return;
+      } else {
+        localrc = ESMC_RC_INTNRL_BAD;
+	    ESMC_LogDefault.MsgFoundError(localrc,
+				      "UNKNOWN", ESMC_CONTEXT, rc);
+	    if (rc!=NULL) *rc = localrc;
+	    return;
+      }
+    } catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      if (rc!=NULL) *rc = localrc;
+      return;
+    } catch(...){
+      localrc = ESMC_RC_INTNRL_BAD;
+      ESMC_LogDefault.MsgFoundError(localrc,
+        "- Caught unknown exception", ESMC_CONTEXT, rc);
+      if (rc!=NULL) *rc = localrc;
+      return;
+    }
+
+    // Set return code
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalElemCoords()"
   void MeshCXX::getLocalElemCoords(double *ecoords, int *num_elems, int *num_dims, int *rc) {
-    ESMCI_getlocalelemcoords(&meshPointer, ecoords, &spatialDim, rc);
+    int localrc;
+    try {
+      ESMCI_getlocalelemcoords(&meshPointer, ecoords, &spatialDim, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;  // bail out with exception
+
+    } catch(std::exception &x) {
+      // catch Mesh exception return code
+      if (x.what()) {
+        localrc = ESMC_RC_INTNRL_BAD;
+	    ESMC_LogDefault.MsgFoundError(localrc,
+				      x.what(), ESMC_CONTEXT, rc);
+	    if (rc!=NULL) *rc = localrc;
+	    return;
+      } else {
+        localrc = ESMC_RC_INTNRL_BAD;
+	    ESMC_LogDefault.MsgFoundError(localrc,
+				      "UNKNOWN", ESMC_CONTEXT, rc);
+	    if (rc!=NULL) *rc = localrc;
+	    return;
+      }
+    } catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      if (rc!=NULL) *rc = localrc;
+      return;
+    } catch(...){
+      localrc = ESMC_RC_INTNRL_BAD;
+      ESMC_LogDefault.MsgFoundError(localrc,
+        "- Caught unknown exception", ESMC_CONTEXT, rc);
+      if (rc!=NULL) *rc = localrc;
+      return;
+    }
 
     *num_elems = this->numOwnedElements;
     *num_dims = spatialDim;

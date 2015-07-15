@@ -199,12 +199,17 @@ def mesh_create_5():
                        3,4,7,6, # element 21
                        4,8,7,   # element 22
                        4,5,8])  # element 23
+    elemCoord = np.array([1.0, 1.0,
+                          3.0, 1.0,
+                          1.0, 3.0,
+                          2.5, 3.5,
+                          3.5, 2.5])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
-    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn, element_coords=elemCoord)
 
-    return mesh, nodeCoord, nodeOwner, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_10():
     '''
@@ -265,12 +270,15 @@ def mesh_create_10():
                          9,10,14,13,
                          10,15,14,
                          10,11,15])
+    elemCoord = np.array([0.75, 0.75, 2.0, 0.75, 3.25, 0.75,
+                          0.75, 2.0, 2.0, 2.0, 3.25, 2.0,
+                          0.75, 3.25, 2.0, 3.25, 3.0, 3.5, 3.5, 3.0])
 
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
-    mesh.add_elements(num_elem,elemId,elemType,elemConn)
+    mesh.add_elements(num_elem,elemId,elemType,elemConn, element_coords=elemCoord)
 
-    return mesh, nodeCoord, nodeOwner, elemType, elemConn
+    return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_50(domask=False, doarea=False):
     '''
@@ -356,6 +364,14 @@ def mesh_create_50(domask=False, doarea=False):
                          77,88,87,
                          77,78,88])
     elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    elemCoord = np.array(
+        [0.5, 0.5, 1.0, 0.5, 1.5, 0.5, 2.0, 0.5, 2.5, 0.5, 3.0, 0.5, 3.5, 0.5,
+         0.5, 1.0, 1.0, 1.0, 1.5, 1.0, 2.0, 1.0, 2.5, 1.0, 3.0, 1.0, 3.5, 1.0,
+         0.5, 1.5, 1.0, 1.5, 1.5, 1.5, 2.0, 1.5, 2.5, 1.5, 3.0, 1.5, 3.5, 1.5,
+         0.5, 2.0, 1.0, 2.0, 1.5, 2.0, 2.0, 2.0, 2.5, 2.0, 3.0, 2.0, 3.5, 2.0,
+         0.5, 2.5, 1.0, 2.5, 1.5, 2.5, 2.0, 2.5, 2.5, 2.5, 3.0, 2.5, 3.5, 2.5,
+         0.5, 3.0, 1.0, 3.0, 1.5, 3.0, 2.0, 3.0, 2.5, 3.0, 3.0, 3.0, 3.5, 3.0,
+         0.5, 3.5, 1.0, 3.5, 1.5, 3.5, 2.0, 3.5, 2.5, 3.5, 3.0, 3.5, 3.375, 3.625, 3.625, 3.375])
     elemMask = None
     if domask:
         elemMask = np.ones(50)
@@ -368,8 +384,9 @@ def mesh_create_50(domask=False, doarea=False):
     mesh.add_nodes(num_node,nodeId,nodeCoord,nodeOwner)
 
     mesh.add_elements(num_elem,elemId,elemType,elemConn, 
-        element_mask=elemMask, element_area=elemArea)
+        element_mask=elemMask, element_area=elemArea, element_coords=elemCoord)
 
+    # TODO: clean this up!
     if domask and doarea:
         return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea
     elif domask and not doarea:
@@ -377,7 +394,7 @@ def mesh_create_50(domask=False, doarea=False):
     elif not domask and doarea:
         return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemArea
     else:
-        return mesh, nodeCoord, nodeOwner, elemType, elemConn
+        return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_50_ngons(domask=False, doarea=False):
     '''
@@ -427,6 +444,7 @@ def mesh_create_50_ngons(domask=False, doarea=False):
 
     Note: This mesh is not parallel, it can only be used in serial
     '''
+
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
@@ -470,6 +488,16 @@ def mesh_create_50_ngons(domask=False, doarea=False):
                          66, 67, 77, 76, 67, 68, 78, 77,
                          71,72,82,81,72,73,83,82,73,74,84,83,74,75,85,84,75,76,86,85,76,77,87,86,77,78,88,87])
     elemConn = np.array([np.where(a==nodeId) for a in elemConn]).flatten()
+    # TODO: element coordinates is not supported for meshes containing ngons
+    elemCoord = np.array(
+        [0.5, 0.5, 1.0, 0.5, 1.5, 0.5, 2.0, 0.5, 2.5, 0.5, 3.0, 0.5, 3.5, 0.5,
+         0.5, 1.0, 1.0, 1.0, 1.5, 1.0, 2.0, 1.0, 2.5, 1.0, 3.0, 1.0, 3.5, 1.0,
+         0.5, 1.5, 1.0, 1.5, 1.5, 1.5, 2.0, 1.5, 2.5, 1.5, 3.0, 1.5, 3.5, 1.5,
+         0.5, 2.0, 1.0, 2.0, 1.5, 2.0, 2.0, 2.0, 2.5, 2.0, 3.0, 2.0, 3.5, 2.0,
+         0.5, 2.5, 1.0, 2.5, 1.5, 2.5, 2.0, 2.5, 2.5, 2.5, 3.0, 2.5, 3.5, 2.5,
+         0.5, 3.0, 1.0, 2.875, 1.5, 3.0, 1.0, 3.12, 2.0, 3.0, 2.5, 3.0, 3.0, 3.0, 3.5, 3.0,
+         0.5, 3.5, 1.0, 3.5, 1.5, 3.5, 2.0, 3.5, 2.5, 3.5, 3.0, 3.5, 3.5, 3.5])
+
     elemMask = None
     if domask:
         elemMask = np.ones(num_elem)

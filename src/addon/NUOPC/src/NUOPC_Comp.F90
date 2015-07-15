@@ -15,6 +15,7 @@
 module NUOPC_Comp
 
   use ESMF
+  use NUOPC_FreeFormatDef
   use NUOPC_Base
 
   implicit none
@@ -24,7 +25,10 @@ module NUOPC_Comp
   ! public module interfaces
   public NUOPC_CompAreServicesSet
   public NUOPC_CompAttributeAdd
+  public NUOPC_CompAttributeEgest
   public NUOPC_CompAttributeGet
+  public NUOPC_CompAttributeIngest
+  public NUOPC_CompAttributeInit
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
@@ -47,6 +51,11 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompAttributeAdd
   end interface
   !---------------------------------------------
+  interface NUOPC_CompAttributeEgest
+    module procedure NUOPC_GridCompAttributeEge
+    module procedure NUOPC_CplCompAttributeEge
+  end interface
+  !---------------------------------------------
   interface NUOPC_CompAttributeGet
     module procedure NUOPC_GridCompAttributeGet
     module procedure NUOPC_CplCompAttributeGet
@@ -54,6 +63,16 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompAttributeGetI
     module procedure NUOPC_GridCompAttributeGetSL
     module procedure NUOPC_CplCompAttributeGetSL
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeIngest
+    module procedure NUOPC_GridCompAttributeIng
+    module procedure NUOPC_CplCompAttributeIng
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompAttributeInit
+    module procedure NUOPC_GridCompAttributeInit
+    module procedure NUOPC_CplCompAttributeInit
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeSet
@@ -198,72 +217,24 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeAdd - Add the NUOPC GridComp Attributes
+! !IROUTINE: NUOPC_CompAttributeAdd - Add NUOPC GridComp Attributes
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeAdd() 
-  subroutine NUOPC_GridCompAttributeAdd(comp, rc)
+  subroutine NUOPC_GridCompAttributeAdd(comp, attrList, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                   :: comp
-    integer,      intent(out), optional   :: rc
+    type(ESMF_GridComp)                       :: comp
+    character(len=*),   intent(in)            :: attrList(:)
+    integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add the standard NUOPC GridComp Attribute package: convention="NUOPC",
-!   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
-!   package extends the CIM Component Attribute package: convention="CIM 1.5",
-!   purpose="ModelComp".
-!
+!   Add Attributes to the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance").
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)            :: attrList(10)
-    
     if (present(rc)) rc = ESMF_SUCCESS
-
-    ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "Verbosity"           ! control verbosity
-    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(4) = "RunPhaseMap"         ! list of strings to map str to phase #
-    attrList(5) = "FinalizePhaseMap"    ! list of strings to map str to phase #
-    attrList(6) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(7) = "Nestling"  ! values: integer starting 0 for first nestling
-    attrList(8) = "InitializeDataComplete"  ! values: strings "false"/"true"
-    attrList(9) = "InitializeDataProgress"  ! values: strings "false"/"true"
-    attrList(10)= "CompLabel"   ! label by which this component was added
     
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
-      purpose="ModelComp", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="CIM 1.5", &
-      nestPurpose="ModelComp", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=rc)
 
-    ! set Attributes to defaults
-    call NUOPC_CompAttributeSet(comp, &
-      name="Verbosity", value="low", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call NUOPC_CompAttributeSet(comp, &
-      name="NestingGeneration", value=0, &        ! default to parent level
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call NUOPC_CompAttributeSet(comp, &
-      name="Nestling", value=0, &                 ! default to first nestling
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call NUOPC_CompAttributeSet(comp, &
-      name="InitializeDataComplete", value="false", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call NUOPC_CompAttributeSet(comp, &
-      name="InitializeDataProgress", value="false", &
-      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
@@ -272,52 +243,126 @@ module NUOPC_Comp
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeAdd - Add the NUOPC CplComp Attributes
+! !IROUTINE: NUOPC_CompAttributeAdd - Add NUOPC CplComp Attributes
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeAdd() 
-  subroutine NUOPC_CplCompAttributeAdd(comp, rc)
+  subroutine NUOPC_CplCompAttributeAdd(comp, attrList, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)         :: comp
+    type(ESMF_CplComp)                        :: comp
+    character(len=*),   intent(in)            :: attrList(:)
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add the standard NUOPC CplComp Attribute package: convention="NUOPC", 
-!   purpose="General" to the Field. The NUOPC CplComp Attribute package extends
-!   the ESG Component Attribute package: convention="ESG", purpose="General".
-!
+!   Add Attributes to the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance").
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)  :: attrList(6)
-
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! Set up a customized list of Attributes to be added to the CplComp
-    attrList(1) = "Verbosity"           ! control verbosity
-    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(3) = "RunPhaseMap"         ! list of strings to map str to phase #
-    attrList(4) = "FinalizePhaseMap"    ! list of strings to map str to phase #
-    attrList(5) = "CplList"
-    attrList(6) = "CompLabel"  ! label by which this component was added
-    
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-          
-    ! set Attributes to defaults
-    call NUOPC_CompAttributeSet(comp, &
-      name="Verbosity", value="low", &
-      rc=rc)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      attrList=attrList, rc=rc)
+
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
   end subroutine
   !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeEgest - Egest NUOPC GridComp Attributes in FreeFormat
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeEgest() 
+  subroutine NUOPC_GridCompAttributeEge(comp, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),    intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the Attributes of the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance") as a FreeFormat object.
+!   It is the caller's responsibility to destroy the created freeFormat object.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: stat, i, attrCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
 
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query attrCount
+#ifdef WORKING
+    call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+      count=attrCount, rc=rc)
+#else
+    call ESMF_AttributeGet(comp, count=attrCount, rc=rc)
+#endif
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+print *, "attrCount=", attrCount
+    
+    allocate(stringList(attrCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    do i=1, attrCount
+#ifdef WORKING
+      call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+        attributeIndex=i, name=stringList(i), rc=rc)
+#else
+      call ESMF_AttributeGet(comp, attributeIndex=i, name=stringList(i), rc=rc)
+#endif
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    enddo
+    
+    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    
+    deallocate(stringList, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeEgest - Egest NUOPC CplComp Attributes in FreeFormat
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeEgest() 
+  subroutine NUOPC_CplCompAttributeEge(comp, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp),     intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the Attributes of the highest level of the standard NUOPC AttPack
+!   hierarchy (convention="NUOPC", purpose="Instance") as a FreeFormat object.
+!   It is the caller's responsibility to destroy the created freeFormat object.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
@@ -330,9 +375,11 @@ module NUOPC_Comp
     character(*),        intent(out)           :: value
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -343,7 +390,7 @@ module NUOPC_Comp
     defaultvalue = "CheckThisDefaultValue"
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -380,9 +427,11 @@ module NUOPC_Comp
     character(*),        intent(out)           :: value
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -393,7 +442,7 @@ module NUOPC_Comp
     defaultvalue = "CheckThisDefaultValue"
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -430,16 +479,18 @@ module NUOPC_Comp
     integer,             intent(out)           :: value
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -461,16 +512,18 @@ module NUOPC_Comp
     integer,             intent(out)           :: value
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -494,23 +547,25 @@ module NUOPC_Comp
     integer,             intent(out), optional :: itemCount
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
     if (present(valueList)) then
       call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
       call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -534,23 +589,25 @@ module NUOPC_Comp
     integer,            intent(out), optional :: itemCount
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
     if (present(valueList)) then
       call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
       call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -560,6 +617,380 @@ module NUOPC_Comp
   end subroutine
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest free format NUOPC GridComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_GridCompAttributeIng(comp, freeFormat, addFlag, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),    intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    logical,                intent(in),  optional :: addFlag
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Ingest the Attributes from a FreeFormat object onto the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+! 
+!   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
+!   an attribute is to be ingested that was not previously added to the 
+!   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
+!   will be added by this method automatically as needed.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    logical                                         :: addFlagOpt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! deal with optional addFlag
+    addFlagOpt = .false. ! default
+    if (present(addFlag)) then
+      addFlagOpt = addFlag
+    endif
+    
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      ! process the configuration line
+      if (tokenCount == 3) then
+        if (trim(tokenList(2)) /= "=") then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Free format Attribute line incorrectly formatted.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+        if (addFlagOpt) then
+          ! automatically add any Attribute
+          call NUOPC_CompAttributeAdd(comp, attrList=(/trim(tokenList(1))/), &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+        call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
+          value=trim(tokenList(3)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Free format Attribute line incorrectly formatted.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)
+        return  ! bail out
+      endif
+      
+      ! clean-up
+      deallocate(tokenList)
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest free format NUOPC CplComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_CplCompAttributeIng(comp, freeFormat, addFlag, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp),     intent(in)            :: comp
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    logical,                intent(in),  optional :: addFlag
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Ingest the Attributes from a FreeFormat object onto the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+! 
+!   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
+!   an attribute is to be ingested that was not previously added to the 
+!   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
+!   will be added by this method automatically as needed.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)                          :: name
+    integer                                         :: i, lineCount, tokenCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    logical                                         :: addFlagOpt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! deal with optional addFlag
+    addFlagOpt = .false. ! default
+    if (present(addFlag)) then
+      addFlagOpt = addFlag
+    endif
+    
+    ! access the FreeFormat lineCount
+    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      
+      ! process the configuration line
+      if (tokenCount == 3) then
+        if (trim(tokenList(2)) /= "=") then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Free format Attribute line incorrectly formatted.", &
+            line=__LINE__, &
+            file=trim(name)//":"//FILENAME)
+          return  ! bail out
+        endif
+        if (addFlagOpt) then
+          ! automatically add any Attribute
+          call NUOPC_CompAttributeAdd(comp, attrList=(/trim(tokenList(1))/), &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+        call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
+          value=trim(tokenList(3)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="Free format Attribute line incorrectly formatted.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)
+        return  ! bail out
+      endif
+      
+      ! clean-up
+      deallocate(tokenList)
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_CompAttributeInit - Initialize the NUOPC GridComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeInit() 
+  subroutine NUOPC_GridCompAttributeInit(comp, kind, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                       :: comp
+    character(len=*),   intent(in)            :: kind
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add the standard NUOPC GridComp AttPack hierarchy to the Gridded Component.
+!   The specifics depend on the component {\tt kind}.
+!
+!   The highest level in the AttPack hierarchy will have convention="NUOPC" and
+!   purpose="Instance".
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR), allocatable            :: attrList(:)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Check for valid component kind
+    if (trim(kind)=="Driver" .or. &
+      trim(kind)=="Model" .or. trim(kind)=="Mediator") then
+      ! a valid component kind -> create the NUOPC/Component AttPack
+      allocate(attrList(7))
+      attrList(1) = "Kind"
+      attrList(2) = "Verbosity"
+      attrList(3) = "Profiling"
+      attrList(4) = "CompLabel"
+      attrList(5) = "InitializePhaseMap"
+      attrList(6) = "RunPhaseMap"
+      attrList(7) = "FinalizePhaseMap"
+      call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
+        purpose="ModelComp", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Component", &
+        attrList=attrList, nestConvention="CIM 1.5", &
+        nestPurpose="ModelComp", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      deallocate(attrList)
+    else
+      ! invalid component kind
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Invalid component kind",&
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! Add more Attributes -> NUOPC/Driver, NUOPC/Model, NUOPC/Mediator AttPacks
+    allocate(attrList(5))
+    attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(2) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(3) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(4) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(5) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose=trim(kind), &
+      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(attrList)
+    
+    ! Highest level of the AttPack hierarchy (where users operate)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      nestConvention="NUOPC", nestPurpose=trim(kind), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! set Attributes to defaults
+    call NUOPC_CompAttributeSet(comp, &
+      name="Kind", value=trim(kind), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="Verbosity", value="0", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="Profiling", value="0", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="NestingGeneration", value=0, &        ! default to parent level
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="Nestling", value=0, &                 ! default to first nestling
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="InitializeDataComplete", value="false", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="InitializeDataProgress", value="false", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_CompAttributeInit - Initialize the NUOPC CplComp Attributes
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeInit() 
+  subroutine NUOPC_CplCompAttributeInit(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add the standard NUOPC CplComp AttPack hierarchy to the Coupler Component.
+!
+!   The highest level in the AttPack hierarchy will have convention="NUOPC" and
+!   purpose="Instance".
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR), allocatable            :: attrList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! The NUOPC/Component level
+    allocate(attrList(7))
+    attrList(1) = "Kind"
+    attrList(2) = "Verbosity"
+    attrList(3) = "Profiling"
+    attrList(4) = "CompLabel"
+    attrList(5) = "InitializePhaseMap"
+    attrList(6) = "RunPhaseMap"
+    attrList(7) = "FinalizePhaseMap"
+    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Component",   &
+      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(attrList)
+    
+    ! Add more Attributes -> NUOPC/Connector AttPack
+    allocate(attrList(1))
+    attrList(1) = "CplList"
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Connector", &
+      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(attrList)
+    
+    ! Highest level of the AttPack hierarchy (where users operate)
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
+      nestConvention="NUOPC", nestPurpose="Connector", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! set Attributes to defaults
+    call NUOPC_CompAttributeSet(comp, &
+      name="Verbosity", value="0", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="Profiling", value="0", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompAttributeSet - Set a NUOPC GridComp Attribute
@@ -572,15 +1003,18 @@ module NUOPC_Comp
     character(*), intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -602,15 +1036,18 @@ module NUOPC_Comp
     character(*), intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -632,15 +1069,18 @@ module NUOPC_Comp
     integer,      intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -662,15 +1102,18 @@ module NUOPC_Comp
     integer,      intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -693,15 +1136,18 @@ module NUOPC_Comp
     character(*), intent(in)              :: valueList(:)
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, valueList=valueList, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -723,15 +1169,18 @@ module NUOPC_Comp
     character(*), intent(in)              :: valueList(:)
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, valueList=valueList, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -918,7 +1367,7 @@ module NUOPC_Comp
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
@@ -928,7 +1377,7 @@ module NUOPC_Comp
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1015,7 +1464,7 @@ module NUOPC_Comp
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
@@ -1025,7 +1474,7 @@ module NUOPC_Comp
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1116,7 +1565,7 @@ module NUOPC_Comp
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1128,7 +1577,7 @@ module NUOPC_Comp
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
@@ -1210,7 +1659,7 @@ module NUOPC_Comp
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1222,7 +1671,7 @@ module NUOPC_Comp
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
@@ -1370,7 +1819,7 @@ module NUOPC_Comp
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -1380,7 +1829,7 @@ module NUOPC_Comp
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1497,7 +1946,7 @@ module NUOPC_Comp
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -1507,7 +1956,7 @@ module NUOPC_Comp
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1625,7 +2074,7 @@ module NUOPC_Comp
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, &
-      convention="NUOPC", purpose="General", rc=rc)
+      convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -1635,7 +2084,7 @@ module NUOPC_Comp
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
         valueList=phases, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif

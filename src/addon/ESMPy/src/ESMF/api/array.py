@@ -11,6 +11,8 @@ import numpy as np
 import numpy.ma as ma
 import ctypes as ct
 
+import numpy as np
+
 def esmf_array(data, dtype, shape):
     '''
     :param data: buffer of fortran allocated ESMF array
@@ -88,16 +90,7 @@ class MaskedArray(ma.MaskedArray):
         obj = super(MaskedArray, cls).__new__(cls, data=npdata, mask=mamask,
                                               dtype=constants._ESMF2PythonType[dtype])
 
-        # save objectwide metadata
-        obj.contents = data.contents
-
         return obj
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        # set instance metadata
-        self.contents = getattr(obj, 'contents', None)
-        super(MaskedArray, self).__array_finalize__(obj)
 
 class Array1D(np.ndarray):
 

@@ -31,6 +31,7 @@ namespace ESMCI {
 				   const char *, int *, const char *, int *);
     void getLocalCoords(double *, int *, int *, int *);
     void getLocalElemCoords(double *, int *, int *, int *);
+    void getConnectivity(double *, int *, int *);
     static int destroy(MeshCXX **);
 
     int addElements(int, int*, int*, int*, int*, double *, double *);

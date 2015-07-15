@@ -849,7 +849,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_PointListSort(srcPointList)
 	    src_pl_used=.true.
 
           else
@@ -1035,8 +1034,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                               rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_PointListSort(dstPointList)
-
             dst_pl_used=.true.
           endif
 

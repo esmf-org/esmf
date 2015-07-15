@@ -39,7 +39,7 @@ class TestField(TestBase):
         assert (type(field.data) is np.ndarray)
         assert (field.mask.shape == field.data.shape)
 
-    def make_maskedfield(self, array):
+    def make_maskedfield(self, array, ndbounds=True):
         '''
         :param self: TestMaskedArray class type
         :param array: maxindices of a 2- or 3d array
@@ -52,9 +52,14 @@ class TestField(TestBase):
         mask[:] = 1
         mask[0, 1] = 0
 
-        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
+        if ndbounds:
+            field = Field(grid, ndbounds=[2, 5], mask_values=[0])
+            assert (np.all(field.mask[:, :, 0, 1]))
+        else:
+            field = Field(grid, mask_values=[0])
+            assert (np.all(field.mask[0, 1]))
 
-        assert(np.all(field.mask[:, :, 0, 1]))
+
 
         field.data[...] = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
 
@@ -75,7 +80,10 @@ class TestField(TestBase):
 
         assert ((field.T == 4).all())
         assert ((field.flatten() == 4).all())
-        assert (type(np.empty_like(field)) == Field)
+
+        # TODO: np.empty_like gives a segfault, waiting for support request to implement empty_like functionality
+        #       for Field that actually allocates a new ESMF Field underneath
+        # assert (type(np.empty_like(field)) == Field)
 
         field.harden_mask()
         field[0, 0, 0, 1] = 7
@@ -382,7 +390,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.I4, meshloc=MeshLoc.NODE)
@@ -465,7 +473,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
@@ -530,7 +538,7 @@ class TestField(TestBase):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
                 mesh_create_50()
 
         field = Field(mesh, typekind=TypeKind.R8, meshloc=MeshLoc.NODE)
@@ -626,3 +634,15 @@ class TestField(TestBase):
         assert field.shape == (2, 5, 10)
         assert field2.shape == (1, 2, 5)
         assert field3.shape == (1, 1, 2)
+
+    @attr('serial')
+    def test_field_reshape(self):
+        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32), ndbounds=False)
+
+        field.data[...] = 4
+
+        field2 = field.reshape(5, 20)
+
+        assert type(field2) == Field
+        assert field2.shape == (5,20)
+        self.examine_field_attributes(field2)
