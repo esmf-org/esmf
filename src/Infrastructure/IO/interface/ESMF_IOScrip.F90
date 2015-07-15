@@ -1453,7 +1453,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             enddo
 	    deallocate(lonBuffer1D, latBuffer1D)
 	    if (srchasbound) then
- 	       allocate(lonBuffer2(src_grid_rank, srcDim),latBuffer2(src_grid_rank,srcDim))
+ 	       allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim))
 	       k=1
                do j=1,src_grid_dims(2)
 	         do i=1,src_grid_dims(1)
@@ -1483,9 +1483,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              latBuffer = reshape(latBuffer2, (/srcDim/))
  	     deallocate(lonBuffer2, latBuffer2)
              if (srchasbound) then
-  	        allocate(lonBuffer2(src_grid_rank, srcDim),latBuffer2(src_grid_rank,srcDim))
-                lonBuffer2=reshape(cornerlon3D, (/src_grid_rank, srcDim/)) 
-                latBuffer2=reshape(cornerlat3D, (/src_grid_rank, srcDim/)) 
+  	        allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim))
+                lonBuffer2=reshape(cornerlon3D, (/src_grid_corner, srcDim/)) 
+                latBuffer2=reshape(cornerlat3D, (/src_grid_corner, srcDim/)) 
                 deallocate(cornerlon3D, cornerlat3D)
              endif
 	   endif
@@ -1871,7 +1871,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              enddo
 	     deallocate(lonBuffer1D, latBuffer1D)
 	     if (dsthasbound) then
-	       allocate(lonBuffer2(dst_grid_rank, dstDim),latBuffer2(dst_grid_rank,dstDim))
+	       allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim))
 	       k=1
                do j=1,dst_grid_dims(2)
 	         do i=1,dst_grid_dims(1)
@@ -1900,9 +1900,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              latBuffer = reshape(latBuffer2, (/dstDim/))
  	     deallocate(lonBuffer2, latBuffer2)
              if (dsthasbound) then
-	       allocate(lonBuffer2(dst_grid_rank, dstDim),latBuffer2(dst_grid_rank,dstDim))
-               lonBuffer2=reshape(cornerlon3D, (/dst_grid_rank, dstDim/)) 
-               latBuffer2=reshape(cornerlat3D, (/dst_grid_rank, dstDim/)) 
+	       allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim))
+               lonBuffer2=reshape(cornerlon3D, (/dst_grid_corner, dstDim/)) 
+               latBuffer2=reshape(cornerlat3D, (/dst_grid_corner, dstDim/)) 
                deallocate(cornerlon3D, cornerlat3D)
              endif
 	   endif
