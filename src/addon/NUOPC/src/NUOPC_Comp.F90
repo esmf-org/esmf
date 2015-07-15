@@ -931,7 +931,7 @@ print *, "attrCount=", attrCount
     type(ESMF_CplComp), intent(inout)         :: comp
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add the standard NUOPC GridComp AttPack hierarchy to the Coupler Component.
+!   Add the standard NUOPC CplComp AttPack hierarchy to the Coupler Component.
 !
 !   The highest level in the AttPack hierarchy will have convention="NUOPC" and
 !   purpose="Instance".

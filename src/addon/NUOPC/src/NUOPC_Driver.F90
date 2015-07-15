@@ -528,7 +528,7 @@ module NUOPC_Driver
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeAdd(is%wrap%modelIS(i), rc=rc)
+      call NUOPC_StateAttributeInit(is%wrap%modelIS(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -539,7 +539,7 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeAdd(is%wrap%modelES(i), rc=rc)
+      call NUOPC_StateAttributeInit(is%wrap%modelES(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out

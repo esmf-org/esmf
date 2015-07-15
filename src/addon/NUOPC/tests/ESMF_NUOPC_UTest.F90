@@ -205,9 +205,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldAttributeAdd() Test"
+  write(name, *) "NUOPC_FieldAttributeInit() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldAttributeAdd(field, "sea_surface_temperature", rc=rc)
+  call NUOPC_FieldAttributeInit(field, "sea_surface_temperature", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -449,9 +449,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateAttributeAdd() Test"
+  write(name, *) "NUOPC_StateAttributeInit() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateAttributeAdd(stateA, rc=rc)
+  call NUOPC_StateAttributeInit(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
