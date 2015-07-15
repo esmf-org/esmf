@@ -143,19 +143,26 @@ module NUOPC_FreeFormatDef
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from Config
 ! !INTERFACE:
   ! call using generic interface: NUOPC_FreeFormatCreate
-  function NUOPC_FreeFormatCreateRead(config, label, rc)
+  function NUOPC_FreeFormatCreateRead(config, label, relaxedflag, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateRead
 ! !ARGUMENTS:
-    type(ESMF_Config)                                         :: config
-    character(len=*),                             intent(in)  :: label
-    integer,                            optional, intent(out) :: rc
+    type(ESMF_Config)                            :: config
+    character(len=*),      intent(in)            :: label
+    logical,               intent(in),  optional :: relaxedflag
+    integer,               intent(out), optional :: rc 
 ! !DESCRIPTION:
 !   Create a new FreeFormat object from ESMF\_Config object. The {\tt config}
-!   object must exist, and {\tt label} must reference a tabel attribute 
+!   object must exist, and {\tt label} must reference a table attribute 
 !   within {\tt config}.
+!
+! By default an error is returned if {\tt label} is not found in {\tt config}.
+! This error can be suppressed by setting {\tt relaxedflag=.true.}, and an 
+! empty FreeFormat object will be returned.
+
 !EOP
   !-----------------------------------------------------------------------------
+    logical   :: isPresent
     integer   :: stat, i, j
     integer   :: lineCount, columnCount
     integer, allocatable  :: count(:)
@@ -164,9 +171,29 @@ module NUOPC_FreeFormatDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_ConfigFindLabel(config, label=label, rc=rc)
+    call ESMF_ConfigFindLabel(config, label=label, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    if (.not.isPresent) then
+      if (present(relaxedflag)) then
+        if (relaxedflag) then
+          ! successful relaxed return with empty FreeFormat object
+          NUOPC_FreeFormatCreateRead = NUOPC_FreeFormatCreate(rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+          return ! early return
+        endif
+      endif
+      ! error condition -> must bail
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Label must be present.", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
     call ESMF_ConfigGetDim(config, lineCount, columnCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
