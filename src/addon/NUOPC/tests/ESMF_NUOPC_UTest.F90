@@ -181,9 +181,17 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeInit() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeInit(cplComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_CompAttributeAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CompAttributeAdd(cplComp, rc=rc)
+  call NUOPC_CompAttributeAdd(cplComp, attrList=(/"myAttribute"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -361,9 +369,17 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeInit() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeInit(gridComp, kind="Model", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_CompAttributeAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_CompAttributeAdd(gridComp, rc=rc)
+  call NUOPC_CompAttributeAdd(gridComp, attrList=(/"myAttribute"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

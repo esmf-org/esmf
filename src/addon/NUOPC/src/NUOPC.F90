@@ -117,8 +117,10 @@ module NUOPC
   ! defined in NUOPC_Comp
   public NUOPC_CompAreServicesSet  
   public NUOPC_CompAttributeAdd
+  public NUOPC_CompAttributeEgest
   public NUOPC_CompAttributeGet
   public NUOPC_CompAttributeIngest
+  public NUOPC_CompAttributeInit
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive

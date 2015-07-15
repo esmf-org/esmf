@@ -78,6 +78,11 @@ module NUOPC_Mediator
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    
+    ! Identify this as a Mediator component kind
+    call NUOPC_CompAttributeSet(gcomp, name="Kind", value="Mediator", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Initialize phases
 
@@ -261,8 +266,8 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! get the value of the "InitializeDataComplete" Attribute
-    call ESMF_AttributeGet(gcomp, name="InitializeDataComplete", &
-      value=oldDataComplete, convention="NUOPC",  purpose="General", rc=rc)
+    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      value=oldDataComplete, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -282,10 +287,8 @@ module NUOPC_Mediator
       return  ! bail out
     
     ! re-set the "InitializeDataProgress" Attribute to "false"
-    call ESMF_AttributeSet(gcomp, &
-      name="InitializeDataProgress", value="false", &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
+    call NUOPC_CompAttributeSet(gcomp, &
+      name="InitializeDataProgress", value="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -299,17 +302,15 @@ module NUOPC_Mediator
     if (newUpdatedCount > oldUpdatedCount) then
       ! there are more Fields now that have their "Updated" Attribute set "true"
       ! -> set "InitializeDataProgress" Attribute "true"
-      call ESMF_AttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
+      call NUOPC_CompAttributeSet(gcomp, &
+        name="InitializeDataProgress", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     
     ! get the value of the "InitializeDataComplete" Attribute
-    call ESMF_AttributeGet(gcomp, name="InitializeDataComplete", &
-      value=newDataComplete, convention="NUOPC",  purpose="General", rc=rc)
+    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+      value=newDataComplete, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -318,10 +319,8 @@ module NUOPC_Mediator
     if (trim(newDataComplete) /= trim(oldDataComplete)) then
       ! there was a change in the "InitializeDataComplete" Attribute setting
       ! -> set "InitializeDataProgress" Attribute "true"
-      call ESMF_AttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
+      call NUOPC_CompAttributeSet(gcomp, &
+        name="InitializeDataProgress", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif

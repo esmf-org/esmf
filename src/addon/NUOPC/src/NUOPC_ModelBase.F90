@@ -83,7 +83,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC GridComp Attribute Package to the Model
-    call NUOPC_CompAttributeAdd(gcomp, rc=rc)
+    call NUOPC_CompAttributeInit(gcomp, kind="Model", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -180,7 +180,6 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pString
     integer                   :: phase
     logical                   :: verbose
-    character(ESMF_MAXSTR)    :: defaultvalue
     character(ESMF_MAXSTR)    :: name
 
     rc = ESMF_SUCCESS
@@ -191,13 +190,12 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    defaultvalue = "low"
-    call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", rc=rc)
-    if (trim(valueString)=="high") then
+    verbose = .false.  ! default
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (trim(valueString)/="0") then
+      ! anything but "0" will turn verbosity on
       verbose = .true.
-    else
-      verbose = .false.
     endif
     
     ! get the modelName and currentPhase
