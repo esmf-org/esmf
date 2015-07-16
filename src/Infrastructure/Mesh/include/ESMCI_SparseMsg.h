@@ -69,7 +69,7 @@ public:
 
   private:
     UChar *beg, *end, *cur;
-    int msize;  // actual message size
+    UInt msize;  // actual message size
     UInt bsize;  // size (with rounding to word boundary)
     UInt proc;
   };

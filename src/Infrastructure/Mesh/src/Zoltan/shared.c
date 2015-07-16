@@ -32,6 +32,7 @@ extern "C" {
 static int initialize_dot(ZZ *, ZOLTAN_ID_PTR, ZOLTAN_ID_PTR, int *,
                           struct Dot_Struct *, int, int *, int, float *);
 
+
 /*****************************************************************************/
 /*****************************************************************************/
 /*****************************************************************************/
@@ -81,12 +82,11 @@ int ierr = ZOLTAN_OK;
     goto End;
   }
 
-
   /* Allow extra space for objects that are imported to the processor. */
   *max_obj = (int)(1.5 * *num_obj) + 1;
   *global_ids = ZOLTAN_REALLOC_GID_ARRAY(zz, *global_ids, (*max_obj));
   *local_ids  = ZOLTAN_REALLOC_LID_ARRAY(zz, *local_ids, (*max_obj));
-  *dots = (struct Dot_Struct *)ZOLTAN_MALLOC((*max_obj)*sizeof(struct Dot_Struct));
+  *dots = (struct Dot_Struct *)ZOLTAN_MALLOC((size_t)(*max_obj)*sizeof(struct Dot_Struct));
 
   if (!(*global_ids) || (zz->Num_LID && !(*local_ids)) || !(*dots)) {
     ZOLTAN_PRINT_ERROR(zz->Proc, yo, "Insufficient memory.");
@@ -97,6 +97,7 @@ int ierr = ZOLTAN_OK;
 
   ierr = initialize_dot(zz, *global_ids, *local_ids, parts, *dots,
                         *num_obj, num_geom, wgtflag, objs_wgt);
+
   if (ierr == ZOLTAN_FATAL || ierr == ZOLTAN_MEMERR) {
     ZOLTAN_PRINT_ERROR(zz->Proc, yo, 
                    "Error returned from user function initialize_dot.");
@@ -145,8 +146,6 @@ static int initialize_dot(
  *  Function that initializes the dot data structure for RCB and RIB. 
  *  It uses the global ID, coordinates and weight provided by the application.  
  */
-
-
 int ierr = ZOLTAN_OK;
 int i, j, tmp, np, fpart;
 double *geom_vec = NULL;
