@@ -337,6 +337,77 @@
       !------------------------------------------------------------------------ @\
  @\
       !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, convention=conv, purpose=purp, & @\
+                             count=count, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.11), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, attpack=attpack, count=count, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.11), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, convention=conv, purpose=purp, count=count, & @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTPACK, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, attpack=attpack, count=count, & @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTPACK, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, convention=conv, purpose=purp, count=count, & @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
+      ! Get the count of an AttPack object on mobj @\
+      count = -5 @\
+      call ESMF_AttributeGet(mname, attpack=attpack, count=count, & @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTLINK, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of an Attpack on mobj, ", & @\
+                     "count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.0), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      !mtag @\
       ! Remove the entire Attribute package from mobj Test @\
       call ESMF_AttributeRemove(mname, attpack=attpack, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\

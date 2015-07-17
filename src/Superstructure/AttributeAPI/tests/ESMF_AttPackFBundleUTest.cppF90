@@ -65,6 +65,7 @@ program ESMF_AttPackFieldBundleUTest
 
       logical                :: isPresent
       type(ESMF_AttPack)     :: attpack
+      integer                :: count
 
 ^endif
 !-------------------------------------------------------------------------------

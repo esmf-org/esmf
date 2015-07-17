@@ -297,6 +297,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttGetInfoByNamAP
         module procedure ESMF_ArrayAttGetInfoByNum
         module procedure ESMF_ArrayAttGetCount
+        module procedure ESMF_ArrayAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_ArrayBundleAttGet)
         TypeKindInterfaceMacro(ESMF_ArrayBundleAttGet1D)
@@ -314,6 +315,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttGetInfoByNamAP
         module procedure ESMF_ArrayBundleAttGetInfoByNum
         module procedure ESMF_ArrayBundleAttGetCount
+        module procedure ESMF_ArrayBundleAttGetCountAttPack                       
 
         TypeKindInterfaceMacro(ESMF_CplCompAttGet)
         TypeKindInterfaceMacro(ESMF_CplCompAttGet1D)
@@ -331,6 +333,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetInfoByNamAP
         module procedure ESMF_CplCompAttGetInfoByNum
         module procedure ESMF_CplCompAttGetCount
+        module procedure ESMF_CplCompAttGetCountAttPack  
         module procedure ESMF_CplCompAttGetAPinstNames
         module procedure ESMF_CplCompAttGetAPinstNamesAP
 
@@ -350,6 +353,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetInfoByNamAP
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetCount
+        module procedure ESMF_GridCompAttGetCountAttPack  
         module procedure ESMF_GridCompAttGetAPinstNames
         module procedure ESMF_GridCompAttGetAPinstNamesAP
 
@@ -369,6 +373,7 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttGetInfoByNamAP
         module procedure ESMF_SciCompAttGetInfoByNum
         module procedure ESMF_SciCompAttGetCount
+        module procedure ESMF_SciCompAttGetCountAttPack  
         module procedure ESMF_SciCompAttGetAPinstNames
         module procedure ESMF_SciCompAttGetAPinstNamesAP
 
@@ -388,6 +393,7 @@ module ESMF_AttributeMod
         module procedure ESMF_DistGridAttGetInfoByNamAP
         module procedure ESMF_DistGridAttGetInfoByNum
         module procedure ESMF_DistGridAttGetCount
+        module procedure ESMF_DistGridAttGetCountAttPack  
 
         TypeKindInterfaceMacro(ESMF_FieldAttGet)
         TypeKindInterfaceMacro(ESMF_FieldAttGet1D)
@@ -405,6 +411,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttGetInfoByNamAP
         module procedure ESMF_FieldAttGetInfoByNum
         module procedure ESMF_FieldAttGetCount
+        module procedure ESMF_FieldAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_FieldBundleAttGet)
         TypeKindInterfaceMacro(ESMF_FieldBundleAttGet1D)
@@ -422,6 +429,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldBundleAttGetInfoByNamAP
         module procedure ESMF_FieldBundleAttGetInfoByNum
         module procedure ESMF_FieldBundleAttGetCount
+        module procedure ESMF_FieldBundleAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_GridAttGet)
         TypeKindInterfaceMacro(ESMF_GridAttGet1D)
@@ -439,6 +447,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttGetInfoByNamAP
         module procedure ESMF_GridAttGetInfoByNum
         module procedure ESMF_GridAttGetCount
+        module procedure ESMF_GridAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_StateAttGet)
         TypeKindInterfaceMacro(ESMF_StateAttGet1D)
@@ -456,6 +465,7 @@ module ESMF_AttributeMod
         module procedure ESMF_StateAttGetInfoByNamAP
         module procedure ESMF_StateAttGetInfoByNum
         module procedure ESMF_StateAttGetCount
+        module procedure ESMF_StateAttGetCountAttPack
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
@@ -7986,7 +7996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 
-#define GetCountNameNumberMacro(mclass, mthis, mthisfield) \
+#define GetCountMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetCount" @\
  @\
@@ -7995,13 +8005,115 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet()  @\
-      subroutine mclass##AttGetCount(mthis, count, attcountflag, rc) @\
+      subroutine mclass##AttGetCount(mthis, count, keywordEnforcer, & @\
+                                     convention, purpose, attPackInstanceName, & @\
+                                     attcountflag, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(in) :: mthis @\
+      integer, intent(out) :: count @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      character (len=*), intent(in), optional :: convention @\
+      character (len=*), intent(in), optional :: purpose @\
+      character (len=*), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Returns the number of Attributes associated with the given Attribute @\
+!     package in the argument {\tt count}. @\
+!  @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [count] @\
+!           The number of Attributes associated with this object. @\
+!     \item [{[convention]}] @\
+!           The convention of the Attribute package. @\
+!     \item [{[purpose]}] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
+!     \item [{[attcountflag]}] @\
+!           Flag to determine which Attribute count to return. @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc  @\
+      type(ESMF_AttGetCountFlag) :: lattcountflag @\
+      type(ESMF_Logical) :: isAttpack @\
+      type(ESMF_AttPack) :: attpack @\
+ @\
+      ! Initialize  @\
+      isAttpack = ESMF_FALSE @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attcountflag)) then @\
+        lattcountflag = attcountflag @\
+      else @\
+        lattcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE @\
+      endif @\
+ @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
+          return @\
+        endif @\
+        isAttpack = ESMF_TRUE @\
+      endif @\
+ @\
+      if (isAttpack == ESMF_TRUE) then @\
+          call mclass##AttGetAttPack(mthis, & @\
+                                  convention, purpose, & @\
+                                  attPackInstanceName=attPackInstanceName, & @\
+                                  attpack=attpack, rc=localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+          call c_ESMC_AttributeGetCountAttPack(attpack, count, lattcountflag, localrc) @\
+      else @\
+          call c_ESMC_AttributeGetCount(mthisfield, count, lattcountflag, localrc) @\
+      endif @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttGetCount @\
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttGetCountAttPack" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeGet()  @\
+      subroutine mclass##AttGetCountAttPack(mthis, attpack, count,  & @\
+                                              attcountflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
-      integer, intent(out) :: count    @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+      integer, intent(out) :: count @\
       type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
-      integer, intent(out), optional :: rc    @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -8012,6 +8124,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description} @\
 !     \item [mthis] @\
 !           An ESMF object. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [count] @\
 !           The number of Attributes associated with this object. @\
 !     \item [attcountflag] @\
@@ -8032,6 +8146,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       if (present(attcountflag)) then @\
         lattcountflag = attcountflag @\
@@ -8039,15 +8154,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lattcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE @\
       endif @\
  @\
-      call c_ESMC_AttributeGetCount(mthisfield, count, lattcountflag, localrc) @\
+      call c_ESMC_AttributeGetCountAttPack(attpack, count, lattcountflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttGetCount @\
- @\
-!------------------------------------------------------------------------------ @\
+      end subroutine mclass##AttGetCountAttPack @\
+
+!------------------------------------------------------------------------------
+
+#define GetNameNumberMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetInfoByNam" @\
  @\
@@ -11056,13 +11173,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif @\
           attpack = ESMF_TRUE @\
         endif @\
- @\ 
+ @\
         if (present(attwriteflag)) then @\
           writeflag = attwriteflag @\
         else @\
           writeflag = ESMF_ATTWRITE_TAB @\
         endif @\
- @\ 
+ @\
         if (attpack == ESMF_TRUE) then @\
           if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
             call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
@@ -11107,7 +11224,9 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_CplComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttGetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
-GetCountNameNumberMacro(ESMF_CplComp, comp, comp%compp%base)
+GetCountMacro(ESMF_CplComp, comp, comp%compp%base)
+GetNameNumberMacro(ESMF_CplComp, comp, comp%compp%base)
+
 AttGetAPinstNamesMacro(ESMF_CplComp, comp, comp%compp%base)
 
 AttLinkCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
@@ -11167,7 +11286,9 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_GridComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttGetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
-GetCountNameNumberMacro(ESMF_GridComp, comp, comp%compp%base)
+GetCountMacro(ESMF_GridComp, comp, comp%compp%base)
+GetNameNumberMacro(ESMF_GridComp, comp, comp%compp%base)
+
 AttGetAPinstNamesMacro(ESMF_GridComp, comp, comp%compp%base)
 
 AttLinkCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
@@ -11225,7 +11346,9 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_SciComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_SciComp, comp, comp%compp%base)
 AttGetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
 
-GetCountNameNumberMacro(ESMF_SciComp, comp, comp%compp%base)
+GetCountMacro(ESMF_SciComp, comp, comp%compp%base)
+GetNameNumberMacro(ESMF_SciComp, comp, comp%compp%base)
+
 AttGetAPinstNamesMacro(ESMF_SciComp, comp, comp%compp%base)
 
 AttLinkCompMacro(ESMF_SciComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
@@ -11279,7 +11402,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_State, state, state%statep%base)
 AttGetLogicalMacro(ESMF_State, state, state%statep%base)
 AttGetCharacterMacro(ESMF_State, state, state%statep%base)
 
-GetCountNameNumberMacro(ESMF_State, state, state%statep%base)
+GetCountMacro(ESMF_State, state, state%statep%base)
+GetNameNumberMacro(ESMF_State, state, state%statep%base)
 
 AttLinkStateMacro(ESMF_Array, Array, state, array, state%statep%base, & @\
                           array, statep%st, array)
@@ -11330,7 +11454,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_FieldBundle, fieldbundle, fieldbun
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+GetCountMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+GetNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%this%base, field%ftypep%base)
@@ -11371,7 +11496,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Field, field, field%ftypep%base)
 AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
-GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
+GetCountMacro(ESMF_Field, field, field%ftypep%base)
+GetNameNumberMacro(ESMF_Field, field, field%ftypep%base)
 
 AttLinkMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
                 field%ftypep%base, grid)
@@ -11408,7 +11534,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_ArrayBundle, arraybundle, arraybun
 AttGetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
-GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+GetCountMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+GetNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 AttLinkMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
                 arraybundle, array)
@@ -11443,7 +11570,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Array, array, array)
 AttGetLogicalMacro(ESMF_Array, array, array)
 AttGetCharacterMacro(ESMF_Array, array, array)
 
-GetCountNameNumberMacro(ESMF_Array, array, array)
+GetCountMacro(ESMF_Array, array, array)
+GetNameNumberMacro(ESMF_Array, array, array)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
@@ -11483,7 +11611,8 @@ AttGet1DBMacro(real, R8, ESMF_Grid, grid, grid)
 AttGetLogicalBMacro(ESMF_Grid, grid, grid)
 AttGetCharacterBMacro(ESMF_Grid, grid, grid)
 
-GetCountNameNumberMacro(ESMF_Grid, grid, grid)
+GetCountMacro(ESMF_Grid, grid, grid)
+GetNameNumberMacro(ESMF_Grid, grid, grid)
 
 AttReadMacro(ESMF_Grid, grid, grid)
 
@@ -11512,7 +11641,8 @@ TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_DistGrid, distgrid, distgrid)
 AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
-GetCountNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)
+GetCountMacro(ESMF_DistGrid, distgrid, distgrid)
+GetNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)
 
 AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 

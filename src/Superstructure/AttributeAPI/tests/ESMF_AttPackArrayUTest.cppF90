@@ -66,6 +66,7 @@ program ESMF_AttPackArrayUTest
 
       logical                :: isPresent
       type(ESMF_AttPack)     :: attpack
+      integer                :: count
 
 ^endif
 !-------------------------------------------------------------------------------

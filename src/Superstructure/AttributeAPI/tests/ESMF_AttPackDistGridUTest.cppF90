@@ -64,6 +64,7 @@ program ESMF_AttPackDistGridUTest
 
       logical                :: isPresent
       type(ESMF_AttPack)     :: attpack
+      integer                :: count
 
 ^endif
 !-------------------------------------------------------------------------------
