@@ -114,12 +114,13 @@ program ESMF_GridCreateEx
 ! to be (1,1,...,1). If {\tt regDecomp} is not specified, then
 ! by default ESMF creates a distribution that partitions the
 ! grid cells in the first dimension (e.g. NPx1x1...1) as evenly 
-! as possible by  the number of processors NP.
+! as possible by  the number of PETs NP.
 ! The remaining dimensions are not partitioned.
 ! The dimension of the Grid is the size of {\tt maxIndex}. 
 ! The following is an example of creating a 10x20x30 3D grid
 ! where the first dimensions is broken into 2 pieces, the second
-! is broken into 4 pieces, and the third is "distributed" across only one processor. 
+! is broken into 4 pieces, and the third is not divided (i.e. every DE will 
+! have length 30 in the 3rd dimension). 
 !EOE
 
 !BOC
@@ -210,7 +211,10 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !
 ! \begin{sloppypar}
 ! The {\tt petMap} parameter may be used to specify on to which specific PETs 
-! the DEs in the Grid are assigned. Note that this parameter is only available for the 
+! the DEs in the Grid are assigned. Each entry in {\tt petMap} specifies to which PET the corresponding
+! DE should be assigned. For example, {\tt petMap(3,2)=4} tells the Grid
+! create call to put the DE located at column 3 row 2 on PET 4.
+! Note that this parameter is only available for the 
 ! regular and irregular distribution types. The {\tt petMap} 
 ! array is a 3D array, for a 3D Grid each of its dimensions correspond to a
 ! Grid dimension. If the Grid is 2D, then the first two dimensions correspond
@@ -222,20 +226,10 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! an irregular Grid the size is equal to the number of items in
 ! the corresponding {\tt countsPerDEDim} variable (i.e. 
 ! {\tt size(petMap,d)=size(countsPerDEDimd)} for all dimensions {\tt d} in the Grid).
-! \end{sloppypar}
-! 
-! \begin{sloppypar}
-! The {\tt petMap} parameter may be used to specify on to which specific PETs 
-! Each entry in {\tt petMap} specifies to which PET the corresponding
-! DE should be assigned. For example, {\tt petMap(3,2)=4} tells the Grid
-! create call to put the DE located at column 3 row 2 on PET 4.
-! \end{sloppypar}
-!
-! \begin{sloppypar}
-! The {\tt petMap} parameter may be used to specify on to which specific PETs 
 ! The following example demonstrates how to specify the PET to DE association 
 ! for an {\tt ESMF\_GridCreateNoPeriDim()} call.
 ! \end{sloppypar}
+! 
 !EOE
 
 ! Skip if not right number of procs.

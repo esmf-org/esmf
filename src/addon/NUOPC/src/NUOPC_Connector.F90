@@ -82,7 +82,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC CplComp Attribute Package to the Connector
-    call NUOPC_CompAttributeAdd(connector, rc=rc)
+    call NUOPC_CompAttributeInit(connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         

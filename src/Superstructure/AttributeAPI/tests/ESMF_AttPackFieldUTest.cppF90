@@ -51,7 +51,8 @@ program ESMF_AttPackFieldUTest
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       ! local variables
-      character(ESMF_MAXSTR) :: conv, purp
+      type(ESMF_AttPack)     :: attpack
+      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp
 
       integer(ESMF_KIND_I4)  :: inI4, outI4, inI4l(3), outI4l(3)
       integer(ESMF_KIND_I8)  :: inI8, outI8, inI8l(3), outI8l(3)
@@ -60,10 +61,16 @@ program ESMF_AttPackFieldUTest
       character(ESMF_MAXSTR) :: inChar, outChar, inCharl(3), outCharl(3)
       logical                :: inLog, outLog, inLogl(3), outLogl(3)
 
-      character(ESMF_MAXSTR) :: attpackList(12)
+      character(ESMF_MAXSTR), dimension(12) :: attpackList, attpackListTNames, &
+                                               attpackListTNames2
+      character(ESMF_MAXSTR), dimension(3) :: attpackListOut2, attpackListOut3, &
+                                              attpackListOut4, &
+                                              attpackDfltList, attpackDfltList2
+      character(ESMF_MAXSTR) :: attrname, attrvalue, filename, baseline
 
-      logical                :: isPresent
-      type(ESMF_AttPack)     :: attpack
+      logical                :: rc_logical, isPresent
+      integer                :: count
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 ^endif
 !-------------------------------------------------------------------------------
@@ -81,8 +88,11 @@ program ESMF_AttPackFieldUTest
 
       field = ESMF_FieldEmptyCreate(name="field", rc=rc)
 
-      AttPackTestMacro(ESMF_Field, field, an Field, EX_UTest)
-      AttPackStandardTestMacro(ESMF_Field, field, a Field, "CIM 1.5", "Inputs ", EX_UTest)
+      AttPackTestMacro(field, "an Field", EX_UTest, "field")
+      AttPackStandardTestMacro(field, "a Field", "ESMF   ", "General", EX_UTest)
+      AttPackStandardTestMacro(field, "a Field", "CIM 1.5", "Inputs ", EX_UTest)
+      AttPackStandardTestMacro(field, "a Field", "CF      ", "Extended", EX_UTest)
+      AttPackStandardTestMacro(field, "a Field", "CF     ", "General", EX_UTest)
 
       call ESMF_FieldDestroy(field, rc=rc)
 

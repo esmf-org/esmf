@@ -1,4 +1,4 @@
-Name: original field	  Convention: ESMF	  Purpose: General	
+Name: field	  Convention: customconvention	  Purpose: custompurpose	
 
-Intent   	StandardName	LongName	ShortName         	Units	
-Export   		             	         Field Attribute   		      
+Custom1	Custom2	Custom3	
+         	         	         	
