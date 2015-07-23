@@ -210,7 +210,7 @@ script_info:
 	-@echo " "
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
-	-@echo " * ESMF benchmark directory *"
+	-@echo " * ESMF Benchmark directory and parameters *"
 	-@echo "ESMF_BENCHMARK_PREFIX:    $(ESMF_BENCHMARK_PREFIX)"
 	-@echo "ESMF_BENCHMARK_TOLERANCE: $(ESMF_BENCHMARK_TOLERANCE)"
 	-@echo "ESMF_BENCHMARK_THRESHOLD_MSEC: $(ESMF_BENCHMARK_THRESHOLD_MSEC)"
