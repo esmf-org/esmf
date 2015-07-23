@@ -781,7 +781,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttWrite
         module procedure ESMF_GridCompAttWrite
         module procedure ESMF_SciCompAttWrite
-        !module procedure ESMF_DistGridAttWrite
+        module procedure ESMF_DistGridAttWrite
         module procedure ESMF_FieldAttWrite
         module procedure ESMF_FieldBundleAttWrite
         module procedure ESMF_GridAttWrite
@@ -3415,6 +3415,7 @@ contains
 !     \item type(ESMF\_CplComp),     intent(in) :: comp
 !     \item type(ESMF\_GridComp),    intent(in) :: comp
 !     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
 !     \item type(ESMF\_Field),       intent(in) :: field
 !     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
 !     \item type(ESMF\_Grid),        intent(in) :: grid
@@ -11649,6 +11650,8 @@ AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
+
+AttWriteMacro(ESMF_DistGrid, distgrid, distgrid, distgrid, distgrid)
 
 !------------------------------------------------------------------------------
 

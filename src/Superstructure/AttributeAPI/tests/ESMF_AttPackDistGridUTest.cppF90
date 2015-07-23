@@ -51,7 +51,8 @@ program ESMF_AttPackDistGridUTest
 ^ifdef ESMF_TESTEXHAUSTIVE
 
       ! local variables
-      character(ESMF_MAXSTR) :: conv, purp
+      type(ESMF_AttPack)     :: attpack
+      character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp
 
       integer(ESMF_KIND_I4)  :: inI4, outI4, inI4l(3), outI4l(3)
       integer(ESMF_KIND_I8)  :: inI8, outI8, inI8l(3), outI8l(3)
@@ -60,11 +61,16 @@ program ESMF_AttPackDistGridUTest
       character(ESMF_MAXSTR) :: inChar, outChar, inCharl(3), outCharl(3)
       logical                :: inLog, outLog, inLogl(3), outLogl(3)
 
-      character(ESMF_MAXSTR) :: attpackList(12)
+      character(ESMF_MAXSTR), dimension(12) :: attpackList, attpackListTNames, &
+                                               attpackListTNames2
+      character(ESMF_MAXSTR), dimension(3) :: attpackListOut2, attpackListOut3, &
+                                              attpackListOut4, &
+                                              attpackDfltList, attpackDfltList2
+      character(ESMF_MAXSTR) :: attrname, attrvalue, filename, baseline
 
-      logical                :: isPresent
-      type(ESMF_AttPack)     :: attpack
+      logical                :: rc_logical, isPresent
       integer                :: count
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 ^endif
 !-------------------------------------------------------------------------------
@@ -83,7 +89,7 @@ program ESMF_AttPackDistGridUTest
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
 
-      AttPackTestMacro(ESMF_DistGrid, distgrid, a DistGrid, EX_UTest)
+      AttPackTestMacro(distgrid, "a DistGrid", EX_UTest, "unnamed  0")
 
       call ESMF_DistGridDestroy(distgrid, rc=rc)
 

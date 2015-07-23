@@ -646,7 +646,8 @@ namespace ESMCI {
              object.compare("field")==0 || 
              object.compare("arraybundle")==0 ||
              object.compare("array")==0 ||
-             object.compare("grid")==0) {
+             object.compare("grid")==0 ||
+             object.compare("distgrid")==0) {
     modelcompname="N/A";
     fullname="N/A";
     version="N/A";
@@ -882,7 +883,7 @@ namespace ESMCI {
     // done with field
     fielddone = true;
   }
-  
+
   // do grid write
   if (!griddone) {
     string attPackInstanceName;
@@ -908,7 +909,7 @@ namespace ESMCI {
       return ESMF_SUCCESS;
     }
   }
-  
+
   // recurse across all linked ESMF objects (e.g. child components, states,
   // fieldBundles, fields, grids, arrays)
   for(i=0; i<linkList.size(); i++)
@@ -951,15 +952,17 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
     for (i=0;  i<attrList.size(); ++i) { 
-      string value = attrList.at(i)->vcpp.at(0); 
       // if this is internal info, retrieve the correct Attribute
-      if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
-          strncmp(value.c_str(), "ESMF:", 5) == 0) {
-        // this is internal information, call internal routine and continue
-        int nest_level = 2;
-        AttributeWriteInternalInfoGrid(io_xml, nest_level, attrList.at(i));
-        continue;
+      if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
+    	  string value = attrList.at(i)->vcpp.at(0);
+    	  if (strncmp(value.c_str(), "ESMF:", 5) == 0) {
+    		  // this is internal information, call internal routine and continue
+    		  int nest_level = 2;
+    		  AttributeWriteInternalInfoGrid(io_xml, nest_level, attrList.at(i));
+    		  continue;
+    	  }
       }
+      printf("xmlbuffergrid\n");
 
       if (attrList.at(i)->items == 1) {
         string name = attrList.at(i)->attrName; 
@@ -1002,7 +1005,7 @@ namespace ESMCI {
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            if (strncmp(value.c_str(), "ESMF:", 5) == 0) break;
+            if (strncmp((attrList.at(i)->vcpp.at(0)).c_str(), "ESMF:", 5) == 0) break;
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 2, 0);
             ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
