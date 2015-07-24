@@ -5,7 +5,7 @@ Given the computational demands of Earth system modeling, the ESMF is by
 necessity complicated software running on complicated hardware.  However,
 our goal is to develop a framework that is straightforward to understand and 
 use, reasonable to maintain, and amenable to extension.  
-To these ends, we are adopting an achitecture modularized in a  
+To these ends, we are adopting an architecture modularized in a  
 systematic and intuitive way.  The ESMF combines elements of 
 object-oriented design, component-based design, and software layering, 
 complementary approaches for ordering and decomposing software that apply
@@ -43,7 +43,7 @@ Together these OO strategies help to organize and streamline codes, making
 them more flexible, maintainable, and extensible.  
 
 The practice of OO design has grown to include the recognition of a family
-of commonly occuring ``design patterns'' and strategies for using them 
+of commonly occurring ``design patterns'' and strategies for using them 
 effectively (e.g., \cite{alexandrescu, gof}.  For example, a widely
 recognized design pattern relevant to ESMF is that of a {\bf mediator},
 the generic equivalent of an Earth system coupler.  The role of a 
@@ -233,7 +233,7 @@ user programs computations using simple arrays.  The latter approach can
 simplify coding
 when computations are free from communications.  When communications or other
 operations that reflect hardware are required within model computations, coding
-model calcuations using more complex data objects can encapsulate some of 
+model calculations using more complex data objects can encapsulate some of 
 these details and simplify codes.  Overture \cite{overture} is an example of a framework 
 that provides such complex data objects. 
 

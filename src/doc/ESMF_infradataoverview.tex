@@ -298,7 +298,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  In 3D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
@@ -331,7 +331,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  In 3D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
@@ -465,7 +465,7 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
  In 3D, ESMF supports conservative regridding between any combination of the following:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
- \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
  \end{itemize}
 
 \smallskip
@@ -667,7 +667,7 @@ of grid types, all grids are converted to a common internal format and the regri
 is performed on that format. This vastly reduces the variety of grids that need to be supported in 
 the weight calculations for each interpolation method. It also has the added benefit of making it
 straightforward to add new grid types and to allow them to work with all the existing grid types.
-To hook into the exisiting weight calculation code, the new type just needs to be converted to the
+To hook into the existing weight calculation code, the new type just needs to be converted to the
 internal format. 
 
 The internal grid format used by the ESMF regrid weight calculation is a finite element
