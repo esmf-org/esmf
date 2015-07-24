@@ -172,8 +172,8 @@ RUN_ESMF_AttPackDistGridUTest:
 	$(MAKE) TNAME=AttPackDistGrid NP=4 ftest
 
 RUN_ESMF_AttPackDistGridUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_distgrid.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_distgrid.stdout $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackDistGrid NP=1 ftest
 
 # --- AttPackFBundle
