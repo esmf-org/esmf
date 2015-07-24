@@ -129,6 +129,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridDestroy
   
   public ESMF_DistGridGet
+  public ESMF_DistGridIsCreated
   public ESMF_DistGridMatch
   public ESMF_DistGridPrint
   public ESMF_DistGridSet
@@ -3080,6 +3081,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DistGridGetPLocalDePDim
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridIsCreated()"
+!BOP
+! !IROUTINE: ESMF_DistGridIsCreated - Check whether a DistGrid object has been created
+
+! !INTERFACE:
+  function ESMF_DistGridIsCreated(distgrid, rc)
+! !RETURN VALUE:
+    logical :: ESMF_DistGridIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid), intent(in)            :: distgrid
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt distgrid} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_DistGridIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_DistGridGetInit(distgrid)==ESMF_INIT_CREATED) &
+      ESMF_DistGridIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 

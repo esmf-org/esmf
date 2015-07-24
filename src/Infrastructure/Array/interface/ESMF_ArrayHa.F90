@@ -65,6 +65,7 @@ module ESMF_ArrayHaMod
   public ESMF_ArrayHalo
   public ESMF_ArrayHaloRelease
   public ESMF_ArrayHaloStore
+  public ESMF_ArrayIsCreated
   public ESMF_ArrayPrint
   public ESMF_ArrayRead
   public ESMF_ArrayRedist
@@ -462,6 +463,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayHaloStore
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ArrayIsCreated - Check whether an Array object has been created
+
+! !INTERFACE:
+  function ESMF_ArrayIsCreated(array, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ArrayIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in)            :: array
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt array} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ArrayIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ArrayGetInit(array)==ESMF_INIT_CREATED) &
+      ESMF_ArrayIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 
