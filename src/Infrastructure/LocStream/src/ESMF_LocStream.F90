@@ -1410,7 +1410,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[distgrid]
 !          Distgrid specifying size and distribution. Only 1D distgrids are allowed.
@@ -1559,7 +1559,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[minIndex]}] 
 !          Number to start the index ranges at. If not present, defaults
@@ -1698,7 +1698,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[localCount]
 !          Number of grid cells to be distributed to this DE.
@@ -1851,7 +1851,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[regDecomp]}]
 !          Specify into how many chunks to divide the locations. 
@@ -2330,9 +2330,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream),   intent(in)       :: locstream
-      integer,                intent(in)                  :: localDE
-      character (len=*),   intent(in)                :: keyName
+      type(ESMF_LocStream),   intent(in)            :: locstream
+      integer,                intent(in),  optional :: localDE
+      character (len=*),      intent(in)            :: keyName
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -2342,7 +2342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: totalLBound
       integer,                intent(out), optional :: totalUBound
       integer,                intent(out), optional :: totalCount
-      integer, intent(out), optional :: rc
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method gets the bounds of a localDE for a locstream.
@@ -2389,34 +2389,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
  ! Check init status of arguments 
  ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
- !! Get localDECount
- !call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
- !    ESMF_CONTEXT, rcToReturn=rc)) return
- !
- !! Check consistency  of localDE
- !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
- !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE too big", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE<0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -2576,10 +2548,10 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    This method gets a Fortran pointer to the piece of memory which holds the 
-!    key data for a particular key on the given local DE. 
+!    This method gets a Fortran pointer to the piece of memory which holds the
+!    key data for a particular key on the given local DE.
 !    This is useful, for example, for setting the key values in a LocStream, or
-!    for reading the values. 
+!    for reading the values.
 !
 !    Supported values for <farray> are:
 !    \begin{description}
@@ -2610,28 +2582,27 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region
 !          \newline
-!          (i.e. {\tt computationalUBound-computationalLBound+1}). 
+!          (i.e. {\tt computationalUBound-computationalLBound+1}).
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
 !     \item[{[totalUBound]}]
 !          Upon return this holds the upper bounds of the total region.
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region
-!          (i.e. {\tt totalUBound-totalLBound+1}). 
+!          (i.e. {\tt totalUBound-totalLBound+1}).
 !     \item[{farray}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farray is a reference to the data in the Grid coordinate arrays. 
+!          farray is a reference to the data in the Grid coordinate arrays.
 !          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
+!          list of valid values.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyI4"
 !BOPI
@@ -2646,21 +2617,21 @@ end subroutine ESMF_LocStreamGetKeyBounds
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
-      character (len=*),    intent(in)              :: keyName
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer,                intent(out), optional :: totalLBound
-      integer,                intent(out), optional :: totalUBound
-      integer,                intent(out), optional :: totalCount
-      integer(ESMF_KIND_I4), pointer :: farray(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_LocStream),     intent(in)            :: locstream
+      integer,                  intent(in),  optional :: localDE
+      character (len=*),        intent(in)            :: keyName
+      integer,                  intent(out), optional :: exclusiveLBound
+      integer,                  intent(out), optional :: exclusiveUBound
+      integer,                  intent(out), optional :: exclusiveCount
+      integer,                  intent(out), optional :: computationalLBound
+      integer,                  intent(out), optional :: computationalUBound
+      integer,                  intent(out), optional :: computationalCount
+      integer,                  intent(out), optional :: totalLBound
+      integer,                  intent(out), optional :: totalUBound
+      integer,                  intent(out), optional :: totalCount
+      integer(ESMF_KIND_I4),    pointer               :: farray(:)
+      type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
+      integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method gets a Fortran pointer to the piece of memory which holds the 
@@ -2716,7 +2687,6 @@ end subroutine ESMF_LocStreamGetKeyBounds
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray 
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -2732,40 +2702,6 @@ end subroutine ESMF_LocStreamGetKeyBounds
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -2812,21 +2748,21 @@ end subroutine ESMF_LocStreamGetKeyI4
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
-      character (len=*),    intent(in)              :: keyName
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer,                intent(out), optional :: totalLBound
-      integer,                intent(out), optional :: totalUBound
-      integer,                intent(out), optional :: totalCount 
-      real(ESMF_KIND_R4), pointer :: farray(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_LocStream),     intent(in)            :: locstream
+      integer,                  intent(in),  optional :: localDE
+      character (len=*),        intent(in)            :: keyName
+      integer,                  intent(out), optional :: exclusiveLBound
+      integer,                  intent(out), optional :: exclusiveUBound
+      integer,                  intent(out), optional :: exclusiveCount
+      integer,                  intent(out), optional :: computationalLBound
+      integer,                  intent(out), optional :: computationalUBound
+      integer,                  intent(out), optional :: computationalCount
+      integer,                  intent(out), optional :: totalLBound
+      integer,                  intent(out), optional :: totalUBound
+      integer,                  intent(out), optional :: totalCount 
+      real(ESMF_KIND_R4),       pointer               :: farray(:)
+      type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
+      integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method gets a Fortran pointer to the piece of memory which holds the 
@@ -2882,7 +2818,6 @@ end subroutine ESMF_LocStreamGetKeyI4
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -2898,40 +2833,6 @@ end subroutine ESMF_LocStreamGetKeyI4
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -2955,8 +2856,7 @@ end subroutine ESMF_LocStreamGetKeyI4
                  computationalLBound, computationalUBound, computationalCount, &
                  totalLBound, totalUBound, totalCount, &
                  localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Return successfully 
  if (present(rc)) rc = ESMF_SUCCESS 
@@ -2979,21 +2879,21 @@ end subroutine ESMF_LocStreamGetKeyR4
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
-      character (len=*),    intent(in)              :: keyName
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer,                intent(out), optional :: totalLBound
-      integer,                intent(out), optional :: totalUBound
-      integer,                intent(out), optional :: totalCount
-      real(ESMF_KIND_R8), pointer :: farray(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_LocStream),     intent(in)            :: locstream
+      integer,                  intent(in),  optional :: localDE
+      character (len=*),        intent(in)            :: keyName
+      integer,                  intent(out), optional :: exclusiveLBound
+      integer,                  intent(out), optional :: exclusiveUBound
+      integer,                  intent(out), optional :: exclusiveCount
+      integer,                  intent(out), optional :: computationalLBound
+      integer,                  intent(out), optional :: computationalUBound
+      integer,                  intent(out), optional :: computationalCount
+      integer,                  intent(out), optional :: totalLBound
+      integer,                  intent(out), optional :: totalUBound
+      integer,                  intent(out), optional :: totalCount
+      real(ESMF_KIND_R8),       pointer               :: farray(:)
+      type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
+      integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method gets a Fortran pointer to the piece of memory which holds the 
@@ -3049,7 +2949,6 @@ end subroutine ESMF_LocStreamGetKeyR4
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -3067,41 +2966,6 @@ end subroutine ESMF_LocStreamGetKeyR4
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -3149,15 +3013,15 @@ end subroutine ESMF_LocStreamGetKeyR8
           rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream),   intent(in) :: locstream
-      integer,                intent(in) :: localDE
+      type(ESMF_LocStream),   intent(in)            :: locstream
+      integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
       integer,                intent(out), optional :: computationalLBound
       integer,                intent(out), optional :: computationalUBound
       integer,                intent(out), optional :: computationalCount
-      integer, intent(out), optional :: rc
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method gets the bounds of a localDE for a locstream.
@@ -3200,34 +3064,6 @@ end subroutine ESMF_LocStreamGetKeyR8
 
  ! Check init status of arguments 
  ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
- !! Get localDECount
- !call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
- !    ESMF_CONTEXT, rcToReturn=rc)) return
- !
- !! Check consistency  of localDE
- !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
- !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE too big", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE<0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
 
  ! Get locstream type object
  lstypep=>locstream%lstypep
@@ -3932,7 +3768,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !      \item[locstream]
 !          Location stream to be copied
-!      \item[{[name]}]
+!      \item[name]
 !          Name of the new location stream
 !      \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4093,7 +3929,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !      \item[locstream]
 !          Location stream from which the new location stream is to be created. 
-!      \item[{[name]}]
+!      \item[name]
 !          Name of the new location stream.
 !      \item[keyNames]
 !          Names of the keys used to determine the subset
@@ -4458,7 +4294,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !     \item[locstreamList]
 !          List of location streams from which the new location stream is to be created
-!     \item[{[name]}]
+!     \item[name]
 !          Name of the resulting location stream
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4743,7 +4579,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !     \item[locstream]
 !          Location stream from which the new location stream is to be created
-!     \item[{[name]}]
+!     \item[name]
 !          Name of the resulting location stream
 !     \item[sortKeys]
 !          Keys to sort by (primary, secondary, and higher level)
