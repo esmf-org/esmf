@@ -171,8 +171,8 @@ class Attribute
       int &attPackInstanceNameCount) const;
     Attribute *AttPackGetAttribute(const std::string &name) const;
     int AttPackIsPresent(const std::string &name, 
-                                          const ESMCI::Attribute *attpack, 
-                                          ESMC_Logical *present) const;
+                         const ESMCI::Attribute *attpack,
+                         ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
                       const std::string &object, 
                       const bool &inObjectTree,
@@ -228,10 +228,12 @@ class Attribute
     int AttributeGet(const std::string &name, int *lens, int count) const;
     int AttributeGet(const std::string &name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
     int AttributeGet(int num, std::string *name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
-    int AttributeGetCount(void) const;
-    int AttributeGetCountPack(void) const;
-    int AttributeGetCountLink(void) const;
-    int AttributeGetCountTotal(void) const;
+    int AttributeGetCount(ESMC_AttGetCountFlag *flag, int *count) const;
+    inline int AttributeGetCountAttr(void) const {return attrList.size();};
+    inline int AttributeGetCountPack(void) const {return packList.size();};
+    inline int AttributeGetCountLink(void) const {return linkList.size();};
+    inline int AttributeGetCountTotal(void) const {
+    	return attrList.size()+packList.size()+linkList.size();};
     int AttributeGetItemCount(const std::string &name) const;
 
     // get attribute parent
@@ -516,6 +518,8 @@ extern "C" {
                                   ESMC_TypeKind_Flag *tk, int *count, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetcount)(ESMC_Base **base, int *count,
+                                  ESMC_AttGetCountFlag *flag, int *rc);
+  void FTN_X(c_esmc_attributegetcountattpack)(ESMCI::Attribute **attpack, int *count,
                                   ESMC_AttGetCountFlag *flag, int *rc);
   void FTN_X(c_esmc_attributeispresent)(ESMC_Base **base, char *name,
                                   ESMC_Logical *present, 

@@ -41,8 +41,8 @@ module NUOPC_Base
   public NUOPC_ClockPrintCurrTime
   public NUOPC_ClockPrintStartTime
   public NUOPC_ClockPrintStopTime
-  public NUOPC_FieldAttributeAdd
   public NUOPC_FieldAttributeGet
+  public NUOPC_FieldAttributeInit
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_FieldDictionaryAddEntry    ! defined in NUOPC_FieldDictionaryApi
@@ -58,8 +58,8 @@ module NUOPC_Base
   public NUOPC_GridCreateSimpleXY
   public NUOPC_StateAdvertiseField    ! mark deprecated, use NUOPC_Advertise
   public NUOPC_StateAdvertiseFields   ! mark deprecated, use NUOPC_Advertise
-  public NUOPC_StateAttributeAdd
   public NUOPC_StateAttributeGet
+  public NUOPC_StateAttributeInit
   public NUOPC_StateAttributeSet
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
@@ -76,7 +76,6 @@ module NUOPC_Base
   ! -- utility methods following the new v7 scheme
   public NUOPC_Add
   public NUOPC_Advertise
-  public NUOPC_AttributeAdd
   public NUOPC_AttributeGet
   public NUOPC_AttributeSet
   public NUOPC_CheckSet
@@ -109,11 +108,6 @@ module NUOPC_Base
     module procedure NUOPC_StateAdvertiseFields
   end interface
   
-  interface NUOPC_AttributeAdd
-    module procedure NUOPC_FieldAttributeAdd
-    module procedure NUOPC_StateAttributeAdd
-  end interface
-
   interface NUOPC_AttributeGet
     module procedure NUOPC_FieldAttributeGet
     module procedure NUOPC_StateAttributeGet
@@ -235,7 +229,7 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    call NUOPC_StateAttributeAdd(nestedS, rc=rc)
+    call NUOPC_StateAttributeInit(nestedS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -321,7 +315,7 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
+    call NUOPC_FieldAttributeInit(field, StandardName=StandardName, &
       Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -344,7 +338,7 @@ module NUOPC_Base
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
+      call NUOPC_FieldAttributeInit(field, StandardName=StandardName, &
         Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -443,10 +437,10 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_AttributeAdd - Add the NUOPC Field Attributes
+!BOPI
+! !IROUTINE: NUOPC_FieldAttributeInit - Initialize the NUOPC Field Attributes
 ! !INTERFACE:
-  subroutine NUOPC_FieldAttributeAdd(field, StandardName, Units, LongName, &
+  subroutine NUOPC_FieldAttributeInit(field, StandardName, Units, LongName, &
     ShortName, Connected, rc)
 ! !ARGUMENTS:
     type(ESMF_Field)                      :: field
@@ -461,9 +455,10 @@ module NUOPC_Base
 !   arguments against the NUOPC Field Dictionary. Omitted optional
 !   information is filled in using defaults.
 !
-!   This adds the standard NUOPC Field Attribute package: convention="NUOPC", 
-!   purpose="General" to the Field. The NUOPC Field Attribute package extends
-!   the ESG Field Attribute package: convention="ESG", purpose="General". 
+!   Add the standard NUOPC Field AttPack hierarchy to the Field.
+!
+!   The highest level in the AttPack hierarchy will have convention="NUOPC" and
+!   purpose="Instance".
 !
 !   The arguments are:
 !   \begin{description}
@@ -494,7 +489,7 @@ module NUOPC_Base
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)            :: attrList(7)
@@ -519,7 +514,7 @@ module NUOPC_Base
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(field, convention="NUOPC", purpose="General",   &
+    call ESMF_AttributeAdd(field, convention="NUOPC", purpose="Instance",   &
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -556,7 +551,7 @@ module NUOPC_Base
     ! set StandardName
     call ESMF_AttributeSet(field, &
       name="StandardName", value=trim(StandardName), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -582,7 +577,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="Units", value=trim(tempString), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -595,7 +590,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="LongName", value=trim(tempString), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -608,7 +603,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="ShortName", value=trim(tempString), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -635,7 +630,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="Connected", value=trim(tempString), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -643,7 +638,7 @@ module NUOPC_Base
     ! set TimeStamp
     call ESMF_AttributeSet(field, &
       name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -651,7 +646,7 @@ module NUOPC_Base
     ! set ProducerConnection
     call ESMF_AttributeSet(field, &
       name="ProducerConnection", value="open", &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -659,7 +654,7 @@ module NUOPC_Base
     ! set ConsumerConnection
     call ESMF_AttributeSet(field, &
       name="ConsumerConnection", value="open", &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -667,7 +662,7 @@ module NUOPC_Base
     ! set Updated
     call ESMF_AttributeSet(field, &
       name="Updated", value="false", &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -675,7 +670,7 @@ module NUOPC_Base
     ! set TransferOfferGeomObject
     call ESMF_AttributeSet(field, &
       name="TransferOfferGeomObject", value="will provide", &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -683,7 +678,7 @@ module NUOPC_Base
     ! set TransferActionGeomObject
     call ESMF_AttributeSet(field, &
       name="TransferActionGeomObject", value="provide", &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -692,20 +687,19 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_AttributeAdd - Add the NUOPC State Attributes
+!BOPI
+! !IROUTINE: NUOPC_StateAttributeInit - Initialize the NUOPC State Attributes
 ! !INTERFACE:
-  subroutine NUOPC_StateAttributeAdd(state, rc)
+  subroutine NUOPC_StateAttributeInit(state, rc)
 ! !ARGUMENTS:
     type(ESMF_state)                      :: state
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Add standard NUOPC Attributes to a State.
+!   Add the standard NUOPC State AttPack hierarchy to the State.
 !
-!   This adds the standard NUOPC State Attribute package: convention="NUOPC",
-!   purpose="General" to the State.
-!
-!EOP
+!   The highest level in the AttPack hierarchy will have convention="NUOPC" and
+!   purpose="Instance".
+!EOPI
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)            :: attrList(1)
@@ -716,7 +710,7 @@ module NUOPC_Base
     attrList(1) = "Namespace"           ! namespace of this State
     
     ! add Attribute packages
-    call ESMF_AttributeAdd(state, convention="NUOPC", purpose="General", &
+    call ESMF_AttributeAdd(state, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -751,7 +745,7 @@ module NUOPC_Base
     defaultvalue = "CheckThisDefaultValue"
 
     call ESMF_AttributeGet(field, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -801,7 +795,7 @@ module NUOPC_Base
 
     call ESMF_AttributeGet(state, name=name, value=value, &
       defaultvalue=defaultvalue, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -845,7 +839,7 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(field, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -874,7 +868,7 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(state, name=name, value=value, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1851,7 +1845,7 @@ module NUOPC_Base
 
     call ESMF_AttributeGet(field, &
       name="TimeStamp", valueList=valueList, &
-      convention="NUOPC", purpose="General", &
+      convention="NUOPC", purpose="Instance", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -2182,7 +2176,7 @@ module NUOPC_Base
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
         call ESMF_AttributeGet(field, name="Updated", value=value, &
-          convention="NUOPC", purpose="General", rc=rc)
+          convention="NUOPC", purpose="Instance", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
         if (present(count) .and. trim(value)=="true") then
@@ -2637,7 +2631,7 @@ module NUOPC_Base
     
     ! Add the Field attributes to the realizing Field and set basic values
     
-    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
+    call NUOPC_FieldAttributeInit(field, StandardName=StandardName,&
       Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -2776,7 +2770,7 @@ module NUOPC_Base
 #endif
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
-          convention="NUOPC", purpose="General", &
+          convention="NUOPC", purpose="Instance", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
@@ -2816,7 +2810,7 @@ module NUOPC_Base
         
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=valueList, &
-            convention="NUOPC", purpose="General", &
+            convention="NUOPC", purpose="Instance", &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -2913,7 +2907,7 @@ module NUOPC_Base
       dstField = dstFieldList(i)
       call ESMF_AttributeGet(srcField, &
         name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
+        convention="NUOPC", purpose="Instance", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -2929,7 +2923,7 @@ module NUOPC_Base
         
       call ESMF_AttributeSet(dstField, &
         name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
+        convention="NUOPC", purpose="Instance", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -3091,7 +3085,7 @@ module NUOPC_Base
         field=stdFieldList(i)
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
-          convention="NUOPC", purpose="General", &
+          convention="NUOPC", purpose="Instance", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
@@ -3113,7 +3107,7 @@ module NUOPC_Base
         
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=valueList, &
-            convention="NUOPC", purpose="General", &
+            convention="NUOPC", purpose="Instance", &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
@@ -3213,7 +3207,7 @@ module NUOPC_Base
           if (selective) then
             call ESMF_AttributeGet(field, &
               name="Updated", value=value, &
-              convention="NUOPC", purpose="General", &
+              convention="NUOPC", purpose="Instance", &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
@@ -3233,7 +3227,7 @@ module NUOPC_Base
         if (selected) then
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
-            convention="NUOPC", purpose="General", &
+            convention="NUOPC", purpose="Instance", &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &

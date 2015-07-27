@@ -64,7 +64,7 @@ contains
 
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
-            purpose = "General"
+            purpose = "Instance"
 
             call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -307,7 +307,7 @@ contains
 
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
-            purpose = "General"
+            purpose = "Instance"
 
             call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1445,7 +1445,7 @@ subroutine NUOPC_GridCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
         itemCount=itemCount, &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1457,7 +1457,7 @@ subroutine NUOPC_GridCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
             line=__LINE__, &
             file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-            convention="NUOPC", purpose="General", rc=rc)
+            convention="NUOPC", purpose="Instance", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

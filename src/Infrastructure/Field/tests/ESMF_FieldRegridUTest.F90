@@ -793,7 +793,7 @@
       !EX_UTest
       ! Test regrid grid to a locstream with regular distribution
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Regrid from Grid to a LocStream with regular distribution"
+      write(name, *) "Regrid from Grid to a LocStream with regular distribution, bilinear and patch"
 
       ! initialize
       rc=ESMF_SUCCESS
@@ -20266,7 +20266,7 @@ return
                             farray=lat,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Lat'
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
     rc=ESMF_FAILURE
     return
   endif
@@ -20276,7 +20276,7 @@ return
                             farray=lon,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Lon'
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
     rc=ESMF_FAILURE
     return
   endif
@@ -20357,7 +20357,7 @@ return
                             farray=lat,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Lat'
+    print*,'ERROR:  trouble getting LocStream key for Latitude'
     rc=ESMF_FAILURE
     return
   endif
@@ -20369,7 +20369,7 @@ return
                             farray=lon,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Lon'
+    print*,'ERROR:  trouble getting LocStream key for Longitude'
     rc=ESMF_FAILURE
     return
   endif
@@ -20667,7 +20667,7 @@ return
                             farray=Yarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Y'
+    print*,'ERROR:  trouble getting LocStream key for Y coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -20677,7 +20677,7 @@ return
                             farray=Xarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for X'
+    print*,'ERROR:  trouble getting LocStream key for X coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -21546,8 +21546,8 @@ return
   integer :: localrc
   type(ESMF_Grid) :: srcGrid
   type(ESMF_LocStream) :: dstLocStream
-  type(ESMF_Field) :: srcField,dstField
-  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_Field) :: srcField,dstField,dstFieldPatch
+  type(ESMF_RouteHandle) :: routeHandle,routeHandlePatch
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
@@ -21786,7 +21786,7 @@ return
     enddo
   enddo
 
-  ! Create dest field
+  ! Create dest fields
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     print*,'ERROR:  trouble calling ArraySpecSet'
@@ -21802,9 +21802,25 @@ return
     return
   endif
 
-  ! clear destination Field
+  dstFieldPatch = ESMF_FieldCreate(dstLocStream, arrayspec, &
+                        name="destPatch", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    print*,'ERROR:  trouble creating field on locStream'
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! clear destination Fields
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+  endif
+
+  farrayPtr1D=0.0
+
+  call ESMF_FieldGet(dstFieldPatch, 0, farrayPtr1D,  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -21825,7 +21841,6 @@ return
       return
    endif
 
-
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -21839,11 +21854,68 @@ return
       return
    endif
 
+  !!! Regrid forward from the Src grid to the LocStream - this time with PATCH
+  ! Regrid store
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstFieldPatch, &
+          routeHandle=routeHandlePatch, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstFieldPatch, routeHandlePatch, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
 
   ! Check results
   do lDE=0,localDECount-1
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr1D, computationalLBound=dclbnd, &
+                             computationalUBound=dcubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! Make sure everthing looks ok
+     do i1=dclbnd(1),dcubnd(1)
+        ! Get coordinates
+        lon=lonArray(i1)
+        lat=latArray(i1)
+
+        ! get the x,y,z coordinates
+        theta = DEG2RAD*(lon)
+        phi = DEG2RAD*(90.-lat)
+        x = cos(theta)*sin(phi)
+        y = sin(theta)*sin(phi)
+        z = cos(phi)
+
+        ! determine validation data
+        expected = x+y+z+15.0
+
+	!! if error is too big report an error
+	if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
+           print*,'ERROR: larger than expected difference, expected ',expected, &
+                  '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected)
+           correct=.false.	
+	endif	
+     enddo
+
+     ! now for patch
+     call ESMF_FieldGet(dstFieldPatch, lDE, farrayPtr1D, computationalLBound=dclbnd, &
                              computationalUBound=dcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -21884,6 +21956,12 @@ return
    endif
 
    call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstFieldPatch, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -22295,11 +22373,8 @@ return
   type(ESMF_Field) :: srcField
   type(ESMF_Field) :: dstField
   type(ESMF_Array) :: dstArray
-  type(ESMF_Field) :: dstFieldPatch
-  type(ESMF_Array) :: dstArrayPatch
   type(ESMF_Array) :: srcArrayA
   type(ESMF_RouteHandle) :: routeHandle
-  type(ESMF_RouteHandle) :: routeHandlePatch
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:,:), farrayPtr1D(:)
@@ -22538,7 +22613,7 @@ return
                             farray=Yarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Y'
+    print*,'ERROR:  trouble getting LocStream key for Y coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -22548,7 +22623,7 @@ return
                             farray=Xarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for X'
+    print*,'ERROR:  trouble getting LocStream key for X coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -22558,7 +22633,7 @@ return
                             farray=Zarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Z'
+    print*,'ERROR:  trouble getting LocStream key for Z coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -22654,26 +22729,9 @@ return
     return
   endif
 
-  dstFieldPatch = ESMF_FieldCreate(dstLocStream, arrayspec, &
-                        name="destPatch", rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble creating field on locStream'
-    rc=ESMF_FAILURE
-    return
-  endif
-
-  
   ! clear destination Fields
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-  endif
-
-  farrayPtr1D=0.0
-
-  call ESMF_FieldGet(dstFieldPatch, 0, farrayPtr1D,  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -22707,33 +22765,6 @@ return
       return
    endif
 
-  !!! Regrid forward from the Src grid to the LocStream - this time with PATCH
-  ! Regrid store
-  call ESMF_FieldRegridStore( &
-	  srcField, &
-          dstField=dstFieldPatch, &
-          routeHandle=routeHandlePatch, &
-          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
-          rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
-
-  ! Do regrid
-  call ESMF_FieldRegrid(srcField, dstFieldPatch, routeHandlePatch, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
-
-  call ESMF_FieldRegridRelease(routeHandlePatch, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
-
-
   ! Check destination field
   ! Should only be 1 localDE
   call ESMF_FieldGet(dstField, 0, farrayPtr1D,  rc=localrc)
@@ -22761,37 +22792,6 @@ return
 
   enddo
 
-
-  ! Check destination fieldPatch
-  ! Should only be 1 localDE
-  call ESMF_FieldGet(dstFieldPatch, 0, farrayPtr1D,  rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-  endif
-
-  ! loop through nodes and make sure interpolated values are reasonable
-  do i1=1,numLocationsOnThisPet
-
-        ! Get coordinates
-        x=Xarray(i1)
-        y=Yarray(i1)
-        z=Zarray(i1)
-
-        expected = x+y+z+20.0
-
-	!! if error is too big report an error
-	if ( abs( farrayPtr1D(i1)-expected )/expected > 0.001) then
-           print*,'ERROR: larger than expected error, expected ',expected, &
-                  '  got ',farrayPtr1D(i1)
-           correct=.false.	
-	endif	
-
-  enddo
-
-
-
-
   ! Destroy the Fields
    call ESMF_FieldDestroy(srcField, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
@@ -22800,12 +22800,6 @@ return
    endif
 
    call ESMF_FieldDestroy(dstField, rc=localrc)
-   if (localrc /=ESMF_SUCCESS) then
-     rc=ESMF_FAILURE
-     return
-   endif
-
-   call ESMF_FieldDestroy(dstFieldPatch, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -23257,7 +23251,7 @@ return
                             farray=Yarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for Y'
+    print*,'ERROR:  trouble getting LocStream key for Y coordinate'
     rc=ESMF_FAILURE
     return
   endif
@@ -23267,7 +23261,7 @@ return
                             farray=Xarray,                   &
                             rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
-    print*,'ERROR:  trouble getting LocStream key for X'
+    print*,'ERROR:  trouble getting LocStream key for X coordinate'
     rc=ESMF_FAILURE
     return
   endif

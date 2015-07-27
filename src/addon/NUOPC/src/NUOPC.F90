@@ -59,7 +59,7 @@ module NUOPC
   public NUOPC_ClockPrintCurrTime
   public NUOPC_ClockPrintStartTime
   public NUOPC_ClockPrintStopTime
-  public NUOPC_FieldAttributeAdd
+  public NUOPC_FieldAttributeInit
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeSet
   public NUOPC_FieldBundleUpdateTime
@@ -69,7 +69,7 @@ module NUOPC
   public NUOPC_GridCreateSimpleXY
   public NUOPC_StateAdvertiseField
   public NUOPC_StateAdvertiseFields
-  public NUOPC_StateAttributeAdd
+  public NUOPC_StateAttributeInit
   public NUOPC_StateAttributeGet
   public NUOPC_StateAttributeSet
   public NUOPC_StateBuildStdList
@@ -87,7 +87,6 @@ module NUOPC
   ! -- utility methods following the new v7 scheme
   public NUOPC_Add
   public NUOPC_Advertise
-  public NUOPC_AttributeAdd
   public NUOPC_AttributeGet
   public NUOPC_AttributeSet
   public NUOPC_CheckSet
@@ -117,8 +116,10 @@ module NUOPC
   ! defined in NUOPC_Comp
   public NUOPC_CompAreServicesSet  
   public NUOPC_CompAttributeAdd
+  public NUOPC_CompAttributeEgest
   public NUOPC_CompAttributeGet
   public NUOPC_CompAttributeIngest
+  public NUOPC_CompAttributeInit
   public NUOPC_CompAttributeSet
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive

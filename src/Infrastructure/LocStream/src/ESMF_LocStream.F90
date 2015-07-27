@@ -2302,7 +2302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! If nothing found return error
    if (keyIndex==0) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-            msg=" - keyName not found in this LocStream", &
+            msg=" - unable to find the following LocStream key: "//keyName, &
             ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 

@@ -105,10 +105,11 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutDestroy
   
   public ESMF_DELayoutGet
-    
+   
   public ESMF_DELayoutGetDEMatchDE
   public ESMF_DELayoutGetDEMatchPET
   
+  public ESMF_DELayoutIsCreated
   public ESMF_DELayoutPrint
   public ESMF_DELayoutValidate
   
@@ -1587,6 +1588,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_DELayoutGetDEMatchPET
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutIsCreated()"
+!BOP
+! !IROUTINE: ESMF_DELayoutIsCreated - Check whether a DELayout object has been created
+
+! !INTERFACE:
+  function ESMF_DELayoutIsCreated(delayout, rc)
+! !RETURN VALUE:
+    logical :: ESMF_DELayoutIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout), intent(in)            :: delayout
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt delayout} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_DELayoutIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_DELayoutGetInit(delayout)==ESMF_INIT_CREATED) &
+      ESMF_DELayoutIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 

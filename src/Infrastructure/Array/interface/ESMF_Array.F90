@@ -80,6 +80,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayHalo             ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayHaloRelease      ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayHaloStore        ! implemented in ESMF_ArrayHaMod
+  public ESMF_ArrayIsCreated        ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayPrint            ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayRead             ! implemented in ESMF_ArrayHaMod
   public ESMF_ArrayRedist           ! implemented in ESMF_ArrayHaMod

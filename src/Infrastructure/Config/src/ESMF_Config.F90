@@ -157,7 +157,7 @@
 ! Revised parameter table to fit Fortran 90 standard.
 
        integer,   parameter :: LSZ = 256  ! Maximum line size
-       integer,   parameter :: MSZ = 512  ! Used to size buffer; this is
+       integer,   parameter :: MSZ = 1024 ! Used to size buffer; this is
                                           ! usually *less* than the number
                                           ! of non-blank/comment lines
                                           ! (because most lines are shorter

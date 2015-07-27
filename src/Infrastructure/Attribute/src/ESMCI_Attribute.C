@@ -2981,85 +2981,40 @@ if (attrRoot == ESMF_TRUE) {
 //    number of {\tt Attributes} in this attrList
 // 
 // !ARGUMENTS:
-      void) const {  
-// 
+      ESMC_AttGetCountFlag *flag,  // in - attgetcount flag
+	  int *count                   // out - the count to return
+	  ) const {
+//
 // !DESCRIPTION:
 //      Returns number of {\tt Attributes} present
 //
 //EOPI
 
-  return attrList.size();
+  int localrc;
+
+  if (*flag == ESMC_ATTGETCOUNT_ATTRIBUTE)
+      *count = this->AttributeGetCountAttr();
+  else if (*flag == ESMC_ATTGETCOUNT_ATTPACK)
+      *count = this->AttributeGetCountPack();
+  else if (*flag == ESMC_ATTGETCOUNT_ATTLINK)
+      *count = this->AttributeGetCountLink();
+  else if (*flag == ESMC_ATTGETCOUNT_TOTAL)
+      *count = this->AttributeGetCountTotal();
+  else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                     "invalid value for attcountflag", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  if (count < 0) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "failed getting attribute count", ESMC_CONTEXT, &localrc);
+      return localrc;
+  }
+
+  return ESMF_SUCCESS;
 
 } // end AttributeGetCount
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetCountPack"
-//BOPI
-// !IROUTINE:  AttributeGetCountPack - get an the number of {\tt Attribute} packages
-// 
-// !INTERFACE:
-      int Attribute::AttributeGetCountPack(
-// 
-// !RETURN VALUE:
-//    number of {\tt Attribute} packages in this attrList
-// 
-// !ARGUMENTS:
-      void) const {  
-// 
-// !DESCRIPTION:
-//      Returns number of {\tt Attribute} packages present
-//
-//EOPI
-
-  return packList.size();
-
-} // end AttributeGetCountPack
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetCountLink"
-//BOPI
-// !IROUTINE:  AttributeGetCountLink - get the number of {\tt Attribute} links
-// 
-// !INTERFACE:
-      int Attribute::AttributeGetCountLink(
-// 
-// !RETURN VALUE:
-//    number of {\tt Attribute} links in this attrList
-// 
-// !ARGUMENTS:
-      void) const {  
-// 
-// !DESCRIPTION:
-//      Returns number of {\tt Attribute} links present
-//
-//EOPI
-
-  return linkList.size();
-
-} // end AttributeGetCountLink
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetCountTotal"
-//BOPI
-// !IROUTINE:  AttributeGetCountTotal - get the total number of {\tt Attributes}
-// 
-// !INTERFACE:
-      int Attribute::AttributeGetCountTotal(
-// 
-// !RETURN VALUE:
-//    total number of {\tt Attributes} in this attrList
-// 
-// !ARGUMENTS:
-      void) const {  
-// 
-// !DESCRIPTION:
-//      Returns the total number of {\tt Attributes} present
-//
-//EOPI
-
-  return attrList.size()+packList.size()+linkList.size();
-
-} // end AttributeGetCountTotal
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGetItemCount"

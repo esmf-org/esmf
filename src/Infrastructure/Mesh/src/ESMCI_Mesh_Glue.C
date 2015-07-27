@@ -2354,34 +2354,6 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 			nodesPerElem[npePos++] = topo->num_nodes;
         }
 
-        /*
-         void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids) {
-
-             // Get number of nodes in element
-             const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-
-             // make sure that we're not bigger than max size
-             if (topo->num_nodes > max_num_nodes) {
-       	Throw() << "Element exceeds maximum poly size";
-             }
-
-             // Get coords of element
-             int k=0;
-             for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
-       	const MeshObj &node = *(elem->Relations[s].obj);
-       	double *c = cfield->data(node);
-               for (int i=0; i<sdim; i++) {
-       	  coords[k]=c[i];
-                 k++;
-       	}
-               ids[s]=node.get_id();
-             }
-
-             // Get number of nodes
-             *num_nodes=topo->num_nodes;
-         }*/
-
-
     } catch(std::exception &x) {
         // catch Mesh exception return code
         if (x.what()) {

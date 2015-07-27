@@ -2385,7 +2385,6 @@ extern "C" {
 
 }  // end c_ESMC_AttributeGetInfoNum
 
-
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
@@ -2429,31 +2428,60 @@ extern "C" {
     return;
   }
 
-  if (*flag == ESMC_ATTGETCOUNT_ATTRIBUTE)
-      *count = (**base).root.AttributeGetCount();
-  else if (*flag == ESMC_ATTGETCOUNT_ATTPACK)
-      *count = (**base).root.AttributeGetCountPack();
-  else if (*flag == ESMC_ATTGETCOUNT_ATTLINK)
-      *count = (**base).root.AttributeGetCountLink();
-  else if (*flag == ESMC_ATTGETCOUNT_TOTAL)
-      *count = (**base).root.AttributeGetCountTotal();
-  else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "invalid value for attcountflag", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (count <= 0) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute count", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
+  status = (**base).root.AttributeGetCount(flag, count);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   
-  if (rc) *rc = ESMF_SUCCESS;    
-
 }  // end c_ESMC_AttributeGetCount
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetCountAttPack - get number of attrs
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_attributegetcountattpack)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetcountattpack()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      ESMCI::Attribute **attpack,    // in/out - attpack object
+      int *count,                  // out - attribute count
+      ESMC_AttGetCountFlag *flag,  // in - attgetcount flag
+      int *rc) {                   // out - return code
+//
+// !DESCRIPTION:
+//   Return the count of attributes for an attpack.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attpack", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (!count) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute count", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  status = (*attpack)->AttributeGetCount(flag, count);
+  ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_AttributeGetCountAttPack
 
 //-----------------------------------------------------------------------------
 //BOP
