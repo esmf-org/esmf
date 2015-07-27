@@ -520,7 +520,7 @@ endif
 ! The following is an example of creating a simple rectilinear grid 
 ! with a periodic dimension and loading in a set of coordinates. It illustrates a straightforward use
 ! of the {\tt ESMF\_GridCreate1PeriDim()} call described in the previous section. 
-! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (1,1) to (360,180).
+! This code creates a 360x180 2D grid with uniformly spaced coordinates varying from (1,1) to (360,180).
 ! The grid is partitioned using a regular distribution. The first dimension
 ! is divided into two pieces, and the second dimension is divided into 3.
 ! This example assumes that the code is being run with a 1-1 mapping between 
@@ -772,7 +772,7 @@ if (petCount .le. 6) then
         countsPerDEDim2=(/11,2,7/),   &
         ! Specify mapping of coords dim to Grid dim
         coordDep1=(/1,2/), & ! 1st coord is 2D and depends on both Grid dim
-        coordDep2=(/1,2/), & ! 2nd coord is 1D and depends on both Grid dim
+        coordDep2=(/1,2/), & ! 2nd coord is 2D and depends on both Grid dim
         indexflag=ESMF_INDEX_GLOBAL, &
         rc=rc)
 !EOC
