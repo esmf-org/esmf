@@ -715,7 +715,7 @@ program ESMF_LocStreamEx
      expected = x+y+z+15.0
 
      ! if error is too big report an error
-     if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.00001) then
+     if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.001) then
        print*,'ERROR: larger than expected difference, expected ',expected, &
               '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected), &
               '  rel diff= ',abs(farrayPtr1D(i1)-expected)/expected
