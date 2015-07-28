@@ -90,6 +90,7 @@ module NUOPC
   public NUOPC_AttributeGet
   public NUOPC_AttributeSet
   public NUOPC_CheckSet
+  public NUOPC_Convert
   public NUOPC_Create
   public NUOPC_FillData
   public NUOPC_Get

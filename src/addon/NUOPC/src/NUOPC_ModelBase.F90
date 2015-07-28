@@ -179,7 +179,7 @@ module NUOPC_ModelBase
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pString
     integer                   :: phase
-    logical                   :: verbose
+    integer                   :: verbosity
     character(ESMF_MAXSTR)    :: name
 
     rc = ESMF_SUCCESS
@@ -190,13 +190,15 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbose = .false.  ! default
     call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
       rc=rc)
-    if (trim(valueString)/="0") then
-      ! anything but "0" will turn verbosity on
-      verbose = .true.
-    endif
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = NUOPC_Convert(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! get the modelName and currentPhase
     call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=phase, rc=rc)
@@ -249,7 +251,7 @@ module NUOPC_ModelBase
       return  ! bail out
 
     ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       write (pString,*) phase
       call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
         trim(modelName)//" entered Run (phase="//trim(adjustl(pString))// &
@@ -354,7 +356,7 @@ module NUOPC_ModelBase
       endif
     
       ! conditionally output diagnostic to Log file
-      if (verbose) then
+      if (btest(verbosity,0)) then
         call NUOPC_ClockPrintCurrTime(internalClock, &
           trim(modelName)//" time stepping loop, current time: ", &
           msgString, rc=rc)
@@ -396,7 +398,7 @@ module NUOPC_ModelBase
     endif
 
     ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
         trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
         ") with current time: ", msgString, rc=rc)
