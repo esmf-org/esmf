@@ -1393,7 +1393,6 @@ module NUOPC_Driver
     type(NUOPC_RunElement), pointer :: runElement
     type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: name, compName, profileString
-    type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: verbosity
     integer                         :: profiling
     integer                         :: runElementCounter, runLoopCounter
@@ -1411,50 +1410,24 @@ module NUOPC_Driver
       return  ! bail out
     
     ! determine profiling
-    profiling = 0 ! initialize
-    call NUOPC_CompAttributeGet(gcomp, name="Profiling", typekind=typekind, &
+    call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        profiling = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=profiling, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    profiling = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)

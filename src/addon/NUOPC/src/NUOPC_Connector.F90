@@ -14,8 +14,6 @@
 
 #define RECONCILE_MEMORY_DEBUG_off
 
-#define PROFILE_off
-
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -879,7 +877,6 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -890,27 +887,14 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -1175,7 +1159,6 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -1186,27 +1169,14 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare local pointer variables
     nullify(cplList)
@@ -1505,7 +1475,6 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
-    type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: verbosity
 
     rc = ESMF_SUCCESS
@@ -1516,27 +1485,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -1821,7 +1777,6 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, msgString, valueString
     integer                   :: phase
-    type(ESMF_TypeKind_Flag)  :: typekind
     integer                   :: verbosity
     integer                   :: profiling
     character(ESMF_MAXSTR)    :: name
@@ -1840,50 +1795,24 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! determine profiling
-    profiling = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        profiling = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=profiling, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    profiling = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! get the compName and currentPhase
     call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
@@ -2085,7 +2014,6 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                   :: localrc
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name, valueString
-    type(ESMF_TypeKind_Flag)  :: typekind
     integer                   :: verbosity
 
     rc = ESMF_SUCCESS
@@ -2096,27 +2024,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbosity = 0 ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (typekind==ESMF_TYPEKIND_CHARACTER) then
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(valueString)=="max") then
-        ! maximum local value
-        verbosity = 255
-      endif
-    else
-      ! actual numerical value expected
-      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
+      specialValueList=(/255/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! query Component for its internal State
     nullify(is%wrap)

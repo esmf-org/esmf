@@ -79,6 +79,7 @@ module NUOPC_Base
   public NUOPC_AttributeGet
   public NUOPC_AttributeSet
   public NUOPC_CheckSet
+  public NUOPC_Convert
   public NUOPC_Create
   public NUOPC_FillData
   public NUOPC_Get
@@ -1012,6 +1013,88 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_Convert - Convert a string into an integer
+! !INTERFACE:
+  function NUOPC_Convert(string, specialStringList, specialValueList, rc)
+! !RETURN VALUE:
+    integer :: NUOPC_Convert
+! !ARGUMENTS:
+    character(len=*), intent(in)            :: string
+    character(len=*), intent(in),  optional :: specialStringList(:)
+    integer,          intent(in),  optional :: specialValueList(:)
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return the numerical integer value represented by the {\tt string}. 
+!   If special strings are to be takein into account, both 
+!   {\tt specialStringList} and {\tt specialValueList} arguments must be
+!   present and of same size.
+!   
+!   An error is returned, and return value set to 0, if {\tt string} is not
+!   found in {\tt specialStringList}, and does not convert into an integer
+!   value.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    logical                 :: ssL, svL
+    integer                 :: i
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    NUOPC_Convert = 0 ! initialize
+    
+    ! checking consistency of inputs provided
+    ssL = present(specialStringList)
+    svL = present(specialValueList)
+    
+    if (ssL.neqv.svL) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Both specialStringList and specialValueList must either be "// &
+        "present or absent.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+    if (ssL) then
+      ! special strings and values present
+      if (size(specialStringList) /= size(specialValueList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Both specialStringList and specialValueList must have "// &
+          "the same number of elements.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+      do i=1, size(specialStringList)
+        if (trim(string)==trim(specialStringList(i))) then
+          ! found a matching special string
+          NUOPC_Convert = specialValueList(i)
+          return ! successful early return
+        endif
+      enddo
+    endif
+    
+    if (verify(trim(string),"0123456789") == 0) then
+      ! should convert to integer just fine
+      read (string, "(i10)") NUOPC_Convert
+    else
+      ! the string contains characters besides numbers
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The string '"//trim(string)//"' contains characters besides "// &
+          "numbers, cannot convert to integer.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_Create - Create a new Clock from Clock and stabilityTimeStep
 ! !INTERFACE:
   function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
@@ -1037,7 +1120,7 @@ module NUOPC_Base
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-      ! make a copy of the external externalClock
+    ! make a copy of the external externalClock
     internalClock = ESMF_ClockCreate(externalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
