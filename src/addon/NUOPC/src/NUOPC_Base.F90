@@ -108,8 +108,14 @@ module NUOPC_Base
     module procedure NUOPC_StateAdvertiseFields
   end interface
   
+  interface NUOPC_FieldAttributeGet
+    module procedure NUOPC_FieldAttributeGetVal
+    module procedure NUOPC_FieldAttributeGetTK
+  end interface
+
   interface NUOPC_AttributeGet
-    module procedure NUOPC_FieldAttributeGet
+    module procedure NUOPC_FieldAttributeGetVal
+    module procedure NUOPC_FieldAttributeGetTK
     module procedure NUOPC_StateAttributeGet
   end interface
 
@@ -725,7 +731,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC Field Attribute
 ! !INTERFACE:
-  subroutine NUOPC_FieldAttributeGet(field, name, value, rc)
+  subroutine NUOPC_FieldAttributeGetVal(field, name, value, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
     character(*),     intent(in)            :: name
@@ -733,7 +739,7 @@ module NUOPC_Base
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt field} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
@@ -772,6 +778,35 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC Field Attribute
+! !INTERFACE:
+  subroutine NUOPC_FieldAttributeGetTK(field, name, typekind, rc)
+! !ARGUMENTS:
+    type(ESMF_Field),         intent(in)            :: field
+    character(*),             intent(in)            :: name
+    type(ESMF_TypeKind_Flag), intent(out)           :: typekind
+    integer,                  intent(out), optional :: rc
+! !DESCRIPTION:
+!   Query the {\tt typekind} of the Attribute {\tt name} inside of {\tt field}
+!   using the convention {\tt NUOPC} and purpose {\tt Instance}. Returns with 
+!   error if the Attribute is not present or not set.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_AttributeGet(field, name=name, typekind=typekind, &
+      convention="NUOPC", purpose="Instance", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC State Attribute
 ! !INTERFACE:
   subroutine NUOPC_StateAttributeGet(state, name, value, rc)
@@ -782,7 +817,7 @@ module NUOPC_Base
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt state} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
@@ -832,7 +867,7 @@ module NUOPC_Base
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
 !   Set the Attribute {\tt name} inside of {\tt field} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   convention {\tt NUOPC} and purpose {\tt Instance}.
 !EOP
   !-----------------------------------------------------------------------------
     
@@ -861,7 +896,7 @@ module NUOPC_Base
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
 !   Set the Attribute {\tt name} inside of {\tt state} using the
-!   convention {\tt NUOPC} and purpose {\tt General}.
+!   convention {\tt NUOPC} and purpose {\tt Instance}.
 !EOP
   !-----------------------------------------------------------------------------
     

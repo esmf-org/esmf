@@ -879,7 +879,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    logical                         :: verbose
+    type(ESMF_TypeKind_Flag)        :: typekind
+    integer                         :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -889,11 +890,27 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbose = .false. ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+    verbosity = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
       rc=rc)
-    if (trim(valueString)=="high") &
-      verbose = .true.
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        verbosity = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -1039,7 +1056,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           cycle ! continue with the next i
         endif
         
-        if (verbose) then
+        if (btest(verbosity,1)) then
           call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1100,7 +1117,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           return  ! bail out
         endif
 
-        if (verbose) then
+        if (btest(verbosity,1)) then
           call ESMF_LogWrite(trim(name)//&
             ": done transferring underlying DistGrid", &
             ESMF_LOGMSG_INFO, rc=rc)
@@ -1158,7 +1175,8 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    logical                         :: verbose
+    type(ESMF_TypeKind_Flag)        :: typekind
+    integer                         :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -1168,11 +1186,27 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    verbose = .false. ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+    verbosity = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
       rc=rc)
-    if (trim(valueString)=="high") &
-      verbose = .true.
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        verbosity = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     
     ! prepare local pointer variables
     nullify(cplList)
@@ -1318,7 +1352,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           cycle ! continue with the next i
         endif
 
-        if (verbose) then
+        if (btest(verbosity,1)) then
           call ESMF_LogWrite(trim(name)//": transferring the full Grid/Mesh", &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1384,7 +1418,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           return  ! bail out
         endif
           
-        if (verbose) then
+        if (btest(verbosity,1)) then
           call ESMF_LogWrite(trim(name)//&
             ": done transferring the full Grid/Mesh", &
             ESMF_LOGMSG_INFO, rc=rc)
@@ -1470,7 +1504,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, valueString
+    type(ESMF_TypeKind_Flag)        :: typekind
+    integer                         :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -1479,6 +1515,29 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    verbosity = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        verbosity = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! prepare local pointer variables
     nullify(cplList)
     nullify(importStandardNameList)
@@ -1643,6 +1702,21 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called default label_ComputeRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    else
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called specialized label_ComputeRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif    
     endif
     
     ! populate remaining internal state members
@@ -1747,83 +1821,76 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, msgString, valueString
     integer                   :: phase
-    logical                   :: verbose
+    type(ESMF_TypeKind_Flag)  :: typekind
+    integer                   :: verbosity
+    integer                   :: profiling
     character(ESMF_MAXSTR)    :: name
 
     real(ESMF_KIND_R8)        :: timeBase, time0, time
 
     rc = ESMF_SUCCESS
 
-#ifdef PROFILE_on
-    ! PROFILE
+    ! PROFILE base time
     call ESMF_VMWtime(timeBase)
     time0=timeBase
-#endif
 
     ! query the Component for info
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 01 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    ! determine profiling
+    profiling = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", typekind=typekind, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        profiling = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=profiling, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
     ! determine verbosity
-    verbose = .false. ! initialize
-    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+    verbosity = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
       rc=rc)
-    if (trim(valueString)=="high") &
-      verbose = .true.
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        verbosity = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 02 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
     ! get the compName and currentPhase
     call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 03 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
-    ! query Component for its internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 04 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
-    !TODO: here may be the place to ensure incoming States are consistent
-    !TODO: with the Fields held in the FieldBundle inside the internal State?
-      
-    ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       write (msgString,"(A)") ">>>"//trim(compName)//" entered Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1831,14 +1898,40 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         return  ! bail out
     endif
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 05 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 01 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
+
+    ! query Component for its internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 02 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
+
+    !TODO: here may be the place to ensure incoming States are consistent
+    !TODO: with the Fields held in the FieldBundle inside the internal State?
+      
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 03 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     ! SPECIALIZE by calling into attached method to execute routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
@@ -1849,14 +1942,14 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 06 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 04 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     if (.not.existflag) then
       ! if not specialized -> use default method to:
@@ -1865,16 +1958,31 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called default label_ExecuteRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    else
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called specialized label_ExecuteRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif    
     endif
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 07 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 05 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     ! Next update the TimeStamp metadata on the export Fields....
 
@@ -1883,28 +1991,28 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 08 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 06 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     call ESMF_CplCompGet(cplcomp, vm=vm, petCount=petCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 09 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 07 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
+    
     do rootPet=0, petCount-1
       call ESMF_VMGet(vm, rootPet, vas=vas, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1912,30 +2020,30 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       if (vas == rootVas) exit
     enddo
     
-#ifdef PROFILE_on
-     ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 10 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 08 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
-   !TODO: bail out if rootPet not found
+    !TODO: bail out if rootPet not found
 
     ! hand coded, specific AttributeUpdate
     call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, rootPet=rootPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 11 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 09 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     ! update the timestamp on all of the dst fields to that on the src side
     call NUOPC_UpdateTimestamp(is%wrap%srcFieldList, is%wrap%dstFieldList, &
@@ -1943,17 +2051,17 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 12 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+    if (btest(profiling,0)) then    ! PROFILE
+      ! PROFILE
+      call ESMF_VMWtime(time)
+      write (msgString, *) "ConnectorProfile 10 time=   ", &
+        time-time0, time-timeBase
+        time0=time
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+    endif
 
     ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       write (msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1961,15 +2069,6 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         return  ! bail out
     endif
     
-#ifdef PROFILE_on
-    ! PROFILE
-    call ESMF_VMWtime(time)
-    write (msgString, *) "ConnectorProfile 13 time=   ", &
-      time-time0, time-timeBase
-      time0=time
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1985,7 +2084,9 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     type(type_InternalState)  :: is
     integer                   :: localrc
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
+    type(ESMF_TypeKind_Flag)  :: typekind
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -1994,6 +2095,29 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    verbosity = 0 ! initialize
+    call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", typekind=typekind, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (typekind==ESMF_TYPEKIND_CHARACTER) then
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(valueString)=="max") then
+        ! maximum local value
+        verbosity = 255
+      endif
+    else
+      ! actual numerical value expected
+      call NUOPC_CompAttributeGet(cplcomp, name="Verbosity", value=verbosity, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
@@ -2015,6 +2139,21 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called default label_ReleaseRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    else
+      if (btest(verbosity,2)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": called specialized label_ReleaseRouteHandle", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif    
     endif
 
     ! SPECIALIZE by calling into optional attached method
