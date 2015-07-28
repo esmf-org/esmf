@@ -71,29 +71,16 @@ void FTN_X(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array,
   
   // Dereference variables
   array=*_array;
-
-  // localDE                                                                                   
-  if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
-    if (array->getDistGrid()->getDELayout()->getLocalDeCount()>1) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                    "- Must provide localDE if localDeCount >1",
-                                    ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-      return;
-    } else {
-      localDE=0;
-    }
-  } else {
-    localDE=*_localDE; // already 0 based                                                      
-
-    // Input Error Checking
-    if ((localDE < 0) || (localDE >=array->getDistGrid()->getDELayout()->getLocalDeCount())) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        "- localDE outside range on this processor", ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
-      return;
-    }
-  }
+  localDE=*_localDE;
   
+  // Input Error Checking
+  if ((localDE < 0) || (localDE >=array->getDistGrid()->getDELayout()->getLocalDeCount())) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+      "- localDE outside range on this processor", ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+    return;
+  }
+
   // ExclusiveLBound
   if (ESMC_NOT_PRESENT_FILTER(exclusiveLBound) != ESMC_NULL_POINTER) {
     *exclusiveLBound=*(array->getExclusiveLBound()+localDE);
