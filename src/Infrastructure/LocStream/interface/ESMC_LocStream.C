@@ -37,7 +37,7 @@ extern "C" {
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamCreateLocal()"
-  ESMC_LocStream ESMC_LocStreamCreateLocal(int ls_size, ESMC_CoordSys_Flag *coordSys, 
+  ESMC_LocStream ESMC_LocStreamCreateLocal(int ls_size, enum ESMC_CoordSys_Flag *coordSys, 
 					   int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -88,7 +88,7 @@ extern "C" {
 #define ESMC_METHOD "ESMC_LocStreamAddKeyAlloc()"
   int ESMC_LocStreamAddKeyAlloc(ESMC_LocStream locstream,
 				const char *keyName,
-				ESMC_TypeKind_Flag *keyTypeKind){
+				enum ESMC_TypeKind_Flag *keyTypeKind){
 
     // initialize return code; assume routine not implemented 
     int localrc = ESMC_RC_NOT_IMPL;         // local return code

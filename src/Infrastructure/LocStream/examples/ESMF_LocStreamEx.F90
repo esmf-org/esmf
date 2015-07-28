@@ -52,7 +52,7 @@ program ESMF_LocStreamEx
       real(ESMF_KIND_R8), pointer :: lonArray(:)
       real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
       real(ESMF_KIND_R8) :: DEG2RAD,theta,phi
-      real(ESMF_KIND_R8) :: x,y,z
+      real(ESMF_KIND_R8) :: x,y,z,expected
       integer :: clbnd(2),cubnd(2), result
 
       character(ESMF_MAXSTR) :: testname
@@ -699,6 +699,29 @@ program ESMF_LocStreamEx
    call ESMF_FieldRegridRelease(routeHandle, rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+   !-------------------------------------------------------------------
+   ! loop through nodes and make sure interpolated values are reasonable
+   !-------------------------------------------------------------------
+   do i1=1,numLocationsOnThisPet
+     ! get the x,y,z coordinates
+     theta = DEG2RAD*lonArray(i1)
+     phi = DEG2RAD*(90.-latArray(i1))
+     x = cos(theta)*sin(phi)
+     y = sin(theta)*sin(phi)
+     z = cos(phi)
+
+     ! determine validation data
+     expected = x+y+z+15.0
+
+     ! if error is too big report an error
+     if ( abs( farrayPtr1D(i1)-(expected) )/expected > 0.00001) then
+       print*,'ERROR: larger than expected difference, expected ',expected, &
+              '  got ',farrayPtr1D(i1),'  diff= ',abs(farrayPtr1D(i1)-expected), &
+              '  rel diff= ',abs(farrayPtr1D(i1)-expected)/expected
+       call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     endif
+   enddo
 
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.

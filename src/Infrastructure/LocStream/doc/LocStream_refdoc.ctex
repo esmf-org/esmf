@@ -88,6 +88,13 @@
 \input{../Infrastructure/LocStream/doc/LocStream_desc}
 #endif
 
+\subsection{Constants}
+#ifdef STANDALONE
+\input{LocStream_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LocStream/doc/LocStream_options}
+#endif
+
 %\subsection{Design}
 %#ifdef STANDALONE
 %\input{LocStream_design}

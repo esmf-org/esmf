@@ -1,0 +1,23 @@
+% $Id$
+
+
+\subsubsection{keyName}
+\label{const:keyname}
+
+{\sf DESCRIPTION:\\}
+ESMF regridding requires LocStream keys containing coordinate information 
+to be named with the appropriate identifiers.
+
+The valid values are:
+\newline
+\begin{tabular}{|l|c|c|c||}
+\hline
+\hline
+Coordinate System & {\bf dimension 1}  & {\bf dimension 2} & {\bf dimension 3 (if used)} \\
+\hline
+{\bf ESMF\_COORDSYS\_SPH\_DEG}  & ESMF:Lon & ESMF:Lat & ESMF:Radius \\
+{\bf ESMF\_COORDSYS\_SPH\_RAD}  & ESMF:Lon & ESMF:Lat & ESMF:Radius \\
+{\bf ESMF\_COORDSYS\_CART}  & ESMF:X & ESMF:Y & ESMF:Z \\
+\hline
+\hline
+\end{tabular}
