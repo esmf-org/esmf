@@ -194,8 +194,9 @@ module NUOPC_ModelBase
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, specialStringList=(/"max"/), &
-      specialValueList=(/255/), rc=rc)
+    verbosity = NUOPC_Convert(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
