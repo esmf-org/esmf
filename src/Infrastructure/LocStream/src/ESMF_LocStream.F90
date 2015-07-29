@@ -60,6 +60,7 @@ module ESMF_LocStreamMod
   use ESMF_ArrayGetMod
   use ESMF_InitMacrosMod
   use ESMF_MeshMod
+  use ESMF_IOScripMod
 
   implicit none
 
@@ -165,6 +166,7 @@ interface ESMF_LocStreamCreate
       module procedure ESMF_LocStreamCreateIrreg
       module procedure ESMF_LocStreamCreateByBkgMesh
       module procedure ESMF_LocStreamCreateByBkgGrid
+      module procedure ESMF_LocStreamCreateFromFile
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -1966,7 +1968,167 @@ contains
       end function ESMF_LocStreamCreateReg
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreate"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a local count
 
+! !INTERFACE:
+      ! Private name: call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateFromFile(name, filename, indexflag, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
+
+!
+! !ARGUMENTS:
+      character (len=*), intent(in), optional    :: name
+      character (len=*), intent(in)         :: filename
+      type(ESMF_Index_Flag), intent(in), optional      :: indexflag
+      integer, intent(out), optional                  :: rc
+
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
+!     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
+!     how the LocStream is distributed. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          Name of the location stream
+!     \item[filename]
+!          Number of grid file to be used to create the Location Stream.  Currently, only
+!          the SCRIP file format is supported.
+!     \item[{[indexflag]}]
+!          Flag that indicates how the DE-local indices are to be defined.
+!          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
+!          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
+!          for the full range of options. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+#ifdef ESMF_NETCDF
+    integer :: totalpoints,totaldims
+    type(ESMF_VM) :: vm
+    integer :: numDim, buf(1), msgbuf(3)
+    integer :: localrc
+    integer :: PetNo, PetCnt
+    type(ESMF_Index_Flag) :: indexflagLocal
+    real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
+    integer(ESMF_KIND_I4), pointer :: imask(:)
+    integer :: starti, count, localcount, index
+    integer :: remain, i
+    type(ESMF_CoordSys_Flag) :: coordSys
+    type(ESMF_LocStream) :: locStream
+    character(len=16) :: units
+
+    if (present(indexflag)) then
+         indexflagLocal=indexflag
+    else
+         indexflagLocal=ESMF_INDEX_DELOCAL
+    endif
+    
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    !
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (PetNo == 0) then
+       call ESMF_ScripInq(filename, grid_rank=totaldims, &
+			  grid_size=totalpoints, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_ScripInqUnits(filename, units=units, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! broadcast the values to other PETs
+       msgbuf(1)=totaldims
+       msgbuf(2)=totalpoints
+       if (units .eq. 'radians') then
+       	  msgbuf(3)=1
+       else
+          msgbuf(3)=0
+       endif
+       call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      totaldims = msgbuf(1)
+      totalpoints=msgbuf(2)
+    endif  
+
+    if (msgbuf(3) .eq. 0) then
+       coordSys = ESMF_COORDSYS_SPH_DEG
+       units = 'degrees'
+    else
+       coordSys = ESMF_COORDSYS_SPH_RAD
+       units = 'radians'
+    endif   
+
+    localcount = totalpoints/PetCnt
+    remain = totalpoints - (localcount*PetCnt)
+    if (PetNo < remain) then
+       localcount = localcount+1
+       starti = localcount*PetNo+1
+    else
+       starti = localcount*PetNo+1+remain
+    endif
+
+    allocate(coordX(localcount), coordY(localcount),imask(localcount))
+    call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
+                          grid_imask=imask, start=starti, count=localcount, rc=localrc)
+    
+    ! create Location Stream
+    locStream = ESMF_LocStreamCreate(name=name, localcount=localcount, indexflag=indexflagLocal,&
+                coordSys = coordSys, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !print *, PetNo, starti, localcount, coordX(1), coordY(1)
+    ! Add coordinate keys
+    call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
+    	 		      keyLongName='Longitude', rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
+    	 		      keyLongName='Latitude', rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !Add mask key
+    call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
+    	 		      keyLongName='Mask', rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+   
+    ESMF_LocStreamCreateFromFile = locStream
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+#else
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+end function ESMF_LocStreamCreateFromFile
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

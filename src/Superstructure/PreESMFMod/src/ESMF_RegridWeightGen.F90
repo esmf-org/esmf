@@ -47,6 +47,7 @@ module ESMF_RegridWeightGenMod
   use ESMF_IOGridspecMod
   use ESMF_IOUGridMod
   use ESMF_RHandleMod
+  use ESMF_LocStreamMod
   
   implicit none
 
@@ -333,6 +334,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
     type(ESMF_NormType_Flag):: localNormType
     logical            :: localIgnoreDegenerate
+    logical            :: srcUseLocStream, dstUseLocStream
+    type(ESMF_LocStream) :: srcLocStream, dstLocStream
 
 #ifdef ESMF_NETCDF     
     !------------------------------------------------------------------------
@@ -369,6 +372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     useDstCorner = .false.
     localPoleNPnts = 0
     localIgnoreDegenerate = .false.
+    srcUseLocStream = .false.
+    dstUseLocStream = .false.
 
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -605,6 +610,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
+    ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor
+    if ((localSrcFileType == ESMF_FILEFORMAT_SCRIP) .and. &
+        (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+        localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
+	srcUseLocStream = .TRUE.
+    endif 
+    ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
+    if ((localDstFileType == ESMF_FILEFORMAT_SCRIP) .and. &
+        (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+	dstUseLocStream = .TRUE.
+    endif 
     ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
     ! either GRIDSPEC or UGRID, same for useDstMask
     if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
@@ -917,75 +933,80 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !Read in the srcfile and create the corresponding ESMF object (either
     ! ESMF_Grid or ESMF_Mesh
 
-    if (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	    if (useSrcCoordVar) then
- 	      if (srcMissingValue) then
-	        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+    if (srcUseLocStream) then
+       srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
+       		      indexflag=ESMF_INDEX_DELOCAL,rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       srcField = ESMF_FieldCreate(srcLocStream, arrayspec, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+       if (useSrcCoordVar) then
+           if (srcMissingValue) then
+	      srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
 		        addCornerStagger=addCorners, &
 		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
 		        coordNames = srcCoordinateVars, rc=localrc)
-        else
-          srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
+           else
+             srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
 		        addCornerStagger=addCorners, &
-            isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
-	      endif
-      else 
- 	      if (srcMissingValue) then
-	        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+             isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
+	   endif
+        else 
+ 	   if (srcMissingValue) then
+	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
 		        addCornerStagger=addCorners, &
 		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
-        else
-          srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
+           else
+              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
 		        addCornerStagger=addCorners, &
-            isSphere=srcIsSphere, rc=localrc)
-	      endif
-	    endif
-      if (ESMF_LogFoundError(localrc, &
+              isSphere=srcIsSphere, rc=localrc)
+	   endif
+	 endif
+         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+         call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    	srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+    	 srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-	    if(srcIsReg) then
-        srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+	 if(srcIsReg) then
+           srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
 			    addCornerStagger=addCorners, &
-          isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+                            isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
-         !call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, filename="srcGrid", &
-         !     rc=localrc)
-         !if (ESMF_LogFoundError(localrc, &
-         !                       ESMF_ERR_PASSTHRU, &
-         !                       ESMF_CONTEXT, rcToReturn=rc)) return
-         !
-
 	      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-    	  srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+     	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	    else
-        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
-          convertToDual=convertSrcToDual, addUserArea=localUserAreaFlag, &
+        else
+           srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+                     convertToDual=convertSrcToDual, addUserArea=localUserAreaFlag, &
 		      rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+           srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
@@ -1041,29 +1062,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     deallocate(dstdims)
-    if (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	    if (useDstCoordVar) then
- 	      if (dstMissingValue) then
-	        dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+
+    if (dstUseLocStream) then
+       dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, &
+       		      indexflag=ESMF_INDEX_DELOCAL,rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       dstField = ESMF_FieldCreate(dstLocStream, arrayspec, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+       if (useDstCoordVar) then
+          if (dstMissingValue) then
+             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 		        addCornerStagger=addCorners, &
 		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
 		        coordNames = dstCoordinateVars, rc=localrc)
-        else
-          dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-			      addCornerStagger=addCorners, &
-            isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
-	      endif
+          else
+             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+			  addCornerStagger=addCorners, &
+                          isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
+	  endif
       else
- 	      if (dstMissingValue) then
-	        dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+ 	  if (dstMissingValue) then
+	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 		        addCornerStagger=addCorners, &
 		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
-        else
-          dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+          else
+              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 			      addCornerStagger=addCorners, &
-            isSphere=dstIsSphere, rc=localrc)
-	      endif
-	    endif
+                              isSphere=dstIsSphere, rc=localrc)
+	  endif
+      endif
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1076,59 +1112,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (localDstFileType == ESMF_FILEFORMAT_SCRIP) then
-	    if(dstIsReg) then
-        dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
+        if (dstIsReg) then
+           dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
 			    addCornerStagger=addCorners, &
-          isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+           isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
+           dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-	    else
-        dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
-          convertToDual=convertDstToDual, addUserArea=localUserAreaFlag, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-	    endif
+	else
+            dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+                convertToDual=convertDstToDual, addUserArea=localUserAreaFlag, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+            dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+	endif
     else
-	    ! if dstfile is not SCRIP, it is always unstructured
-	    if (dstMissingValue) then
- 	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
+	! if dstfile is not SCRIP, it is always unstructured
+	if (dstMissingValue) then
+ 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
                       meshname = trim(dstMeshName), maskFlag=meshloc, &
                       addUserArea=localUserAreaFlag, &
                       convertToDual=convertDstToDual, &
 		      varname=trim(dstMissingvalueVar), rc=localrc)
-	    else
-	      dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
+	else
+	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
 	                addUserArea=localUserAreaFlag, &
                         convertToDual=convertDstToDual, &
           		meshname = trim(dstMeshName), rc=localrc)
-      endif
-      if (ESMF_LogFoundError(localrc, &
+        endif
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+        dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1341,7 +1377,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! src fraction is always 0
     ! destination fraction depends on the src mask, dst mask, and the weight
     if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-      if (dstIsReg) then
+      if (dstUseLocStream) then
+	call computeFracLocStream(dstLocStream, vm, factorIndexList, dstFrac, localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      elseif (dstIsReg) then
 	call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -2636,6 +2677,114 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   deallocate(globalDispl)
 
 end subroutine computeFracGrid
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "computeFracLocStream"
+
+subroutine computeFracLocStream(locstream, vm, indices, frac, rc)
+  type(ESMF_Locstream) :: locstream
+  type(ESMF_VM) :: vm
+  integer :: indices(:,:)
+  real(ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+
+  type (ESMF_DistGrid) :: distgrid
+  integer (ESMF_KIND_I4) :: localCount(1), elementCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer (ESMF_KIND_I4),pointer :: buffer(:),buffer1(:)
+  integer :: totalCount
+  integer :: i, j, total 
+  integer :: petNo,petCnt
+  integer :: saved, count
+
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  call ESMF_LocStreamGet(locstream, distgrid=distgrid, rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif
+
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
+  total = size(indices,2)
+  ! find unique indices in the destination column: indices(2,:)
+  count = 0
+  saved = 0
+  do i=1,total
+    if (indices(2,i) /= saved) then
+	count = count+1
+        saved = indices(2,i)
+    endif
+  enddo
+  allocate(buffer(count))
+  saved = 0
+  j=1
+  do i=1,total
+   if (indices(2,i) /= saved) then
+     buffer(j)=indices(2,i)
+     j=j+1
+     saved = indices(2,i)
+   endif
+  enddo
+
+  ! Get List of counts
+  localCount(1)=count
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif
+ 
+! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+    globalDispl=0
+  endif
+
+  ! Sum size
+  if (petNo==0) then
+    totalCount=0
+    do i=1,petCnt
+       totalCount=totalCount+globalCount(i)
+    enddo
+  else 
+    totalCount=1 ! Because I'm not sure what happens
+                 ! if array is not allocated in VM
+  endif
+
+
+  ! Allocate final frac list
+  allocate(buffer1(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=buffer, sendCount=localCount(1),&
+         recvData=buffer1,recvCounts=globalCount,recvOffsets=globalDispl,&
+         rootPet=0, rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif  
+
+  if (PetNo==0) then
+    allocate(frac(elementCount(1)))
+    frac = 0
+    do i=1,totalCount
+       frac(buffer1(i))=1
+    enddo
+  endif
+
+  ! Get rid of helper variables
+  deallocate(buffer, buffer1) 
+  deallocate(globalCount)
+  deallocate(globalDispl)
+
+end subroutine computeFracLocStream
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
