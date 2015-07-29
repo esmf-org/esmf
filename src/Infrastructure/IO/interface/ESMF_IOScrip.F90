@@ -303,6 +303,7 @@ end subroutine ESMF_ScripInqUnits
     integer:: totalcells, grid_corners
     logical :: convertToDegLocal
     integer:: localrc
+    integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
     convertToDegLocal = .false.
@@ -433,19 +434,18 @@ end subroutine ESMF_ScripInqUnits
 
     if (present(grid_imask)) then
       ncStatus = nf90_inq_varid (ncid, "grid_imask", VarId)
-      errmsg = "variable grid_imask in "//trim(filename)
-      if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,&
-	errmsg,&
-        rc)) return
-	grid_imask=1
-      ncStatus = nf90_get_var (ncid, VarId, grid_imask, start1, count1)
-      if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,&
-	errmsg,&
-        rc)) return
+      errmsg = "variable grid_imask is not defined in "//trim(filename)
+      if (ncStatus /= nf90_noerror) then
+         print *, 'Warning:', errmsg
+         grid_imask = 1
+      else
+         ncStatus = nf90_get_var (ncid, VarId, grid_imask, start1, count1)
+         if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+	    errmsg,&
+            rc)) return
+      endif
     endif
 
     ! Read in grid_corner_lon and grid_corner_lat
