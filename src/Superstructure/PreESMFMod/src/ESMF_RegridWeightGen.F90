@@ -1666,12 +1666,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_FieldDestroy(srcFracField)
        call ESMF_FieldDestroy(dstFracField)
     endif
-    if (srcIsReg) then
+    if (srcUseLocStream) then
+       call ESMF_LocStreamDestroy(srcLocStream)
+    elseif (srcIsReg) then
        call ESMF_GridDestroy(srcGrid)
     else
        call ESMF_MeshDestroy(srcMesh)
     endif   
-    if (dstIsReg) then
+    if (dstUseLocStream) then
+       call ESMF_LocStreamDestroy(dstLocStream)
+    elseif (dstIsReg) then
        call ESMF_GridDestroy(dstGrid)
     else
        call ESMF_MeshDestroy(dstMesh)
