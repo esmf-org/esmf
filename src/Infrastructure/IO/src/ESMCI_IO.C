@@ -319,29 +319,40 @@ int IO::read(
   PRINTPOS;
   // Read each item from the object list
   std::vector<IO_ObjectContainer *>::iterator it;
-  bool need_redist;
+  bool need_redist, has_undist;
   for (it = objects.begin(); it < objects.end(); ++it) {
+    Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
+    Array *temp_array_undist_p;               // temp when Array has undistributed dimensions
+    ESMCI::RouteHandle *rh;
     switch((*it)->type) {
     case IO_NULL:
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
-      need_redist = redist_check((*it)->getArray(), &localrc);
+      // Check for undistributed dimensions
+      has_undist = undist_check (temp_array_p, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+
+      if (has_undist) {
+        temp_array_undist_p = temp_array_p;
+        // Create an aliased Array which treats all dimensions as distributed.
+        // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
+        undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+      }
+
+      // Check for redistribution (when > 1 DE per PET)
+      need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
       // Close the file but return original error even if close fails.
         localrc = close();
         return rc;
       }
-      // std::cout << ESMC_METHOD << ": need_redist = " << (need_redist?"y":"n") << std::endl;
-      if (!need_redist) {
-        ioHandler->arrayRead((*it)->getArray(),
-                             (*it)->getName(), timeslice, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &rc)) return rc;  // bail out
-      } else {
+      if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
-        Array *temp_array_p;
         // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -350,17 +361,18 @@ int IO::read(
           localrc = close();
           return rc;
         }
+      }
 
-        // Read data into the temp Array
-        // std::cout << ESMC_METHOD << ": DE count > 1 - calling arrayRead into temp Array" << std::endl;
-        ioHandler->arrayRead(temp_array_p,
-                            (*it)->getName(), timeslice, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
-          return rc;
+      // Read data into the Array
+      // std::cout << ESMC_METHOD << ": calling arrayRead" << std::endl;
+      ioHandler->arrayRead(temp_array_p,
+                          (*it)->getName(), timeslice, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
 
+      if (need_redist) {
         // Redistribute into the caller supplied Array
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-        ESMCI::RouteHandle *rh;
         localrc = ESMCI::Array::redistStore(temp_array_p, (*it)->getArray(), &rh, NULL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
@@ -375,7 +387,7 @@ int IO::read(
           return rc;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
 
-        // Need other cleanups here?
+        // Cleanups
         // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
         localrc = ESMCI::Array::destroy(&temp_array_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
@@ -504,14 +516,30 @@ int IO::write(
   // Write each item from the object list to the open IO handler
   PRINTPOS;
   std::vector<IO_ObjectContainer *>::iterator it;
-  bool need_redist;
+  bool need_redist, has_undist;
   for (it = objects.begin(); it < objects.end(); ++it) {
+    Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
+    DistGrid *dg = temp_array_p->getDistGrid ();
+
+    int tilecount = dg->getTileCount ();
+    if (tilecount != 1) {
+      localrc = ESMF_RC_NOT_IMPL;
+      if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
+          &rc)) {
+      // Close the file but return original error even if close fails.
+        localrc = close();
+        return rc;
+      }
+    }
+
+    Array *temp_array_undist_p;  // temp when Array has undistributed dimensions
+    ESMCI::RouteHandle *rh;
     switch((*it)->type) {
     case IO_NULL:
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
-      need_redist = redist_check((*it)->getArray(), &localrc);
+      need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
       // Close the file but return original error even if close fails.
@@ -519,14 +547,8 @@ int IO::write(
         return rc;
       }
       // std::cout << ESMC_METHOD << ": need_redist = " << (need_redist?"y":"n") << std::endl;
-      if (!need_redist) {
-        ioHandler->arrayWrite((*it)->getArray(),
-                              (*it)->getName(), timeslice, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &rc)) return rc;  // bail out
-      } else {
+      if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
-        Array *temp_array_p;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redist_arraycreate1de" << std::endl;
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -538,25 +560,45 @@ int IO::write(
 
         // Redistribute into the temp Array
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-        ESMCI::RouteHandle *rh;
         localrc = ESMCI::Array::redistStore((*it)->getArray(), temp_array_p, &rh, NULL);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+        // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
         localrc = ESMCI::Array::redist((*it)->getArray(), temp_array_p, &rh);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+        // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
+      }
 
-        // Write the temp Array
-        ioHandler->arrayWrite(temp_array_p,
-                              (*it)->getName(), timeslice, &localrc);
+      // Check for undistributed dimensions
+      has_undist = undist_check (temp_array_p, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+
+      if (has_undist) {
+        temp_array_undist_p = temp_array_p;
+        // Create an aliased Array which treats all dimensions as distributed.
+        // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist()" << std::endl;
+        undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
+      }
 
-        // Need other cleanups here?
-        // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
+      // Write the Array
+      ioHandler->arrayWrite(temp_array_p,
+                            (*it)->getName(), timeslice, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+
+      // Clean ups //
+      if (need_redist) {
         localrc = temp_array_p->redistRelease(rh);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
@@ -870,31 +912,21 @@ bool IO::redist_check(Array *array_p, int *rc) {
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return false;
   int npets = currentVM->getNpets();
-  int mypet = currentVM->getMypet();
   int localDeCount = array_p->getDELayout()->getLocalDeCount();
-  int *deCounts_send = new int[npets]();
-  for (int i=0; i<npets; i++)
-    deCounts_send[i] = localDeCount;
-  int *deCounts_recv = new int[npets]();
-  localrc = currentVM->VMK::allgather (deCounts_send, deCounts_recv, sizeof(int));
+  std::vector<int> deCounts_send(npets, localDeCount);
+  std::vector<int> deCounts_recv(npets);
+  localrc = currentVM->VMK::allgather (deCounts_send.data(), deCounts_recv.data(), sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-    delete[] deCounts_recv;
-    delete[] deCounts_send;
     return false;
   }
-  delete[] deCounts_send;
 
   bool need_redist  = false;
-  bool zero_de_flag = false;
   for (int i=0; i<npets; i++) {
     if (deCounts_recv[i] != 1) {
       need_redist = true;
-      if (deCounts_recv[i] == 0)
-        zero_de_flag = true;
       break;
     }
   }
-  delete[] deCounts_recv;
 
   if (rc) *rc = ESMF_SUCCESS;
   return need_redist;
@@ -958,6 +990,117 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
 
 }  // end IO::redist_arraycreate1de
 //-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::undist_check()"
+//BOP
+// !IROUTINE:  IO::undist_check - check for undistributed dimensions
+//
+// !INTERFACE:
+bool IO::undist_check(Array *array_p, int *rc) {
+// !DESCRIPTION:
+//      Check for presense of undistributed dimensions
+//
+//EOP
+//-------------------------------------------------------------------------
+
+  int tc = array_p->getTensorCount();
+  if (rc) *rc = ESMF_SUCCESS;
+  return tc != 0;
+
+}  // end IO::undist_check
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::undist_arraycreate_alldist()"
+//BOP
+// !IROUTINE:  IO::undist_arraycreate_alldist
+//
+// !INTERFACE:
+void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, int *rc) {
+// !DESCRIPTION:
+//      Create a dest Array with all dimensions considered distributed,
+//      even though some are not.  Data elements are aliased to those in
+//      the src Array.
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  int localrc;
+
+  int rank = src_array_p->getRank ();
+  DistGrid *dg = src_array_p->getDistGrid ();
+  int dimcount = dg->getDimCount ();
+  int tilecount = dg->getTileCount ();
+
+  const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
+  const int *undistLBound = src_array_p->getUndistLBound();
+  const int *undistUBound = src_array_p->getUndistUBound();
+  const int *minIndexPTile = dg->getMinIndexPDimPTile ();
+  const int *maxIndexPTile = dg->getMaxIndexPDimPTile ();
+
+  // construct the new minIndex and maxIndex
+//std::cout << ESMC_METHOD << ": construct the new minIndex and maxIndex." << std::endl;
+  std::vector<int> minIndexNew(rank);
+  std::vector<int> maxIndexNew(rank);
+  int jj = 0;
+  for (int i=0; i<rank; i++) {
+    int j = arrayToDistGridMap[i];
+    if (j > 0) {
+      // valid DistGrid dimension
+      minIndexNew[i] = minIndexPTile[j-1];
+      maxIndexNew[i] = maxIndexPTile[j-1];
+    } else {
+      // undistributed dimension
+      minIndexNew[i] = undistLBound[jj];
+      maxIndexNew[i] = undistUBound[jj];
+      jj++;
+    }
+  }
+
+  // general dimensionality of regDecomp
+  std::vector<int> regDecomp(rank);
+  VM *currentVM = VM::getCurrent(&localrc);
+  regDecomp[0] = currentVM->getNpets(); // first element petCount for default distribution
+  for (int i=1; i<rank; i++)  // default all other dims to 1
+    regDecomp[i] = 1;
+
+  // create the fixed up DistGrid
+//std::cout << ESMC_METHOD << ": creating new DistGrid" << std::endl;
+  ESMCI::InterfaceInt minIndexInterface(minIndexNew.data(), rank);
+  ESMCI::InterfaceInt maxIndexInterface(maxIndexNew.data(), rank);
+  ESMCI::InterfaceInt regDecompInterface(regDecomp.data() , rank);
+  DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
+                 &maxIndexInterface, &regDecompInterface,
+      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+      &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+    return;
+  }
+
+  // finally, create the fixed up Array using pointer to original data.
+  // Assuming only 1 DE/PET since redist step would have been performed previously.
+//std::cout << ESMC_METHOD << ": creating alias Array" << std::endl;
+  CopyFlag copyflag = DATA_REF;
+  *dest_array_p = Array::create (src_array_p->getLocalarrayList(), 1,
+      dg_temp, copyflag,
+      NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL,
+      NULL, NULL, NULL,
+      &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+    return;
+  }
+
+  (*dest_array_p)->setName(src_array_p->getName());
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+}  // end IO::undist_arraycreate_alldist
+//-------------------------------------------------------------------------
+
 
 //-------------------------------------------------------------------------
 #undef  ESMC_METHOD
