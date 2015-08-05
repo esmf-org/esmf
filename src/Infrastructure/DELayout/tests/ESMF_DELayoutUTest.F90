@@ -56,6 +56,7 @@ program ESMF_DELayoutUTest
   integer:: petCount
   logical:: delayoutBool
   logical :: correct
+  integer :: localrc
 
 #ifdef ESMF_TESTEXHAUSTIVE
   type(ESMF_VM):: vm1
@@ -97,17 +98,6 @@ program ESMF_DELayoutUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "DELayout IsCreated Test"
-  correct=.true.
-  if(ESMF_DELayoutIsCreated(delayout3)) correct=.false.
-  delayout3 = ESMF_DELayoutCreate(vm, rc=rc)
-  if(.not. ESMF_DELayoutIsCreated(delayout3)) correct=.false.
-  call ESMF_DELayoutDestroy(delayout3, rc=rc)
-  if(ESMF_DELayoutIsCreated(delayout3)) correct=.false.
-  call ESMF_Test((correct), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !EX_UTest
@@ -215,6 +205,34 @@ program ESMF_DELayoutUTest
 !-------------------------------------------------------------------------------
 ! Test the NEWSTYLE DELayout ...
 !-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! First make sure IsCreated fails for an uncreated object
+  if (ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+
+  ! Now make sure that a created object returns successfully
+  delayout3 = ESMF_DELayoutCreate(vm, rc=rc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (.not. ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+
+  ! Now make sure that destroying object will have IsCreate again fail
+  call ESMF_DELayoutDestroy(delayout3,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   !------------------------------------------------------------------------
   !NEX_UTest
