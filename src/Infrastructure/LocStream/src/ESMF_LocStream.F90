@@ -1972,7 +1972,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a local count
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a SCRIP format grid file
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1989,16 +1989,17 @@ contains
       integer, intent(out), optional                  :: rc
 
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
-!     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
-!     how the LocStream is distributed. 
+!     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
+!     to the LocStream using the variables {\tt grid\_center\_lon}, {\tt grid\_center\_lat},
+!     and {\tt grid\_imask} defined in the SCRIP format grid file.  The data is distributed
+!     evenly on all the PETs with the extra elements on the lower PETs.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[filename]
-!          Number of grid file to be used to create the Location Stream.  Currently, only
+!          Name of grid file to be used to create the location stream.  Currently, only
 !          the SCRIP file format is supported.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.

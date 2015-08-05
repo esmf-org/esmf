@@ -24,7 +24,7 @@ if (ESMF.local_pet() == 0):
     if not os.path.exists(datadir):
         os.mkdir(datadir)
 
-    for fname in datafilelist:
+    	for fname in datafilelist:
     	 # Retrieve the data files needed for the test cases from the remote server.
              status_ok = cache_data_file(os.path.join(datadir,fname))
              if not status_ok:
