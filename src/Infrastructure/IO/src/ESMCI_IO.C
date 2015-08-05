@@ -915,7 +915,7 @@ bool IO::redist_check(Array *array_p, int *rc) {
   int localDeCount = array_p->getDELayout()->getLocalDeCount();
   std::vector<int> deCounts_send(npets, localDeCount);
   std::vector<int> deCounts_recv(npets);
-  localrc = currentVM->VMK::allgather (deCounts_send.data(), deCounts_recv.data(), sizeof(int));
+  localrc = currentVM->VMK::allgather (&deCounts_send[0], &deCounts_recv[0], sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
     return false;
   }
@@ -1069,9 +1069,9 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   // create the fixed up DistGrid
 //std::cout << ESMC_METHOD << ": creating new DistGrid" << std::endl;
-  ESMCI::InterfaceInt minIndexInterface(minIndexNew.data(), rank);
-  ESMCI::InterfaceInt maxIndexInterface(maxIndexNew.data(), rank);
-  ESMCI::InterfaceInt regDecompInterface(regDecomp.data() , rank);
+  ESMCI::InterfaceInt minIndexInterface(&minIndexNew[0], rank);
+  ESMCI::InterfaceInt maxIndexInterface(&maxIndexNew[0], rank);
+  ESMCI::InterfaceInt regDecompInterface(&regDecomp[0] , rank);
   DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
                  &maxIndexInterface, &regDecompInterface,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
