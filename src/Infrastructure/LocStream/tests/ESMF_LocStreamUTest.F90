@@ -92,6 +92,33 @@ program ESMF_LocStreamCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Testing LocStream IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! First make sure IsCreated fails for an uncreated object
+  if (ESMF_LocStreamIsCreated(locstream)) correct=.false.
+
+  ! Now make sure that a created object returns successfully
+  locstream=ESMF_LocStreamCreate(name="test",distgrid=distgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+     
+  if (.not. ESMF_LocStreamIsCreated(locstream)) correct=.false.
+
+  ! Now make sure that destroying object will have IsCreate again fail  
+  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (ESMF_LocStreamIsCreated(locstream)) correct=.false.
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Testing LocStream Validate"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 

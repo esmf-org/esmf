@@ -623,21 +623,21 @@ program ESMF_LocStreamEx
    ! For this example use an arbitrary set of points around globe.  
    !-------------------------------------------------------------------
    if (petCount .eq. 1) then
-     latArray = (/105.75, -56.25, 47.25, -29.25, 209.25, 114.75, 308.25 /)
-     lonArray = (/16.0, 36.0, 52.0, 72.0, 104.0, 124.0, 144.0 /)
+     latArray = (/-87.75, -56.25, -26.5, 0.0, 26.5, 56.25, 87.75 /)
+     lonArray = (/51.4, 102.8, 154.2, 205.6, 257.0, 308.4, 359.8 /)
    else
      if (localpet .eq. 0) then
-       latArray = (/ 105.75, -56.25 /)
-       lonArray = (/ 16.0, 36.0 /)
+       latArray = (/ -87.75, -56.25 /)
+       lonArray = (/ 51.4, 102.8 /)
      else if (localpet .eq.1) then
-       latArray = (/ 47.25, -29.25 /)
-       lonArray = (/ 52.0, 72.0 /)
+       latArray = (/ -26.5, 0.0 /)
+       lonArray = (/ 154.2, 205.6 /)
      else if (localpet .eq.2) then
-       latArray = (/ 209.25, 114.75 /)
-       lonArray = (/ 104.0, 124.0 /)
+       latArray = (/ 26.5, 56.25 /)
+       lonArray = (/ 257.0, 308.4 /)
      else if (localpet .eq.3) then
-       latArray = (/ 308.25 /)
-       lonArray = (/ 144.0 /)
+       latArray = (/ 87.75 /)
+       lonArray = (/ 359.8 /)
      endif
    endif
 

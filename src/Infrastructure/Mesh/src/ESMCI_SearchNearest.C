@@ -69,7 +69,7 @@ struct SearchData {
     SearchData *sd = static_cast<SearchData*>(y);
 
     // Get source node coords
-    const double *c=&(this_pt->coords[0]);  
+    const double *c=this_pt->coords;  
 
     // Convert to 3D point
     double src_pnt[3];

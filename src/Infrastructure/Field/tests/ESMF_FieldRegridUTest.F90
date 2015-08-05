@@ -8559,7 +8559,7 @@ write(*,*) "LOCALRC=",localrc
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
         lat = farrayPtrYC(i1,i2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -21158,6 +21158,7 @@ return
   integer :: i1,i2,i3, index(2)
   integer :: lDE, localDECount
   integer :: cl,cu,cc
+  integer :: clb,cub,mcc,elb,eub,ec
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
@@ -21264,6 +21265,20 @@ return
         rc=ESMF_FAILURE
         return
       endif
+      print*,'mvr: cl= ',cl,' cu= ',cu,' cc= ',cc
+
+!mvr vvvvvvvvvvvvvvv
+      call ESMF_LocStreamGetKey(srcLocStream, keyName="ESMF:Lat", localDE=0, &
+           exclusiveLBound=elb, &
+           exclusiveUBound=eub, &
+           exclusiveCount=ec, &
+           computationalLBound=clb, &
+           computationalUBound=cub, &
+           computationalCount=mcc, &
+           rc=localrc)
+      print*,'mvr: elb= ',elb,' eub= ',eub,' ec= ',ec,' clb= ',clb,' cub= ',cub,' mcc= ',mcc
+!mvr ^^^^^^^^^^^^^^^
+
 
       !-------------------------------------------------------------------
       ! Get key data.
@@ -21302,8 +21317,8 @@ return
         i2=mod((idx-1),src_nx) + 1
 
         ! Set source coordinates as 0 to 360
-        Xarray(idx) = REAL(i1-1)*src_dx
-        Yarray(idx) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
+        Xarray(idx) = REAL(i2-1)*src_dx
+        Yarray(idx) = -90. + (REAL(i1-1)*src_dy + 0.5*src_dy)
 
         ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(Xarray(idx))
@@ -21781,8 +21796,8 @@ return
       i2=mod((idx-1),dst_nx) + 1
 
       ! Set source coordinates as 0 to 360
-      lonArray(idx) = REAL(i1-1)*dst_dx
-      latArray(idx) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
+      lonArray(idx) = REAL(i2-1)*dst_dx
+      latArray(idx) = -90. + (REAL(i1-1)*dst_dy + 0.5*dst_dy)
     enddo
   enddo
 
@@ -22232,21 +22247,21 @@ return
   ! Set key data.
   !-------------------------------------------------------------------
   if (petCount .eq. 1) then
-    latArray = (/105.75, -56.25, 47.25, -29.25, 209.25, 114.75, 308.25 /)
-    lonArray = (/16.0, 36.0, 52.0, 72.0, 104.0, 124.0, 144.0 /)
+    latArray = (/-87.75, -56.25, -26.5, 0.0, 26.5, 56.25, 87.75 /)
+    lonArray = (/51.4, 102.8, 154.2, 205.6, 257.0, 308.4, 359.8 /)
   else
     if (localpet .eq. 0) then
-      latArray = (/ 105.75, -56.25 /)
-      lonArray = (/ 16.0, 36.0 /)
+      latArray = (/ -87.75, -56.25 /)
+      lonArray = (/ 51.4, 102.8 /)
     else if (localpet .eq.1) then
-      latArray = (/ 47.25, -29.25 /)
-      lonArray = (/ 52.0, 72.0 /)
+      latArray = (/ -26.5, 0.0 /)
+      lonArray = (/ 154.2, 205.6 /)
     else if (localpet .eq.2) then
-      latArray = (/ 209.25, 114.75 /)
-      lonArray = (/ 104.0, 124.0 /)
+      latArray = (/ 26.5, 56.25 /)
+      lonArray = (/ 257.0, 308.4 /)
     else if (localpet .eq.3) then
-      latArray = (/ 308.25 /)
-      lonArray = (/ 144.0 /)
+      latArray = (/ 87.75 /)
+      lonArray = (/ 359.8 /)
     endif
   endif
 

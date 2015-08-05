@@ -55,6 +55,7 @@ program ESMF_DELayoutUTest
   type(ESMF_DELayout):: delayout, delayoutAlias, delayoutAssigned
   integer:: petCount
   logical:: delayoutBool
+  logical :: correct
 
 #ifdef ESMF_TESTEXHAUSTIVE
   type(ESMF_VM):: vm1
@@ -62,7 +63,7 @@ program ESMF_DELayoutUTest
   integer, allocatable:: list(:)
   integer, allocatable:: petMap(:)
   integer:: i, ndes, n, nsum, isum, rc_loop
-  type(ESMF_DELayout):: delayout1, delayout2
+  type(ESMF_DELayout):: delayout1, delayout2, delayout3
 
   character, pointer :: buffer(:)
   integer :: buff_len, offset
@@ -96,6 +97,18 @@ program ESMF_DELayoutUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "DELayout IsCreated Test"
+  correct=.true.
+  if(ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+  delayout3 = ESMF_DELayoutCreate(vm, rc=rc)
+  if(.not. ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+  call ESMF_DELayoutDestroy(delayout3, rc=rc)
+  if(ESMF_DELayoutIsCreated(delayout3)) correct=.false.
+  call ESMF_Test((correct), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !EX_UTest
   write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"

@@ -116,6 +116,7 @@ module ESMF_LocStreamMod
    public operator(==)
    public operator(/=)
 
+   public ESMF_LocStreamIsCreated
    public ESMF_LocStreamValidate           ! Check internal consistency
    public ESMF_LocStreamCreate
    public ESMF_LocStreamGet
@@ -1412,7 +1413,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[distgrid]
 !          Distgrid specifying size and distribution. Only 1D distgrids are allowed.
@@ -1561,7 +1562,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[minIndex]}] 
 !          Number to start the index ranges at. If not present, defaults
@@ -1700,7 +1701,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[localCount]
 !          Number of grid cells to be distributed to this DE.
@@ -1853,7 +1854,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
+!     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[regDecomp]}]
 !          Specify into how many chunks to divide the locations. 
@@ -2302,6 +2303,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     character(len=*), intent(out),     optional  :: name
     integer, intent(out), optional               :: rc
+
+
 !
 ! !DESCRIPTION:
 ! Query an {\tt ESMF\_LocStream} for various information. All arguments after
@@ -3525,6 +3528,35 @@ end subroutine ESMF_LocStreamGetBounds
   end function ESMF_LocStreamMatch
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamIsCreated()"
+!BOP
+! !IROUTINE: ESMF_LocStreamIsCreated - Check whether a LocStream object has been created
+
+! !INTERFACE:
+  function ESMF_LocStreamIsCreated(locstream, rc)
+! !RETURN VALUE:
+    logical :: ESMF_LocStreamIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_LocStream), intent(in)            :: locstream
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt locstream} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_LocStreamIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_LocStreamGetInit(locstream)==ESMF_INIT_CREATED) &
+      ESMF_LocStreamIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamPrint"
@@ -4094,7 +4126,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !      \item[locstream]
 !          Location stream to be copied
-!      \item[{[name]}]
+!      \item[name]
 !          Name of the new location stream
 !      \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4255,7 +4287,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !      \item[locstream]
 !          Location stream from which the new location stream is to be created. 
-!      \item[{[name]}]
+!      \item[name]
 !          Name of the new location stream.
 !      \item[keyNames]
 !          Names of the keys used to determine the subset
@@ -4620,7 +4652,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !     \item[locstreamList]
 !          List of location streams from which the new location stream is to be created
-!     \item[{[name]}]
+!     \item[name]
 !          Name of the resulting location stream
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4905,7 +4937,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !     \item[locstream]
 !          Location stream from which the new location stream is to be created
-!     \item[{[name]}]
+!     \item[name]
 !          Name of the resulting location stream
 !     \item[sortKeys]
 !          Keys to sort by (primary, secondary, and higher level)

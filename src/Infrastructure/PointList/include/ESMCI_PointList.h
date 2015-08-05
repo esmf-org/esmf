@@ -19,7 +19,6 @@
 #ifndef ESMCI_PointList_H
 #define ESMCI_PointList_H
 
-#include <vector>
 #include <stdio.h>
 
 
@@ -43,10 +42,11 @@ namespace ESMCI {
 
   struct point {
     int id;
-    std::vector<double> coords;
+    double coords[3];
 
     point() {
       id=0;
+      coords[0] = coords[1] = coords[2] = 0.0;
     }
 
     bool operator< (const point &rhs) const {

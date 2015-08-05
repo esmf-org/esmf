@@ -165,8 +165,6 @@ namespace ESMCI {
     // Add point id
     points[curr_num_pts].id = _id;
 
-    points[curr_num_pts].coords.resize(coord_dim);
-
     // Add point coords
     for (int i=0; i<coord_dim; i++) {
       points[curr_num_pts].coords[i] = _coord[i];
@@ -485,7 +483,7 @@ namespace ESMCI {
       throw localrc;
     }
 
-    return &(points[loc].coords[0]);
+    return points[loc].coords;
   }
 
 } // namespace ESMCI
