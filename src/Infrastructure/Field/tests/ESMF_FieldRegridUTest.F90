@@ -21265,19 +21265,6 @@ return
         rc=ESMF_FAILURE
         return
       endif
-      print*,'mvr: cl= ',cl,' cu= ',cu,' cc= ',cc
-
-!mvr vvvvvvvvvvvvvvv
-      call ESMF_LocStreamGetKey(srcLocStream, keyName="ESMF:Lat", localDE=0, &
-           exclusiveLBound=elb, &
-           exclusiveUBound=eub, &
-           exclusiveCount=ec, &
-           computationalLBound=clb, &
-           computationalUBound=cub, &
-           computationalCount=mcc, &
-           rc=localrc)
-      print*,'mvr: elb= ',elb,' eub= ',eub,' ec= ',ec,' clb= ',clb,' cub= ',cub,' mcc= ',mcc
-!mvr ^^^^^^^^^^^^^^^
 
 
       !-------------------------------------------------------------------
