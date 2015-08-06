@@ -60,6 +60,7 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
   logical:: arraybundleBool, isPresent, loopResult
+  logical:: isCreated
   
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -81,6 +82,70 @@ program ESMF_ArrayBundleCreateUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test ArrayBundle for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundle = ESMF_ArrayBundleCreate(name="MyEmptyArrayBundle", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test ArrayBundle for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing ArrayBundle IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ArrayBundleIsCreated(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "empty ArrayBundleCreate Test"

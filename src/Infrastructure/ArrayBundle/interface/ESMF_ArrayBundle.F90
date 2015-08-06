@@ -86,6 +86,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
+  public ESMF_ArrayBundleIsCreated
   public ESMF_ArrayBundlePrint
   public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleRedist
@@ -1426,6 +1427,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArrayBundleHaloStore
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleIsCreated - Check whether an ArrayBundle object has been created
+
+! !INTERFACE:
+  function ESMF_ArrayBundleIsCreated(arraybundle, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ArrayBundleIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt arraybundle} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ArrayBundleIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ArrayBundleGetInit(arraybundle)==ESMF_INIT_CREATED) &
+      ESMF_ArrayBundleIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 
 ! -------------------------- ESMF-public method -------------------------------

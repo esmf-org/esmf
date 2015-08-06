@@ -255,7 +255,7 @@ program ESMF_DELayoutUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Testing DELayout IsCreated for created object"
+  write(name, *) "Testing DELayout IsCreated for destroyed object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_DELayoutIsCreated(delayout3)
   call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
@@ -263,7 +263,7 @@ program ESMF_DELayoutUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Testing DELayout IsCreated for created object"
+  write(name, *) "Testing DELayout IsCreated for destroyed object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_DELayoutIsCreated(delayout3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
