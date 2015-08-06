@@ -296,6 +296,8 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+#define WORKING_not
+
     ! query attrCount
 #ifdef WORKING
     call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
