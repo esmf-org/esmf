@@ -30,6 +30,15 @@ If you are looking for more documentation, or higher-level information
 about the ESMF project itself, go to the "MORE HELP" section below.
 
 
+Several addon packages are included with this ESMF release under ./src/addon:
+  ESMPy   - Python interface to ESMF.
+  MAPL    - Usability layer developed under the NASA 
+            Modeling Analysis and Prediction (MAP) program.
+  NUOPC   - Interoperability layer developed under the 
+            National Unified Operational Prediction Capability (NUOPC) program.
+See each addon package for a specific README file.
+
+
 Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
 
 ================================================================================
