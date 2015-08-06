@@ -219,7 +219,7 @@ program ESMF_DELayoutUTest
   if (ESMF_DELayoutIsCreated(delayout3)) correct=.false.
 
   ! Now make sure that a created object returns successfully
-  delayout3 = ESMF_DELayoutCreate(vm, rc=rc)
+  delayout3 = ESMF_DELayoutCreate(vm, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   if (.not. ESMF_DELayoutIsCreated(delayout3)) correct=.false.
