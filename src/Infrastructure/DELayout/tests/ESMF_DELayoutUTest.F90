@@ -52,7 +52,7 @@ program ESMF_DELayoutUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
-  type(ESMF_DELayout):: delayout, delayoutAlias, delayoutAssigned
+  type(ESMF_DELayout):: delayout, delayout3, delayoutAlias, delayoutAssigned
   integer:: petCount
   logical:: delayoutBool
   logical :: isCreated
@@ -63,7 +63,7 @@ program ESMF_DELayoutUTest
   integer, allocatable:: list(:)
   integer, allocatable:: petMap(:)
   integer:: i, ndes, n, nsum, isum, rc_loop
-  type(ESMF_DELayout):: delayout1, delayout2, delayout3
+  type(ESMF_DELayout):: delayout1, delayout2
 
   character, pointer :: buffer(:)
   integer :: buff_len, offset
