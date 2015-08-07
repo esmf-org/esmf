@@ -109,7 +109,7 @@ program ESMF_ArrayCreateGetUTest
 
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for uncreated object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_ArrayIsCreated(array)
@@ -117,7 +117,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for uncreated object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
@@ -125,7 +125,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create test Array for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
@@ -134,7 +134,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for created object"
   write(failMsg, *) "Did not return .true."
   isCreated = ESMF_ArrayIsCreated(array)
@@ -142,7 +142,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for created object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
@@ -150,7 +150,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy test Array for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -158,7 +158,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for destroyed object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_ArrayIsCreated(array)
@@ -166,7 +166,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing Array IsCreated for destroyed object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_ArrayIsCreated(array, rc=rc)
