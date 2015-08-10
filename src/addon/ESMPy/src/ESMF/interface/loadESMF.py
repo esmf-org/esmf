@@ -33,8 +33,7 @@ except:
 #       use this information to set variables that can be checked at beginning
 #       of the routines that require an ESMF build with these dependencies
 
-try:
-    MKFILE = open(esmfmk, 'r')
+with open(esmfmk, 'r') as MKFILE:
     
     # investigate esmf.mk
     libsdir = None
@@ -65,48 +64,44 @@ try:
             esmfversion = line.split("=")[1]
             esmfversion = esmfversion.rstrip('\n')
         
-            
-    MKFILE.close()
-    if not libsdir:
-        raise ValueError("ESMF_LIBSDIR not found!")
-    if not esmfos:
-        raise ValueError("ESMF_OS not found!")
-    if not esmfabi:
-        raise ValueError("ESMF_ABI not found!")
-    libsdir = libsdir.rstrip()
-    esmfos = esmfos.rstrip()
-    
-    # set _ESMF_OS
-    if "Darwin" in esmfos:
-        constants._ESMF_OS = constants._ESMF_OS_DARWIN
-    elif "Linux" in esmfos:
-        constants._ESMF_OS = constants._ESMF_OS_LINUX
-    elif "Unicos" in esmfos:
-        constants._ESMF_OS = constants._ESMF_OS_UNICOS
-    else:
-        raise ValueError("Unrecognized ESMF_OS setting!")
-    
-    # set _ESMF_ABI for 32/64 switching
-    if "64" in esmfabi:
-        constants._ESMF_ABI=constants._ESMF_ABI_64
-    elif "32" in esmfabi:
-        constants._ESMF_ABI=constants._ESMF_ABI_32
+if not libsdir:
+    raise ValueError("ESMF_LIBSDIR not found!")
+if not esmfos:
+    raise ValueError("ESMF_OS not found!")
+if not esmfabi:
+    raise ValueError("ESMF_ABI not found!")
+libsdir = libsdir.rstrip()
+esmfos = esmfos.rstrip()
 
-    # set _ESMF_NETCDF
-    if all(netcdf):
-        constants._ESMF_NETCDF = True
+# set _ESMF_OS
+if "Darwin" in esmfos:
+    constants._ESMF_OS = constants._ESMF_OS_DARWIN
+elif "Linux" in esmfos:
+    constants._ESMF_OS = constants._ESMF_OS_LINUX
+elif "Unicos" in esmfos:
+    constants._ESMF_OS = constants._ESMF_OS_UNICOS
+else:
+    raise ValueError("Unrecognized ESMF_OS setting!")
 
-    # set _ESMF_COMM
-    if "mpiuni" in esmfcomm:
-        constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
+# set _ESMF_ABI for 32/64 switching
+if "64" in esmfabi:
+    constants._ESMF_ABI=constants._ESMF_ABI_64
+elif "32" in esmfabi:
+    constants._ESMF_ABI=constants._ESMF_ABI_32
+else:
+    raise ValueError("Unrecognized ESMF_ABI setting!")
 
-    # set _ESMF_VERSION_STRING 
-    constants._ESMF_VERSION = esmfversion
+# set _ESMF_NETCDF
+if all(netcdf):
+    constants._ESMF_NETCDF = True
 
-except:
-    raise ValueError('There is no ESMF shared library object available \
-           (libesmf_fullylinked.so).\nPlease set ESMFMKFILE to a current \
-           ESMF installation to proceed.')
+# set _ESMF_COMM
+if "mpiuni" in esmfcomm:
+    constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
+
+# set _ESMF_VERSION_STRING 
+constants._ESMF_VERSION = esmfversion
+
 #### SHARED LIBRARY ###########################################################
 
 # load the shared library for esmf
@@ -118,4 +113,4 @@ try:
                         mode=ct.RTLD_GLOBAL)
 except:
     traceback.print_exc(file=sys.stdout)
-    raise ValueError('The ESMF shared library did not load properly.')
+    raise ImportError('The ESMF shared library did not load properly.')
