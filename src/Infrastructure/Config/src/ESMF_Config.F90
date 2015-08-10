@@ -57,6 +57,7 @@
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
                                    ! counting disregarding type (function)
+       public :: ESMF_ConfigIsCreated
        public :: ESMF_ConfigSetAttribute ! sets value
        public :: ESMF_ConfigValidate   ! validates config object
 !------------------------------------------------------------------------------
@@ -2408,6 +2409,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
     end function ESMF_ConfigGetLen
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ConfigIsCreated - Check whether a Config object has been created
+
+! !INTERFACE:
+  function ESMF_ConfigIsCreated(config, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ConfigIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Config), intent(in)            :: config
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt config} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ConfigIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ConfigGetInit(config)==ESMF_INIT_CREATED) &
+      ESMF_ConfigIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
