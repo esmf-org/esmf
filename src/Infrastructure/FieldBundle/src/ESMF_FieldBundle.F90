@@ -131,6 +131,7 @@ module ESMF_FieldBundleMod
   public ESMF_FieldBundleHalo
   public ESMF_FieldBundleHaloRelease
   public ESMF_FieldBundleHaloStore
+  public ESMF_FieldBundleIsCreated
   public ESMF_FieldBundlePrint
   public ESMF_FieldBundleRead
   public ESMF_FieldBundleRedist
@@ -1927,6 +1928,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         
     end subroutine ESMF_FieldBundleHaloStore
 !------------------------------------------------------------------------------ 
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleIsCreated()"
+!BOP
+! !IROUTINE: ESMF_FieldBundleIsCreated - Check whether a FieldBundle object has been created
+
+! !INTERFACE:
+  function ESMF_FieldBundleIsCreated(fieldbundle, rc)
+! !RETURN VALUE:
+    logical :: ESMF_FieldBundleIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt fieldbundle} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_FieldBundleIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldBundleGetInit(fieldbundle)==ESMF_INIT_CREATED) &
+      ESMF_FieldBundleIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
