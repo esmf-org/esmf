@@ -666,9 +666,7 @@ namespace ESMCI {
       // maximum amount of space needed.  I'm also creating the array
       // for the item types list.
       //***
-      char*	itemNameList = new char[numItems * ESMF_MAXSTR];
-      memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
-
+      char*	itemNameList = new char[numItems * ESMF_MAXSTR]();
       ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[numItems];
  
       //***
@@ -704,8 +702,8 @@ namespace ESMCI {
       //***
       // Clean up the allocated space
       //***
-      delete itemTypeList;
-      delete itemNameList;
+      delete[] itemTypeList;
+      delete[] itemNameList;
 
       rc = localrc;
       return itemNames;
@@ -756,9 +754,7 @@ namespace ESMCI {
       // Create the array for the item types list... we need this array so
       // so that we can count only those items of a specified type.
       //***
-      char*	itemNameList = new char[maxItems * ESMF_MAXSTR];
-      memset(itemNameList, '\0', maxItems * ESMF_MAXSTR);
-
+      char*	itemNameList = new char[maxItems * ESMF_MAXSTR]();
       ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[maxItems];
  
       //***
@@ -836,9 +832,7 @@ namespace ESMCI {
       // maximum amount of space needed.  I'm also creating the array
       // for the item types list.
       //***
-      char*	itemNameList = new char[numItems * ESMF_MAXSTR];
-      memset(itemNameList, '\0', numItems * ESMF_MAXSTR);
-
+      char*	itemNameList = new char[numItems * ESMF_MAXSTR]();
       ESMC_StateItemType   *itemTypeList = new ESMC_StateItemType[numItems];
  
       //***
