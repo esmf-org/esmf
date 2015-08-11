@@ -301,7 +301,7 @@ contains
         rcToReturn=rc)) return
 
     ! 1.) Each PET constructs its send arrays containing local Id
-    ! and VMId info for each object contained in the State
+    ! and VMId info for each object contained in the State.
     ! Note that element zero is reserved for the State itself.
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -409,7 +409,6 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
 
     ! 6.) Send/receive serialized objects to whoever needed them
 
@@ -2218,12 +2217,12 @@ contains
 !     {\tt ESMF\_State} to collect information from.
 !   \item[siwrap]
 !     State items in the state.
-!   \item[needs_list]
+!   \item[needs\_list]
 !     List of State items that need to be sent to other PETs
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
-!   \item[buffer]
-!     Buffer of serialized State objects (intent(out))
+!   \item[id\_info]
+!     IDInfo array containing buffers of serialized State objects (intent(out))
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
