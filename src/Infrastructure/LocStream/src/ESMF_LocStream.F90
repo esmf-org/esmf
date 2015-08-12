@@ -120,6 +120,7 @@ module ESMF_LocStreamMod
    public ESMF_LocStreamValidate           ! Check internal consistency
    public ESMF_LocStreamCreate
    public ESMF_LocStreamGet
+   public ESMF_LocStreamGetBounds
    public ESMF_LocStreamDeserialize
    public ESMF_LocStreamSerialize
    public ESMF_LocStreamDestroy
@@ -175,23 +176,6 @@ interface ESMF_LocStreamCreate
 !EOPI 
 end interface
 
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_LocStreamGet -- Generic interface
-
-! !INTERFACE:
-interface ESMF_LocStreamGet
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_LocStreamGetDefault
-      module procedure ESMF_LocStreamGetBounds
-      
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_LocStreamGet} functions.   
-!EOPI 
-end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -207,7 +191,6 @@ interface ESMF_LocStreamGetKey
       module procedure ESMF_LocStreamGetKeyR8
       module procedure ESMF_LocStreamGetKeyArray  
       module procedure ESMF_LocStreamGetKeyInfo
-      module procedure ESMF_LocStreamGetKeyBounds
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -2285,13 +2268,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamGetDefault"
+#define ESMF_METHOD "ESMF_LocStreamGet"
 !BOP
 ! !IROUTINE: ESMF_LocStreamGet - Return object-wide information from a LocStream
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_LocStreamGet()
-  subroutine ESMF_LocStreamGetDefault(locstream, distgrid, keyCount, &
+  subroutine ESMF_LocStreamGet(locstream, distgrid, keyCount, &
                keyNames, localDECount, indexflag, coordSys, name, rc)
 !
 ! !ARGUMENTS:
@@ -2406,7 +2388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_LocStreamGetDefault
+  end subroutine ESMF_LocStreamGet
 !------------------------------------------------------------------------------
 
 
@@ -2480,129 +2462,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_LocStreamGetKeyArray
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamGetKeyBounds"
-!BOP
-! !IROUTINE: ESMF_LocStreamGetKey - Get the bounds of a key Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyBounds(locstream, localDE, keyName, & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
-          computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,     &
-          rc)
-!
-! !ARGUMENTS:
-      type(ESMF_LocStream),   intent(in)       :: locstream
-      integer,                intent(in)                  :: localDE
-      character (len=*),   intent(in)                :: keyName
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer,                intent(out), optional :: totalLBound
-      integer,                intent(out), optional :: totalUBound
-      integer,                intent(out), optional :: totalCount
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    This method gets the bounds of a localDE for a locstream.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{locstream}]
-!          LocStream to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{[exclusiveLBound]}]
-!          Upon return this holds the lower bounds of the exclusive region.
-!     \item[{[exclusiveUBound]}]
-!          Upon return this holds the upper bounds of the exclusive region.
-!     \item[{[exclusiveCount]}]
-!          Upon return this holds the number of items in the exclusive region \newline
-!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
-!     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region.
-!     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!     \item[{[computationalCount]}]
-!          Upon return this holds the number of items in the computational region \newline
-!          (i.e. {\tt computationalUBound-computationalLBound+1}). 
-!     \item[{[totalLBound]}]
-!          Upon return this holds the lower bounds of the total region.
-!     \item[{[totalUBound]}]
-!          Upon return this holds the upper bounds of the total region.
-!     \item[{[totalCount]}]
-!          Upon return this holds the number of items in the total region
-!          (i.e. {\tt totalUBound-totalLBound+1}). 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
- integer :: localrc
- type(ESMF_Array) :: array
-
- ! Initialize return code 
- localrc = ESMF_RC_NOT_IMPL 
- if (present(rc)) rc = ESMF_RC_NOT_IMPL 
-
- ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
- !! Get localDECount
- !call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
- !    ESMF_CONTEXT, rcToReturn=rc)) return
- !
- !! Check consistency  of localDE
- !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
- !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE too big", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE<0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
-
- ! Get Key Array
- call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get Bounds via C++
-   call c_ESMC_locstreamgetkeybnds(array, localDE, & 
-                 exclusiveLBound, exclusiveUBound, exclusiveCount, &
-                 computationalLBound, computationalUBound, computationalCount, &
-                 totalLBound, totalUBound, totalCount, &
-                 localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-
- ! Return successfully 
- if (present(rc)) rc = ESMF_SUCCESS 
-
-end subroutine ESMF_LocStreamGetKeyBounds
 
 
 !------------------------------------------------------------------------------
@@ -2813,7 +2672,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
+      integer, intent(in), optional :: localDE
       character (len=*),    intent(in)              :: keyName
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -2838,7 +2697,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{localDE}]
+!     \item[{]localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -2882,7 +2741,6 @@ end subroutine ESMF_LocStreamGetKeyBounds
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray 
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -2898,40 +2756,6 @@ end subroutine ESMF_LocStreamGetKeyBounds
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -2979,7 +2803,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
+      integer, intent(in), optional :: localDE
       character (len=*),    intent(in)              :: keyName
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -3004,7 +2828,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{localDE}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -3048,7 +2872,6 @@ end subroutine ESMF_LocStreamGetKeyI4
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -3064,40 +2887,6 @@ end subroutine ESMF_LocStreamGetKeyI4
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -3146,7 +2935,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in) :: localDE
+      integer, intent(in), optional :: localDE
       character (len=*),    intent(in)              :: keyName
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -3171,7 +2960,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{localDE}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -3215,7 +3004,6 @@ end subroutine ESMF_LocStreamGetKeyR4
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
- integer :: localDECount
 
  ! Initialize return code 
  localrc = ESMF_RC_NOT_IMPL 
@@ -3233,41 +3021,6 @@ end subroutine ESMF_LocStreamGetKeyR4
  else
     datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
-
- ! Get localDECount
- call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-     ESMF_CONTEXT, rcToReturn=rc)) return
- 
- ! Check consistency  of localDE
- if (localDeCount < 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDeCount == 0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
-           msg="- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif
- 
- if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE too big", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
- if (localDE<0) then 
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-    return 
- endif 
-
 
  ! Get Key Array
  call ESMF_LocStreamGetKeyArray(locstream, keyName=keyName, keyArray=array, rc=localrc)  
@@ -3308,7 +3061,6 @@ end subroutine ESMF_LocStreamGetKeyR8
 ! !IROUTINE: ESMF_LocStreamGet - Get DE-local bounds of a LocStream
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_LocStreamGet()
       subroutine ESMF_LocStreamGetBounds(locstream, localDE, & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
@@ -3316,7 +3068,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream),   intent(in) :: locstream
-      integer,                intent(in) :: localDE
+      integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -3366,34 +3118,6 @@ end subroutine ESMF_LocStreamGetKeyR8
 
  ! Check init status of arguments 
  ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
- !! Get localDECount
- !call ESMF_LocStreamGetDefault(locstream, localDECount=localDECount, rc=localrc)
- !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
- !    ESMF_CONTEXT, rcToReturn=rc)) return
- !
- !! Check consistency  of localDE
- !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
- !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE too big", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
- !
- !if (localDE<0) then 
- !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
- !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rcToReturn=rc) 
- !   return 
- !endif 
 
  ! Get locstream type object
  lstypep=>locstream%lstypep
