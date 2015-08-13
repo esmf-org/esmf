@@ -63,6 +63,7 @@
       type(ESMF_Time) :: startTime, stopTime
       type(ESMF_Time) :: alarmTime
 
+      logical :: isCreated
 
 #ifdef ESMF_TESTEXHAUSTIVE
       logical :: bool
@@ -124,6 +125,7 @@
 
 
       ! initialize clock time intervals and instants
+
 
       ! ----------------------------------------------------------------------------
 
@@ -192,6 +194,73 @@
       call ESMF_AlarmDestroy(alarm1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_AlarmIsCreated(alarm1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_AlarmIsCreated(alarm1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test Alarm for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_AlarmIsCreated(alarm1)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_AlarmIsCreated(alarm1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test Alarm for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AlarmDestroy(alarm1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_AlarmIsCreated(alarm1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Alarm IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_AlarmIsCreated(alarm1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
 
 
 #ifdef ESMF_TESTEXHAUSTIVE

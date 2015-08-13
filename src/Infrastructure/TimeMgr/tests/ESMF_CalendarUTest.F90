@@ -58,6 +58,7 @@
      ! instantiate a calendar
      type(ESMF_Calendar) :: gregorianCalendar
 
+     logical :: isCreated
 
 #ifdef ESMF_TESTEXHAUSTIVE
       integer :: DD, MM, YY, totalDays, days, sols, H, M, S
@@ -125,6 +126,72 @@
       call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test Calendar for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
+                                          name="Gregorian", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test Calendar for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Calendar IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_CalendarIsCreated(gregorianCalendar, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
 

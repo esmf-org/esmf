@@ -86,6 +86,7 @@
       public ESMF_AlarmDisable
       public ESMF_AlarmEnable
       public ESMF_AlarmGet
+      public ESMF_AlarmIsCreated
       public ESMF_AlarmIsEnabled
       public ESMF_AlarmIsRinging
       public ESMF_AlarmIsSticky
@@ -805,6 +806,36 @@
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmGet
+
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmIsCreated()"
+!BOP
+! !IROUTINE: ESMF_AlarmIsCreated - Check whether a Alarm object has been created
+
+! !INTERFACE:
+  function ESMF_AlarmIsCreated(alarm, rc)
+! !RETURN VALUE:
+    logical :: ESMF_AlarmIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Alarm), intent(in)            :: alarm
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt alarm} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_AlarmIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_AlarmGetInit(alarm)==ESMF_INIT_CREATED) &
+      ESMF_AlarmIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

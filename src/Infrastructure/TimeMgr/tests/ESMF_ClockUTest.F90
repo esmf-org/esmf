@@ -65,6 +65,8 @@
       type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime
 
+      logical :: isCreated
+
 #ifdef ESMF_TESTEXHAUSTIVE
 
       ! individual test result code
@@ -187,6 +189,71 @@
       call ESMF_ClockDestroy(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_ClockIsCreated(clock)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ClockIsCreated(clock, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test Clock for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  clock = ESMF_ClockCreate(timeStep, startTime, name="Clock 1", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_ClockIsCreated(clock)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ClockIsCreated(clock, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test Clock for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ClockDestroy(clock, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_ClockIsCreated(clock)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Clock IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_ClockIsCreated(clock, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
 
 #ifdef ESMF_TESTEXHAUSTIVE 

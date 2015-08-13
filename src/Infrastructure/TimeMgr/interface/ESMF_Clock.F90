@@ -82,6 +82,7 @@
       public ESMF_ClockGetAlarm
       public ESMF_ClockGetAlarmList
       public ESMF_ClockGetNextTime
+      public ESMF_ClockIsCreated
       public ESMF_ClockIsDone
       public ESMF_ClockIsReverse
       public ESMF_ClockIsStopTime
@@ -1102,6 +1103,34 @@
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGetNextTime
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ClockIsCreated - Check whether a Clock object has been created
+
+! !INTERFACE:
+  function ESMF_ClockIsCreated(clock, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ClockIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt clock} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ClockIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
+      ESMF_ClockIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
