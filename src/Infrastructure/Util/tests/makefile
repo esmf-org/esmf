@@ -9,17 +9,20 @@ LOCDIR	  = src/Infrastructure/Util/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_UtilUTest \
                 $(ESMF_TESTDIR)/ESMF_FortranWordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_TypeKindGetUTest \
-                $(ESMF_TESTDIR)/ESMF_InitMacrosUTest 
+                $(ESMF_TESTDIR)/ESMF_InitMacrosUTest \
+                $(ESMF_TESTDIR)/ESMF_ValIteratorUTest
 
 TESTS_RUN     = RUN_ESMF_UtilUTest \
                 RUN_ESMF_FortranWordsizeUTest \
                 RUN_ESMF_TypeKindGetUTest \
-                RUN_ESMF_InitMacrosUTest 
+                RUN_ESMF_InitMacrosUTest \
+                RUN_ESMF_ValIteratorUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_UtilUTestUNI \
                 RUN_ESMF_FortranWordsizeUTestUNI \
                 RUN_ESMF_TypeKindGetUTestUNI \
-                RUN_ESMF_InitMacrosUTestUNI
+                RUN_ESMF_InitMacrosUTestUNI \
+                RUN_ESMF_ValIteratorUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -73,5 +76,15 @@ RUN_ESMF_InitMacrosUTest:
 RUN_ESMF_InitMacrosUTestUNI:
 	$(MAKE) TNAME=InitMacros NP=1 ftest
 
+
+#
+#  ValIteratorTests
+#
+
+RUN_ESMF_ValIteratorUTest:
+	$(MAKE) TNAME=Util NP=4 ftest
+
+RUN_ESMF_ValIteratorUTestUNI:
+	$(MAKE) TNAME=Util NP=1 ftest
 
 
