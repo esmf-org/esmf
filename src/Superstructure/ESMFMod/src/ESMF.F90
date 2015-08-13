@@ -29,6 +29,10 @@ module ESMF
     use ESMF_BaseMod
     use ESMF_IOUtilMod
 
+    use ESMF_ValIteratorMod
+    use ESMF_ValUtilsMod
+    use ESMF_VecUtilsMod
+
     use ESMF_FractionMod
     use ESMF_CalendarMod
     use ESMF_TimeIntervalMod
