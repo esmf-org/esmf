@@ -21256,7 +21256,7 @@ return
 
 !  if (petCount .eq. 1) then
     do lDE=0,localDECount-1
-      call  ESMF_LocStreamGet(srcLocStream, localDE=lDE, &
+      call  ESMF_LocStreamGetBounds(srcLocStream, localDE=lDE, &
                               computationalLBound=cl, computationalUBound=cu, &
                               computationalCount=cc, &
                               rc=localrc)
@@ -21745,7 +21745,7 @@ return
   ! Get key data.
   !-------------------------------------------------------------------
   do lDE=0,localDECount-1
-    call  ESMF_LocStreamGet(dstLocStream, localDE=lDE, &
+    call  ESMF_LocStreamGetBounds(dstLocStream, localDE=lDE, &
                             computationalLBound=cl, computationalUBound=cu, &
                             rc=localrc)
     if (localrc /=ESMF_SUCCESS) then

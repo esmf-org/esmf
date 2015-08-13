@@ -4,11 +4,12 @@
 # following block of code:
 #
 # import os
-# if not os.path.isdir("data"):
-#     os.makedirs("data")
+# DD = os.path.join(os.getcwd(), "examples/data")
+# if not os.path.isdir(DD):
+#     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(os.getcwd(), "data", "GRIDSPEC_ACCESS1.nc"))
-# cache_data_file(os.path.join(os.getcwd(), "data", "tx0.1v2_070911.nc"))
+# cache_data_file(os.path.join(DD, "GRIDSPEC_ACCESS1.nc"))
+# cache_data_file(os.path.join(DD, "tx0.1v2_070911.nc"))
 
 import ESMF
 import numpy

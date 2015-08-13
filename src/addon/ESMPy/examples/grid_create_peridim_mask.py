@@ -1,7 +1,19 @@
 # This example demonstrates how to create an ESMPy grid in memory with
 # periodic dimension and mask.
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# import os
+# DD = os.path.join(os.getcwd(), "examples/data")
+# if not os.path.isdir(DD):
+#     os.makedirs(DD)
+# from ESMF.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
+
 import ESMF
 import numpy
+
+gridfile = "examples/data/ll2.5deg_grid.nc"
 
 # This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
@@ -43,7 +55,7 @@ srcfield.data[...] = 0
 srcfield.data[numpy.where(srcfield.mask)] = -1000
 
 # Create a destination grid from a SCRIP formatted file.
-dstgrid = ESMF.Grid(filename="examples/data/ll2.5deg_grid.nc",
+dstgrid = ESMF.Grid(filename=gridfile,
                     filetype=ESMF.FileFormat.SCRIP)
 
 # Create a field on the centers of the destination grid.

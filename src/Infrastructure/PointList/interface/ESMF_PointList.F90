@@ -650,7 +650,7 @@ contains
           endif
         endif
 
-        call  ESMF_LocStreamGet(locstream, localDE=lDE, &
+        call  ESMF_LocStreamGetBounds(locstream, localDE=lDE, &
                                 computationalLBound=cl, computationalUBound=cu, &
                                 computationalCount=cc, &
                                 rc=localrc)

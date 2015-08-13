@@ -17,7 +17,6 @@ PET*.
 *.out
 *.vtk
 *.csv
-*.nc
 
 # Eclipse #
 ###########

@@ -4,19 +4,20 @@
 # following block of code:
 #
 # import os
-# if not os.path.isdir("data"):
-#     os.makedirs("data")
+# DD = os.path.join(os.getcwd(), "examples/data")
+# if not os.path.isdir(DD):
+#     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(os.getcwd(), "data", "tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"))
-# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
+# cache_data_file(os.path.join(DD, "tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"))
+# cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
 import ESMF
 
 # This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
-datafile = "data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"
-gridfile = "data/ll1deg_grid.nc"
+datafile = "examples/data/tasmax_day_CanCM4_decadal2010_r2i1p1_20110101-20201231.nc"
+gridfile = "examples/data/ll1deg_grid.nc"
 
 # Create a  grid from a GRIDSPEC formatted file
 srcgrid = ESMF.Grid(filename=datafile, filetype=ESMF.FileFormat.GRIDSPEC)
