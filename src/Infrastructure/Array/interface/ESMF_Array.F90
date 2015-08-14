@@ -736,7 +736,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Array sparse matrix multiplication. 
+!   Release resources associated with an Array sparse matrix multiplication. 
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -894,7 +894,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination element in {\tt dstArray}. For this format to be a valid
 !     option source and destination Arrays must have matching number of
 !     tensor elements (the product of the sizes of all Array tensor dimensions).
-!     Under this condition an identiy matrix can be applied within the space of
+!     Under this condition an identity matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     \begin{sloppypar}
@@ -922,7 +922,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
 !     are summed into partial sums on the source PET before being transferred
-!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
 !     is done on the destination PET; source elements are neither multiplied 
 !     by their factors nor added into partial sums before being sent off by the
 !     source PET. A value of 1 indicates that source elements are multiplied
@@ -958,7 +958,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
@@ -1576,7 +1576,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
 !     are summed into partial sums on the source PET before being transferred
-!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
 !     is done on the destination PET; source elements are neither multiplied 
 !     by their factors nor added into partial sums before being sent off by the
 !     source PET. A value of 1 indicates that source elements are multiplied
@@ -1612,7 +1612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme

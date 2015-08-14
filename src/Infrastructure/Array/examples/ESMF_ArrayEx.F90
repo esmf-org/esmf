@@ -89,7 +89,7 @@ program ESMF_ArrayEx
 ! 
 ! As before, to create an {\tt ESMF\_Array} object an {\tt ESMF\_DistGrid}
 ! must be created. The DistGrid object holds information about the entire 
-! index space and how it is dcomposed into DE-local exclusive regions. The 
+! index space and how it is decomposed into DE-local exclusive regions. The 
 ! following line of code creates a DistGrid for a 5x5 global index space that 
 ! is decomposed into 2 x 3 = 6 DEs.
 !EOE
@@ -99,8 +99,8 @@ program ESMF_ArrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The following is a representation of the index space and its decompositon into
-! DEs. Each asterix (*) represents a single element.
+! The following is a representation of the index space and its decomposition into
+! DEs. Each asterisk (*) represents a single element.
 !
 ! \begin{verbatim}
 ! 
@@ -155,7 +155,7 @@ program ESMF_ArrayEx
 !BOE
 ! Alternatively the same Array can be created specifying the "tkr" information
 ! in form of an ArraySpec variable. The ArraySpec explicitly contains the 
-! Array rank and thus results in an overspecification on the ArrayCreate()
+! Array rank and thus results in an over specification on the ArrayCreate()
 ! interface. ESMF checks all input information for consistency and returns 
 ! appropriate error codes in case any inconsistencies are found.
 !EOE

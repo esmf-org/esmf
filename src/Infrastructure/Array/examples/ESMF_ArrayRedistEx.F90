@@ -143,13 +143,13 @@ program ESMF_ArrayRedistEx
 ! For instance, an Array where the first two dimensions are undistributed, 
 ! and are of size 5 and 6 (i.e. undistributed shape (5,6)), is weakly congruent
 ! to an Array that only has a single undistributed first dimension. Furthermore,
-! the size of this single undistribute dimension is not restricted by the
+! the size of this single undistributed dimension is not restricted by the
 ! number of undistributed elements in the first Array (i.e. here it does not
 ! have to be 5x6=30). The Array is also weakly congruent to an Array that does
 ! not have a first undistributed dimension at all. In either case the only 
 ! restriction is that the distributed dimensions must be congruent.
 !
-! The transferablity of RouteHandles between Array pairs that are weakly
+! The transferability of RouteHandles between Array pairs that are weakly
 ! congruent can greatly reduce the number of communication store calls needed.
 ! In a typical application Arrays are often defined on the same decomposition,
 ! typically leading to congruent distributed dimensions. However, these Arrays

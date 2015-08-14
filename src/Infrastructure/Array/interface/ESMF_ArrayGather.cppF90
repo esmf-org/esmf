@@ -147,7 +147,7 @@ contains
 ! @\
 !   If the Array contains replicating DistGrid dimensions data will be @\
 !   gathered from the numerically higher DEs. Replicated data elements in @\
-!   numericaly lower DEs will be ignored. @\
+!   numerically lower DEs will be ignored. @\
 ! @\
 !   This version of the interface implements the PET-based blocking paradigm: @\
 !   Each PET of the VM must issue this call exactly once for {\em all} of its @\

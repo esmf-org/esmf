@@ -322,7 +322,7 @@ program ESMF_ArraySparseMatMulEx
 ! \end{verbatim}
 !
 ! The {\tt ESMF\_RouteHandle} object returned by {\tt ESMF\_ArraySMMStore()}
-! can be applied to any src/dst Array pairs that are weakly congurent to the
+! can be applied to any src/dst Array pairs that are weakly congruent to the
 ! Array pair used during precomputation. Arrays are congruent if they are
 ! defined on matching DistGrids and the shape of local array allocations match
 ! for all DEs. For weakly congruent Arrays the sizes of the undistributed
