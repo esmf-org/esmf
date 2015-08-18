@@ -257,7 +257,7 @@ void Array::destruct(bool followCreator){
 // TODO: The followCreator flag is only needed until we have reference counting
 // TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
-// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: sequence problems during automatic garbage collection unit reference
 // TODO: counting comes in to solve this problem in the final manner.
 //
 // !DESCRIPTION:
@@ -2597,7 +2597,7 @@ int Array::read(
 //
 // !DESCRIPTION:
 //   Read Array data from file and put it into an ESMF_Array object.
-//   For this API to be functional, the environmentvariable ESMF_PIO
+//   For this API to be functional, the environment variable ESMF_PIO
 //   should be set to "internal" when the ESMF library is built.
 //
 //EOPI
@@ -4358,7 +4358,7 @@ int Array::halo(
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
   bool *cancelledflag,                  // out   - any cancelled operations
-  bool checkflag                        // in    - false: (def.) basic chcks
+  bool checkflag                        // in    - false: (def.) basic checks
                                         //         true:  full input check
   ){
 //
@@ -4971,7 +4971,7 @@ int Array::redist(
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
   bool *cancelledflag,                  // out   - any cancelled operations
-  bool checkflag                        // in    - false: (def.) basic chcks
+  bool checkflag                        // in    - false: (def.) basic checks
                                         //         true:  full input check
   ){
 //
@@ -10977,7 +10977,7 @@ int Array::sparseMatMul(
                                         //          -> order by src PET & seqInd
                                         //         ESMC_TERMORDER_FREE:
                                         //          -> free order
-  bool checkflag,                       // in    - false: (def.) basic chcks
+  bool checkflag,                       // in    - false: (def.) basic checks
                                         //         true:  full input check
   bool haloFlag                         // in    - support halo conditions
   ){
@@ -13522,7 +13522,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 // !DESCRIPTION:
 //    This Create method generates a DELayout following a very simple 
 //    algorithm that assumes:
-//      1. that the DE vertix weight is proportional to the number of logical
+//      1. that the DE vertex weight is proportional to the number of logical
 //         grid points of the associated array domain - thus it is best to
 //         chunk up the entire domain into equal pieces
 //EOPI

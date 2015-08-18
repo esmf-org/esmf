@@ -109,7 +109,7 @@ program ESMF_ArrayBundleEx
 ! \subsubsection{Adding, removing, replacing Arrays in the ArrayBundle}
 !
 ! Individual Arrays can be added using the Fortran array constructor syntax
-! {\tt (/ ... /)}. Here an ESMF\_Array is created on the fly and immediatly
+! {\tt (/ ... /)}. Here an ESMF\_Array is created on the fly and immediately
 ! added to the ArrayBundle.
 !EOE
 !BOC

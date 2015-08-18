@@ -481,7 +481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     across an {ESMF\_Array} object. This version of the interface 
 !     implements the DE-based non-blocking paradigm.
 !     Each PET must issue this call once for {\em each} of its DEs. The call
-!     is non-blocking and will return immediatly. Use {\tt ESMF\_ArrayWait}
+!     is non-blocking and will return immediately. Use {\tt ESMF\_ArrayWait}
 !     to wait for the completion on a specific DE. No {\tt ESMF\_CommHandle} is
 !     necessary for the per DE-synchronization because the {\tt array} variable
 !     holds all required information and it is not allowed to have more than 

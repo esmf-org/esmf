@@ -122,8 +122,8 @@ program ESMF_ArrayCommNBEx
 ! collective communication calls described in the previous sections. In the
 ! blocking mode the user must assume that the communication call will not
 ! return until all PETs have exchanged the precomputed information. On the
-! other hand, the user has no guarante about the exact synchronization 
-! behavior, and it is unsafe to make specific assumtions. What is guaranteed
+! other hand, the user has no guarantee about the exact synchronization 
+! behavior, and it is unsafe to make specific assumptions. What is guaranteed
 ! in the blocking communication mode is that when the call returns on the
 ! local PET, all data exchanges associated with all local DEs have finished.
 ! This means that all in-bound data elements are valid and that all out-bound
@@ -149,7 +149,7 @@ program ESMF_ArrayCommNBEx
 ! RouteHandles.
 !
 ! Setting {\tt routesyncflag} to {\tt ESMF\_ROUTESYNC\_NBSTART} in any RouteHandle
-! execution call returns immediatly after all out-bound data has been moved
+! execution call returns immediately after all out-bound data has been moved
 ! into ESMF internal transfer buffers and the exchange has been initiated.
 !EOE
 
@@ -190,10 +190,10 @@ program ESMF_ArrayCommNBEx
 ! Some situations require more flexibility than is provided by the 
 ! {\tt ESMF\_ROUTESYNC\_NBSTART} - {\tt ESMF\_ROUTESYNC\_NBWAITFINISH} pair. For
 ! instance, a Component that needs to interact with several other Components,
-! virtually simultanously, would initiated several different exchanges with 
+! virtually simultaneously, would initiated several different exchanges with 
 ! {\tt ESMF\_ROUTESYNC\_NBSTART}. Calling with {\tt ESMF\_ROUTESYNC\_NBWAITFINISH} for
 ! any of the outstanding exchanges may potentially block for a long time, 
-! lowering the throughput. In the worst case a dead lock situation may arrise.
+! lowering the throughput. In the worst case a dead lock situation may arise.
 ! Calling with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH} addresses this problem.
 ! \end{sloppypar}
 !EOE
@@ -209,7 +209,7 @@ program ESMF_ArrayCommNBEx
 ! This call tests the locally outstanding data transfer operation in 
 ! {\tt routehandle}, and finishes the exchange as much as currently possible.
 ! It does not block until the entire exchange has finished locally, instead
-! it returns immediatly after one round of testing has been
+! it returns immediately after one round of testing has been
 ! completed. The optional return argument {\tt finishedflag} is set to 
 ! {\tt .true.} if the exchange is completely finished locally, and set to 
 ! {\tt .false.} otherwise.
@@ -217,7 +217,7 @@ program ESMF_ArrayCommNBEx
 ! The user code must decide, depending on the value of the returned
 ! {\tt finishedflag}, whether additional calls are required to finish an
 ! outstanding non-blocking exchange. If so, it can be done by 
-! calling {\tt ESMF\_ArrayRedist()} repeatly with 
+! calling {\tt ESMF\_ArrayRedist()} repeatedly with 
 ! {\tt ESMF\_ROUTESYNC\_NBTESTFINISH} until 
 ! {\tt finishedflag} comes back with a value of {\tt .true.}. Such a loop
 ! allows other pieces of user code to be executed between the calls. 
@@ -236,7 +236,7 @@ program ESMF_ArrayCommNBEx
 ! simply return immediately (with {\tt finishedflag} set to {\tt .true.}).
 !
 ! {\em Noteworthy property.}
-! It is fine to mix blocking and non-blocking invokations of the same 
+! It is fine to mix blocking and non-blocking invocations of the same 
 ! RouteHandle based communication call across the PETs. This means that it is
 ! fine for some PETs to issue the call with {\tt ESMF\_ROUTESYNC\_BLOCKING}
 ! (or using the default), while other PETs call the same communication call
