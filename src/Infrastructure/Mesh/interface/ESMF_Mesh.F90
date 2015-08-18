@@ -165,6 +165,7 @@ module ESMF_MeshMod
   public ESMF_MeshFreeMemory
   public ESMF_MeshGetInit
   public ESMF_MeshGet
+  public ESMF_MeshIsCreated
   public ESMF_MeshMatch
   public ESMF_MeshSerialize
   public ESMF_MeshDeserialize
@@ -3659,6 +3660,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_MeshGet
 
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshIsCreated()"
+!BOP
+! !IROUTINE: ESMF_MeshIsCreated - Check whether a Mesh object has been created
+
+! !INTERFACE:
+  function ESMF_MeshIsCreated(mesh, rc)
+! !RETURN VALUE:
+    logical :: ESMF_MeshIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)            :: mesh
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt mesh} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_MeshIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_MeshGetInit(mesh)==ESMF_INIT_CREATED) &
+      ESMF_MeshIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

@@ -80,6 +80,8 @@ module ESMF_RHandleMod
 
   public ESMF_RouteHandleCreate
   public ESMF_RouteHandleDestroy
+
+  public ESMF_RouteHandleIsCreated
   
   public ESMF_RouteHandleRelease
 
@@ -298,6 +300,34 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_RouteHandleDestroy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleIsCreated()"
+!BOP
+! !IROUTINE: ESMF_RouteHandleIsCreated - Check whether a RouteHandle object has been created
+
+! !INTERFACE:
+  function ESMF_RouteHandleIsCreated(routehandle, rc)
+! !RETURN VALUE:
+    logical :: ESMF_RouteHandleIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt routehandle} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_RouteHandleIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_RouteHandleGetInit(routehandle)==ESMF_INIT_CREATED) &
+      ESMF_RouteHandleIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 

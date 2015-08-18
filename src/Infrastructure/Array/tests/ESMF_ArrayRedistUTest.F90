@@ -72,6 +72,7 @@ program ESMF_ArrayRedistUTest
 #endif
   integer               :: rc, i, petCount, localPet
   integer, allocatable  :: srcIndices(:)
+  logical :: isCreated
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -250,6 +251,23 @@ program ESMF_ArrayRedistUTest
   ! 4     0         4     41, 42, 43, 44, 45, 46, 47
   ! 5     0         5     51, 52, 53, 54, 55, 56, 57
   
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_RouteHandleIsCreated(routehandle)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedistStore Test"
@@ -257,6 +275,22 @@ program ESMF_ArrayRedistUTest
   call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
     routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_RouteHandleIsCreated(routehandle)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -333,6 +367,22 @@ program ESMF_ArrayRedistUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_RouteHandleIsCreated(routehandle)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing RouteHandle IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
