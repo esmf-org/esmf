@@ -1458,7 +1458,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
 !     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
 !     and the error code will not be set to an error.  Thus this routine
-!     can be used to safely query for the existance of items by name 
+!     can be used to safely query for the existence of items by name 
 !     whether or not they are expected to be there.   The error code will
 !     be set in case of other errors, for example if the {\tt ESMF\_State}
 !     itself is invalid.
