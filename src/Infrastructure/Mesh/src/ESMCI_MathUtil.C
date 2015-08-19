@@ -45,7 +45,7 @@ namespace ESMCI {
 
   ///////// File for random math routines that I didn't know where to put ///////////
 
-
+ 
 //// These should eventually be moved elsewhere (perhaps into ESMCI_ShapeFunc.C??) 
 // INSTEAD OF THIS USE MACRO!
 void mult(double m[], double v[], double out_v[]) {
@@ -92,7 +92,7 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
 // of the intersection.                                                           
 // NOTE: the intersection doesn't have to be inside the quad or line for this to return true    
 bool intersect_quad_with_line(const double *q, const double *l1, const double *l2, double *p,
-			      double *t) {
+ 			      double *t) {
 
   double A[3], B[3], C[3], D[3], E[3], F[3];
   double J[3*3], inv_J[3*3];
@@ -139,7 +139,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
     // If we're close enough to 0.0 then exit           
-    if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
+     if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
 
     // Construct Jacobian
     J[0]=A[0]*X[1]+B[0]; J[1]=A[0]*X[0]+C[0]; J[2]=D[0];
@@ -186,7 +186,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 			     double *t) {
 
   double M[3*3], inv_M[3*3];
-  double V[3];
+   double V[3];
   double X[3];
 
   const double *tri0=tri;
@@ -1686,14 +1686,19 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   u_pnt1[2] = pnt1[2]/len1;
 
   // Compute angle between 0 and 1
-  // TODO: FIX THIS SO IT WORKS FOR ALL 360 DEG. 
+  // Right now this only works up to 180 degrees
+  // TODO: fix so it works up to 360
+  //// cos
   double cos01=MU_DOT_VEC3D(u_pnt0,u_pnt1);
-  if (cos01 < -1.0) cos01=-1.0;
-  else if (cos01 > 1.0) cos01=1.0;
-  double angle01=acos(cos01);
 
-  // printf("angle01=%f\n",angle01);
- 
+  //// sin
+  double u_pnt0x1[3];
+  MU_CROSS_PRODUCT_VEC3D(u_pnt0x1,u_pnt0,u_pnt1);
+  double sin01=MU_LEN_VEC3D(u_pnt0x1);
+
+  //// Compute angle
+  double angle01=std::atan2(sin01,cos01);
+
   // Compute info to use to compute new point
   double cosp=cos(p*angle01);  // cos contribution
   double sinp=sin(p*angle01);  // sin contribution
@@ -1805,53 +1810,59 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 
 // Take in a spherical quad represented in Cartesian 3D and 
-// 2 parameter (p) values. Calculate the jacobian for the 
+// 2 parameter (p) values. Calculate the pnt and the jacobian for the 
 // position described by the parameters in the quad.
-void calc_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,double *jac) {
-  double delta=1.0E-10; // Small distance to use to estimate derivative
-  double max_angle[3];   
+// Do both at the same time to avoid having to recalc. o_pnt
+  void calc_pnt_and_jac_hex_sph3D_xyz(const double *hex_xyz, double *p, 
+                              double *o_pnt, double *o_jac, double *o_max_angle) {
+  double delta=1.0E-14; // Small distance to use to estimate derivative
+  double tmp_max_angle[3];   
 
   // Calculate Function with given p's
   double f[3];
-  calc_pnt_hex_sph3D_xyz(hex_xyz, p, f, max_angle);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, p, f, o_max_angle);
+
+  // output point
+  o_pnt[0]=f[0];
+  o_pnt[1]=f[1];
+  o_pnt[2]=f[2];
 
   // Variable to hold info for computing derivatives
   double tmp_p[3];
   double tmp_f[3];
-
 
   // Compute partial by p[0]
   tmp_p[0]=p[0]+delta; 
   tmp_p[1]=p[1];
   tmp_p[2]=p[2];
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, tmp_max_angle);
 
-  jac[0]=(tmp_f[0]-f[0])/delta;
-  jac[3]=(tmp_f[1]-f[1])/delta;
-  jac[6]=(tmp_f[2]-f[2])/delta;
+  o_jac[0]=(tmp_f[0]-f[0])/delta;
+  o_jac[3]=(tmp_f[1]-f[1])/delta;
+  o_jac[6]=(tmp_f[2]-f[2])/delta;
 
   // Compute partial by p[1]
   tmp_p[0]=p[0]; 
   tmp_p[1]=p[1]+delta;
   tmp_p[2]=p[2];
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, tmp_max_angle);
 
-  jac[1]=(tmp_f[0]-f[0])/delta;
-  jac[4]=(tmp_f[1]-f[1])/delta;
-  jac[7]=(tmp_f[2]-f[2])/delta;
+  o_jac[1]=(tmp_f[0]-f[0])/delta;
+  o_jac[4]=(tmp_f[1]-f[1])/delta;
+  o_jac[7]=(tmp_f[2]-f[2])/delta;
 
   // Compute partial by p[2]
   tmp_p[0]=p[0]; 
   tmp_p[1]=p[1];
   tmp_p[2]=p[2]+delta;
 
-  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, max_angle);
+  calc_pnt_hex_sph3D_xyz(hex_xyz, tmp_p, tmp_f, tmp_max_angle);
 
-  jac[2]=(tmp_f[0]-f[0])/delta;
-  jac[5]=(tmp_f[1]-f[1])/delta;
-  jac[8]=(tmp_f[2]-f[2])/delta;
+  o_jac[2]=(tmp_f[0]-f[0])/delta;
+  o_jac[5]=(tmp_f[1]-f[1])/delta;
+  o_jac[8]=(tmp_f[2]-f[2])/delta;
 
 }
 
@@ -1877,12 +1888,9 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
                         {1.0,1.0,0.0},
                         {1.0,1.0,1.0}};
 
-  // Best set of p's so far
-  double best_dist_sq=std::numeric_limits<double>::max();
-  double best_p[3];
+  // PIs
   double pi=M_PI;
   double two_pi=2*M_PI;
-
 
   // Initial guess
   p[0]=0.5;
@@ -1891,43 +1899,30 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 
   // Do multiple interations exiting in loop if solution is close enough
-  bool stuck=false;
+  bool converged=false;
   for (int i=0; i<1000; i++) {
 
-    // Calculate point at p
+    // Calculate point and jacobian at p
     double tmp_pnt[3];
+    double jac[3*3];
     double max_angle[3];
-    calc_pnt_hex_sph3D_xyz(hex_xyz, p, tmp_pnt, max_angle);    
+    calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, p, 
+                                   tmp_pnt, jac, max_angle);
     
     // Calculate function we're trying to 0
     // (point at p-pnt_xyz)
     double f[3];
-     MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
+    MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
 
-    // calc squared distance from solution
-    double dist_sq=f[0]*f[0]+f[1]*f[1]+f[2]*f[2];
+    // Calculate Cart. dist. between point at p and actual point
+    double cart_dist_at_p=MU_LEN_VEC3D(f); 
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
-      printf("%d AFTER DIST CALC    p=%f %f %f d=%E\n",i,p[0],p[1],p[2],dist_sq);
+      printf("%d AFTER DIST CALC    p=%f %f %f \n",i,p[0],p[1],p[2]);
       printf("%d AFTER DIST CALC  ang=%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
     }
 #endif
-
-    // record the best point so far
-    if (dist_sq < best_dist_sq) {
-      best_dist_sq=dist_sq;
-      best_p[0]=p[0];
-      best_p[1]=p[1];
-      best_p[2]=p[2];
-    }
-
-    // If we're close enough then exit
-     if (best_dist_sq <1.0E-22) break;
-
-     // Construct Jacobian
-    double jac[3*3];
-    calc_jac_hex_sph3D_xyz(hex_xyz, p, jac);    
 
     // Invert Jacobian
     double inv_jac[3*3];
@@ -1938,52 +1933,52 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
         p[1]=p_guess[guess][1];
         p[2]=p_guess[guess][2];
         guess++;
-      } else { //... if we've tried them all then continue with best so far.
-        //// If the best_p leads to an un-invertable matrix, then we could be stuck in a loop, 
-         //// if that happens then just stop, so we don't have to go through all 1000 iterations
-        if (stuck) break;
-        stuck=true;
-
-        // continue with best so far...
-        p[0]=best_p[0];
-        p[1]=best_p[1];
-        p[2]=best_p[2];
-        guess++;
+      } else { //... if we've tried them all then just stop
+        break;
       }
-      continue; // back to top of loop with new p
     }
 
-    // We're not stuck
-    stuck=false;
 
-     // Calculate change in p
-     double delta_p[3];
+    // Calculate change in p
+    double delta_p[3];
     MU_MAT_X_VEC3D(delta_p, inv_jac, f);
-
-#define NEW_WAY 1
-#if NEW_WAY
 
     // get length of change
     double len_delta_p=MU_LEN_VEC3D(delta_p);
 
-    // If change is to big, make it smaller
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("%d AFTER Delta_P: p=%f %f %f  p_dist=%E cart_dist=%E\n",i,p[0],p[1],p[2],len_delta_p,MU_LEN_VEC3D(f));
+    }
+#endif
+
+    // The length of the change in p gives an approximation for
+    // the distance in p-space from the point. 
+    // If we're close enough in p-space dist. to be significantly
+    // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist. 
+    // then exit.
+    if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+      converged=true;
+      break;
+    }
+
+    // If change is too big, make it smaller
     if (len_delta_p > 1.0) {
       delta_p[0] = delta_p[0]/len_delta_p;
       delta_p[1] = delta_p[1]/len_delta_p;
       delta_p[2] = delta_p[2]/len_delta_p;
     }
-#endif
 
     // Move to next approximation of p
     MU_SUB_VEC3D(p,p,delta_p);    
 
+
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
        printf("%d AFTER P UPDATE new p=%f %f %f \n",i,p[0],p[1],p[2]);
-    }
+     }
 #endif
 
-#if NEW_WAY
     // Calculate half the max_angle to make things easier below
     double half_max_angle[3];
     half_max_angle[0]=0.5*max_angle[0];
@@ -1994,14 +1989,14 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     if (p[0]*max_angle[0] > pi+half_max_angle[0]) {
       // how many turns
       double turns=trunc(p[0]*max_angle[0]/two_pi);
-#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+ #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf("       P[0] big p=%f angle=%f turns=%f -> ",p[0],p[0]*max_angle[0],turns);
 #endif
        // subtract off all the complete turns
       p[0]=p[0]-turns*two_pi/max_angle[0];
 
        // If still too big one more turn to push to pos
-       if (p[0]*max_angle[0] > pi+half_max_angle[0]) {
+        if (p[0]*max_angle[0] > pi+half_max_angle[0]) {
         p[0]=p[0]-two_pi/max_angle[0];
       }
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
@@ -2014,7 +2009,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       if (mathutil_debug) printf("       P[0] small p=%f angle=%f turns=%f -> ",p[0],p[0]*max_angle[0],turns);
 #endif
       // Add on all the complete turns
-      p[0]=p[0]+turns*two_pi/max_angle[0];
+       p[0]=p[0]+turns*two_pi/max_angle[0];
  
        // If still inside cell on neg. side add one more turn to push to pos
       if (p[0]*max_angle[0] < -pi+half_max_angle[0]) {
@@ -2027,14 +2022,14 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
     if (p[1]*max_angle[1] > pi+half_max_angle[1]) {
       // how many turns
-      double turns=trunc(p[1]*max_angle[1]/two_pi);
+       double turns=trunc(p[1]*max_angle[1]/two_pi);
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
        if (mathutil_debug) printf("       P[1] big p=%f angle=%f turns=%f -> ",p[1],p[1]*max_angle[1],turns);
 #endif
       // subtract off all the complete turns
       p[1]=p[1]-turns*two_pi/max_angle[1];
 
-       // If still too big one more turn to push to pos
+        // If still too big one more turn to push to pos
       if (p[1]*max_angle[1] > pi+half_max_angle[1]) {
         p[1]=p[1]-two_pi/max_angle[1];
       }
@@ -2047,7 +2042,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf("       P[1] small p=%f angle=%f turns=%f -> ",p[1],p[1]*max_angle[1],turns);
 #endif
-      // Add on all the complete turns
+       // Add on all the complete turns
       p[1]=p[1]+turns*two_pi/max_angle[1];
   
        // If still inside cell on neg. side add one more turn to push to pos
@@ -2060,14 +2055,14 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     } 
 
     if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
-      // how many turns
+       // how many turns
       double turns=trunc(p[2]*max_angle[2]/two_pi);
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf("       P[2] big p=%f angle=%f turns=%f -> ",p[2],p[2]*max_angle[2],turns);
 #endif
       // subtract off all the complete turns
       p[2]=p[2]-turns*two_pi/max_angle[2];
-
+ 
        // If still too big one more turn to push to pos
       if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
         p[2]=p[2]-two_pi/max_angle[2];
@@ -2080,7 +2075,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       double turns=trunc(std::abs(p[2]*max_angle[2])/two_pi);
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf("       P[2] small p=%f angle=%f turns=%f -> ",p[2],p[2]*max_angle[2],turns);
-#endif
+ #endif
        // Add on all the complete turns
       p[2]=p[2]+turns*two_pi/max_angle[2];
  
@@ -2092,46 +2087,14 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       if (mathutil_debug) printf(" AFTER P[2] small p=%f angle=%f \n",p[2],p[2]*max_angle[2]);
 #endif
     }                             
-#else
-    // If we're too far away then try something else
-     // HANDLES CASE WHERE P WRAPS AROUND SPHERE 
-      // TODO: calculate beter limits for p from hex and use here
-    if (guess < 9){
-      if ((p[0]< -5.0) || (p[0]>4.0) ||
-          (p[1]< -5.0) || (p[1]>4.0) ||
-          (p[2]< -5.0) || (p[2]>4.0)) {
-        // Try another guess...
-        if (guess<8) {
-          p[0]=p_guess[guess][0];
-          p[1]=p_guess[guess][1];
-          p[2]=p_guess[guess][2];
-          guess++;
-        } else { //... if we've tried them all then continue with best so far.
-          p[0]=best_p[0];
-          p[1]=best_p[1];
-          p[2]=best_p[2];
-           guess++;
-        }
-#ifdef ESMF_REGRID_DEBUG_MAP_NODE
-        if (mathutil_debug) printf(" AFTER ADJ new p=%f %f %f \n",p[0],p[1],p[2]);
-#endif
-      }
-    }
-#endif
-  }
 
-  // Use the best p
-  p[0]=best_p[0];
-  p[1]=best_p[1];
-  p[2]=best_p[2];
+   }
 
-  // If we're too far then return false
-  // This tolerence was chosen to be closer than the 1.0E-10 used 
-  // in the is_in_cell checking... 
-  if (best_dist_sq > 1.0E-21) return false;
+  // Report if we've converged close enough to the actual point
+  if (converged) return true;
 
-  // Return success
-  return true;
+  // Otherwise  return false
+  return false;
 }
 
   // Do some quick checks to see if the point is 
