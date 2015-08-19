@@ -992,7 +992,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 //
 // !ARGUMENTS:
 //
-  const char*  clientId	 // (in) the id of the client whos component service is 
+  const char*  clientId	 // (in) the id of the client whose component service is 
                    //      to be unregistered
   )
 //
