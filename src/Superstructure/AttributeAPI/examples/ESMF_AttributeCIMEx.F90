@@ -197,7 +197,7 @@ program ESMF_AttributeCIMEx
         convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
-  'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+  'EarthSys-ESMF simulation run in respect to CMIP5 core experiment 1.1 ()', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &

@@ -648,7 +648,7 @@ module ESMF_AttributeUpdateMod
 !
 ! The first thing to do is to retrieve the Component, VM, and States.  Then
 ! {\tt ESMF\_AttributeUpdate()} will be called on the import State to accomplish
-! a VM wide communication.  Afterwards, the Attribute hierarchy can be transfered,
+! a VM wide communication.  Afterwards, the Attribute hierarchy can be transferred,
 ! in a local sense, from the import State to the export State using an
 ! {\tt ESMF\_AttributeCopy()} call.  
 !EOE

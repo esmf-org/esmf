@@ -261,7 +261,7 @@ program ESMF_AttributeEx
 !    numbers start from 1.  Then the name that is retrieved
 !    is used to get other information about the Attribute, such as the
 !    typekind, and the number of items in the value of the Attribute.
-!    This information is then used to actually retreive the Attribute value.
+!    This information is then used to actually retrieve the Attribute value.
 !    Then the count of the number of Attributes on the object will be retrieved.
 !EOE
 

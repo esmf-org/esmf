@@ -3378,7 +3378,7 @@ contains
 ! !DESCRIPTION:
 !     Write the Attribute package for <object>.  The Attribute package defines
 !     the convention, purpose, and object type of the associated Attributes.  Either
-!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.
+!     tab-delimited or xml format is achieved by using {\tt attwriteflag}.
 !     Currently, only ESMF/ESG/CF Field Attribute packages can be written in
 !     tab-delimited format.  See Section~\ref{sec:AttPacks} for a description
 !     of Attribute packages and their conventions, purposes, and object types.
