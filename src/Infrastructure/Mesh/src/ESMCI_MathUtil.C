@@ -1815,7 +1815,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 // Do both at the same time to avoid having to recalc. o_pnt
   void calc_pnt_and_jac_hex_sph3D_xyz(const double *hex_xyz, double *p, 
                               double *o_pnt, double *o_jac, double *o_max_angle) {
-  double delta=1.0E-14; // Small distance to use to estimate derivative
+    //  double delta=1.0E-14; // Small distance to use to estimate derivative
+  double delta=1.0E-10; // Small distance to use to estimate derivative
   double tmp_max_angle[3];   
 
   // Calculate Function with given p's
@@ -1902,13 +1903,30 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   bool converged=false;
   for (int i=0; i<1000; i++) {
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("%d --- Begin Iteration %d --- \n",i,i);
+      printf("%d p      =%f %f %f \n",i,p[0],p[1],p[2]);
+    }
+#endif
+
     // Calculate point and jacobian at p
     double tmp_pnt[3];
     double jac[3*3];
     double max_angle[3];
     calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, p, 
                                    tmp_pnt, jac, max_angle);
-    
+   
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+    if (mathutil_debug) {
+      printf("%d tmp_pnt=%f %f %f \n",i,tmp_pnt[0],tmp_pnt[1],tmp_pnt[2]);
+      printf("%d jac    =%f %f %f %f %f %f %f %f %f\n",i,jac[0],jac[1],jac[2],jac[3],jac[4],jac[5],jac[6],jac[7],jac[8]);
+      printf("%d max_ang=%f %f %f \n",i,max_angle[0],max_angle[1],max_angle[2]);
+      // printf("%d ~ang   =%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
+    }
+#endif
+
     // Calculate function we're trying to 0
     // (point at p-pnt_xyz)
     double f[3];
@@ -1917,27 +1935,29 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // Calculate Cart. dist. between point at p and actual point
     double cart_dist_at_p=MU_LEN_VEC3D(f); 
 
-#ifdef ESMF_REGRID_DEBUG_MAP_NODE
-    if (mathutil_debug) {
-      printf("%d AFTER DIST CALC    p=%f %f %f \n",i,p[0],p[1],p[2]);
-      printf("%d AFTER DIST CALC  ang=%f %f %f \n",i,p[0]*max_angle[0],p[1]*max_angle[1],p[2]*max_angle[2]);
-    }
-#endif
-
     // Invert Jacobian
     double inv_jac[3*3];
     if (!invert_matrix_3x3(jac, inv_jac)) {
       // Oops, couldn't invert, so try another guess
       if (guess<8) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+        if (mathutil_debug) {
+          printf("%d Couldn't invert so trying guess=%d\n",i,guess);
+        }
+#endif
         p[0]=p_guess[guess][0];
         p[1]=p_guess[guess][1];
         p[2]=p_guess[guess][2];
         guess++;
       } else { //... if we've tried them all then just stop
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+        if (mathutil_debug) {
+          printf("%d Couldn't invert and no more guesses, so giving up and leaving\n",i,guess);
+        }
+#endif
         break;
       }
     }
-
 
     // Calculate change in p
     double delta_p[3];
@@ -1948,7 +1968,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
-      printf("%d AFTER Delta_P: p=%f %f %f  p_dist=%E cart_dist=%E\n",i,p[0],p[1],p[2],len_delta_p,MU_LEN_VEC3D(f));
+      printf("%d p_dist =%E   cart_dist=%E\n",i,len_delta_p,MU_LEN_VEC3D(f));
     }
 #endif
 
@@ -1958,6 +1978,11 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist. 
     // then exit.
     if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+      if (mathutil_debug) {
+        printf("%d Within tols so exiting...\n",i);
+      }
+#endif
       converged=true;
       break;
     }
@@ -1975,7 +2000,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
-       printf("%d AFTER P UPDATE new p=%f %f %f \n",i,p[0],p[1],p[2]);
+       printf("%d new p  =%f %f %f \n",i,p[0],p[1],p[2]);
      }
 #endif
 
