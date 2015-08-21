@@ -60,7 +60,7 @@
 // Notes:
 //    - Instantiate as few as possible; ideally no more than one calendar
 //      kind per application (for reference only, like a wall calendar)
-//      But may have multiples for convienience such as one per component.
+//      But may have multiples for convenience such as one per component.
 //    - Generic enough to define for any planetary body
 //    - if secondsPerDay != 86400, then how are minutes and hours defined ?
 //      Assume always minute=60 seconds; hour=3600 seconds
