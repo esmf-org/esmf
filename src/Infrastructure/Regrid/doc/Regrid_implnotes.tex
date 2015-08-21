@@ -54,7 +54,7 @@ Figure~\ref{fig:RegridScaling} for scaling curves from an example application).
      grids.  Standard bilinear interpolation schemes can be found in many textbooks.
      Here we present a more general scheme which uses a local bilinear approximation
      to interpolate to a point in a quadrilateral grid.  Consider the grid points
-     shown in Figure~\ref{fig:quad} labelled with logically-rectangular indices
+     shown in Figure~\ref{fig:quad} labeled with logically-rectangular indices
      (e.g. $(i,j)$).
 
 \begin{figure}
@@ -365,7 +365,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
            a quadrilateral source grid.  The region $A_{kn}$
            is where cell $k$ overlaps the quadrilateral cell $n$.
            Vectors used by search and intersection routines are
-           also labelled. \label{fig:grids}}
+           also labeled. \label{fig:grids}}
 
 \begin{picture}(10,10)
 
@@ -431,7 +431,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      range of physical coordinates.  Each bin therefore identifies an index range
      corresponding to a physical coordinate range.  Then when the sweep begins,
      only those cells in the index range belonging to the same coordinate bin as
-     the identifed subsegment are used.  Please reference
+     the identified subsegment are used.  Please reference
      Figure~\ref{fig:ConservSweep} for an illustration of binning and the sweep
      algorithm.
 
