@@ -206,7 +206,7 @@
 !BOE
 ! The same code fragment can be used to demonstrate what happens when the label is not 
 ! present.  Note that "file\_name" does not exist in the Resource File. The result of 
-! its abscense is the default value provided in the call.
+! its absence is the default value provided in the call.
 !EOE
 
 !BOC 
