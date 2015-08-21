@@ -1000,7 +1000,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
 // !INTERFACE:
 bool IO::undist_check(Array *array_p, int *rc) {
 // !DESCRIPTION:
-//      Check for presense of undistributed dimensions
+//      Check for presence of undistributed dimensions
 //
 //EOP
 //-------------------------------------------------------------------------
