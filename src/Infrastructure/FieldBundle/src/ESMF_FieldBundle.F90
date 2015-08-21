@@ -1788,7 +1788,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle halo operation. After this call
+!   Release resources associated with a FieldBundle halo operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -2392,7 +2392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle redistribution. After this call
+!   Release resources associated with a FieldBundle redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -3172,7 +3172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle regrid operation. After this call
+!   Release resources associated with a FieldBundle regrid operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -4248,7 +4248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle sparse matrix multiplication. After this call
+!   Release resources associated with a FieldBundle sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -4379,7 +4379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination element in {\tt dstFieldBundle}. For this format to be a valid
 !     option source and destination FieldBundles must have matching number of
 !     tensor elements (the product of the sizes of all Field tensor dimensions).
-!     Under this condition an identiy matrix can be applied within the space of
+!     Under this condition an identity matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     The {\em size 4 format} is more general and does not require a matching
