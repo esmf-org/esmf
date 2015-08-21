@@ -646,7 +646,9 @@ program ESMF_AttributeUpdateUTest
     !EX_UTest_Multi_Proc_Only
 	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
-    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
+    print *, "PET #", localPet, " - Poised for segv.."
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, &
+                           attnestflag=ESMF_ATTNEST_ON, rc=rc)
     print *, "outVal = ", outVal 
     print *, "value2 = ", value2
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

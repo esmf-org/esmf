@@ -63,7 +63,7 @@ class Attribute
     int items;                  // number of items (NOT byte count) for lists
 
     ESMC_Logical attrRoot;
-	  ESMC_Logical attrUpdateDone; // hack for non-ordered containers
+	ESMC_Logical attrUpdateDone; // hack for non-ordered containers
   
     std::string attrConvention;             // Convention of Attpack
     std::string attrPurpose;                // Purpose of Attpack
@@ -118,32 +118,127 @@ class Attribute
 //-----------------------------------------------------------------------------
  public:
     // constant strings for conventions and purposes
-    static const char   CF_CONV[];
-    static const char	ESG_CONV[];
-    static const char	ESMF_CONV[];
+    static const char CF_CONV[];
+    static const char ESG_CONV[];
+    static const char ESMF_CONV[];
     static const char CIM_1_5_CONV[];
     static const char CIM_1_5_1_CONV[];
     static const char CIM_1_7_1_CONV[];
 
 
-    static const char	GENERAL_PURP[];
-    static const char	EXTENDED_PURP[];
-    static const char	INPUTS_PURP[];
-    static const char	MODEL_COMP_PURP[];
-    static const char	PLATFORM_PURP[];
-    static const char	RESP_PARTY_PURP[];
-    static const char	CITATION_PURP[];
-    static const char	SCI_PROP_PURP[];
+    static const char GENERAL_PURP[];
+    static const char EXTENDED_PURP[];
+    static const char INPUTS_PURP[];
+    static const char MODEL_COMP_PURP[];
+    static const char PLATFORM_PURP[];
+    static const char RESP_PARTY_PURP[];
+    static const char CITATION_PURP[];
+    static const char SCI_PROP_PURP[];
     static const char COMP_PROP_PURP[];
     static const char GRIDS_PURP[];
 
+    // Print
+    int ESMC_Print(void) const;
+
+    // Modifiers, Constructors, Destructors, Serializers, Operators
+    Attribute(const std::string &conv, const std::string &purp, const std::string &obj);
+    Attribute(const std::string &name, const std::string &conv, const std::string &purp,
+      const std::string &obj);
+    Attribute(void);
+    Attribute(const ESMC_Logical &attributeRoot);
+    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind,
+      int numitems, void *datap);
+    int AttrModifyValue(const ESMC_TypeKind_Flag &typekind, int numitems,
+      void *datap);
+    Attribute& operator=(const Attribute& source);
+    ~Attribute(void);
+    int ESMC_Deserialize(char *buffer, int *offset);
+    int ESMC_Serialize(char *buffer, int *length, int *offset,
+      ESMC_InquireFlag inquireflag) const;
+    int ESMC_SerializeCC(char *buffer, int *length, int &offset,
+      bool cc, ESMC_InquireFlag inquireflag) const;
+
     // accessors for private member variables
-    inline const std::string getConvention() {return this->attrConvention;}
-    inline const std::string getPurpose() {return this->attrPurpose;}
-    inline const std::string getObject() {return this->attrObject;}
+    inline const std::string getName() const {return this->attrName;}
+    inline const ESMC_TypeKind_Flag getTypeKind() const {return this->tk;}
+    inline const int getItemCount() const {return this->items;}
+    inline const std::string getConvention() const {return this->attrConvention;}
+    inline const std::string getPurpose() const {return this->attrPurpose;}
+    inline const std::string getObject() const {return this->attrObject;}
+    inline const Attribute* getParent() const {return this->parent;}
+
+    // accessors for counts
+    inline int getCountAttr() const {return attrList.size();};
+    inline int getCountPack() const {return packList.size();};
+    inline int getCountLink() const {return linkList.size();};
+    inline int getCountTotal() const {
+    	return attrList.size()+packList.size()+linkList.size();};
 
     // helper to set the Base address in attrBase
-    void setBase(ESMC_Base *setBase){ attrBase = setBase; }
+    void setBase(ESMC_Base *setBase) {attrBase = setBase;}
+
+    // get the value of an Attribute
+    int get(int *count, std::vector<ESMC_I4> *value) const;
+    int get(int *count, std::vector<ESMC_I8> *value) const;
+    int get(int *count, std::vector<ESMC_R4> *value) const;
+    int get(int *count, std::vector<ESMC_R8> *value) const;
+    int get(int *count, std::vector<ESMC_Logical> *value) const;
+    int get(std::vector<std::string> *value) const;
+
+    // get info from an Attribute
+    int get(int *lens, int count) const;
+    int getCount(ESMC_AttGetCountFlag *flag, int *count) const;
+    int getCount(ESMC_AttGetCountFlag *gcflag,
+    		     ESMC_AttNest_Flag *anflag, int *count) const;
+
+    // query whether an Attribute is "present" or "set"
+    bool isSet() const;
+
+    // return an Attribute by name or number
+    Attribute *AttributeGet(const std::string &name) const;
+    Attribute *AttributeGet(int num) const;
+
+    // query whether an Attribute is "present"
+    int AttributeIsPresent(const std::string &name, ESMC_Logical *present) const;
+    int AttributeIsPresent(const int &num, ESMC_Logical *present) const;
+
+    // attribute methods - set
+    int AttributeSet(const std::string &name, int count, std::vector<ESMC_I4> *value);
+    int AttributeSet(const std::string &name, int count, std::vector<ESMC_I8> *value);
+    int AttributeSet(const std::string &name, int count, std::vector<ESMC_R4> *value);
+    int AttributeSet(const std::string &name, int count, std::vector<ESMC_R8> *value);
+    int AttributeSet(const std::string &name, int count, std::vector<ESMC_Logical> *value);
+    int AttributeSet(const std::string &name, int count, std::vector<std::string> *value);
+
+     // copy and swap an attribute hierarchy
+    int AttributeCopy(const Attribute &source);
+    int AttributeCopyHybrid(const Attribute &source);
+    int AttributeCopyIgnore(const Attribute &source);
+    int AttributeCopyReplace(const Attribute &source);
+    int AttributeMove(Attribute *source);
+
+    // count the number of objects in an attribute hierarchy
+    int AttributeCountTree(const std::string &convention, const std::string &purpose,
+      const std::string &object, int &objcount, int &numattrs) const;
+    int AttributeCountTreeAttpack(int &objcount, int& numattrs) const;
+    int AttributeCountTreeLens(const std::string &convention, const std::string &purpose,
+      const std::string &object, int *attrLens, std::vector<std::string> &attrNames) const;
+    int AttributeCountTreeLensAttpack(int &index, int *attrLens,
+      std::vector<std::string> &attrNames) const;
+
+    // link/unlink an attribute hierarchy
+    int AttributeLink(Attribute *destination, ESMC_Logical *linkChangeIn);
+    int AttributeLinkRemove(Attribute *destination, ESMC_Logical *linkChangeIn);
+
+    // destroy an attribute or attpack
+    int AttributeRemove(const std::string &name);
+
+    // setting when you have an attribute already assembled
+    int AttributeSet(Attribute *attr);
+
+   // recursive call to set all attributes with attrObject = object
+    int AttributeSetObjsInTree(const std::string &name, const std::string &object,
+      const ESMC_TypeKind_Flag &tk, const int &count, void *value);
 
     // attpack methods
     int AttPackAddAttribute(const std::string &name, const std::string &convention, 
@@ -170,7 +265,15 @@ class Attribute
       std::vector<std::string> &attPackInstanceNameList, 
       int &attPackInstanceNameCount) const;
     Attribute *AttPackGetAttribute(const std::string &name) const;
+    Attribute *AttPackGetAttribute(const int &num) const;
+    Attribute *AttPackGetAttribute(const std::string &name,
+    		                       ESMC_AttNest_Flag anflag) const;
+    Attribute *AttPackGetAttribute(const int &num,
+    		                       ESMC_AttNest_Flag anflag) const;
     int AttPackIsPresent(const std::string &name, 
+                         const ESMCI::Attribute *attpack,
+                         ESMC_Logical *present) const;
+    int AttPackIsPresent(const int &num,
                          const ESMCI::Attribute *attpack,
                          ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
@@ -190,113 +293,6 @@ class Attribute
     int AttPackRemoveAttribute(const std::string &name, ESMCI::Attribute *attpack);
     int AttPackSet(Attribute *attr);
     
-    // copy and swap an attribute hierarchy
-    int  AttributeCopy(const Attribute &source);
-    int  AttributeCopyHybrid(const Attribute &source);
-    int  AttributeCopyIgnore(const Attribute &source);
-    int  AttributeCopyReplace(const Attribute &source);
-    int  AttributeMove(Attribute *source);
-    
-    // count the number of objects in an attribute hierarchy
-    int AttributeCountTree(const std::string &convention, const std::string &purpose,  
-      const std::string &object, int &objcount, int &numattrs) const;
-    int AttributeCountTreeAttpack(int &objcount, int& numattrs) const;
-    int AttributeCountTreeLens(const std::string &convention, const std::string &purpose,  
-      const std::string &object, int *attrLens, std::vector<std::string> &attrNames) const;
-    int AttributeCountTreeLensAttpack(int &index, int *attrLens, 
-      std::vector<std::string> &attrNames) const;
-    
-    // attribute methods - get
-//    int AttributeGet(const std::string &name, ESMC_I4 *value) const;
-    int AttributeGet(const std::string &name, int *count, std::vector<ESMC_I4> *value) const;
-//    int AttributeGet(const std::string &name, ESMC_I8 *value) const;
-    int AttributeGet(const std::string &name, int *count, std::vector<ESMC_I8> *value) const;
-//    int AttributeGet(const std::string &name, ESMC_R4 *value) const;
-    int AttributeGet(const std::string &name, int *count, std::vector<ESMC_R4> *value) const;
-//    int AttributeGet(const std::string &name, ESMC_R8 *value) const;
-    int AttributeGet(const std::string &name, int *count, std::vector<ESMC_R8> *value) const;
-//    int AttributeGet(const std::string &name, ESMC_Logical *value) const;
-    int AttributeGet(const std::string &name, int *count, std::vector<ESMC_Logical> *value) const;
-//    int AttributeGet(const std::string &name, std::string *value) const;
-    int AttributeGet(const std::string &name, std::vector<std::string> *value) const;
-
-    // getting either by name or number directly return attribute ptr
-    Attribute *AttributeGet(const std::string &name) const; 
-    Attribute *AttributeGet(int num) const;
-
-    // get attribute info
-    int AttributeGet(const std::string &name, int *lens, int count) const;
-    int AttributeGet(const std::string &name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
-    int AttributeGet(int num, std::string *name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
-    int AttributeGetCount(ESMC_AttGetCountFlag *flag, int *count) const;
-    inline int AttributeGetCountAttr(void) const {return attrList.size();};
-    inline int AttributeGetCountPack(void) const {return packList.size();};
-    inline int AttributeGetCountLink(void) const {return linkList.size();};
-    inline int AttributeGetCountTotal(void) const {
-    	return attrList.size()+packList.size()+linkList.size();};
-    int AttributeGetItemCount(const std::string &name) const;
-
-    // get attribute parent
-    Attribute *AttributeGetParent(void) const; 
-
-    // query for existence of an attribute
-    int AttributeIsPresent(const std::string &name, ESMC_Logical *present) const;
-
-    // query for whether an attribute has been set
-    bool AttributeIsSet(const std::string &name) const;
-
-    // link/unlink an attribute hierarchy
-    int AttributeLink(Attribute *destination, ESMC_Logical *linkChangeIn);
-    int AttributeLinkRemove(Attribute *destination, ESMC_Logical *linkChangeIn);
-
-    // destroy an attribute or attpack
-    int AttributeRemove(const std::string &name);
-    
-    // setting when you have an attribute already assembled
-    int AttributeSet(Attribute *attr);
-
-    // attribute methods - set
-//    int AttributeSet(const std::string &name, ESMC_I4 value);
-    int AttributeSet(const std::string &name, int count, std::vector<ESMC_I4> *value);
-//    int AttributeSet(const std::string &name, ESMC_I8 value);
-    int AttributeSet(const std::string &name, int count, std::vector<ESMC_I8> *value);
-//    int AttributeSet(const std::string &name, ESMC_R4 value);
-    int AttributeSet(const std::string &name, int count, std::vector<ESMC_R4> *value);
-//    int AttributeSet(const std::string &name, ESMC_R8 value);
-    int AttributeSet(const std::string &name, int count, std::vector<ESMC_R8> *value);
-//    int AttributeSet(const std::string &name, ESMC_Logical value);
-    int AttributeSet(const std::string &name, int count, std::vector<ESMC_Logical> *value);
-//    int AttributeSet(const std::string &name, std::string *value);
-    int AttributeSet(const std::string &name, int count, std::vector<std::string> *value);
-//    int AttributeSet(const std::string &name, const ESMC_TypeKind_Flag &tk, 
-//      int count, void *value);
-    
-    // recursive call to set all attributes with attrObject = object
-    int AttributeSetObjsInTree(const std::string &name, const std::string &object, 
-      const ESMC_TypeKind_Flag &tk, const int &count, void *value);
-
-    // Print
-    int ESMC_Print(void) const;
-
-    // Modifiers, Constructors, Destructors, Serializers, Operators
-    Attribute(const std::string &conv, const std::string &purp, const std::string &obj);
-    Attribute(const std::string &name, const std::string &conv, const std::string &purp, 
-      const std::string &obj);
-    Attribute(void);
-    Attribute(const ESMC_Logical &attributeRoot);
-/*    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
-      void *datap);*/
-    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
-      int numitems, void *datap);
-    int AttrModifyValue(const ESMC_TypeKind_Flag &typekind, int numitems, 
-      void *datap);
-    Attribute& operator=(const Attribute& source);
-    ~Attribute(void);
-    int ESMC_Deserialize(char *buffer, int *offset);
-    int ESMC_Serialize(char *buffer, int *length, int *offset,
-      ESMC_InquireFlag inquireflag) const;
-    int ESMC_SerializeCC(char *buffer, int *length, int &offset,
-      bool cc, ESMC_InquireFlag inquireflag) const;
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
     //  AttributeUpdate
@@ -441,14 +437,15 @@ extern "C" {
   void FTN_X(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
                                   ESMC_TypeKind_Flag *tk, int *count,
-                                  int *lens, char *valueList,
-                                  int *rc, 
+								  ESMC_AttNest_Flag *anflag, int *lens,
+								  char *valueList, int *rc,
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
                                   ESMC_TypeKind_Flag *tk, int *count,
-                                  void *value, int *rc, 
+								  ESMC_AttNest_Flag *anflag,
+								  void *value, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetapinstnames)(ESMC_Base **base, 
                                   ESMCI::Attribute **attpack,
@@ -506,7 +503,8 @@ extern "C" {
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name, 
                                   ESMCI::Attribute **attpack,
-                                  ESMC_TypeKind_Flag *tk, int *count,
+								  ESMC_AttNest_Flag *anflag,
+								  ESMC_TypeKind_Flag *tk, int *count,
                                   int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
@@ -519,8 +517,9 @@ extern "C" {
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetcount)(ESMC_Base **base, int *count,
                                   ESMC_AttGetCountFlag *flag, int *rc);
-  void FTN_X(c_esmc_attributegetcountattpack)(ESMCI::Attribute **attpack, int *count,
-                                  ESMC_AttGetCountFlag *flag, int *rc);
+  void FTN_X(c_esmc_attributegetcountattpack)(ESMCI::Attribute **attpack,
+		  	  	  	  	  	      int *count, ESMC_AttGetCountFlag *gcflag,
+								  ESMC_AttNest_Flag *anflag, int *rc);
   void FTN_X(c_esmc_attributeispresent)(ESMC_Base **base, char *name,
                                   ESMC_Logical *present, 
                                   int *rc, 

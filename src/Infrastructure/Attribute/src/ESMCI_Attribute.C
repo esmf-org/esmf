@@ -1158,9 +1158,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // if not found at this level, recurse through the nested Attribute packages,
   // one level at a time, right-to-left, to find right-most package
 //printf("AttPackGet(): going down a level, packList.size()=%d\n", packList.size());
-  for (i=packList.size()-1; i >= 0; i--) {
+  for (i=packList.size(); i > 0; i--) {
 //printf("i=%d\n", i);
-    ap = packList.at(i)->AttPackGet(convention, purpose, object,
+    ap = packList.at(i-1)->AttPackGet(convention, purpose, object,
                                     attPackInstanceName);
     if (ap) return ap;
   }
@@ -1200,9 +1200,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // first check if given attpack is set on *this* esmf object's attribute tree
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-  if (attpack != NULL) {
-    if (attpack->AttributeIsSet(name)) {
-      attpack->AttributeGet(name, &vv);
+  if (attpack) {
+    if (attpack->AttributeGet(name)->isSet()) {
+      attpack->AttributeGet(name)->get(&vv);
       if (vv.size() == 1) {
         if (value.compare(vv.at(0)) == 0) return attpack; // match !
       }
@@ -1265,8 +1265,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // if not found at this level, recurse through the nested Attribute packages,
   // one level at a time, right-to-left, to find right-most package
-  for (i=packList.size()-1; i >= 0; i--) {
-    packList.at(i)->AttPackGet(convention, purpose, object,
+  for (i=packList.size(); i > 0; i--) {
+    packList.at(i-1)->AttPackGet(convention, purpose, object,
                                attPackInstanceNameList, 
                                attPackInstanceNameCount);
     if (attPackInstanceNameCount > 0) return ESMF_SUCCESS;
@@ -1303,10 +1303,6 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   
   attr = NULL;
     
-  // recurse through the nested Attribute packages
-  for (i=0; i<packList.size(); i++)
-      attr = packList.at(i)->AttPackGetAttribute(name);
-  
   // look for the Attribute on this attpack
   for (i=0; i<attrList.size(); i++) {
     if (name.compare(attrList.at(i)->attrName) == 0)
@@ -1314,6 +1310,142 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   }
 
   return attr;
+
+}  // end AttPackGetAttribute
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackGetAttribute"
+//BOPI
+// !IROUTINE:  AttPackGetAttribute - get an {\tt Attribute} from an attpack
+//
+// !INTERFACE:
+      Attribute *Attribute::AttPackGetAttribute(
+//
+// !RETURN VALUE:
+//    {\tt Attribute} pointer to requested object or NULL on early exit.
+//
+// !ARGUMENTS:
+      const int &num) const {         // in - Attribute name to retrieve)
+//
+// !DESCRIPTION:
+//     Get an {\tt Attribute} from an attpack given its index.
+//     This routine is assumed to be called on the
+//     Attribute package that holds the Attribute in question.
+//
+//EOPI
+
+  int localrc;
+
+  if (num >= attrList.size()) {
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+	          "index number is too large for Attribute list\n",
+			  ESMC_CONTEXT, &localrc);
+  	  return NULL;
+  }
+
+  return attrList.at(num);
+
+}  // end AttPackGetAttribute
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackGetAttribute"
+//BOPI
+// !IROUTINE:  AttPackGetAttribute - get an {\tt Attribute} from an attpack
+//
+// !INTERFACE:
+      Attribute *Attribute::AttPackGetAttribute(
+//
+// !RETURN VALUE:
+//    {\tt Attribute} pointer to requested object or NULL on early exit.
+//
+// !ARGUMENTS:
+      const string &name,         // in - Attribute name to retrieve)
+	  ESMC_AttNest_Flag anflag    // in - attnestflag
+	  ) const {
+//
+// !DESCRIPTION:
+//     Get an {\tt Attribute} from an attpack given its name, convention,
+//     purpose, and object type.  This routine is assumed to be called on the
+//     Attribute package that holds the Attribute in question.
+//
+//EOPI
+
+  Attribute *attr;
+  unsigned int i;
+
+  // look for the Attribute on this attpack
+  for (i=0; i<attrList.size(); i++)
+    if (name.compare(attrList.at(i)->attrName) == 0)
+      return attrList.at(i);
+
+  // recurse through the nested Attribute packages
+  if (anflag == ESMC_ATTNEST_ON) {
+	  for (i=packList.size(); i > 0; i--) {
+		  attr = packList.at(i-1)->AttPackGetAttribute(name, anflag);
+		  // return first that is found (highest in nested tree)
+  	  	  if (attr) return attr;
+	  }
+  }
+
+
+  // if nothing is found return NULL initialized attr
+  return NULL;
+
+}  // end AttPackGetAttribute
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackGetAttribute"
+//BOPI
+// !IROUTINE:  AttPackGetAttribute - get an {\tt Attribute} from an attpack
+//
+// !INTERFACE:
+      Attribute *Attribute::AttPackGetAttribute(
+//
+// !RETURN VALUE:
+//    {\tt Attribute} pointer to requested object or NULL on early exit.
+//
+// !ARGUMENTS:
+      const int &num,              // in - Attribute index
+	  ESMC_AttNest_Flag anflag    // in - attnestflag
+	  ) const {
+//
+// !DESCRIPTION:
+//     Get an {\tt Attribute} from an attpack given its index.
+//     This routine is assumed to be called on the
+//     Attribute package that holds the Attribute in question.
+//
+//EOPI
+
+  unsigned int i;
+  int localrc;
+  Attribute *attr;
+
+  // if num is valid on this attribute return immediately
+  if (num < attrList.size())
+	  return attrList.at(num);
+  // recurse packages until we get a valid index
+  else {
+	  if (anflag == ESMC_ATTNEST_ON) {
+		  for (i=packList.size(); i > 0; i--) {
+			  attr = packList.at(i-1)->AttPackGetAttribute(num-attrList.size(),
+					                                     anflag);
+		  	  // return first that is found (highest in nested tree)
+		      if (attr) return attr;
+		  }
+	  }
+	  else {
+		  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+		  	          "index number is too large for Attribute list\n",
+		  			  ESMC_CONTEXT, &localrc);
+		  return NULL;
+	  }
+  }
+
+  // if nothing is found return NULL initialized attr
+  return NULL;
 
 }  // end AttPackGetAttribute
 
@@ -1351,7 +1483,50 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   }
 
   // get the attr on the attpack
-  attr = attpack->AttPackGetAttribute(name);
+  attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_ON);
+  if (!attr) *present = ESMF_FALSE;
+  else *present = ESMF_TRUE;
+
+  // return
+  return ESMF_SUCCESS;
+
+}  // end AttPackIsPresent
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackIsPresent"
+//BOPI
+// !IROUTINE:  AttPackIsPresent - query an {\tt Attribute} for an attpack
+//
+// !INTERFACE:
+      int Attribute::AttPackIsPresent(
+//
+// !RETURN VALUE:
+//    Value of the present flag.
+//
+// !ARGUMENTS:
+      const int &num,                    // in - Attribute name
+      const Attribute *attpack,          // in - Attribute package
+      ESMC_Logical *present) const {     // in/out - the present flag
+//
+// !DESCRIPTION:
+//     Query an Attribute package for an {\tt Attribute} given its name.
+//
+//EOPI
+
+  unsigned int i;
+  Attribute *attr;
+
+  attr = NULL;
+
+  // get the attpack
+  if (!attpack) {
+    *present = ESMF_FALSE;
+    return ESMF_SUCCESS;
+  }
+
+  // get the attr on the attpack
+  attr = attpack->AttPackGetAttribute(num, ESMC_ATTNEST_ON);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
@@ -1359,6 +1534,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   return ESMF_SUCCESS;
 
 }  // end AttPackIsPresent
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackIsSet"
@@ -1420,6 +1596,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // if we get here, no set attributes found
   return false;
 }  // end AttPackIsSet
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackIsSet"
@@ -1450,10 +1627,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   Attribute *ap;
 
   // check attributes defined on this attpack
-  for(int i=0; i<attrList.size(); i++) { 
+  for(int i=0; i<attrList.size(); i++) {
     string name = attrList.at(i)->attrName;
-    if (((ap = AttPackGetAttribute(name)) != NULL) &&
-         (ap->parent->AttributeIsSet(name))) return true;
+    if (AttPackGetAttribute(name)->isSet()) return true;
   }
   // otherwise check for any set attributes on nested attpacks, if requested
   if (inNestedAttPacks) {
@@ -1563,7 +1739,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     return localrc;
   }
   
-  attr = attpack->AttPackGetAttribute(name);
+  attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_OFF);
   if(!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute in this Attribute Package", ESMC_CONTEXT, &localrc);
@@ -2371,20 +2547,19 @@ if (attrRoot == ESMF_TRUE) {
 }  // end AttributeCountTreeLensAttpack
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "Get"
 //BOPI
-// !IROUTINE:  AttributeGet(int *) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(int *)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      int *count,                    // out - number of values in list
-      vector<ESMC_I4> *value) const {        // out - Attribute value
+      int *count,                      // out - number of values in list
+      vector<ESMC_I4> *value) const {  // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC\_I4} valueList of an {\tt Attribute}.
@@ -2392,55 +2567,41 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   int localrc;
-  Attribute *attr;
-  
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-    return ESMF_FAILURE;
+  // simple sanity checks
+  if (tk != ESMC_TYPEKIND_I4) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+      "Attribute not typekind I4", ESMC_CONTEXT, &localrc);
+    return localrc;
   }
-  else {
-    // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_I4) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-        "Attribute not typekind I4", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
 
-    if (count) 
-      *count = attr->items;
+  if (count)
+    *count = items;
 
-    if (value) 
-      *value = attr->vip;
-  }
+  if (value)
+    *value = vip;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(int *)
+}  // end get(int *)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "get"
 //BOPI
-// !IROUTINE:  AttributeGet(ESMC_I8 *) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(ESMC_I8 *)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      int *count,                    // out - number of values in list
-      vector<ESMC_I8> *value) const {        // out - Attribute value
+      int *count,                      // out - number of values in list
+      vector<ESMC_I8> *value) const {  // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC\_I8} valueList of an {\tt Attribute}.
@@ -2448,55 +2609,41 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   int localrc;
-  Attribute *attr;
-
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+  // simple sanity checks
+  if (tk != ESMC_TYPEKIND_I8) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+      "Attribute not typekind I8", ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  else {
-    // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_I8) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-        "Attribute not typekind I8", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
 
-    if (count) 
-      *count = attr->items;
+  if (count)
+    *count = items;
 
-    if (value) 
-      *value = attr->vlp;
-  }
+  if (value)
+    *value = vlp;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_I8 *)
+}  // end get(ESMC_I8 *)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "get"
 //BOPI
-// !IROUTINE:  AttributeGet(ESMC_R4 *) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(ESMC_R4 *)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      int *count,                    // out - number of values in list
-      vector<ESMC_R4> *value) const {        // out - Attribute value
+      int *count,                      // out - number of values in list
+      vector<ESMC_R4> *value) const {  // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC\_R4} valueList of an {\tt Attribute}.
@@ -2504,55 +2651,42 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   int localrc;
-  Attribute *attr;
-
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+  // simple sanity checks
+  if (tk != ESMC_TYPEKIND_R4) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+      "Attribute not typekind R4", ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  else {
-    // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_R4) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-        "Attribute not typekind R4", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
 
-    if (count) 
-      *count = attr->items;
+  if (count)
+    *count = items;
 
-    if (value) 
-      *value = attr->vfp;
-  }
+  if (value)
+    *value = vfp;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_R4 *)
+}  // end get(ESMC_R4 *)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "get"
 //BOPI
-// !IROUTINE:  AttributeGet(ESMC_R8 *) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(ESMC_R8 *)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      int *count,                    // out - number of values in list
-      vector<ESMC_R8> *value) const {        // out - Attribute value
+
+      int *count,                      // out - number of values in list
+      vector<ESMC_R8> *value) const {  // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC\_R8} valueList of an {\tt Attribute}.
@@ -2560,55 +2694,41 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   int localrc;
-  Attribute *attr;
-
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL; 
   
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-    return localrc;
-  }
-  else {
     // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_R8) {
+    if (tk != ESMC_TYPEKIND_R8) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind R8", ESMC_CONTEXT, &localrc);
       return localrc;
     }
 
     if (count) 
-      *count = attr->items;
+      *count = items;
 
     if (value) 
-      *value = attr->vdp;
-  }
+      *value = vdp;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_R8 *)
+}  // end get(ESMC_R8 *)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "get"
 //BOPI
-// !IROUTINE:  AttributeGet(ESMC_Logical *) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(ESMC_Logical *)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      int *count,                    // out - number of values in list
-      vector<ESMC_Logical> *value) const {   // out - Attribute value
+      int *count,                           // out - number of values in list
+      vector<ESMC_Logical> *value) const {  // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC\_Logical} valueList of an {\tt Attribute}.
@@ -2616,205 +2736,205 @@ if (attrRoot == ESMF_TRUE) {
 //EOPI
 
   int localrc;
-  Attribute *attr;
-
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-    return localrc;
-  }
-  else {
     // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
+    if (tk != ESMC_TYPEKIND_LOGICAL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind LOGICAL", ESMC_CONTEXT, &localrc);
       return localrc;
     }
 
     if (count) 
-      *count = attr->items;
+      *count = items;
 
     if (value) 
-      *value = attr->vbp;
-  }
+      *value = vbp;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_Logical *)
+}  // end get(ESMC_Logical *)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
+#define ESMC_METHOD "get"
 //BOPI
-// !IROUTINE:  AttributeGet(charlist) - get {\tt Attribute} from an ESMF type
+// !IROUTINE:  get(charlist)
 //
 // !INTERFACE:
-      int Attribute::AttributeGet(
+      int Attribute::get(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,            // in - name of Attribute to retrieve
-      vector<string> *value) const {   // out - Attribute values
+      vector<string> *value) const {  // out - Attribute values
 // 
 // !DESCRIPTION:
-//    Get the value of an {\tt Attribute}.
+//    Get the charlist value of an {\tt Attribute}.
 //
 //EOPI
 
   int localrc;
-  Attribute *attr;
-
-  attr = NULL;
-
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-// took this out because i think it should return success if not an error.. 
-//    return localrc;
-  }
-  else {
-    // simple sanity checks
-    if (attr->tk == ESMF_NOKIND) {
-      ESMC_LogDefault.Write(
-        "Attribute not set, will return empty vector", ESMC_LOGMSG_INFO,
-        ESMC_CONTEXT);
-    }
-    else if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-        "Attribute not typekind CHARACTER", ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-
-    *value = attr->vcpp;
-  }
-  
-  return ESMF_SUCCESS;
-
-}  // end AttributeGet(charlist)
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
-//BOPI
-// !IROUTINE:  AttributeGet(name) - get {\tt Attribute} from an ESMF type
-//
-// !INTERFACE:
-      int Attribute::AttributeGet(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      const string &name,           // in - name of Attribute to retrieve
-      ESMC_TypeKind_Flag *tk,            // out - typekind
-      int *itemCount) const {       // out - number of values in list
-// 
-// !DESCRIPTION:
-//    Get the {\tt void *} value of an {\tt Attribute} by name.
-//
-//EOPI
-
-  int localrc;
-  Attribute *attr;
-
-  attr = NULL;
-
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  // Get the attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-    return ESMF_FAILURE;
-  }
-  else {
-    if (tk) 
-      *tk = attr->tk;
-
-    if (itemCount)
-      *itemCount = attr->items; 
-  }
-
-  return ESMF_SUCCESS;
-
-}  // end AttributeGet(name)
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
-//BOPI
-// !IROUTINE:  AttributeGet(num) - get {\tt Attribute} from an ESMF type
-//
-// !INTERFACE:
-      int Attribute::AttributeGet(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      int num,                        // in - number of Attribute to retrieve
-      string *name,                   // out - Attribute name
-      ESMC_TypeKind_Flag *tk,              // out - typekind
-      int *itemCount) const {         // out - number of values in list
-// 
-// !DESCRIPTION:
-//    Get the {\tt void *} value of an {\tt Attribute} by number.
-//
-//EOPI
-
-  int localrc;
-  Attribute *attr;
-
-  attr = NULL;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
-  if (num < 0) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-      "Attribute index must be >0", ESMC_CONTEXT, &localrc);
+  if (tk != ESMC_TYPEKIND_CHARACTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+      "Attribute not typekind CHARACTER", ESMC_CONTEXT, &localrc);
     return localrc;
   }
 
-  // Get the attribute
-  attr = AttributeGet(num);
-  if (!attr) {
-    ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
-    return ESMF_FAILURE;
+  *value = vcpp;
+  
+  return ESMF_SUCCESS;
+
+}  // end get(charlist)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "get"
+//BOPI
+// !IROUTINE:  get - get lengths of strings in an {\tt Attribute}
+//
+// !INTERFACE:
+      int Attribute::get(
+//
+// !RETURN VALUE:
+//    {\tt Attribute} pointer or NULL on error exit.
+//
+// !ARGUMENTS:
+      int *lens,          // out - Atttribute char* lengths to retrieve
+      int count) const {  // in/out - number of Attribute lengths to retrieve
+//
+// !DESCRIPTION:
+//    Get the lengths of the strings in an {\tt Attribute}.
+//
+//EOPI
+
+  int size, localrc;
+  unsigned int i;
+
+  // check whether this Attribute has been set
+  if (!isSet()) {
+    // not set -> return in a sensible way
+    for (i=0; i<count; i++)
+      lens[i] = 0;
+    return ESMF_SUCCESS;
   }
+
+  // check that this is a char Attribute
+  if (tk != ESMC_TYPEKIND_CHARACTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
+      "Attribute is not typekind CHARACTER", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // check that the count is correct
+  if (count < 0 || (count > items)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
+      "Count argument is incorrect", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
+
+  // find the lengths of the strings on this Attribute
+  if (!vcpp.empty()) {
+  for (i=0; i<count; i++)
+    lens[i] = (vcpp[i]).size();
+  } //else if (!vcp.empty()) lens[0] = vcp.size();
+  else lens[0] = 0;
+
+  return ESMF_SUCCESS;
+
+}  // end get
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getCount"
+//BOPI
+// !IROUTINE:  getCount - get an the number of {\tt Attributes}
+// 
+// !INTERFACE:
+      int Attribute::getCount(
+// 
+// !RETURN VALUE:
+//    number of {\tt Attributes} in this attrList
+// 
+// !ARGUMENTS:
+      ESMC_AttGetCountFlag *gcflag,  // in - attgetcount flag
+	  int *count                     // out - the count to return
+	  ) const {
+//
+// !DESCRIPTION:
+//      Returns number of {\tt Attributes} present
+//
+//EOPI
+
+  int localrc;
+
+  if (*gcflag == ESMC_ATTGETCOUNT_ATTRIBUTE)
+      *count = this->getCountAttr();
+  else if (*gcflag == ESMC_ATTGETCOUNT_ATTPACK)
+      *count = this->getCountPack();
+  else if (*gcflag == ESMC_ATTGETCOUNT_ATTLINK)
+      *count = this->getCountLink();
+  else if (*gcflag == ESMC_ATTGETCOUNT_TOTAL)
+      *count = this->getCountTotal();
   else {
-    if (name) 
-      *name = attr->attrName;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                     "invalid value for attcountflag", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
 
-    if (tk) 
-      *tk = attr->tk;
-
-    if (itemCount)
-      *itemCount = attr->items;
+  if (*count < 0) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "failed getting attribute count", ESMC_CONTEXT, &localrc);
+      return localrc;
   }
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(num)
+} // end getCount
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getCount"
+//BOPI
+// !IROUTINE:  getCount - get an the number of {\tt Attributes}
+//
+// !INTERFACE:
+      int Attribute::getCount(
+//
+// !RETURN VALUE:
+//    number of {\tt Attributes} in this attrList
+//
+// !ARGUMENTS:
+      ESMC_AttGetCountFlag *gcflag,  // in - attgetcount flag
+      ESMC_AttNest_Flag *anflag,     // in - attgetcount flag
+	  int *count                     // out - the count to return
+	  ) const {
+//
+// !DESCRIPTION:
+//      Returns number of {\tt Attributes} present
+//
+//EOPI
+
+  int localrc;
+  int lcount;
+
+  localrc = getCount(gcflag, &lcount);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &localrc)) return localrc;
+
+  *count += lcount;
+
+  if (*anflag == ESMC_ATTNEST_ON)
+	  for (int i=0; i<this->packList.size(); ++i)
+		  this->packList.at(i)->getCount(gcflag, anflag, count);
+
+  return ESMF_SUCCESS;
+
+} // end getCount
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2823,13 +2943,13 @@ if (attrRoot == ESMF_TRUE) {
 //
 // !INTERFACE:
       Attribute *Attribute::AttributeGet(
-// 
+//
 // !RETURN VALUE:
 //    {\tt Attribute} pointer or NULL on error exit.
-// 
+//
 // !ARGUMENTS:
       const string &name) const {        // in - Attribute name to retrieve
-// 
+//
 // !DESCRIPTION:
 //    Get the {\tt Attribute} name.
 //
@@ -2840,7 +2960,7 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<attrList.size(); i++) {
       if (name.compare(attrList.at(i)->attrName) == 0)
           return attrList.at(i);
-  }   
+  }
 
   // you get here if no matches found
   return NULL;
@@ -2854,13 +2974,13 @@ if (attrRoot == ESMF_TRUE) {
 //
 // !INTERFACE:
       Attribute *Attribute::AttributeGet(
-// 
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
       int number) const {             // in - Attribute number
-// 
+//
 // !DESCRIPTION:
 //     Allows the caller to get {\tt Attributes} by number instead of by name.
 //     This can be useful in iterating through all {\tt Attributes} in a loop.
@@ -2869,7 +2989,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // simple sanity check
   if ((number < 0) || (number >= attrList.size())) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
       "Invalid index for AttributeGet(index)", ESMC_CONTEXT, NULL);
     return NULL;
   }
@@ -2877,179 +2997,6 @@ if (attrRoot == ESMF_TRUE) {
   return attrList.at(number);
 
 }  // end AttributeGet
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetParent"
-//BOPI
-// !IROUTINE:  AttributeGetParent - get {\tt Attribute} parent from an ESMF type
-//
-// !INTERFACE:
-      Attribute *Attribute::AttributeGetParent(
-// 
-// !RETURN VALUE:
-//    {\tt Attribute} parent pointer or NULL on error exit.
-// 
-// !ARGUMENTS:
-      void) const {        // none
-// 
-// !DESCRIPTION:
-//    Get the parent of {\tt Attribute}.
-//
-//EOPI
-
-  return parent;
-
-}  // end AttributeGetParent
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGet"
-//BOPI
-// !IROUTINE:  AttributeGet - get {\tt Attribute} from an ESMF type
-//
-// !INTERFACE:
-      int Attribute::AttributeGet(
-// 
-// !RETURN VALUE:
-//    {\tt Attribute} pointer or NULL on error exit.
-// 
-// !ARGUMENTS:
-      const string &name,               // in - Attribute name to retrieve
-      int *lens,                // in - Atttribute char* lengths to retrieve
-      int count) const {        // in - number of Attribute lengths to retrieve
-// 
-// !DESCRIPTION:
-//    Get the lengths of the strings in an {\tt Attribute}.
-//
-//EOPI
-
-  int size, localrc;
-  unsigned int i;
-  Attribute *attr;
-
-  attr = NULL;
-
-  // look for the Attribute
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
-      "Could not locate the Attribute", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  
-  // check whether this Attribute has been set
-  if (!AttributeIsSet(name)) {
-    // not set -> return in a sensible way
-    for (i=0; i<count; i++)
-      lens[i] = 0;
-    return ESMF_SUCCESS;
-  }
-  
-  // check that this is a char Attribute
-  if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-      "Attribute is not typekind CHARACTER", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  
-  // check that the count is correct
-  if (count < 0 || (count > attr->items)) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ATTR_ITEMSOFF, 
-      "Count argument is incorrect", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  
-  // find the lengths of the strings on this Attribute
-  if (!(attr->vcpp).empty()) {
-  for (i=0; i<count; i++) 
-    lens[i] = (attr->vcpp[i]).size();
-  } //else if (!(attr->vcp).empty()) lens[0] = (attr->vcp).size();
-  else lens[0] = 0;
-
-  return ESMF_SUCCESS;
-
-}  // end AttributeGet
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetCount"
-//BOPI
-// !IROUTINE:  AttributeGetCount - get an the number of {\tt Attributes}
-// 
-// !INTERFACE:
-      int Attribute::AttributeGetCount(
-// 
-// !RETURN VALUE:
-//    number of {\tt Attributes} in this attrList
-// 
-// !ARGUMENTS:
-      ESMC_AttGetCountFlag *flag,  // in - attgetcount flag
-	  int *count                   // out - the count to return
-	  ) const {
-//
-// !DESCRIPTION:
-//      Returns number of {\tt Attributes} present
-//
-//EOPI
-
-  int localrc;
-
-  if (*flag == ESMC_ATTGETCOUNT_ATTRIBUTE)
-      *count = this->AttributeGetCountAttr();
-  else if (*flag == ESMC_ATTGETCOUNT_ATTPACK)
-      *count = this->AttributeGetCountPack();
-  else if (*flag == ESMC_ATTGETCOUNT_ATTLINK)
-      *count = this->AttributeGetCountLink();
-  else if (*flag == ESMC_ATTGETCOUNT_TOTAL)
-      *count = this->AttributeGetCountTotal();
-  else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                     "invalid value for attcountflag", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-
-  if (count < 0) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                      "failed getting attribute count", ESMC_CONTEXT, &localrc);
-      return localrc;
-  }
-
-  return ESMF_SUCCESS;
-
-} // end AttributeGetCount
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetItemCount"
-//BOPI
-// !IROUTINE:  AttributeGetItemCount - get the item count of this {\tt Attribute}
-// 
-// !INTERFACE:
-      int Attribute::AttributeGetItemCount(
-// 
-// !RETURN VALUE:
-//    item count of this {\tt Attribute}
-// 
-// !ARGUMENTS:
-      const string &name) const {       // in - name
-// 
-// !DESCRIPTION:
-//      Returns number of items on this {\tt Attribute}
-//
-//EOPI
-
-  int localrc;
-  Attribute *attr;
-  
-  attr = NULL;
-
-  attr = AttributeGet(name);
-  if (!attr) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
-      "Attribute not found", ESMC_CONTEXT, &localrc);
-    return localrc;
-  }
-  
-  return attr->items;
-
-} // end AttributeGetItemCount
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeIsPresent"
@@ -3086,37 +3033,75 @@ if (attrRoot == ESMF_TRUE) {
 }  // end AttributeIsPresent
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeIsSet"
+#define ESMC_METHOD "AttributeIsPresent"
 //BOPI
-// !IROUTINE:  AttributeIsSet - query if an {\tt Attribute} has been set
+// !IROUTINE:  AttributeIsPresent - query for an {\tt Attribute}
 //
 // !INTERFACE:
-      bool Attribute::AttributeIsSet(
+      int Attribute::AttributeIsPresent(
+//
+// !RETURN VALUE:
+//    Value of the present flag.
+//
+// !ARGUMENTS:
+      const int &num,                 // in - Attribute index
+      ESMC_Logical *present) const {  // in/out - the present flag
+//
+// !DESCRIPTION:
+//     Query for an {\tt Attribute} given its index
+//
+//EOPI
+
+  Attribute *attr;
+
+  attr = NULL;
+
+  attr = AttributeGet(num);
+  if (!attr)
+    *present = ESMF_FALSE;
+  else *present = ESMF_TRUE;
+
+  // return
+  return ESMF_SUCCESS;
+
+}  // end AttributeIsPresent
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "isSet"
+//BOPI
+// !IROUTINE:  isSet - query if an {\tt Attribute} has been set
+//
+// !INTERFACE:
+      bool Attribute::isSet() const {
+
 // 
 // !RETURN VALUE:
 //    Whether the value has been set
 // 
 // !ARGUMENTS:
-      const string &name) const {            // in - Attribute name
 // 
+//    None
+//
 // !DESCRIPTION:
-//     Query for whether an {\tt Attribute} has been set, given its name
+//     Query for whether an {\tt Attribute} has been set
 //
 //EOPI
 
-  Attribute *attr = NULL;
-  
-  attr = AttributeGet(name);
-  if (!attr)
-    return false;   // not present
-  else {
-    if (attr->items > 0 && attr->tk != ESMF_NOKIND)
-      return true;  // set
+  if (this == NULL) {
+	  ESMC_LogDefault.Write("isSet - this == NULL",
+	        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
+	  return false;
   }
+
+  if (items > 0 && tk != ESMF_NOKIND)
+	  return true;  // set
+
+  ESMC_LogDefault.Write("isSet - items <= 0 or tk == ESMF_NOKIND",
+     ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 
   return false;     // not set
 
-}  // end AttributeIsSet
+}  // end isSet
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeLink"
@@ -3367,7 +3352,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I4, count, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I4, count, value);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", ESMC_CONTEXT, &localrc);
@@ -3411,7 +3396,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I8, count, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I8, count, value);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", ESMC_CONTEXT, &localrc);
@@ -3455,7 +3440,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_R4, count, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_R4, count, value);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", ESMC_CONTEXT, &localrc);
@@ -3543,7 +3528,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", ESMC_CONTEXT, &localrc);
@@ -3587,7 +3572,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, count, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, count, value);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", ESMC_CONTEXT, &localrc);
@@ -3771,7 +3756,7 @@ if (attrRoot == ESMF_TRUE) {
   printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 
-  sprintf(msgbuf, "        attrCount: %d\n", attrList.at(i)->AttributeGetCountTotal());
+  sprintf(msgbuf, "        attrCount: %d\n", attrList.at(i)->getCountTotal());
   printf("%s",msgbuf);
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   }

@@ -786,7 +786,8 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
 	call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_AttributeGet(field1, name2, value=outVal, attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field1, name2, value=outVal, attpack=attpack, &
+                           attnestflag=ESMF_ATTNEST_ON, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value", &
                       "PET: ", localPet, "outVal: ", trim(outVal), &
                       "expected: ", trim(value2)

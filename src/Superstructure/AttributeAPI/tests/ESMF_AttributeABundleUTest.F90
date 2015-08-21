@@ -1200,8 +1200,7 @@ program ESMF_AttributeArrayBundleUTest
         itemcount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting Attribute info by name from an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                                       .and.(attrTK==ESMF_TYPEKIND_CHARACTER) &
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(attrTK==ESMF_TYPEKIND_CHARACTER) &
                                        .and.(items==1), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------

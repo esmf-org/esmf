@@ -503,7 +503,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    ! Finally, construct the top-level gmd:responsibleParty, containing 
+    ! Finally, construct the top-level gmd:responsibleParty, containing
     !   gmd:CI_ResponsibleParty and attribute 'abbreviation'
     !-------------------------------------------------------------------------
 
@@ -512,7 +512,7 @@ program ESMF_AttributeXMLUTest
     ! Now create parent node to include the 1 child node created above, and
     ! add new attribute 'abbreviation'
     attrList(1) = 'description'  ! use to hold XML comment
-    attrList(2) = 'abbreviation'   
+    attrList(2) = 'abbreviation'
     call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='responsibleParty', &
                                      attrList=attrList, count=2, &
