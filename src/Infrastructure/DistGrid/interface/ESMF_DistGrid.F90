@@ -2237,7 +2237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI1D()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitray index list
+! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitrary index list
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2359,7 +2359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitray index list and minIndexPTile/maxIndexPTile
+! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitrary index list and minIndexPTile/maxIndexPTile
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
