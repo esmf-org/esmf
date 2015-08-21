@@ -426,7 +426,8 @@ module user_model1
           convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
-        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=rc)
+        call ESMF_AttributeRemove(field, name=name3, convention="CF", &
+                                  purpose="General", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
 
