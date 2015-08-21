@@ -539,8 +539,8 @@
 !
 !  This example introduces a helper method, the {\tt ESMF\_GridGetFieldBounds}
 !  interface that facilitates the computation of Fortran data array bounds
-!  and shape to assist {\tt ESMF\_FieldEmptyComplete} finalizing a Field from a
-!  instrinsic Fortran data array and a Grid.
+!  and shape to assist {\tt ESMF\_FieldEmptyComplete} finalizing a Field from an
+!  intrinsic Fortran data array and a Grid.
 !
 !EOE
 

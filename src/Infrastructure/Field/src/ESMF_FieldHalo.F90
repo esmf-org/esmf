@@ -215,7 +215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a Field halo operation.
+!   Release resources associated with a Field halo operation.
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -322,7 +322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
-!     elements potential halo destination elments.
+!     elements potential halo destination elements.
 !     See section \ref{const:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}

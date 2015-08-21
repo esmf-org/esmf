@@ -104,7 +104,7 @@ contains
 !   gathered from the numerically higher DEs. Replicated data elements in @\
 !   numericaly lower DEs will be ignored. @\
 ! @\
-!   The implementation of Scatter and Gather is not seqence index based. @\
+!   The implementation of Scatter and Gather is not sequence index based. @\
 !   If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, @\
 !   Gather will not gather data to rootPet @\
 !   from source data points corresponding to the sequence index on rootPet. @\
