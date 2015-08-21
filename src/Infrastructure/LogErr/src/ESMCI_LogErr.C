@@ -587,7 +587,7 @@ bool LogErr::MsgFoundError(
     )
 // !DESCRIPTION:
 // Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
-// to the log with a user supplied mesage.  This method uses cpp macros.
+// to the log with a user supplied message.  This method uses cpp macros.
 //EOP
 {
     bool result=false;
@@ -628,7 +628,7 @@ bool LogErr::MsgFoundError(
     )
 // !DESCRIPTION:
 // Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
-// to the log with a user supplied mesage.  This method uses cpp macros.
+// to the log with a user supplied message.  This method uses cpp macros.
 //EOP
 {
     bool result=false;
