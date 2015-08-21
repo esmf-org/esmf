@@ -76,7 +76,7 @@ program ESMF_GridCreateEx
       
 !BOE    
 ! Construct a single tile tripole domain. 
-! Specifiy that the first dimension is periodic: \\
+! Specify that the first dimension is periodic: \\
 !
 ! \begin{itemize}
 ! \item Setting tileIndexA=tileIndexB indicates that the connection 
@@ -99,7 +99,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE    
-! Specifiy the northern bipolar fold: \\
+! Specify the northern bipolar fold: \\
 !
 !  The position and orientation vectors indicate that each element 
 !  along the top edge of the tile is attached to the corresponding
@@ -116,7 +116,7 @@ program ESMF_GridCreateEx
 !EOC
 
 !BOE    
-! Specifiy the south pole: \\
+! Specify the south pole: \\
 !
 !  The position and orientation vectors indicate that each element along
 !   the bottom edge of the tile is attached to the element directly across the pole. 
