@@ -511,7 +511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
@@ -542,8 +542,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The indices for a sparse matrix which interpolates from {\tt srcField} to 
 !           {\tt dstField}. This argument is a 2D array containing pairs of source and destination
 !           sequence indices corresponding to the coefficients in the {\tt factorList} argument. 
-!           The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifes 
-!           the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifes 
+!           The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifies 
+!           the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifies 
 !           the sequence index of the destination element in the {\tt dstField}. The se cond dimension of 
 !           {\tt factorIndexList} steps through the list of pairs, i.e. {\tt size(factorIndexList,2)==size(factorList)}.
 !           The array coming out of this variable is in the appropriate format to be used
@@ -1383,7 +1383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Creates a sparse matrix operation (stored in {\tt routehandle}) that contains the calculations and 
 !       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. 
 !       The routehandle can then be used in the call
-!       {\tt ESMF\_FieldRegrid()} to interpolate between the {\tt ESMF\_Field}s. Informaton such as
+!       {\tt ESMF\_FieldRegrid()} to interpolate between the {\tt ESMF\_Field}s. Information such as
 !       index mapping and weights are obtained from the XGrid by matching the Field Grids or Meshes in the XGrid. 
 !       It's erroneous to have matching Grid or Mesh objects in the {\tt srcField} and {\tt dstField}. 
 !       They must be different in either topological or geometric characteristics. For {\tt ESMF\_Field}s 

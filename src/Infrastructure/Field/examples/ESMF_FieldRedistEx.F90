@@ -435,7 +435,7 @@
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 !BOE
-! We can now verify that the sequentially intialized source data is scattered
+! We can now verify that the sequentially initialized source data is scattered
 ! on to the destination Field. The data has been scattered onto the destination
 ! Field with the following distribution.
 !\begin{verbatim}

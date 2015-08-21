@@ -725,12 +725,12 @@ int getComputationalUBound(
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;
     
-    int rank; // rank of grid and number of valid entires in the below
+    int rank; // rank of grid and number of valid entries in the below
     int curInd[ESMF_MAXDIM];  // current position in index space
 
     int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
     int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
-    int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
+    int exLBndInd[ESMF_MAXDIM]; // start position on exclusive region on this DE
 
     int lBndOrig[ESMF_MAXDIM]; // start position for non-expanded this local DE
     int uBndOrig[ESMF_MAXDIM]; // end position for non-expanded on this local DE  
@@ -790,12 +790,12 @@ int getComputationalUBound(
     const ESMC_GridConn *connL;
     const ESMC_GridConn *connU;
     
-    int rank; // rank of grid and number of valid entires in the below
+    int rank; // rank of grid and number of valid entries in the below
     int curInd[ESMF_MAXDIM];  // current position in index space
 
     int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
     int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
-    int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
+    int exLBndInd[ESMF_MAXDIM]; // start position on exclusive region on this DE
 
     int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
 

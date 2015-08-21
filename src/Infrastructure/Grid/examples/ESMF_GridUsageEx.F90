@@ -1091,7 +1091,7 @@ endif
    ! based on the total number of PETS. The cells are evenly distributed in 
    ! all the PETs. If the total number of cells are not divisible by the 
    ! total PETs, the remaining cells are assigned to the last PET.  The 
-   ! cells are card dealed to each PET in y dimension first, 
+   ! cells are card dealt to each PET in y dimension first, 
    ! i.e. (1,1) -> PET 0, (1,2)->  PET 1, (1,3)-> PET 2, and so forth.  
    !-------------------------------------------------------------------
    xdim = 360
@@ -1262,7 +1262,7 @@ endif
 
 !BOE
 !  ESMF also support the creation of a 2D Grid from the SCRIP format Grid file using a user specified
-!  ESMF\_DistGrid.  The following example code demostrates the creation of an Grid object using a pre-defined
+!  ESMF\_DistGrid.  The following example code demonstrates the creation of an Grid object using a pre-defined
 !  DistGrid.  The resulting Grid is the same as the one created above:
 !EOE
 
@@ -1406,7 +1406,7 @@ endif
 !BOE
 !\subsubsection{Associate coordinates with stagger locations}
 !
-! The primary type of data the Grid is resposible for storing is coordinates. 
+! The primary type of data the Grid is responsible for storing is coordinates. 
 ! The coordinate values in a Grid can be employed by the user in calculations or
 ! to describe the geometry of a Field. The Grid coordinate values are also used by 
 ! {\tt ESMF\_FieldRegridStore()} when calculating the interpolation
@@ -2017,12 +2017,12 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! "as is" to access the data. 
 !
 ! Each of the three types of bounds refers to the maximum and minimum
-! per dimension of the index ranges of a particular region. The paramters
+! per dimension of the index ranges of a particular region. The parameters
 ! referring to the maximums contain a 'U' for upper. The parameters referring 
 ! to the minimums contain an 'L' for lower. The bounds and associated
 ! quantities are almost always given on a per DE basis. The three types of
 ! bounds {\tt exclusiveBounds}, {\tt computationalBounds}, and {\tt totalBounds} refer
-! to the ranges of the exlusive region, the computational region, and the
+! to the ranges of the exclusive region, the computational region, and the
 ! total region. Each of these bounds also has a corresponding count parameter
 ! which gives the number of items across that region (on a DE) in each dimension.
 ! (e.g. {\tt totalCount(d)=totallUBound(i)-totalLBound(i)+1}). Width parameters
@@ -2738,7 +2738,7 @@ endif
 ! up (factored) into arrays. Obviously, if all coordinate components (e.g. x,y,z) vary over
 ! the entire Grid, then the coordinate arrays need to be the same dimension as the Grid.
 ! However, if a coordinate component stays the same over all values of an index, such 
-! as rectilinear Grid, then the coordinate array can be broken into seperate arrays saving
+! as rectilinear Grid, then the coordinate array can be broken into separate arrays saving
 ! memory and more closely matching the structure of the coordinate data. 
 !
 ! The Grid accepts coordinates as an array of ESMF Arrays. 

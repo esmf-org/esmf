@@ -1252,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 ! \item[{[staggerLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
 !      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
@@ -1419,7 +1419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -1578,7 +1578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 ! \item[{[staggerLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
 !      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
@@ -15627,7 +15627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[array]
-!          An array into which to put the coordinate infomation. 
+!          An array into which to put the coordinate information. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -18656,7 +18656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[array]
-!          An array into which to put the item infomation. 
+!          An array into which to put the item information. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

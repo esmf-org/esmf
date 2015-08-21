@@ -2094,7 +2094,7 @@ int PIO_IODescHandler::getDims(
 //
 // !ARGUMENTS:
 //
-  const pio_io_desc_t &iodesc,    // (in)  - The IO desciptor
+  const pio_io_desc_t &iodesc,    // (in)  - The IO descriptor
   int * nioDims,                  // (out) - The number of IO dimensions
   int ** ioDims,                  // (out) - Array of dimensions (shape) for IO
   int * narrDims,                 // (out) - The array's rank
@@ -2156,7 +2156,7 @@ int PIO_IODescHandler::getIOType(
 //
 // !ARGUMENTS:
 //
-  const pio_io_desc_t &iodesc,            // (in)  - The IO desciptor
+  const pio_io_desc_t &iodesc,            // (in)  - The IO descriptor
   int *rc                                 // (out) - Error return code
   ) {
 //
@@ -2208,7 +2208,7 @@ pio_io_desc_t PIO_IODescHandler::getIODesc(
 // !ARGUMENTS:
 //
   pio_iosystem_desc_t iosys,              // (in)  - The PIO IO system
-  Array *arrayArg,                        // (in)  - The IO desciptor
+  Array *arrayArg,                        // (in)  - The IO descriptor
   int *rc                                 // (out) - Error return code
   ) {
 //

@@ -217,7 +217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a Field redistribution. After this call
+!   Release resources associated with a Field redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
