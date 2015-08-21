@@ -88,7 +88,7 @@ program ESMF_ArrayArbHaloEx
   enddo
 !EOC
 !BOE
-! This results in the following cylic distribution scheme:
+! This results in the following cyclic distribution scheme:
 ! \begin{verbatim}
 ! DE 0 on PET 0: seqIndexList = (/1, 5, 9, 13, 17/)
 ! DE 1 on PET 1: seqIndexList = (/2, 6, 10, 14, 18/)
