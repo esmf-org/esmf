@@ -189,7 +189,7 @@ class Attribute
     int get(int *lens, int count) const;
     int getCount(ESMC_AttGetCountFlag *flag, int *count) const;
     int getCount(ESMC_AttGetCountFlag *gcflag,
-    		     ESMC_AttNest_Flag *anflag, int *count) const;
+    		     ESMC_AttNest_Flag anflag, int *count) const;
 
     // query whether an Attribute is "present" or "set"
     bool isSet() const;
@@ -272,10 +272,10 @@ class Attribute
     		                       ESMC_AttNest_Flag anflag) const;
     int AttPackIsPresent(const std::string &name, 
                          const ESMCI::Attribute *attpack,
-                         ESMC_Logical *present) const;
+						 ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
     int AttPackIsPresent(const int &num,
                          const ESMCI::Attribute *attpack,
-                         ESMC_Logical *present) const;
+						 ESMC_AttNest_Flag anflag, ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
                       const std::string &object, 
                       const bool &inObjectTree,
@@ -457,19 +457,25 @@ extern "C" {
                                   ESMCI_FortranStrLenArg napinlen);
   void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
-                                  ESMC_Logical *present, int *rc, 
+								  //ESMC_AttNest_Flag *anflag,
+								  ESMC_Logical *present, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
+  void FTN_X(c_esmc_attpackispresentindex)(ESMC_Base **base, int *num,
+                                  ESMCI::Attribute **attpack,
+								  //ESMC_AttNest_Flag *anflag,
+								  ESMC_Logical *present, int *rc);
   void FTN_X(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk, int *count,
                                   char *valueList, int *lens,
                                   ESMCI::Attribute **attpack,
-                                  int *rc,
+								  ESMC_AttNest_Flag *anflag, int *rc,
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk, int *count,
-                                  void *value, ESMCI::Attribute **attpack,                                  int *rc,
-                                  ESMCI_FortranStrLenArg nlen);
+                                  void *value, ESMCI::Attribute **attpack,
+								  ESMC_AttNest_Flag *anflag, int *rc,
+								  ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributeread)(ESMC_Base **base, int *fileNameLen,
                                   const char *fileName, int *schemaFileNameLen,
                                   const char *schemaFileName, int *status,
@@ -529,7 +535,7 @@ extern "C" {
   void FTN_X(c_esmc_attributelinkremove)(ESMC_Base **source,
                                   ESMC_Base **destination, ESMC_Logical *linkChange,
                                   int *rc);
-  void FTN_X(c_esmc_attributeremove)(ESMC_Base **base, char *name, int *rc,                   // in - return code     
+  void FTN_X(c_esmc_attributeremove)(ESMC_Base **base, char *name, int *rc,
 	                                ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind_Flag *tk,

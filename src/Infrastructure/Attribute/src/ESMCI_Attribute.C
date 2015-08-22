@@ -1464,6 +1464,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // !ARGUMENTS:
       const string &name,                // in - Attribute name
       const Attribute *attpack,          // in - Attribute package
+      ESMC_AttNest_Flag anflag,          // in - attgetcount flag
       ESMC_Logical *present) const {     // in/out - the present flag
 // 
 // !DESCRIPTION:
@@ -1483,7 +1484,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   }
 
   // get the attr on the attpack
-  attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_ON);
+  attr = attpack->AttPackGetAttribute(name, anflag);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
 
@@ -1507,6 +1508,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // !ARGUMENTS:
       const int &num,                    // in - Attribute name
       const Attribute *attpack,          // in - Attribute package
+      ESMC_AttNest_Flag anflag,          // in - attgetcount flag
       ESMC_Logical *present) const {     // in/out - the present flag
 //
 // !DESCRIPTION:
@@ -1526,7 +1528,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   }
 
   // get the attr on the attpack
-  attr = attpack->AttPackGetAttribute(num, ESMC_ATTNEST_ON);
+  attr = attpack->AttPackGetAttribute(num, anflag);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
@@ -2910,7 +2912,7 @@ if (attrRoot == ESMF_TRUE) {
 //
 // !ARGUMENTS:
       ESMC_AttGetCountFlag *gcflag,  // in - attgetcount flag
-      ESMC_AttNest_Flag *anflag,     // in - attgetcount flag
+      ESMC_AttNest_Flag anflag,      // in - attgetcount flag
 	  int *count                     // out - the count to return
 	  ) const {
 //
@@ -2928,7 +2930,7 @@ if (attrRoot == ESMF_TRUE) {
 
   *count += lcount;
 
-  if (*anflag == ESMC_ATTNEST_ON)
+  if (anflag == ESMC_ATTNEST_ON)
 	  for (int i=0; i<this->packList.size(); ++i)
 		  this->packList.at(i)->getCount(gcflag, anflag, count);
 

@@ -227,20 +227,28 @@ module AttributeUpdateContainerStressUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -267,56 +275,65 @@ module AttributeUpdateContainerStressUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field2", rc=status)
     call ESMF_AttributeAdd(field2, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field2, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field3 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field3", rc=status)
     call ESMF_AttributeAdd(field3, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field3, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field3, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field4 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field4", rc=status)
     call ESMF_AttributeAdd(field4, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field4, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field4, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field5 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field5", rc=status)
     call ESMF_AttributeAdd(field5, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field5, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field5, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field6 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field6", rc=status)
     call ESMF_AttributeAdd(field6, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field6, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field6, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field7 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field7", rc=status)
     call ESMF_AttributeAdd(field7, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field7, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field7, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field8 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field8", rc=status)
     call ESMF_AttributeAdd(field8, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field8, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field8, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field9 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field9", rc=status)
     call ESMF_AttributeAdd(field9, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field9, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field9, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     field10 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field10", rc=status)
     call ESMF_AttributeAdd(field10, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field10, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field10, name1, value1, &
+      convention=convESMF, purpose=purpGen, &
+      attnestflag=ESMF_ATTNEST_ON, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
     fieldbundle2 = ESMF_FieldBundleCreate(name="fieldbundle2", rc=status)
@@ -496,18 +513,21 @@ then for each of the fields we will make different run time modifications:
     call ESMF_AttributeGetAttPack(field2, convESMF, purpGen, attpack=attpack, rc=rc)
     call ESMF_AttributeAdd(field2, convESMF, purpGen, attrList=(/"att1"/), &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field2, "att1", "val1", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field2, "att1", "val1", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! field3: add an attribute to a package and set it, then delete it, readd it and set it to a different value
     call ESMF_AttributeGetAttPack(field3, convESMF, purpGen, attpack=attpack, rc=rc)
     call ESMF_AttributeAdd(field3, convESMF, purpGen, attrList=(/"att1"/), &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field3, "att1", "val1", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field3, "att1", "val1", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     call ESMF_AttributeRemove(field3, name="att1", attpack=attpack, rc=rc)
     call ESMF_AttributeAdd(field3, convESMF, purpGen, attrList=(/"att1"/), &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field3, "att1", "val2", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field3, "att1", "val2", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! field6: add a nested attribute package and set a value
@@ -515,7 +535,8 @@ then for each of the fields we will make different run time modifications:
                            attrList=(/"att1","att2"/), &
                            nestConvention=convESMF, nestPurpose=purpGen, &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field6, "att1", "val1", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field6, "att1", "val1", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! field7: add a nested attribute package (around old package), set a value, 
@@ -525,12 +546,14 @@ then for each of the fields we will make different run time modifications:
                            attrList=(/"att1","att2"/), &
                            nestConvention=convESMF, nestPurpose=purpGen, &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field7, "att1", "val1", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field7, "att1", "val1", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     call ESMF_AttributeRemove(field7, attpack=attpack, rc=rc)
     call ESMF_AttributeAdd(field7, "newConvention", "newPurpose", &
                            attrList=(/"att1","att2"/), &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field7, "att1", "val2", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field7, "att1", "val2", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! field8: add a nested package, then remove all attributes from parent package and the nested package,
@@ -541,8 +564,10 @@ then for each of the fields we will make different run time modifications:
                            attrList=(/"att1","att2"/), &
                            nestConvention=convESMF, nestPurpose=purpGen, &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field8, "att1", "val1", attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field8, "att2", "val2", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field8, "att1", "val1", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    call ESMF_AttributeSet(field8, "att2", "val2", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     call ESMF_AttributeRemove(field8, name="ShortName", &
                               attpack=attpack_parent, rc=rc)
     call ESMF_AttributeRemove(field8, name="StandardName", &
@@ -559,7 +584,8 @@ then for each of the fields we will make different run time modifications:
                            attrList=(/"att1","att2"/), &
                            nestConvention=convESMF, nestPurpose=purpGen, &
                            attpack=attpack, rc=rc)
-    call ESMF_AttributeSet(field8, "att1", "val1.2", attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(field8, "att1", "val1.2", attpack=attpack, &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! field9: open for a new test
