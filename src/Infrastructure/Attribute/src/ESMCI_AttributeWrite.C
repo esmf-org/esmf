@@ -559,7 +559,8 @@ namespace ESMCI {
     // get value of attribute 0 or set to N/A if not present
     string attPackInstanceName;
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("ComponentShortName", attpack, &presentflag);
+    localrc = AttPackIsPresent("ComponentShortName", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
@@ -587,7 +588,8 @@ namespace ESMCI {
   
     // get value of attribute 1 or set to N/A if not present
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("ComponentLongName", attpack, &presentflag);
+    localrc = AttPackIsPresent("ComponentLongName", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
@@ -615,7 +617,8 @@ namespace ESMCI {
   
     // get value of attribute 2 or set to N/A if not present
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("Version", attpack, &presentflag);
+    localrc = AttPackIsPresent("Version", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);

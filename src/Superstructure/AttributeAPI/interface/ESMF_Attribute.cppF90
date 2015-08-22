@@ -4859,7 +4859,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       count = 1 @\
  @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
-                     lisPresent, localrc) @\
+                                   lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
       if (lisPresent == ESMF_TRUE) then @\
@@ -5014,7 +5014,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
-          lisPresent, localrc) @\
+                                     lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
@@ -9764,7 +9764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetAP##mtypekind(mthis, name, value, attpack, & @\
-        keywordEnforcer, rc) @\
+        keywordEnforcer, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -9772,6 +9772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -9789,6 +9790,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The integer value of the Attribute to add. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9799,6 +9803,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc  @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9809,6 +9814,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -9827,7 +9838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, count, value, & @\
-        attpack, localrc) @\
+        attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -9846,7 +9857,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet##mtypekind(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+        purpose, attPackInstanceName, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -9855,6 +9866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -9879,6 +9891,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  (Not implemented yet) @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9891,6 +9906,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9901,6 +9917,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       count = 1 @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -9937,7 +9959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, & @\
-          attpackobj, localrc) @\
+          attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
@@ -9959,7 +9981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet1DAP##mtypekind(mthis, name, & @\
-        valueList, attpack, keywordEnforcer, itemCount, rc) @\
+        valueList, attpack, keywordEnforcer, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -9968,6 +9990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -9989,6 +10012,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9998,6 +10024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
       integer :: localrc, litemCount @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10006,6 +10033,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10043,7 +10076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-        attpack, localrc) @\
+        attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -10060,7 +10093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet1D##mtypekind(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10070,6 +10103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount    @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -10098,6 +10132,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10109,6 +10146,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10117,6 +10155,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10172,7 +10216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          attpackobj, localrc) @\
+          attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
@@ -10196,7 +10240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclAP(mthis, name, value, attpack, & @\
-        keywordEnforcer, rc) @\
+        keywordEnforcer, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10204,6 +10248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical, intent(in) :: value @\
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -10221,6 +10266,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The logical true/false value of the Attribute to add. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10232,6 +10280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: localvalue @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10240,6 +10289,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10261,7 +10316,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localvalue = value @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-        attpack, localrc) @\
+        attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -10279,7 +10334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgcl(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+        purpose, attPackInstanceName, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10288,6 +10343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -10312,6 +10368,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  (Not implemented yet) @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10325,6 +10384,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10333,6 +10393,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
        !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10372,7 +10438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-          attpackobj, localrc) @\
+          attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
@@ -10394,7 +10460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclListAP(mthis, name, valueList, attpack, & @\
-        keywordEnforcer, itemCount, rc) @\
+        keywordEnforcer, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10403,6 +10469,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -10424,6 +10491,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10433,6 +10503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc, litemCount @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10441,6 +10512,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10478,7 +10555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-        attpack, localrc) @\
+        attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -10495,7 +10572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10505,6 +10582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount    @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -10533,6 +10611,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10544,6 +10625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10552,6 +10634,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10607,7 +10695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-          attpackobj, localrc) @\
+          attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
@@ -10631,7 +10719,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharAP(mthis, name, value, attpack, & @\
-        keywordEnforcer, rc) @\
+        keywordEnforcer, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10639,6 +10727,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in) :: value @\
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -10656,6 +10745,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character value of the Attribute to add. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10667,6 +10759,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(1) :: lens @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10675,6 +10768,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10695,7 +10794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       count = 1 @\
  @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        count, value, lens, attpack, localrc) @\
+        count, value, lens, attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -10713,7 +10812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetChar(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+        purpose, attPackInstanceName, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -10722,6 +10821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -10746,6 +10846,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10759,6 +10862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10767,6 +10871,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10805,7 +10915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          count, value, lens, attpackobj, localrc) @\
+          count, value, lens, attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           count, value, lens, localrc) @\
@@ -10827,7 +10937,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharListAP(mthis, name, valueList, attpack, & @\
-        keywordEnforcer, itemCount, rc) @\
+        keywordEnforcer, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -10836,6 +10946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -10853,6 +10964,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character value of the Attribute to add. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10864,6 +10978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10872,6 +10987,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -10915,7 +11036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo @\
  @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, attpack, localrc) @\
+        litemCount, valueString, lens, attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -10932,7 +11053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -10942,6 +11063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -10966,6 +11088,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance. (Not implemented yet) @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -10979,6 +11104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -10987,6 +11113,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -11048,7 +11180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, attpackobj, localrc) @\
+          litemCount, valueString, lens, attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -11072,7 +11204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharAP(mthis, name, value, attpack, & @\
-        keywordEnforcer, inputList, rc) @\
+        keywordEnforcer, inputList, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -11081,6 +11213,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: inputList(:) @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -11100,6 +11233,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to set internal info. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11113,6 +11249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=ESMF_MAXSTR) :: modName @\
       character, allocatable :: valueString(:) @\
       integer :: lens_size, valuestring_size, tag_size @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -11122,6 +11259,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -11196,7 +11339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, attpack, localrc) @\
+        litemCount, valueString, lens, attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT,  rcToReturn=rc)) return @\
  @\
@@ -11221,7 +11364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetChar(mthis, name, value, inputList, & @\
-        convention, purpose, attPackInstanceName, rc) @\
+        convention, purpose, attPackInstanceName, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -11231,6 +11374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -11257,6 +11401,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11272,6 +11419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character, allocatable :: valueString(:) @\
       integer :: lens_size, valuestring_size, tag_size @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -11281,6 +11429,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -11375,7 +11529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, attpackobj, localrc) @\
+          litemCount, valueString, lens, attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -11402,7 +11556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharListAP(mthis, name, valueList, attpack, & @\
-        keywordEnforcer, itemCount, rc) @\
+        keywordEnforcer, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -11411,6 +11565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -11428,6 +11583,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character value of the Attribute to add. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11439,6 +11597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -11447,6 +11606,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -11490,7 +11655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo @\
  @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-        litemCount, valueString, lens, attpack, localrc) @\
+        litemCount, valueString, lens, attpack, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -11507,7 +11672,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -11517,6 +11682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -11541,6 +11707,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance. (Not implemented yet) @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when setting this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -11554,6 +11723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
       type(ESMF_AttPack) :: attpackobj @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -11562,6 +11732,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_OFF @\
+      endif @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -11623,7 +11799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, attpackobj, localrc) @\
+          litemCount, valueString, lens, attpackobj, lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
