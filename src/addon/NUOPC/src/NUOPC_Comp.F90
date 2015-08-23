@@ -296,34 +296,30 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-#define WORKING_not
-
     ! query attrCount
-#ifdef WORKING
     call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
-      count=attrCount, rc=rc)
-#else
-    call ESMF_AttributeGet(comp, count=attrCount, rc=rc)
-#endif
+      count=attrCount, attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+#if 1    
 print *, "attrCount=", attrCount
-    
+#endif
+
     allocate(stringList(attrCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="stringList.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     do i=1, attrCount
-#ifdef WORKING
       call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
-        attributeIndex=i, name=stringList(i), rc=rc)
-#else
-      call ESMF_AttributeGet(comp, attributeIndex=i, name=stringList(i), rc=rc)
-#endif
+        attributeIndex=i, name=stringList(i), attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 1    
+print *, "stringList(",i,")=", stringList(i)
+#endif
     enddo
     
     freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
@@ -395,7 +391,7 @@ print *, "attrCount=", attrCount
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
       defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -447,7 +443,7 @@ print *, "attrCount=", attrCount
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
       defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -495,7 +491,7 @@ print *, "attrCount=", attrCount
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
       convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -528,7 +524,7 @@ print *, "attrCount=", attrCount
 
     call ESMF_AttributeGet(comp, name=name, value=value, &
       convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -562,14 +558,16 @@ print *, "attrCount=", attrCount
 
     if (present(valueList)) then
       call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
       call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -604,14 +602,16 @@ print *, "attrCount=", attrCount
 
     if (present(valueList)) then
       call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
       call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", rc=rc)
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -643,7 +643,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -675,7 +675,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1082,7 +1082,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1115,7 +1115,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1148,7 +1148,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1181,7 +1181,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1215,7 +1215,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, valueList=valueList, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1248,7 +1248,7 @@ print *, "attrCount=", attrCount
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(comp, name=name, valueList=valueList, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1434,8 +1434,8 @@ print *, "attrCount=", attrCount
     
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
@@ -1445,7 +1445,8 @@ print *, "attrCount=", attrCount
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1531,8 +1532,8 @@ print *, "attrCount=", attrCount
     
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
@@ -1542,7 +1543,8 @@ print *, "attrCount=", attrCount
       file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -1632,8 +1634,8 @@ print *, "attrCount=", attrCount
     
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1645,7 +1647,8 @@ print *, "attrCount=", attrCount
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
@@ -1726,8 +1729,8 @@ print *, "attrCount=", attrCount
     
     ! access phaseMap info
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1739,7 +1742,8 @@ print *, "attrCount=", attrCount
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (present(phaseLabel)) then
@@ -1886,8 +1890,8 @@ print *, "attrCount=", attrCount
     
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -1896,8 +1900,8 @@ print *, "attrCount=", attrCount
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        valueList=phases, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2013,8 +2017,8 @@ print *, "attrCount=", attrCount
     
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -2023,8 +2027,8 @@ print *, "attrCount=", attrCount
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        valueList=phases, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2141,8 +2145,8 @@ print *, "attrCount=", attrCount
     
     ! query the already existing phaseMap enties
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
-      itemCount=itemCount, &
-      convention="NUOPC", purpose="Instance", rc=rc)
+      itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(phases(itemCount+phaseLabelCount), stat=stat) ! space to add more
@@ -2151,8 +2155,8 @@ print *, "attrCount=", attrCount
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (itemCount > 0) then
       call ESMF_AttributeGet(comp, name=trim(attributeName), &
-        valueList=phases, &
-        convention="NUOPC", purpose="Instance", rc=rc)
+        valueList=phases, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
