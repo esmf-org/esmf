@@ -2208,7 +2208,7 @@ print *, "stringList(",i,")=", stringList(i)
 !   Try to find a routine called "{\tt SetServices}" in the {\tt sharedObj} file
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetServices}", allowing for compiler name
-!   mangeling, i.e. upper and lower case, as well as trailing underscores.
+!   mangling, i.e. upper and lower case, as well as trailing underscores.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2217,7 +2217,7 @@ print *, "stringList(",i,")=", stringList(i)
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! attempt to find something called SetServices, allowing variations
-    ! caused by compiler name mangeling
+    ! caused by compiler name mangling
     
     call ESMF_GridCompSetServices(comp, userRoutine="setservices", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
