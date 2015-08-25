@@ -30,6 +30,7 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF 
+      use ESMF_StateAPImod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -40,6 +41,7 @@
 
 !     ! Local variables
       integer :: rc, localrc
+      logical :: isCreated
       type(ESMF_VM) :: vm
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
@@ -125,6 +127,22 @@
 
       !------------------------------------------------------------------------
       
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_StateIsCreated(state1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_StateIsCreated(state1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
       !NEX_UTest      
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
@@ -133,6 +151,24 @@
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_StateIsCreated(state1)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_StateIsCreated(state1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Destruction of State
@@ -141,6 +177,25 @@
       write(name, *) "Destruction of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_StateIsCreated(state1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing State IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_StateIsCreated(state1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
+
       !------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
