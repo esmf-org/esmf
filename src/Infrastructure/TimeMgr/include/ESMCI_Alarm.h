@@ -61,7 +61,7 @@
 // to be set upon crossing the ring time in the positive or negative direction.
 // This is to handle both positive and negative clock timesteps.  After the
 // ringer is set for interval alarms, the check method will recalculate the
-// next ring time.  This can be in the positve or negative direction, again
+// next ring time.  This can be in the positive or negative direction, again
 // depending on the parameter passed in by the clock.
 //
 // Other methods are defined for getting the ringing state, turning the
@@ -126,7 +126,7 @@ class Alarm {
                                               //   number of time steps.
 
     bool              ringing;    // (TMG 4.4) currently ringing
-    bool              ringingOnCurrTimeStep; // was ringing immedidately after
+    bool              ringingOnCurrTimeStep; // was ringing immediately after
                                              // current clock timestep.
                                              // (could have been turned off
                                              //  later due to RingerOff or

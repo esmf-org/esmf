@@ -5,11 +5,11 @@
 
 The interaction between NUOPC compliant components during the initialization process is regulated by the {\bf Initialize Phase Definition} or {\bf IPD}. The IPDs are versioned, with a higher version number indicating backward compatibility with all previous versions.
 
-There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documenation.
+There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documentation.
 
-The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. Child components publish their available initialze phases through the {\tt InitialzePhaseMap} attribute.
+The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. Child components publish their available initialize phases through the {\tt InitializePhaseMap} attribute.
 
-The driver also calls into its own internal initialize methods. This allows the driver to participate in the initialization of its children in a structured fashion. The internal initialization phases of a driver are published via the {\tt InternalInitialzePhaseMap} attribute.
+The driver also calls into its own internal initialize methods. This allows the driver to participate in the initialization of its children in a structured fashion. The internal initialization phases of a driver are published via the {\tt InternalInitializePhaseMap} attribute.
 
 The following tables document the meaning of each initialization phase of the available IPD versions for the child components and for the driver component itself. The phases are listed in the same sequence in which the driver calls them.
 \newline
@@ -124,7 +124,7 @@ The following tables document the meaning of each initialization phase of the av
      \hline\hline
      {\tt IPDv04p1}   & driver-self                 & {\em unspecified by NUOPC}\\ \hline
      {\tt IPDv04p1}   & models, mediators, drivers  & Advertise their import and export Fields and set the {\tt TransferOfferGeomObject} Attribute.\\ \hline
-     {\tt IPDv04p1a}  & connectors                  & Consider all connection possibilites for their {\tt CplList} Attribute.\\ \hline
+     {\tt IPDv04p1a}  & connectors                  & Consider all connection possibilities for their {\tt CplList} Attribute.\\ \hline
      {\tt IPDv04p1b}  & connectors                  & Unambiguous construction of their {\tt CplList} Attribute.\\ \hline
      {\tt IPDv04p2}   & driver-self                 & Modify the {\tt CplList} Attributes on the Connectors.\\ \hline
      {\tt IPDv04p2}   & models, mediators, drivers  & {\em unspecified/unused by NUOPC}\\ \hline

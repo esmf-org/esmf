@@ -58,7 +58,7 @@
 //
 //   Notes:
 //       - For arithmetic consistency both whole seconds and the numerator of
-//         fractional seconds must carry the same sign (both positve or both 
+//         fractional seconds must carry the same sign (both positive or both 
 //         negative), except, of course, for zero values.
 //
 //-------------------------------------------------------------------------

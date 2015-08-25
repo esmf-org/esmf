@@ -87,7 +87,7 @@ program ESMF_ArrayCommNBEx
 ! \subsubsection{Non-blocking Communications}
 ! \label{Array:CommNB}
 ! 
-! All {\tt ESMF\_RouteHandle} based communcation methods, like 
+! All {\tt ESMF\_RouteHandle} based communication methods, like 
 ! {\tt ESMF\_ArrayRedist()}, {\tt ESMF\_ArrayHalo()} and {\tt ESMF\_ArraySMM()}, 
 ! can be executed in blocking or non-blocking mode. The non-blocking feature is
 ! useful, for example, to overlap computation with communication, or to

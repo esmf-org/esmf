@@ -232,7 +232,7 @@ ESMC_Mesh ESMC_MeshCreate(
 //    of 2, whereas a Mesh constructed of cubes would have one of 3.)
 //  \item[spatialDim]
 //  The number of coordinate dimensions needed to describe the locations of the nodes making up the Mesh. For a 
-//  manifold, the spatial dimesion can be larger than the parametric dim (e.g. the 2D 
+//  manifold, the spatial dimension can be larger than the parametric dim (e.g. the 2D 
 //  surface of a sphere in 3D space), 
 //   but it can't be smaller. 
 //  \item[rc]

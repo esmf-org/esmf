@@ -103,7 +103,7 @@ contains
 !   If the Field contains replicating DistGrid dimensions data will be @\
 !   scattered across all of the replicated pieces. @\
 ! @\
-!   The implementation of Scatter and Gather is not seqence index based. @\
+!   The implementation of Scatter and Gather is not sequence index based. @\
 !   If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, @\
 !   Scatter will not scatter data from rootPet @\
 !   to the destination data points corresponding to the sequence index on the rootPet. @\

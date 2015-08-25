@@ -178,7 +178,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     A flag to indicate which type of artificial pole
 !     to construct on the source Grid for regridding. Please see 
 !     Section~\ref{const:polemethod} for a list of valid options.
-!     The default value varies depending on the regridding method and the grid type and foramt.  
+!     The default value varies depending on the regridding method and the grid type and format.  
 !   \item [{[regridPoleNPnts]}]
 !     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points should be averaged over at the pole.
@@ -194,7 +194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     the conservative regridding.  If set to false, a degenerate cell produces an error.
 !     The default is .FALSE.  
 !   \item [{[srcFileType]}]
 !     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
@@ -754,7 +754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
 	endif
       else 
-	print *, "  Source File is in GRIDSPEC foramt"
+	print *, "  Source File is in GRIDSPEC format"
 	if (useSrcCoordVar) then
 	   print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
 	               "' as the coordinate variables"
@@ -1732,10 +1732,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! This subroutine does online regridding weight generation from files with user specified distribution.  
 ! The main differences between this API with the one in \ref{api:esmf_regridweightgenfile} are as follows:
 ! \begin{itemize}
-! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
-! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
+! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructured.
+! \item The input grids will be decomposed using user-specified distribution instead of a fixed decomposition in the 
 ! other subroutine if {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are specified.
-! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
+! \item The source and destination grid files have to be in the SCRIP grid file format. 
 ! \item This subroutine has one additional required argument {\tt regridRouteHandle} and four additional optional
 ! arguments: {\tt srcElementDistgrid}, {\tt dstElementDistgrid}, {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid}.
 ! These four arguments are of type {\tt ESMF\_DistGrid}, they are used to define the distribution of the source
@@ -1757,14 +1757,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     A optional distGrid that specifies the distribution of the source grid's elements. If not 
 !     specified, a system-defined block decomposition is used.
 !   \item [dstElementDistgrid]
-!     A optional distGrid taht specifies the distribution of the destination grid's elements. If
+!     A optional distGrid that specifies the distribution of the destination grid's elements. If
 !     not specified, a system-defined block decomposition is used.
 !   \item [weightFile]
 !     The interpolation weight file name. If present, an output weight file will be generated.
 !   \item [srcNodalDistgrid]
 !     An optinonal distGrid that specifies the distribution of the source grid's nodes
 !   \item [dstNodalDistgrid]
-!     An optional distGrid taht specifies the distribution of the destination grid's nodes
+!     An optional distGrid that specifies the distribution of the destination grid's nodes
 !   \item [{[regridmethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} 
 !     for a list of valid options. If not specified, defaults to 
@@ -1780,8 +1780,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
-!     Ignore degenrate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
+!     the conservative regridding.  If set to false, a degenerate cell produces an error.
 !     The default is .FALSE.  
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.

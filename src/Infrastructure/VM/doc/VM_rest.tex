@@ -4,7 +4,7 @@
 
 \begin{enumerate}
 
-\item {\bf Only array section syntax that leads to contiguous sub sections is supported}. The source and destination arguments in VM communication calls must reference contiguos data arrays. Fortran array sections are not guaranteed to be contiguous in all cases.
+\item {\bf Only array section syntax that leads to contiguous sub sections is supported}. The source and destination arguments in VM communication calls must reference contiguous data arrays. Fortran array sections are not guaranteed to be contiguous in all cases.
 
 \item {\bf Non-blocking {\tt Reduce()} operations {\em not} implemented.} None of the reduce communication calls have an implementation for the non-blocking feature. This affects:
 \begin{itemize}

@@ -48,7 +48,7 @@ There are three mechanisms through which user code specializes generic component
 
 \item Some generic components require that specific methods are attached to the component by calling {\tt NUOPC\_CompSpecialize()}. If a generic component uses specialization through attachable methods, the specific method labels (i.e. the names by which these methods are registered) and the purpose of the method are clearly documented. In some cases attachable methods are optional. This is clearly documented. Further, some generic components attach a default method to a label, which then is used for all phases. This default can be overwritten with a phase specific attachable method. Attaching methods to the component should be done in the {\tt SetServices} routine right after setting entry points for the standard component methods.
 
-\item Some generic components offer methods that allow parameter specialization. The options of this specialization type are documentated as part of the {\tt Set()} methods.
+\item Some generic components offer methods that allow parameter specialization. The options of this specialization type are documented as part of the {\tt Set()} methods.
 
 \end{enumerate}
 

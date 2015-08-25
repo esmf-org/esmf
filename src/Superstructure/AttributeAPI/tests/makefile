@@ -20,6 +20,7 @@ AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 .NOTPARALLEL:
+
 TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttPackCplCompUTest \

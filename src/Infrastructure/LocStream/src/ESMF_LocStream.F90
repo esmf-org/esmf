@@ -2298,7 +2298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [locstream]
 ! The {\tt ESMF\_LocStream} object to query.
 ! \item [{[distgrid]}]
-! The {\tt ESMF\_DistGrid} object that descibes 
+! The {\tt ESMF\_DistGrid} object that describes 
 ! \item [{[keyCount]}]
 ! Number of keys in the {\tt locstream}.
 ! \item [{[keyNames]}]

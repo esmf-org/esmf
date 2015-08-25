@@ -377,7 +377,7 @@ int  ESMCI_WebServComponentSvr::requestLoop(
 // !DESCRIPTION:
 //    Sets up a socket service for a grid component server to handle client
 //    requests.  The input parameters are all saved for later use when the
-//    client makes requests of the server to initalize, run, and finalize.
+//    client makes requests of the server to initialize, run, and finalize.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -468,7 +468,7 @@ int  ESMCI_WebServComponentSvr::cplCompRequestLoop(
 // !DESCRIPTION:
 //    Sets up a socket service for a grid component server to handle client
 //    requests.  The input parameters are all saved for later use when the
-//    client makes requests of the server to initalize, run, and finalize.
+//    client makes requests of the server to initialize, run, and finalize.
 //
 //EOPI
 //-----------------------------------------------------------------------------

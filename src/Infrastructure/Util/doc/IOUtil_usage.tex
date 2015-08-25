@@ -43,7 +43,7 @@ or higher to avoid these preconnected units.
 Fortran run-time libraries generally use buffering techniques to improve I/O
 performance.  However output buffering can be problematic when output is needed,
 but is ``trapped'' in the buffer because it is not full.
-This is a common occurance when debugging a program, and inserting {\tt WRITE} statements
+This is a common occurrance when debugging a program, and inserting {\tt WRITE} statements
 to track down the bad area of code.  If the program crashes before the output
 buffer has been flushed, the desired debugging output may never be seen --- giving
 a misleading indication of where the problem occurred.  It would be desirable

@@ -11,7 +11,7 @@
 
 
 # Or, the data can be a list of single value pairs. 
-# It is simplier to retrieve data in this format:
+# It is simpler to retrieve data in this format:
 
  radius_of_the_earth:   6.37E6         
  parameter_1:           89

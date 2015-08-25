@@ -152,7 +152,7 @@ module user_model1
     
     call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &
-      attpack=attpack, rc=rc)
+      attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, localPet, "User Comp1 Init returning"

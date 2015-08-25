@@ -110,7 +110,7 @@
 ! example.
 !
 ! Section \ref{Array:SparseMatMul} provides a detailed discussion of the 
-! sparse matrix mulitiplication operation implemented in ESMF.
+! sparse matrix multiplication operation implemented in ESMF.
 ! 
 !EOE
 !BOC 

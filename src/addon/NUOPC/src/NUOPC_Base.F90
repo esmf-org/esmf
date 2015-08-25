@@ -558,7 +558,7 @@ module NUOPC_Base
     ! set StandardName
     call ESMF_AttributeSet(field, &
       name="StandardName", value=trim(StandardName), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -584,7 +584,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="Units", value=trim(tempString), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -597,7 +597,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="LongName", value=trim(tempString), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -610,7 +610,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="ShortName", value=trim(tempString), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -637,7 +637,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="Connected", value=trim(tempString), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -645,7 +645,7 @@ module NUOPC_Base
     ! set TimeStamp
     call ESMF_AttributeSet(field, &
       name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -653,7 +653,7 @@ module NUOPC_Base
     ! set ProducerConnection
     call ESMF_AttributeSet(field, &
       name="ProducerConnection", value="open", &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -661,7 +661,7 @@ module NUOPC_Base
     ! set ConsumerConnection
     call ESMF_AttributeSet(field, &
       name="ConsumerConnection", value="open", &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -669,7 +669,7 @@ module NUOPC_Base
     ! set Updated
     call ESMF_AttributeSet(field, &
       name="Updated", value="false", &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -677,7 +677,7 @@ module NUOPC_Base
     ! set TransferOfferGeomObject
     call ESMF_AttributeSet(field, &
       name="TransferOfferGeomObject", value="will provide", &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -685,7 +685,7 @@ module NUOPC_Base
     ! set TransferActionGeomObject
     call ESMF_AttributeSet(field, &
       name="TransferActionGeomObject", value="provide", &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -753,7 +753,7 @@ module NUOPC_Base
 
     call ESMF_AttributeGet(field, name=name, value=value, &
       defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -797,7 +797,7 @@ module NUOPC_Base
 
     call ESMF_AttributeGet(field, name=name, typekind=typekind, &
       convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -832,7 +832,7 @@ module NUOPC_Base
     call ESMF_AttributeGet(state, name=name, value=value, &
       defaultvalue=defaultvalue, &
       convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -875,7 +875,7 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(field, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -904,7 +904,7 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     call ESMF_AttributeSet(state, name=name, value=value, &
-      convention="NUOPC", purpose="Instance", &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1964,7 +1964,7 @@ module NUOPC_Base
     call ESMF_AttributeGet(field, &
       name="TimeStamp", valueList=valueList, &
       convention="NUOPC", purpose="Instance", &
-      rc=rc)
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -2294,7 +2294,8 @@ module NUOPC_Base
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
         call ESMF_AttributeGet(field, name="Updated", value=value, &
-          convention="NUOPC", purpose="Instance", rc=rc)
+          convention="NUOPC", purpose="Instance", &
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
         if (present(count) .and. trim(value)=="true") then
@@ -2889,7 +2890,7 @@ module NUOPC_Base
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="Instance", &
-          rc=rc)
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -2929,7 +2930,7 @@ module NUOPC_Base
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=valueList, &
             convention="NUOPC", purpose="Instance", &
-            rc=rc)
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -3026,7 +3027,7 @@ module NUOPC_Base
       call ESMF_AttributeGet(srcField, &
         name="TimeStamp", valueList=valueList, &
         convention="NUOPC", purpose="Instance", &
-        rc=rc)
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -3041,7 +3042,7 @@ module NUOPC_Base
         
       call ESMF_AttributeSet(dstField, &
         name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="Instance", &
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -3204,7 +3205,7 @@ module NUOPC_Base
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="Instance", &
-          rc=rc)
+          attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -3226,7 +3227,7 @@ module NUOPC_Base
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=valueList, &
             convention="NUOPC", purpose="Instance", &
-            rc=rc)
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -3326,7 +3327,7 @@ module NUOPC_Base
             call ESMF_AttributeGet(field, &
               name="Updated", value=value, &
               convention="NUOPC", purpose="Instance", &
-              rc=rc)
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
@@ -3346,7 +3347,7 @@ module NUOPC_Base
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
             convention="NUOPC", purpose="Instance", &
-            rc=rc)
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &

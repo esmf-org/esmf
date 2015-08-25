@@ -999,7 +999,7 @@ int Clock::count=0;
       Alarm **alarm) {   // out - the alarm named "name"
 //
 // !DESCRIPTION:
-//     Retrieve's the clock's alarm named "alarmname" from the alarm list
+//     Retrieves the clock's alarm named "alarmname" from the alarm list
 //
 //EOP
 // !REQUIREMENTS:  TMG x.x
@@ -1231,7 +1231,7 @@ int Clock::count=0;
       Alarm **alarm) {   // out - the i'th alarm
 //
 // !DESCRIPTION:
-//     Retrieve's the clock's i'th ringing alarm from the alarm list
+//     Retrieves the clock's i'th ringing alarm from the alarm list
 //
 //EOP
 // !REQUIREMENTS:  TMG 4.1, 4.2

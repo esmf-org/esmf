@@ -591,7 +591,7 @@ int  ESMCI_WebServLowLevelSocket::read(
 // 
   int&  	size,  // (out) the size of the data according to the packet header
   void*  data   // (out) the buffer to contain the data (enough memory must 
-                // be allocated ahed of time)
+                // be allocated ahead of time)
   )
 // 
 // !DESCRIPTION:

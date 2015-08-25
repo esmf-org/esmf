@@ -655,7 +655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.  
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase 
@@ -1108,7 +1108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.  
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase 
@@ -1414,7 +1414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase  
@@ -1554,7 +1554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.  
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase 
@@ -1839,7 +1839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[configFile]}]
 !   Set the configuration filename for this {\tt ESMF\_CplComp}.
 !   An {\tt ESMF\_Config} object will be created for this file
-!   and attached to the {\tt ESMF\_CplComp}.  Superceeded by {\tt config}
+!   and attached to the {\tt ESMF\_CplComp}.  Superseded by {\tt config}
 !   if both are specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_CplComp}.
@@ -2913,7 +2913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
+! When executing asynchronously, wait for an {\tt ESMF\_CplComp} to return.
 !
 ! The arguments are:
 ! \begin{description}
@@ -3053,7 +3053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase  

@@ -975,7 +975,7 @@ int Calendar::count=0;
 //     3/1/-4900 Gregorian forward.  When converting from a Gregorian date to
 //     a Julian day (implemented in this method), the algorithm is valid from
 //     3/1/-4800 forward.  In both cases, the algorithm correctly takes into
-//     account leap years, those that are divisable by 4 and not 100, or those
+//     account leap years, those that are divisible by 4 and not 100, or those
 //     divisible by 400.
 //
 //     The Fliegel algorithm implements the Gregorian calendar as continuously
@@ -1351,7 +1351,7 @@ int Calendar::count=0;
 //     (implemented in method {\tt ESMC\_CalendarConvertToTime()}), the
 //     algorithm is valid from 3/1/-4800 forward.  In both cases, the
 //     algorithm correctly takes into account leap years, those that are
-//     divisable by 4 and not 100, or those divisible by 400.
+//     divisible by 4 and not 100, or those divisible by 400.
 //
 //     The Fliegel algorithm implements the Gregorian calendar as continuously
 //     proleptic from October 15, 1582 backward to March 1, -4800/-4900.
@@ -2509,12 +2509,12 @@ int Calendar::count=0;
     switch (calkindflag)
     {
       case ESMC_CALKIND_GREGORIAN:
-        // leap year is divisable by 400 or divisable by 4 and not 100.
+        // leap year is divisible by 400 or divisible by 4 and not 100.
         return( (yy_i8 % 400 == 0) || ((yy_i8 % 4 == 0)&&(yy_i8 % 100 != 0)) );
         break;
       
       case ESMC_CALKIND_JULIAN:
-        // leap year is divisable by 4.
+        // leap year is divisible by 4.
         return(yy_i8 % 4 == 0);
         break;
 

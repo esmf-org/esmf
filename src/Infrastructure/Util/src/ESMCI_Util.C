@@ -238,7 +238,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !RETURN VALUE:
 //  Returns the length of a Fortran character string, minus trailing blanks.
-//  Analguous to the Fortran LEN_TRIM intrinsic.  Return type is size_t for
+//  Analoguous to the Fortran LEN_TRIM intrinsic.  Return type is size_t for
 //  compatibility with the C++ string constructor and other places where
 //  string lengths are needed.
 // 

@@ -1157,7 +1157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase
@@ -1462,7 +1462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase  
@@ -1602,7 +1602,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase  
@@ -2966,7 +2966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
+! When executing asynchronously, wait for an {\tt ESMF\_GridComp} to return.
 !
 ! The arguments are:
 ! \begin{description}
@@ -2979,7 +2979,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[timeout]}]
 !   The maximum period in seconds the actual component is allowed to execute
-!   a previously envoked component method before it must communicate back to
+!   a previously invoked component method before it must communicate back to
 !   the dual component. If the actual component does not communicate back in
 !   the specified time, a timeout condition is raised on the dual side (this
 !   side). The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
@@ -3106,7 +3106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Single-phase routines require only one invocation to complete
 !   their work.    
 !   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
+!   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
 !   For multiple-phase child components, this is the integer phase  

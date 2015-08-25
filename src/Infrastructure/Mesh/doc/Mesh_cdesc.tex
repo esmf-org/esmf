@@ -7,7 +7,7 @@ in hydrology, ocean modeling, and many other applications.
 
 In order to provide support for application codes using unstructured grids, the ESMF library provides a class for representing 
 unstructured grids called the {\bf Mesh}. Fields can be created on a Mesh to hold data. In Fortran, Fields created on a Mesh can also be used 
-as either the source or destination or both of an interpolaton (i.e. an {\tt ESMF\_FieldRegridStore()} call). This capability is currently
+as either the source or destination or both of an interpolation (i.e. an {\tt ESMF\_FieldRegridStore()} call). This capability is currently
 not supported with the C interface, however, if the C Field is passed via a State to a component written in Fortran then the regridding
 can be performed there. The rest of this section describes the Mesh class and how to create and use them in ESMF. 
 

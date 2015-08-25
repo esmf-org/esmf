@@ -1105,7 +1105,7 @@ void IO_NetCDF::destruct(void) {
       return localrc;
     }
 
-    int  numAttributes = thisArray->root.AttributeGetCountTotal();
+    int  numAttributes = thisArray->root.getCountTotal();
     if (trace)
       std::cerr << ESMC_METHOD << ": numAttributes = " << numAttributes << std::endl;
     for (int i = 0; i < numAttributes; ++i)
@@ -1114,7 +1114,9 @@ void IO_NetCDF::destruct(void) {
       ESMC_TypeKind_Flag  attEsmfType;
       int            numAttValues = 0;
       Attribute*     thisAtt = thisArray->root.AttributeGet(i);
-      thisArray->root.AttributeGet(i, &attName, &attEsmfType, &numAttValues);
+      attName = thisAtt->getName();
+      attEsmfType = thisAtt->getTypeKind();
+      numAttValues = thisAtt->getItemCount();
 
       nc_type  attNcType = esmcToNcType(attEsmfType);
 
@@ -1129,7 +1131,7 @@ void IO_NetCDF::destruct(void) {
         {
           string  attVal;
 		  vector<string> attValVector;
-          thisArray->root.AttributeGet(attName, &attValVector);
+          thisArray->root.AttributeGet(attName)->get(&attValVector);
           if (numAttValues == 1) {
             attVal = attValVector.at(0);
             if (trace)
@@ -1156,7 +1158,7 @@ void IO_NetCDF::destruct(void) {
             std::cerr << ESMC_METHOD << ": writing NC_INT attribute" << std::endl;
           int  attVal;
           vector<int> attValVector;
-          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          thisArray->root.AttributeGet(attName)->get(&numAttValues, &attValVector);
           if (numAttValues == 1) {
             attVal = attValVector.at(0);
             if ((ncerr = nc_put_att_int (netCdfFile, thisVar, attName.c_str(), NC_INT, 1, &attVal)) != NC_NOERR) {
@@ -1182,7 +1184,7 @@ void IO_NetCDF::destruct(void) {
             std::cerr << ESMC_METHOD << ": writing NC_FLOAT attribute" << std::endl;
           float  attVal;
           vector<float> attValVector;
-          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          thisArray->root.AttributeGet(attName)->get(&numAttValues, &attValVector);
           if (numAttValues == 1) {
             attVal = attValVector.at(0);
             if ((ncerr = nc_put_att_float (netCdfFile, thisVar, attName.c_str(), NC_FLOAT, 1, &attVal)) != NC_NOERR) {
@@ -1207,7 +1209,7 @@ void IO_NetCDF::destruct(void) {
             std::cerr << ESMC_METHOD << ": writing NC_DOUBLE attribute" << std::endl;
           double  attVal;
           vector<double> attValVector;
-          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          thisArray->root.AttributeGet(attName)->get(&numAttValues, &attValVector);
           if (numAttValues == 1) {
             attVal = attValVector.at(0);
             if ((ncerr = nc_put_att_double (netCdfFile, thisVar, attName.c_str(), NC_DOUBLE, 1, &attVal)) != NC_NOERR) {

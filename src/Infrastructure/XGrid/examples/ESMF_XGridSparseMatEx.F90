@@ -91,7 +91,7 @@
 !\caption{Grid layout for simple XGrid creation example. Overlapping of 3 Grids
 !(Green 2x2, Red 2x1, Blue 2x2). Green and red Grids on side A, blue Grid on side
 !B, black indicates the resulting XGrid. Color coded sequence indices are shown.
-!Physical coordinates are the tuples in parenthese, e.g. at the four 
+!Physical coordinates are the tuples in parenthesis, e.g. at the four 
 !corners of rectangular computational domain.}
 !\label{fig:xgridsimple}
 !\end{figure}

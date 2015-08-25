@@ -109,7 +109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The grid files can be in one of the following two formats:
 ! \begin{itemize}
 ! \item The GRIDSPEC Tile grid file following the CF metadata convention~(\ref{sec:fileformat:gridspec}) for logically rectangular grids
-! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid}) for  unstructrued grids.
+! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid}) for  unstructured grids.
 ! \end{itemize}
 ! \smallskip
 ! The optional arguments allow users to specify various options to control the regrid operation, 
@@ -136,7 +136,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     A flag to indicate which type of artificial pole
 !     to construct on the source Grid for regridding. Please see 
 !     Section~\ref{const:polemethod} for a list of valid options.
-!     The default value varies depending on the regridding method and the grid type and foramt.  
+!     The default value varies depending on the regridding method and the grid type and format.  
 !   \item [{[regridPoleNPnts]}]
 !     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points should be averaged over at the pole.
@@ -148,7 +148,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenenate cell produces an error.
+!     the conservative regridding.  If set to false, a degenerate cell produces an error.
 !     The default is .FALSE.  
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
@@ -637,7 +637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (localsrcfiletype == ESMF_FILEFORMAT_UGRID) then
             print *, "  Source File is in UGRID format with mesh name ", trim(srcVarStr)
 	else 
-            print *, "  Source File is in GRIDSPEC foramt with coordinate names ", trim(srcVarStr)
+            print *, "  Source File is in GRIDSPEC format with coordinate names ", trim(srcVarStr)
         endif
         if (srcIsRegional) then
 	      print *, "  Source Grid is a regional grid"
@@ -647,7 +647,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (localdstfiletype == ESMF_FILEFORMAT_UGRID) then
            print *, "  Destination File is in UGRID format with mesh name ", trim(dstVarStr)
         else 
-           print *, "  Destination File is in GRIDSPEC foramt with coordinate names ", trim(dstVarStr)
+           print *, "  Destination File is in GRIDSPEC format with coordinate names ", trim(dstVarStr)
         endif
         if (dstIsRegional) then
 	      print *, "  Destination Grid is a regional grid"
