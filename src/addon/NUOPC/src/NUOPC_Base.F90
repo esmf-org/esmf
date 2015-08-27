@@ -202,7 +202,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Add - Add a namespace to a State
+! !IROUTINE: NUOPC_AddNamespace - Add a namespace to a State
 ! !INTERFACE:
   subroutine NUOPC_StateNamespaceAdd(state, namespace, nestedStateName, &
     nestedState, rc)
@@ -213,11 +213,26 @@ module NUOPC_Base
     type(ESMF_State), intent(out), optional :: nestedState
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add a namespace to {\tt state}. This creates a nested State inside of 
-!   {\tt state}. The nested State is returned as {\tt nestedState}.
-!   If provided, {\tt nestedStateName} will be used to name the newly created
-!   nested State. The default name of the nested State is equal to 
-!   {\tt namespace}.
+!   Add a namespace to {\tt state}. Namespaces are implemented via nested 
+!   states. This creates a nested state inside of {\tt state}. The nested state
+!   is returned as {\tt nestedState}. If provided, {\tt nestedStateName} will 
+!   be used to name the newly created nested state. The default name of the 
+!   nested state is equal to {\tt namespace}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to which the namespace is added.
+!   \item[namespace]
+!     The namespace string.
+!   \item[{[nestedStateName]}]
+!     Name of the nested state. Defaults to {\tt namespace}.
+!   \item[{[nestedState]}]
+!     Optional return of the newly created nested state.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -271,39 +286,46 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Advertise a Field in a State. This call checks the provided
-!   information against the NUOPC Field Dictionary. Defaults are set according
-!   to the NUOPC Field Dictionary.
+!   \label{NUOPC_StateAdvertiseField}
+!   Advertise a field in a state. This creates an empty field and adds it to
+!   {\tt state}. The "StandardName", "Units", "LongName", "ShortName", and 
+!   "TransferOfferGeomObject" attributes of the field are set according to the
+!   provided input..
+!
+!   The call checks the provided information against the NUOPC Field Dictionary
+!   to ensure correctness. Defaults are set according to the NUOPC Field 
+!   Dictionary.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     The {\tt ESMF\_State} object through which the Field is advertised.
+!     The {\tt ESMF\_State} object through which the field is advertised.
 !   \item[StandardName]
-!     The StandardName of the advertised Field. Must be a StandardName found in
-!     the  NUOPC Field Dictionary.
+!     The "StandardName" attribute of the advertised field. Must be a 
+!     StandardName found in the  NUOPC Field Dictionary.
 !   \item[{[Units]}]
-!     The Units of the advertised Field. Must be convertible to the canonical
-!     units specified in the NUOPC Field Dictionary for the specified
-!     StandardName.
+!     The "Units" attribute of the advertised field. Must be convertible to the
+!     canonical units specified in the NUOPC Field Dictionary for the specified
+!     StandardName. (Currently this is restricted to be identical to the 
+!     canonical untis specified in the NUOPC Field Dictionary.)
 !     If omitted, the default is to use the canonical units associated with
 !     the StandardName in the NUOPC Field Dictionary.
 !   \item[{[LongName]}]
-!     The LongName of the advertised Field. NUOPC does not restrict the value
-!     of this variable.
+!     The "LongName" attribute of the advertised field. NUOPC does not restrict
+!     the value of this attribute.
 !     If omitted, the default is to use the StandardName.
 !   \item[{[ShortName]}]
-!     The ShortName of the advertised Field. NUOPC does not restrict the value
-!     of this variable.
+!     The "ShortName" attribute of the advertised field. NUOPC does not restrict
+!     the value of this attribute.
 !     If omitted, the default is to use the StandardName.
 !   \item[{[name]}]
-!     The actual name of the advertised Field by which it is accessed in the
-!     State object. NUOPC does not restrict the value of this variable.
+!     The actual name of the advertised field by which it is accessed in the
+!     state object. NUOPC does not restrict the value of this variable.
 !     If omitted, the default is to use the value of the ShortName.
 !   \item[{[TransferOfferGeomObject]}]
-!     The transfer offer for the geom object (Grid, Mesh, LocStream, 
-!     XGrid) associated with the advertised Field. NUOPC controls the vocabulary
-!     of this attribute: "will provide", "can provide", "cannot provide".
+!     The "TransferOfferGeomObject" attribute of the advertised field. NUOPC 
+!     controls the vocabulary of this attribute. Valid options are 
+!     "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -404,21 +426,28 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Advertise a list of Fields in a State. Defaults are set according to the 
-!   NUOPC Field Dictionary.
+!   Advertise a list of fields in a state. This creates a list of empty fields
+!   and adds it to the {\tt state}. The "StandardName", and 
+!   "TransferOfferGeomObject" attributes of all the fields are set according to
+!   the provided input. The "Units", "LongName", and "ShortName" attributes for
+!   each field are set according to the defaults documented under method 
+!   \ref{NUOPC_StateAdvertiseField}
+!
+!   The call checks the provided information against the NUOPC Field Dictionary
+!   to ensure correctness.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     The {\tt ESMF\_State} object through which the Field is advertised.
+!     The {\tt ESMF\_State} object through which the fields are advertised.
 !   \item[StandardNames]
-!     A list of StandardNames of the advertised Fields. Must be StandardNames 
-!     found in the  NUOPC Field Dictionary.
+!     A list of "StandardName" attributes of the advertised fields. Must be 
+!     StandardNames found in the  NUOPC Field Dictionary.
 !   \item[{[TransferOfferGeomObject]}]
-!     The transfer offer for the geom object (Grid, Mesh, LocStream, 
-!     XGrid) associated with the advertised Fields. This setting applies to all
-!     the Fields advertised in this call. NUOPC controls the vocabulary
-!     of this attribute: "will provide", "can provide", "cannot provide".
+!     The "TransferOfferGeomObject" attribute associated with the advertised
+!     fields. This setting applies to all the fields advertised in this call. 
+!     NUOPC controls the vocabulary of this attribute. Valid options are 
+!     "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -730,7 +759,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC Field Attribute
+! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC Field Attribute
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeGetVal(field, name, value, rc)
 ! !ARGUMENTS:
@@ -739,9 +768,22 @@ module NUOPC_Base
     character(*),     intent(out)           :: value
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt field} using the
+!   Access the attribute {\tt name} inside of {\tt field} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
-!   the Attribute is not present or not set.
+!   the attribute is not present or not set.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to be queried.
+!   \item[name]
+!     The name of the queried attribute.
+!   \item[value]
+!     The value of the queried attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -779,7 +821,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC Field Attribute
+! !IROUTINE: NUOPC_GetAttribute - Get the typekind of a NUOPC Field Attribute
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeGetTK(field, name, typekind, rc)
 ! !ARGUMENTS:
@@ -788,9 +830,22 @@ module NUOPC_Base
     type(ESMF_TypeKind_Flag), intent(out)           :: typekind
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Query the {\tt typekind} of the Attribute {\tt name} inside of {\tt field}
+!   Query the {\tt typekind} of the attribute {\tt name} inside of {\tt field}
 !   using the convention {\tt NUOPC} and purpose {\tt Instance}. Returns with 
-!   error if the Attribute is not present or not set.
+!   error if the attribute is not present or not set.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to be queried.
+!   \item[name]
+!     The name of the queried attribute.
+!   \item[typekind]
+!     The typekind of the queried attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -808,7 +863,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AttributeGet - Get a NUOPC State Attribute
+! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC State Attribute
 ! !INTERFACE:
   subroutine NUOPC_StateAttributeGet(state, name, value, rc)
 ! !ARGUMENTS:
@@ -817,9 +872,22 @@ module NUOPC_Base
     character(*),     intent(out)           :: value
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt state} using the
+!   Access the attribute {\tt name} inside of {\tt state} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
-!   the Attribute is not present or not set.
+!   the attribute is not present or not set.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be queried.
+!   \item[name]
+!     The name of the queried attribute.
+!   \item[value]
+!     The value of the queried attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -858,7 +926,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AttributeSet - Set a NUOPC Field Attribute
+! !IROUTINE: NUOPC_SetAttribute - Set the value of a NUOPC Field Attribute
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeSet(field, name, value, rc)
 ! !ARGUMENTS:
@@ -867,8 +935,21 @@ module NUOPC_Base
     character(*), intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt field} using the
+!   Set the attribute {\tt name} inside of {\tt field} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object on which to set the attribute.
+!   \item[name]
+!     The name of the set attribute.
+!   \item[value]
+!     The value of the set attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     
@@ -887,7 +968,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_AttributeSet - Set a NUOPC State Attribute
+! !IROUTINE: NUOPC_SetAttribute - Set the value of a NUOPC State Attribute
 ! !INTERFACE:
   subroutine NUOPC_StateAttributeSet(state, name, value, rc)
 ! !ARGUMENTS:
@@ -896,8 +977,21 @@ module NUOPC_Base
     character(*), intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Set the Attribute {\tt name} inside of {\tt state} using the
+!   Set the attribute {\tt name} inside of {\tt state} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object on which to set the attribute.
+!   \item[name]
+!     The name of the set attribute.
+!   \item[value]
+!     The value of the set attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     
@@ -916,7 +1010,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CheckSet - Check a Clock for compatibility and set values
+! !IROUTINE: NUOPC_CheckSetClock - Check a Clock for compatibility and set its values
 ! !INTERFACE:
   subroutine NUOPC_ClockCheckSetClock(setClock, checkClock, &
     setStartTimeToCurrent, rc)
@@ -927,15 +1021,29 @@ module NUOPC_Base
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Compare {\tt setClock} to {\tt checkClock} to ensure they match in
-!   their current Time. Further ensure that {\tt checkClock}'s timeStep is a
-!   multiple of {\tt setClock}'s timeStep. If both conditions are satisfied
-!   then the stopTime of the {\tt setClock} is set one {\tt checkClock}'s
-!   timeStep ahead of the current Time, taking into account the direction of 
-!   the Clock.
+!   their current fime. Further ensure that the timeStep of {\tt checkClock}
+!   is a multiple of the timeStep of {\tt setClock}. If both conditions are 
+!   satisfied then the stopTime of the {\tt setClock} is set one 
+!   {\tt checkClock} timeStep ahead of the current time. The direction of the
+!   clock is considered.
 !
 !   By default the startTime of the {\tt setClock} is not modified. However, if
 !   {\tt setStartTimeToCurrent == .true.} the startTime of {\tt setClock} is set
 !   to the currentTime of {\tt checkClock}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[setClock]
+!     The {\tt ESMF\_Clock} object to be checked and set.
+!   \item[checkClock]
+!     The reference clock object.
+!   \item[{[setStartTimeToCurrent]}]
+!     If {\tt .true.} then also set the startTime in {\tt setClock} according to
+!     the startTime in {\tt checkClock}. The default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1013,7 +1121,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Convert - Convert a string into an integer
+! !IROUTINE: NUOPC_ConvertStringToInt - Convert a string to an integer
 ! !INTERFACE:
   function NUOPC_Convert(string, specialStringList, specialValueList, rc)
 ! !RETURN VALUE:
@@ -1032,6 +1140,19 @@ module NUOPC_Base
 !   An error is returned, and return value set to 0, if {\tt string} is not
 !   found in {\tt specialStringList}, and does not convert into an integer
 !   value.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!     The string to be converted
+!   \item[{[specialStringList]}]
+!     List of special strings.
+!   \item[{[specialValueList]}]
+!     List of values associated with special strings.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1095,7 +1216,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Create - Create a new Clock from Clock and stabilityTimeStep
+! !IROUTINE: NUOPC_CreateClock - Create a new Clock from Clock and stabilityTimeStep
 ! !INTERFACE:
   function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
 ! !RETURN VALUE:
@@ -1110,6 +1231,18 @@ module NUOPC_Base
 !   timestep of the incoming Clock ({\tt externalClock}) is a multiple of the
 !   new Clock's timestep, while also satisfying that the new timestep is <= 
 !   the {\tt stabilityTimeStep}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[externalClock]
+!     The clock to be cloned.
+!   \item[{[stabilityTimeStep]}]
+!     Upper bound of the timeStep supporting model stability. Defaults to
+!     infinity.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1158,7 +1291,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CreateSimpleSph - Create a simple spherical grid
+! !IROUTINE: NUOPC_CreateSimpleSphGrid - Create a simple spherical grid
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleSph(x_min, y_min, x_max, y_max, &
     i_count, j_count, half_polar_cell, area_adj, tag, scheme, rc)
@@ -1173,7 +1306,34 @@ module NUOPC_Base
     integer,            intent(in) , optional :: scheme
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Create and return a simple spherical Grid.
+!   Return a simple spherical Grid.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[x\_min]
+!     Lower bound x coordinate.
+!   \item[x\_max]
+!     Upper bound x coordinate.
+!   \item[y\_min]
+!     Lower bound y coordinate.
+!   \item[y\_max]
+!     Upper bound y coordinate.
+!   \item[i\_count]
+!     Number of elements along x.
+!   \item[j\_count]
+!     Number of elements along y.
+!   \item[{[half\_polar\_cell]}]
+!     {\em Need documentation.}
+!   \item[{[area\_adj]}]
+!     {\em Need documentation.}
+!   \item[{[tag]}]
+!     {\em Need documentation.}
+!   \item[{[scheme]}]
+!     {\em Need documentation.}
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1382,7 +1542,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CreateSimpleXY - Create a simple XY cartesian grid
+! !IROUTINE: NUOPC_CreateSimpleXYGrid - Create a simple XY cartesian grid
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
     i_count, j_count, rc)
@@ -1393,7 +1553,26 @@ module NUOPC_Base
     integer,            intent(in)            :: i_count, j_count
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Create and return a very simple XY cartesian Grid.
+!   Create a very simple XY cartesian Grid.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[x\_min]
+!     Lower bound x coordinate.
+!   \item[x\_max]
+!     Upper bound x coordinate.
+!   \item[y\_min]
+!     Lower bound y coordinate.
+!   \item[y\_max]
+!     Upper bound y coordinate.
+!   \item[i\_count]
+!     Number of elements along x.
+!   \item[j\_count]
+!     Number of elements along y.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1459,7 +1638,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FillData - Fill data into a Field
+! !IROUTINE: NUOPC_FillField - Fill data into a Field
 ! !INTERFACE:
   subroutine NUOPC_FillData(field, dataFillScheme, member, step, rc)
 ! !ARGUMENTS:
@@ -1469,9 +1648,25 @@ module NUOPC_Base
     integer, intent(in)             :: step
     integer, intent(out), optional  :: rc
 ! !DESCRIPTION:
-!   Fill data into {\tt field} according to {\tt dataFillScheme}. Depending
+!   \label{NUOPC_FillField}
+!   Fill {\tt field} with data according to {\tt dataFillScheme}. Depending
 !   on the chosen fill scheme, the {\tt member} and {\tt step} arguments are
-!   used as to provide differing fill data patterns.
+!   used to provide differing fill data patterns.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to fill with data.
+!   \item[dataFillScheme]
+!     The fill scheme. The available options are "sincos", and "one".
+!   \item[member]
+!     Member incrementor.
+!   \item[step]
+!     Step incrementor.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1669,7 +1864,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Get - Build lists of Field information from a State
+! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
   recursive subroutine NUOPC_StateBuildStdList(state, stdAttrNameList, &
     stdItemNameList, stdConnectedList, namespaceList, stdFieldList, rc)
@@ -1682,13 +1877,32 @@ module NUOPC_Base
     type(ESMF_Field),       pointer, optional     :: stdFieldList(:)
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Construct lists containing the StandardName, Field name, and connected 
-!   status of the Fields in {\tt state}. Return this information in the
+!   Construct lists containing the StandardNames, field names, and connected 
+!   status of the fields in {\tt state}. Return this information in the
 !   list arguments. Recursively parse through nested States.
 !
 !   All pointer arguments present must enter this method unassociated. On 
 !   return, the deallocation of an associated pointer becomes the responsibility
 !   of the caller.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be queried.
+!   \item[{[stdAttrNameList]}]
+!     If present, return a list of the "StandardName" attribute of each member.
+!   \item[{[stdItemNameList]}]
+!     If present, return a list of each member name.
+!   \item[{[stdConnectedList]}]
+!     If present, return a list of the "Connected" attribute of each member.
+!   \item[{[namespaceList]}]
+!     If present, return a list of the namespace of each member.
+!   \item[{[stdFieldList]}]
+!     If present, return a list of the member fields.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1942,8 +2156,19 @@ module NUOPC_Base
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if the Field has a timestamp 
+!   Returns {\tt .true.} if {\tt field} has a timestamp attribute
 !   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to be checked.
+!   \item[time]
+!     The time to compare against.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2004,8 +2229,19 @@ module NUOPC_Base
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if all the Fields in {\tt state} have a timestamp 
-!   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!   Return {\tt .true.} if all the fields in {\tt state} have a timestamp 
+!   attribute that matches {\tt time}. Otherwise returns {\tt .false.}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be checked.
+!   \item[time]
+!     The time to compare against.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2069,8 +2305,17 @@ module NUOPC_Base
     type(ESMF_State), intent(in)            :: state
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if all the Fields in {\tt state} are connected.
+!   Return {\tt .true.} if all the fields in {\tt state} are connected.
 !   Otherwise return {\tt .false.}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be checked.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2111,7 +2356,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsConnected - Test if a field in a State is connected
+! !IROUTINE: NUOPC_IsConnected - Test if a specific Field in a State is connected
 ! !INTERFACE:
   function NUOPC_StateIsFieldConnected(state, fieldName, rc)
 ! !RETURN VALUE:
@@ -2121,8 +2366,20 @@ module NUOPC_Base
     character(*),     intent(in)            :: fieldName
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if Fields with name {\tt fieldName} contained in 
-!   {\tt state} is connected. Otherwise return {\tt .false.}.
+!   Return {\tt .true.} if the field with name {\tt fieldName} contained in 
+!   {\tt state} is connected. Otherwise return {\tt .false.}. If {\tt state}
+!   does not contain a field with {\tt fieldName}, return an error in {\tt rc}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be checked.
+!   \item[fieldName]
+!     The name of the checked field.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2154,7 +2411,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_IsCreated - Check whether a Clock object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
@@ -2167,7 +2424,7 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt clock} is in the
 !   created state, {\tt .false.} otherwise.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     NUOPC_ClockIsCreated = .false.  ! default assumption
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2177,7 +2434,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_IsCreated - Check whether a FieldBundle object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
@@ -2190,7 +2447,7 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt fieldbundle} is in the
 !   created state, {\tt .false.} otherwise.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     NUOPC_FieldBundleIsCreated = .false.  ! default assumption
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2200,7 +2457,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_IsCreated - Check whether a Field object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
@@ -2213,7 +2470,7 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt field} is in the
 !   created state, {\tt .false.} otherwise.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     NUOPC_FieldIsCreated = .false.  ! default assumption
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2223,7 +2480,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_IsCreated - Check whether a Grid object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
@@ -2236,7 +2493,7 @@ module NUOPC_Base
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt grid} is in the
 !   created state, {\tt .false.} otherwise.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------    
     NUOPC_GridIsCreated = .false.  ! default assumption
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2257,10 +2514,20 @@ module NUOPC_Base
     integer,          intent(out), optional :: count
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if all the Fields in {\tt state} have their "Updated"
-!   Attribute set to "true". Otherwise return {\tt .false.}. The {\tt count}
-!   argument return how many of the Fields have the Updated" Attribtue set to
-!   "true".
+!   Return {\tt .true.} if all the fields in {\tt state} have their "Updated"
+!   attribute set to "true". Otherwise return {\tt .false.}. 
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be checked.
+!   \item[{[count]}]
+!     If provided, the number of fields with "Updated" attribute set to "true"
+!     is returned.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2355,6 +2622,19 @@ module NUOPC_Base
 !   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
 !   string variable. If {\tt unit} is not present then the output is written to
 !   the default external unit (typically that would be stdout).
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[time]
+!     The {\tt ESMF\_Time} object to be printed
+!   \item[{[string]}]
+!     Optionally prepended string. Default to empty string.
+!   \item[{[unit]}]
+!     Internal unit, i.e. a string. Default to printing to stdout.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2406,8 +2686,21 @@ module NUOPC_Base
 !   unit, i.e. a string variable. If {\tt unit} is not present then the output
 !   is written to the default external unit (typically that would be stdout).
 !
-!   The {\tt selection} argument supports three settings; {\tt "currTime"} 
-!   (default), {\tt "startTime"}, and {\tt "stopTime"}. 
+!   The arguments are:
+!   \begin{description}
+!   \item[clock]
+!     The {\tt ESMF\_Clock} object to be printed
+!   \item[{[selection]}]
+!     Selection of information printed. Three options are implemented:
+!     "currTime" (default), "startTime", and "stopTime".
+!   \item[{[string]}]
+!     Optionally prepended string. Default to empty string.
+!   \item[{[unit]}]
+!     Internal unit, i.e. a string. Default to printing to stdout.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2559,7 +2852,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Realize - Realize Fields inside a State on a single Grid with selection
+! !IROUTINE: NUOPC_Realize - Realize Fields inside a State on a single Grid with options
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Realize
   subroutine NUOPC_RealizeComplete(state, grid, selection, dataFillScheme, rc)
@@ -2570,17 +2863,33 @@ module NUOPC_Base
     character(len=*), optional      :: dataFillScheme    
     integer, intent(out), optional  :: rc
 ! !DESCRIPTION:
-!   Realize the Fields inside of {\tt state}. All of the Fields are created
+!   Realize the fields inside of {\tt state}. All of the fields are created
 !   on the same {\tt grid} object. Fields are realized and/or removed from
-!   {\tt state} according to {\tt selection} argument. The options are:
-!   \begin{itemize}
-!   \item {\tt "realize\_all"} (default)
-!   \item {\tt "realize\_connected\_remove\_others"}
-!   \end{itemize}
+!   {\tt state} according to {\tt selection} argument.
 !
-!   Realized Fields are filled with data if {\tt dataFillScheme} is present.
-!   See {\tt NUOOC\_FillData()} for details about the available data fill 
-!   schemes.
+!   Realized Fields are filled with data according to the {\tt dataFillScheme}
+!   argument.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the fields are realized.
+!   \item[grid]
+!     The {\tt ESMF\_Grid} object on which to realize the fields.
+!   \item[{[selection]}]
+!     Selection of mode of operation:
+!     \begin{itemize}
+!     \item {\tt "realize\_all"} (default)
+!     \item {\tt "realize\_connected\_remove\_others"}
+!     \end{itemize}
+!   \item[{[dataFillScheme]}]
+!     Realized fields will be filled according to the selected fill
+!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     the data in realized fields uninitialized.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2690,8 +2999,19 @@ module NUOPC_Base
     type(ESMF_Field), intent(in)            :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Realize a previously advertised Field in {\tt state} by replacing the
-!   advertised Field with {\tt field}.
+!   Realize a previously advertised field in {\tt state} by replacing the
+!   advertised (empty) field with {\tt field}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object in which the fields are realized.
+!   \item[field]
+!     The new field to put in place of the previously advertised (empty) field.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2789,8 +3109,18 @@ module NUOPC_Base
     type(ESMF_State), intent(inout)         :: state
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Reconcile the {\tt state} with attribute handling as required by NUOPC 
-!   Layer.
+!   Reconcile the {\tt state}, including attribute handling as required by 
+!   the NUOPC Layer. This call is typically made during the initialization 
+!   of a Connector. It should rarely be needed in user written code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to reconcile.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2804,7 +3134,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_UpdateTimestamp - Update the timestamp on all the Fields
+! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields across PETs
 ! !INTERFACE:
   ! call using generic interface: NUOPC_UpdateTimestamp
   subroutine NUOPC_UpdateFieldList(fieldList, rootPet, rc)
@@ -2813,9 +3143,20 @@ module NUOPC_Base
     integer,          intent(in)            :: rootPet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the TimeStamp Attribute for all the Fields on all the PETs in the
-!   current VM to the TimeStamp Attribute held by the Field instance on the 
+!   Update the "TimeStamp" attribute for all the fields on all the PETs in the
+!   current VM to the "TimeStamp" attribute held by the field instance on the 
 !   {\tt rootPet}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldList]
+!     List of {\tt ESMF\_Field} objects to be handled.
+!   \item[rootPet]
+!     Root PET from where to propagate the "TimeStamp" across all other PETs.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2979,7 +3320,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_UpdateTimestamp - Propagate the timestamp from src to dst Fields
+! !IROUTINE: NUOPC_UpdateTimestamp - Propagate the TimeStamp from src to dst Fields
 ! !INTERFACE:
   ! call using generic interface: NUOPC_UpdateTimestamp
   subroutine NUOPC_UpdateAcrossFieldLists(srcFieldList, dstFieldList, rc)
@@ -2988,8 +3329,24 @@ module NUOPC_Base
     type(ESMF_Field), pointer               :: dstFieldList(:)
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the timestamp on all Fields in the {\tt dstFieldList} to
-!   equal the timestamps of {\tt dstFieldList}.
+!   Update the "TimeStamp" attribute on each field in {\tt dstFieldList} 
+!   according to the corresponding (by position) field in the
+!   {\tt srcFieldList}. The number of elements in {\tt dstFieldList} and
+!   {\tt srcFieldList} must be equal. The update is carried out locally on 
+!   each PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[srcFieldList]
+!     List of {\tt ESMF\_Field} objects providing the valid "TimeStamp"
+!     attribute.
+!   \item[dstFieldList]
+!     List of {\tt ESMF\_Field} objects that will receive the updated
+!     "TimeStamp" attribute.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3055,7 +3412,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_UpdateTimestamp - Update the timestamp on all Fields in a FieldBundle
+! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields in a FieldBundle
 ! !INTERFACE:
   subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
 ! !ARGUMENTS:
@@ -3063,8 +3420,21 @@ module NUOPC_Base
     type(ESMF_FieldBundle), intent(inout)         :: dstFields
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the timestamp on all Fields in the {\tt dstFields} FieldBundle to
-!   be the same as in the {\tt srcFields} FieldBundle.
+!   Update the "TimeStamp" attribute on all the fields in the {\tt dstFields}
+!   FieldBundle to be the same as in the {\tt srcFields} FieldBundle. The number
+!   of elements in both FieldBundles must be equal. The update is carried out 
+!   locally on each PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[srcFields]
+!     FieldBundle providing the valid "TimeStamp" attributes.
+!   \item[dstFields]
+!     FieldBundle that will receive the updated "TimeStamp" attributes.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3120,7 +3490,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_UpdateTimestamp - Update the timestamp on all the Fields in a State
+! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields in a State
 ! !INTERFACE:
   subroutine NUOPC_StateUpdateTimestamp(state, rootPet, rc)
 ! !ARGUMENTS:
@@ -3128,9 +3498,20 @@ module NUOPC_Base
     integer,          intent(in)            :: rootPet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the TimeStamp Attribute for all the Fields on all the PETs in the
-!   current VM to the TimeStamp Attribute held by the Field instance on the 
+!   Update the "TimeStamp" attribute for all the fields on all the PETs in the
+!   current VM to the "TimeStamp" attribute held by the field instance on the 
 !   {\tt rootPet}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object holding the fields.
+!   \item[rootPet]
+!     Root PET from where to propagate the "TimeStamp" across all other PETs.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3269,7 +3650,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_UpdateTimestamp - Set a timestamp on all Fields in a State
+! !IROUTINE: NUOPC_UpdateTimestamp - Set the TimeStamp on all the Fields in a State
 ! !INTERFACE:
   subroutine NUOPC_StateSetTimestamp(state, clock, selective, rc)
 ! !ARGUMENTS:
@@ -3278,8 +3659,24 @@ module NUOPC_Base
     logical,          intent(in),  optional :: selective
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Set the TimeStamp Attribute according to {\tt clock} on all the Fields in 
-!   {\tt state}.
+!   Set the "TimeStamp" attribute according to {\tt clock} on all the fields in
+!   {\tt state}. Depending on {\tt selective}, all or only some fields may be
+!   updated.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object holding the fields.
+!   \item[clock]
+!     The {\tt ESMF\_Clock} object defining the TimeStamp by its current time.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the "TimeStamp" attributes on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     "TimeStamp" attribute on all the fields. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3365,7 +3762,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Write - Write Field data into a file
+! !IROUTINE: NUOPC_Write - Write Field data to file
 ! !INTERFACE:
   subroutine NUOPC_FieldWrite(field, file, overwrite, status, timeslice, &
     iofmt, relaxedflag, rc)
@@ -3379,9 +3776,30 @@ module NUOPC_Base
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write Field data into a file under the StandardName Attribute. If the
-!   {\tt relaxedflag} is provided, set to {\tt .true.}, then no error is
-!   returned even if the call cannot write the file due to library limitations.
+!   Write the data in {\tt field} to {\tt file} under the field's "StandardName" 
+!   attribute if supported by the {\tt iofmt}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object whose data is to be written.
+!   \item[file]
+!     The name of the file to write to.
+!   \item[{[overwrite]}]
+!     {\em Need documentation.}
+!   \item[{[status]}]
+!     {\em Need documentation.}
+!   \item[{[timeslice]}]
+!     {\em Need documentation.}
+!   \item[{[iofmt]}]
+!     {\em Need documentation.}
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3436,9 +3854,32 @@ module NUOPC_Base
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data of the Fields within a State to NetCDF files. Each Field is
-!   written to an individual file using the StandardName Attribute as NetCDF
-!   attribute.
+!   Write the data of the fields within a {\tt state} to NetCDF files. Each 
+!   field is written to an individual file using the "StandardName" attribute
+!   as NetCDF attribute.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object containing the fields.
+!   \item[{[fieldNameList]}]
+!     List of names of the fields to be written. By default write all the fields
+!     in {\tt state}.
+!   \item[{[filePrefix]}]
+!     File name prefix, common to all the files written.
+!   \item[{[overwrite]}]
+!     {\em Need documentation.}
+!   \item[{[status]}]
+!     {\em Need documentation.}
+!   \item[{[timeslice]}]
+!     {\em Need documentation.}
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3507,7 +3948,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Write - Write distributed weights into file
+! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
   subroutine NUOPC_WriteWeights(factorList, fileName, rc)
@@ -3516,11 +3957,23 @@ module NUOPC_Base
     character(*),       intent(in)            :: fileName
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Each PET calls with its local list of factors. The call then writes the
-!   distributed factors into a single file. The order of the factors in the file
-!   is first by PET, and within each PET the PET-local order is preserved. 
-!   Changing the number of PETs for the same regrid operation will likely change
-!   the order of factors across PETs, and therefore files written will differ.
+!   Write the destributed {\tt factorList} to file. Each PET calls with its 
+!   local list of factors. The call then writes the distributed factors into
+!   a single file. The order of the factors in the file is first by PET, and 
+!   within each PET the PET-local order is preserved. Changing the number of 
+!   PETs for the same regrid operation will likely change the order of factors
+!   across PETs, and therefore files written will differ.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[factorList]
+!     The distributed factor list.
+!   \item[fileName]
+!     The name of the file to be written to.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
