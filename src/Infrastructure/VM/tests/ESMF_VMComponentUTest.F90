@@ -298,7 +298,7 @@ program ESMF_VMComponentUTest
 #if 0
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX__UTest
   write(name, *) "Testing VM IsCreated for destroyed object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_VMIsCreated(vm2)
@@ -306,7 +306,7 @@ program ESMF_VMComponentUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX__UTest
   write(name, *) "Testing VM IsCreated for destroyed object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_VMIsCreated(vm2, rc=rc)
