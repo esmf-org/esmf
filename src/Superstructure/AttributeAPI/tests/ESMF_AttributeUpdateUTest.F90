@@ -227,23 +227,21 @@ module ESMF_AttributeUpdateUTestMod
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'RegDecompX', 96, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'RegDecompY', 84, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -346,17 +344,16 @@ module ESMF_AttributeUpdateUTestMod
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(1), valueList(1), &
-      convention=convESMF, purpose=purp2, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(2), valueList(2), &
-      convention=convESMF, purpose=purp2, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -652,8 +649,7 @@ program ESMF_AttributeUpdateUTest
 	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     print *, "PET #", localPet, " - Poised for segv.."
-    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, &
-                           attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
     print *, "outVal = ", outVal 
     print *, "value2 = ", value2
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

@@ -241,17 +241,13 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field, name1, value1, &
-      convention=convESMF,  purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF,  purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name2, value2, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name3, value3, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field, name4, value4, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)

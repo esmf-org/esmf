@@ -41,7 +41,7 @@ program ESMF_AttPackArrayUTest
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXPATHLEN) :: name
       integer                :: rc
       integer                :: result = 0
 
@@ -51,8 +51,8 @@ program ESMF_AttPackArrayUTest
       type(ESMF_DistGrid)    :: distgrid
 
 ^ifdef ESMF_TESTEXHAUSTIVE
-
       ! local variables
+      integer :: i
       type(ESMF_AttPack)     :: attpack
       character(ESMF_MAXSTR) :: conv, nestconv, purp, nestpurp
 
