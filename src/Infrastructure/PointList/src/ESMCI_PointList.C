@@ -79,7 +79,8 @@ namespace ESMCI {
 
     // allocate memory
     points = NULL;
-    if (max_num_pts>0) {
+
+    if (max_num_pts>=0) {
       points=new point [max_num_pts];
     }
 
