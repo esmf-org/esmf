@@ -992,7 +992,8 @@ program ESMF_ArrayIOUTest
   end if
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
-  call ESMF_Test(ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+  rc = ESMF_SUCCESS
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------
