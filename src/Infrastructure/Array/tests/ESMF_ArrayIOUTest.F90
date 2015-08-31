@@ -972,7 +972,13 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   farray3D_DE1_r => null ()
   call ESMF_ArrayGet(array_20DE_r, localDe=1, farrayPtr=Farray3D_DE1_r, rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
+  ! Pets 0 and 1 should succeed.  Pets 2-5 should fail.
+  if (localPet == 0 .or. localPet == 1) then
+    passfail = rc == ESMF_SUCCESS
+  else
+    passfail = rc /= ESMF_SUCCESS
+  end if
+  call ESMF_Test(passfail, name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
