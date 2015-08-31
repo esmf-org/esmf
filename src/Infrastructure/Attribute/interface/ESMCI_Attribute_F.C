@@ -2704,7 +2704,7 @@ extern "C" {
     return;
   }
 
-  status = (**base).root.getCount(gcflag, count);
+  status = (**base).root.getCount(*gcflag, count);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -2771,7 +2771,7 @@ extern "C" {
     return;
   }
 
-  status = (*attpack)->getCount(gcflag, *anflag, &lcount);
+  status = (*attpack)->getCount(*gcflag, *anflag, &lcount);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 

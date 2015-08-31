@@ -79,8 +79,8 @@
  @\
       !mtag @\
       ! Create a custom Attribute package using an AttPack object and a specList on mobj Test @\
-      call ESMF_AttributeAdd(mname, (/conv, purp/), & @\
-        attpackList, attpack=attpack, rc=rc) @\
+      call ESMF_AttributeAdd(mname, conv, purp, attrList=attpackList, & @\
+        attpack=attpack, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Creating a custom Attribute package using an AttPack object and a specList on ", mobj, " Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
@@ -627,7 +627,8 @@
       !mtag @\
       call ESMF_AttributeGet(mname, count, & @\
                              convention=nestconv, purpose=nestpurp, & @\
-                             attcountflag=ESMF_ATTGETCOUNT_ATTRIBUTE, rc=rc) @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTRIBUTE, & @\
+                             attnestflag=ESMF_ATTNEST_OFF, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
                      " nested Attpack, count = ", count @\
@@ -727,8 +728,25 @@
                              attnestflag=ESMF_ATTNEST_ON, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
-                     " nested Attpack, count = ", count @\
+                     "nested Attpack, count = ", count @\
       call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.22), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      ! Get all Attributes in an AttPack object by index on mobj Test @\
+      !mtag @\
+      do i = 1, count @\
+        call ESMF_AttributeGet(mname, attributeIndex=i, name=name, & @\
+                               convention=nestconv, purpose=nestpurp, & @\
+                               attnestflag=ESMF_ATTNEST_ON, rc=rc) @\
+        if (rc /= ESMF_SUCCESS) continue @\
+      enddo @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Get all Attributes in an AttPack object by index Test", & @\
+                     ", count = ", count, & @\
+                     ", convention = ", trim(conv), & @\
+                     ", purpose = ", trim(purp) @\
+      call ESMF_Test((rc==ESMF_SUCCESS), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
@@ -938,6 +956,36 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Creating a standard Attribute package using an AttPack object and a specList on ", mobj, " Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      ! Get the count of an AttPack object on mobj Test @\
+      count = -5 @\
+      !mtag @\
+      call ESMF_AttributeGet(mname, count, & @\
+                             convention=conv, purpose=purp, & @\
+                             attcountflag=ESMF_ATTGETCOUNT_ATTRIBUTE, & @\
+                             attnestflag=ESMF_ATTNEST_ON, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Test for getting the count of Attributes in a ", & @\
+                     "nested Attpack, count = ", count @\
+      call ESMF_Test((rc==ESMF_SUCCESS), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
+      !------------------------------------------------------------------------ @\
+ @\
+      ! Get all Attributes in an AttPack object by index on mobj Test @\
+      !mtag_disable @\
+      ! do i = 1, count @\
+      !   call ESMF_AttributeGet(mname, attributeIndex=i, name=name, & @\
+      !                          convention=conv, purpose=purp, rc=rc) @\
+      !   if (rc /= ESMF_SUCCESS) continue @\
+      ! enddo @\
+      ! write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      ! write(name, *) "Get all Attributes in an AttPack object by index Test", & @\
+      !                ", count = ", count, & @\
+      !                ", convention = ", trim(conv), & @\
+      !                ", purpose = ", trim(purp) @\
+      ! call ESMF_Test((rc==ESMF_SUCCESS), & @\
+      !                 name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
 ^endif @\

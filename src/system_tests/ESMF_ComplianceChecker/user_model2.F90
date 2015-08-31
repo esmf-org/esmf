@@ -131,7 +131,7 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     call ESMF_AttributeSet(comp, name="ShortName", value="ABC", &
-      attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     field = ESMF_FieldEmptyCreate(name="myTestField", rc=rc)
