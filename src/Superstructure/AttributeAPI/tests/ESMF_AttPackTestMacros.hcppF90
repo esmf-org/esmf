@@ -973,19 +973,19 @@
       !------------------------------------------------------------------------ @\
  @\
       ! Get all Attributes in an AttPack object by index on mobj Test @\
-      !mtag_disable @\
-      ! do i = 1, count @\
-      !   call ESMF_AttributeGet(mname, attributeIndex=i, name=name, & @\
-      !                          convention=conv, purpose=purp, rc=rc) @\
-      !   if (rc /= ESMF_SUCCESS) continue @\
-      ! enddo @\
-      ! write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      ! write(name, *) "Get all Attributes in an AttPack object by index Test", & @\
-      !                ", count = ", count, & @\
-      !                ", convention = ", trim(conv), & @\
-      !                ", purpose = ", trim(purp) @\
-      ! call ESMF_Test((rc==ESMF_SUCCESS), & @\
-      !                 name, failMsg, result, ESMF_SRCLINE) @\
+      !mtag @\
+      do i = 1, count @\
+        call ESMF_AttributeGet(mname, attributeIndex=i, name=name, & @\
+                               convention=conv, purpose=purp, rc=rc) @\
+        if (rc /= ESMF_SUCCESS) continue @\
+      enddo @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Get all Attributes in an AttPack object by index Test", & @\
+                     ", count = ", count, & @\
+                     ", convention = ", trim(conv), & @\
+                     ", purpose = ", trim(purp) @\
+      call ESMF_Test((rc==ESMF_SUCCESS), & @\
+                      name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
 ^endif @\

@@ -529,42 +529,26 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      ESMC_CONTEXT, &localrc)) return localrc;
 
-      localrc = AttPackCreateCustom(convention,
-                                    PLATFORM_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+        localrc = AttPackCreateCustom("ISO 19115", RESP_PARTY_PURP, object);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, &localrc)) return localrc;
 
-      localrc = AttPackCreateCustom("ISO 19115",
-                                    CITATION_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+        // nest the newly created package inside of this package
+        localrc = AttPackNest("ISO 19115", CITATION_PURP, object, "ISO 19115", RESP_PARTY_PURP);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, &localrc)) return localrc;
 
-      localrc = AttPackCreateCustom("ISO 19115",
-                                    RESP_PARTY_PURP, object);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
+        // nest the newly created package inside of this package
+        localrc = AttPackNest(convention, PLATFORM_PURP, object, "ISO 19115", CITATION_PURP);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, &localrc)) return localrc;
 
-      vector<string> nestconv, nestpurp;
-      int nestcount = 3;  // TODO: bump to 4 when Scientific Properties enabled
-      nestconv.reserve(nestcount);
-      nestpurp.reserve(nestcount);
-      // TODO: uncomment and expand when we have better definition from CIM
-      //nestconv.push_back(convention);
-      //nestpurp.push_back("Scientific Property Description");
-      nestconv.push_back(convention);
-      nestpurp.push_back(PLATFORM_PURP);
-      nestconv.push_back("ISO 19115");
-      nestpurp.push_back(CITATION_PURP);
-      nestconv.push_back("ISO 19115");
-      nestpurp.push_back(RESP_PARTY_PURP);
+        localrc = AttPackNest(convention, purpose, object, convention, PLATFORM_PURP);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, &localrc)) return localrc;
 
-      localrc = AttPackNest(convention,
-                            MODEL_COMP_PURP, object,
-                            nestcount, nestconv, nestpurp);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &localrc)) return localrc;
- 
-      //
+
+        //
       // Model Component attributes
       //  1 <modelComponent> in separate CIM document node, also
       //    1 within each <childComponent>
