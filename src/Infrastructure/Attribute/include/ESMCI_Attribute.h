@@ -187,8 +187,8 @@ class Attribute
 
     // get info from an Attribute
     int get(int *lens, int count) const;
-    int getCount(ESMC_AttGetCountFlag *flag, int *count) const;
-    int getCount(ESMC_AttGetCountFlag *gcflag,
+    int getCount(ESMC_AttGetCountFlag gcflag, int *count) const;
+    int getCount(ESMC_AttGetCountFlag gcflag,
     		     ESMC_AttNest_Flag anflag, int *count) const;
 
     // query whether an Attribute is "present" or "set"

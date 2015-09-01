@@ -3141,24 +3141,26 @@ namespace ESMCI {
 
   // write out all nested RPs
   for(int i=0; i<packList.size(); i++) {
-    attpack = packList.at(i);
-    if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare(RESP_PARTY_PURP)==0))
-      continue; // skip non-RPs
+      // RLO: added recursion to fix the false one-level recursion that worked before
+      //    because the attpack nesting for standard attpacks was making flat trees
+      localrc = packList.at(i)->AttributeWriteCIMRP(io_xml, indent);
+  }
 
-    // if no attributes set in this attpack instance, skip it ...
-    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+  if (!(attrConvention.compare("ISO 19115")==0 &&
+          attrPurpose.compare(RESP_PARTY_PURP)==0))
+      return ESMF_SUCCESS; // skip non-RPs
 
-    // otherwise, write it out ...
+  // if no attributes set in this attpack instance, skip it ...
+  if (!(AttPackIsSet(inNestedAttPacks=false))) return ESMF_SUCCESS;
 
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    if (attpack->AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->isSet()) {
+    if (AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->isSet()) {
       // first, determine name type:  individual, organization, or position.
       //   first choice is the setting of the NameType attribute ...
       nameType = "gmd:individualName";  // default
-      attr = attpack->AttPackGetAttribute("NameType", ESMC_ATTNEST_ON);
+      attr = AttPackGetAttribute("NameType", ESMC_ATTNEST_ON);
       if (attr->isSet()) {
           localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
@@ -3181,7 +3183,7 @@ namespace ESMCI {
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
       // ... otherwise guess based on the role ...
-      } else if ((attr = attpack->AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON))->isSet()) {
+      } else if ((attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON))->isSet()) {
           localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -3197,7 +3199,7 @@ namespace ESMCI {
         }
       }
       // ... finally output the Name using the name type
-      localrc = attpack->AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->get(&valuevector);
+      localrc = AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3235,9 +3237,9 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
-    if (attpack->AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
-        attpack->AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet() ||
-        attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
+    if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
 
       // contactInfo header
       localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
@@ -3245,15 +3247,15 @@ namespace ESMCI {
       localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-      if (attpack->AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
-          attpack->AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet()) {
+      if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
+          AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet()) {
 
         // address header
         localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-        attr = attpack->AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON);
+        attr = AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON);
         if (attr->isSet()) {
           localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
@@ -3276,7 +3278,7 @@ namespace ESMCI {
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
-        attr = attpack->AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON);
+        attr = AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON);
         if (attr->isSet()) {
           localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
@@ -3318,7 +3320,7 @@ namespace ESMCI {
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } // end if PhysicalAddress or EmailAddress
 
-      attr = attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
+      attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
       if (attr->isSet()) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
@@ -3356,7 +3358,7 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } // end if PhysicalAddress, EmailAddress or URL
 
-    attr = attpack->AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3392,7 +3394,7 @@ namespace ESMCI {
     }
 
     // use "Abbreviation" attribute if set ...
-    attr = attpack->AttPackGetAttribute("Abbreviation", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("Abbreviation", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3408,7 +3410,7 @@ namespace ESMCI {
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    } else if ((attr = attpack->AttPackGetAttribute("Name", ESMC_ATTNEST_ON))->isSet()) {
+    } else if ((attr = AttPackGetAttribute("Name", ESMC_ATTNEST_ON))->isSet()) {
       // ... otherwise get initials from "Name"
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3439,9 +3441,7 @@ namespace ESMCI {
     // responsibleParty footer
     localrc = io_xml->writeEndElement("responsibleParty", --indent);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-
-  } // end for each nested package
-
+      
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMRP
@@ -3773,23 +3773,25 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // write out all nested Citations
-  for(int i=0; i<packList.size(); i++) {
-    attpack = packList.at(i);
-    if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare(CITATION_PURP)==0))
-      continue; // skip non-Citations
+      // write out all nested citations
+      for(int i=0; i<packList.size(); i++) {
+        // RLO: added recursion to fix the false one-level recursion that worked before
+        //    because the attpack nesting for standard attpacks was making flat trees
+        localrc = packList.at(i)->AttributeWriteCIMcitation(io_xml, indent);
+      }
+
+      if (!(attrConvention.compare("ISO 19115")==0 &&
+            attrPurpose.compare("Citation")==0))
+        return ESMF_SUCCESS; // skip non-RPs
 
     // if no attributes set in this attpack instance, skip it ...
-    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
-
-    // otherwise, write it out ...
-
+    if (!(AttPackIsSet(inNestedAttPacks=false))) return ESMF_SUCCESS;
+      
     // citation header
     localrc = io_xml->writeStartElement("citation", "", indent, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-    attr = attpack->AttPackGetAttribute("ShortTitle", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("ShortTitle", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3817,7 +3819,7 @@ namespace ESMCI {
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
-    attr = attpack->AttPackGetAttribute("Date", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("Date", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3862,7 +3864,7 @@ namespace ESMCI {
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
-    attr = attpack->AttPackGetAttribute("PresentationForm", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("PresentationForm", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3886,7 +3888,7 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
-    attr = attpack->AttPackGetAttribute("DOI", ESMC_ATTNEST_ON);
+    attr = AttPackGetAttribute("DOI", ESMC_ATTNEST_ON);
     if (attr->isSet()) {
       localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
@@ -3909,10 +3911,10 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
-    if (attpack->AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON)->isSet() ||
-        attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
+    if (AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
       value.clear();
-      attr = attpack->AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON);
+      attr = AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON);
       if (attr->isSet()) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
@@ -3925,7 +3927,7 @@ namespace ESMCI {
       // definition for a citation URL.  Until CIM extends (subclasses)
       // CI_Citation_Type to add a place for citation URL, append it to
       // LongTitle.
-      attr = attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
+      attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
       if (attr->isSet()) {
         localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
@@ -3954,9 +3956,7 @@ namespace ESMCI {
     // citation footer
     localrc = io_xml->writeEndElement("citation", --indent);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-
-  } // end for each nested package
-
+      
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMcitation

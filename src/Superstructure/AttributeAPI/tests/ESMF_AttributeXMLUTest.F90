@@ -724,8 +724,6 @@ program ESMF_AttributeXMLUTest
     call ESMF_AttributeSet(gridcomp2, 'Name', 'John Doe', &
                            convention=convCIM, &
                            purpose=purpComp, &
-                           attnestflag=ESMF_ATTNEST_ON, &
-    !       convention=convISO, purpose=purpRP, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st attribute value in last CIM RP package test"
@@ -1332,7 +1330,6 @@ program ESMF_AttributeXMLUTest
     call ESMF_AttributeSet(field1, 'ShortName', 'DMS_emi', &
                            convention=convCIM, &
                            purpose=purpField, &
-                           attnestflag=ESMF_ATTNEST_ON, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st <input> attribute value in CIM field package test"

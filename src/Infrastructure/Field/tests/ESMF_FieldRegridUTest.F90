@@ -57,6 +57,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
 #if 1
 
+
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -565,7 +566,6 @@
 
       !------------------------------------------------------------------------
 
-      call ESMF_UtilIOUnitFlush (6)
 
 
 
@@ -854,7 +854,8 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+!      call ESMF_LogFlush()
+!      call ESMF_UtilIOUnitFlush (6)
 
 
 #endif
@@ -22847,6 +22848,7 @@ return
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
   integer :: i1,i2,i3, index(2)
   integer :: lDE, localDECount
+  integer :: cl,cu
   
   real(ESMF_KIND_R8) :: x,y
 
@@ -23184,15 +23186,25 @@ return
   ! Setup Dst LocStream
   if (petCount .eq. 1) then
     numLocationsOnThisPet=11
+    cl=1
+    cu=11
   else
     if (localpet .eq. 0) then
       numLocationsOnThisPet=3
+      cl=1
+      cu=3
     else if (localpet .eq. 1) then
       numLocationsOnThisPet=3
+      cl=4
+      cu=6
     else if (localpet .eq. 2) then
-      numLocationsOnThisPet=3
+      numLocationsOnThisPet=5
+      cl=7
+      cu=11
     else if (localpet .eq. 3) then
-      numLocationsOnThisPet=2
+      numLocationsOnThisPet=0
+      cl=12
+      cu=11
     endif
   endif
 
@@ -23203,6 +23215,7 @@ return
   dstLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
                                    localCount=numLocationsOnThisPet, &
                                    coordSys=ESMF_COORDSYS_CART, &
+                                   indexflag=ESMF_INDEX_GLOBAL, &
                                    rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     print*,'ERROR:  trouble creating locStream'
@@ -23248,7 +23261,6 @@ return
   ! Get key data.
   !-------------------------------------------------------------------
   call ESMF_LocStreamGetKey(dstLocStream,                    &
-                            localDE=0,                    &
                             keyName="ESMF:Y",                &
                             farray=Yarray,                   &
                             rc=localrc)
@@ -23258,7 +23270,6 @@ return
     return
   endif
   call ESMF_LocStreamGetKey(dstLocStream,                    &
-                            localDE=0,                    &
                             keyName="ESMF:X",                &
                             farray=Xarray,                   &
                             rc=localrc)
@@ -23268,7 +23279,6 @@ return
     return
   endif
   call ESMF_LocStreamGetKey(dstLocStream,                    &
-                            localDE=0,                    &
                             keyName="ESMF:Mask",                &
                             farray=maskArray,                   &
                             rc=localrc)
@@ -23277,6 +23287,7 @@ return
     rc=ESMF_FAILURE
     return
   endif
+
 
   !-------------------------------------------------------------------
   ! Set key data.
@@ -23331,38 +23342,36 @@ return
       maskArray(2)=1
       maskArray(3)=0
     else if (localpet .eq. 1) then
-      Xarray(1)=2.0
-      Xarray(2)=0.0
-      Xarray(3)=1.0
+      Xarray(4)=2.0
+      Xarray(5)=0.0
+      Xarray(6)=1.0
 
-      Yarray(1)=0.0
-      Yarray(2)=1.0
-      Yarray(3)=1.0
+      Yarray(4)=0.0
+      Yarray(5)=1.0
+      Yarray(6)=1.0
 
-      maskArray(1)=0
-      maskArray(2)=0
-      maskArray(3)=0
+      maskArray(4)=0
+      maskArray(5)=0
+      maskArray(6)=0
     else if (localpet .eq. 2) then
-      Xarray(1)=2.0
-      Xarray(2)=0.0
-      Xarray(3)=1.0
+      Xarray(7)=2.0
+      Xarray(8)=0.0
+      Xarray(9)=1.0
+      Xarray(10)=1.5
+      Xarray(11)=2.0
 
-      Yarray(1)=1.0
-      Yarray(2)=2.0
-      Yarray(3)=2.0
+      Yarray(7)=1.0
+      Yarray(8)=2.0
+      Yarray(9)=2.0
+      Yarray(10)=1.5
+      Yarray(11)=2.0
 
-      maskArray(1)=0
-      maskArray(2)=0
-      maskArray(3)=0
-    else if (localpet .eq. 3) then
-      Xarray(1)=1.5
-      Xarray(2)=2.0
-
-      Yarray(1)=1.5
-      Yarray(2)=2.0
-
-      maskArray(1)=2
-      maskArray(2)=0
+      maskArray(7)=0
+      maskArray(8)=0
+      maskArray(9)=0
+      maskArray(10)=2
+      maskArray(11)=0
+!    else if (localpet .eq. 3) then
     endif
   endif
 
@@ -23426,7 +23435,7 @@ return
   endif
 
   ! loop through nodes and make sure interpolated values are reasonable
-  do i1=1,numLocationsOnThisPet
+  do i1=cl,cu
 
         if (maskArray(i1) .gt. 0) then
 	  if ( abs( farrayPtr1D(i1) ) > 0.0001) then
@@ -23438,6 +23447,7 @@ return
           y=Yarray(i1)
 
           if ( abs( farrayPtr1D(i1)-(x+y+20.0) ) > 0.0001) then
+             print*,'ERROR: expecting ',x+y+20.0,'  got ',abs(farrayPtr1d(i1))
              correct=.false.
           endif
         endif
@@ -23480,7 +23490,6 @@ return
   endif
 
  end subroutine test_regridMeshToLocStreamMask
-
 
 
  subroutine test_regridCollapsedQuads(rc)

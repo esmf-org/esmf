@@ -232,17 +232,13 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeAdd(field1, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field1, name1, value1, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field1, name2, value2, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field1, name3, value3, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field1, name4, value4, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     field12 = ESMF_FieldCreate(grid1, arrayspec=arrayspec, &
@@ -250,17 +246,13 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeAdd(field12, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field12, name1, value1, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field12, name2, value2, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field12, name3, value3, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field12, name4, value4, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     field2 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
@@ -268,36 +260,28 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeAdd(field2, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field2, name1, value1, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field2, name2, value2, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field2, name3, value3, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(field2, name4, value4, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid1,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid1,'RegDecompX', 96, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid1,'RegDecompY', 84, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeAdd(grid2,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid2,'RegDecompX', 96, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid2,'RegDecompY', 84, &
-      convention=convESMF, purpose=purpGen, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -411,17 +395,16 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     ! Modify Attributes on one Field in the FieldBundle
     call ESMF_AttributeGetAttPack(field1, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(field1, name2, value2, attpack=attpack, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+    call ESMF_AttributeSet(field1, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeAdd(field1, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field1, attrList(1), valueList(1), &
-      convention=convESMF, purpose=purp2, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field1, attrList(2), valueList(2), &
-      convention=convESMF, purpose=purp2, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeRemove(field1, name=name3, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -431,7 +414,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeGetAttPack(grid_from_field1, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(grid_from_field1, 'RegDecompX', 106, &
-      attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(1), rc=status)
@@ -441,7 +424,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeGetAttPack(grid_from_field12, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(grid_from_field12, 'RegDecompX', 126, &
-      attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(2), rc=status)
@@ -451,7 +434,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeGetAttPack(grid_from_fb, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(grid_from_fb, 'RegDecompX', 306, attpack=attpack, &
-      attnestflag=ESMF_ATTNEST_ON, rc=status)
+      rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(3), rc=status)
@@ -465,7 +448,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     call ESMF_AttributeGetAttPack(grid_from_field2, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(grid_from_field2, 'RegDecompX', 206, &
-      attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=status)
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(4), rc=status)
@@ -811,8 +794,7 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
 	call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_AttributeGet(field1, name2, value=outVal, attpack=attpack, &
-                           attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    call ESMF_AttributeGet(field1, name2, value=outVal, attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value", &
                       "PET: ", localPet, "outVal: ", trim(outVal), &
                       "expected: ", trim(value2)
