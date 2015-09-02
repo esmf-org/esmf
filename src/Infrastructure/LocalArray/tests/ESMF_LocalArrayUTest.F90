@@ -35,6 +35,7 @@
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
     logical:: localarrayBool
+    logical:: isCreated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -61,6 +62,25 @@
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
  
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_LocalArrayIsCreated(array1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_LocalArrayIsCreated(array1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
+
     !--------------------------------------------------------------------------
     !NEX_UTest
     ! Allocate and set initial data values, using a lower bound != 1
@@ -75,12 +95,52 @@
     array1 = ESMF_LocalArrayCreate(intptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
+
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_LocalArrayIsCreated(array1)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_LocalArrayIsCreated(array1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
+
+
     !--------------------------------------------------------------------------
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     write(name, *) "Local Array Destroy Test"
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_LocalArrayIsCreated(array1)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing LocalArray IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_LocalArrayIsCreated(array1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+
 
     deallocate(intptr)
 
