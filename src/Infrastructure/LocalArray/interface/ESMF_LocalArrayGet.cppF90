@@ -383,6 +383,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_LocalArrayGetDefault
 !------------------------------------------------------------------------------
 
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+TypeKindRankDeclarationMacro(LocalArrayGetData)
+
+!------------------------------------------------------------------------------
+
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayIsCreated()"
@@ -411,14 +421,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-TypeKindRankDeclarationMacro(LocalArrayGetData)
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 

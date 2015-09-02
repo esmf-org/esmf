@@ -521,12 +521,14 @@ contains
 
       do j=cl,cu
         masked_value=.false.
+        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.
             exit
           endif
         enddo
+        endif
         if (.not. masked_value) num_local_pts = num_local_pts + 1  
       enddo
     enddo
@@ -596,12 +598,14 @@ contains
 
       do j=cl,cu
         masked_value=.false.
+        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.
             exit
           endif
         enddo
+        endif
         if (.not. masked_value) then
           mycoords(1)=farrayPtrX(j)
           mycoords(2)=farrayPtrY(j)

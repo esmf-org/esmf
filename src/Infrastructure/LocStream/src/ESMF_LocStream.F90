@@ -3318,6 +3318,11 @@ end subroutine ESMF_LocStreamGetBounds
         integer                          :: localrc
         character(len=6)                 :: defaultopts
         integer                          :: i
+        type(ESMF_TypeKind_Flag)              :: keyKind
+        real(ESMF_KIND_R8), pointer :: tmpR8(:)
+        real(ESMF_KIND_R4), pointer :: tmpR4(:)
+        integer(ESMF_KIND_I4), pointer :: tmpI4(:)
+        integer                          :: cl,cu,j
 
         ! Initialize
         localrc = ESMF_RC_NOT_IMPL
@@ -3350,6 +3355,45 @@ end subroutine ESMF_LocStreamGetBounds
            write(ESMF_UtilIOStdout,*) "   ",trim(lstypep%keyNames(i)),     &
                                       " - ",trim(lstypep%keyLongNames(i)), &
                                       "    ",trim(lstypep%keyUnits(i))
+
+
+          call ESMF_LocStreamGetKey(locstream,lstypep%keyNames(i),typekind=keyKind,rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (keyKind .eq. ESMF_TYPEKIND_I4) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpI4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpI4(j)
+            enddo
+          else if (keyKind .eq. ESMF_TYPEKIND_R4) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpR4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpR4(j)
+            enddo
+          else if (keyKind .eq. ESMF_TYPEKIND_R8) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpR8, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpR8(j)
+            enddo
+          else
+            if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+              msg=" - unknown typekind for LocStream key", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
         enddo
 
         write(ESMF_UtilIOStdout,*) "LocStream Print Ends   ====>"
