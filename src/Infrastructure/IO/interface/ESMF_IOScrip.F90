@@ -76,7 +76,7 @@
 !
 ! !INTERFACE:
   subroutine ESMF_ScripInq(filename, grid_size, grid_corners, &
-			  grid_dims, grid_rank,rc)
+			  grid_dims, grid_rank, has_area, rc)
 
 ! !ARGUMENTS:
  
@@ -85,12 +85,14 @@
     integer, intent(out), optional :: grid_corners
     integer, intent(out), optional :: grid_dims(:)
     integer, intent(out), optional :: grid_rank
+    logical, intent(out), optional :: has_area
     integer, intent(out), optional :: rc
 
     integer:: localrc, ncStatus
     integer :: DimId, VarId
     integer :: ncid, local_rank
     character(len=256) :: errmsg
+    integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
@@ -188,6 +190,14 @@
         errmsg,&
         rc)) return
     end if
+    if (present(has_area)) then
+      ncStatus = nf90_inq_varid (ncid, "grid_area", VarId)
+      if (ncStatus /= nf90_noerror) then
+        has_area = .false.
+      else
+        has_area = .true.
+      endif
+    endif
     ncStatus = nf90_close(ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -659,12 +669,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical            :: srchasbound, dsthasbound
       logical            :: useSrcCornerlocal, useDstCornerlocal
       type(ESMF_NormType_Flag):: localNormType
+      logical            :: src_has_area, dst_has_area
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
       ! first find out the starting index of my portion of table
       ! Global reduce
 
+      src_has_area = .false.
+      dst_has_area = .false.
       if (present(srcFileType)) then
 	  srcFileTypeLocal = srcFileType
       else 
@@ -882,7 +895,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then 
           allocate(src_grid_dims(2))
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
-	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
+	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, &
+	      has_area=src_has_area, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
 	  ! by SCRIP, thus some of the SCRIP files did not set this value correctly.
           ! This causes the scrip_test generating wrong output data, i.e.
@@ -918,7 +932,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 src_grid_corner =3
 	  else
             call ESMF_EsmfInq(srcFile, elementCount=srcDim, maxNodePElement=src_grid_corner, &
-	        coordDim = srcCoordDim, nodeCount=srcNodeDim, rc=status)
+	        coordDim = srcCoordDim, nodeCount=srcNodeDim, haveArea=src_has_area, rc=status)
 	  endif
           call ESMF_EsmfInqUnits(srcFile,units = srcunits, rc=status)
           allocate(src_grid_dims(1))
@@ -948,7 +962,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         if (dstFileTypelocal == ESMF_FILEFORMAT_SCRIP) then
           allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
-	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
+	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, &
+	     has_area=dst_has_area, rc=status)
 	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
 	  ! by SCRIP, thus some of the SCRIP files did not set this value correctly.
           ! This causes the scrip_test generating wrong output data, i.e.
@@ -984,7 +999,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 dst_grid_corner =3
 	  else
             call ESMF_EsmfInq(dstFile, elementCount=dstDim, maxNodePElement=dst_grid_corner, &
-	      coordDim = dstCoordDim, nodeCount=dstNodeDim, rc=status)    
+	      coordDim = dstCoordDim, nodeCount=dstNodeDim, haveArea=dst_has_area, rc=status)    
 	  endif
           call ESMF_EsmfInqUnits(dstFile,units = dstunits, rc=status)
           allocate(dst_grid_dims(1))
@@ -1426,6 +1441,22 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	     errmsg,&
              rc)) return
            deallocate(mask)
+
+	   if (src_has_area .and. .not. present(srcArea)) then
+              allocate(area(srcDim))
+              call ESMF_ScripGetVar(srcFile, grid_area=area, rc=status)
+              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+         	  ESMF_CONTEXT, rcToReturn=rc)) return
+              ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
+              ncStatus=nf90_put_var(ncid,VarId, area)          
+              errmsg = "Variable area_a in "//trim(wgtfile)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        errmsg,&
+                rc)) return
+              deallocate(area)
+           endif
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then 
            allocate(lonBuffer(srcDim), latBuffer(srcDim))
            if (src_ndims == 1) then
@@ -1578,6 +1609,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"
+             src_has_area = .false.
 	   else
              ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
 	     varStr = "centerCoords"
@@ -1676,6 +1708,29 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(mask)
+	   if (src_has_area .and. .not. present(srcArea)) then   
+	     allocate(area(srcDim))         
+             ncStatus=nf90_inq_varid(ncid1,"elementArea",VarId)
+             errmsg = "Variable elementArea in "//trim(srcFile)
+             if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+             ncStatus=nf90_get_var(ncid1,VarId, area)
+             errmsg = "Variable elementArea in "//trim(srcFile)
+             if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+             ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
+             ncStatus=nf90_put_var(ncid,VarId, area)          
+             errmsg = "Variable mask_a in "//trim(wgtfile)
+             if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,errmsg,&
+               rc)) return
+             deallocate(area)
+           endif
            ncStatus=nf90_close(ncid1)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
@@ -1845,6 +1900,21 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
          deallocate(mask)
+	 if (dst_has_area .and. .not. present(dstArea)) then
+              allocate(area(dstDim))
+              call ESMF_ScripGetVar(dstFile, grid_area=area, rc=status)
+              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+         	  ESMF_CONTEXT, rcToReturn=rc)) return
+              ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
+              ncStatus=nf90_put_var(ncid,VarId, area)          
+              errmsg = "Variable area_b in "//trim(wgtfile)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+  	        errmsg,&
+                rc)) return
+              deallocate(area)
+         endif
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then 
            allocate(lonBuffer(dstDim), latBuffer(dstDim))
 	   ! check if bound variables exist or not
@@ -1994,6 +2064,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"
+             dst_has_area = .false.
 	   else
              ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
 	     varStr = "centerCoords"
@@ -2091,6 +2162,29 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(mask)
+	   if (dst_has_area .and. .not. present(dstArea)) then   
+	     allocate(area(dstDim))         
+             ncStatus=nf90_inq_varid(ncid1,"elementArea",VarId)
+             errmsg = "Variable elementArea in "//trim(dstFile)
+             if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+             ncStatus=nf90_get_var(ncid1,VarId, area)
+             errmsg = "Variable elementArea in "//trim(dstFile)
+             if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+             ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
+             ncStatus=nf90_put_var(ncid,VarId, area)          
+             errmsg = "Variable mask_a in "//trim(wgtfile)
+             if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,errmsg,&
+               rc)) return
+             deallocate(area)
+           endif
            ncStatus=nf90_close(ncid1)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
@@ -2209,7 +2303,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return 
-         else
+         else if (.not. src_has_area) then
           ! Just set these to 0.0, because not provided
            allocate(area(srcDim))         
            area=0.0
@@ -2220,6 +2314,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
            deallocate(area)
+
          endif
 
          ! Write area_b
@@ -2231,12 +2326,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return 
-         else
+         else if (.not. dst_has_area) then
           ! Just set these to 0.0, because not provided
            allocate(area(dstDim))         
            area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)          
-           errmsg = "Variable area_a in "//trim(wgtfile)
+           errmsg = "Variable area_b in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
@@ -2500,7 +2595,7 @@ end subroutine ESMF_OutputScripVarFile
 ! !INTERFACE:
 subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
 	      		maxNodePElement, coordDim, &
-			haveNodeMask, haveElmtMask, rc)    
+			haveNodeMask, haveElmtMask, haveArea, rc)    
 
 ! !ARGUMENTS:
 
@@ -2511,6 +2606,7 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     integer, intent(out), optional :: coordDim
     logical, intent(out), optional :: haveNodeMask
     logical, intent(out), optional :: haveElmtMask
+    logical, intent(out), optional :: haveArea
     integer, intent(out), optional :: rc
 
     integer:: localrc, ncStatus
@@ -2607,6 +2703,16 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
            haveNodeMask = .true.
       else
 	   haveNodeMask = .false.
+      end if
+    end if
+
+    ! check if elementArea exit
+    if (present(haveArea)) then
+      ncStatus = nf90_inq_varid (ncid, "elementArea", VarId)
+      if (ncStatus == nf90_noerror) then
+           haveArea = .true.
+      else
+	   haveArea = .false.
       end if
     end if
 

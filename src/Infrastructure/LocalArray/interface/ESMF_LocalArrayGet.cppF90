@@ -218,6 +218,7 @@ character(*), parameter, private :: version = &
 ! !PUBLIC MEMBER FUNCTIONS:
 
   public ESMF_LocalArrayGet
+  public ESMF_LocalArrayIsCreated
   
 !==============================================================================
 ! 
@@ -381,6 +382,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_LocalArrayGetDefault
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayIsCreated()"
+!BOP
+! !IROUTINE: ESMF_LocalArrayIsCreated - Check whether a LocalArray object has been created
+
+! !INTERFACE:
+  function ESMF_LocalArrayIsCreated(array, rc)
+! !RETURN VALUE:
+    logical :: ESMF_LocalArrayIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_LocalArray), intent(in)            :: array
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt localarray} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ESMF_LocalArrayIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_LocalArrayGetInit(array)==ESMF_INIT_CREATED) &
+      ESMF_LocalArrayIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

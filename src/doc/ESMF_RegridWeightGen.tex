@@ -860,8 +860,10 @@ The variable {\tt nv} is a two-dimensional array that defines the node indices o
 defines the maximal number of nodes for each face. In this example, it is a
 triangle mesh so the number of nodes per face is 3.  Since each face may have different number of corner nodes,
 some of the cells may have fewer nodes than the specified dimension. In that case, it is filled with the
-missing values defined by the attribute {\tt \_FillValue}.  The nodes are in counter clockwise order.  An optional attribute
-{\tt start\_index} defines whether the node index is 1-based or 0-based.
+missing values defined by the attribute {\tt \_FillValue}.  If {\tt \_FillValue} is not defined, the default value
+is -1. The nodes are in counter clockwise order.  An optional attribute
+{\tt start\_index} defines whether the node index is 1-based or 0-based.  If {\tt start\_index} is not defined, 
+the default node index is 0-based.
 
 The coordinate variables follows the CF metadata convention for coordinates.  They are 1D array with attribute
 {\tt standard\_name} being either {\tt latitude} or {\tt longitude}.  The units of the coordinates can be either {\tt degrees} or {\tt radians}.

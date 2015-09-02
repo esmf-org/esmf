@@ -156,6 +156,7 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentID
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
+  public ESMF_VMIsCreated
   public ESMF_VMLogMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint

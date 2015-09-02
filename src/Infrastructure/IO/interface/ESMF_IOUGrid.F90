@@ -1046,7 +1046,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ! number of corner nodes
     errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-    if (ncStatus /= nf90_noerror) localFillValue = 0
+    if (ncStatus /= nf90_noerror) localFillValue = -1
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based

@@ -389,10 +389,10 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer             :: localrc      ! local return code
-    integer             :: i,j,k,dimcount,regrid_dims, num_local_pts
+    integer             :: i,j,k,dimcount,regrid_dims, num_local_pts, num_maskValues
     integer             :: cl,cu,cc
     integer             :: localDECount,lDE
-    logical             :: isPresent,maskPresent,masked_value
+    logical             :: d3Present,maskPresent,masked_value
     character(len=ESMF_MAXSTR)    :: keystring
     character(len=ESMF_MAXSTR), pointer  :: myKeyNames(:)
     type(ESMF_Array),pointer           :: myKeyArrays(:)
@@ -412,6 +412,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     pointlist%this = ESMF_NULL_POINTER
+
 
     call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, localDECount=localDECount, &
                            distgrid=distgridOut, rc=localrc)
@@ -457,19 +458,27 @@ contains
     endif
     !only deal with third dimension if it's present
     call ESMF_LocStreamGetKey(locstream, keyName=keystring, &
-                              isPresent=isPresent, rc=localrc)
+                              isPresent=d3Present, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if (isPresent) then
+    if (d3Present) then
       call ESMF_LocStreamGetKey(locstream, keyName=keystring, &
                                 keyArray=ZArr, rc=localrc)
-      if (.not. ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) then
-        dimcount = dimcount+1
-      else
-        return
-      endif
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      dimcount = dimcount+1
     endif
+
+    allocate(mycoords(dimcount), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_ESMC_PointListCalcCartDim(coordSysLocal, dimcount, regrid_dims, localrc)
+    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(cart_coords(regrid_dims), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     !only deal with mask info if it's present
     call ESMF_LocStreamGetKey(locstream, keyName='ESMF:Mask', &
@@ -483,181 +492,117 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    num_local_pts=0
     if (present(maskValues)) then
-      if(maskPresent) then
-        do lDE=0,localDECount-1
-          call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          do j=1,size(maskarray)
-            masked_value=.false.
-            do k=1,size(maskValues)
-              if (maskArray(j) .eq. maskValues(k)) then
-                masked_value=.true.
-                exit
-              endif
-            enddo
-            if (.not. masked_value) num_local_pts = num_local_pts + 1  
-          enddo
-        enddo
-      else
+      if (.not. maskPresent) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
              msg='- LocStream has no masking info for use with specified mask values', &
              ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
+      num_maskValues = size(maskValues)
     else
-      do lDE=0,localDECount-1
-        call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
+      num_maskValues = 0
+    endif
+
+    !must count the points first to create the pointlist with the proper size
+    num_local_pts=0
+    do lDE=0,localDECount-1
+      if (maskPresent) then
+        call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      call  ESMF_LocStreamGetBounds(locstream, localDE=lDE, &
+                              computationalLBound=cl, computationalUBound=cu, &
+                              rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        num_local_pts = num_local_pts + size(farrayPtrX)
-      enddo
-    endif 
 
-    allocate(mycoords(dimcount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call c_ESMC_PointListCalcCartDim(coordSysLocal, dimcount, regrid_dims, localrc)
-    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(cart_coords(regrid_dims), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, rc=localrc)
-
-
-    if (present(maskValues)) then
-      if(maskPresent) then
-        do lDE=0,localDECount-1
-          call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (dimcount .eq. 3) then
-            call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+      do j=cl,cu
+        masked_value=.false.
+        do k=1,num_maskValues
+          if (maskArray(j) .eq. maskValues(k)) then
+            masked_value=.true.
+            exit
           endif
-          ! Allocate space for seqInd 
-          allocate(seqInd(size(farrayPtrX)), stat=localrc)
-          if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_DistGridGet(distgridOut, localDe=lDE, &
-                                seqIndexList=seqInd, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-              msg='- coord arrays must be equal in size and greater than size 0', &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-          endif
-
-          if (dimcount .eq. 3 ) then
-	    if (size(farrayPtrZ) .ne. size(farrayPtrX)) then
-              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                msg='- coord arrays must be equal in size and greater than size 0', &
-                ESMF_CONTEXT, rcToReturn=rc)
-              return
-            endif
-          endif
-
-          call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-          if (size(maskarray) .ne. size(farrayPtrX)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-              msg='- mask array must be equal in size to coordinate arrays', &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-          endif
-
-          do j=1,size(maskArray)
-            masked_value=.false.
-            do k=1,size(maskValues)
-              if (maskArray(j) .eq. maskValues(k)) then
-                masked_value=.true.
-                exit
-              endif
-            enddo
-            if (.not. masked_value) then
-              mycoords(1)=farrayPtrX(j)
-              mycoords(2)=farrayPtrY(j)
-              if (dimcount .eq. 3) mycoords(3)=farrayPtrZ(j)
-
-              call c_ESMC_PointListSph2CartCoord(coordSysLocal, dimcount, mycoords, &
-                                                 cart_coords, localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-
-              call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j), &
-                                     loc_coords=cart_coords, rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-          enddo
-          deallocate(seqInd, stat=localrc)
-          if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-      else
+        if (.not. masked_value) num_local_pts = num_local_pts + 1  
+      enddo
+    enddo
+
+    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !now we add the points
+    do lDE=0,localDECount-1
+      call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if (dimcount .eq. 3) then
+        call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      !Allocate space for seqInd 
+      allocate(seqInd(size(farrayPtrX)), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_DistGridGet(distgridOut, localDe=lDE, &
+                            seqIndexList=seqInd, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call  ESMF_LocStreamGetBounds(locstream, localDE=lDE, &
+                              computationalLBound=cl, computationalUBound=cu, &
+                              rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      cc=cu-cl+1
+
+      if (size(farrayPtrX) .ne. size(farrayPtrY) .or. size(farrayPtrX) .ne. cc) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-          msg='- LocStream has no masking info for use with specified mask values', &
+          msg='- coord arrays must be equal in size and greater than size 0', &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-    else
-      do lDE=0,localDECount-1
-        call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        if (dimcount .eq. 3) then
-          call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-        ! Allocate space for seqInd 
-        allocate(seqInd(size(farrayPtrX)), stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_DistGridGet(distgridOut, localDe=lDE, &
-                              seqIndexList=seqInd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (size(farrayPtrX) .eq. 0 .or. size(farrayPtrX) .ne. size(farrayPtrY)) then
+      if (dimcount .eq. 3 ) then
+        if (size(farrayPtrZ) .ne. size(farrayPtrX)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg='- coord arrays must be equal in size and greater than size 0', &
             ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
+      endif
 
-        if (dimcount .eq. 3 ) then
-          if (size(farrayPtrZ) .ne. size(farrayPtrX)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-              msg='- coord arrays must be equal in size and greater than size 0', &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-          endif
-        endif
-
-        call  ESMF_LocStreamGetBounds(locstream, localDE=lDE, &
-                                computationalLBound=cl, computationalUBound=cu, &
-                                computationalCount=cc, &
-                                rc=localrc)
+      if (maskPresent) then
+        call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
-        do j=cl,cu
+        if (size(maskarray) .ne. size(farrayPtrX)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg='- mask array must be equal in size to coordinate arrays', &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
+      endif
+
+      do j=cl,cu
+        masked_value=.false.
+        do k=1,num_maskValues
+          if (maskArray(j) .eq. maskValues(k)) then
+            masked_value=.true.
+            exit
+          endif
+        enddo
+        if (.not. masked_value) then
           mycoords(1)=farrayPtrX(j)
           mycoords(2)=farrayPtrY(j)
           if (dimcount .eq. 3) mycoords(3)=farrayPtrZ(j)
@@ -665,23 +610,18 @@ contains
           call c_ESMC_PointListSph2CartCoord(coordSysLocal, dimcount, mycoords, &
                                              cart_coords, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1),loc_coords=cart_coords, &
-                                 rc=localrc)
+          call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
+                                 loc_coords=cart_coords, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        enddo
-        deallocate(seqInd, stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
       enddo
-    endif 
-
-    call c_ESMC_PointListSort(pointlist, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      deallocate(seqInd, stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
 
     deallocate(mycoords, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
@@ -700,6 +640,7 @@ contains
 
   end function ESMF_PointListCreateFrmLocStream
 !------------------------------------------------------------------------------
+
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListCreateFrmInput"
@@ -1059,7 +1000,5 @@ contains
  
   end subroutine ESMF_PointListPrint
 !------------------------------------------------------------------------------
-
-
 
 end module ESMF_PointListMod

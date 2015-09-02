@@ -37,6 +37,8 @@
     character(*), parameter :: version = &
       '$Id$'
 
+    type(ESMF_XGrid)                    :: xgrid
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
 
@@ -47,9 +49,79 @@
     character(ESMF_MAXSTR) :: failMsg
     character(512) :: name
 
+    logical :: isCreated
+
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
+    !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_XGridIsCreated(xgrid)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_XGridIsCreated(xgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test XGrid for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  xgrid = ESMF_XGridCreate(sideAGrid=(/make_grid(4,8,1.,1.,0.,0.,rc=rc)/), &
+                           sideBGrid=(/make_grid(4,8,0.7,0.7,0.,0.,rc=rc)/), &
+                           rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_XGridIsCreated(xgrid)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_XGridIsCreated(xgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test XGrid for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_XGridDestroy(xgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_XGridIsCreated(xgrid)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_XGridIsCreated(xgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Create an empty XGrid with area/centroid, sparseMatA2X

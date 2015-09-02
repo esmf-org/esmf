@@ -123,8 +123,7 @@ module user_model3
 
     call ESMF_AttributeSet(comp, 'ShortName', &
                            'EarthSys_AtmosDynCore', &
-      convention=convCIM, purpose=purpComp, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convCIM, purpose=purpComp,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  1) Name of component in navigator bar on the left; 
     !                  attribute 'Version' appended, if set.
@@ -135,29 +134,25 @@ module user_model3
 
     call ESMF_AttributeSet(comp, 'LongName', &
                            'Dynamical core of EarthSys_Atmos', &
-      convention=convCIM, purpose=purpComp, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
     !               under title, prepended to attribute 'SimulationLongName'.
 
     call ESMF_AttributeSet(comp, 'Description', &
       'The dynamical core of the EarthSys atmosphere model.', &
-        convention=convCIM, purpose=purpComp, &
-        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Description:" in top box.
 
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-10-31T23:59:59Z', &
-        convention=convCIM, purpose=purpComp, &
-        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Release Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'atmosphere', convention=convCIM, purpose=purpComp, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      'atmosphere', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Maps to "Realm:", expanded under component name, in 
     !               navigator bar on the left.
@@ -171,29 +166,25 @@ module user_model3
 
     call ESMF_AttributeSet(comp, 'Name', &
      'Jane Doe', &
-      convention=convISO, purpose=purpRP, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Name" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology, University of ABC', &
-      convention=convISO, purpose=purpRP, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
      'jane.doe@earthatm.org', &
-      convention=convISO, purpose=purpRP, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Email" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Contact', &
-      convention=convISO, purpose=purpRP, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
@@ -206,8 +197,7 @@ module user_model3
 
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2006', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
@@ -217,38 +207,33 @@ module user_model3
      'The Earth System High Resolution Global Model - ' // &
      'Atmosphere Dynamical Core model description . Journal of ' // &
      'Earth Modeling, 12 (4). 1561-1596.', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
      '2006-06-08', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
      'Online Refereed', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
      'doi:14.1032/2006JCLI4505.1', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
-      convention=convISO, purpose=purpCitation, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it).
 
@@ -271,8 +256,7 @@ module user_model3
     call ESMF_AttributeSet(comp, &
       'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables', &
         valueList=sciPropVal, itemCount=4, &
-      convention=convCIM, purpose=purpSci, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convCIM, purpose=purpSci, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
@@ -280,8 +264,7 @@ module user_model3
     call ESMF_AttributeSet(comp, &
       'AtmosphereAtmosDynamicalCoreTopBoundaryCondition', &
         'radiation boundary condition', &
-      convention=convCIM, purpose=purpSci, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convCIM, purpose=purpSci, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
@@ -300,50 +283,43 @@ module user_model3
 
     ! Ozone CF-Extended Attributes
     call ESMF_AttributeSet(Ozone, 'ShortName', 'Global_O3_mon', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
     call ESMF_AttributeSet(Ozone, 'StandardName', 'Ozone', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(Ozone, 'LongName', 'Ozone', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(Ozone, 'Units', 'kg/m3', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! Ozone CIM Attributes
     call ESMF_AttributeSet(Ozone, 'CouplingPurpose', 'Boundary', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(Ozone, 'CouplingSource', &
                                   'EarthSys_AtmosDynCore', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(Ozone, 'CouplingTarget', &
                                   'EarthSys_Atmos', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
@@ -351,36 +327,31 @@ module user_model3
     call ESMF_AttributeSet(Ozone, 'Description', &
                                   'Global Ozone concentration ' // &
                                   'monitoring in the atmosphere.', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(Ozone, 'SpatialRegriddingMethod', &
                                   'Conservative-Second-Order', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(Ozone, 'SpatialRegriddingDimension', &
                                   '3D', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(Ozone, 'Frequency', '20 Days', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Frequency" under tab "Inputs", under field name.
 
     call ESMF_AttributeSet(Ozone, 'TimeTransformationType', &
                                   'TimeInterpolation', &
-         convention=convCIM, purpose=purpField, &
-          attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
@@ -394,8 +365,7 @@ module user_model3
 
     ! UM CF-Extended Attributes
     call ESMF_AttributeSet(UM, 'ShortName', 'UM_Initial_1960', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
@@ -403,24 +373,21 @@ module user_model3
     ! UM CIM Attributes
     call ESMF_AttributeSet(UM, 'CouplingPurpose', &
                                'Initial', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(UM, 'CouplingSource', &
                                'EarthSys_AtmosDynCore', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(UM, 'CouplingTarget', &
                                'EarthSys_Atmos', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
@@ -428,23 +395,20 @@ module user_model3
     call ESMF_AttributeSet(UM, 'Description', &
                                'Initialization start ' // &
                                'data for 0000UTC 1st Jan 1960.', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(UM, 'SpatialRegriddingMethod', &
                                'Linear', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
    if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(UM, 'TimeTransformationType', &
                                'Exact', &
-         convention=convCIM, purpose=purpField, &
-         attnestflag=ESMF_ATTNEST_ON, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
@@ -493,8 +457,7 @@ module user_model3
     attrVal = "Test change"
     call ESMF_AttributeSet(comp, name="Name", &
       value=attrVal, &
-      convention=convCIM, purpose=purpComp, &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
 

@@ -81,9 +81,6 @@ program ESMF_AttReadCplCompUTest
       ! coupler component
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
 
-! TODO:  resolve
-print *, "this print statement prevents mpi abort!"
-
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! assume Xerces XML C++ API library present until proven otherwise

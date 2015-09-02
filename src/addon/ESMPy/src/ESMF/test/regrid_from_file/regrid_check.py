@@ -21,7 +21,8 @@ except:
     raise ImportError('The ESMF library cannot be found!')
 
 from ESMF.test.regrid_from_file.regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL
-from ESMF.test.test_api.grid_utilities import compute_mass_grid as compute_mass
+from ESMF.test.test_api.grid_utilities import compute_mass_grid
+from ESMF.test.test_api.mesh_utilities import compute_mass_mesh
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
@@ -46,7 +47,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
                          meshname=meshname,
                          convert_to_dual=convert_to_dual)
         is_mesh = True
-        add_mask = None
+        add_mask = False
     else:
         print "Creating ESMF.Grid object"
         add_mask = (missingvalue is not None) and (len(missingvalue) > 0)
@@ -56,13 +57,19 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
                                  varname=missingvalue)
     return grid_or_mesh, is_mesh, add_mask
 
-def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
+def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
     if is_mesh:
-        coords_interleaved, num_nodes, num_dims = ESMF.ESMP_MeshGetCoordPtr(grid_or_mesh)
-        lons = np.array([coords_interleaved[2*i] for i in range(num_nodes)])
-        lats = np.array([coords_interleaved[2*i+1] for i in range(num_nodes)])
+        if regrid_method == ESMF.RegridMethod.CONSERVE:
+            print "Calling ESMP_MeshGetElemCoordPtr"
+            coords_interleaved, num_coords, num_dims = ESMF.ESMP_MeshGetElemCoordPtr(grid_or_mesh)
+        else:
+            print "Calling ESMP_MeshGetCoordPtr"
+            coords_interleaved, num_coords, num_dims = ESMF.ESMP_MeshGetCoordPtr(grid_or_mesh)
+        lons = np.array([coords_interleaved[2*i] for i in range(num_coords)])
+        lats = np.array([coords_interleaved[2*i+1] for i in range(num_coords)])
     else:
         # get the data pointer and bounds of the ESMF allocation
+        print "Calling ESMP_GridGetCoordPtr"
         lonptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 0, staggerloc=ESMF.StaggerLoc.CENTER)
         latptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 1, staggerloc=ESMF.StaggerLoc.CENTER)
         lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
@@ -76,6 +83,9 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
         else:
             lons = ESMF.esmf_array(lonptr, grid_or_mesh.type, ub - lb)
             lats = ESMF.esmf_array(latptr, grid_or_mesh.type, ub - lb)
+
+    print "lons=",lons
+    print "lats=",lats
 
     lons = np.radians(lons)
     lats = np.radians(lats)
@@ -198,9 +208,11 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
             if (err < min_error):
                 min_error = err
 
+    print 'mass1 = %15.11e' % mass1
+    print 'mass2 = %15.11e' % mass2
     # gather error on processor 0 or set global variables in serial case
-    mass1_global = 0
-    mass2_global = 0
+    mass1_global = 0.
+    mass2_global = 0.
     if parallel:
         # use mpi4py to collect values
         from mpi4py import MPI
@@ -221,15 +233,21 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
             mass1_global = mass1
             mass2_global = mass2
 
+    print 'mass1_global = %15.20e' % mass1_global
+    print 'mass2_global = %15.20e' % mass2_global
+
     # compute relative error measures and compare against tolerance values
     itrp_mean = False
     itrp_max = False
     csrv = False
     if ESMF.local_pet() == 0:
-        if mass1_global == 0:
+        if mass1_global == 0.:
             csrv_error_global = abs(mass2_global - mass1_global)
         else:
+            print 'm1glob = %15.20e' % mass1_global
+            print 'm2glob = %15.20e' % mass2_global
             csrv_error_global = abs(mass2_global - mass1_global)/abs(mass1_global)
+            print 'csrverrglob = %15.11e' % csrv_error_global
 
         # compute mean relative error
         if num_nodes_global != 0:
@@ -264,6 +282,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         print "PET{0} - FAIL".format(ESMF.local_pet())
 
     return correct
+
 def parse_options(options):
         options = options.split()
         opts, args = getopt(options,'it:p:r', ['src_type=', 'dst_type=', 
@@ -357,9 +376,11 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
                                                     add_corner_stagger=add_corner_stagger,
                                                     missingvalue=dst_missingvalue)
 
-    # Get node coordinates in radians
-    src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
-    dst_lons, dst_lats = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh)
+    # Get coordinates in radians.
+    src_lons, src_lats = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh, 
+                                                      regrid_method)
+    dst_lons, dst_lats = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh, 
+                                                      regrid_method)
     
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', 
@@ -390,15 +411,21 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
     srcmass = None
     dstmass = None
     if regrid_method == ESMF.RegridMethod.CONSERVE:
-        # create the area fields
-        srcareafield = create_field(srcgrid, 'srcareafield', 
-                        regrid_method=regrid_method)
-        dstareafield = create_field(dstgrid, 'dstareafield', 
-                        regrid_method=regrid_method)
+        if src_is_mesh:
+            print "src_is_mesh"
+            srcmass = compute_mass_mesh(srcfield, dofrac=True, 
+                                        fracfield=srcfracfield)
+        else:
+            print "src_is_grid"
+            srcmass = compute_mass_grid(srcfield, dofrac=True, 
+                                        fracfield=srcfracfield)
+        if dst_is_mesh:
+            print "dst_is_mesh"
+            dstmass = compute_mass_mesh(dstfield, uninitval=UNINITVAL)
+        else:
+            print "dst_is_grid"
+            dstmass = compute_mass_grid(dstfield, uninitval=UNINITVAL)
 
-        srcmass = compute_mass(srcfield, srcareafield, 
-                            dofrac=True, fracfield=srcfracfield)
-        dstmass = compute_mass(dstfield, dstareafield, uninitval=UNINITVAL)
     else:
         srcfracfield.destroy()
         dstfracfield.destroy()
@@ -418,8 +445,6 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
     if regrid_method == ESMF.RegridMethod.CONSERVE: 
         srcfracfield.destroy()
         dstfracfield.destroy()
-        srcareafield.destroy()
-        dstareafield.destroy()
     srcgrid.destroy()
     dstgrid.destroy()
 

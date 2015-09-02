@@ -80,6 +80,7 @@ module ESMF_StateAPIMod
 
       public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
+      public ESMF_StateIsCreated
       public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateWriteRestart
@@ -1658,6 +1659,36 @@ StateGetMacro(ESMF_RouteHandle,RouteHandle,routehandle,rp)
 ^define stateversion
 StateGetMacro(ESMF_State,State,nestedState,spp)
 ^undef  stateversion
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateIsCreated()"
+!BOP
+! !IROUTINE: ESMF_StateIsCreated - Check whether an State object has been created
+
+! !INTERFACE:
+  function ESMF_StateIsCreated(state, rc)
+! !RETURN VALUE:
+    logical :: ESMF_StateIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(in)            :: state
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt state} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ESMF_StateIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_StateGetInit(state)==ESMF_INIT_CREATED) &
+      ESMF_StateIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
+
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

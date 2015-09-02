@@ -282,13 +282,19 @@ module NUOPC_Comp
 ! !DESCRIPTION:
 !   Egest the Attributes of the highest level of the standard NUOPC AttPack
 !   hierarchy (convention="NUOPC", purpose="Instance") as a FreeFormat object.
-!   It is the caller's responsibility to destroy the created freeFormat object.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
     integer                                         :: stat, i, attrCount
     character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
-
+    character(len=NUOPC_FreeFormatLen)              :: tempString
+    type(ESMF_TypeKind_Flag)                        :: tk
+    integer                                         :: k, itemCount
+    character(len=80), allocatable                  :: valueSL(:)
+    integer, allocatable                            :: valueIL(:)
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -302,24 +308,46 @@ module NUOPC_Comp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#if 1    
-print *, "attrCount=", attrCount
-#endif
-
     allocate(stringList(attrCount), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="stringList.", &
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, msg="stringList.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     do i=1, attrCount
+      ! pull out the name of the attribute
       call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
         attributeIndex=i, name=stringList(i), attnestflag=ESMF_ATTNEST_ON, &
-        rc=rc)
+        typekind=tk, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 1    
-print *, "stringList(",i,")=", stringList(i)
-#endif
+      if (tk==ESMF_TYPEKIND_CHARACTER) then
+        allocate(valueSL(itemCount))
+        call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+          name=stringList(i), attnestflag=ESMF_ATTNEST_ON, valueList=valueSL, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        tempString=stringList(i)
+        tempString=trim(tempString)//" = "
+        do k=1, itemCount
+          tempString=trim(tempString)//" "//valueSL(k)
+        enddo
+        deallocate(valueSL)
+        stringList(i)=trim(adjustl(tempString))
+      elseif (tk==ESMF_TYPEKIND_I4) then
+        allocate(valueIL(itemCount))
+        call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+          name=stringList(i), attnestflag=ESMF_ATTNEST_ON, valueList=valueIL, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        tempString=stringList(i)
+        tempString=trim(tempString)//" = "
+        do k=1, itemCount
+          write(tempString, *) trim(tempString)//" ", valueIL(k)
+        enddo
+        deallocate(valueIL)
+        stringList(i)=trim(adjustl(tempString))
+      endif
     enddo
     
     freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
@@ -340,18 +368,24 @@ print *, "stringList(",i,")=", stringList(i)
   subroutine NUOPC_CplCompAttributeEge(comp, freeFormat, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(in)            :: comp
-    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Egest the Attributes of the highest level of the standard NUOPC AttPack
 !   hierarchy (convention="NUOPC", purpose="Instance") as a FreeFormat object.
-!   It is the caller's responsibility to destroy the created freeFormat object.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
-    integer                                         :: i, lineCount, tokenCount
-    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
-
+    integer                                         :: stat, i, attrCount
+    character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
+    character(len=NUOPC_FreeFormatLen)              :: tempString
+    type(ESMF_TypeKind_Flag)                        :: tk
+    integer                                         :: k, itemCount
+    character(len=80), allocatable                  :: valueSL(:)
+    integer, allocatable                            :: valueIL(:)
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -359,7 +393,61 @@ print *, "stringList(",i,")=", stringList(i)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! query attrCount
+    call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+      count=attrCount, attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    allocate(stringList(attrCount), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, msg="stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    do i=1, attrCount
+      ! pull out the name of the attribute
+      call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+        attributeIndex=i, name=stringList(i), attnestflag=ESMF_ATTNEST_ON, &
+        typekind=tk, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (tk==ESMF_TYPEKIND_CHARACTER) then
+        allocate(valueSL(itemCount))
+        call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+          name=stringList(i), attnestflag=ESMF_ATTNEST_ON, valueList=valueSL, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        tempString=stringList(i)
+        tempString=trim(tempString)//" = "
+        do k=1, itemCount
+          tempString=trim(tempString)//" "//valueSL(k)
+        enddo
+        deallocate(valueSL)
+        stringList(i)=trim(adjustl(tempString))
+      elseif (tk==ESMF_TYPEKIND_I4) then
+        allocate(valueIL(itemCount))
+        call ESMF_AttributeGet(comp, convention="NUOPC", purpose="Instance", &
+          name=stringList(i), attnestflag=ESMF_ATTNEST_ON, valueList=valueIL, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        tempString=stringList(i)
+        tempString=trim(tempString)//" = "
+        do k=1, itemCount
+          write(tempString, *) trim(tempString)//" ", valueIL(k)
+        enddo
+        deallocate(valueIL)
+        stringList(i)=trim(adjustl(tempString))
+      endif
+    enddo
     
+    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    
+    deallocate(stringList, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
   
@@ -2208,7 +2296,7 @@ print *, "stringList(",i,")=", stringList(i)
 !   Try to find a routine called "{\tt SetServices}" in the {\tt sharedObj} file
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetServices}", allowing for compiler name
-!   mangeling, i.e. upper and lower case, as well as trailing underscores.
+!   mangling, i.e. upper and lower case, as well as trailing underscores.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2217,7 +2305,7 @@ print *, "stringList(",i,")=", stringList(i)
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! attempt to find something called SetServices, allowing variations
-    ! caused by compiler name mangeling
+    ! caused by compiler name mangling
     
     call ESMF_GridCompSetServices(comp, userRoutine="setservices", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
