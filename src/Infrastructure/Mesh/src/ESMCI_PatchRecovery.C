@@ -46,8 +46,7 @@ extern "C" void FTNX(dgelsd)(int *,int *, int*, double*, int*, double*,
 
 extern "C" void FTN_X(f_esmf_lapack_iworksize)(int *,int *);
 
-namespace ESMCI {
-
+  namespace ESMCI {
 
 template<typename NFIELD, typename Real>
 UInt PatchRecov<NFIELD,Real>::get_ncoeff(UInt dim, UInt deg) {
@@ -95,7 +94,7 @@ void eval_monomial2(UInt nsamples, UInt sample, UInt pdeg, const double coord[],
 
 /**
  * Needs a buffer of size buf(3*(pdeg+1)]
- */
+  */
 void eval_monomial3(UInt nsamples, UInt sample, UInt pdeg, const double coord[], double res[], double buf[]) {
   // Lay out 1 x x^2 x^2 ... 1 y y^2 y
   buf[0] = 1.0;
@@ -141,10 +140,18 @@ void eval_monomial3(UInt nsamples, UInt sample, UInt pdeg, const double coord[],
 
 } 
 
+// This is used in set creation so that things are sorted by id vs. pointer
+// sorting by pointer can result in different orders which can 
+// result in different values on different runs (not bfb). 
+struct CompUsingIds {
+  bool operator() (const MeshObj *lhs, const MeshObj *rhs) const
+  {return (lhs->get_id() < rhs->get_id());}
+};
+
 template<typename NFIELD, typename Real>
 void PatchRecov<NFIELD,Real>::eval_poly(UInt nsamples, UInt sample, UInt ldb, UInt cur_rhs, 
           UInt dim, std::vector<double> &mat, double coord[],
-                          std::vector<Real> &rhs, const Real fvals[], UInt fdim) {
+                           std::vector<Real> &rhs, const Real fvals[], UInt fdim) {
   if (pdeg == 0) {
     mat[0*nsamples + sample] = 1;
   } else if (dim == 2) {
@@ -664,8 +671,7 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
   std::vector<Real> rhs;
 
   // Get elements to use for generating patch
-
-  std::set<const MeshObj*> elems;
+  std::set<const MeshObj*,CompUsingIds> elems;
   MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
 
   // If there's a mask then use mask to avoid bad elements
