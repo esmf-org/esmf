@@ -82,9 +82,9 @@ RUN_ESMF_InitMacrosUTestUNI:
 #
 
 RUN_ESMF_ValIteratorUTest:
-	$(MAKE) TNAME=Util NP=4 ftest
+	$(MAKE) TNAME=ValIterator NP=4 ftest
 
 RUN_ESMF_ValIteratorUTestUNI:
-	$(MAKE) TNAME=Util NP=1 ftest
+	$(MAKE) TNAME=ValIterator NP=1 ftest
 
 
