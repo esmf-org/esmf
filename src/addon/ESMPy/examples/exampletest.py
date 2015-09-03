@@ -29,3 +29,6 @@ class TestExamples(TestBase):
 
     def test_meshlocstreamregrid(self):
         import mesh_locstream_regrid
+
+    def test_gridlocstreamregrid(self):
+        import grid_locstream_regrid

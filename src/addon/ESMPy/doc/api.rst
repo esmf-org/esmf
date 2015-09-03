@@ -12,15 +12,16 @@ Regridding between Fields is accomplished with the Regrid class.  All of these
 classes are explained in more detail in the sections provided by the links in
 the following table.
 
-=======================================  ==================================================
+=======================================  =============================================================================
 Class                                    Description
-=======================================  ==================================================
+=======================================  =============================================================================
 :class:`~ESMF.api.esmpymanager.Manager`  A manager class to initialize and finalize ESMF
 :class:`~ESMF.api.field.Field`           A data field built on a Grid or Mesh
 :class:`~ESMF.api.grid.Grid`             A structured grid for coordinate representation
 :class:`~ESMF.api.mesh.Mesh`             An unstructured grid for coordinate representation
+:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of unconnected points
 :class:`~ESMF.api.regrid.Regrid`         The regridding utility
-=======================================  ==================================================
+=======================================  =============================================================================
 
 
 ---------------

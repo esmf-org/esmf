@@ -12,7 +12,6 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 

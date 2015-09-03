@@ -7,7 +7,7 @@ The LocStream API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import Array1D
+from ESMF.api.array import esmf_array1D
 import ESMF.api.constants as constants
 from copy import copy
 from ESMF.util.slicing import get_formatted_slice
@@ -138,21 +138,24 @@ class LocStream(dict):
 
     def __setitem__(self, key, value):
         # check types
-        if not isinstance(value, (list, tuple, np.ndarray, Array1D)):
+        if not isinstance(value, (list, tuple, np.ndarray)):
             raise ValueError("type of value must be list, tuple, or numpy array")
         if type(value) is not np.ndarray:
             value = np.array(value)
         if len(value) != self.size:
             raise ValueError("value must be of length "+str(self.size))
 
+        keyvals = value
         if key not in self:
-            self.add(key, typekind=constants._Python2ESMFType[type(value[0])])
+            keyvals = self._add_(key, typekind=constants._Python2ESMFType[type(value[0])])
 
-        ret = dict.__setitem__(self, key, value)
+        ret = dict.__setitem__(self, key, keyvals)
+
+        keyvals[...] = value
 
         return ret
 
-    def add(self, key_name, typekind=None):
+    def _add_(self, key_name, typekind=None):
         '''
         Add a key to a LocStream. \n
         Required Arguments: \n
@@ -173,9 +176,9 @@ class LocStream(dict):
         key_ptr = ESMP_LocStreamGetKeyPtr(self.struct, key_name)
 
         # create an Array1D object out of the pointer
-        value = Array1D(key_ptr, dtype=typekind, size=self.size)
+        keyvals = esmf_array1D(key_ptr, dtype=typekind, size=self.size)
 
-        return value
+        return keyvals
 
     def copy(self):
         # shallow copy
@@ -220,4 +223,3 @@ class LocStream(dict):
     @property
     def singlestagger(self):
         return self._singlestagger
-
