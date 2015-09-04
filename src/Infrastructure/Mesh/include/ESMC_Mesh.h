@@ -232,7 +232,7 @@ ESMC_Mesh ESMC_MeshCreate(
 //    of 2, whereas a Mesh constructed of cubes would have one of 3.)
 //  \item[spatialDim]
 //  The number of coordinate dimensions needed to describe the locations of the nodes making up the Mesh. For a 
-//  manifold, the spatial dimesion can be larger than the parametric dim (e.g. the 2D 
+//  manifold, the spatial dimension can be larger than the parametric dim (e.g. the 2D 
 //  surface of a sphere in 3D space), 
 //   but it can't be smaller. 
 //  \item[rc]
@@ -381,6 +381,46 @@ void ESMC_MeshGetElemCoord(
 //
 //EOP
 //-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetConnectivity - Get Mesh connectivity
+//
+// !INTERFACE:
+void ESMC_MeshGetConnectivity(
+			 ESMC_Mesh mesh_in,     // in (required)
+			 double *connCoord,     // out
+			 int *nodesPerElem,  // out
+			 int *rc                // out
+			 );
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  NOTE: At this time the connectivity that is returned from this call is
+//        not necessarily in the same format as how it was passed into the
+//        creation routine.
+//
+// This call returns the connectivity of the given {\tt ESMC\_Mesh}
+// in the provided {\tt connCoord} buffer of doubles.  At completion, this
+// buffer is a 1-D array with the coordinates for the nodes of a given element
+// in counterclockwise order.  The {/tt nodesPerElem} buffer of integers
+// contains the number of nodes to expect per element.
+//
+// The arguments are:
+// \begin{description}
+// \item[mesh\_in] Mesh object.
+// \item[connCoord] Pointer to doubles.  The connectivity is returned here.
+// \item[nodesPerElem] Pointer to integers.  The number of nodes in each
+//    element.
+// \item[rc] Return code; equals {\tt ESMF\_SUCCESS} if there are no
+// errors.
+// \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 //BOPI

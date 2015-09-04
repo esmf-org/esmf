@@ -48,7 +48,7 @@ module config_subrs
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
       integer :: result = 0
-   
+      logical :: isCreated   
 
 
       character(*), parameter :: fname = 'ESMF_Resource_File_Sample.rc'
@@ -1460,6 +1460,71 @@ end module config_subrs
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for uncreated object"
+      write(failMsg, *) "Did not return .false."
+      isCreated = ESMF_ConfigIsCreated(cf)
+      call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for uncreated object"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      isCreated = ESMF_ConfigIsCreated(cf, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Create test Config for IsCreated"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      cf = ESMF_ConfigCreate(rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for created object"
+      write(failMsg, *) "Did not return .true."
+      isCreated = ESMF_ConfigIsCreated(cf)
+      call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for created object"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      isCreated = ESMF_ConfigIsCreated(cf, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Destroy test Config for IsCreated"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_ConfigDestroy(cf, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for destroyed object"
+      write(failMsg, *) "Did not return .false."
+      isCreated = ESMF_ConfigIsCreated(cf)
+      call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Testing Config IsCreated for destroyed object"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      isCreated = ESMF_ConfigIsCreated(cf, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !NEX_UTest

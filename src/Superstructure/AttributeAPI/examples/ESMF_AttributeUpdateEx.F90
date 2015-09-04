@@ -266,7 +266,7 @@ implicit none
 ! What 
 ! follows are the calls from the driver code that run the initialize, run, and finalize routines
 ! for each of the Components.  After these calls we will step through the first 
-! cycle as explained in the introduction, through the intialize routines of
+! cycle as explained in the introduction, through the initialize routines of
 ! gridded Component 1 to gridded Component 2 to the coupler Component.
 !EOE
 

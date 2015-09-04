@@ -271,6 +271,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !  public ESMF_GridGetCoordInd ! HOPEFULLY TEMPORARY SEPARATE INTERFACE
   public ESMF_GridGetDecompType
   
+  public ESMF_GridIsCreated
+
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
@@ -1250,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 ! \item[{[staggerLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
 !      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
@@ -1417,7 +1419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -1576,7 +1578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this determines the default array padding for a stagger. 
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
-!      center and the padding is all on the postive side.) 
+!      center and the padding is all on the positive side.) 
 ! \item[{[staggerLBound]}] 
 !      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
 !      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
@@ -15625,7 +15627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[array]
-!          An array into which to put the coordinate infomation. 
+!          An array into which to put the coordinate information. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -18654,7 +18656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[array]
-!          An array into which to put the item infomation. 
+!          An array into which to put the item information. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -19157,6 +19159,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
       end function ESMF_GridDeserialize
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridIsCreated()"
+!BOP
+! !IROUTINE: ESMF_GridIsCreated - Check whether a Grid object has been created
+
+! !INTERFACE:
+  function ESMF_GridIsCreated(grid, rc)
+! !RETURN VALUE:
+    logical :: ESMF_GridIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)            :: grid
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt grid} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_GridIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_GridGetInit(grid)==ESMF_INIT_CREATED) &
+      ESMF_GridIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

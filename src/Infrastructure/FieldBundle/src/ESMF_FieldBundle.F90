@@ -131,6 +131,7 @@ module ESMF_FieldBundleMod
   public ESMF_FieldBundleHalo
   public ESMF_FieldBundleHaloRelease
   public ESMF_FieldBundleHaloStore
+  public ESMF_FieldBundleIsCreated
   public ESMF_FieldBundlePrint
   public ESMF_FieldBundleRead
   public ESMF_FieldBundleRedist
@@ -1787,7 +1788,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle halo operation. After this call
+!   Release resources associated with a FieldBundle halo operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -1931,6 +1932,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleIsCreated()"
+!BOP
+! !IROUTINE: ESMF_FieldBundleIsCreated - Check whether a FieldBundle object has been created
+
+! !INTERFACE:
+  function ESMF_FieldBundleIsCreated(fieldbundle, rc)
+! !RETURN VALUE:
+    logical :: ESMF_FieldBundleIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt fieldbundle} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_FieldBundleIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldBundleGetInit(fieldbundle)==ESMF_INIT_CREATED) &
+      ESMF_FieldBundleIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundlePrint()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundlePrint - Print FieldBundle information
@@ -2035,7 +2064,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
+!     \item Only single tile Arrays within Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -2363,7 +2392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle redistribution. After this call
+!   Release resources associated with a FieldBundle redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -3143,7 +3172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle regrid operation. After this call
+!   Release resources associated with a FieldBundle regrid operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -4219,7 +4248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a FieldBundle sparse matrix multiplication. After this call
+!   Release resources associated with a FieldBundle sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -4350,7 +4379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination element in {\tt dstFieldBundle}. For this format to be a valid
 !     option source and destination FieldBundles must have matching number of
 !     tensor elements (the product of the sizes of all Field tensor dimensions).
-!     Under this condition an identiy matrix can be applied within the space of
+!     Under this condition an identity matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     The {\em size 4 format} is more general and does not require a matching
@@ -4941,7 +4970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only 1 DE per PET supported.
+!     \item Only single tile Arrays within Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -5081,20 +5110,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       ! Get and read the fields in the Bundle
       do i=1,fieldCount
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
-      if (.not. errorFound) then
+
       call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-      endif
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
     else
       do i=1,fieldCount
         ! Clear the IO object (only need to do this for i > 1)
@@ -5102,20 +5130,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         write(cnum,"(i3.3)") i
         filename = trim (file) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
-        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
-            ESMF_CONTEXT, rcToReturn=rc)
-        if (errorFound) exit
-        if (.not. errorFound) then
-          call ESMF_IOWrite(io, trim(filename),                         &
-              overwrite=opt_overwriteflag, status=opt_status,           &
-              timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
-          errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
-              ESMF_CONTEXT, rcToReturn=rc)
-        endif
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_IOWrite(io, trim(filename),                         &
+             overwrite=opt_overwriteflag, status=opt_status,           &
+             timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
 

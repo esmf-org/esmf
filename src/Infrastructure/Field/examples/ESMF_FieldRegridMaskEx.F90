@@ -291,7 +291,7 @@ program ESMF_FieldRegridEx
 ! However, in this case we apply masking to the regrid operation. 
 ! The mask value for each index location in the Grids may be set using
 ! the {\tt ESMF\_GridAddItem()} call (see Section~\ref{sec:usage:items}
-! and Section~\ref{sec:usage:items:accessing}). Mask values may be set independantly 
+! and Section~\ref{sec:usage:items:accessing}). Mask values may be set independently 
 ! for the source and destination Grids. If no mask values have been set in a Grid, then it is 
 ! assumed no masking should be used for that Grid. The {\tt srcMaskValues}
 ! parameter allows the user to set the list of values which indicate

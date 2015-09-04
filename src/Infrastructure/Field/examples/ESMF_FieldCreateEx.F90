@@ -261,7 +261,7 @@
 ! 
 !  \end{verbatim}
 !
-!  Here we use rank and dimension count interchangably. These 2 terminologies are typically
+!  Here we use rank and dimension count interchangeably. These 2 terminologies are typically
 !  equivalent. But there are subtle differences
 !  under certain conditions. Rank is the total number of dimensions of a tensor object.
 !  Dimension count allows a finer description of the heterogeneous dimensions in that object.
@@ -777,7 +777,7 @@
              rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      ! Field is created on the 1 dimensinonal nodal distgrid. On
+      ! Field is created on the 1 dimensional nodal distgrid. On
       ! each PET, Field is created on the locally owned nodes.
       field = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -962,7 +962,7 @@
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      ! Field is created on the 1 dimensinonal nodal distgrid. On
+      ! Field is created on the 1 dimensional nodal distgrid. On
       ! each PET, Field is created on the locally owned nodes.
       field = ESMF_FieldCreate(mesh, arrayspec, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

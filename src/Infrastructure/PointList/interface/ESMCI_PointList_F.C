@@ -126,7 +126,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_pointlistcreatefrminput()"
 
     try {
-      if (*maxpts < 1) {
+      if (*maxpts < 0) {
 	int localrc;
 	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	  "- size of Point List object must be greater than zero",
@@ -139,14 +139,9 @@ extern "C" {
 	  ESMC_CONTEXT, &localrc)) throw localrc;
       }
 
-	int localrc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
 
-	// call into C++
-	//	*plptr = ESMCI::PointList::create(maxpts,numdims,&localrc);
-	//if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,NULL))
-	//  throw localrc;
-	//}
-	*plptr = new ESMCI::PointList(*maxpts,*numdims);
+      *plptr = new ESMCI::PointList(*maxpts,*numdims);
     } catch(std::exception &x) {
       // catch Mesh exception return code
       if (x.what()) {
@@ -159,9 +154,11 @@ extern "C" {
 
       return;
     } catch(int localrc) {
+
       // catch standard ESMF return code
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
       return;
+
     } catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
 				    "- Caught unknown exception", ESMC_CONTEXT, rc);
@@ -321,6 +318,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
     // call into C++
     localrc = (*ptr)->sort_by_id();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

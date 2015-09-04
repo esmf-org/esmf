@@ -88,7 +88,7 @@
 ! In this example, we solve a 1D heat transfer problem: $u_t = \alpha^2 u_{xx}$ with the
 ! initial condition $u(0, x) = 20$ and boundary conditions $u(t, 0) = 10, u(t, 1) = 40$.
 ! The temperature field $u$
-! is represented by a {\tt ESMF\_Field}. A finite difference explicit time steping scheme is employed.
+! is represented by a {\tt ESMF\_Field}. A finite difference explicit time stepping scheme is employed.
 ! During each time step, FieldHalo update is called to communicate values in the halo region
 ! to neighboring domain elements. The steady state (as $t \rightarrow \infty$) solution 
 ! is a linear temperature profile along $x$. The numerical solution is an approximation of
@@ -164,7 +164,7 @@
     dx = 1./npx
     alpha = 0.1
 
-    ! Employ explicit time steping
+    ! Employ explicit time stepping
     ! Solution converges after about 9000 steps based on apriori knowledge.
     ! The result is a linear temperature profile stored in field.
     do iter = 1, 9000

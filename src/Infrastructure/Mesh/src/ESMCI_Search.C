@@ -310,7 +310,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Mapping dst pnt id=%d in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
+    printf("Mapping dst_id=%d dst_coords=%f %f %f in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,si.coords[0],si.coords[1],si.coords[2],in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
 
     double coords[3*40];
     int num_nds;
@@ -794,8 +794,9 @@ BBox bbox_from_pl(PointList &dst_pl) {
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
 
-
-    // STOPPED HERE //
+    // Set spherical map type                                                                      
+    bool old_is_map_sph=is_map_sph;
+    is_map_sph=src.is_sph;
         
     // Set global map_type
     // TODO: pass this directly to is_in_cell mapping function
@@ -808,6 +809,10 @@ BBox bbox_from_pl(PointList &dst_pl) {
     // Reset global map_type
     sph_map_type=old_sph_map_type;
 
+    // Reset                                                                                       
+    is_map_sph=old_is_map_sph;
+
+    // process output from search
     if (!si.investigated) {
       again.push_back(loc);
     } else {

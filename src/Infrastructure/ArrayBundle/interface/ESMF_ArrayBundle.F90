@@ -86,6 +86,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
+  public ESMF_ArrayBundleIsCreated
   public ESMF_ArrayBundlePrint
   public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleRedist
@@ -1247,7 +1248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an ArrayBundle halo operation.
+!   Release resources associated with an ArrayBundle halo operation.
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -1358,7 +1359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
-!     elements potential halo destination elments.
+!     elements potential halo destination elements.
 !     See section \ref{const:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
@@ -1426,6 +1427,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArrayBundleHaloStore
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleIsCreated - Check whether an ArrayBundle object has been created
+
+! !INTERFACE:
+  function ESMF_ArrayBundleIsCreated(arraybundle, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ArrayBundleIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt arraybundle} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ArrayBundleIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ArrayBundleGetInit(arraybundle)==ESMF_INIT_CREATED) &
+      ESMF_ArrayBundleIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -1515,7 +1545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only 1 DE per PET supported.
+!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -1732,7 +1762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an ArrayBundle redistribution.
+!   Release resources associated with an ArrayBundle redistribution.
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -1839,7 +1869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factor]
-!     Factor by which to multipy source data.
+!     Factor by which to multiply source data.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in the Arrays in
 !     {\tt srcArrayBundle}. Each
@@ -2595,7 +2625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an ArrayBundle sparse matrix multiplication. 
+!   Release resources associated with an ArrayBundle sparse matrix multiplication. 
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -2720,7 +2750,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination element in the destination Array. For this format to be a
 !     valid option source and destination Arrays must have matching number of
 !     tensor elements (the product of the sizes of all Array tensor dimensions).
-!     Under this condition an identiy matrix can be applied within the space of
+!     Under this condition an identity matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     \begin{sloppypar}

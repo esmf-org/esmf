@@ -12,7 +12,6 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
@@ -593,6 +592,16 @@ class Mesh(object):
 
         if not self.parametric_dim:
             self._parametric_dim = num_dims
+
+        try:
+            pass
+            # TODO: removed connectivity because the hardcoded array allocation is
+            #       eating up too much memory on some systems, this method can be
+            #       added back in after mesh connectivity retrieval has been fixed the
+            #       C interface
+            # self._connectivity, self._nodes_per_elem = ESMP_MeshGetConnectivityPtr(self)
+        except:
+            warnings.warn("Mesh connectivity could not be read")
 
         # initialize the coordinates structures
         # index order is [meshloc][coord_dim]

@@ -196,6 +196,8 @@ namespace ESMCI {
 #endif // TBI
     bool redist_check(Array *array_p, int *rc);
     void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
+    bool undist_check(Array *array_p, int *rc);
+    void undist_arraycreate_alldist(Array *src_array_p, Array **dst_array_p, int *rc);
     void clear();
 
 // TBI

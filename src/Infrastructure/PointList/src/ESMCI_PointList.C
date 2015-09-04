@@ -79,7 +79,8 @@ namespace ESMCI {
 
     // allocate memory
     points = NULL;
-    if (max_num_pts>0) {
+
+    if (max_num_pts>=0) {
       points=new point [max_num_pts];
     }
 
@@ -417,18 +418,17 @@ namespace ESMCI {
   }
 
 
-
   #undef  ESMC_METHOD
-  #define ESMC_METHOD "ESMCI::PointList::get_id_ref()"
+  #define ESMC_METHOD "ESMCI::PointList::get_point()"
   //BOP
-  // !IROUTINE:  get_id_ref
+  // !IROUTINE:  get_point
   //
   // !INTERFACE:
-  int &PointList::get_id_ref(
+  point *PointList::get_point(
 
     //
     // !RETURN VALUE:
-    //  int &
+    //  point *
     //
     // !ARGUMENTS:
     //
@@ -449,7 +449,7 @@ namespace ESMCI {
       throw localrc;
     }
 
-    return points[loc].id;
+    return &points[loc];
   }
 
 
@@ -486,42 +486,5 @@ namespace ESMCI {
 
     return points[loc].coords;
   }
-
-
-  #undef  ESMC_METHOD
-  #define ESMC_METHOD "ESMCI::PointList::get_coord_ptr_from_id()"
-  //BOP
-  // !IROUTINE:  get_coord_ptr_from_id
-  //
-  // !INTERFACE:
-  const double *PointList::get_coord_ptr_from_id(
-
-    //
-    // !RETURN VALUE:
-    //  none
-    //
-    // !ARGUMENTS:
-    //
-				      int *id) const {
-    //
-    // !DESCRIPTION:
-    // return pointer to coordinates corresponding to given point id.
-    //
-    //EOP
-    //-----------------------------------------------------------------------------
-
-
-    int loc = ((point*)&(*id)-points);
-    if (loc<0 || loc>=curr_num_pts) {
-      int localrc;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-    				    "- invalid location derived from input id ",
-    				    ESMC_CONTEXT, &localrc);
-      throw localrc;
-    }
-
-    return get_coord_ptr(loc);
-  }
-
 
 } // namespace ESMCI

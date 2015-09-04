@@ -231,53 +231,57 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field1", rc=status)
     call ESMF_AttributeAdd(field1, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field1, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field1, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field1, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field1, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field1, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field1, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field1, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field1, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     field12 = ESMF_FieldCreate(grid1, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field12", rc=status)
     call ESMF_AttributeAdd(field12, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field12, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field12, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field12, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field12, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field12, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field12, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field12, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field12, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     field2 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field2", rc=status)
     call ESMF_AttributeAdd(field2, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field2, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field2, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field2, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field2, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid1,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid1,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid1,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid1,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid1,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeAdd(grid2,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid2,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid2,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid2,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid2,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -409,7 +413,8 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     ! Modify Attributes on grid_from_field1
     call ESMF_AttributeGetAttPack(grid_from_field1, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(grid_from_field1, 'RegDecompX', 106, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid_from_field1, 'RegDecompX', 106, &
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(1), rc=status)
@@ -418,7 +423,8 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     ! Modify Attributes on grid_from_field12
     call ESMF_AttributeGetAttPack(grid_from_field12, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(grid_from_field12, 'RegDecompX', 126, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid_from_field12, 'RegDecompX', 126, &
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(2), rc=status)
@@ -427,7 +433,8 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     ! Modify Attributes on grid_from_fb
     call ESMF_AttributeGetAttPack(grid_from_fb, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(grid_from_fb, 'RegDecompX', 306, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid_from_fb, 'RegDecompX', 306, attpack=attpack, &
+      rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(3), rc=status)
@@ -440,7 +447,8 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGetAttPack(grid_from_field2, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(grid_from_field2, 'RegDecompX', 206, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid_from_field2, 'RegDecompX', 206, &
+      attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeGet(grid_from_field1, 'RegDecompX', attpack=attpack, &
         value=outInt(4), rc=status)

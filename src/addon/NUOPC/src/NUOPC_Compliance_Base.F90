@@ -81,7 +81,7 @@ contains
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
-        purpose = "General"
+        purpose = "Instance"
 
         call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -199,7 +199,7 @@ contains
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
-        purpose = "General"
+        purpose = "Instance"
 
         call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -291,7 +291,7 @@ contains
 
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
-            purpose = "General"
+            purpose = "Instance"
 
             call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -452,7 +452,7 @@ contains
 
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
-            purpose = "General"
+            purpose = "Instance"
 
             call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -550,7 +550,7 @@ contains
 
             ! set NUOPC convention and purpose specifiers
             convention = "NUOPC"
-            purpose = "General"
+            purpose = "Instance"
 
             call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -749,7 +749,8 @@ contains
                 return  ! bail out
         endif
         call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
-            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -778,7 +779,8 @@ contains
                 allocate(valueStringList(itemCount))
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueStringList, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
@@ -808,7 +810,8 @@ contains
                 allocate(valueI4List(itemCount))
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueI4List, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
@@ -886,7 +889,8 @@ contains
                 return  ! bail out
         endif
         call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
-            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -915,7 +919,8 @@ contains
                 allocate(valueStringList(itemCount))
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueStringList, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
@@ -945,7 +950,8 @@ contains
                 allocate(valueI4List(itemCount))
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueI4List, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
@@ -1022,7 +1028,8 @@ contains
                 return  ! bail out
         endif
         call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
-            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -1051,7 +1058,8 @@ contains
                 allocate(valueStringList(itemCount))
                 call ESMF_AttributeGet(state, name=attributeName, &
                     valueList=valueStringList, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     call ESMF_LogWrite(trim(prefix)//" State level attribute: <"// &
@@ -1081,7 +1089,8 @@ contains
                 allocate(valueI4List(itemCount))
                 call ESMF_AttributeGet(state, name=attributeName, &
                     valueList=valueI4List, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
@@ -1161,7 +1170,8 @@ contains
                 return  ! bail out
         endif
         call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
-            typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
+            typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -1190,7 +1200,8 @@ contains
                 allocate(valueStringList(itemCount))
                 call ESMF_AttributeGet(field, name=attributeName, &
                     valueList=valueStringList, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
@@ -1220,7 +1231,8 @@ contains
                 allocate(valueI4List(itemCount))
                 call ESMF_AttributeGet(field, name=attributeName, &
                     valueList=valueI4List, &
-                    convention=convention, purpose=purpose, rc=rc)
+                    convention=convention, purpose=purpose, &
+                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
@@ -1695,7 +1707,8 @@ contains
         ! access phaseMap info
         call ESMF_AttributeGet(comp, name=trim(attributeName), &
             itemCount=itemCount, &
-            convention="NUOPC", purpose="General", rc=rc)
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1707,7 +1720,8 @@ contains
                 line=__LINE__, &
                 file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-                convention="NUOPC", purpose="General", rc=rc)
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1786,7 +1800,8 @@ contains
         ! access phaseMap info
         call ESMF_AttributeGet(comp, name=trim(attributeName), &
             itemCount=itemCount, &
-            convention="NUOPC", purpose="General", rc=rc)
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1798,7 +1813,8 @@ contains
                 line=__LINE__, &
                 file=trim(name)//":"//FILENAME)) return  ! bail out
             call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-                convention="NUOPC", purpose="General", rc=rc)
+                convention="NUOPC", purpose="Instance", &
+                attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

@@ -72,7 +72,7 @@ responsible for maintaining
 information about the individual value type (e.g. float, integer), 
 the physical representation (e.g. Cray format float vs IEEE), 
 data count, and memory ordering information when multidimensional
-arrays are linearzied in memory.
+arrays are linearized in memory.
 The metadata is stored in an ArraySpec
 derived type/structure (see below).
 
@@ -154,7 +154,7 @@ One is a unified logical view of the entire Field as a whole
 regardless of the current decomposition.  The other view allows code
 running on a single processing element to query and retrieve a pointer 
 to the subset of the Field which is local to that processing element,
-and to make requests that result in data being updated among neigboring
+and to make requests that result in data being updated among neighboring
 subsets (e.g. Halo updates).
 
 A PhysicalGrid is sometimes an algorithmic description of the

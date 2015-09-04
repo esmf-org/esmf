@@ -134,6 +134,7 @@ module ESMF_FieldMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
+   public ESMF_FieldIsCreated
    public ESMF_FieldValidate           ! Check internal consistency
    public operator(==), operator(/=)
 
@@ -169,6 +170,34 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldIsCreated()"
+!BOP
+! !IROUTINE: ESMF_FieldIsCreated - Check whether a Field object has been created
+
+! !INTERFACE:
+  function ESMF_FieldIsCreated(field, rc)
+! !RETURN VALUE:
+    logical :: ESMF_FieldIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in)            :: field
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt field} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_FieldIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldGetInit(field)==ESMF_INIT_CREATED) &
+      ESMF_FieldIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

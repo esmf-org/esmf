@@ -1,13 +1,4 @@
-# This example demonstrates how to regrid between a grid and a mesh.
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# if not os.path.isdir("data"):
-#     os.makedirs("data")
-# from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(os.getcwd(), "data", "ll1deg_grid.nc"))
-# cache_data_file(os.path.join(os.getcwd(), "data", "mpas_uniform_10242_dual_counterclockwise.nc"))
+# This example demonstrates how to regrid between a mesh and a locstream.
 
 import ESMF
 import numpy

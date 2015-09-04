@@ -86,7 +86,7 @@
 ! User can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
 ! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
 !
-! Note that the implementation of Scatter and Gather is not seqence index based.
+! Note that the implementation of Scatter and Gather is not sequence index based.
 ! If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, 
 ! Gather will not gather data to rootPet 
 ! from source data points corresponding to the sequence index on the rootPet. 

@@ -3,11 +3,12 @@
 # following block of code:
 #
 # import os
-# if not os.path.isdir("data"):
-#     os.makedirs("data")
+# DD = os.path.join(os.getcwd(), "examples/data")
+# if not os.path.isdir(DD):
+#     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(os.getcwd(), "data", "so_Omon_GISS-E2.nc"))
-# cache_data_file(os.path.join(os.getcwd(), "data", "mpas_uniform_10242_dual_counterclockwise.nc"))
+# cache_data_file(os.path.join(DD, "so_Omon_GISS-E2.nc"))
+# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
 
 import os
 import ESMF
@@ -16,7 +17,7 @@ import ESMF
 # ESMF.Manager(debug=True)
 
 # set up the DATADIR
-DATADIR = os.path.join(os.getcwd(), "data")
+DATADIR = os.path.join(os.getcwd(), "examples/data")
 
 # Create a uniform global latlon grid from a SCRIP formatted file
 grid = ESMF.Grid(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),

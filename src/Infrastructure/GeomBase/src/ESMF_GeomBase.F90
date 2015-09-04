@@ -1156,7 +1156,7 @@ end subroutine ESMF_GeomBaseGet
             endif
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
-          call ESMF_LocStreamGet(gbcp%locstream, localDE, &   
+          call ESMF_LocStreamGetBounds(gbcp%locstream, localDE, &   
                exclusiveLBound=el, &
                exclusiveUBound=eu, &
                exclusiveCount=ec,  &

@@ -55,11 +55,11 @@ block of data on one DE.
 Reassembling data which is decomposed over a set of DEs into multiple
 copies of a single block of data, one copy per original DE.
 \item {\bf Scatter}
-Spreading an undecomposed block of data on one DE over a set of DEs,
+Spreading an undercomposed block of data on one DE over a set of DEs,
 decomposing that single block into smaller subsets of data, one
 data decomposition per DE.
 \item {\bf AlltoAll}
-Spreading an undecomposed block of data from multiple DEs onto
+Spreading an undercomposed block of data from multiple DEs onto
 each of the other DEs in the set, resulting in a set of multiple decomposed 
 data blocks per DE, one from each of the original source DEs.
 \item {\bf Broadcast}
@@ -256,7 +256,7 @@ executes it, and releases the resources before returning.
 The current CommTable code executes one very specific communication
 strategy based on input from a user who did extensive timing
 measurements on several different hardware platforms.  Rather than
-broadcasting all data at once asychronously, it selects combinations
+broadcasting all data at once asynchronously, it selects combinations
 of pairs of processors and has them execute a SendRecv operation, which
 does both a data send and a data receive in a single call.
 At each step in the execution, different pairs of processors
@@ -277,11 +277,11 @@ but would require writing a set of alternative RouteRun methods.
 \item
 
 The current RouteRun routine has many possible performance options for how
-to make the tradeoff between time spent packing disjoint memory
+to make the trade off between time spent packing disjoint memory
 blocks into a single buffer to minimize the number of sends,
 verses simply sending the contiguous blocks without the pack overhead.
-The tradeoffs are not expected to be the same on all systems;
-hardware latency verses bandwith characteristics will differ,
+The trade offs are not expected to be the same on all systems;
+hardware latency verses bandwidth characteristics will differ,
 plus the underlying communication software (MPI, shared memory, etc)
 will change the performance.  Also the size of the data blocks
 to be sent, the amount of contiguity, and limits on the number 
@@ -365,7 +365,7 @@ contiguous pieces into a packed buffer.}
 \begin{figure}
 \caption{When the XPacket describes memory which is physically
 a single contiguous region, there is no need to copy the data
-into another buffer; it can be communicated inplace.  There is
+into another buffer; it can be communicated in place.  There is
 a flag in the XPacket which marks how many of the dimensions
 are contiguous.}
 \label{fig:xpacketcontig}
@@ -412,7 +412,7 @@ equivalent of an MPI\_SendRecv() call, which does not return until
 both the send and receive have completed.
 
 \item[Async] Each processor executes both an asynchronous send
-and asychronous receive to the other processor and does not wait
+and asynchronous receive to the other processor and does not wait
 for completion before moving on to the next communication in the
 CommTable.  Then in a separate loop through the RTables, each
 call is waited for in turn and when all outstanding communication
@@ -420,7 +420,7 @@ calls have completed, then the API call returns to the user.
 
 \end{enumerate}
 (Note that in the Async case it makes much more sense to iterate
-throught the Route table in PET order instead of the complication
+through the Route table in PET order instead of the complication
 of computing communication pairs and iterating in a non-sequential
 order.  The code is as it is now for reasons of implementation speed
 and not for any other design reason.  This would require a slightly

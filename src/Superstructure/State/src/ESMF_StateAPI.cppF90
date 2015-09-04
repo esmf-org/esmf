@@ -80,6 +80,7 @@ module ESMF_StateAPIMod
 
       public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
+      public ESMF_StateIsCreated
       public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateWriteRestart
@@ -1458,7 +1459,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
 !     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
 !     and the error code will not be set to an error.  Thus this routine
-!     can be used to safely query for the existance of items by name 
+!     can be used to safely query for the existence of items by name 
 !     whether or not they are expected to be there.   The error code will
 !     be set in case of other errors, for example if the {\tt ESMF\_State}
 !     itself is invalid.
@@ -1658,6 +1659,36 @@ StateGetMacro(ESMF_RouteHandle,RouteHandle,routehandle,rp)
 ^define stateversion
 StateGetMacro(ESMF_State,State,nestedState,spp)
 ^undef  stateversion
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateIsCreated()"
+!BOP
+! !IROUTINE: ESMF_StateIsCreated - Check whether an State object has been created
+
+! !INTERFACE:
+  function ESMF_StateIsCreated(state, rc)
+! !RETURN VALUE:
+    logical :: ESMF_StateIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(in)            :: state
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt state} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ESMF_StateIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_StateGetInit(state)==ESMF_INIT_CREATED) &
+      ESMF_StateIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
+
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

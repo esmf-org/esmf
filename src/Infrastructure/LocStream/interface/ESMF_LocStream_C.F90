@@ -79,7 +79,7 @@
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LocStreamGet(locstream, localDe=localDe, &
+    call ESMF_LocStreamGetBounds(locstream, localDe=localDe, &
       computationalLBound=cLBound, computationalUBound=cUBound, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

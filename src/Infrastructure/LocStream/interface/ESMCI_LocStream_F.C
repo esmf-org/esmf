@@ -71,16 +71,29 @@ void FTN_X(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array,
   
   // Dereference variables
   array=*_array;
-  localDE=*_localDE;
-  
-  // Input Error Checking
-  if ((localDE < 0) || (localDE >=array->getDistGrid()->getDELayout()->getLocalDeCount())) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-      "- localDE outside range on this processor", ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
-    return;
-  }
 
+  // localDE                                                                                   
+  if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
+    if (array->getDistGrid()->getDELayout()->getLocalDeCount()>1) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                    "- Must provide localDE if localDeCount >1",
+                                    ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    } else {
+      localDE=0;
+    }
+  } else {
+    localDE=*_localDE; // already 0 based                                                      
+
+    // Input Error Checking
+    if ((localDE < 0) || (localDE >=array->getDistGrid()->getDELayout()->getLocalDeCount())) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+        "- localDE outside range on this processor", ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
+  }
+  
   // ExclusiveLBound
   if (ESMC_NOT_PRESENT_FILTER(exclusiveLBound) != ESMC_NULL_POINTER) {
     *exclusiveLBound=*(array->getExclusiveLBound()+localDE);
@@ -158,51 +171,51 @@ void FTN_X(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
   
   // Dereference variables
   distgrid=*_distgrid;
-  localDE=*_localDE;
   indexflag=*_indexflag;
-  
-  // Input Error Checking
-  if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-      "- localDE outside range on this processor", ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
-    return;
+
+  // localDE                                                                                   
+  if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
+    if (distgrid->getDELayout()->getLocalDeCount()>1) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                    "- Must provide localDE if localDeCount >1",
+                                    ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    } else {
+      localDE=0;
+    }
+  } else {
+    localDE=*_localDE; // already 0 based                                                      
+
+    // Input Error Checking
+    if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+        "- localDE outside range on this processor", ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
   }
 
-  // Set lower bound based on indexflag
   if (indexflag==ESMF_INDEX_DELOCAL) {
-      *exclusiveLBound = 1; // excl. region starts at (1,1,1...) 
+    *exclusiveLBound = 1; // excl. region starts at (1,1,1...)                                  
   } else {
+
     // Get some useful information
     const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
 
     // Get the Global DE from the local DE
     int de = localDeToDeMap[localDE];
 
-    // obtain indexList for this DE and dim
-    const int *indexList =
-      distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
+    // obtain min index for this DE
+    int const *index_min=distgrid->getMinIndexPDimPDe(de,&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-      
-      // make sure this dimension is contiguous         
-      const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
-      if (!contig) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-          "- doesn't handle non-contiguous DEs yet ",  ESMC_CONTEXT,
-          ESMC_NOT_PRESENT_FILTER(rc));
-        return;
-      }
-      
-      // Set lower bounds of exclusive region to match indexList[0]
-      *exclusiveLBound = indexList[0];
-  }
+                                      ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // Set lower bound of exclusive region
+    *exclusiveLBound = *index_min;
+  }    
   
   // Return ESMF_SUCCESS
   if (rc != NULL) *rc = ESMF_SUCCESS;
-    
   return;
 } 
 
@@ -226,15 +239,28 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   
   // Dereference variables
   distgrid=*_distgrid;
-  localDE=*_localDE;
   indexflag=*_indexflag;
-  
-  // Input Error Checking
-  if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-      "- localDE outside range on this processor", ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
-    return;
+
+  // localDE                                                                                   
+  if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
+    if (distgrid->getDELayout()->getLocalDeCount()>1) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                    "- Must provide localDE if localDeCount >1",
+                                    ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    } else {
+      localDE=0;
+    }
+  } else {
+    localDE=*_localDE; // already 0 based                                                      
+
+    // Input Error Checking
+    if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+        "- localDE outside range on this processor", ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
   }
 
   // Get some useful information
@@ -244,34 +270,19 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   // Get the Global DE from the local DE
   int de = localDeToDeMap[localDE];
 
-  // exlc. region for each DE ends at indexCountPDimPDe of the associated
-  // DistGrid
-  *exclusiveUBound = indexCountPDimPDe[de];
-  
   // Set upper bound based on indexflag
-  if (indexflag==ESMF_INDEX_GLOBAL) {
+  if (indexflag==ESMF_INDEX_DELOCAL) {
+    *exclusiveUBound = indexCountPDimPDe[de];
+  } else {
 
-    // obtain indexList for this DE and dim
-    const int *indexList =
-      distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
-    
-    // make sure is contiguous         
-    const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
-    if (!contig) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-        "- doesn't handle non-contiguous DEs yet ", ESMC_CONTEXT,
-        ESMC_NOT_PRESENT_FILTER(rc));
-      return;
-    }
-    
-    // shift bounds of exclusive region to match indexList[0]
-    *exclusiveUBound += indexList[0] - 1;
-  }
-  
+    // obtain max index for this DE
+    int const *index_max=distgrid->getMaxIndexPDimPDe(de,&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      ESMC_NOT_PRESENT_FILTER(rc))) return;
+      
+    // Set upper bound of exclusive region
+    *exclusiveUBound = *index_max;
+  }  
   // Return ESMF_SUCCESS
   if (rc != NULL) *rc = ESMF_SUCCESS;
     

@@ -817,7 +817,7 @@ void LocalArray::getDataInternal(
 // !DESCRIPTION:
 //  Get the data at a particular index location in a LocalArray. For
 //  efficiency's sake this routine doesn't do error checking. It's assumed 
-//  that the error checking is occuring at a higher level. For error checking
+//  that the error checking is occurring at a higher level. For error checking
 //  use getData.
 //
 //EOPI
@@ -915,7 +915,7 @@ void LocalArray::setDataInternal(
 // !DESCRIPTION:
 //  Get the data at a particular index location in a LocalArray. For
 //  efficiency's sake this routine doesn't do error checking. It's assumed 
-//  that the error checking is occuring at a higher level. For error checking
+//  that the error checking is occurring at a higher level. For error checking
 //  use setData.
 //
 //EOPI

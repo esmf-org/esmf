@@ -40,7 +40,7 @@
 // {\tt ESMC\_BaseTime.C} contains the definitions (full code bodies) for
 // the {\tt ESMC\_BaseTime} methods.
 //
-// The {\tt BaseTime} class is a base class which encapulates the core
+// The {\tt BaseTime} class is a base class which encapsulates the core
 // representation and functionality of time for time intervals and time
 // instances.
 //

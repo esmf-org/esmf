@@ -1429,7 +1429,7 @@ Grid *Grid::create(
   }
 
 
-  // setup the grids internal structure using the passed in paramters. 
+  // setup the grids internal structure using the passed in parameters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     gridEdgeLWidthArg,gridEdgeUWidthArg, gridAlignArg,
                     distgridToGridMapArg, 
@@ -1505,7 +1505,7 @@ Grid *Grid::create(
   }
 
 
-  // setup the grids internal structure using the passed in paramters. 
+  // setup the grids internal structure using the passed in parameters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     minIndexArg, maxIndexArg, localArbIndexArg, localArbIndexCount,
 		    distDimArg, arbDim, 
@@ -1548,7 +1548,7 @@ Grid *Grid::create(
 //    Create an empty {\tt ESMC\_Grid} object. The returned Grid object may
 // only be used with set and commit. To make this object usable employ
 // {\tt set} to fill the object with parameters and then {\tt commit} to
-// construct a usable Grid based on those paramters. 
+// construct a usable Grid based on those parameters. 
 //EOP
 //-----------------------------------------------------------------------------
   // local vars
@@ -3109,11 +3109,11 @@ int Grid::set(
 // !DESCRIPTION:
 //   As the second part of the create empty/set/commit incremental grid 
 //  creation paradigm, this subroutine is used to set values in a Grid in
-//  preperation for  a later commit. This method may be called multiple times 
+//  preparation for  a later commit. This method may be called multiple times 
 //  to set different sets of parameters. If the same parameter is set twice,
 //  the second value overwrites the first. 
 //   
-//   TODO: eventually seperate this into a bunch of seperate sets to allow 
+//   TODO: eventually separate this into a bunch of separate sets to allow 
 //         easier access from C.
 //EOP
 //-----------------------------------------------------------------------------
@@ -6011,7 +6011,7 @@ int construct(
 //   Take an existing {\tt ESMCI_Grid} object and setup its internal structure
 //   so that its usable in other Grid methods. Note that this routine
 //   does error checking of input parameters and sets a default if an optional
-//   parameter isn't passed in. (A non-present optionl paramters is passed with 
+//   parameter isn't passed in. (A non-present optional parameters is passed with 
 //   the value NULL).The consturction routine is for a non-arbitrarily distributed
 //   grid.
 //EOP
@@ -7708,7 +7708,7 @@ bool GridIter::isShared(
 //
 // !RETURN VALUE:
 //    returns true if the current index MAY have a copy on another processor.  
-//    returne false otherwise
+//    return false otherwise
 //
 // !ARGUMENTS:
 //   none  

@@ -2278,6 +2278,111 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
 ////////////////
 
 
+void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
+		                   int *_orig_sdim, int *rc)
+{
+    int localrc;
+    try {
+        Mesh *meshp = *meshpp;
+        ThrowRequire(meshp);
+        Mesh &mesh = *meshp;
+
+        // Initialize the parallel environment for mesh (if not already done)
+        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+            throw localrc;
+
+        // Get some info
+        int sdim=*_orig_sdim;
+        int num_elems = mesh.num_elems();
+        int num_nodes = mesh.num_nodes();
+
+        // Choose which coords field and dimension to use
+        // try orig_coordinates first, if it doesn't exist
+        // then go with coordinates
+        MEField<> *coords=mesh.GetField("orig_coordinates");
+        if (!coords) {
+            coords = mesh.GetCoordField();
+            sdim=mesh.spatial_dim();
+        }
+
+        // Make a map between data index and associated elem pointer
+        std::vector<std::pair<int,MeshObj *> > index_to_elem;
+        index_to_elem.reserve(num_elems);
+
+        // iterate through local nodes collecting indices and node pointers
+        Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+        for (; ei != ee; ++ei) {
+            MeshObj &elem = *ei;
+
+            if (!GetAttr(elem).is_locally_owned()) continue;
+
+            int idx = elem.get_data_index();
+            index_to_elem.push_back(std::make_pair(idx,&elem));
+        }
+
+        // Sort by data index
+        std::sort(index_to_elem.begin(), index_to_elem.end());
+
+        // iterate through local elements
+        int npePos = 0, cpPos = 0;
+        for (UInt i = 0; i < index_to_elem.size(); ++i) {
+            MeshObj &elem = *(index_to_elem[i].second);
+
+            // Get number of nodes in element
+            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+
+            // iterate through local nodes collecting coordinates and counting
+			for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+
+				const MeshObj &node = *(elem.Relations[s].obj);
+
+				// NOTE: we are iterating all nodes on this element to put
+				//       together a connectivity list of node coordinates
+				//if (!GetAttr(node).is_locally_owned()) continue;
+
+				double *c=coords->data(node);
+                for (int j = 0; j < sdim; ++j)
+                	connCoord[cpPos++] = c[j];
+
+    			// NOTE: must implement sort if we want IDs
+                //nodeIDs[s]=node.get_id();
+			}
+			// NOTE: must implement sort if we want IDs
+			//elemIDs[npePos] = elem.get_id();
+
+			nodesPerElem[npePos++] = topo->num_nodes;
+        }
+
+    } catch(std::exception &x) {
+        // catch Mesh exception return code
+        if (x.what()) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   			    x.what(), ESMC_CONTEXT, rc);
+        } else {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   			    "UNKNOWN", ESMC_CONTEXT, rc);
+        }
+
+        return;
+    } catch(int localrc) {
+        // catch standard ESMF return code
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+        return;
+    } catch(...) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "- Caught unknown exception", ESMC_CONTEXT, rc);
+        return;
+    }
+
+    // Set return code
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+////////////////
+
+
 void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
 
   

@@ -240,14 +240,14 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, &
+      convention=convESMF,  purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -339,7 +339,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeGetAttPack(field, convESMF, purpGen, attpack=attpack, rc=status)
+    ! it's actually the CF/Extended (nested) package that contains "StandardName"
+    call ESMF_AttributeGetAttPack(field, "CF", "Extended", attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeRemove(field, name=name2, attpack=attpack, rc=status)
@@ -606,8 +607,9 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttributeGetAttPack(field, convention=convESMF, &
-                         purpose=purpGen, attpack=attpack, rc=rc)
+    ! This Attribute actually lives in the CF/Extended (nested) Attpack
+    call ESMF_AttributeGetAttPack(field, convention="CF", &
+                         purpose="Extended", attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, attpack=attpack, &
     					   isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

@@ -329,20 +329,20 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttributeSet(DPEDT, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DPEDT, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttributeSet(DPEDT, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DPEDT, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DPEDT, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -368,14 +368,14 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(DTDT, convESMF, purpGen, &
 	attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DTDT, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DTDT, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DTDT, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DTDT, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DTDT, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! DUDT
@@ -397,14 +397,14 @@ program ESMF_AttributePackageEx
       ! retrieve Attribute package
       call ESMF_AttributeGetAttPack(DUDT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DUDT, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DUDT, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DUDT, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DUDT, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DUDT, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DUDT, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! DVDT
@@ -426,14 +426,14 @@ program ESMF_AttributePackageEx
       ! retrieve Attribute package
       call ESMF_AttributeGetAttPack(DVDT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DVDT, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DVDT, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DVDT, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DVDT, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(DVDT, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(DVDT, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! PHIS
@@ -456,16 +456,16 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(PHIS, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(PHIS, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(PHIS, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(PHIS, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(PHIS, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(PHIS, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(PHIS, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(PHIS, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! QTR
@@ -488,16 +488,16 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(QTR, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(QTR, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(QTR, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(QTR, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(QTR, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(QTR, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(QTR, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(QTR, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! CNV
@@ -510,26 +510,26 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(CNV, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CNV, name='Coordinates', value='latlon', &
-        convention=convCC, purpose=purpGen, rc=rc)
+        convention=convCC, purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CNV, name='Mask', value='yes', &
-        convention=convCC, purpose=purpGen, rc=rc)
+        convention=convCC, purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
       call ESMF_AttributeGetAttPack(CNV, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CNV, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CNV, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CNV, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CNV, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CNV, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CNV, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CNV, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! CONVCPT
@@ -545,23 +545,23 @@ program ESMF_AttributePackageEx
         convention=convCC, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVCPT, name='Mask', value='yes', &
-        convention=convCC, purpose=purpGen, rc=rc)
+        convention=convCC, purpose=purpGen, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
      ! retrieve Attribute package
       call ESMF_AttributeGetAttPack(CONVCPT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVCPT, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVCPT, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVCPT, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVCPT, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVCPT, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVCPT, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVCPT, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! CONVKE
@@ -584,16 +584,16 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(CONVKE, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVKE, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVKE, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVKE, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVKE, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVKE, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVKE, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVKE, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
       ! CONVPHI
@@ -615,16 +615,16 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeGetAttPack(CONVPHI, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVPHI, name1, value1, &
-        attpack=attpack, rc=rc)
+        attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVPHI, name2, value2, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVPHI, name2, value2, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVPHI, name3, value3, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVPHI, name3, value3, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESMF, &
-        purpose=purpGen, rc=rc)
+      call ESMF_AttributeSet(CONVPHI, name4, value4, &
+        convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE

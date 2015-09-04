@@ -447,42 +447,42 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'Name', &
      'Samuel Doe', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Name" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'Abbreviation', &
      'SD', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
      'samuel.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Email" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Contact', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
     call ESMF_AttributeSet(comp, 'URL', &
      'www.earthsys.org', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
@@ -495,28 +495,28 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'Name', &
      'EarthSys Funding Office', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(3),rc=rc)
+      attPackInstanceName=nestAttPackName(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Funding Source" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Oceanography, University of GHI', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(3),rc=rc)
+      attPackInstanceName=nestAttPackName(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
      'sally.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(3),rc=rc)
+      attPackInstanceName=nestAttPackName(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Funder', &
       convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(3),rc=rc)
+      attPackInstanceName=nestAttPackName(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
@@ -586,7 +586,7 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2006', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
@@ -597,7 +597,7 @@ module user_coupler
      'Improvements in Atmosphere and Ocean modeling. ' // &
      'Journal of Earth Modeling, 11 (3). 1021-1036.', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
@@ -605,21 +605,21 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'Date', &
      '2006-10-21', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
      'Online Refereed', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
      'doi:11.1234/2006JCLI1357.1', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
@@ -627,7 +627,7 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, &
-      attPackInstanceName=nestAttPackName(5),rc=rc)
+      attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
 

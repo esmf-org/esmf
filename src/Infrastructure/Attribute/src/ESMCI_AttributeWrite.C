@@ -559,7 +559,8 @@ namespace ESMCI {
     // get value of attribute 0 or set to N/A if not present
     string attPackInstanceName;
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("ComponentShortName", attpack, &presentflag);
+    localrc = AttPackIsPresent("ComponentShortName", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
@@ -569,7 +570,7 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName"));
+      attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) modelcompname = "N/A";
         else modelcompname = attr->vcpp.at(0);
@@ -587,7 +588,8 @@ namespace ESMCI {
   
     // get value of attribute 1 or set to N/A if not present
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("ComponentLongName", attpack, &presentflag);
+    localrc = AttPackIsPresent("ComponentLongName", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
@@ -597,7 +599,7 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName"));
+      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) fullname = "N/A";
         else fullname = attr->vcpp.at(0);
@@ -615,7 +617,8 @@ namespace ESMCI {
   
     // get value of attribute 2 or set to N/A if not present
     attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
-    localrc = AttPackIsPresent("Version", attpack, &presentflag);
+    localrc = AttPackIsPresent("Version", attpack, ESMC_ATTNEST_ON,
+    		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
@@ -625,7 +628,7 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version"));
+      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) version = "N/A";
         else version = attr->vcpp.at(0);
@@ -646,7 +649,8 @@ namespace ESMCI {
              object.compare("field")==0 || 
              object.compare("arraybundle")==0 ||
              object.compare("array")==0 ||
-             object.compare("grid")==0) {
+             object.compare("grid")==0 ||
+             object.compare("distgrid")==0) {
     modelcompname="N/A";
     fullname="N/A";
     version="N/A";
@@ -882,7 +886,7 @@ namespace ESMCI {
     // done with field
     fielddone = true;
   }
-  
+
   // do grid write
   if (!griddone) {
     string attPackInstanceName;
@@ -908,7 +912,7 @@ namespace ESMCI {
       return ESMF_SUCCESS;
     }
   }
-  
+
   // recurse across all linked ESMF objects (e.g. child components, states,
   // fieldBundles, fields, grids, arrays)
   for(i=0; i<linkList.size(); i++)
@@ -951,14 +955,15 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
     for (i=0;  i<attrList.size(); ++i) { 
-      string value = attrList.at(i)->vcpp.at(0); 
       // if this is internal info, retrieve the correct Attribute
-      if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
-          strncmp(value.c_str(), "ESMF:", 5) == 0) {
-        // this is internal information, call internal routine and continue
-        int nest_level = 2;
-        AttributeWriteInternalInfoGrid(io_xml, nest_level, attrList.at(i));
-        continue;
+      if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
+    	  string value = attrList.at(i)->vcpp.at(0);
+    	  if (strncmp(value.c_str(), "ESMF:", 5) == 0) {
+    		  // this is internal information, call internal routine and continue
+    		  int nest_level = 2;
+    		  AttributeWriteInternalInfoGrid(io_xml, nest_level, attrList.at(i));
+    		  continue;
+    	  }
       }
 
       if (attrList.at(i)->items == 1) {
@@ -1002,7 +1007,7 @@ namespace ESMCI {
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            if (strncmp(value.c_str(), "ESMF:", 5) == 0) break;
+            if (strncmp((attrList.at(i)->vcpp.at(0)).c_str(), "ESMF:", 5) == 0) break;
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 2, 0);
             ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
@@ -2043,6 +2048,7 @@ namespace ESMCI {
 
   int localrc;
   Attribute *attpack = NULL;
+  Attribute *attr = NULL;
   static int callCount=0;
   int callCountBeforeRecursion;
   bool inObjectTree, inThisCompTreeOnly, inNestedAttPacks;
@@ -2064,15 +2070,17 @@ namespace ESMCI {
   localrc = io_xml->writeStartElement("modelComponent", "", indent++, 0);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("ShortName")) {
-    localrc = attpack->AttributeGet("ShortName", &valuevector);
+  attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
-    if (attpack->AttributeIsSet("Version")) {
-      localrc = attpack->AttributeGet("Version", &valuevector);
+    attr = attpack->AttPackGetAttribute("Version", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2102,8 +2110,9 @@ namespace ESMCI {
       " required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
-  if (attpack->AttributeIsSet("LongName")) {
-    localrc = attpack->AttributeGet("LongName", &valuevector);
+  attr = attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2118,8 +2127,9 @@ namespace ESMCI {
       "'SimulationLongName' appended.", indent+1);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("Description")) {
-    localrc = attpack->AttributeGet("Description", &valuevector);
+  attr = attpack->AttPackGetAttribute("Description", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2189,8 +2199,9 @@ namespace ESMCI {
   localrc = attpack->AttributeWriteCIMRP(io_xml, indent);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
  
-  if (attpack->AttributeIsSet("ReleaseDate")) {
-    localrc = attpack->AttributeGet("ReleaseDate", &valuevector);
+  attr = attpack->AttPackGetAttribute("ReleaseDate", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2210,8 +2221,9 @@ namespace ESMCI {
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
  
   // <onlineResource>
-  if (attpack->AttributeIsSet("URL")) {
-    localrc = attpack->AttributeGet("URL", &valuevector);
+  attr = attpack->AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2276,9 +2288,9 @@ namespace ESMCI {
     }
   }
 
-  if (attpack->AttributeIsSet("SimulationNumberOfProcessingElements")) {
-    localrc = attpack->AttributeGet("SimulationNumberOfProcessingElements",
-                                    &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationNumberOfProcessingElements", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2296,8 +2308,9 @@ namespace ESMCI {
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
-  if (attpack->AttributeIsSet("ModelType")) {
-    localrc = attpack->AttributeGet("ModelType", &valuevector);
+  attr = attpack->AttPackGetAttribute("ModelType", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2339,8 +2352,9 @@ namespace ESMCI {
   localrc = io_xml->writeElement("documentID", attpack->attrGUID, indent, 0);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("MetadataVersion")) {
-    localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
+  attr = attpack->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2386,8 +2400,8 @@ namespace ESMCI {
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // <documentGenealogy>
-  if (attpack->AttributeIsSet("PreviousVersionDescription") || 
-      attpack->AttributeIsSet("PreviousVersion")) {
+  if (attpack->AttPackGetAttribute("PreviousVersionDescription", ESMC_ATTNEST_ON)->isSet() ||
+      attpack->AttPackGetAttribute("PreviousVersion", ESMC_ATTNEST_ON)->isSet()) {
 
     localrc = io_xml->writeStartElement("documentGenealogy", "", indent, 0);
     localrc = io_xml->writeStartElement("relationship", "", ++indent, 0);
@@ -2401,8 +2415,9 @@ namespace ESMCI {
       // Note: ESG 1.3.1 harvester CimHarvest.java looks for "previousVersion";
       //       bug was reported in Jira ticket #2692 8/31/11.
 
-    if (attpack->AttributeIsSet("PreviousVersionDescription")) {
-      localrc = attpack->AttributeGet("PreviousVersionDescription", &valuevector);
+    attr = attpack->AttPackGetAttribute("PreviousVersionDescription", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2417,8 +2432,9 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
-    if (attpack->AttributeIsSet("PreviousVersion")) {
-      localrc = attpack->AttributeGet("PreviousVersion", &valuevector);
+    attr = attpack->AttPackGetAttribute("PreviousVersion", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2480,6 +2496,7 @@ namespace ESMCI {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+  Attribute *attr = NULL;
   bool inObjectTree, inThisCompTreeOnly, inNestedAttPacks;
 
   vector<string> valuevector;
@@ -2496,8 +2513,9 @@ namespace ESMCI {
   localrc = io_xml->writeStartElement("simulationRun", "", 1, 0);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("SimulationRationale")) {
-    localrc = attpack->AttributeGet("SimulationRationale", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationRationale", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2511,8 +2529,9 @@ namespace ESMCI {
       "   to ESG: Not ingested yet.", 3);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("SimulationProjectName")) {
-    localrc = attpack->AttributeGet("SimulationProjectName", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationProjectName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2533,8 +2552,9 @@ namespace ESMCI {
     localrc = io_xml->writeEndElement("project", 2);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("SimulationShortName")) {
-    localrc = attpack->AttributeGet("SimulationShortName", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationShortName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2558,8 +2578,9 @@ namespace ESMCI {
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
-  if (attpack->AttributeIsSet("SimulationLongName")) {
-    localrc = attpack->AttributeGet("SimulationLongName", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationLongName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2602,8 +2623,9 @@ namespace ESMCI {
 
   localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
   localrc = io_xml->writeStartElement("closedDateRange", "", 3, 0);
-  if (attpack->AttributeIsSet("SimulationDuration")) {
-    localrc = attpack->AttributeGet("SimulationDuration", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationDuration", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2617,8 +2639,9 @@ namespace ESMCI {
       "   to ESG: \"Simulation Duration\" under tabs \"Properties/Basic\".",5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("SimulationEndDate")) {
-    localrc = attpack->AttributeGet("SimulationEndDate", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationEndDate", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2632,8 +2655,9 @@ namespace ESMCI {
       "   to ESG: \"Simulation End Date\" under tabs \"Properties/Basic\".", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("SimulationStartDate")) {
-    localrc = attpack->AttributeGet("SimulationStartDate", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationStartDate", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2668,8 +2692,9 @@ namespace ESMCI {
   localrc = io_xml->writeElement("documentID", GUID, 2, 0);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("MetadataVersion")) {
-    localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
+  attr = attpack->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2685,8 +2710,9 @@ namespace ESMCI {
   } else {
     localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
-  if (attpack->AttributeIsSet("SimulationEnsembleID")) {
-    localrc = attpack->AttributeGet("SimulationEnsembleID", &valuevector);
+  attr = attpack->AttPackGetAttribute("SimulationEnsembleID", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2745,6 +2771,7 @@ namespace ESMCI {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+  Attribute *attr = NULL;
   Attribute *attpackMain = NULL;
 
   vector<string> valuevector;
@@ -2761,8 +2788,9 @@ namespace ESMCI {
   localrc = io_xml->writeStartElement("platform", "", 1, 0);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("MachineName")) {
-    localrc = attpack->AttributeGet("MachineName", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2775,8 +2803,9 @@ namespace ESMCI {
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
-  if (attpack->AttributeIsSet("CompilerName")) {
-    localrc = attpack->AttributeGet("CompilerName", &valuevector);
+  attr = attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2809,8 +2838,9 @@ namespace ESMCI {
     }
   }
 
-  if (attpack->AttributeIsSet("MachineDescription")) {
-    localrc = attpack->AttributeGet("MachineDescription", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineDescription", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2838,8 +2868,9 @@ namespace ESMCI {
       "   to ESG: \"Machine Name\" under tabs \"Properties/Technical\".", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineSystem")) {
-    localrc = attpack->AttributeGet("MachineSystem", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineSystem", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2853,8 +2884,9 @@ namespace ESMCI {
       "   to ESG: \"Hardware Type\" under tabs \"Properties/Technical\".", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineOperatingSystem")) {
-    localrc = attpack->AttributeGet("MachineOperatingSystem", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineOperatingSystem", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2870,8 +2902,9 @@ namespace ESMCI {
       "   to ESG: \"Operating System\" under tabs \"Properties/Technical\".",5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineVendor")) {
-    localrc = attpack->AttributeGet("MachineVendor", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineVendor", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2887,8 +2920,9 @@ namespace ESMCI {
       "   to ESG: Ingested, but only used to classify platform.", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineInterconnectType")) {
-    localrc = attpack->AttributeGet("MachineInterconnectType", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineInterconnectType", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2904,8 +2938,9 @@ namespace ESMCI {
       "   to ESG: \"Interconnect Type\" under tabs \"Properties/Technical\".",5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineMaximumProcessors")) {
-    localrc = attpack->AttributeGet("MachineMaximumProcessors", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineMaximumProcessors", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2920,8 +2955,9 @@ namespace ESMCI {
       "\"Properties/Technical\".", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineCoresPerProcessor")) {
-    localrc = attpack->AttributeGet("MachineCoresPerProcessor", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineCoresPerProcessor", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2936,8 +2972,9 @@ namespace ESMCI {
       "\"Properties/Technical\".", 5);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineProcessorType")) {
-    localrc = attpack->AttributeGet("MachineProcessorType", &valuevector);
+  attr = attpack->AttPackGetAttribute("MachineProcessorType", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2957,14 +2994,15 @@ namespace ESMCI {
   localrc = io_xml->writeEndElement("machine", 3);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-  if (attpack->AttributeIsSet("CompilerName") ||
-      attpack->AttributeIsSet("CompilerVersion")) {
+  if (attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON)->isSet() ||
+      attpack->AttPackGetAttribute("CompilerVersion", ESMC_ATTNEST_ON)->isSet()) {
 
     localrc = io_xml->writeStartElement("compiler", "", 3, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-    if (attpack->AttributeIsSet("CompilerName")) {
-      localrc = attpack->AttributeGet("CompilerName", &valuevector);
+    attr = attpack->AttPackGetAttribute("CompilerName", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -2986,8 +3024,9 @@ namespace ESMCI {
        "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
-    if (attpack->AttributeIsSet("CompilerVersion")) {
-      localrc = attpack->AttributeGet("CompilerVersion", &valuevector);
+    attr = attpack->AttPackGetAttribute("CompilerVersion", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3033,8 +3072,9 @@ namespace ESMCI {
   attpackMain = AttPackGet(convention, MODEL_COMP_PURP,
                            "comp", attPackInstanceName);
   if (attpackMain == NULL) return ESMF_SUCCESS;  // if package not found, return 
-  if (attpackMain->AttributeIsSet("MetadataVersion")) {
-    localrc = attpackMain->AttributeGet("MetadataVersion", &valuevector);
+  attr = attpackMain->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
+  if (attr->isSet()) {
+    localrc = attr->get(&valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3090,6 +3130,7 @@ namespace ESMCI {
 
   int localrc;
   Attribute *attpack = NULL;
+  Attribute *attr = NULL;
   bool inNestedAttPacks;
 
   vector<string> valuevector;
@@ -3100,25 +3141,28 @@ namespace ESMCI {
 
   // write out all nested RPs
   for(int i=0; i<packList.size(); i++) {
-    attpack = packList.at(i);
-    if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare(RESP_PARTY_PURP)==0))
-      continue; // skip non-RPs
+      // RLO: added recursion to fix the false one-level recursion that worked before
+      //    because the attpack nesting for standard attpacks was making flat trees
+      localrc = packList.at(i)->AttributeWriteCIMRP(io_xml, indent);
+  }
 
-    // if no attributes set in this attpack instance, skip it ...
-    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+  if (!(attrConvention.compare("ISO 19115")==0 &&
+          attrPurpose.compare(RESP_PARTY_PURP)==0))
+      return ESMF_SUCCESS; // skip non-RPs
 
-    // otherwise, write it out ...
+  // if no attributes set in this attpack instance, skip it ...
+  if (!(AttPackIsSet(inNestedAttPacks=false))) return ESMF_SUCCESS;
 
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    if (attpack->AttributeIsSet("Name")) {
+    if (AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->isSet()) {
       // first, determine name type:  individual, organization, or position.
       //   first choice is the setting of the NameType attribute ...
       nameType = "gmd:individualName";  // default
-      if (attpack->AttributeIsSet("NameType")) {
-          localrc = attpack->AttributeGet("NameType", &valuevector);
+      attr = AttPackGetAttribute("NameType", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+          localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3139,8 +3183,8 @@ namespace ESMCI {
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
       // ... otherwise guess based on the role ...
-      } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-          localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+      } else if ((attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON))->isSet()) {
+          localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3155,7 +3199,7 @@ namespace ESMCI {
         }
       }
       // ... finally output the Name using the name type
-      localrc = attpack->AttributeGet("Name", &valuevector);
+      localrc = AttPackGetAttribute("Name", ESMC_ATTNEST_ON)->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3193,9 +3237,9 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
-    if (attpack->AttributeIsSet("PhysicalAddress") ||
-        attpack->AttributeIsSet("EmailAddress") ||
-        attpack->AttributeIsSet("URL")) {
+    if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
 
       // contactInfo header
       localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
@@ -3203,16 +3247,17 @@ namespace ESMCI {
       localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-      if (attpack->AttributeIsSet("PhysicalAddress") ||
-          attpack->AttributeIsSet("EmailAddress")) {
+      if (AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON)->isSet() ||
+          AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON)->isSet()) {
 
         // address header
         localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-        if (attpack->AttributeIsSet("PhysicalAddress")) {
-          localrc = attpack->AttributeGet("PhysicalAddress", &valuevector);
+        attr = AttPackGetAttribute("PhysicalAddress", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3233,8 +3278,9 @@ namespace ESMCI {
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
-        if (attpack->AttributeIsSet("EmailAddress")) {
-          localrc = attpack->AttributeGet("EmailAddress", &valuevector);
+        attr = AttPackGetAttribute("EmailAddress", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3274,8 +3320,9 @@ namespace ESMCI {
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } // end if PhysicalAddress or EmailAddress
 
-      if (attpack->AttributeIsSet("URL")) {
-        localrc = attpack->AttributeGet("URL", &valuevector);
+      attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3311,8 +3358,9 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } // end if PhysicalAddress, EmailAddress or URL
 
-    if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-      localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+    attr = AttPackGetAttribute("ResponsiblePartyRole", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3346,8 +3394,9 @@ namespace ESMCI {
     }
 
     // use "Abbreviation" attribute if set ...
-    if (attpack->AttributeIsSet("Abbreviation")) {
-      localrc = attpack->AttributeGet("Abbreviation", &valuevector);
+    attr = AttPackGetAttribute("Abbreviation", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3361,9 +3410,9 @@ namespace ESMCI {
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-    } else if (attpack->AttributeIsSet("Name")) {
+    } else if ((attr = AttPackGetAttribute("Name", ESMC_ATTNEST_ON))->isSet()) {
       // ... otherwise get initials from "Name"
-      localrc = attpack->AttributeGet("Name", &valuevector);
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3392,9 +3441,7 @@ namespace ESMCI {
     // responsibleParty footer
     localrc = io_xml->writeEndElement("responsibleParty", --indent);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-
-  } // end for each nested package
-
+      
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMRP
@@ -3421,7 +3468,8 @@ namespace ESMCI {
 //EOPI
 
   int localrc;
-  Attribute *attpack = NULL, *ap;
+  Attribute *attpack = NULL;
+  Attribute *attr = NULL;
 
   vector<string> valuevector;
   string value;
@@ -3441,9 +3489,9 @@ namespace ESMCI {
   // output all attributes set in this package
   for(int i=0; i<attpack->attrList.size(); i++) { 
     string name = attpack->attrList.at(i)->attrName;
-    if (((ap = attpack->AttPackGetAttribute(name)) != NULL) &&
-         (ap->parent->AttributeIsSet(name))) {
-      localrc = ap->parent->AttributeGet(name, &valuevector);
+    attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
 
       // Custom, user-defined general component properties
       if (purpose.compare(COMP_PROP_PURP) == 0) { 
@@ -3517,7 +3565,8 @@ namespace ESMCI {
 //EOPI
 
   int localrc;
-  Attribute *attpack = NULL, *ap;
+  Attribute *attpack = NULL;
+  Attribute *attr = NULL;
 
   vector<string> valuevector;
   string value;
@@ -3546,27 +3595,18 @@ namespace ESMCI {
       } 
 
       // skip if no ESMF/General, CF/Extended, or CF/general  attributes set
-      if ((((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
-           (!ap->parent->AttributeIsSet("Intent")) || ap == NULL) &&
-
-          (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
-           (!ap->parent->AttributeIsSet("ShortName")) || ap == NULL) &&
-
-          (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
-           (!ap->parent->AttributeIsSet("LongName")) || ap == NULL) &&
-
-          (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
-           (!ap->parent->AttributeIsSet("Units")) || ap == NULL) &&
-
-          (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
-           (!ap->parent->AttributeIsSet("StandardName")) || ap == NULL)) { 
+      if (attpack->AttPackGetAttribute("Intent", ESMC_ATTNEST_ON)->isSet() &&
+          attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON)->isSet() &&
+          attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON)->isSet() &&
+          attpack->AttPackGetAttribute("Units", ESMC_ATTNEST_ON)->isSet() &&
+          attpack->AttPackGetAttribute("StandardName", ESMC_ATTNEST_ON)->isSet()) {
         continue;
       }
 
       // found CIM/Inputs package, now write its set attributes
-      if (((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
-           (ap->parent->AttributeIsSet("Intent"))) {
-        localrc = ap->parent->AttributeGet("Intent", &valuevector);
+      attr = attpack->AttPackGetAttribute("Intent", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3601,9 +3641,9 @@ namespace ESMCI {
                                             1, "represented", "true");
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
-           (ap->parent->AttributeIsSet("ShortName"))) {
-        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+      attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3627,9 +3667,9 @@ namespace ESMCI {
           "CF/Extended, or ESMF/General, to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
-           (ap->parent->AttributeIsSet("LongName"))) {
-        localrc = ap->parent->AttributeGet("LongName", &valuevector);
+      attr = attpack->AttPackGetAttribute("LongName", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3644,9 +3684,9 @@ namespace ESMCI {
           "   to ESG: Not ingested yet.", indent+3);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
-           (ap->parent->AttributeIsSet("Units"))) {
-        localrc = ap->parent->AttributeGet("Units", &valuevector);
+      attr = attpack->AttPackGetAttribute("Units", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3669,9 +3709,9 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("units", indent+2);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
-           (ap->parent->AttributeIsSet("StandardName"))) {
-        localrc = ap->parent->AttributeGet("StandardName", &valuevector);
+      attr = attpack->AttPackGetAttribute("StandardName", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3724,6 +3764,7 @@ namespace ESMCI {
 
   int localrc;
   Attribute *attpack = NULL;
+  Attribute *attr = NULL;
   bool inNestedAttPacks;
 
   vector<string> valuevector;
@@ -3732,24 +3773,27 @@ namespace ESMCI {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  // write out all nested Citations
-  for(int i=0; i<packList.size(); i++) {
-    attpack = packList.at(i);
-    if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare(CITATION_PURP)==0))
-      continue; // skip non-Citations
+      // write out all nested citations
+      for(int i=0; i<packList.size(); i++) {
+        // RLO: added recursion to fix the false one-level recursion that worked before
+        //    because the attpack nesting for standard attpacks was making flat trees
+        localrc = packList.at(i)->AttributeWriteCIMcitation(io_xml, indent);
+      }
+
+      if (!(attrConvention.compare("ISO 19115")==0 &&
+            attrPurpose.compare("Citation")==0))
+        return ESMF_SUCCESS; // skip non-RPs
 
     // if no attributes set in this attpack instance, skip it ...
-    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
-
-    // otherwise, write it out ...
-
+    if (!(AttPackIsSet(inNestedAttPacks=false))) return ESMF_SUCCESS;
+      
     // citation header
     localrc = io_xml->writeStartElement("citation", "", indent, 0);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-    if (attpack->AttributeIsSet("ShortTitle")) {
-      localrc = attpack->AttributeGet("ShortTitle", &valuevector);
+    attr = AttPackGetAttribute("ShortTitle", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3775,8 +3819,9 @@ namespace ESMCI {
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
-    if (attpack->AttributeIsSet("Date")) {
-      localrc = attpack->AttributeGet("Date", &valuevector);
+    attr = AttPackGetAttribute("Date", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3819,8 +3864,9 @@ namespace ESMCI {
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
-    if (attpack->AttributeIsSet("PresentationForm")) {
-      localrc = attpack->AttributeGet("PresentationForm", &valuevector);
+    attr = AttPackGetAttribute("PresentationForm", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3842,8 +3888,9 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
-    if (attpack->AttributeIsSet("DOI")) {
-      localrc = attpack->AttributeGet("DOI", &valuevector);
+    attr = AttPackGetAttribute("DOI", ESMC_ATTNEST_ON);
+    if (attr->isSet()) {
+      localrc = attr->get(&valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3864,11 +3911,12 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
-    if (attpack->AttributeIsSet("LongTitle") ||
-        attpack->AttributeIsSet("URL")) {
+    if (AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON)->isSet() ||
+        AttPackGetAttribute("URL", ESMC_ATTNEST_ON)->isSet()) {
       value.clear();
-      if (attpack->AttributeIsSet("LongTitle")) {
-        localrc = attpack->AttributeGet("LongTitle", &valuevector);
+      attr = AttPackGetAttribute("LongTitle", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3879,8 +3927,9 @@ namespace ESMCI {
       // definition for a citation URL.  Until CIM extends (subclasses)
       // CI_Citation_Type to add a place for citation URL, append it to
       // LongTitle.
-      if (attpack->AttributeIsSet("URL")) {
-        localrc = attpack->AttributeGet("URL", &valuevector);
+      attr = AttPackGetAttribute("URL", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -3907,9 +3956,7 @@ namespace ESMCI {
     // citation footer
     localrc = io_xml->writeEndElement("citation", --indent);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
-
-  } // end for each nested package
-
+      
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMcitation
@@ -3936,6 +3983,7 @@ namespace ESMCI {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL, *ap;
+  Attribute *attr = NULL;
   bool inNestedAttPacks;
 
   vector<string> valuevector, value2vector;
@@ -3957,9 +4005,9 @@ namespace ESMCI {
       if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
 
       // otherwise, write it out ...
-
-      if (attpack->AttributeIsSet("CouplingPurpose")) {
-        localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingPurpose", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4002,8 +4050,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (attpack->AttributeIsSet("Frequency")) {
-        localrc = attpack->AttributeGet("Frequency", &valuevector);
+      attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4043,11 +4092,12 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("timeProfile", 4);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
-          attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+      if (attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)->isSet() ||
+          attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON)->isSet()) {
 
-        if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
+    	attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4069,8 +4119,9 @@ namespace ESMCI {
           // spatialRegriddingDimension="" xml attribute.
           localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 0);
         }
-        if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
+        attr = attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&value2vector);
           if (value2vector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4100,8 +4151,9 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("spatialRegridding", 4);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("TimeTransformationType")) {
-        localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
+      attr = attpack->AttPackGetAttribute("TimeTransformationType", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4114,8 +4166,9 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("timeTransformation", 4);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("CouplingSource")) {
-        localrc = attpack->AttributeGet("CouplingSource", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingSource", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4137,8 +4190,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (attpack->AttributeIsSet("CouplingTarget")) {
-        localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingTarget", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4160,9 +4214,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
-           (ap->parent->AttributeIsSet("ShortName"))) {
-        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+      attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4213,6 +4267,7 @@ namespace ESMCI {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL, *ap;
+  Attribute *attr = NULL;
   bool inNestedAttPacks;
 
   vector<string> valuevector, value2vector;
@@ -4234,9 +4289,9 @@ namespace ESMCI {
       if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
 
       // otherwise, write it out ...
-
-      if (attpack->AttributeIsSet("CouplingPurpose")) {
-        localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingPurpose", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4289,8 +4344,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (attpack->AttributeIsSet("Description")) {
-        localrc = attpack->AttributeGet("Description", &valuevector);
+      attr = attpack->AttPackGetAttribute("Description", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4321,8 +4377,9 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("type", 3);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
-      if (attpack->AttributeIsSet("Frequency")) {
-        localrc = attpack->AttributeGet("Frequency", &valuevector);
+      attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4367,11 +4424,12 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("timeProfile", 3);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
-          attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+      if (attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)->isSet() ||
+          attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON)->isSet()) {
 
-        if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
+    	attr = attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4401,8 +4459,9 @@ namespace ESMCI {
           localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 0);
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
-        if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
+        attr = attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON);
+        if (attr->isSet()) {
+          localrc = attr->get(&value2vector);
           if (value2vector.size() > 1) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                         "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4440,8 +4499,9 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("spatialRegridding", 3);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("TimeTransformationType")) {
-        localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
+      attr = attpack->AttPackGetAttribute("TimeTransformationType", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4461,8 +4521,9 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("timeTransformation", 3);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
-      if (attpack->AttributeIsSet("CouplingSource")) {
-        localrc = attpack->AttributeGet("CouplingSource", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingSource", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4527,8 +4588,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (attpack->AttributeIsSet("CouplingTarget")) {
-        localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
+      attr = attpack->AttPackGetAttribute("CouplingTarget", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                       "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
@@ -4585,9 +4647,9 @@ namespace ESMCI {
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
-      if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
-           (ap->parent->AttributeIsSet("ShortName"))) {
-        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+      attr = attpack->AttPackGetAttribute("ShortName", ESMC_ATTNEST_ON);
+      if (attr->isSet()) {
+        localrc = attr->get(&valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);

@@ -158,7 +158,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! add standard NUOPC GridComp Attribute Package to the Model
-    call NUOPC_CompAttributeAdd(gcomp, rc=rc)
+    call NUOPC_CompAttributeInit(gcomp, kind="Driver", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -528,7 +528,7 @@ module NUOPC_Driver
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeAdd(is%wrap%modelIS(i), rc=rc)
+      call NUOPC_StateAttributeInit(is%wrap%modelIS(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -539,7 +539,7 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeAdd(is%wrap%modelES(i), rc=rc)
+      call NUOPC_StateAttributeInit(is%wrap%modelES(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1342,9 +1342,8 @@ module NUOPC_Driver
               write (pString, *) phase
               
               ! check model InitializeDataComplete Attribute to see if complete
-              call ESMF_AttributeGet(is%wrap%modelComp(i), &
-                name="InitializeDataComplete", value=valueString, &
-                convention="NUOPC",  purpose="General", rc=rc)
+              call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
+                name="InitializeDataComplete", value=valueString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
@@ -1423,9 +1422,8 @@ module NUOPC_Driver
                 return  ! bail out
                 
               ! check model InitializeDataProgress Attribute if progress made
-              call ESMF_AttributeGet(is%wrap%modelComp(i), &
-                name="InitializeDataProgress", value=valueString, &
-                convention="NUOPC",  purpose="General", rc=rc)
+              call NUOPC_CompAttributeGet(is%wrap%modelComp(i), &
+                name="InitializeDataProgress", value=valueString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
@@ -1481,8 +1479,8 @@ module NUOPC_Driver
     type(NUOPC_RunElement), pointer :: runElement
     type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: name, compName, profileString
-    logical                         :: verbose
-    character(ESMF_MAXSTR)          :: defaultvalue
+    integer                         :: verbosity
+    integer                         :: profiling
     integer                         :: runElementCounter, runLoopCounter
     integer                         :: runElementCounterMax
     real(ESMF_KIND_R8)              :: timeBase, timeStart, timeStop
@@ -1497,18 +1495,27 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-    ! determine verbosity
-    defaultvalue = "high"
-    call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", rc=rc)
+    ! determine profiling
+    call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=valueString, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    if (trim(valueString)=="high") then
-      verbose = .true.
-    else
-      verbose = .false.
-    endif
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    profiling = NUOPC_Convert(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = NUOPC_Convert(valueString, &
+      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
@@ -1524,7 +1531,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
         trim(name)//" - entered Run with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1533,6 +1540,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(timeBase, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1632,7 +1641,7 @@ module NUOPC_Driver
             exState=is%wrap%modelIS(j)
           endif
           
-          if (verbose) then
+          if (btest(profiling,0)) then
             call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1672,7 +1681,7 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
             
-          if (verbose) then
+          if (btest(profiling,0)) then
             call ESMF_VMWtime(timeStop, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1698,7 +1707,8 @@ module NUOPC_Driver
           write (iString, *) i
           write (pString, *) phase
           
-          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+          if (btest(profiling,0) .and. &
+            ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
             call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1735,7 +1745,8 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
             
-          if (verbose .and. ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
+          if (btest(profiling,0) .and. &
+            ESMF_GridCompIsPetLocal(is%wrap%modelComp(i))) then
             call ESMF_VMWtime(timeStop, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1767,7 +1778,7 @@ module NUOPC_Driver
     runElementCounterMax = runElementCounter
 
     ! conditionally output diagnostic to Log file
-    if (verbose) then
+    if (btest(verbosity,0)) then
       call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
         trim(name)//" - leaving Run with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1776,6 +1787,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+    if (btest(profiling,0)) then
       ! profile output
       write (msgString, *) "RunSequence Profile:"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2140,7 +2153,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeAdd(cmEntry%wrap%component, rc=rc)
+    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2297,7 +2310,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeAdd(cmEntry%wrap%component, rc=rc)
+    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2524,7 +2537,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! add standard NUOPC CplComp Attribute Package to the connectorComp
-    call NUOPC_CompAttributeAdd(cmEntry%wrap%connector, rc=rc)
+    call NUOPC_CompAttributeInit(cmEntry%wrap%connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

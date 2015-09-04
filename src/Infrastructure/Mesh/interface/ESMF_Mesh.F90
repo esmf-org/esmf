@@ -165,6 +165,7 @@ module ESMF_MeshMod
   public ESMF_MeshFreeMemory
   public ESMF_MeshGetInit
   public ESMF_MeshGet
+  public ESMF_MeshIsCreated
   public ESMF_MeshMatch
   public ESMF_MeshSerialize
   public ESMF_MeshDeserialize
@@ -882,7 +883,7 @@ contains
 !         of 3.)
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 ! \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
@@ -1007,7 +1008,7 @@ contains
 !         of 3.)
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [nodeIds]
 !         An array containing the global ids of the nodes to be created on this PET. 
@@ -1341,7 +1342,7 @@ num_elems, &
 !         of 3.)
 !   \item [{[spatialDim]}]
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
@@ -2607,7 +2608,7 @@ end function ESMF_MeshCreateFromScrip
 !         of 3.)
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2685,7 +2686,7 @@ end function ESMF_MeshCreateFromScrip
 !         of 3.)
 !   \item[spatialDim] 
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2933,7 +2934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  Create a copy of an existing Mesh with a new distribution. Information
 ! in the Mesh such as connections, coordinates, areas, masks, etc. are 
 ! automatically redistributed to the new Mesh. To redistribute 
-! data in Fields built on the orginal Mesh create a Field on the new Mesh
+! data in Fields built on the original Mesh create a Field on the new Mesh
 !  and then use the Field redistribution functionality 
 ! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
 ! can also be used for data in FieldBundles.  
@@ -3544,7 +3545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of 3.)
 ! \item[{[spatialDim]}] 
 ! The number of coordinate dimensions needed to describe the locations of the nodes 
-! making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+! making up the Mesh. For a manifold, the spatial dimension can be larger than the 
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
 ! \item [{[nodalDistgrid]}]
 ! A 1D arbitrary distgrid describing the distribution of the nodes across the PETs. Note that
@@ -3659,6 +3660,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_MeshGet
 
 !------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshIsCreated()"
+!BOP
+! !IROUTINE: ESMF_MeshIsCreated - Check whether a Mesh object has been created
+
+! !INTERFACE:
+  function ESMF_MeshIsCreated(mesh, rc)
+! !RETURN VALUE:
+    logical :: ESMF_MeshIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)            :: mesh
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt mesh} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_MeshIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_MeshGetInit(mesh)==ESMF_INIT_CREATED) &
+      ESMF_MeshIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

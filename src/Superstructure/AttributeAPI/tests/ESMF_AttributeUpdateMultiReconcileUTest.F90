@@ -327,20 +327,22 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -881,7 +883,8 @@ program ESMF_AttributeUpdateMultiReconcileUTest
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
-    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, &
+                           rc=rc)
     print *, "PET: ", localPet, "outVal: ", trim(outVal)
     print *, "                expected: ", trim(value2)
     print *, "                      rc: ", rc

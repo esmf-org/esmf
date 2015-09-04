@@ -107,7 +107,7 @@ program ESMF_MeshEx
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
 ! The Mesh class is distributed by elements. This means that a node must be present on any PET that contains an element 
 ! associated with that node, but not on any other PET (a node can't be on a PET without an element ""home"). Since a node may be used
-! by two or more elements located on different PETs, a node may be duplicated on muliple PETs. When a node is duplicated in this manner, 
+! by two or more elements located on different PETs, a node may be duplicated on multiple PETs. When a node is duplicated in this manner, 
 ! one and only one of the PETs that contain the node must "own" the node. The user sets this ownership when they define the nodes during Mesh creation.
 ! When a Field is created on a Mesh (i.e. on  the Mesh nodes), on each PET the Field is only created on the nodes which are owned by that PET.
 ! This means that the size of the Field memory on the PET can be smaller than the number of nodes used to create the Mesh on 

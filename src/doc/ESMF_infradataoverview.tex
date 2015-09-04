@@ -213,16 +213,18 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
  In 2D, ESMF supports bilinear regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
 
 \smallskip
 
  In 3D, ESMF supports bilinear regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of hexahedrons (e.g. cubes)
+ \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of hexahedrons 
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
 
 \smallskip
@@ -257,8 +259,9 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
  In 2D, ESMF supports patch regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
  \end{itemize}
 
 \smallskip
@@ -285,16 +288,18 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 2D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
 \smallskip
 
  In 3D, ESMF supports nearest source to destination regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
 \smallskip
@@ -316,16 +321,18 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  In 2D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
 \smallskip
 
  In 3D, ESMF supports nearest destination to source regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) 
  \end{itemize}
 
 \smallskip
@@ -403,8 +410,7 @@ from the {\tt ESMF\_FieldRegridStore()} call. The following pseudocode demonstra
 For weights generated using destination area normalization (either by not specifying any normalization type or by specifying {\tt normType=ESMF\_NORMTYPE\_DSTAREA}), 
 the following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the
 destination field values ({\tt dst\_field}) resulting
-from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
-call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. As shown in the previous paragraph, it also 
+from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. As shown in the previous paragraph, it also 
 shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the
 fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
 
@@ -450,16 +456,16 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
 
  In 2D, ESMF supports conservative regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \end{itemize}
 
 \smallskip
 
  In 3D, ESMF supports conservative regridding between any combination of the following:
  \begin{itemize}
- \item Structured Grids composed of a single logically rectangular patch
- \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
+ \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular patch
+ \item Unstructured Meshes ({\tt ESMF\_Mesh}) composed of hexahedrons (e.g. cubes) and tetrahedrals
  \end{itemize}
 
 \smallskip
@@ -661,7 +667,7 @@ of grid types, all grids are converted to a common internal format and the regri
 is performed on that format. This vastly reduces the variety of grids that need to be supported in 
 the weight calculations for each interpolation method. It also has the added benefit of making it
 straightforward to add new grid types and to allow them to work with all the existing grid types.
-To hook into the exisiting weight calculation code, the new type just needs to be converted to the
+To hook into the existing weight calculation code, the new type just needs to be converted to the
 internal format. 
 
 The internal grid format used by the ESMF regrid weight calculation is a finite element

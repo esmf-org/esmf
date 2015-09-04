@@ -71,6 +71,7 @@ module ESMF_XGridCreateMod
 ! - ESMF-public methods:
     public ESMF_XGridCreate                 ! Create
     public ESMF_XGridCreateFromSparseMat    ! Create
+    public ESMF_XGridIsCreated
     public ESMF_XGridDestroy                ! Destroy
 !
 !
@@ -2689,6 +2690,35 @@ subroutine ESMF_XGridConstructBaseObj(xgtype, name, rc)
 
 end subroutine ESMF_XGridConstructBaseObj
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridIsCreated()"
+!BOP
+! !IROUTINE: ESMF_XGridIsCreated - Check whether a XGrid object has been created
+
+! !INTERFACE:
+  function ESMF_XGridIsCreated(xgrid, rc)
+! !RETURN VALUE:
+    logical :: ESMF_XGridIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_XGrid), intent(in)            :: xgrid
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt xgrid} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_XGridIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_XGridGetInit(xgrid)==ESMF_INIT_CREATED) &
+      ESMF_XGridIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

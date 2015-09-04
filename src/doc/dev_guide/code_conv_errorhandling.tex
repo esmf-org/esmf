@@ -136,7 +136,7 @@ end subroutine
 
 \item {\tt branch==1}. Here the behavior is essentially the same as in scenarios 1 and 2. When there is an error in {\tt subsub1()}, the returned {\tt rc} from {\tt sub()} has the error code {\tt subsub1()} generated. When there is not an error in {\tt subsub1()}, the returned {\tt rc} from {\tt sub()} is {\tt ESMF\_SUCCESS}.
 
-\item {\tt branch==2} and there is an error in {\tt subsub2()}. The behavior here is analagous to scenario 3. The returned {\tt rc} from {\tt sub()} has the error code {\tt subsub2()} generated.
+\item {\tt branch==2} and there is an error in {\tt subsub2()}. The behavior here is analogous to scenario 3. The returned {\tt rc} from {\tt sub()} has the error code {\tt subsub2()} generated.
 
 \item {\tt branch==2} and there is no error in {\tt subsub2()}. The value of {\tt rc} remains {\tt ESMF\_RC\_NOT\_SET} up to the point at which it is explicitly set to {\tt ESMF\_RC\_NOT\_IMPL}, and {\tt sub()} ends. Method documentation is expected to explain the gap in functionality.
 

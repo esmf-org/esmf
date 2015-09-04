@@ -126,7 +126,7 @@ int ArrayBundle::destruct(bool followCreator){
 // TODO: The followCreator flag is only needed until we have reference counting.
 // TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
-// TODO: sequence problems during automatic garbage collection unitl reference
+// TODO: sequence problems during automatic garbage collection unit reference
 // TODO: counting comes in to solve this problem in the final manner.
 //
 // !DESCRIPTION:
@@ -478,7 +478,7 @@ int ArrayBundle::write(
       }
     }
     if (ESMF_SUCCESS == localrc) {
-      // Call the IO read function
+      // Call the IO write function
       localrc = newIO->write(file, localiofmt, localoverwrite,
                              localstatus, timeslice);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

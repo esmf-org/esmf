@@ -1,0 +1,39 @@
+% $Id$
+
+
+\subsubsection{Coordinate keyNames}
+\label{const:coordkeyname}
+
+{\sf DESCRIPTION:\\}
+For ESMF to be able to use coordinates specified in a LocStream key (e.g. in regridding) 
+they need to be named with the appropriate identifiers. The particular identifiers depend 
+on the coordinate system (i.e. coordSys argument) used to create the LocStream containing 
+the keys. 
+
+The valid values are:
+\newline
+\begin{tabular}{|l|c|c|c||}
+\hline
+\hline
+Coordinate System & {\bf dimension 1}  & {\bf dimension 2} & {\bf dimension 3 (if used)} \\
+\hline
+{\bf ESMF\_COORDSYS\_SPH\_DEG}  & ESMF:Lon & ESMF:Lat & ESMF:Radius \\
+{\bf ESMF\_COORDSYS\_SPH\_RAD}  & ESMF:Lon & ESMF:Lat & ESMF:Radius \\
+{\bf ESMF\_COORDSYS\_CART}  & ESMF:X & ESMF:Y & ESMF:Z \\
+\hline
+\hline
+\end{tabular}
+
+
+\subsubsection{Masking keyName}
+\label{const:maskkeyname}
+
+{\sf DESCRIPTION:\\}
+Points within a LocStream can be marked and then potentially ignored during certain 
+operations, like regridding.  This masking information must be contained in a key 
+named with the appropriate identifier.
+
+The valid value is:
+\begin{description}
+\item [ESMF:Mask] 
+\end{description}

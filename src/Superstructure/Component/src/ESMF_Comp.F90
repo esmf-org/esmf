@@ -2203,7 +2203,7 @@ contains
 !   See section \ref{const:sync} for a list of valid blocking options.
 ! \item[{[timeout]}]
 !   The maximum period in seconds the actual component is allowed to execute
-!   a previously envoked component method before it must communicate back to
+!   a previously invoked component method before it must communicate back to
 !   the dual component. If the actual component does not communicate back in
 !   the specified time, a timeout condition is raised on the dual side (this
 !   side). The default is 3600, i.e. 1 hour.

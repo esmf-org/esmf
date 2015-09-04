@@ -257,8 +257,8 @@ program ESMF_FieldRegridEx
 ! This section describes the Field regrid methods. For an in depth description of ESMF regridding and the options available
 ! please see Section~\ref{sec:regrid}. 
 !
-! The basic flow of using ESMF Field regridding is as follows. First a source and destination grid object are created, both can be either a Grid or Mesh. 
-! Coordinates are set during Mesh creation, but for the Grid they must be set separately using the {\tt ESMF\_GridAddCoord()} and {\tt ESMF\_GridGetCoord()} methods. 
+! The basic flow of ESMF Field regridding is as follows. First a source and destination geometry object are created, depending on 
+! the regrid method they can be either a Grid, a Mesh, or a LocStream. 
 ! Next Fields are built on the source and destination grid objects. These Fields are then passed into {\tt ESMF\_FieldRegridStore()}. The user can either get a 
 ! sparse matrix from this call and/or a {\tt routeHandle}. If the user gets the sparse matrix then they are responsible for deallocating it, but other than that
 ! can use it as they wish. The {\tt routeHandle} can be used in the {\tt ESMF\_FieldRegrid()} call to perform the actual interpolation of data from the source 
@@ -288,25 +288,23 @@ program ESMF_FieldRegridEx
 
 !BOC
 
-  ! (Create source Grid or Mesh.)
-  ! (Create srcField on this Grid or Mesh)
+  ! (Create source Grid, Mesh, or LocStream.)
+  ! (Create srcField on the above.)
 
-  ! (Create destination Grid or Mesh.)
-  ! (Create dstField on this Grid or Mesh)
+  ! (Create destination Grid, Mesh, or LocStream.)
+  ! (Create dstField on the above.)
   
   ! Create the routeHandle which encodes the communication and
   ! information necessary for the regrid sparse matrix multiply.
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-                  routeHandle=routeHandle, &
-                  regridmethod=ESMF_REGRIDMETHOD_BILINEAR, rc=localrc)
+                             routeHandle=routeHandle, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOB
 
 !BOC
  
-  ! Can loop here regridding from srcField to dstField as long as 
-  ! source and destination Grid or Mesh don't change.
+  ! Can loop here regridding from srcField to dstField 
   ! do i=1,....
 
        ! (Put data into srcField)

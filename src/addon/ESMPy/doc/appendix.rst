@@ -36,6 +36,7 @@ Classes
     field
     grid
     mesh
+    locstream
     regrid
 
 ---------------

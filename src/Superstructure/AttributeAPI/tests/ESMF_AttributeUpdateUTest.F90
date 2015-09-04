@@ -238,8 +238,10 @@ module ESMF_AttributeUpdateUTestMod
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -646,6 +648,7 @@ program ESMF_AttributeUpdateUTest
     !EX_UTest_Multi_Proc_Only
 	call ESMF_AttributeGetAttPack(field, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
+    print *, "PET #", localPet, " - Poised for segv.."
     call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
     print *, "outVal = ", outVal 
     print *, "value2 = ", value2

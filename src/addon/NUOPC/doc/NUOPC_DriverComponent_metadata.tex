@@ -1,0 +1,30 @@
+\label{DriverCompMeta}
+The Driver component metadata is implemented as an ESMF Attribute Package:
+
+\begin{itemize}
+    \item Convention: NUOPC
+    \item Purpose: Instance
+    \item Includes:
+    \begin{itemize}
+      \item CIM Model Component Simulation Description (see for example the \htmladdnormallink{Component Attribute packages}{http://www.earthsystemmodeling.org/esmf\_releases/public/ESMF\_5\_2\_0rp2/ESMF\_refdoc/node6.html\#SECTION06022100000000000000} section in the ESMF v5.2.0rp2 documentation)
+    \end{itemize} 
+\end{itemize}
+
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+     \hline\hline
+     {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
+     \hline\hline
+     {\tt Kind} & String value indicating component kind.& Driver\\ \hline
+     {\tt Verbosity} & String value controlling the verbosity of the component. This attribute is used by the generic code layer but should also be considered by any specializing code that implements verbose diagnostic output.& 0, 1, ... max\\ \hline
+     {\tt Profiling} & String value controlling the profiling level. This attribute is used by the generic code layer but should also be considered by any specializing code that implements profiling.& 0, 1, ... max\\ \hline
+     {\tt CompLabel} & String value holding the label under which the component was added to its parent driver.& {\em no restriction}\\ \hline
+     {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
+     {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
+     {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
+     {\tt InternalInitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
+     {\tt NestingGeneration} & Integer value enumerating nesting level.& 0, 1, 2, ...\\ \hline
+     {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\ \hline
+     {\tt InitializeDataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
+     {\tt InitializeDataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
+     \hline
+\end{tabular}

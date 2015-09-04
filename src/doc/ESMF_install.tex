@@ -93,7 +93,7 @@ ESMF provides the ability to read Grid and Mesh data in
 Beginning with NetCDF 4.2, the C and Fortran API libraries are released as separate packages.
 To compile ESMF with NetCDF 4.2 and newer releases, it is required to have the NetCDF C library, 
 and the NetCDF Fortran API library installed in the same directory. 
-The {\tt ESMF\_NETCDF} environement variable must be set to {\tt "split"}.
+The {\tt ESMF\_NETCDF} environment variable must be set to {\tt "split"}.
 
 The following environment variables enable, and specify the name and location
 of the desired NetCDF library and associated header files:
@@ -370,7 +370,7 @@ Possible value: {\tt 32}, {\tt 64}, {\tt x86\_64\_32}, {\tt x86\_64\_small}, {\t
 If a system supports 32-bit and 64-bit (pointer wordsize) application binary
 interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
 values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen. On
-x86\_64 achitectures three additional, more specific ABI settings are available,
+x86\_64 architectures three additional, more specific ABI settings are available,
 {\tt x86\_64\_32}, {\tt x86\_64\_small} and {\tt x86\_64\_medium}.
 
 \item[ESMF\_ARRAY\_LITE]
@@ -643,7 +643,7 @@ See \ref{sec:lapack}
 \item[ESMF\_MACHINE]
 Possible value: output of {\tt uname -m} where available.
 
-Not normally set by user. This variable indicates achitectual details about
+Not normally set by user. This variable indicates architectural details about
 the machine on which the ESMF library is being built. The value of this 
 variable will affect which ABI settings are available and what they mean. 
 {\tt ESMF\_MACHINE} is set automatically.
@@ -979,8 +979,8 @@ Check the ESMF installation with the command:
 
 {\em Advice to installers.} To complete the installation of ESMF, a single ESMF specific environment variable should be set. The variable is named {\tt ESMFMKFILE}, and it must point to the {\tt esmf.mk} file that was generated during the installation process. Systems that support multiple ESMF installations via management software (e.g. {\em modules, softenv, ...}) should set/reset the {\tt ESMFMKFILE} environment variable as part of the configuration.
 
-Additionally, it is typically conventient to append the user's {\tt PATH} environment variable to provide access to the ESMF applications that were built during the installation process. The application binaries are located in the directory that was specifyied as {\tt ESMF\_INSTALL\_BINDIR} during the ESMF installation. The location is also stored in variable {\tt ESMF\_APPSDIR}, defined in file {\tt esmf.mk}. Systems that make ESMF installations available through management software (e.g. {\em modules, softenv, ...}) should modify the user's {\tt PATH} environment variable as part of the configuration.
+Additionally, it is typically convenient to append the user's {\tt PATH} environment variable to provide access to the ESMF applications that were built during the installation process. The application binaries are located in the directory that was specified as {\tt ESMF\_INSTALL\_BINDIR} during the ESMF installation. The location is also stored in variable {\tt ESMF\_APPSDIR}, defined in file {\tt esmf.mk}. Systems that make ESMF installations available through management software (e.g. {\em modules, softenv, ...}) should modify the user's {\tt PATH} environment variable as part of the configuration.
 
 {\em Hint.} By default, file {\tt esmf.mk} is located next to the ESMF library file in  directory {\tt ESMF\_INSTALL\_LIBDIR}. Consequently, unless {\tt esmf.mk} has been moved to a different location after the installation, the correct setting for {\tt ESMFMKFILE} is {\tt \$(ESMF\_INSTALL\_LIBDIR)/esmf.mk}.
 
-{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:Apps} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if managment software (e.g. {\em modules, softenv, ...}) is used on the system.
+{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:Apps} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if management software (e.g. {\em modules, softenv, ...}) is used on the system.

@@ -65,6 +65,7 @@ module ESMF_ArrayHaMod
   public ESMF_ArrayHalo
   public ESMF_ArrayHaloRelease
   public ESMF_ArrayHaloStore
+  public ESMF_ArrayIsCreated
   public ESMF_ArrayPrint
   public ESMF_ArrayRead
   public ESMF_ArrayRedist
@@ -257,7 +258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Array halo operation. 
+!   Release resources associated with an Array halo operation. 
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -371,7 +372,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
-!     elements potential halo destination elments.
+!     elements potential halo destination elements.
 !     See section \ref{const:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
@@ -393,7 +394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
@@ -462,6 +463,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayHaloStore
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ArrayIsCreated - Check whether an Array object has been created
+
+! !INTERFACE:
+  function ESMF_ArrayIsCreated(array, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ArrayIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in)            :: array
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt array} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ArrayIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ArrayGetInit(array)==ESMF_INIT_CREATED) &
+      ESMF_ArrayIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 
@@ -818,7 +847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Array redistribution. After this call
+!   Release resources associated with an Array redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -963,7 +992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Handle to the precomputed Route.
 !
 !   \item [factor]
-!     Factor by which to multipy source data.
+!     Factor by which to multiply source data.
 !
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in {\tt srcArray}. Each
@@ -986,7 +1015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
@@ -1575,7 +1604,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme

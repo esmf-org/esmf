@@ -140,7 +140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer :: grid1area(:), grid2area(:)
     real(ESMF_KIND_R8), pointer :: grid1areaXX(:), grid2areaXX(:)
     type(ESMF_NormType_Flag) :: normType
-
+    type(ESMF_RegridMethod_Flag) :: regridmethod
     !--------------------------------------------------------------------------
     ! EXECUTION
     !--------------------------------------------------------------------------
@@ -171,7 +171,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc = ESMF_SUCCESS
 
     ! read in the grid dimensions
-    call NCFileInquire(weightFile, title, normType, src_dim, dst_dim, rc=status)
+    call NCFileInquire(weightFile, title, normType, src_dim, dst_dim, &
+    	 regridmethod, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -458,35 +459,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       meanRelError = totErrDif/REAL(numRelError,ESMF_KIND_R8)
       lsRelError = sqrt(twoErrDif)/sqrt(twoErrX)
 
-      ! area calculations
-      ! use one of src_ or dst_frac, but NOT both!
-      allocate(grid1area(src_dim))
-      allocate(grid2area(dst_dim))
-      allocate(grid1areaXX(src_dim))
-      allocate(grid2areaXX(dst_dim))
-      grid1area = FsrcArray*src_area*src_frac
-
+     ! area calculations for conservative regridding only
      ! Calculate dst area depending on norm option
-      grid2area=0.0
-      if (normType == ESMF_NORMTYPE_DSTAREA) then
-         do i=1,dst_dim
-            ! Only calculate dst area over region that is unmasked and initialized
-            if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
-               grid2area(i) = FdstArray(i)*dst_area(i)
-            endif
-         enddo
-      else if (normType == ESMF_NORMTYPE_FRACAREA) then
-         do i=1,dst_dim
-            ! Only calculate dst area over region that is unmasked and initialized
-            if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
-               grid2area(i) = FdstArray(i)*dst_area(i)*dst_frac(i)
-            endif
-         enddo
+      if (regridmethod == ESMF_REGRIDMETHOD_CONSERVE) then
+         ! use one of src_ or dst_frac, but NOT both!
+         allocate(grid1area(src_dim))
+         allocate(grid2area(dst_dim))
+         allocate(grid1areaXX(src_dim))
+         allocate(grid2areaXX(dst_dim))
+
+         grid1area = FsrcArray*src_area*src_frac
+         grid2area=0.0
+         if (normType == ESMF_NORMTYPE_DSTAREA) then
+            do i=1,dst_dim
+              ! Only calculate dst area over region that is unmasked and initialized
+              if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
+                 grid2area(i) = FdstArray(i)*dst_area(i)
+              endif
+            enddo
+         else if (normType == ESMF_NORMTYPE_FRACAREA) then
+            do i=1,dst_dim
+              ! Only calculate dst area over region that is unmasked and initialized
+              if ((dst_mask(i) /= 0) .and. (FdstArray(i) /=UNINITVAL)) then
+                 grid2area(i) = FdstArray(i)*dst_area(i)*dst_frac(i)
+              endif
+            enddo
+         endif
+
+         grid1areaXX = FsrcArray*src_area
+         grid2areaXX = FdstArray*dst_area*dst_frac
       endif
-
-      grid1areaXX = FsrcArray*src_area
-      grid2areaXX = FdstArray*dst_area*dst_frac
-
       print *, trim(weightFile), " - ", trim(title)
       print *, " "
       print *, "Grid 1 min: ", grid1min, "    Grid 1 max: ", grid1max
@@ -499,17 +501,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       print *, "Maximum relative error  = ", maxRelError
       print *, "Least squares error     = ", lsRelError
       print *, " "
-      print *, "Grid 1 area = ", sum(grid1area)
-      print *, "Grid 2 area = ", sum(grid2area)
-      print *, "Conservation error = ", abs(sum(grid2area)-sum(grid1area))
+      if (regridmethod == ESMF_REGRIDMETHOD_CONSERVE) then
+         print *, "Grid 1 area = ", sum(grid1area)
+         print *, "Grid 2 area = ", sum(grid2area)
+         print *, "Conservation error = ", abs(sum(grid2area)-sum(grid1area))
+         deallocate(grid1area)
+         deallocate(grid2area)
+         deallocate(grid1areaXX)
+         deallocate(grid2areaXX)
+      else 
+         print *, "Grid 1 area = 0.000000000000000"
+         print *, "Grid 2 area = 0.000000000000000"
+         print *, "Conservation error = 0.000000000000000"
+      endif
 !      print *, " "
 !      print *, "reverse fracs  - Grid 1 area = ", sum(grid1areaXX)
 !      print *, "reverse fracs  - Grid 2 area = ", sum(grid2areaXX)
 !      print *, "reverse - Conservation error = ", abs(sum(grid2areaXX)-sum(grid1areaXX))
-      deallocate(grid1area)
-      deallocate(grid2area)
-      deallocate(grid1areaXX)
-      deallocate(grid2areaXX)
+
       deallocate(src_area)
       deallocate(src_frac)
       deallocate(dst_area)
@@ -547,19 +556,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! The weights file should have the source and destination grid information
   ! provided.
   !****************************************************************************
-  subroutine NCFileInquire (weightFile, title, normType, src_dim, dst_dim, rc)
+  subroutine NCFileInquire (weightFile, title, normType, src_dim, dst_dim, regridmethod, rc)
 
     character(len=*), intent(in)   :: weightFile
     character(len=*), intent(out)  :: title
     integer, intent(out)           :: src_dim
     integer, intent(out)           :: dst_dim
     type(ESMF_NormType_Flag), intent(out) :: normType
+    type(ESMF_RegridMethod_Flag), intent(out) :: regridmethod
     integer, intent(out), optional :: rc
 
     integer :: ncstat,  nc_file_id,  nc_srcdim_id, nc_dstdim_id
-    integer :: titleLen, normLen
+    integer :: titleLen, normLen, methodLen
 
-    character(ESMF_MAXPATHLEN) :: msg, normStr
+    character(ESMF_MAXPATHLEN) :: msg, normStr, methodStr
 
 #ifdef ESMF_NETCDF
     !-----------------------------------------------------------------
@@ -596,6 +606,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    !-----------------------------------------------------------------
+    ! Regridmethod
+    !-----------------------------------------------------------------
+    ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'map_method', &
+             len=methodLen)
+    if(ncstat /= 0) then
+      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
+      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
+    if(len(methodStr) < methodLen) then
+      print *, "Not enough space to put regridmethod string."
+      return
+    end if
+    ncstat = nf90_get_att(nc_file_id, nf90_global, "map_method", methodStr)
+    if(ncstat /= 0) then
+      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
+      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
+    
+    regridmethod = ESMF_REGRIDMETHOD_BILINEAR
+    if (trim(methodStr) .eq. "Conservative remapping")  then
+       regridmethod = ESMF_REGRIDMETHOD_CONSERVE
+    endif
 
     !-----------------------------------------------------------------
     ! Normalization

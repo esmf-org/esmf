@@ -115,6 +115,7 @@
       public ESMF_CalendarFinalize
       public ESMF_CalendarGet
       public ESMF_CalendarInitialize
+      public ESMF_CalendarIsCreated
       public ESMF_CalendarIsLeapYear
       public ESMF_CalendarPrint
       public ESMF_CalendarReadRestart
@@ -1042,6 +1043,34 @@
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_CalendarInitialize
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CalendarIsCreated()"
+!BOP
+! !IROUTINE: ESMF_CalendarIsCreated - Check whether a Calendar object has been created
+
+! !INTERFACE:
+  function ESMF_CalendarIsCreated(calendar, rc)
+! !RETURN VALUE:
+    logical :: ESMF_CalendarIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Calendar), intent(in)            :: calendar
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt calendar} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_CalendarIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_CalendarGetInit(calendar)==ESMF_INIT_CREATED) &
+      ESMF_CalendarIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
     
 !------------------------------------------------------------------------------
 !BOP

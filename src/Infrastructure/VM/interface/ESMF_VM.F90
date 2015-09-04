@@ -156,6 +156,7 @@ module ESMF_VMMod
   public ESMF_VMGetCurrentID
   public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetMemInfo
+  public ESMF_VMIsCreated
   public ESMF_VMLogMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
@@ -4554,6 +4555,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetMemInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIsCreated()"
+!BOP
+! !IROUTINE: ESMF_VMIsCreated - Check whether a VM object has been created
+
+! !INTERFACE:
+  function ESMF_VMIsCreated(vm, rc)
+! !RETURN VALUE:
+    logical :: ESMF_VMIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)            :: vm
+    integer,       intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt vm} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_VMIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_VMGetInit(vm)==ESMF_INIT_CREATED) &
+      ESMF_VMIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 

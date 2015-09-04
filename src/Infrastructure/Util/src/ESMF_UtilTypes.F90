@@ -642,6 +642,24 @@
         ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(3)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttNestFlag
+!
+!     ! Interface flag for Attribute tree
+
+      type ESMF_AttNest_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttNest_Flag), parameter ::  &
+        ESMF_ATTNEST_OFF = ESMF_AttNest_Flag(0), &
+        ESMF_ATTNEST_ON = ESMF_AttNest_Flag(1)
+
+
+!------------------------------------------------------------------------------
 !     ! ESMF_AttTreeFlag
 !
 !     ! Interface flag for Attribute tree
@@ -944,6 +962,7 @@
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
                                    ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
+      public ESMF_AttNest_Flag, ESMF_ATTNEST_OFF, ESMF_ATTNEST_ON
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
 

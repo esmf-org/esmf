@@ -404,7 +404,7 @@
       endflag=ESMF_END_ABORT)
 
 !BOE
-! In the above example, we first set up all the required paramters to create an XGrid from user
+! In the above example, we first set up all the required parameters to create an XGrid from user
 ! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
 ! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
 ! to the destination side.

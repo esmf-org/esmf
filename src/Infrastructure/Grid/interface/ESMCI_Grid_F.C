@@ -250,7 +250,7 @@ extern "C" {
       return;
     }
 
-    // Use grid access methods to retrieve information seperately
+    // Use grid access methods to retrieve information separately
     // I'm a little leary of putting this much logic in an interface call, but
     // it makes things less convoluted to do it this way. 
 

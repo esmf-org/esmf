@@ -107,6 +107,10 @@ enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
                             ESMC_ATTGETCOUNT_ATTLINK,
                             ESMC_ATTGETCOUNT_TOTAL};
                         
+// attnest flag type
+enum ESMC_AttNest_Flag { ESMC_ATTNEST_OFF=0,
+                         ESMC_ATTNEST_ON};
+
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMC_ATTRECONCILE_OFF=0,
                              ESMC_ATTRECONCILE_ON};

@@ -123,7 +123,7 @@ module user_model3
 
     call ESMF_AttributeSet(comp, 'ShortName', &
                            'EarthSys_AtmosDynCore', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+      convention=convCIM, purpose=purpComp,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  1) Name of component in navigator bar on the left; 
     !                  attribute 'Version' appended, if set.

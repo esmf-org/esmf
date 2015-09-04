@@ -832,7 +832,7 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeUpdateTreeChanges"
 //BOPI
-// !IROUTINE:  AttributeUpdateTreeChanges - look for all changes in Attribute hierachy
+// !IROUTINE:  AttributeUpdateTreeChanges - look for all changes in Attribute hierarchy
 //
 // !INTERFACE:
       int Attribute::AttributeUpdateTreeChanges(

@@ -11,6 +11,8 @@ import numpy as np
 import numpy.ma as ma
 import ctypes as ct
 
+import numpy as np
+
 def esmf_array(data, dtype, shape):
     '''
     :param data: buffer of fortran allocated ESMF array
@@ -34,7 +36,7 @@ def esmf_array(data, dtype, shape):
 
     return esmfarray
 
-def esmf_array1d(data, dtype, size):
+def esmf_array1D(data, dtype, size):
     '''
     :param data: buffer of fortran allocated ESMF array
     :type data: ctypes void_p
@@ -49,6 +51,8 @@ def esmf_array1d(data, dtype, size):
         ct.addressof(data.contents),
         np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
     esmfarray = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+
+    esmfarray = esmfarray.reshape(esmfarray.shape, order='F')
 
     return esmfarray
 
@@ -88,16 +92,7 @@ class MaskedArray(ma.MaskedArray):
         obj = super(MaskedArray, cls).__new__(cls, data=npdata, mask=mamask,
                                               dtype=constants._ESMF2PythonType[dtype])
 
-        # save objectwide metadata
-        obj.contents = data.contents
-
         return obj
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        # set instance metadata
-        self.contents = getattr(obj, 'contents', None)
-        super(MaskedArray, self).__array_finalize__(obj)
 
 class Array1D(np.ndarray):
 
@@ -120,6 +115,9 @@ class Array1D(np.ndarray):
             ct.addressof(data.contents),
             np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
         npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+
+        # TODO: the fortran order here will re-reindex data that has already been reindexed, causing the new and ownership tests to fail
+        npdata = npdata.reshape(npdata.shape, order='F')
 
         # create the new Field instance
         obj = super(Array1D, cls).__new__(cls, size,

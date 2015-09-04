@@ -430,7 +430,7 @@ program ESMF_RHandleBitForBitEx
 ! 
 ! First using {\tt srcTermProcessing=0} at store time and
 ! {\tt termorderflag=ESMF\_TERMORDER\_SRCSEQ} at execution time,
-! the canoncial term order is expected:
+! the canonical term order is expected:
 !
 !     d(1) = s(1) + s(6) + s(9) = 0.5 + 0.1 + 0.1 = sumA
 !
@@ -1429,7 +1429,7 @@ do i=1,5
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  ! try to open the file that holds the SMM paramters
+  ! try to open the file that holds the SMM parameters
   open(unit=iounit, file="smmParameters.dat", status="old", action="read", &
     form="unformatted", iostat=iostat)
   

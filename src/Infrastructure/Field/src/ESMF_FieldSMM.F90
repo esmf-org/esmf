@@ -251,7 +251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Release resouces associated with a Field sparse matrix multiplication. After this call
+!   Release resources associated with a Field sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -413,7 +413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination element in {\tt dstField}. For this format to be a valid
 !     option source and destination Fields must have matching number of
 !     tensor elements (the product of the sizes of all Field tensor dimensions).
-!     Under this condition an identiy matrix can be applied within the space of
+!     Under this condition an identity matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     \begin{sloppypar}
@@ -477,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
@@ -935,7 +935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     or runtime errors.
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the results. However, it may affect the performance
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme

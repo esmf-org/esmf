@@ -147,7 +147,7 @@ void OTree::add(
   ) {
 //
 // !DESCRIPTION:
-// Add an item to the OTree min,max gives the boundarys of the item and data 
+// Add an item to the OTree min,max gives the boundaries of the item and data 
 // represents the item.
 //EOP
 //-----------------------------------------------------------------------------
@@ -302,7 +302,7 @@ void OTree::add_commit(
   ) {
 //
 // !DESCRIPTION:
-// Add an item to the OTree min,max gives the boundarys of the item and data 
+// Add an item to the OTree min,max gives the boundaries of the item and data 
 // represents the item, also commit the item to the tree. This is in contrast
 // to the add() function which just adds an item in preparation for the commit
 // which adds all of the items which have been previously added to the tree. 

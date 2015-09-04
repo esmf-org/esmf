@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with ESMF Version 7.0.0 beta snapshot, http://www.earthsystemmodeling.org -->
+  <model_component name="N/A" full_name="N/A" version="N/A" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xmlns:xlink="http://www.w3.org/1999/xlink" 
+      xmlns:gco="http://www.isotc211.org/2005/gco" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns="http://www.earthsystemmodeling.org" 
+      xsi:schemaLocation="http://www.earthsystemmodeling.org file:/esmf_model_component.xsd">
+    <variable_set>
+    </variable_set>
+<GridSpec name="unnamed  0">
+  <Mosaic name="unnamed  0">
+  </Mosaic>
+</GridSpec>
+  </model_component>

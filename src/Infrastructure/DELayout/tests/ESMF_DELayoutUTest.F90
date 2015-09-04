@@ -52,9 +52,10 @@ program ESMF_DELayoutUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
-  type(ESMF_DELayout):: delayout, delayoutAlias, delayoutAssigned
+  type(ESMF_DELayout):: delayout, delayout3, delayoutAlias, delayoutAssigned
   integer:: petCount
   logical:: delayoutBool
+  logical :: isCreated
 
 #ifdef ESMF_TESTEXHAUSTIVE
   type(ESMF_VM):: vm1
@@ -96,6 +97,7 @@ program ESMF_DELayoutUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
   !------------------------------------------------------------------------
   !EX_UTest
   write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
@@ -203,10 +205,74 @@ program ESMF_DELayoutUTest
 ! Test the NEWSTYLE DELayout ...
 !-------------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for uncreated object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_DELayoutIsCreated(delayout3)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for uncreated object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_DELayoutIsCreated(delayout3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create test DELayout for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  delayout3 = ESMF_DELayoutCreate(vm, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for created object"
+  write(failMsg, *) "Did not return .true."
+  isCreated = ESMF_DELayoutIsCreated(delayout3)
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_DELayoutIsCreated(delayout3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test DELayout for IsCreated"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DELayoutDestroy(delayout3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  isCreated = ESMF_DELayoutIsCreated(delayout3)
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing DELayout IsCreated for destroyed object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_DELayoutIsCreated(delayout3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Default DELayout Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   delayout = ESMF_DELayoutCreate(rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

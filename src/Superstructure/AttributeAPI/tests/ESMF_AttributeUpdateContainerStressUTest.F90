@@ -227,20 +227,22 @@ module AttributeUpdateContainerStressUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX', 96, &
+      convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY', 84, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -267,56 +269,56 @@ module AttributeUpdateContainerStressUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field2", rc=status)
     call ESMF_AttributeAdd(field2, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field2, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field2, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field3 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field3", rc=status)
     call ESMF_AttributeAdd(field3, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field3, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field3, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field4 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field4", rc=status)
     call ESMF_AttributeAdd(field4, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field4, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field4, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field5 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field5", rc=status)
     call ESMF_AttributeAdd(field5, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field5, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field5, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field6 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field6", rc=status)
     call ESMF_AttributeAdd(field6, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field6, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field6, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field7 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field7", rc=status)
     call ESMF_AttributeAdd(field7, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field7, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field7, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field8 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field8", rc=status)
     call ESMF_AttributeAdd(field8, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field8, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field8, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field9 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field9", rc=status)
     call ESMF_AttributeAdd(field9, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field9, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field9, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     field10 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field10", rc=status)
     call ESMF_AttributeAdd(field10, convention=convESMF, purpose=purpGen, &
       rc=status)
-    call ESMF_AttributeSet(field10, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field10, name1, value1, &
+      convention=convESMF, purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
     fieldbundle2 = ESMF_FieldBundleCreate(name="fieldbundle2", rc=status)

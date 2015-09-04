@@ -24,11 +24,11 @@ if (ESMF.local_pet() == 0):
     if not os.path.exists(datadir):
         os.mkdir(datadir)
 
+    # Retrieve the data files needed for the test cases from the remote server.
     for fname in datafilelist:
-    	 # Retrieve the data files needed for the test cases from the remote server.
-             status_ok = cache_data_file(os.path.join(datadir,fname))
-             if not status_ok:
-                   raise IOError
+        status_ok = cache_data_file(os.path.join(datadir,fname))
+        if not status_ok:
+            raise IOError
 
 # run utests, pipe to file
 num_proc = 1

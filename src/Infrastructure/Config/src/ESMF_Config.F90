@@ -57,6 +57,7 @@
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
                                    ! counting disregarding type (function)
+       public :: ESMF_ConfigIsCreated
        public :: ESMF_ConfigSetAttribute ! sets value
        public :: ESMF_ConfigValidate   ! validates config object
 !------------------------------------------------------------------------------
@@ -157,7 +158,7 @@
 ! Revised parameter table to fit Fortran 90 standard.
 
        integer,   parameter :: LSZ = 256  ! Maximum line size
-       integer,   parameter :: MSZ = 512  ! Used to size buffer; this is
+       integer,   parameter :: MSZ = 1024 ! Used to size buffer; this is
                                           ! usually *less* than the number
                                           ! of non-blank/comment lines
                                           ! (because most lines are shorter
@@ -2409,6 +2410,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_ConfigGetLen
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigIsCreated()"
+!BOP
+! !IROUTINE: ESMF_ConfigIsCreated - Check whether a Config object has been created
+
+! !INTERFACE:
+  function ESMF_ConfigIsCreated(config, rc)
+! !RETURN VALUE:
+    logical :: ESMF_ConfigIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Config), intent(in)            :: config
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt config} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_ConfigIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_ConfigGetInit(config)==ESMF_INIT_CREATED) &
+      ESMF_ConfigIsCreated = .true.
+  end function
+!------------------------------------------------------------------------------
+
+
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
 !BOP
@@ -2501,9 +2532,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: lu, loop, ls, ptr
+      integer :: i, ls, ptr
+      integer :: lu, nrecs
+      integer :: iostat
       character(len=LSZ) :: line
       integer :: localrc
+      character(LSZ), allocatable :: line_buffer(:)
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2525,15 +2559,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="error opening text file: " // trim (filename), &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+!     Count records, then read them into a local buffer
+      nrecs = 0
+      do
+        read (lu, *, iostat=iostat)
+        if (iostat /= 0) exit
+        nrecs = nrecs + 1
+      end do
+
+      rewind (lu)
+
+      allocate (line_buffer(nrecs))
+      do, i = 1, nrecs
+        read (lu, '(a)') line_buffer(i)
+      end do
+
 !     Read to end of file
 !     -------------------
       config%cptr%buffer(1:1) = EOL
       ptr = 2                         ! next buffer position
-      do loop = 1, NBUF_MAX
+      do, i = 1, nrecs
 
 !        Read next line
 !        --------------
-         read(lu,'(a)', end=11) line  ! read next line
+         line = line_buffer(i)            ! copy next line
          call ESMF_Config_trim ( line )      ! remove trailing white space
          call ESMF_Config_pad ( line )       ! Pad with # from end of line
 
@@ -2550,16 +2599,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          end if
 
       end do
-      
-      ! good chance config%cptr%buffer is not big enough 
-      localrc = ESMF_RC_MEM
-      if ( present (rc )) then
-        rc = localrc
-      endif
-
-      return
-      
-11    continue
 
 !     All done
 !     --------
