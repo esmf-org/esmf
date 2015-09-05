@@ -34,6 +34,7 @@ def create_locstream_16_parallel(domask=False):
     if ESMF.pet_count() is not 4:
         raise ValueError("processor count must be 4 to use this function")
 
+    locstream = None
     if ESMF.local_pet() is 0:
         locstream = ESMF.LocStream(4)
         locstream["ESMF:X"] = [0.0, 1.5, 0.0, 1.5]
@@ -86,36 +87,29 @@ def create_locstream_spherical_16_parallel(coord_sys=ESMF.CoordSys.SPH_DEG, doma
     if coord_sys == ESMF.CoordSys.SPH_DEG:
         deg_rad = 180.0
 
+    locstream = None
     if ESMF.local_pet() is 0:
-        locstream = ESMF.LocStream(4, coord_sys=ESMF.CoordSys.SPH_RAD)
-        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        locstream["ESMF:Lat"] = [0.0, 0.0, 0.0, 0.0]
-        #locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
-        #locstream["ESMF:Lat"] = [0.0, 0.0, 0.25*deg_rad, 0.25*deg_rad]
+        locstream = ESMF.LocStream(4, coord_sys=coord_sys)
+        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
+        locstream["ESMF:Lat"] = [0.0, 0.0, 0.25*deg_rad, 0.25*deg_rad]
         if domask:
             locstream["ESMF:Mask"] = np.array([1, 0, 0, 1], dtype=np.int32)
     elif ESMF.local_pet() is 1:
-        locstream = ESMF.LocStream(4, coord_sys=ESMF.CoordSys.SPH_RAD)
-        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        locstream["ESMF:Lat"] = [0.25*deg_rad, 0.25*deg_rad, 0.25*deg_rad, 0.25*deg_rad]
-        #locstream["ESMF:Lon"] = [1.5*deg_rad, 2*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        #locstream["ESMF:Lat"] = [0.0, 0.0, 0.25*deg_rad, 0.25*deg_rad]
+        locstream = ESMF.LocStream(4, coord_sys=coord_sys)
+        locstream["ESMF:Lon"] = [1.5*deg_rad, 2*deg_rad, 1.5*deg_rad, 2*deg_rad]
+        locstream["ESMF:Lat"] = [0.0, 0.0, 0.25*deg_rad, 0.25*deg_rad]
         if domask:
             locstream["ESMF:Mask"] = np.array([1, 1, 1, 1], dtype=np.int32)
     elif ESMF.local_pet() is 2:
-        locstream = ESMF.LocStream(4, coord_sys=ESMF.CoordSys.SPH_RAD)
-        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        locstream["ESMF:Lat"] = [0.75*deg_rad, 0.75*deg_rad, 0.75*deg_rad, 0.75*deg_rad]
-        #locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
-        #locstream["ESMF:Lat"] = [0.75*deg_rad, 0.75*deg_rad, deg_rad, deg_rad]
+        locstream = ESMF.LocStream(4, coord_sys=coord_sys)
+        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
+        locstream["ESMF:Lat"] = [0.75*deg_rad, 0.75*deg_rad, deg_rad, deg_rad]
         if domask:
             locstream["ESMF:Mask"] = np.array([1, 1, 1, 1], dtype=np.int32)
     elif ESMF.local_pet() is 3:
-        locstream = ESMF.LocStream(4, coord_sys=ESMF.CoordSys.SPH_RAD)
-        locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        locstream["ESMF:Lat"] = [deg_rad, deg_rad, deg_rad, deg_rad]
-        #locstream["ESMF:Lon"] = [1.5*deg_rad, 2*deg_rad, 1.5*deg_rad, 2*deg_rad]
-        #locstream["ESMF:Lat"] = [0.75*deg_rad, 0.75*deg_rad, deg_rad, deg_rad]
+        locstream = ESMF.LocStream(4, coord_sys=coord_sys)
+        locstream["ESMF:Lon"] = [1.5*deg_rad, 2*deg_rad, 1.5*deg_rad, 2*deg_rad]
+        locstream["ESMF:Lat"] = [0.75*deg_rad, 0.75*deg_rad, deg_rad, deg_rad]
         if domask:
             locstream["ESMF:Mask"] = np.array([1, 1, 1, 1], dtype=np.int32)
 

@@ -36,12 +36,18 @@ Regridding from Mesh to LocStream
 
     .. literalinclude:: ../examples/mesh_locstream_regrid.py
 
-----------------------
-Field Regridding Tools
-----------------------
+---------------------------------
+Regridding from LocStream to Grid
+---------------------------------
+
+    .. literalinclude:: ../examples/locstream_grid_regrid.py
+
+---------------------------
+Regridding Helper Functions
+---------------------------
 
 The following code snippets demonstrate how to build all of the pieces
-necessary to regrid data between Fields built on Grids and Meshes.
+necessary to regrid data between Fields built on Grids, Meshes and LocStreams.
 
 ~~~~~~~~~~~~~~~~
 LocStream Create

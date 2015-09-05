@@ -1,4 +1,4 @@
-# This example demonstrates how to regrid between a grid and a mesh.
+# This example demonstrates how to regrid between a Grid and a LocStream.
 # The data files can be retrieved from the ESMF data repository by uncommenting the
 # following block of code:
 #
@@ -32,13 +32,8 @@ grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
 # create a field
 srcfield = ESMF.Field(grid, name='srcfield')
 
-# create a field on the locstream
-mask_values=None
-if domask:
-    mask_values=[0]
-
-dstfield = ESMF.Field(locstream, name='dstfield', mask_values=mask_values)
-xctfield = ESMF.Field(locstream, name='xctfield', mask_values=mask_values)
+dstfield = ESMF.Field(locstream, name='dstfield')
+xctfield = ESMF.Field(locstream, name='xctfield')
 
 # initialize the fields
 [x, y] = [0, 1]
@@ -55,19 +50,18 @@ if coord_sys == ESMF.CoordSys.SPH_DEG:
 elif coord_sys == ESMF.CoordSys.SPH_RAD:
     xctfield.data[...] = 10.0 + numpy.cos(gridXCoord) ** 2 + numpy.cos(2 * gridYCoord)
 else:
-    raise ValueError("coordsys value not supported")
+    raise ValueError("coordsys value does not work in this example")
 
 dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
-# TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
 dst_mask_values=None
 if domask:
     dst_mask_values=numpy.array([0])
 
 regrid = ESMF.Regrid(srcfield, dstfield,
                      regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.IGNORE,
+                     unmapped_action=ESMF.UnmappedAction.ERROR,
                      dst_mask_values=dst_mask_values)
 
 # do the regridding from source to destination field
