@@ -755,7 +755,7 @@ module NUOPC_Base
 
     ! set Attributes to defaults
     call ESMF_AttributeSet(state, attrList(2), "transferNone", &
-        convention="NUOPC", purpose="General", rc=rc)
+        convention="NUOPC", purpose="Instance", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
