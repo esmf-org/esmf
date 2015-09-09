@@ -25,31 +25,43 @@ Regridding from Grid to Mesh
     .. literalinclude:: ../examples/grid_mesh_regrid.py
 
 ---------------------------------
+Regridding from Grid to LocStream
+---------------------------------
+
+    .. literalinclude:: ../examples/grid_locstream_regrid.py
+
+---------------------------------
 Regridding from Mesh to LocStream
 ---------------------------------
 
     .. literalinclude:: ../examples/mesh_locstream_regrid.py
+
+---------------------------------
+Regridding from LocStream to Grid
+---------------------------------
+
+    .. literalinclude:: ../examples/locstream_grid_regrid.py
+
+---------------------------
+Regridding Helper Functions
+---------------------------
+
+The following code snippets demonstrate how to build all of the pieces
+necessary to regrid data between Fields built on Grids, Meshes and LocStreams.
 
 ~~~~~~~~~~~~~~~~
 LocStream Create
 ~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
-        :pyobject: create_locstream_16
+        :pyobject: create_locstream_spherical_16
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 LocStream Create Parallel
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../src/ESMF/test/test_api/locstream_utilities.py
-        :pyobject: create_locstream_16_parallel
-
-----------------------
-Field Regridding Tools
-----------------------
-
-The following code snippets demonstrate how to build all of the pieces
-necessary to regrid data between Fields built on Grids and Meshes.
+        :pyobject: create_locstream_spherical_16_parallel
 
 ~~~~~~~~~~~~~~~~
 Create a 2D Grid

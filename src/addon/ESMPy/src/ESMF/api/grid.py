@@ -18,7 +18,19 @@ from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_o
 #### Grid class #########################################################
 
 class Grid(object):
+    """
+    The Grid class is a Python wrapper object for the ESMF Grid.
+    The individual values of all coordinate and mask arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
+    The Grid class is used to describe the geometry and discretization of logically rectangular physical grids.
+    It also contains the description of the grid's underlying topology and the decomposition of the physical grid
+    across the available computational resources. The most frequent use of the Grid class is to describe physical
+    grids in user code so that sufficient information is available to perform regridding operations.
+
+    For more information about the ESMF Grid class, please see the `ESMF Grid documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
+    """
     @initialize
     def __init__(self, max_index=None,
                  num_peri_dims=0,
