@@ -588,7 +588,7 @@ contains
 
       if (maskPresent) then
         call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, &
             msg="expecting mask key to be INTEGER*4", &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
