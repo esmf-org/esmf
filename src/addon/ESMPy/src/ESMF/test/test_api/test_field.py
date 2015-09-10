@@ -280,14 +280,14 @@ class TestField(TestBase):
         assert np.all(field.data == field2.data)
 
     # don't change this function, it's used in the documentation
-    def create_field(grid_or_mesh, name):
+    def create_field(gml, name):
         '''
-        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+        PRECONDITIONS: An Grid, Mesh or LocStream has been created, and 'name' is a string that
                        will be used to initialize the name of a new Field.\n
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(grid_or_mesh, name=name)
+        field = ESMF.Field(gml, name=name)
 
         return field
 

@@ -12,7 +12,6 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
@@ -22,7 +21,23 @@ import warnings
 [node, element] = [0, 1]
 
 class Mesh(object):
+    """
+    The Mesh class is a Python wrapper object for the ESMF Mesh.
+    The individual values of all coordinate and mask arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
+    The ESMF library provides a class for representing unstructured grids called the Mesh. Fields can be created
+    on a Mesh to hold data. Fields created on a Mesh can also be used as either the source or destination or both
+    of a regrididng operation which allows data to be moved between unstructured grids.  A Mesh is constructed of
+    nodes and elements. A node, also known as a vertex or corner, is a part of a Mesh which represents a single
+    point. Coordinate information is set in a node. An element, also known as a cell, is a part of a mesh which
+    represents a small region of space. Elements are described in terms of a connected set of nodes which represent
+    locations along their boundaries. Field data may be located on either the nodes or elements of a Mesh.
+
+    For more information about the ESMF Mesh class, please see the `ESMF Mesh documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+
+    """
     @initialize
     def __init__(self, parametric_dim=None,
                  spatial_dim=None,

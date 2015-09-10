@@ -18,7 +18,26 @@ import ESMF.api.constants as constants
 [node, element] = [0, 1]
 
 class Field(MaskedArray):
+    """
+    The Field class is a Python wrapper object for the ESMF Field.  Field is a derived type of the
+    numpy.MaskedArray.  This means that it has built in masking functionality,
+    as well as native numpy Array operations.
+    The individual values of all data arrays are referenced to those of the underlying Fortran ESMF object.
 
+    A Field represents a physical field, such as temperature.   The Field class contains distributed and
+    discretized field data, a reference to its associated grid, and metadata. The Field class stores the grid
+    staggering for that physical field. This is the relationship of how the data array of a field maps onto a
+    grid (e.g. one item per cell located at the cell center, one item per cell located at the NW corner,
+    one item per cell vertex, etc.). This means that different Fields which are on the same underlying
+    Grid but have different staggerings can share the same Grid object without needing to replicate it multiple times.
+
+    For more information about the ESMF Field class, please see the `ESMF Field documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    """
+    """
+    The ESMPy Field is a derived class of numpy.MaskedArray.  This means that it has built in masking functionality,
+    as well as native numpy Array operations.  All data is referenced to the underlying Fortran ESMF objects.
+    """
     @initialize
     def __new__(cls, grid, name=None,
                 typekind=None,

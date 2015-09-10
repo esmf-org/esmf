@@ -7,7 +7,7 @@ The LocStream API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import Array1D
+from ESMF.api.array import esmf_array1D
 import ESMF.api.constants as constants
 from copy import copy
 from ESMF.util.slicing import get_formatted_slice
@@ -16,13 +16,50 @@ from ESMF.util.slicing import get_formatted_slice
 #### LocStream class #########################################################
 
 class LocStream(dict):
+    """
+    The LocStream class is a Python wrapper object for the ESMF LocStream.  LocStream is a derived type of the
+    Python dict class.
+    The individual values of all key arrays are referenced to those of the underlying Fortran ESMF object.
 
+    A location stream (LocStream) is used to represent the locations of a set of data points. The values of the
+    data points are stored within a Field created using the LocStream.
+
+    In the data assimilation world, LocStreams can be thought of as a set of observations. Their locations are
+    generally described using Cartesian (x, y, z), or (lat, lon, height) coordinates. There is no assumption of
+    any regularity in the positions of the points. To make the concept more general, the locations for each data
+    point are represented using a construct called keys. Keys can include other descriptors besides location,
+    including a second set of coordinates.
+
+    For more information about the ESMF LocStream class, please see the `ESMF LocStream documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+
+    LocStream follows standard Python.dict behavior for setting and getting keys.  For example::
+
+        locstream["ESMF:X"] = [1, 2, 3]
+        x = locstream["ESMF:X"]
+
+    NOTE: Setting keys of lists of mixed types can result in errors due to type mismatches from the ESMF library.
+
+    For ESMF to be able to recognize coordinates specified in a LocStream key they need to be named with the
+    appropriate identifiers. The particular identifiers depend on the coordinate system (i.e. coord_sys argument)
+    used to create the LocStream.
+
+    The valid values are:
+
+    ===================  ===========  ===========  ===========
+    Coordinate System    dimension 1  dimension 2  dimension 3
+    ===================  ===========  ===========  ===========
+    CoordSys.SPH_DEG     ESMF:Lon     ESMF:Lat     ESMF:Radius
+    CoordSys.SPH_RAD     ESMF:Lon     ESMF:Lat     ESMF:Radius
+    CoordSys.CART        ESMF:X       ESMF:Y       ESMF:Z
+    ===================  ===========  ===========  ===========
+    """
     @initialize
     def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
         '''
         Create a LocStream. \n
         Required Arguments: \n
-            location_count: the number of locations in this stream. \n
+            location_count: the number of point in this stream. \n
         Optional Arguments: \n
             coord_sys: the coordinates system for the Grid. \n
                     Argument values are:\n
@@ -138,21 +175,24 @@ class LocStream(dict):
 
     def __setitem__(self, key, value):
         # check types
-        if not isinstance(value, (list, tuple, np.ndarray, Array1D)):
+        if not isinstance(value, (list, tuple, np.ndarray)):
             raise ValueError("type of value must be list, tuple, or numpy array")
         if type(value) is not np.ndarray:
             value = np.array(value)
         if len(value) != self.size:
             raise ValueError("value must be of length "+str(self.size))
 
+        keyvals = value
         if key not in self:
-            self.add(key, typekind=constants._Python2ESMFType[type(value[0])])
+            keyvals = self._add_(key, typekind=constants._Python2ESMFType[type(value[0])])
 
-        ret = dict.__setitem__(self, key, value)
+        ret = dict.__setitem__(self, key, keyvals)
+
+        keyvals[...] = value
 
         return ret
 
-    def add(self, key_name, typekind=None):
+    def _add_(self, key_name, typekind=None):
         '''
         Add a key to a LocStream. \n
         Required Arguments: \n
@@ -173,9 +213,9 @@ class LocStream(dict):
         key_ptr = ESMP_LocStreamGetKeyPtr(self.struct, key_name)
 
         # create an Array1D object out of the pointer
-        value = Array1D(key_ptr, dtype=typekind, size=self.size)
+        keyvals = esmf_array1D(key_ptr, dtype=typekind, size=self.size)
 
-        return value
+        return keyvals
 
     def copy(self):
         # shallow copy
@@ -220,4 +260,3 @@ class LocStream(dict):
     @property
     def singlestagger(self):
         return self._singlestagger
-
