@@ -12,16 +12,16 @@ Regridding between Fields is accomplished with the Regrid class.  All of these
 classes are explained in more detail in the sections provided by the links in
 the following table.
 
-=======================================  =============================================================================
+=======================================  ==============================================================================
 Class                                    Description
-=======================================  =============================================================================
+=======================================  ==============================================================================
 :class:`~ESMF.api.esmpymanager.Manager`  A manager class to initialize and finalize ESMF
-:class:`~ESMF.api.field.Field`           A data field built on a Grid or Mesh
-:class:`~ESMF.api.grid.Grid`             A structured grid for coordinate representation
-:class:`~ESMF.api.mesh.Mesh`             An unstructured grid for coordinate representation
-:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of unconnected points
+:class:`~ESMF.api.field.Field`           A data field built on a Grid, Mesh, or LocStream
+:class:`~ESMF.api.grid.Grid`             A class to represent a logically rectangular grid
+:class:`~ESMF.api.mesh.Mesh`             A calss to represent an unstructured grid
+:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of disconnected points
 :class:`~ESMF.api.regrid.Regrid`         The regridding utility
-=======================================  =============================================================================
+=======================================  ==============================================================================
 
 
 ---------------
@@ -69,7 +69,7 @@ formats.  Grid files can be in SCRIP and GRIDSPEC format.
 SCRIP
 +++++
 
-This file format is used by the SCRIP :cite:`SCRIP`, :cite:`Jones1999` package, grid files that
+This file format is used by the SCRIP :cite:`ref:SCRIP`, package, grid files that
 work with that package should also work here.  SCRIP format files are
 capable of storing either 2D logically rectangular grids or 2D
 unstructured grids.  More information can be found in the ESMF reference
