@@ -37,8 +37,14 @@ class LocStream(dict):
 
         locstream["ESMF:X"] = [1, 2, 3]
         x = locstream["ESMF:X"]
+        locstream["ESMF:Y"] = [1, 2, 3]
+        y = locstream["ESMF:Y"]
+        locstream["ESMF:Mask"] = [0, 1, 0]
+        mask = locstream["ESMF:Mask"]
 
     NOTE: Setting keys of lists of mixed types can result in errors due to type mismatches from the ESMF library.
+
+    NOTE: Mask must be of type TypeKind.I4, and coordinates must by of type TypeKind.R8
 
     For ESMF to be able to recognize coordinates specified in a LocStream key they need to be named with the
     appropriate identifiers. The particular identifiers depend on the coordinate system (i.e. coord_sys argument)

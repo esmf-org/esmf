@@ -14,237 +14,197 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def grid_create(bounds, coords, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
-    '''
-    PRECONDITIONS: 'bounds' contains the number of indices required for the 
-                   two dimensions of a 2D Grid.  'coords' contains the 
-                   upper and lower coordinate bounds of the Grid.  'domask' 
-                   is a boolean value that gives the option to put a mask 
-                   on this Grid.  'doarea' is an option to create user 
-                   defined areas on this Grid. \n
-    POSTCONDITIONS: A 2D Grid has been created.
-    RETURN VALUES: \n Grid :: grid \n
-    '''
-    lb_x = float(bounds[0])
-    lb_y = float(bounds[1])
-    ub_x = float(bounds[2])
-    ub_y = float(bounds[3])
+def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, ctk=ESMF.TypeKind.R8):
+    """
+    :param xdom: 2,1 list containing the x domain
+    :param ydom: 2,1 list conatining the y domain
+    :param nx: number of longitude values at cell centers
+    :param ny: number of latitude values at cell centers
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :param doarea: boolean to determine whether to set an arbitrary area values or not
+    :param ctk: the coordinate typekind
+    :return: grid
+    """
+    [x, y] = [0, 1]
 
-    min_x = float(coords[0])
-    min_y = float(coords[1])
-    max_x = float(coords[2])
-    max_y = float(coords[3])
+    # +1 because corners have one more than center
+    xs = np.linspace(xdom[0], xdom[1], nx + 1)
+    xcorner = np.array([xs[0:-1], xs[1::]]).T
+    xcenter = (xcorner[:, 1] + xcorner[:, 0]) / 2
 
-    cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
-    cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
-    
-    max_index = np.array([ub_x,ub_y])
+    # +1 because corners have one more than center
+    ys = np.linspace(ydom[0], ydom[1], ny + 1)
+    ycorner = np.array([ys[0:-1], ys[1::]]).T
+    ycenter = (ycorner[:, 1] + ycorner[:, 0]) / 2
 
-    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
+    max_index = np.array([nx, ny])
+    grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER], coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
-    ##     CORNERS
-    grid.add_coords(staggerloc=[ESMF.StaggerLoc.CORNER])
+    gridXCenter = grid.get_coords(x)
+    x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][x]]
+    gridXCenter[...] = x_par.reshape((x_par.size, 1))
 
-    # get the coordinate pointers and set the coordinates
-    [x,y] = [0,1]
-    gridCorner = grid.coords[ESMF.StaggerLoc.CORNER]
-    
-    for i in xrange(gridCorner[x].shape[x]):
-        gridCorner[x][i, :] = float(i)*cellwidth_x + \
-            min_x + grid.lower_bounds[ESMF.StaggerLoc.CORNER][x] * cellwidth_x
-            # last line is the pet specific starting point for this stagger and dim
+    gridYCenter = grid.get_coords(y)
+    y_par = ycenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][y]]
+    gridYCenter[...] = y_par.reshape((1, y_par.size))
 
-    for j in xrange(gridCorner[y].shape[y]):
-        gridCorner[y][:, j] = float(j)*cellwidth_y + \
-            min_y + grid.lower_bounds[ESMF.StaggerLoc.CORNER][y] * cellwidth_y
-            # last line is the pet specific starting point for this stagger and dim
+    if corners:
+        grid.add_coords([ESMF.StaggerLoc.CORNER])
+        lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER][x]
+        ubx = grid.upper_bounds[ESMF.StaggerLoc.CORNER][x]
+        lby = grid.lower_bounds[ESMF.StaggerLoc.CORNER][y]
+        uby = grid.upper_bounds[ESMF.StaggerLoc.CORNER][y]
 
-    ##     CENTERS
-    grid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER])
+        gridXCorner = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CORNER)
+        for i0 in range(ubx - lbx - 1):
+            gridXCorner[i0, :] = xcorner[i0+lbx, 0]
+        gridXCorner[i0 + 1, :] = xcorner[i0+lbx, 1]
 
-    # get the coordinate pointers and set the coordinates
-    [x,y] = [0,1]
-    gridXCenter = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CENTER)
-    gridYCenter = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CENTER)
-    
-    for i in xrange(gridXCenter.shape[x]):
-        gridXCenter[i, :] = float(i)*cellwidth_x + cellwidth_x/2.0 + \
-            min_x + grid.lower_bounds[ESMF.StaggerLoc.CENTER][x] * cellwidth_x
-            # last line is the pet specific starting point for this stagger and dim
- 
-    for j in xrange(gridYCenter.shape[y]):
-        gridYCenter[:, j] = float(j)*cellwidth_y + cellwidth_y/2.0 + \
-            min_y + grid.lower_bounds[ESMF.StaggerLoc.CENTER][y] * cellwidth_y
-            # last line is the pet specific starting point for this stagger and dim
+        gridYCorner = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CORNER)
+        for i1 in range(uby - lby - 1):
+            gridYCorner[:, i1] = ycorner[i1+lby, 0]
+        gridYCorner[:, i1 + 1] = ycorner[i1+lby, 1]
 
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
         mask[np.where((1.75 <= gridXCenter.data < 2.25) &
                       (1.75 <= gridYCenter.data < 2.25))] = 0
-        
 
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
-    
+
         area = grid.get_item(ESMF.GridItem.AREA)
-    
+
         area[:] = 5.0
 
     return grid
 
-def grid_create_periodic(bounds, domask=False):
-    '''
-    PRECONDITIONS: 'bounds' contains the number of indices required for the first two 
-                   dimensions of a periodic Grid.  'domask' is a boolean value 
-                   that gives the option to put a mask on this Grid.\n
-    POSTCONDITIONS: A periodic Grid has been created.\n
-    RETURN VALUES: \n Grid :: grid \n
-    '''
+def grid_create_periodic(nlon, nlat, corners=False, domask=False):
+    """
+    :param nlons: number of longitude values at cell centers
+    :param nlats: number of latitude values at cell centers
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :return: grid
+    """
+    [lon, lat] = [0, 1]
 
-    nx = float(bounds[0])
-    ny = float(bounds[1])
+    # +1 because corners have one more than center
+    lons = np.linspace(-180, 180, nlon + 1)
+    loncorner = np.array([lons[0:-1], lons[1::]]).T
+    loncenter = (loncorner[:, 1] + loncorner[:, 0]) / 2
 
-    dx = 360.0/nx
-    dy = 180.0/ny
+    # +1 because corners have one more than center
+    lats = np.linspace(-90, 90, nlat + 1)
+    latcorner = np.array([lats[0:-1], lats[1::]]).T
+    latcenter = (latcorner[:, 1] + latcorner[:, 0]) / 2
 
-    DEG2RAD = 3.141592653589793/180.0
+    max_index = np.array([nlon, nlat])
+    grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=[ESMF.StaggerLoc.CENTER])
 
-    max_index = np.array([nx,ny])
+    gridXCenter = grid.get_coords(lon)
+    lon_par = loncenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
+    gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
 
-    staggerLocs = [ESMF.StaggerLoc.CORNER, ESMF.StaggerLoc.CENTER]
-    grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=staggerLocs)
+    gridYCenter = grid.get_coords(lat)
+    lat_par = latcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
+    gridYCenter[...] = lat_par.reshape((1, lat_par.size))
 
-    # VM
-    vm = ESMF.ESMP_VMGetGlobal()
-    localPet, petCount = ESMF.ESMP_VMGet(vm)
+    if corners:
+        grid.add_coords([ESMF.StaggerLoc.CORNER])
+        lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER][lon]
+        ubx = grid.upper_bounds[ESMF.StaggerLoc.CORNER][lon]
+        lby = grid.lower_bounds[ESMF.StaggerLoc.CORNER][lat]
+        uby = grid.upper_bounds[ESMF.StaggerLoc.CORNER][lat]
 
- # get the coordinate pointers and set the coordinates
-    [x,y] = [0, 1]
-    gridXCorner = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CORNER)
-    gridYCorner = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CORNER)
+        gridXCorner = grid.get_coords(lon, staggerloc=ESMF.StaggerLoc.CORNER)
+        for i0 in range(ubx - lbx - 1):
+            gridXCorner[i0, :] = loncorner[i0+lbx, 0]
+        gridXCorner[i0 + 1, :] = loncorner[i0+lbx, 1]
 
-    # make an array that holds indices from lower_bounds to upper_bounds
-    bnd2indX = np.arange(grid.lower_bounds[ESMF.StaggerLoc.CORNER][x],
-                         grid.upper_bounds[ESMF.StaggerLoc.CORNER][x], 1)
-    bnd2indY = np.arange(grid.lower_bounds[ESMF.StaggerLoc.CORNER][y],
-                         grid.upper_bounds[ESMF.StaggerLoc.CORNER][y], 1)
+        gridYCorner = grid.get_coords(lat, staggerloc=ESMF.StaggerLoc.CORNER)
+        for i1 in range(uby - lby - 1):
+            gridYCorner[:, i1] = latcorner[i1+lby, 0]
+        gridYCorner[:, i1 + 1] = latcorner[i1+lby, 1]
 
-    for i in xrange(gridXCorner.shape[x]):
-        gridXCorner[i, :] = float(bnd2indX[i])*dx - 180.0
-
-    for j in xrange(gridYCorner.shape[y]):
-        gridYCorner[:, j] = float(bnd2indY[j])*dy - 90.0
-
-    ##     CENTERS
-
-    # get the coordinate pointers and set the coordinates
-    [x,y] = [0, 1]
-    gridXCenter = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CENTER)
-    gridYCenter = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CENTER)
-
-    # make an array that holds indices from lower_bounds to upper_bounds
-    bnd2indX = np.arange(grid.lower_bounds[ESMF.StaggerLoc.CENTER][x],
-                         grid.upper_bounds[ESMF.StaggerLoc.CENTER][x], 1)
-    bnd2indY = np.arange(grid.lower_bounds[ESMF.StaggerLoc.CENTER][y],
-                         grid.upper_bounds[ESMF.StaggerLoc.CENTER][y], 1)
-
-    for i in xrange(gridXCenter.shape[x]):
-        gridXCenter[i, :] = float(bnd2indX[i])*dx + 0.5*dx - 180.0
-
-    for j in xrange(gridYCenter.shape[y]):
-        y = (float(bnd2indY[j])*dy - 90.0)
-        yp1 = (float(bnd2indY[j]+1)*dy - 90.0)
-        gridYCenter[:, j] = (y+yp1)/2.0
-
-    [x,y] = [0, 1]
     if domask:
-        # set up the grid mask
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((175. < gridXCenter.data < 185.) &
-                      (-5. < gridYCenter.data < 5.))] = 0
+        mask[np.where((1.75 <= gridXCenter.data < 2.25) &
+                      (1.75 <= gridYCenter.data < 2.25))] = 0
 
     return grid
 
-def grid_create_3d(bounds, coords, domask=False, doarea=False):
-    '''
-    PRECONDITIONS: 'bounds' contains the number of indices required for the 
-                   two dimensions of a 2D Grid.  'coords' contains the 
-                   upper and lower coordinate bounds of the Grid.  'domask' 
-                   is a boolean value that gives the option to put a mask 
-                   on this Grid.  'doarea' is an option to create user 
-                   defined areas on this Grid. \n
-    POSTCONDITIONS: A Grid has been created.
-    RETURN VALUES: \n Grid :: grid \n
-    '''
-    lb_x = float(bounds[0])
-    lb_y = float(bounds[1])
-    lb_z = float(bounds[2])
-    ub_x = float(bounds[3])
-    ub_y = float(bounds[4])
-    ub_z = float(bounds[5])
+def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, doarea=False):
+    """
+    :param xdom: 2,1 list containing the x domain
+    :param ydom: 2,1 list conatining the y domain
+    :param zdom: 2,1 list conatining the z domain
+    :param nx: number of x values at cell centers
+    :param ny: number of y values at cell centers
+    :param nz: number of z values at cell centers
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :param doarea: boolean to determine whether to set an arbitrary area values or not
+    :return: grid
+    """
+    [x, y, z] = [0, 1, 2]
 
-    min_x = float(coords[0])
-    min_y = float(coords[1])
-    min_z = float(coords[2])
-    max_x = float(coords[3])
-    max_y = float(coords[4])
-    max_z = float(coords[5])
+    # +1 because corners have one more than center
+    xs = np.linspace(xdom[0], xdom[1], nx + 1)
+    xcorner = np.array([xs[0:-1], xs[1::]]).T
+    xcenter = (xcorner[:, 1] + xcorner[:, 0]) / 2
 
-    cellwidth_x = (max_x-min_x)/(ub_x-lb_x)
-    cellwidth_y = (max_y-min_y)/(ub_y-lb_y)
-    cellwidth_z = (max_z-min_z)/(ub_z-lb_z)
-    
-    max_index = np.array([ub_x,ub_y,ub_z])
+    # +1 because corners have one more than center
+    ys = np.linspace(ydom[0], ydom[1], ny + 1)
+    ycorner = np.array([ys[0:-1], ys[1::]]).T
+    ycenter = (ycorner[:, 1] + ycorner[:, 0]) / 2
 
-    grid = ESMF.Grid(max_index, coord_sys=ESMF.CoordSys.CART)
+    # +1 because corners have one more than center
+    zs = np.linspace(zdom[0], zdom[1], nz + 1)
+    zcorner = np.array([zs[0:-1], zs[1::]]).T
+    zcenter = (zcorner[:, 1] + zcorner[:, 0]) / 2
 
-    ##     CORNERS
-    grid.add_coords(staggerloc=[ESMF.StaggerLoc.CORNER_VFACE])
+    max_index = np.array([nx, ny, nz])
+    grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER_VCENTER], coord_sys=ESMF.CoordSys.CART)
 
-    # get the coordinate pointers and set the coordinates
-    [x,y,z] = [0,1,2]
-    gridCorner = grid.coords[ESMF.StaggerLoc.CORNER_VFACE]
-    
-    for i in xrange(gridCorner[x].shape[x]):
-        gridCorner[x][i, :, :] = float(i)*cellwidth_x + \
-            min_x + grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][x] * cellwidth_x
-            # last line is the pet specific starting point for this stagger and dim
- 
-    for j in xrange(gridCorner[y].shape[y]):
-        gridCorner[y][:, j, :] = float(j)*cellwidth_y + \
-            min_y + grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][y] * cellwidth_y
-            # last line is the pet specific starting point for this stagger and dim
+    gridXCenter = grid.get_coords(x)
+    x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]]
+    gridXCenter[...] = x_par.reshape(x_par.size, 1, 1)
 
-    for k in xrange(gridCorner[z].shape[z]):
-        gridCorner[z][:, :, k] = float(k)*cellwidth_z + \
-            min_z + grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][z] * cellwidth_z
-            # last line is the pet specific starting point for this stagger and dim
+    gridYCenter = grid.get_coords(y)
+    y_par = ycenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y]]
+    gridYCenter[...] = y_par.reshape(1, y_par.size, 1)
 
-    ##     CENTERS
-    grid.add_coords(staggerloc=[ESMF.StaggerLoc.CENTER_VCENTER])
+    gridZCenter = grid.get_coords(z)
+    z_par = zcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]]
+    gridZCenter[...] = z_par.reshape(1, 1, z_par.size)
 
-    # get the coordinate pointers and set the coordinates
-    [x,y,z] = [0,1,2]
-    gridXCenter = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CENTER_VCENTER)
-    gridYCenter = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CENTER_VCENTER)
-    gridZCenter = grid.get_coords(z, staggerloc=ESMF.StaggerLoc.CENTER_VCENTER)
-    
-    for i in xrange(gridXCenter.shape[x]):
-        gridXCenter[i, :, :] = float(i)*cellwidth_x + cellwidth_x/2.0 + \
-            min_x + grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x] * cellwidth_x
-            # last line is the pet specific starting point for this stagger and dim
- 
-    for j in xrange(gridYCenter.shape[y]):
-        gridYCenter[:, j, :] = float(j)*cellwidth_y + cellwidth_y/2.0 + \
-            min_y + grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][y] * cellwidth_y
-            # last line is the pet specific starting point for this stagger and dim
+    if corners:
+        grid.add_coords([ESMF.StaggerLoc.CORNER_VFACE])
+        lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][x]
+        ubx = grid.upper_bounds[ESMF.StaggerLoc.CORNER_VFACE][x]
+        lby = grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][y]
+        uby = grid.upper_bounds[ESMF.StaggerLoc.CORNER_VFACE][y]
+        lbz = grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][z]
+        ubz = grid.upper_bounds[ESMF.StaggerLoc.CORNER_VFACE][z]
 
-    for k in xrange(gridZCenter.shape[z]):
-        gridZCenter[:, :, k] = float(k)*cellwidth_z + cellwidth_z/2.0 + \
-            min_z + grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z] * cellwidth_z
-            # last line is the pet specific starting point for this stagger and dim
+        gridXCorner = grid.get_coords(x, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
+        for i0 in range(ubx - lbx - 1):
+            gridXCorner[i0, :, :] = xcorner[i0+lbx, 0]
+        gridXCorner[i0 + 1, :, :] = xcorner[i0+lbx, 1]
+
+        gridYCorner = grid.get_coords(y, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
+        for i1 in range(uby - lby - 1):
+            gridYCorner[:, i1, :] = ycorner[i1+lby, 0]
+        gridYCorner[:, i1 + 1, :] = ycorner[i1+lby, 1]
+
+        gridZCorner = grid.get_coords(z, staggerloc=ESMF.StaggerLoc.CORNER_VFACE)
+        for i2 in range(ubz - lbz - 1):
+            gridZCorner[:, :, i2] = zcorner[i2+lbz, 0]
+        gridZCorner[:, :, i2 + 1] = zcorner[i2+lbz, 1]
 
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
@@ -255,9 +215,9 @@ def grid_create_3d(bounds, coords, domask=False, doarea=False):
 
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
-    
+
         area = grid.get_item(ESMF.GridItem.AREA)
-    
+
         area[:] = 5.0
 
     return grid
@@ -395,7 +355,7 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
                         field2_flat[i])/abs(field2_flat[i])
 
             if err > 1:
-                print field1_flat[i], field2_flat[i], dstfracfield_flat[i]
+                print "PET #{0}, {1}, {2}, {3}".format(ESMF.local_pet(), field1_flat[i], field2_flat[i], dstfracfield_flat[i])
             num_nodes += 1
             totalErr += err
             if (err > max_error):

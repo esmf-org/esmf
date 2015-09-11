@@ -141,7 +141,7 @@ class TestRegrid(TestBase):
             srcfield.data[i] = 20.0
 
         # create grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], domask=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, domask=True)
 
         [x, y] = [0, 1]
 
@@ -179,7 +179,7 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         [x, y] = [0, 1]
 
@@ -210,8 +210,8 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        srcgrid = grid_create_periodic([60, 30], domask=True)
-        dstgrid = grid_create_periodic([55, 28])
+        srcgrid = grid_create_periodic(60, 30, corners=True, domask=True)
+        dstgrid = grid_create_periodic(55, 28, corners=True)
 
         # create the Fields
         srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
@@ -255,9 +255,8 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        srcgrid = grid_create_3d([0, 0, 0, 21, 21, 21], [0, 0, 0, 21, 21, 21])
-        dstgrid = grid_create_3d([0.5, 0.5, 0.5, 19.5, 19.5, 19.5],
-                                 [0.5, 0.5, 0.5, 19.5, 19.5, 19.5])
+        srcgrid = grid_create_3d([0, 21], [0, 21], [0, 21], 21, 21, 21, corners=True)
+        dstgrid = grid_create_3d([0.5, 19.5], [0.5, 19.5], [0.5, 19.5], 19, 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield')
@@ -298,8 +297,8 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create two unique Grid objects
-        srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True)
-        dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
+        srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True)
+        dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
@@ -343,9 +342,9 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create two unique Grid objects
-        srcgrid = grid_create([0, 0, 21, 21], [0, 0, 21, 21], domask=True,
+        srcgrid = grid_create([0, 21], [0, 21], 21, 21, corners=True, domask=True,
                               ctk=ESMF.TypeKind.R4)
-        dstgrid = grid_create([0.5, 0.5, 19.5, 19.5], [0.5, 0.5, 19.5, 19.5])
+        dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
@@ -360,7 +359,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
-                                    src_mask_values=np.array([0]),
+                                    src_mask_values=[0],
                                     regrid_method=ESMF.RegridMethod.CONSERVE,
                                     unmapped_action=ESMF.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
@@ -395,7 +394,7 @@ class TestRegrid(TestBase):
                 mesh_create_50(domask=True, doarea=True)
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -448,7 +447,7 @@ class TestRegrid(TestBase):
                 mesh_create_50()
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4])
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True)
 
         # create Fields
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -491,7 +490,7 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], domask=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, domask=True)
 
         # create a Mesh
         if parallel:
@@ -532,7 +531,7 @@ class TestRegrid(TestBase):
             parallel = True
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4])
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True)
 
         # create a Mesh
         if parallel:
@@ -635,7 +634,7 @@ class TestRegrid(TestBase):
                 mesh_create_50_ngons()
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -683,7 +682,7 @@ class TestRegrid(TestBase):
             mesh_create_4_ngons()
 
         # create a grid
-        grid = grid_create([0, 0, 3, 3], [0, 2.5, 2, 3.5], doarea=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.ELEMENT)
@@ -737,7 +736,7 @@ class TestRegrid(TestBase):
                 mesh_create_50_ngons()
 
         # create a grid
-        grid = grid_create([0, 0, 8, 8], [0, 0, 4, 4], doarea=True)
+        grid = grid_create([0, 4], [0, 4], 8, 8, corners=True, doarea=True)
 
         # create Field objects on the Meshes
         srcfield = ESMF.Field(mesh, name='srcfield', meshloc=ESMF.MeshLoc.NODE)
