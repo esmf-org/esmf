@@ -12729,10 +12729,10 @@ write(*,*) "LOCALRC=",localrc
      do i2=fclbnd(2),fcubnd(2)
 
         if (xdstPtr(i1,i2) .ne. 0.0) then
-           if (abs(dstPtr(i1,i2)-xdstPtr(i1,i2))/abs(dstPtr(i1,i2)) &
-                .gt. 0.05) then
+           if (abs((dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2)) .gt. 0.05) then
               correct=.false.
-              write(*,*) i1,i2,"::",dstPtr(i1,i2),xdstPtr(i1,i2),(dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2)
+              write(*,*) i1,i2,"::",dstPtr(i1,i2),xdstPtr(i1,i2), &
+                 abs((dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2))
            endif
         else
            if (abs(dstPtr(i1,i2)-xdstPtr(i1,i2)) &
@@ -23508,7 +23508,7 @@ return
  end subroutine test_regridMeshToLocStreamMask
 
   subroutine test_regridGridToGML(rc)
-        integer, intent(out)  :: rc
+  integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
   type(ESMF_Grid) :: srcGrid
@@ -23530,7 +23530,7 @@ return
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)
-  integer :: lDE, localDECount
+  integer :: lDE, localDECount,localDECountDst
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
@@ -23538,6 +23538,7 @@ return
   type(ESMF_LocStream) :: dstLocStream
   real(ESMF_KIND_R8), pointer :: Xarray(:),Yarray(:)
   real(ESMF_KIND_R8) :: x,y
+  integer :: decompX,decompY
 
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
@@ -23579,8 +23580,8 @@ return
   ! Establish the resolution of the grids
   ! Make the same resolution, so src and dst 
   ! fall on top of each other
-  src_nx = 20
-  src_ny = 20
+  src_nx = 17
+  src_ny = 17
 
   src_dx=360.0/src_nx
   src_dy=180.0/src_ny
@@ -23679,8 +23680,15 @@ return
   dst_dy=180.0/dst_ny
 
   ! setup dest. grid
+  if (petCount .eq. 4) then
+    decompX=2
+    decompY=2
+  else
+    decompX=1
+    decompY=1
+  endif  
   dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/), &
-                                  regDecomp=(/2,2/), &
+                                  regDecomp=(/decompX,decompY/), &
                                   coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                                   rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -23708,8 +23716,16 @@ return
     return
   endif
 
+  ! Get number of local DEs for dest
+  call ESMF_GridGet(dstGrid, localDECount=localDECountDst, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
   ! Get memory and set coords for dst
-  do lDE=0,localDECount-1
+  do lDE=0,localDECountDst-1
  
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
@@ -23750,19 +23766,17 @@ return
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
 
+        !small shift to x coord
+        farrayPtrXC(i1,i2) = farrayPtrXC(i1,i2) + 2.0
+
         ! initialize destination field
         dstPtr(i1,i2)=0.0
 
-        ! Set the source to be a function of the x,y,z coordinate
+        ! Set the expected to be a function of the x,y,z coordinate
         theta = DEG2RAD*(farrayPtrXC(i1,i2))
         phi = DEG2RAD*(90.-farrayPtrYC(i1,i2))
 
-        ! After calculating field shift coords slighlty to be close, but not exact
-        ! to make test more interesting
-        farrayPtrXC(i1,i2) = farrayPtrXC(i1,i2) + 2.0
-
         xdstPtr(i1,i2) = (2. + cos(theta)**2.*cos(2.*phi))
-        ! xdstPtr(i1,i2) = 20.0
      enddo
      enddo
   enddo    ! lDE
@@ -23853,35 +23867,35 @@ return
   if (petCount .eq. 1) then
     Xarray(1)=2.0
     Xarray(2)=92.0
-    Xarray(3)=2.0
-    Xarray(4)=92.0
-    Xarray(5)=182.0
-    Xarray(6)=272.0
+    Xarray(3)=182.0
+    Xarray(4)=272.0
+    Xarray(5)=2.0
+    Xarray(6)=92.0
     Xarray(7)=182.0
     Xarray(8)=272.0
     Xarray(9)=2.0
     Xarray(10)=92.0
-    Xarray(11)=2.0
-    Xarray(12)=92.0
-    Xarray(13)=182.0
-    Xarray(14)=272.0
+    Xarray(11)=182.0
+    Xarray(12)=272.0
+    Xarray(13)=2.0
+    Xarray(14)=92.0
     Xarray(15)=182.0
     Xarray(16)=272.0
 
     Yarray(1)=-67.5
     Yarray(2)=-67.5
-    Yarray(3)=-22.5
-    Yarray(4)=-22.5
-    Yarray(5)=-67.5
-    Yarray(6)=-67.5
+    Yarray(3)=-67.5
+    Yarray(4)=-67.5
+    Yarray(5)=-22.5
+    Yarray(6)=-22.5
     Yarray(7)=-22.5
     Yarray(8)=-22.5
     Yarray(9)=22.5
     Yarray(10)=22.5
-    Yarray(11)=67.5
-    Yarray(12)=67.5
-    Yarray(13)=22.5
-    Yarray(14)=22.5
+    Yarray(11)=22.5
+    Yarray(12)=22.5
+    Yarray(13)=67.5
+    Yarray(14)=67.5
     Yarray(15)=67.5
     Yarray(16)=67.5
   else
@@ -23967,18 +23981,18 @@ return
     allocate(nodeCoords(2*numNodes))
     nodeCoords=(/2.0,-67.5, &    ! node id 1
                  92.0,-67.5, &   ! node id 2
-                 2.0,-22.5, &    ! node id 3
-                 92.0,-22.5, &   ! node id 4
-                 182.0,-67.5, &  ! node id 5
-                 272.0,-67.5, &  ! node id 6
+                 182.0,-67.5, &    ! node id 3
+                 272.0,-67.5, &   ! node id 4
+                 2.0,-22.5, &  ! node id 5
+                 92.0,-22.5, &  ! node id 6
                  182.0,-22.5, &  ! node id 7
                  272.0,-22.5, &  ! node id 8
                  2.0,22.5, &     ! node id 9
                  92.0,22.5, &    ! node id 10
-                 2.0,67.5, &     ! node id 11
-                 92.0,67.5, &    ! node id 12
-                 182.0,22.5, &   ! node id 13
-                 272.0,22.5, &   ! node id 14
+                 182.0,22.5, &     ! node id 11
+                 272.0,22.5, &    ! node id 12
+                 2.0,67.5, &   ! node id 13
+                 92.0,67.5, &   ! node id 14
                  182.0,67.5, &   ! node id 15
                  272.0,67.5 /)   ! node id 16
 
@@ -24365,11 +24379,11 @@ return
      do i2=fclbnd(2),fcubnd(2)
 
         if (xdstPtr(i1,i2) .ne. 0.0) then
-           if (abs(dstPtr(i1,i2)-xdstPtr(i1,i2))/abs(dstPtr(i1,i2)) &
+           if (abs((dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2)) &
                 .gt. 0.05) then
               correct=.false.
               write(*,*) "dst Grid and expected differ",i1,i2,"::",dstPtr(i1,i2), &
-                         xdstPtr(i1,i2),(dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2)
+                         xdstPtr(i1,i2),abs((dstPtr(i1,i2)-xdstPtr(i1,i2))/xdstPtr(i1,i2))
            endif
         else
            if (abs(dstPtr(i1,i2)-xdstPtr(i1,i2)) &
