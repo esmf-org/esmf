@@ -28,6 +28,7 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
     """
     [x, y] = [0, 1]
 
+    # Create arrays of center and corner values to emulate what would be read from a standard CF-like file
     # +1 because corners have one more than center
     xs = np.linspace(xdom[0], xdom[1], nx + 1)
     xcorner = np.array([xs[0:-1], xs[1::]]).T
@@ -38,9 +39,11 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
     ycorner = np.array([ys[0:-1], ys[1::]]).T
     ycenter = (ycorner[:, 1] + ycorner[:, 0]) / 2
 
+    # create a grid given the number of grid cells in each dimension
     max_index = np.array([nx, ny])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER], coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
+    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
     x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][x]]
     gridXCenter[...] = x_par.reshape((x_par.size, 1))
@@ -49,6 +52,7 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
     y_par = ycenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][y]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][y]]
     gridYCenter[...] = y_par.reshape((1, y_par.size))
 
+    # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
     if corners:
         grid.add_coords([ESMF.StaggerLoc.CORNER])
         lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER][x]
@@ -66,12 +70,14 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
             gridYCorner[:, i1] = ycorner[i1+lby, 0]
         gridYCorner[:, i1 + 1] = ycorner[i1+lby, 1]
 
+    # add an arbitrary mask
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
         mask[np.where((1.75 <= gridXCenter.data < 2.25) &
                       (1.75 <= gridYCenter.data < 2.25))] = 0
 
+    # add arbitrary areas values
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
 
@@ -91,6 +97,7 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
     """
     [lon, lat] = [0, 1]
 
+    # Create arrays of center and corner values to emulate what would be read from a standard CF-like file
     # +1 because corners have one more than center
     lons = np.linspace(-180, 180, nlon + 1)
     loncorner = np.array([lons[0:-1], lons[1::]]).T
@@ -101,9 +108,11 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
     latcorner = np.array([lats[0:-1], lats[1::]]).T
     latcenter = (latcorner[:, 1] + latcorner[:, 0]) / 2
 
+    # create a grid given the number of grid cells in each dimension
     max_index = np.array([nlon, nlat])
     grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=[ESMF.StaggerLoc.CENTER])
 
+    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(lon)
     lon_par = loncenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
     gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
@@ -112,6 +121,7 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
     lat_par = latcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lat]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lat]]
     gridYCenter[...] = lat_par.reshape((1, lat_par.size))
 
+    # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
     if corners:
         grid.add_coords([ESMF.StaggerLoc.CORNER])
         lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER][lon]
@@ -129,6 +139,7 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
             gridYCorner[:, i1] = latcorner[i1+lby, 0]
         gridYCorner[:, i1 + 1] = latcorner[i1+lby, 1]
 
+    # add an arbitrary mask
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
@@ -152,6 +163,7 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
     """
     [x, y, z] = [0, 1, 2]
 
+    # Create arrays of center and corner values to emulate what would be read from a standard CF-like file
     # +1 because corners have one more than center
     xs = np.linspace(xdom[0], xdom[1], nx + 1)
     xcorner = np.array([xs[0:-1], xs[1::]]).T
@@ -167,9 +179,11 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
     zcorner = np.array([zs[0:-1], zs[1::]]).T
     zcenter = (zcorner[:, 1] + zcorner[:, 0]) / 2
 
+    # create a grid given the number of grid cells in each dimension
     max_index = np.array([nx, ny, nz])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER_VCENTER], coord_sys=ESMF.CoordSys.CART)
 
+    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
     x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]]
     gridXCenter[...] = x_par.reshape(x_par.size, 1, 1)
@@ -182,6 +196,7 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
     z_par = zcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][z]]
     gridZCenter[...] = z_par.reshape(1, 1, z_par.size)
 
+    # create grid corners in a slightly different manner to account for the bounds format common in CF-like files
     if corners:
         grid.add_coords([ESMF.StaggerLoc.CORNER_VFACE])
         lbx = grid.lower_bounds[ESMF.StaggerLoc.CORNER_VFACE][x]
@@ -206,6 +221,7 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
             gridZCorner[:, :, i2] = zcorner[i2+lbz, 0]
         gridZCorner[:, :, i2 + 1] = zcorner[i2+lbz, 1]
 
+    # add an arbitrary mask
     if domask:
         mask = grid.add_item(ESMF.GridItem.MASK)
         mask[:] = 1
@@ -213,6 +229,7 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
                       (1.75 < gridYCenter.data < 2.25) &
                       (1.75 < gridZCenter.data < 2.25))] = 0
 
+    # add arbitrary areas values
     if doarea:
         grid.add_item(ESMF.GridItem.AREA)
 
