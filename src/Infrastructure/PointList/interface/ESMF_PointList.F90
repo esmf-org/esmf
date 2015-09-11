@@ -540,15 +540,18 @@ contains
     !now we add the points
     do lDE=0,localDECount-1
       call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if (dimcount .eq. 3) then
         call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       !Allocate space for seqInd 
@@ -585,7 +588,8 @@ contains
 
       if (maskPresent) then
         call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, &
+            msg="expecting mask key to be INTEGER*4", &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (size(maskarray) .ne. size(farrayPtrX)) then
