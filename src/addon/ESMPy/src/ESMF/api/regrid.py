@@ -17,7 +17,15 @@ from ESMF.api.field import *
 #### Regrid class ##############################################################
 
 class Regrid(object):
+    """
+    The Regrid object represents a regridding operator between two Fields.  The creation of this object is
+    analogous to ESMF_FieldRegridStore(), and calling this object corresponds to ESMF_FieldRegrid().
+    ESMF_FieldRegridRelease() is called when the Regrid object goes out of scope (this only happens when the
+    Manager goes out of scope, there is a destroy() call for explicit deallocation of the Regrid).
 
+    For more information about the ESMF Regridding functionality, please see the `ESMF Regrid documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    """
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield,
@@ -57,6 +65,8 @@ class Regrid(object):
                     (default) RegridMethod.BILINEAR\n
                     RegridMethod.PATCH\n
                     RegridMethod.CONSERVE\n
+                    RegridMethod.NEAREST_STOD\n
+                    RegridMethod.NEAREST_DTOS\n
             pole_method: specifies which type of artificial pole
                          to construct on the source Grid for regridding.\n
                 Argument values are:\n

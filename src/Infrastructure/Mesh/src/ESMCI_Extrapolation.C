@@ -28,7 +28,7 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
-/*
+  /*
 void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweights) {
 
 
@@ -46,7 +46,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweight
     if (ker.type() == MeshObj::NODE && ker.key() == node_id) {
 
       Kernel::obj_iterator oi = ker.obj_begin(), oe = ker.obj_end();
-      
+       
       for (; oi != oe; ++oi) {
 
         MeshObj &node = *oi;
@@ -58,7 +58,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweight
         // Push all connected elements onto list
         MeshObjRelationList::iterator ei = node.Relations.begin(), ee = node.Relations.end();
         for (; ei != ee; ++ei) {
-
+  
           if (ei->type == MeshObj::USED_BY && ei->obj->get_type() == MeshObj::ELEMENT) {
             elements.insert(ei->obj);
           }
@@ -88,13 +88,13 @@ void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweight
 
 
   // Otherwise we mesh.
-
+  
   // Step 1: Figure out the coordinates of the new node.
 
   UInt nsend = nodes.size();
   double ncoord[3] = {0,0,0};
   double gncoord[3] = {0,0,0};
-
+ 
   // Sum the local coords
   std::set<MeshObj*>::iterator si = nodes.begin(), se = nodes.end();
 
@@ -118,7 +118,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweight
     // Move coords onto the spehere
     double r = std::sqrt(gncoord[0]*gncoord[0] +
                  gncoord[1]*gncoord[1] +
-                 gncoord[2]*gncoord[2]);
+                   gncoord[2]*gncoord[2]);
 
     gncoord[0] *= r;
     gncoord[1] *= r;
@@ -142,12 +142,21 @@ void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweight
         false);  // genesis
         
     mesh.add_node(pnode,a);
-   
+    
   }
 
 
 }
 */
+
+// This is used in set creation so that things are sorted by id vs. pointer 
+// sorting by pointer can result in different orders which can 
+// result in different values on different runs (not bfb). 
+struct CompUsingIds {
+  bool operator() (const MeshObj *lhs, const MeshObj *rhs) const
+  {return (lhs->get_id() < rhs->get_id());}
+};
+
 
 void MeshAddPole(Mesh &mesh, UInt node_id,
                   UInt constraint_id, IWeights &cweights)
@@ -158,7 +167,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
   {
 
   // First: Get the elements around the pole and ship them to processor zero
-  std::set<MeshObj*> elements;
+    std::set<MeshObj*,CompUsingIds> elements;
 
   // Loop the nodes with given node_id
   KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
@@ -238,7 +247,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   // So now to the job at hand of meshing on proc zero
 
-  std::set<MeshObj*> elems, nodes;
+  std::set<MeshObj*,CompUsingIds> elems, nodes;
   if (rank == 0) {
     // Gather all the nodes and elements
 
@@ -407,7 +416,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       Attr attr(oattr, newctxt);
       mesh.update_obj(&node, attr);
         
-    }
+     }
       
     // Set the coordinates of the pole. ASSUM: pole at (0,0,1)
     double *pole_coord = coords.data(*pnode);
@@ -417,21 +426,24 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
     std::set<MeshObj*>::iterator ni = nodes.begin(), ne = nodes.end();
 
+    int v=0;
     for (; ni != ne; ++ni) {
 
       double *c = coords.data(**ni);
 
       new_coords[0] += c[0]; new_coords[1] += c[1]; new_coords[2] += c[2];
 
-    }
+      // printf("PN %d id=%d\n",v,(**ni).get_id());
 
+      v++;
+    }
 
     UInt nfound = nodes.size();
 
     new_coords[0] /= nfound;
     new_coords[1] /= nfound;
     new_coords[2] /= nfound;
-
+ 
     // Move coords onto the spehere
     double rr = 1.0/std::sqrt(new_coords[0]*new_coords[0] +
                               new_coords[1]*new_coords[1] +
@@ -444,6 +456,8 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     pole_coord[0] = new_coords[0];
     pole_coord[1] = new_coords[1];
     pole_coord[2] = new_coords[2];
+
+    // printf("Pole id=%d coords=%30.27f %30.27f %30.27f\n",pole_id,pole_coord[0],pole_coord[1],pole_coord[2]);
 
     // Get mask field
     MEField<> *mask_ptr = mesh.GetField("mask");
@@ -458,7 +472,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     // Count number of valid points around pole
     int points_around_pole=0;
     if (mask_ptr!=NULL) {
-      for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
+       for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
 	double *m = mask_ptr->data(**bf_i);
 	if (*m < 0.5) points_around_pole++;
       }
@@ -488,7 +502,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     } else {
       for (bf_i = nodes.begin(); bf_i != nodes.end(); ++bf_i) {
         
-	MeshObj &node = **bf_i;
+ 	MeshObj &node = **bf_i;
 	
 	col.push_back(IWeights::Entry(node.get_id(), 0, val));
 	
@@ -518,7 +532,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   typedef std::map<UInt, EEdge> EEdge_Map;
 
-
+ 
   // TODO: MeshAddPoleNPnts needs to be modified to use mask data, before
   //       being hooked into the on-line regridding 
   void MeshAddPoleNPnts(Mesh &mesh, int num_avg_pnts, UInt node_id, 
@@ -530,7 +544,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
   {
 
   // First: Get the elements around the pole and ship them to processor zero
-  std::set<MeshObj*> elements;
+    std::set<MeshObj*,CompUsingIds> elements;
 
   // Loop the nodes with given node_id
   KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
@@ -548,7 +562,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       for (; oi != oe; ++oi) {
 
         MeshObj &node = *oi;
-
+ 
         // Push all connected elements onto list
         MeshObjRelationList::iterator ei = node.Relations.begin(), ee = node.Relations.end();
         for (; ei != ee; ++ei) {
@@ -578,7 +592,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   // Form the migration comm to send elements to proc 0
   CommReg mig("_rebalance_migration", mesh, mesh);
-
+ 
 
 
   if (rank != 0) // don't ship elements on zero to zero (causes trouble)
@@ -607,7 +621,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   // So now to the job at hand of meshing on proc zero
 
-  std::set<MeshObj*> elems, nodes;
+  std::set<MeshObj*,CompUsingIds> elems, nodes;
   if (rank == 0) {
     // Gather all the nodes and elements
 
@@ -1157,7 +1171,7 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
   {
 
   // First: Get the elements around the pole and ship them to processor zero
-  std::set<MeshObj*> elements;
+    std::set<MeshObj*,CompUsingIds> elements;
 
   // Loop the nodes with given node_id
   KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end();
@@ -1234,7 +1248,7 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 
   // So now to the job at hand of meshing on proc zero
 
-  std::set<MeshObj*> elems, nodes;
+  std::set<MeshObj*,CompUsingIds> elems, nodes;
   if (rank == 0) {
     // Gather all the nodes and elements
 
