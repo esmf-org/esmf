@@ -17,7 +17,15 @@ from ESMF.api.field import *
 #### Regrid class ##############################################################
 
 class Regrid(object):
+    """
+    The Regrid object represents a regridding operator between two Fields.  The creation of this object is
+    analogous to ESMF_FieldRegridStore(), and calling this object corresponds to ESMF_FieldRegrid().
+    ESMF_FieldRegridRelease() is called when the Regrid object goes out of scope (this only happens when the
+    Manager goes out of scope, there is a destroy() call for explicit deallocation of the Regrid).
 
+    For more information about the ESMF Regridding functionality, please see the `ESMF Regrid documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    """
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield,
@@ -34,10 +42,10 @@ class Regrid(object):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
-            srcfield: source Field associated with an underlying Grid 
-                      or Mesh. \n
+            srcfield: source Field associated with an underlying Grid,
+                      Mesh or LocStream. \n
             dstfield: destination Field associated with an underlying 
-                      Grid or Mesh.  The data in this Field may be 
+                      Grid, Mesh or LocStream.  The data in this Field may be
                       overwritten by this call.\n
         Optional Arguments: \n
             src_mask_values: a numpy array (internally cast to 
@@ -57,6 +65,8 @@ class Regrid(object):
                     (default) RegridMethod.BILINEAR\n
                     RegridMethod.PATCH\n
                     RegridMethod.CONSERVE\n
+                    RegridMethod.NEAREST_STOD\n
+                    RegridMethod.NEAREST_DTOS\n
             pole_method: specifies which type of artificial pole
                          to construct on the source Grid for regridding.\n
                 Argument values are:\n
@@ -100,27 +110,19 @@ class Regrid(object):
         self.routehandle = 0
 
         # type checking
-        local_src_mask_values = None
         if src_mask_values is not None:
-            if src_mask_values.dtype is not np.int32:
-                local_src_mask_values = np.array(src_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_src_mask_values = src_mask_values
+            src_mask_values = np.array(src_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
-        local_dst_mask_values = None
         if dst_mask_values is not None:
-            if dst_mask_values.dtype is not np.int32:
-                local_dst_mask_values = np.array(dst_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_dst_mask_values = dst_mask_values
+            dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
 
         # call into the ctypes layer
         self.routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
-                           srcMaskValues=local_src_mask_values,
-                           dstMaskValues=local_dst_mask_values,
+                           srcMaskValues=src_mask_values,
+                           dstMaskValues=dst_mask_values,
                            regridmethod=regrid_method,
                            polemethod=pole_method,
                            regridPoleNPnts=regrid_pole_npoints,

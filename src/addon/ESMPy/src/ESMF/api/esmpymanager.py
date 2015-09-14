@@ -44,14 +44,23 @@ def pet_count():
 
 class Manager(object):
     '''
-    This singleton class and its pair of methods __init__
-    and __del__ are designed to called ESMP_Initialize and
-    ESMP_Finalize once, and only once, in a Python session.
+    This singleton class is designed to ensure that ESMF is properly initialized and finalized.  ESMF is
+    initialized at Manager creation, and the __del__ method is registered with atexit to ensure ESMF
+    is always finalized prior to exiting Python.  If the object is copied, the copy will always be an
+    alias to the original Manager object.  The Manager will be created when the first ESMPy object is created if
+    it is not created explicitly by the user.
 
-    ESMF is initialized at ESMPyManager object creation,
-    __del__ is registered with atexit to ensure ESMF is always
-    finalized prior to exiting Python.  If the object is copied,
-    the copy will always be an alias to the original Manager object.
+    Explicit creation of a Manager object allows for setting a flag which results in the output of debug information
+    from the ESMF logging capability during the application runtime.  The output log files are named
+    PET<processor number>.ESMF_LogFile.
+
+    The processor rank (local_pet) and total number of processers (pet_count) can also be retrieved from the Manager
+    using the following calls::
+
+        ESMF.local_pet()
+        ESMF.pet_count()
+
+    *local_pet* and *pet_count* are also properties of the Manager.
     '''
 
     # The singleton instance for this class

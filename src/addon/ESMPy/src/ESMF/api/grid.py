@@ -18,7 +18,19 @@ from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_o
 #### Grid class #########################################################
 
 class Grid(object):
+    """
+    The Grid class is a Python wrapper object for the ESMF Grid.
+    The individual values of all coordinate and mask arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
+    The Grid class is used to describe the geometry and discretization of logically rectangular physical grids.
+    It also contains the description of the grid's underlying topology and the decomposition of the physical grid
+    across the available computational resources. The most frequent use of the Grid class is to describe physical
+    grids in user code so that sufficient information is available to perform regridding operations.
+
+    For more information about the ESMF Grid class, please see the `ESMF Grid documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
+    """
     @initialize
     def __init__(self, max_index=None,
                  num_peri_dims=0,
@@ -598,19 +610,15 @@ class Grid(object):
         Returns: \n
             None \n
         """
-   
-        # handle the default case
-        staggerlocs = 0
         if staggerloc is None:
-            staggerlocs = [StaggerLoc.CENTER]
-        elif type(staggerloc) is list:
-            staggerlocs = staggerloc
-        elif type(staggerloc) is tuple:
-            staggerlocs = list(staggerloc)
+            staggerloc = [StaggerLoc.CENTER]
         else:
-            staggerlocs = [staggerloc]
+            try:
+                staggerloc = list(staggerloc)
+            except TypeError:
+                staggerloc = [staggerloc]
 
-        for stagger in staggerlocs:
+        for stagger in staggerloc:
             if self.coords[stagger][0] is not None:
                 warnings.warn("This coordinate has already been added.")
             else:
@@ -624,8 +632,8 @@ class Grid(object):
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
 
-        if len(staggerlocs) == 1 and coord_dim is not None:
-            return self.coords[staggerlocs[0]][coord_dim]
+        if len(staggerloc) == 1 and coord_dim is not None:
+            return self.coords[staggerloc[0]][coord_dim]
 
     def add_item(self, item, staggerloc=None, from_file=False):
         """
@@ -655,20 +663,16 @@ class Grid(object):
         Returns: \n
             None \n
         """
-
-        # handle the default case
-        staggerlocs = 0
         if staggerloc is None:
-            staggerlocs = [StaggerLoc.CENTER]
-        elif type(staggerloc) is list:
-            staggerlocs = staggerloc
-        elif type(staggerloc) is tuple:
-            staggerlocs = list(staggerloc)
+            staggerloc = [StaggerLoc.CENTER]
         else:
-            staggerlocs = [staggerloc]
+            try:
+                staggerloc = list(staggerloc)
+            except TypeError:
+                staggerloc = [staggerloc]
 
         done = True
-        for stagger in staggerlocs:
+        for stagger in staggerloc:
             # check to see if they are done
             if item == GridItem.MASK:
                 if self.mask[stagger] is not None:
@@ -689,11 +693,11 @@ class Grid(object):
                 # and now for Python..
                 self._allocate_items_(item, stagger, from_file=from_file)
 
-        if len(staggerlocs) is 1:
+        if len(staggerloc) is 1:
             if item == GridItem.MASK:
-                return self.mask[staggerlocs[0]]
+                return self.mask[staggerloc[0]]
             elif item == GridItem.AREA:
-                return self.area[staggerlocs[0]]
+                return self.area[staggerloc[0]]
             else:
                 raise GridItemNotSupported
 
@@ -882,16 +886,13 @@ class Grid(object):
         self.verify_grid_bounds(stagger)
 
         # allocate space for the coordinates on the Python side
-        self._coords[stagger][0] = np.zeros(\
-                                           shape = (self.size[stagger]),
-                                           dtype = constants._ESMF2PythonType[self.type])
-        self._coords[stagger][1] = np.zeros(\
-                                           shape = (self.size[stagger]),
-                                           dtype = constants._ESMF2PythonType[self.type])
+        self._coords[stagger][0] = np.zeros(shape = (self.size[stagger]),
+                                            dtype = constants._ESMF2PythonType[self.type])
+        self._coords[stagger][1] = np.zeros(shape = (self.size[stagger]),
+                                            dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
-            self._coords[stagger][2] = np.zeros(\
-                                        shape = (self.size[stagger]),
-                                        dtype = constants._ESMF2PythonType[self.type])
+            self._coords[stagger][2] = np.zeros(shape = (self.size[stagger]),
+                                                dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         [x, y, z] = [0, 1, 2]

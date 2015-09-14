@@ -1,4 +1,4 @@
-# This example demonstrates how to regrid between a Grid and a LocStream.
+# This example demonstrates how to regrid between a LocStream and a Grid.
 # The data files can be retrieved from the ESMF data repository by uncommenting the
 # following block of code:
 #
@@ -15,6 +15,9 @@ import numpy
 # This call enables debug logging
 ESMF.Manager(debug=True)
 
+grid1 = "examples/data/ll1deg_grid.nc"
+grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+
 from ESMF.test.test_api.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
 coord_sys=ESMF.CoordSys.SPH_DEG
 domask=True
@@ -26,31 +29,29 @@ else:
     else:
         locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 
-grid1 = "examples/data/ll1deg_grid.nc"
-grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
-
 # create a field
-srcfield = ESMF.Field(grid, name='srcfield')
+srcfield = ESMF.Field(locstream, name='srcfield')
 
-dstfield = ESMF.Field(locstream, name='dstfield')
-xctfield = ESMF.Field(locstream, name='xctfield')
+dstfield = ESMF.Field(grid, name='dstfield')
+xctfield = ESMF.Field(grid, name='xctfield')
 
 # initialize the fields
 [x, y] = [0, 1]
 deg2rad = 3.14159/180
 
-gridXCoord = srcfield.grid.get_coords(x)
-gridYCoord = srcfield.grid.get_coords(y)
-srcfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 * gridYCoord * deg2rad)
-
 gridXCoord = locstream["ESMF:Lon"]
 gridYCoord = locstream["ESMF:Lat"]
 if coord_sys == ESMF.CoordSys.SPH_DEG:
-    xctfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 * gridYCoord * deg2rad)
+    srcfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 * gridYCoord * deg2rad)
 elif coord_sys == ESMF.CoordSys.SPH_RAD:
-    xctfield.data[...] = 10.0 + numpy.cos(gridXCoord) ** 2 + numpy.cos(2 * gridYCoord)
+    srcfield.data[...] = 10.0 + numpy.cos(gridXCoord) ** 2 + numpy.cos(2 * gridYCoord)
 else:
-    raise ValueError("coordsys value does not work in this example")
+    raise ValueError("coordsys value does not apply in this example")
+
+gridXCoord = xctfield.grid.get_coords(x)
+gridYCoord = xctfield.grid.get_coords(y)
+xctfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 * gridYCoord * deg2rad)
+
 
 dstfield.data[...] = 1e20
 
@@ -60,7 +61,7 @@ if domask:
     dst_mask_values=numpy.array([0])
 
 regrid = ESMF.Regrid(srcfield, dstfield,
-                     regrid_method=ESMF.RegridMethod.BILINEAR,
+                     regrid_method=ESMF.RegridMethod.NEAREST_DTOS,
                      unmapped_action=ESMF.UnmappedAction.ERROR,
                      dst_mask_values=dst_mask_values)
 
@@ -90,5 +91,5 @@ if ESMF.pet_count() > 1:
 # output the results from one processor only
 if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
-    print "ESMPy Grid LocStream Regridding Example"
+    print "ESMPy LocStream Grid Regridding Example"
     print "  interpolation mean relative error = {0}".format(meanrelerr)
