@@ -367,6 +367,7 @@ module NUOPC_Driver
     do i=0, is%wrap%modelCount
       write (iString, *) i
       
+      nullify(i_petList)
       if (i==0) then
       
         is%wrap%modelComp(0) = gcomp      ! driver itself is in slot 0
@@ -398,32 +399,34 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         
-        ! set rootVas Attribute on the States to help during AttributeUpdate
-        rootPet = 0   ! initialize
-        if (associated(i_petList)) rootPet = i_petList(1)
-        ! need to translate rootPet->rootVas because connector petList may
-        ! scamble PETs across VASs
-        call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        call ESMF_VMGet(vm, rootPet, vas=rootVas, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
-          value=rootVas, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
-          value=rootVas, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-          
       endif
       
+      ! set rootVas Attribute on the States to help during AttributeUpdate
+      ! should be done for driver-self and models
+      rootPet = 0   ! initialize
+      if (associated(i_petList)) rootPet = i_petList(1)
+      ! need to translate rootPet->rootVas because connector petList may
+      ! scamble PETs across VASs
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMGet(vm, rootPet, vas=rootVas, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
+        value=rootVas, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
+        value=rootVas, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+
       ! initialize the modelPhaseMap pointer members
       nullify(modelPhaseMap(i)%phaseValue)
       nullify(modelPhaseMap(i)%phases)
@@ -514,8 +517,8 @@ module NUOPC_Driver
     enddo
     
     ! now the component labels are available -> create States with Namespace
-    do i=1, is%wrap%modelCount
-      if (is%wrap%newStyleFlag) then
+    do i=0, is%wrap%modelCount
+      if (i > 0 .and. is%wrap%newStyleFlag) then
         ! have component label available for namespace
         call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &
           cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
