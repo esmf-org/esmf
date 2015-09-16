@@ -8,29 +8,27 @@
 % Licensed under the University of Illinois-NCSA License.
 
 A location stream (LocStream) is used to represent the locations of
-a set of data points.  The values of the data points are stored within
-a Field or FieldBundle created using the LocStream.
+a set of data points (for example, in the data assimilation world, 
+LocStreams can be thought of as a set of observations).  The values 
+of the data points are stored within a Field or FieldBundle created 
+using the LocStream.
 
-In the data assimilation world, LocStreams can
-be thought of as a set of observations.  Their locations are generally
+The locations are generally
 described using Cartesian (x, y, z), or (lat, lon, radius) coordinates.
 There is no assumption of any regularity in the positions of the points.
 To make the concept more general, the locations for each data point are
-represented using a construct called {\it keys}. 
-
-Keys are essentially vectors for point descriptors.  They may include 
+represented using a construct called {\it keys}. Keys are essentially 
+vectors containing point descriptors.  They may include 
 other information besides location (a mask, for example) or a second 
 set of coordinates.  Each key must contain the same number of elements 
-as there are observations.  Keys may be used for the distribution of 
-LocStreams.  As such, they must be defined before the LocStream is 
-distributed.
+as there are locations in the LocStream.
 
 LocStreams can be very large. Data assimilation systems might use
 LocStreams with up to $10^{8}$ observations, so efficiency is critical.
-LocStreams can be created from file, depending on file format.
+LocStreams can be created from file, see \ref{locstream:createfromfile}.
 
 Common operations involving LocStreams are similar to those involving Grids.
-In data assimilation, for example, LocStreams allow users to:
+For example, LocStreams allow users to:
 
 \begin{enumerate}
 \item Create a Field or FieldBundle on a LocStream

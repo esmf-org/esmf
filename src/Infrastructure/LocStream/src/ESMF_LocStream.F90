@@ -1953,9 +1953,10 @@ contains
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamCreate"
+#define ESMF_METHOD "ESMF_LocStreamCreateFromFile"
 !BOP
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a SCRIP format grid file
+!\label{locstream:createfromfile}
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
