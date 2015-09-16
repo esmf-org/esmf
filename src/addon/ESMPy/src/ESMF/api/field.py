@@ -46,7 +46,7 @@ class Field(MaskedArray):
                 ndbounds=None,
                 mask_values=None):
         """
-        Create a Field from a Grid or Mesh. \n
+        Create a Field from a Grid, Mesh or LocStream. \n
         Required Arguments: \n
             grid: a Grid, Mesh or LocStream with coordinates allocated on
                   at least one stagger location. \n

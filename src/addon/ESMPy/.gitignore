@@ -29,3 +29,5 @@ PET*.
 build
 doc/esmpy_doc
 src/ESMF/interface/esmfmkfile.py
+examples/data
+src/ESMF/test/regrid_from_file/data

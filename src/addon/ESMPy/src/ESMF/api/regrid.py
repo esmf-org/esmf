@@ -42,10 +42,10 @@ class Regrid(object):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
-            srcfield: source Field associated with an underlying Grid 
-                      or Mesh. \n
+            srcfield: source Field associated with an underlying Grid,
+                      Mesh or LocStream. \n
             dstfield: destination Field associated with an underlying 
-                      Grid or Mesh.  The data in this Field may be 
+                      Grid, Mesh or LocStream.  The data in this Field may be
                       overwritten by this call.\n
         Optional Arguments: \n
             src_mask_values: a numpy array (internally cast to 
@@ -110,27 +110,19 @@ class Regrid(object):
         self.routehandle = 0
 
         # type checking
-        local_src_mask_values = None
         if src_mask_values is not None:
-            if src_mask_values.dtype is not np.int32:
-                local_src_mask_values = np.array(src_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_src_mask_values = src_mask_values
+            src_mask_values = np.array(src_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
-        local_dst_mask_values = None
         if dst_mask_values is not None:
-            if dst_mask_values.dtype is not np.int32:
-                local_dst_mask_values = np.array(dst_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_dst_mask_values = dst_mask_values
+            dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
 
         # call into the ctypes layer
         self.routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
-                           srcMaskValues=local_src_mask_values,
-                           dstMaskValues=local_dst_mask_values,
+                           srcMaskValues=src_mask_values,
+                           dstMaskValues=dst_mask_values,
                            regridmethod=regrid_method,
                            polemethod=pole_method,
                            regridPoleNPnts=regrid_pole_npoints,
