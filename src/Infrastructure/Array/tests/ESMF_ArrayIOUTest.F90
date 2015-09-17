@@ -957,13 +957,12 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2/0 DE read Array - DE 0 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  print *, 'Pet', localPet, ': associated Farray3D_DE0_r = ', associated (Farray3D_DE0_r)
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #else
-  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+  rc = ESMF_SUCCESS
 #endif
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
