@@ -2042,7 +2042,7 @@ end function ESMF_MeshCreateFromFile
          if (associated(faceCoords)) then
           hasFaceCoords = .true.
          endif
-      else 
+       else 
          if (haveElmtMask .and. localAddUserArea) then 
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
@@ -2063,9 +2063,10 @@ end function ESMF_MeshCreateFromFile
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
          endif
-         if (associated(faceCoords)) then
-          hasFaceCoords = .true.
-         endif
+         ! cannot add center coordinates if maxedges > 4
+         ! if (associated(faceCoords)) then
+         ! hasFaceCoords = .true.
+         ! endif
       endif
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
