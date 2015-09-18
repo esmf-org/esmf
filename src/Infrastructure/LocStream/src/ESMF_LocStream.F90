@@ -1956,7 +1956,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateFromFile"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a SCRIP format grid file
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a grid file
 !\label{locstream:createfromfile}
 
 ! !INTERFACE:
@@ -1977,9 +1977,11 @@ contains
 
 ! !DESCRIPTION:
 !     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
-!     to the LocStream using the variables {\tt grid\_center\_lon}, {\tt grid\_center\_lat},
-!     and {\tt grid\_imask} defined in the SCRIP format grid file.  The data is distributed
-!     evenly on all the PETs with the extra elements on the lower PETs.  
+!     to the LocStream using the coordinates defined in a grid file.  Currently, it 
+!     supports the SCRIP format, the ESMF unstructured grid format and the UGRID format.
+!     For a grid in ESMF or UGRID format, it can construct the LocStream using either 
+!     the center coordinates or the corner coordinates.  For a SCRIP format grid file, the
+!     LocStream can only be constructed using the center coordinates.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -1999,7 +2001,7 @@ contains
 !     \item[{[centerflag]}]
 !          Flag that indicates whether to use the center coordinates to construct the location stream.
 !          If true, use center coordinates, otherwise, use the corner coordinates.  If not specified,
-!          use center coordinates as default.  For SCRIP or GRIDSPEC files, only center coordinate 
+!          use center coordinates as default.  For SCRIP files, only center coordinate 
 !          is supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
