@@ -61,6 +61,7 @@ module ESMF_LocStreamMod
   use ESMF_InitMacrosMod
   use ESMF_MeshMod
   use ESMF_IOScripMod
+  use ESMF_IOUGridMod
 
   implicit none
 
@@ -1953,23 +1954,26 @@ contains
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamCreate"
+#define ESMF_METHOD "ESMF_LocStreamCreateFromFile"
 !BOP
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a SCRIP format grid file
+!\label{locstream:createfromfile}
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromFile(name, filename, indexflag, rc)
+      function ESMF_LocStreamCreateFromFile(name, filename, fileformatflag, indexflag, centerflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
 
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in), optional    :: name
-      character (len=*), intent(in)         :: filename
-      type(ESMF_Index_Flag), intent(in), optional      :: indexflag
-      integer, intent(out), optional                  :: rc
+      character (len=*), intent(in), optional     :: name
+      character (len=*), intent(in)               :: filename
+      type(ESMF_FileFormat_Flag), intent(in), optional  :: fileformatflag
+      type(ESMF_Index_Flag), intent(in), optional :: indexflag
+      logical, intent(in), optional               :: centerflag
+      integer, intent(out), optional              :: rc
 
 ! !DESCRIPTION:
 !     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
@@ -1982,13 +1986,21 @@ contains
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[filename]
-!          Name of grid file to be used to create the location stream.  Currently, only
-!          the SCRIP file format is supported.
+!          Name of grid file to be used to create the location stream.  
+!     \item[{[fileformatflag]}]
+!          Flag that indicates the file format of the grid file.  Please see
+!          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
+!          list of valid options.  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[centerflag]}]
+!          Flag that indicates whether to use the center coordinates to construct the location stream.
+!          If true, use center coordinates, otherwise, use the corner coordinates.  If not specified,
+!          use center coordinates as default.  For SCRIP or GRIDSPEC files, only center coordinate 
+!          is supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2002,20 +2014,45 @@ contains
     integer :: localrc
     integer :: PetNo, PetCnt
     type(ESMF_Index_Flag) :: indexflagLocal
-    real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
+    real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:), coordZ(:)
+    real(ESMF_KIND_R8), pointer :: coord2D(:,:)
     integer(ESMF_KIND_I4), pointer :: imask(:)
     integer :: starti, count, localcount, index
     integer :: remain, i
+    integer :: meshid
     type(ESMF_CoordSys_Flag) :: coordSys
     type(ESMF_LocStream) :: locStream
+    type(ESMF_FileFormat_Flag) :: localfileformatflag
+    logical :: localcenterflag, haveface
     character(len=16) :: units
 
     if (present(indexflag)) then
-         indexflagLocal=indexflag
+       indexflagLocal=indexflag
     else
-         indexflagLocal=ESMF_INDEX_DELOCAL
+       indexflagLocal=ESMF_INDEX_DELOCAL
     endif
     
+    if (present(fileformatflag)) then
+       localfileformatflag = fileformatflag
+    else
+       localfileformatflag = ESMF_FILEFORMAT_SCRIP
+    endif
+
+    if (present(centerflag)) then
+       localcenterflag = centerflag
+    else
+       localcenterflag = .TRUE.
+    endif
+
+    if ((localfileformatflag == ESMF_FILEFORMAT_SCRIP .or. &
+         localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) .and. &
+       .NOT. localcenterflag) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="Only allow center coordinates if the file is in SCRIP or GRIDSPEC format", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif   
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2031,42 +2068,71 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (PetNo == 0) then
+    if (localfileformatflag == ESMF_FILEFORMAT_SCRIP) then 
+       ! totaldims represent grid_ranks in SCRIP - 1 for unstructured and
+       ! 2 for logically rectangular
        call ESMF_ScripInq(filename, grid_rank=totaldims, &
-			  grid_size=totalpoints, rc=localrc)
+		  grid_size=totalpoints, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
+             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ScripInqUnits(filename, units=units, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! broadcast the values to other PETs
-       msgbuf(1)=totaldims
-       msgbuf(2)=totalpoints
-       if (units .eq. 'radians') then
-       	  msgbuf(3)=1
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       if (units == 'degrees') then
+          coordSys = ESMF_COORDSYS_SPH_DEG
        else
-          msgbuf(3)=0
+          coordSys = ESMF_COORDSYS_SPH_RAD
+       endif   
+#if 0
+    elseif (localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) then
+       ! totaldims is the dimension of the lat/lon variable: 1 for regular
+       ! grid and 2 for curvilinear
+       call ESMF_GridspecInq(filename, ndims=totaldims, &
+	       	     grid_dims = grid_dims, coordids=varids, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       totalpoints=grid_dims(1)*grid_dims(2)
+#endif
+    elseif (localfileformatflag == ESMF_FILEFORMAT_ESMFMESH) then
+       ! totaldims is the coordDim, 2 for 2D and 3 for 3D
+       if (localcenterflag) then
+           call ESMF_EsmfInq(filename, elementCount=totalpoints, & 
+	        coordDim=totaldims, rc=localrc)
+       else
+           call ESMF_EsmfInq(filename, nodeCount=totalpoints, &
+	        coordDim=totaldims, rc=localrc)
        endif
-       call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      totaldims = msgbuf(1)
-      totalpoints=msgbuf(2)
-    endif  
-
-    if (msgbuf(3) .eq. 0) then
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_EsmfInqUnits(filename, units, rc=localrc)
+       if (units == 'degrees') then
+          coordSys = ESMF_COORDSYS_SPH_DEG
+       elseif (units == 'radians') then
+          coordSys = ESMF_COORDSYS_SPH_RAD
+       else
+          coordSys = ESMF_COORDSYS_CART
+       endif   
+    elseif (localfileformatflag == ESMF_FILEFORMAT_UGRID) then
+       ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
+       if (localcenterflag) then
+          call ESMF_UGridInq(filename, elementCount=totalpoints, meshid=meshid, &
+	     	  nodeCoordDim=totaldims, faceCoordFlag=haveface, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          if (.not. haveface) then
+             call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                    msg="The grid file does not have face coordinates", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
+       else
+          call ESMF_UGridInq(filename, nodeCount=totalpoints, meshid=meshid, &
+	          nodeCoordDim=totaldims, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
        coordSys = ESMF_COORDSYS_SPH_DEG
-       units = 'degrees'
-    else
-       coordSys = ESMF_COORDSYS_SPH_RAD
-       units = 'radians'
-    endif   
+    endif             
 
     localcount = totalpoints/PetCnt
     remain = totalpoints - (localcount*PetCnt)
@@ -2078,9 +2144,48 @@ contains
     endif
 
     allocate(coordX(localcount), coordY(localcount),imask(localcount))
-    call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
+    if (localfileformatflag == ESMF_FILEFORMAT_SCRIP) then 
+       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
                           grid_imask=imask, start=starti, count=localcount, rc=localrc)
-    
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+    elseif (localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) then 
+       if (totaldims == 1) then
+          call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
+          !construct 2D arrays and do the distribution
+          xdim=size(coordX)
+          ydim=size(coordY)
+#endif
+    elseif (localfileformatflag == ESMF_FILEFORMAT_ESMFMESH) then
+       allocate(coord2D(totaldims,localcount))
+       call ESMF_EsmfGetCoords(filename, coord2D, imask, &
+	       starti, localcount, localcenterflag, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       coordX(:) = coord2D(1,:)
+       coordY(:) = coord2D(2,:)
+       if (totaldims == 3) then
+         allocate(coordZ(localcount))
+         coordZ(:) = coord2D(3,:)
+       endif
+       deallocate(coord2D)
+    elseif (localfileformatflag == ESMF_FILEFORMAT_UGRID) then
+       allocate(coord2D(localcount, totaldims))
+       call ESMF_UGridGetCoords(filename, meshid, coord2D, &
+       	    starti, localcount, localcenterflag, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       coordX(:) = coord2D(:,1)
+       coordY(:) = coord2D(:,2)
+       if (totaldims == 3) then
+          allocate(coordZ(localcount))
+          coordZ(:) = coord2D(:,3)
+       endif
+       deallocate(coord2D)
+       ! no mask for UGRID
+       imask(:)=1
+    endif
     ! create Location Stream
     locStream = ESMF_LocStreamCreate(name=name, localcount=localcount, indexflag=indexflagLocal,&
                 coordSys = coordSys, rc=localrc)
@@ -2099,6 +2204,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !If 3D grid, add the height coordinates
+    if (totaldims == 3) then
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
+    	 		      keyLongName='Height', rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
     	 		      keyLongName='Mask', rc=localrc)
@@ -3318,6 +3430,11 @@ end subroutine ESMF_LocStreamGetBounds
         integer                          :: localrc
         character(len=6)                 :: defaultopts
         integer                          :: i
+        type(ESMF_TypeKind_Flag)              :: keyKind
+        real(ESMF_KIND_R8), pointer :: tmpR8(:)
+        real(ESMF_KIND_R4), pointer :: tmpR4(:)
+        integer(ESMF_KIND_I4), pointer :: tmpI4(:)
+        integer                          :: cl,cu,j
 
         ! Initialize
         localrc = ESMF_RC_NOT_IMPL
@@ -3350,6 +3467,45 @@ end subroutine ESMF_LocStreamGetBounds
            write(ESMF_UtilIOStdout,*) "   ",trim(lstypep%keyNames(i)),     &
                                       " - ",trim(lstypep%keyLongNames(i)), &
                                       "    ",trim(lstypep%keyUnits(i))
+
+
+          call ESMF_LocStreamGetKey(locstream,lstypep%keyNames(i),typekind=keyKind,rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (keyKind .eq. ESMF_TYPEKIND_I4) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpI4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpI4(j)
+            enddo
+          else if (keyKind .eq. ESMF_TYPEKIND_R4) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpR4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpR4(j)
+            enddo
+          else if (keyKind .eq. ESMF_TYPEKIND_R8) then
+            call  ESMF_LocStreamGetKey(locstream, keyName=lstypep%keyNames(i), &
+              computationalLBound=cl, computationalUBound=cu, farray=tmpR8, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+            do j=cl,cu
+              write(ESMF_UtilIOStdout,*) "    arr(",j,")= ",tmpR8(j)
+            enddo
+          else
+            if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+              msg=" - unknown typekind for LocStream key", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
         enddo
 
         write(ESMF_UtilIOStdout,*) "LocStream Print Ends   ====>"
@@ -3357,7 +3513,6 @@ end subroutine ESMF_LocStreamGetBounds
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LocStreamPrint
-
 
 #define FINISH_LATER
 #ifdef FINISH_LATER
