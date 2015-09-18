@@ -29,6 +29,7 @@
 #include "ESMCI_Util.h"
 
 #include <string>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
@@ -272,15 +273,13 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     char *ESMC_F90toCstring(
 //
 // !RETURN VALUE:
-//  returns pointer to a newly allocated C string buffer.  this space
+//  returns pointer to a newly allocated C string buffer.  This space
 //  must be deleted by the caller when finished!
 // 
 // !ARGUMENTS:
     const char *src,                // in - F90 character source buffer
     ESMCI_FortranStrLenArg slen) {   // in - length of the F90 source buffer
 //EOPI
-
-    char *cp, *ctmp;
 
     if (slen == 0) return NULL; // nothing to do, but not an error
     
@@ -293,7 +292,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
     // make new space and leave room for a null terminator
     ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
-    ctmp = new char[clen+1];
+    char *ctmp = new char[clen+1];
     strncpy(ctmp, src, clen);
     ctmp[clen] = '\0';
 
@@ -321,12 +320,8 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     ESMCI_FortranStrLenArg dlen) { // in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp;
-    int rc;
-    char msgbuf[ESMF_MAXSTR];
-
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
@@ -341,10 +336,10 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
-       sprintf(msgbuf, 
-             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
-             (long) dlen, (long) clen+1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       std::stringstream msgbuf;
+       msgbuf << "dest buffer size of " << dlen
+           << " bytes too small, must be >= " << clen+1 << " bytes\n";
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str (), ESMC_CONTEXT, 
          &rc);
        return rc;
     }
@@ -378,13 +373,8 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     ESMCI_FortranStrLenArg dlen) {  // in - length of dst buffer, space padded
 //EOPI
 
-    char *cp;
-    int rc;
-    ESMCI_FortranStrLenArg clen;
-    char msgbuf[ESMF_MAXSTR];
-
     // Initialize return code; assume routine not implemented
-    rc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
 
     // minor idiotproofing
     if ((src == NULL) || (dst == NULL) || (dlen <= 0)) {
@@ -394,21 +384,19 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     }
 
     // fortran doesn't need trailing null, so len can be up to == maxlen
-    clen = strlen(src);
+    ESMCI_FortranStrLenArg clen = strlen(src);
     if (clen > dlen) {
-       sprintf(msgbuf, 
-             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
-             (long) dlen, (long) clen);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       std::stringstream msgbuf;
+       msgbuf << "dest buffer size of " << dlen
+           << " bytes too small, must be >= " << clen << " bytes";
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
          &rc);
        return rc;
     }
 
     // move bytes, then pad rest of string to spaces
     strncpy(dst, src, clen);
-    
-    for (cp=&dst[clen]; cp < &dst[dlen]; cp++)
-        *cp = ' ';
+    memset (&dst[clen], ' ', dlen-clen);
 
     // return ok. 
     rc = ESMF_SUCCESS;
@@ -439,9 +427,6 @@ extern "C" {
     ESMCI_FortranStrLenArg dlen) { // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp;
-    char msgbuf[ESMF_MAXSTR];
-
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -458,10 +443,10 @@ extern "C" {
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
-       sprintf(msgbuf, 
-             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
-             (long) dlen, (long) clen+1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       std::stringstream msgbuf;
+       msgbuf << "dest buffer size of " << dlen
+           << " bytes too small, must be >= " << clen+1 << " bytes";
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
          rc);
        return;
     }
@@ -500,10 +485,6 @@ extern "C" {
     ESMCI_FortranStrLenArg dlen) { // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp;
-    ESMCI_FortranStrLenArg clen;
-    char msgbuf[ESMF_MAXSTR];
-
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
@@ -516,21 +497,19 @@ extern "C" {
     }
 
     // fortran doesn't need trailing null, so len can be up to == maxlen
-    clen = strlen(src);
+    ESMCI_FortranStrLenArg clen = strlen(src);
     if (clen > dlen) {
-       sprintf(msgbuf, 
-             "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
-             (long) dlen, (long) clen);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+       std::stringstream msgbuf;
+       msgbuf << "dest buffer size of " << dlen
+           << " bytes too small, must be >= " << clen << " bytes";
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
            rc);
        return;
     }
 
     // move bytes, then pad rest of string to spaces
     strncpy(dst, src, clen);
-    
-    for (cp=&dst[clen]; cp < &dst[dlen-1]; cp++)
-        *cp = ' ';
+    memset (&dst[clen], ' ', dlen-clen);
 
     // return ok.  caller has passed us in dst buffer so it is up to them
     // to manage that space.

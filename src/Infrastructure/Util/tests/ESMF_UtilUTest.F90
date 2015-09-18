@@ -105,7 +105,8 @@
       character(ESMF_MAXPATHLEN) :: pathname
       character(1) :: pathname_tooshort
 
-      character(ESMF_MAXSTR) :: str
+      character(ESMF_MAXSTR) :: str, cstr
+      integer :: cstrlen
 #endif
 
 !-------------------------------------------------------------------------------
@@ -679,6 +680,35 @@
     str = "aBcDeFg123+-*/"
     call ESMF_StringLowerCase (str)
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'abcdefg123+-*/')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test converting a C string (zero byte terminated) to a Fortran string (blank padded)
+    write (name, *) "Testing converting C string to Fortran string"
+    write (failMsg, *) "conversion failure"
+    cstr = 'A text string' // achar (0)
+    str = repeat (achar(255), len (str))
+    call ESMF_CtoF90String (cstr, str, rc)
+    if (rc == ESMF_SUCCESS) then
+      if (str /= 'A text string') then
+        rc = ESMF_FAILURE
+      end if
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test converting a Fortran string (blank padded) to a C string (zero byte terminated)
+    write (name, *) "Testing converting Fortran string to C string"
+    write (failMsg, *) "conversion failure"
+    str = 'A second text string'
+    cstr = repeat (achar(255), len (cstr))
+    call ESMF_F90toCString (str, cstr, rc)
+    if (rc == ESMF_SUCCESS) then
+      cstrlen = index (cstr, achar (0))
+      if (cstr(1:cstrlen) /= trim (str) // achar (0)) then
+        rc = ESMF_FAILURE
+      end if
+    end if
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
