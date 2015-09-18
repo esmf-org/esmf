@@ -107,6 +107,11 @@ class TestField(TestBase):
         # the value of single masked element should be ma.masked
         assert (field[0, 0, 0, 1] == ma.masked)
 
+        # extended slices
+        for i in range(10):
+            field.data[:, :, :, i] = i
+        assert field.data[0, 0, 0, ::2].all() == np.array([0, 2, 4, 6, 8]).all()
+
     @attr('serial')
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
@@ -280,14 +285,14 @@ class TestField(TestBase):
         assert np.all(field.data == field2.data)
 
     # don't change this function, it's used in the documentation
-    def create_field(grid_or_mesh, name):
+    def create_field(gml, name):
         '''
-        PRECONDITIONS: An Grid or Mesh has been created, and 'name' is a string that
+        PRECONDITIONS: An Grid, Mesh or LocStream has been created, and 'name' is a string that
                        will be used to initialize the name of a new Field.\n
         POSTCONDITIONS: A Field has been created.\n
         RETURN VALUES: \n Field :: field \n
         '''
-        field = ESMF.Field(grid_or_mesh, name=name)
+        field = ESMF.Field(gml, name=name)
 
         return field
 

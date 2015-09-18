@@ -484,26 +484,50 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
  For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
 
 \subsubsection{Masking}
- Masking is the process whereby parts of a grid can be marked to be ignored during an operation, such as regridding. Masking can be used on a source grid to 
- indicate that certain portions of the grid should not be used to generate regridded data. This is useful, for example, if a portion of source grid contains 
- unusable values. Masking can also be used on a destination grid to indicate that the portion of the field built on that part of the Grid should not receive 
- regridded data. This is useful, for example, when part of the grid isn't being used (e.g. the land portion of an ocean grid).
+\label {regrid:masking}
+Masking is the process whereby parts of a Grid, Mesh or LocStream 
+can be marked to be ignored during an operation, such as when they 
+are used in regridding.  Masking can be used on a Field created from 
+a regridding source to indicate that certain portions should not be 
+used to generate regridded data.  This is useful, for example, if a 
+portion of the source contains unusable values.  Masking can also be 
+used on a Field created from a regridding destination to indicate 
+that a certain portion should not receive regridded data.  This is 
+useful, for example, when part of the destination isn't being used 
+(e.g. the land portion of an ocean grid).
 
- ESMF currently supports masking for Fields built on structured Grids and masking for Fields built on unstructured Meshes. The user may mask out points 
- in the source Field or destination Field or both. To do masking the user sets mask information in the Grid (see~\ref{sec:usage:items}) or 
- Mesh (see~\ref{sec:mesh:mask}) upon which the Fields passed into the 
- {\tt ESMF\_FieldRegridStore()} call are built. The `srcMaskValues' and `dstMaskValues' arguments to that call can then be used to specify which values in that mask 
- information indicate that a location should be masked out. For example, if `dstMaskValues' is set to (/1,2/), then any location that has a value of 1 or 2 in 
- the mask information of the Grid or Mesh upon which the destination Field is built will be masked out.
+The user may mask out points in the source
+Field or destination Field or both. To do masking the user sets
+mask information in the Grid (see \ref{sec:usage:items}), Mesh
+(see \ref{sec:mesh:mask}), or LocStream (see \ref{const:maskkeyname})
+upon which the Fields passed into the
+{\tt ESMF\_FieldRegridStore()} call are built. The {\tt srcMaskValues}
+and {\tt dstMaskValues} arguments to that
+call can then be used to specify which values in that mask
+information indicate that a location should be masked out. For
+example, if {\tt dstMaskValues} is set to (/1,2/), then any location that
+has a value of 1 or 2 in the mask information of the Grid, Mesh or LocStream
+upon which the destination Field is built will be masked out.
 
- Masking behavior differs slightly between regridding methods. For non-conservative regridding methods (e.g. bilinear or high-order patch), masking is done on
- points. For these methods, masking a destination point means that the point won't participate in regridding (e.g. won't be interpolated to). For these methods, 
- masking a source point means that the entire source cell using that point is masked out. In other words, if any corner point making up a source cell is masked 
- then the cell is masked. For conservative regridding methods (e.g. first-order conservative) masking is done on cells. Masking a destination cell means that the 
- cell won't participate in regridding (e.g. won't be interpolated to). Similarly, masking a source cell means that the cell won't participate in regridding 
- (e.g. won't be interpolated from). For any type of interpolation method (conservative or non-conservative) the masking is set on the location upon which the 
- Fields passed into the regridding call are built. For example, if Fields built on {\tt ESMF\_STAGGERLOC\_CENTER} are passed into the {\tt ESMF\_FieldRegridStore()} 
- call then the masking should also be set in {\tt ESMF\_STAGGERLOC\_CENTER}.
+Masking behavior differs slightly between regridding methods. For
+non-conservative regridding methods (e.g. bilinear or high-order
+patch), masking is done on points. For these methods, masking a
+destination point means that that point won't participate in
+regridding (e.g. won't be interpolated to). For these methods,
+masking a source point means that the entire source cell using
+that point is masked out. In other words, if any corner point
+making up a source cell is masked then the cell is masked. For
+conservative regridding methods (e.g. first-order conservative)
+masking is done on cells. Masking a destination cell means that
+the cell won't participate in regridding (e.g. won't be
+interpolated to). Similarly, masking a source cell means that the
+cell won't participate in regridding (e.g. won't be interpolated
+from).  For any type of interpolation method (conservative or
+non-conservative) the masking is set on the location upon
+which the Fields passed into the regridding call are built.
+For example, if Fields built on  {\tt ESMF\_STAGGERLOC\_CENTER} are
+passed into the {\tt ESMF\_FieldRegridStore()} call then the masking
+should also be set on {\tt ESMF\_STAGGERLOC\_CENTER}.
 
 
 \subsubsection{Unmapped destination points}

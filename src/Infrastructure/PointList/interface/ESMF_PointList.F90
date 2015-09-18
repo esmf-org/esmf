@@ -521,12 +521,14 @@ contains
 
       do j=cl,cu
         masked_value=.false.
+        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.
             exit
           endif
         enddo
+        endif
         if (.not. masked_value) num_local_pts = num_local_pts + 1  
       enddo
     enddo
@@ -538,15 +540,18 @@ contains
     !now we add the points
     do lDE=0,localDECount-1
       call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if (dimcount .eq. 3) then
         call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       !Allocate space for seqInd 
@@ -583,7 +588,8 @@ contains
 
       if (maskPresent) then
         call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, &
+            msg="expecting mask key to be INTEGER*4", &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (size(maskarray) .ne. size(farrayPtrX)) then
@@ -596,12 +602,14 @@ contains
 
       do j=cl,cu
         masked_value=.false.
+        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.
             exit
           endif
         enddo
+        endif
         if (.not. masked_value) then
           mycoords(1)=farrayPtrX(j)
           mycoords(2)=farrayPtrY(j)

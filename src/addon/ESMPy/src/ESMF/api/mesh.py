@@ -12,7 +12,6 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.array import *
 from ESMF.api.esmpymanager import *
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound_list
 
@@ -22,7 +21,23 @@ import warnings
 [node, element] = [0, 1]
 
 class Mesh(object):
+    """
+    The Mesh class is a Python wrapper object for the ESMF Mesh.
+    The individual values of all coordinate and mask arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
+    The ESMF library provides a class for representing unstructured grids called the Mesh. Fields can be created
+    on a Mesh to hold data. Fields created on a Mesh can also be used as either the source or destination or both
+    of a regrididng operation which allows data to be moved between unstructured grids.  A Mesh is constructed of
+    nodes and elements. A node, also known as a vertex or corner, is a part of a Mesh which represents a single
+    point. Coordinate information is set in a node. An element, also known as a cell, is a part of a mesh which
+    represents a small region of space. Elements are described in terms of a connected set of nodes which represent
+    locations along their boundaries. Field data may be located on either the nodes or elements of a Mesh.
+
+    For more information about the ESMF Mesh class, please see the `ESMF Mesh documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+
+    """
     @initialize
     def __init__(self, parametric_dim=None,
                  spatial_dim=None,
@@ -182,10 +197,16 @@ class Mesh(object):
 
     @property
     def size(self):
+        """
+        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
+        """
         return self._size
 
     @property
     def size_local(self):
+        """
+        :return: a 2 element list containing the number of owned nodes and element in the Mesh on the current processor
+        """
         return self._size_local
 
     @property
@@ -198,6 +219,9 @@ class Mesh(object):
 
     @property
     def rank(self):
+        """
+        :return: the rank of the Mesh
+        """
         return self._rank
 
     @property
@@ -246,6 +270,9 @@ class Mesh(object):
 
     @property
     def coords(self):
+        """
+        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and element of the Mesh
+        """
         return self._coords
 
     @property
@@ -294,15 +321,13 @@ class Mesh(object):
         Return a string containing a printable representation of the object
         """
         string = ("Mesh:\n"
-                  "    parametric_dim = %r\n"
-                  "    spatial_dim = %r\n"
+                  "    rank = %r\n"
                   "    size = %r\n"
                   "    size_local = %r\n" 
                   "    coords = %r\n"
                   %
                   (
-                   self.parametric_dim,
-                   self.spatial_dim,
+                   self.rank,
                    self.size,
                    self.size_local,
                    self.coords))
@@ -542,7 +567,7 @@ class Mesh(object):
                     node=0 (default) \n
                     element=1 (not implemented) \n
         Returns: \n
-            None \n
+            A numpy array of coordinate values at the specified meshloc. \n
         """
 
         ret = None
@@ -571,15 +596,6 @@ class Mesh(object):
         ESMP_MeshWrite(self, filename)
 
     def _link_coords_(self):
-        """
-        Link Python Mesh to ESMC Mesh coordinates.
-        Required Arguments: \n
-           None \n
-        Optional Arguments: \n
-             None \n
-        Returns: \n
-            None \n
-        """
         elemcoords = True
 
         # get the pointer to the underlying ESMF data array for coordinates
@@ -595,7 +611,12 @@ class Mesh(object):
             self._parametric_dim = num_dims
 
         try:
-            self._connectivity, self._nodes_per_elem = ESMP_MeshGetConnectivityPtr(self)
+            pass
+            # TODO: removed connectivity because the hardcoded array allocation is
+            #       eating up too much memory on some systems, this method can be
+            #       added back in after mesh connectivity retrieval has been fixed the
+            #       C interface
+            # self._connectivity, self._nodes_per_elem = ESMP_MeshGetConnectivityPtr(self)
         except:
             warnings.warn("Mesh connectivity could not be read")
 

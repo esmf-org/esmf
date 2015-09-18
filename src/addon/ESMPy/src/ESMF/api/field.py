@@ -18,7 +18,26 @@ import ESMF.api.constants as constants
 [node, element] = [0, 1]
 
 class Field(MaskedArray):
+    """
+    The Field class is a Python wrapper object for the ESMF Field.  Field is a derived type of the
+    numpy.MaskedArray.  This means that it has built in masking functionality,
+    as well as native numpy Array operations.
+    The individual values of all data arrays are referenced to those of the underlying Fortran ESMF object.
 
+    A Field represents a physical field, such as temperature.   The Field class contains distributed and
+    discretized field data, a reference to its associated grid, and metadata. The Field class stores the grid
+    staggering for that physical field. This is the relationship of how the data array of a field maps onto a
+    grid (e.g. one item per cell located at the cell center, one item per cell located at the NW corner,
+    one item per cell vertex, etc.). This means that different Fields which are on the same underlying
+    Grid but have different staggerings can share the same Grid object without needing to replicate it multiple times.
+
+    For more information about the ESMF Field class, please see the `ESMF Field documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    """
+    """
+    The ESMPy Field is a derived class of numpy.MaskedArray.  This means that it has built in masking functionality,
+    as well as native numpy Array operations.  All data is referenced to the underlying Fortran ESMF objects.
+    """
     @initialize
     def __new__(cls, grid, name=None,
                 typekind=None,
@@ -27,7 +46,7 @@ class Field(MaskedArray):
                 ndbounds=None,
                 mask_values=None):
         """
-        Create a Field from a Grid or Mesh. \n
+        Create a Field from a Grid, Mesh or LocStream. \n
         Required Arguments: \n
             grid: a Grid, Mesh or LocStream with coordinates allocated on
                   at least one stagger location. \n
@@ -266,38 +285,65 @@ class Field(MaskedArray):
 
     @property
     def name(self):
+        """
+        :return: the name of the Field
+        """
         return self._name
 
     @property
     def type(self):
+        """
+        :return: the type of the data in the Field
+        """
         return self._type
 
     @property
     def rank(self):
+        """
+        :return: the rank of the Field
+        """
         return self._rank
 
     @property
     def xd(self):
+        """
+        :return: the number of extra (ungridded) dimensions of the Field
+        """
         return self._xd
 
     @property
     def staggerloc(self):
+        """
+        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        """
         return self._staggerloc
 
     @property
     def lower_bounds(self):
+        """
+        :return: the lower bounds of the Field
+        """
         return self._lower_bounds
 
     @property
     def upper_bounds(self):
+        """
+        :return: the upper bounds of the Field
+        """
         return self._upper_bounds
 
     @property
     def ndbounds(self):
+        """
+        :return: the bounds of the extra dimensions in the Field
+        """
         return self._ndbounds
 
     @property
     def grid(self):
+        """
+        :return: the Grid, Mesh or LocStream upon which this Field is built
+        """
         return self._grid
 
     @property
