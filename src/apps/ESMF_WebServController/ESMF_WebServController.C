@@ -159,6 +159,7 @@ int main(int    argc,
    char compSvrScriptName[512];
    strcpy(compSvrScriptName, argv[5]);
 
+   ESMC_Initialize(NULL, ESMC_InitArgLogKindFlag(ESMC_LOGKIND_SINGLE), ESMC_ArgLast);
 
    ESMCI::ESMCI_WebServProcCtrl
       server(procCtrlPort,
@@ -187,6 +188,8 @@ int main(int    argc,
 
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
+
+   ESMC_Finalize();
 
   	return 0;
 }
