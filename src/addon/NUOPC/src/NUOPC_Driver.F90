@@ -19,7 +19,6 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
 
   use ESMF
-  use ESMF_StateAPIMod
   use NUOPC
   use NUOPC_RunSequenceDef
   
