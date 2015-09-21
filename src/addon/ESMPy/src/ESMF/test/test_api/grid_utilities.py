@@ -39,11 +39,12 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
     ycorner = np.array([ys[0:-1], ys[1::]]).T
     ycenter = (ycorner[:, 1] + ycorner[:, 0]) / 2
 
-    # create a grid given the number of grid cells in each dimension
+    # create a grid given the number of grid cells in each dimension, the center stagger location is allocated, the
+    # Cartesian coordinate system and type of the coordinates are specified
     max_index = np.array([nx, ny])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER], coord_sys=ESMF.CoordSys.CART, coord_typekind=ctk)
 
-    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
+    # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
     x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][x]]
     gridXCenter[...] = x_par.reshape((x_par.size, 1))
@@ -79,10 +80,7 @@ def grid_create(xdom, ydom, nx, ny, corners=False, domask=False, doarea=False, c
 
     # add arbitrary areas values
     if doarea:
-        grid.add_item(ESMF.GridItem.AREA)
-
-        area = grid.get_item(ESMF.GridItem.AREA)
-
+        area = grid.add_item(ESMF.GridItem.AREA)
         area[:] = 5.0
 
     return grid
@@ -108,11 +106,11 @@ def grid_create_periodic(nlon, nlat, corners=False, domask=False):
     latcorner = np.array([lats[0:-1], lats[1::]]).T
     latcenter = (latcorner[:, 1] + latcorner[:, 0]) / 2
 
-    # create a grid given the number of grid cells in each dimension
+    # create a grid given the number of grid cells in each dimension the center stagger location is allocated
     max_index = np.array([nlon, nlat])
     grid = ESMF.Grid(max_index, num_peri_dims=1, staggerloc=[ESMF.StaggerLoc.CENTER])
 
-    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
+    # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(lon)
     lon_par = loncenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER][lon]:grid.upper_bounds[ESMF.StaggerLoc.CENTER][lon]]
     gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
@@ -179,11 +177,12 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
     zcorner = np.array([zs[0:-1], zs[1::]]).T
     zcenter = (zcorner[:, 1] + zcorner[:, 0]) / 2
 
-    # create a grid given the number of grid cells in each dimension
+    # create a grid given the number of grid cells in each dimension, the center stagger location is allocated and the
+    # Cartesian coordinate system is specified
     max_index = np.array([nx, ny, nz])
     grid = ESMF.Grid(max_index, staggerloc=[ESMF.StaggerLoc.CENTER_VCENTER], coord_sys=ESMF.CoordSys.CART)
 
-    # set the grid coordinates using fabricated arrays, parallel case is handled using grid bounds
+    # set the grid coordinates using numpy arrays, parallel case is handled using grid bounds
     gridXCenter = grid.get_coords(x)
     x_par = xcenter[grid.lower_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]:grid.upper_bounds[ESMF.StaggerLoc.CENTER_VCENTER][x]]
     gridXCenter[...] = x_par.reshape(x_par.size, 1, 1)
@@ -231,10 +230,7 @@ def grid_create_3d(xdom, ydom, zdom, nx, ny, nz, corners=False, domask=False, do
 
     # add arbitrary areas values
     if doarea:
-        grid.add_item(ESMF.GridItem.AREA)
-
-        area = grid.get_item(ESMF.GridItem.AREA)
-
+        area = grid.add_item(ESMF.GridItem.AREA)
         area[:] = 5.0
 
     return grid

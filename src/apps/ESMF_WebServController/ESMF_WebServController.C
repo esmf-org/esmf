@@ -87,6 +87,8 @@ int print_usage()
    printf("    procCtrlPort    Port num for Process Controller listener.\n");
    printf("    registrarHost   Host name on which Registrar is running.\n");
    printf("    registrarPort   Port num on which Registrar is listening.\n");
+   printf("    runScriptDir    Directory containing run script.\n");
+   printf("    runScriptFile   File name of run script.\n");
    printf("\n");
    return 0;
 }
@@ -100,8 +102,8 @@ int main(int    argc,
    string   compSvrHost = "localhost";
    int      compSvrStartPort = 27060;
    int      portPoolSize = 5;
-   string   compSvrScriptDir = "/nics/c/home/ksaint/Scripts";
-   string   compSvrScriptName = "runjob.sh";
+   //string   compSvrScriptDir = "./";
+   //string   compSvrScriptName = "runjob.sh";
 
 
    int	argIndex = 0;
@@ -139,7 +141,7 @@ int main(int    argc,
 		return 0;
    }
 
-	if (argc < 4)
+	if (argc < 6)
 	{
       print_usage();
 		return 1;
@@ -149,6 +151,15 @@ int main(int    argc,
    char     registrarHost[256];
    strcpy(registrarHost, argv[2]);
    int      registrarPort = atoi(argv[3]);
+
+   //string   compSvrScriptDir = "./";
+   //string   compSvrScriptName = "runjob.sh";
+   char compSvrScriptDir[512];
+   strcpy(compSvrScriptDir, argv[4]);
+   char compSvrScriptName[512];
+   strcpy(compSvrScriptName, argv[5]);
+
+   ESMC_Initialize(NULL, ESMC_InitArgLogKindFlag(ESMC_LOGKIND_SINGLE), ESMC_ArgLast);
 
    ESMCI::ESMCI_WebServProcCtrl
       server(procCtrlPort,
@@ -165,6 +176,8 @@ int main(int    argc,
    printf(" Registrar:\n");
    printf("    host:  %s\n", registrarHost);
    printf("    port:  %d\n", registrarPort);
+   printf("    script dir: %s\n", compSvrScriptDir);
+   printf("    script name: %s\n", compSvrScriptName);
    printf("-----------------------------------------------------\n");
    printf("\n");
 
@@ -175,6 +188,8 @@ int main(int    argc,
 
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
+
+   ESMC_Finalize();
 
   	return 0;
 }

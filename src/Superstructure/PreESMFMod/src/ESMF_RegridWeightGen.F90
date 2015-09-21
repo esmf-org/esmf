@@ -611,13 +611,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor
-    if ((localSrcFileType == ESMF_FILEFORMAT_SCRIP) .and. &
+    if ((localSrcFileType /= ESMF_FILEFORMAT_GRIDSPEC) .and. &
         (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
         localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
 	srcUseLocStream = .TRUE.
     endif 
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
-    if ((localDstFileType == ESMF_FILEFORMAT_SCRIP) .and. &
+    if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
 	dstUseLocStream = .TRUE.
     endif 
@@ -935,7 +935,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (srcUseLocStream) then
        srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      indexflag=ESMF_INDEX_DELOCAL,rc=localrc)
+       		      fileformatflag=localSrcFileType, &
+		      indexflag=ESMF_INDEX_GLOBAL, & 
+		      centerflag=.not. useSrcCorner, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1065,7 +1067,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (dstUseLocStream) then
        dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, &
-       		      indexflag=ESMF_INDEX_DELOCAL,rc=localrc)
+       		      fileformatflag=localDstFileType, &
+		      indexflag=ESMF_INDEX_GLOBAL, & 
+		      centerflag=.not. useDstCorner, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return

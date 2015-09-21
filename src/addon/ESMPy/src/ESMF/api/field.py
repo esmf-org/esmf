@@ -285,38 +285,65 @@ class Field(MaskedArray):
 
     @property
     def name(self):
+        """
+        :return: the name of the Field
+        """
         return self._name
 
     @property
     def type(self):
+        """
+        :return: the type of the data in the Field
+        """
         return self._type
 
     @property
     def rank(self):
+        """
+        :return: the rank of the Field
+        """
         return self._rank
 
     @property
     def xd(self):
+        """
+        :return: the number of extra (ungridded) dimensions of the Field
+        """
         return self._xd
 
     @property
     def staggerloc(self):
+        """
+        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        """
         return self._staggerloc
 
     @property
     def lower_bounds(self):
+        """
+        :return: the lower bounds of the Field
+        """
         return self._lower_bounds
 
     @property
     def upper_bounds(self):
+        """
+        :return: the upper bounds of the Field
+        """
         return self._upper_bounds
 
     @property
     def ndbounds(self):
+        """
+        :return: the bounds of the extra dimensions in the Field
+        """
         return self._ndbounds
 
     @property
     def grid(self):
+        """
+        :return: the Grid, Mesh or LocStream upon which this Field is built
+        """
         return self._grid
 
     @property
