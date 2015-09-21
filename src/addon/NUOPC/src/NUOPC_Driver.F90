@@ -19,6 +19,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
 
   use ESMF
+  use ESMF_StateAPIMod
   use NUOPC
   use NUOPC_RunSequenceDef
   
@@ -415,17 +416,20 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
-        value=rootVas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
-        value=rootVas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-
+      if (ESMF_StateIsCreated(is%wrap%modelIS(i))) then
+        call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
+          value=rootVas, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+      endif
+      if (ESMF_StateIsCreated(is%wrap%modelES(i))) then
+        call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
+          value=rootVas, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
 
       ! initialize the modelPhaseMap pointer members
       nullify(modelPhaseMap(i)%phaseValue)
@@ -531,27 +535,31 @@ module NUOPC_Driver
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeInit(is%wrap%modelIS(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      call NUOPC_StateAttributeSet(is%wrap%modelIS(i), &
-        name="Namespace", value=trim(namespace), &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
+      if (ESMF_StateIsCreated(is%wrap%modelIS(i))) then
+        call NUOPC_StateAttributeInit(is%wrap%modelIS(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_StateAttributeSet(is%wrap%modelIS(i), &
+          name="Namespace", value=trim(namespace), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       ! add State level attributes, set the namespace according to comp label
-      call NUOPC_StateAttributeInit(is%wrap%modelES(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      call NUOPC_StateAttributeSet(is%wrap%modelES(i), &
-        name="Namespace", value=trim(namespace), &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
+      if (ESMF_StateIsCreated(is%wrap%modelES(i))) then
+        call NUOPC_StateAttributeInit(is%wrap%modelES(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_StateAttributeSet(is%wrap%modelES(i), &
+          name="Namespace", value=trim(namespace), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
     enddo
       
     ! query Component for its Clock (set during specialization)
