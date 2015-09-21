@@ -2029,6 +2029,11 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    ! if count==0, return with success
+    if (count==0) then 
+       rc=ESMF_SUCCESS
+       return
+    endif
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
