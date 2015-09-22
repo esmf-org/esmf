@@ -15,13 +15,14 @@ using the LocStream.
 
 The locations are generally
 described using Cartesian (x, y, z), or (lat, lon, radius) coordinates.
-There is no assumption of any regularity in the positions of the points.
-To make the concept more general, the locations for each data point are
-represented using a construct called {\it keys}. Keys are essentially 
-vectors containing point descriptors.  They may include 
-other information besides location (a mask, for example) or a second 
+The coordinates are
+stored using constructs called {\it keys}. Keys are essentially 
+vectors containing point descriptors.  They may hold 
+other information besides the coordinates - a mask, for example.  They 
+may also hold a second 
 set of coordinates.  Each key must contain the same number of elements 
-as there are locations in the LocStream.
+as there are data points in the LocStream.
+There is no assumption of any regularity in the positions of the points.
 
 LocStreams can be very large. Data assimilation systems might use
 LocStreams with up to $10^{8}$ observations, so efficiency is critical.
@@ -35,7 +36,7 @@ For example, LocStreams allow users to:
 \item Regrid data in Fields defined on LocStreams
 \item Redistribute data between Fields defined on LocStreams
 \item Gather or scatter a FieldBundle defined on a LocStream from/to a root DE
-\item Extract Fortran array from Field which was defined by a LocStream
+\item Extract Fortran array from Field which was defined on a LocStream
 \end{enumerate}
 
 
@@ -53,6 +54,6 @@ of which other point).
 
 A LocStream is similar to a Mesh in that both are collections of irregularly positioned 
 points.  However, the two structures differ because a Mesh also has connectivity: 
-each data point has a set of neighboring data points. There is no requirement that the
+each data point represents a corner of a defined cell. There is no requirement that the
 points in a LocStream have connectivity, in fact there is no requirement that any two points 
 have any particular spatial relationship at all.
