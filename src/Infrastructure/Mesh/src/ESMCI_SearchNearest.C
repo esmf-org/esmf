@@ -245,8 +245,6 @@ struct CommData {
   //  Trace __trace("FindPnts()");
 
   // Get spatial dim and make sure both have the same
-
-
   int sdim=src_pl.get_coord_dim();
   if (sdim != dst_pl.get_coord_dim()) {
     Throw() << "src and dst must have same spatial dim for search";
@@ -280,7 +278,6 @@ struct CommData {
   proc_min[0]=max; proc_min[1]=max; proc_min[2]=max;
   proc_max[0]=min; proc_max[1]=min; proc_max[2]=min;
 
-
   // Add unmasked nodes to search tree
   for (UInt p = 0; p < num_nodes_to_search; ++p) {
 
@@ -303,11 +300,13 @@ struct CommData {
     if (pnt[2] > proc_max[2]) proc_max[2]=pnt[2];
   }
 
+
   // Commit tree
   tree->commit();
 
+
   // Create SpaceDir
-  SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree);
+    SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree, false);
 
 
   //// Find the closest point locally ////
@@ -348,7 +347,6 @@ struct CommData {
     }
   }
 
-  
   // Get list of procs where a point can be located
   vector< vector<int> > proc_lists;  // List of procs
   proc_lists.resize(dst_size);
@@ -446,7 +444,6 @@ struct CommData {
       snd_sizes[i]=snd_size*snd_inds[i].size();
     }
   
-
 #if 0
   // Debug output
   for (int i=0; i<num_snd_procs; i++) {
@@ -501,14 +498,15 @@ struct CommData {
     }
   }
 
+
   // Communicate point information
   comm.communicate();
 
+  // Calculate the number of recv. pets
   int num_rcv_pets=0;
   for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
     num_rcv_pets++;
   }
-
 
   // Hold rcv results  
   int *rcv_pets=NULL;
@@ -550,8 +548,7 @@ struct CommData {
 
  /* XMRKX */
       b->pop((UChar *)buf, (UInt)snd_size);
-      //      printf(" [%f %f %f], ",pnt[0],pnt[1],pnt[2]);
-
+      
 
       // Unpack buf
       double pnt[3]={0.0,0.0,0.0};
@@ -649,10 +646,8 @@ struct CommData {
     }
   }
 
-
   // Communicate point information
   comm_to_home.communicate();
-
 
   // Get rid of rcv results
   if (num_rcv_pets>0) { 
@@ -703,7 +698,6 @@ struct CommData {
       j++;
     }
   }
-
 
   // Do output based on CommData
   result.clear();

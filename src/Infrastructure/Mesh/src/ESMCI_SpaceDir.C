@@ -72,9 +72,15 @@ SpaceDir::SpaceDir(
 // !ARGUMENTS:
 		   double _proc_min[3], // min of objects in otree for this proc 
 		   double _proc_max[3], // max of objects in otree for this proc
-		   OTree *_otree        // Otree of objects on this proc 
+                                        // NOTE: If the above min-max box is empty
+                                        //       (e.g. min>max for any dim. then 
+                                        //       the box won't be added to the tree. 
+		   OTree *_otree,       // Otree of objects on this proc 
                                         // NOTE: _otree should be commited before being passed in
                                         // NOTE: SpaceDir won't destruct this otree
+		   bool search_this_proc // If true, return results for the proc that this is being 
+                                        // called from, otherwise the current proc won't be included
+                                        // in the results (defaults to true).
   ){
 //
 // !DESCRIPTION:
@@ -95,9 +101,8 @@ SpaceDir::SpaceDir(
    proc_max[2]=_proc_max[2];
 
 
-
-   // EVENTUALLY NEED TO MAKE THIS MORE SCALABLE, BUT FOR
-   // AN INITIAL TEST DO SOMETHING EASY
+   // EVENTUALLY MAY NEED TO MAKE THIS MORE SCALABLE, BUT FOR
+   // NOW DO A SIMPLE VERSION
 
    // Distribute min-max box of each proc 
    // Pack up local minmax
@@ -131,9 +136,17 @@ SpaceDir::SpaceDir(
    // Add proc min max boxes
    for (int i=0; i<num_procs; i++) {
 
+     // Don't add calling proc if not wanted
+     if (!search_this_proc && i == Par::Rank()) continue;
+     
      // Get min and max from global list
      double *min=&global_minmax[6*i];
      double *max=&global_minmax[6*i+3];
+     
+     // If box empty, don't add it to the tree
+     if ((min[0] > max[0]) || 
+         (min[1] > max[1]) || 
+         (min[2] > max[2])) continue;
 
      // Add proc to tree
      proc_otree->add(min, max, (void *)(proc_nums+i));
