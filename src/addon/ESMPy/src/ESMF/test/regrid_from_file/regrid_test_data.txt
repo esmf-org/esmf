@@ -74,7 +74,7 @@ fv1.9x2.5_050503.nc : ne30np4-t2.nc : conserve : -p none : 10E-03 : 10E-02 : 10E
 # cubed sphere to cubed sphere
 ne60np4_pentagons_100408.nc : ne30np4-t2.nc : bilinear : -p all -i  : 10E-05 : 10E-05 : 10E-16
 ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -p all -i  : 10E-05 : 10E-05 : 10E-16
-ne60np4_pentagons_100408.nc : ne30np4-t2.nc : conserve : -p none -i : 10E-04 : 10E-03 : 10E-13
+#ne60np4_pentagons_100408.nc : ne30np4-t2.nc : conserve : -p none -i : 10E-04 : 10E-03 : 10E-13
 
 # cubed sphere to regional, conservative with masking
 ne30np4-t2.nc : wr50a_090614.nc : bilinear : --dst_regional -i : 10E-05 : 10E-04 : 10E-16
@@ -94,8 +94,8 @@ mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : bilinear : --src_type 
 mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : bilinear : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
 mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
 mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : patch    : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-16
-mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : conserve : -i --src_type ESMF --dst_type ESMF : 10E-04 : 10E-03 : 10E-13
-mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : conserve : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-14
+#mpas_uniform_10242.nc      : mpas_uniform_10242_dual.nc : conserve : -i --src_type ESMF --dst_type ESMF : 10E-04 : 10E-03 : 10E-13
+#mpas_uniform_10242_dual.nc : mpas_uniform_10242.nc      : conserve : --src_type ESMF --dst_type ESMF    : 10E-04 : 10E-04 : 10E-14
 
 # mpas with regular grids
 T42_grid.nc                : mpas_uniform_10242_dual.nc : patch    : --dst_type ESMF    : 10E-04 : 10E-03 : 10E-16
@@ -108,8 +108,8 @@ mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : bilinear : --src_typ
 ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : bilinear : --dst_type ESMF : 10E-05 : 10E-05 : 10E-16
 mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : patch    : --src_type ESMF : 10E-04 : 10E-04 : 10E-16
 ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : patch    : --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
-mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : conserve : --src_type ESMF : 10E-03 : 10E-02 : 10E-13
-ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : conserve : --dst_type ESMF : 10E-05 : 10E-04 : 10E-13
+#mpas_uniform_10242_dual.nc  : ne60np4_pentagons_100408.nc : conserve : --src_type ESMF : 10E-03 : 10E-02 : 10E-13
+#ne60np4_pentagons_100408.nc : mpas_uniform_10242.nc       : conserve : --dst_type ESMF : 10E-05 : 10E-04 : 10E-13
 
 # mpas with regional grid
 wr50a_090614.nc            : mpas_uniform_10242_dual.nc : bilinear : -i --src_regional --dst_type ESMF : 10E-06 : 10E-05 : 10E-16
@@ -129,7 +129,7 @@ ne15nc4_scrip.nc : fv1.9x2.5_050503.nc : conserve : -p none  : 10E-04 : 10E-03 :
 
 # new cubed sphere grids with concave cells
 ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : bilinear : -p all  : 10E-05 : 10E-04 : 10E-16
-ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : conserve : -p none  : 10E-04 : 10E-03 : 10E-13
+#ARM_30_x8.g_scrip.nc : SCRIP_1x1.nc : conserve : -p none  : 10E-04 : 10E-03 : 10E-13
 
 # Nearest source to destination
 wr50a_090614.nc : wr50a_090614.nc : neareststod : --src_regional --dst_regional : 10E-16 : 10E-16 : 10E-16
