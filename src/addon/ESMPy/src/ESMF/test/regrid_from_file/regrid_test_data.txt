@@ -3,7 +3,7 @@
 # Input data for the RegridWeightGenCheck external demo
 
 # total number of test cases
-92
+86
 
 # source_grid : destination_grid : method : options : RelErr : AreaErr
 
