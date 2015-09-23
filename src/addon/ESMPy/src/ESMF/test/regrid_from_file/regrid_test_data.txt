@@ -16,9 +16,9 @@ wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --
 
 # FVCOM_grid2d.nc:  unstructured grid in UGRID format
 FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
-scrip_regional_1140x690.nc : FVCOM_grid2d_20120314.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
+scrip_regional_1140x690.nc : FVCOM_grid2d_20120314.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
 FVCOM_grid2d_20130228.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
-scrip_regional_1140x690.nc : FVCOM_grid2d_20130228.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
+scrip_regional_1140x690.nc : FVCOM_grid2d_20130228.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
 
 # global grids with pole options
 ll2.5deg_grid.nc : T42_grid.nc      : bilinear : -p none    : 10E-04 : 10E-03 : 10E-16
@@ -152,5 +152,5 @@ GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingv
 # UGRID
 FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
 FVCOM_grid2d.nc : scrip_regional_1140x690.nc : bilinear : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-07 : 10E-06 : 10E-16
-scrip_regional_1140x690.nc : FVCOM_grid2d.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-15
+scrip_regional_1140x690.nc : FVCOM_grid2d.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
 scrip_regional_1140x690.nc : FVCOM_grid2d.nc : bilinear : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-08 : 10E-07 : 10E-16
