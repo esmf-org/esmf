@@ -7226,6 +7226,7 @@ void GridIter::setDEBnds(
 //EOPI
 //-----------------------------------------------------------------------------
 
+
   // Set Bounds of iteration on this proc
   this->getDEBnds(localDE,uBndInd,lBndInd);
 
@@ -7239,11 +7240,7 @@ void GridIter::setDEBnds(
 
     currOff *=(uBndInd[i]-lBndInd[i]+1);
   }  
-
-  //   printf("Ind lBnd=%d %d Ubnd=%d %d \n",lBndInd[0],lBndInd[1],uBndInd[0],uBndInd[1]);
-
-
-
+ 
   // Exclusive Bounds
   grid->getExclusiveLBound(staggerloc, localDE, exLBndInd);
 
@@ -7256,23 +7253,21 @@ void GridIter::setDEBnds(
   grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBndNew);  
   grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBndNew);  
 
-  //  printf("Orig lBnd=%d %d Ubnd=%d %d ::  New lBnd=%d %d UBnd=%d %d\n",lBndOrig[0],lBndOrig[1],uBndOrig[0],uBndOrig[1],lBndNew[0],lBndNew[1],uBndNew[0],uBndNew[1]);
 
   // Set to first index on DE
   for (int i=0; i<rank; i++) {
     curInd[i]=lBndInd[i];
   }
 
-
   // Temporarily set min/max
   int localrc;
   const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   const int *DETileList = staggerDistgrid->getTileListPDe();
   int tile=DETileList[localDEList[localDE]];
-
+ 
   const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
   const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
-    
+
    for (int i=0; i<rank; i++) {
     minInd[i]=tileMin[i];
     maxInd[i]=tileMax[i];
@@ -7291,19 +7286,85 @@ void GridIter::setDEBnds(
 //-----------------------------------------------------------------------------
 
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::advToNonZeroDE()"
+//BOPI
+// !IROUTINE:  advToNonZeroDE()
+//
+// !INTERFACE:
+bool GridIter::advToNonEmptyDE(
+//
+// !RETURN VALUE:
+//    true - advanced to next DEs
+//    false - there were no more non-empty DEs
+// !ARGUMENTS:
+//  
+   int *_localDE
+ ){
+//
+// !DESCRIPTION:
+// Starting with the current value of localDE advance to the next non-empty one. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  int tmp_uBnd[ESMF_MAXDIM];
+  int tmp_lBnd[ESMF_MAXDIM];
+
+ /* XMRKX */
+
+  // temp localDE to advance
+  int localDE=*_localDE;
+
+  // Loop until we've found a non-empty DE
+  while (localDE <= uBndDE) {
+
+    // Set Bounds of iteration on this proc
+    this->getDEBnds(localDE,tmp_uBnd,tmp_lBnd);
+
+    // See if the DE has 0-width in some dimension
+    bool empty=false;
+    for (int i=0; i<rank; i++) {
+      if (tmp_uBnd[i] < tmp_lBnd[i]) {
+        empty=true;
+        break;
+      }
+    }  
+
+    // If it's not empty then set output and return
+    if (!empty) {
+      *_localDE=localDE;
+      return true;
+    }
+
+    // Advance to next DE 
+    localDE++;
+  }
+
+  // return that there were no more empty DEs
+  *_localDE=localDE;
+  return false;
+
+}
+//-----------------------------------------------------------------------------
+
+
+
 //-----------------------------------------------------------------------------
  #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter()"
 //BOPI
-// !IROUTINE:  GridIter Construct
+ // !IROUTINE:  GridIter Construct
 //
-// !INTERFACE:
+ // !INTERFACE:
 GridIter::GridIter(
 //
 // !RETURN VALUE:
 //    Pointer to a new Grid Iterator
 //
-// !ARGUMENTS:
+ // !ARGUMENTS:
 //  
  Grid *gridArg,
  int  staggerlocArg,
@@ -7314,7 +7375,7 @@ GridIter::GridIter(
 
 //
 //EOPI
-//-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
 
   // Set parameters
   grid=gridArg;
@@ -7326,10 +7387,10 @@ GridIter::GridIter(
 
   // Get distgrid for this staggerloc 
   grid->getStaggerDistgrid(staggerloc, &staggerDistgrid);
-
+ 
   // initialize 
   for (int i=0; i<ESMF_MAXDIM; i++) {
-    curInd[i]=0;
+     curInd[i]=0;
     lBndInd[i]=0;
     uBndInd[i]=0;
   }
@@ -7345,8 +7406,6 @@ GridIter::GridIter(
 
   // set to beginning (just in case)
   this->toBeg();
-
-
 }
 //-----------------------------------------------------------------------------
 
@@ -7356,7 +7415,7 @@ GridIter::GridIter(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridIter::toBeg()"
  //BOPI
-// !IROUTINE:  toBeg
+ // !IROUTINE:  toBeg
 //
 // !INTERFACE:
 GridIter *GridIter::toBeg(
@@ -7365,7 +7424,7 @@ GridIter *GridIter::toBeg(
 //    GridIter object
 //
 // !ARGUMENTS:
-//  
+ //  
  ){
 //
 // !DESCRIPTION:
@@ -7380,16 +7439,23 @@ GridIter *GridIter::toBeg(
     return this;
   } 
 
+  // Set to first DE 
+  curDE=0; 
+
+  // Advance to first non-empty position
+  // If there are none, then set as done and leave
+  if (!this->advToNonEmptyDE(&curDE)) {
+    done=true;
+    return this;
+  }
+
   // Set to beginning (localDE=0)
-  this->setDEBnds(0);
+  this->setDEBnds(curDE);
   
   // Set to first index
   for (int i=0; i<rank; i++) {
     curInd[i]=lBndInd[i];
   }
-
-  // Set to first DE 
-  curDE=0; 
 
   // set done status
   if (curDE > uBndDE) { 
@@ -7414,7 +7480,7 @@ GridIter *GridIter::toBeg(
 // !INTERFACE:
 GridIter *GridIter::adv(
 //
-// !RETURN VALUE:
+ // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
@@ -7457,6 +7523,13 @@ GridIter *GridIter::adv(
 
       ////// If we're past the top of the DEs then we're done
       if (curDE > uBndDE) { 
+        done=true;
+        return this;
+      }
+
+      // Advance to first non-empty position
+      // If there are none, then set as done and leave
+      if (!this->advToNonEmptyDE(&curDE)) {
         done=true;
         return this;
       }
@@ -8156,7 +8229,7 @@ void GridCellIter::getDEBnds(
 //
 // !ARGUMENTS:
 //  
-                         int localDE,
+                          int localDE,
                          int *uBnd,
                          int *lBnd
  ){
@@ -8299,6 +8372,69 @@ void GridCellIter::setDEBnds(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::advToNonZeroDE()"
+//BOPI
+// !IROUTINE:  advToNonZeroDE()
+//
+// !INTERFACE:
+bool GridCellIter::advToNonEmptyDE(
+//
+// !RETURN VALUE:
+//    true - advanced to next DEs
+//    false - there were no more non-empty DEs
+// !ARGUMENTS:
+//  
+   int *_localDE
+ ){
+//
+// !DESCRIPTION:
+// Starting with the current value of localDE advance to the next non-empty one. 
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  int tmp_uBnd[ESMF_MAXDIM];
+  int tmp_lBnd[ESMF_MAXDIM];
+
+ /* XMRKX */
+
+  // temp localDE to advance
+  int localDE=*_localDE;
+
+  // Loop until we've found a non-empty DE
+  while (localDE <= uBndDE) {
+
+    // Set Bounds of iteration on this proc
+    this->getDEBnds(localDE,tmp_uBnd,tmp_lBnd);
+
+    // See if the DE has 0-width in some dimension
+    bool empty=false;
+    for (int i=0; i<rank; i++) {
+      if (tmp_uBnd[i] < tmp_lBnd[i]) {
+        empty=true;
+        break;
+      }
+    }  
+
+    // If it's not empty then set output and return
+    if (!empty) {
+      *_localDE=localDE;
+      return true;
+    }
+
+    // Advance to next DE 
+    localDE++;
+  }
+
+  // return that there were no more empty DEs
+  *_localDE=localDE;
+  return false;
+
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridCellIter()"
 //BOPI
 // !IROUTINE:  GridCellIter Construct
@@ -8401,8 +8537,18 @@ GridCellIter *GridCellIter::toBeg(
     return this;
   } 
 
+  // Set to first DE 
+  curDE=0; 
+
+ // Advance to first non-empty position
+  // If there are none, then set as done and leave
+  if (!this->advToNonEmptyDE(&curDE)) {
+    done=true;
+    return this;
+  }
+
   // Set to beginning (localDE=0)
-  this->setDEBnds(0);
+  this->setDEBnds(curDE);
 
   //  printf("B cur=[%d,%d] \n",curInd[0],curInd[1]);
 
@@ -8414,8 +8560,6 @@ GridCellIter *GridCellIter::toBeg(
     curInd[i]=lBndInd[i];
   }
 
-  // Set to first DE 
-  curDE=0; 
 
   // set done status
   if (curDE > uBndDE) { 
@@ -8485,6 +8629,13 @@ GridCellIter *GridCellIter::adv(
 
       ////// If we're past the top of the DEs then we're done
       if (curDE > uBndDE) { 
+        done=true;
+        return this;
+      }
+
+      // Advance to first non-empty position
+      // If there are none, then set as done and leave
+      if (!this->advToNonEmptyDE(&curDE)) {
         done=true;
         return this;
       }

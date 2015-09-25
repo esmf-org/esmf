@@ -1402,7 +1402,8 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     return field
 
-def compute_mass_mesh(valuefield, dofrac=False, fracfield=None):
+def compute_mass_mesh(valuefield, dofrac=False, fracfield=None,
+                      uninitval=422397696.):
     '''
     PRECONDITIONS: 'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
@@ -1416,10 +1417,12 @@ def compute_mass_mesh(valuefield, dofrac=False, fracfield=None):
     areafield = ESMF.Field(valuefield.grid, name='areafield',
                            meshloc=ESMF.MeshLoc.ELEMENT)
     areafield.get_area()
+
+    ind = np.where(valuefield.data != uninitval)
     if dofrac:
-        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+        mass = np.sum(areafield.data[ind[0]] * valuefield.data[ind[0]] * fracfield.data[ind[0]])
     else:
-        mass = np.sum(areafield.data * valuefield.data)
+        mass = np.sum(areafield.data[ind[0]] * valuefield.data[ind[0]])
 
     return mass
 
