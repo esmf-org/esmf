@@ -136,7 +136,7 @@ public:
 /*--------------------------------------------------------------------------*/
  /* XMRKX */
 
-static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
+  static int num_intersecting(const Mesh &src, bool on_sph, const BBox &dstBBox, double btol, double nexp) {
   
   int ret = 0;
 
@@ -158,7 +158,7 @@ static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, d
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-      BBox bounding_box(coord_field, elem, nexp, src.is_sph);
+      BBox bounding_box(coord_field, elem, nexp, on_sph);
   
      // First check to see if the box even intersects the dest mesh bounding
      // box.  
@@ -169,7 +169,7 @@ static int num_intersecting(const Mesh &src, const BBox &dstBBox, double btol, d
   return ret;
 }
 
-static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
+  static void populate_box(OTree *box, const Mesh &src, bool on_sph, const BBox &dstBBox, double btol, double nexp) {
 
   MEField<> &coord_field = *src.GetCoordField();
 
@@ -192,7 +192,7 @@ static void populate_box(OTree *box, const Mesh &src, const BBox &dstBBox, doubl
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
    
-      BBox bounding_box(coord_field, elem, nexp, src.is_sph);
+      BBox bounding_box(coord_field, elem, nexp, on_sph);
   
       // First check to see if the box even intersects the dest mesh bounding
       // box.  
@@ -714,6 +714,13 @@ BBox bbox_from_pl(PointList &dst_pl) {
   const double normexp = 0.15;
   const double dstint = 1e-8;
 
+  
+  // If using great circle edges, set flag to treat as on a spherical surface when generating seach boxes
+  bool on_sph=false;
+  if (mtype==MAP_TYPE_GREAT_CIRCLE) {
+    on_sph=true;
+  }
+
   // Get spatial dim  and error check
   UInt sdim = src.spatial_dim();
   if (sdim != dst_pl.get_coord_dim()) {
@@ -727,13 +734,13 @@ BBox bbox_from_pl(PointList &dst_pl) {
     BBox dstBBox=bbox_from_pl(dst_pl);
   
     // Count number of elements to go into tree
-    int num_box = num_intersecting(src, dstBBox, dstint, normexp);
+    int num_box = num_intersecting(src, on_sph, dstBBox, dstint, normexp);
   
     // Create tree
     box=new OTree(num_box); 
 
     // Fill tree
-    populate_box(box, src, dstBBox, dstint, normexp);
+    populate_box(box, src, on_sph, dstBBox, dstint, normexp);
 
     // Commit
     box->commit();

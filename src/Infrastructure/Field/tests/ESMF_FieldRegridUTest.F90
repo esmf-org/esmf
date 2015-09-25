@@ -19540,6 +19540,7 @@ return
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -19752,7 +19753,7 @@ return
   src_ny=60
   src_nz=14
   src_minr=0.9
-   src_maxr=2.1
+  src_maxr=2.1
 
    dst_nx=50
   dst_ny=50
@@ -20029,6 +20030,7 @@ return
           routeHandle=routeHandle, &
           unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -20128,6 +20130,8 @@ return
   if (.not. correct) then
      write(*,*) "Test not correct. Max Rel. Error= ",maxRelErr
   endif
+
+   write(*,*) "Max Rel. Error= ",maxRelErr
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &

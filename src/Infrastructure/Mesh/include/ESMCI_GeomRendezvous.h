@@ -150,6 +150,9 @@ private:
   UInt sdim;
   bool iter_is_obj;
   bool freeze_src;  // true if src mesh will not be migrated to create src rendezvous mesh
+
+  // Treat as on a spherical surface (probably because we're using great circle edges)
+  bool on_sph;
   
   /* 
    * Store the fields on the rendezvous meshes that line up with those
