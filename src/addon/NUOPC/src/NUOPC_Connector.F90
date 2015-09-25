@@ -202,12 +202,7 @@ module NUOPC_Connector
     integer, intent(out) :: rc
 
     character(ESMF_MAXSTR) :: name
-    character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
     character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
-    integer                :: itemCount, i, stat
-    character (ESMF_MAXSTR), allocatable :: itemNameList(:)
-    type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
-    type(ESMF_Field)       :: field
 
     rc = ESMF_SUCCESS
 
@@ -234,7 +229,34 @@ module NUOPC_Connector
     if (trim(exportXferPolicy)=="transferAll" .and. &
         trim(importXferPolicy)=="transferAll") then
 
-      call ESMF_StateGet(exportState, itemCount=itemCount, rc=rc)
+        call doTransfer(exportState, importState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        call doTransfer(importState, exportState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    end if
+
+    contains
+
+    subroutine doTransfer(fromState, toState, rc)
+
+      type(ESMF_State), intent(inout) :: fromState
+      type(ESMF_State), intent(inout) :: toState
+      integer, intent(out) :: rc
+
+      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
+      integer                :: itemCount, i, stat
+      character (ESMF_MAXSTR), allocatable :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
+      type(ESMF_Field)       :: field
+
+      rc = ESMF_SUCCESS
+
+      call ESMF_StateGet(fromState, itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -249,7 +271,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
 
-      call ESMF_StateGet(exportState, itemNameList=itemNameList, &
+      call ESMF_StateGet(fromState, itemNameList=itemNameList, &
         itemTypeList=itemTypeList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -259,10 +281,19 @@ module NUOPC_Connector
         !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
         if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
 
+          ! do not transfer if it already exists in the destination state
+          call ESMF_StateGet(toState, &
+            itemSearch=itemNameList(i), itemCount=itemCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (itemCount > 0) then
+            cycle
+          endif
+
           ! reverse TransferOfferGeomObject attribute, e.g., if a component
           ! providing a field wants to provide a grid, then the accepting
           ! component should not try to provide its own grid
-          call ESMF_StateGet(exportState, &
+          call ESMF_StateGet(fromState, &
             itemNameList(i), field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -282,8 +313,8 @@ module NUOPC_Connector
             newTransferGeom = "will provide"
           end if
 
-          ! transfer to import state
-          call NUOPC_Advertise(importState, StandardName=itemNameList(i), &
+          ! transfer to toState
+          call NUOPC_Advertise(toState, StandardName=itemNameList(i), &
             TransferOfferGeomObject=newTransferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -294,7 +325,7 @@ module NUOPC_Connector
      deallocate(itemNameList)
      deallocate(itemTypeList)
 
-    end if
+    end subroutine
 
   end subroutine
 
