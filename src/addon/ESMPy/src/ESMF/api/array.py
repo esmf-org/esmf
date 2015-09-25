@@ -11,8 +11,6 @@ import numpy as np
 import numpy.ma as ma
 import ctypes as ct
 
-import numpy as np
-
 def esmf_array(data, dtype, shape):
     '''
     :param data: buffer of fortran allocated ESMF array
@@ -82,7 +80,6 @@ class MaskedArray(ma.MaskedArray):
             np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
         npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
 
-        # TODO: the fortran order here will re-reindex data that has already been reindexed, causing the new and ownership tests to fail
         npdata = npdata.reshape(shape, order='F')
 
         if mask is None: mamask = [False]*size
@@ -116,7 +113,6 @@ class Array1D(np.ndarray):
             np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
         npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
 
-        # TODO: the fortran order here will re-reindex data that has already been reindexed, causing the new and ownership tests to fail
         npdata = npdata.reshape(npdata.shape, order='F')
 
         # create the new Field instance
@@ -134,47 +130,46 @@ class Array1D(np.ndarray):
         self.contents = getattr(obj, 'contents', None)
         super(Array1D, self).__array_finalize__(obj)
 
-# class Array(np.ndarray):
-#
-#     def __new__(cls, data, dtype, shape):
-#         '''
-#         :param cls: Array class type
-#         :param data: buffer of fortran allocated ESMF array
-#         :type data: ctypes void_p
-#         :param dtype: the type of the esmf buffer
-#         :type dtype: ESMF.TypeKind
-#         :param shape: N-D Python shape corresponding to 1D ESMF allocation
-#         :type shape: list or tuple
-#         :return: Array object
-#
-#         :attribute contents: esmf array pointer
-#         '''
-#         # find the size of the local coordinates
-#         size = reduce(mul, shape)
-#
-#         # create a numpy array to point to the ESMF data allocation
-#         buffer = np.core.multiarray.int_asbuffer(
-#             ct.addressof(data.contents),
-#             np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
-#         npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
-#
-#         npdata = npdata.reshape(shape, order='F')
-#
-#         # create the new Field instance
-#         obj = super(Array, cls).__new__(cls, tuple(shape),
-#                                          dtype=constants._ESMF2PythonType[dtype],
-#                                          buffer=npdata)
-#
-#         # save objectwide metadata
-#         obj.contents = data.contents
-#
-#         return obj
-#
-#     def __array_finalize__(self, obj):
-#         if obj is None: return
-#         # set instance metadata
-#         self.contents = getattr(obj, 'contents', None)
-#
-#     def __array_wrap__(self, out_arr):
-#         return np.ndarray.__array_wrap__(self, out_arr)
-#
+class Array(np.ndarray):
+
+    def __new__(cls, data, dtype, shape):
+        '''
+        :param cls: Array class type
+        :param data: buffer of fortran allocated ESMF array
+        :type data: ctypes void_p
+        :param dtype: the type of the esmf buffer
+        :type dtype: ESMF.TypeKind
+        :param shape: N-D Python shape corresponding to 1D ESMF allocation
+        :type shape: list or tuple
+        :return: Array object
+
+        :attribute contents: esmf array pointer
+        '''
+        # find the size of the local coordinates
+        size = reduce(mul, shape)
+
+        # create a numpy array to point to the ESMF data allocation
+        buffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(data.contents),
+            np.dtype(constants._ESMF2PythonType[dtype]).itemsize * size)
+        npdata = np.frombuffer(buffer, constants._ESMF2PythonType[dtype])
+
+        npdata = npdata.reshape(shape, order='F')
+
+        # create the new Field instance
+        obj = super(Array, cls).__new__(cls, tuple(shape),
+                                         dtype=constants._ESMF2PythonType[dtype],
+                                         buffer=npdata)
+
+        # save objectwide metadata
+        obj.contents = data.contents
+
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        # set instance metadata
+        self.contents = getattr(obj, 'contents', None)
+
+    def __array_wrap__(self, out_arr):
+        return np.ndarray.__array_wrap__(self, out_arr)

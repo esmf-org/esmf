@@ -52,15 +52,15 @@ class Grid(object):
         """
         Create a logically rectangular Grid object and optionally 
         allocate space for coordinates at a specified stagger location. 
-        A grid can be created in-memory or from file, there are two sets
-        of argument for these methods, outlined below. \n
-        Grid in memory: \n
-            Required arguments for creating a Grid in memory: \n
+        A grid can be created in memory or from file, there are different
+        arguments required for each method, outlined below. \n
+        The following arguments apply to a Grid created in memory: \n
+            Required arguments: \n
                 max_index: a numpy array which specifies the maximum
                            index of each dimension of the Grid. \n
                     type: np.array \n
                     shape: [number of dimensions, 1] \n
-            Optional arguments for creating a grid in memory: \n
+            Optional arguments: \n
                 num_peri_dims: the number of periodic dimensions (0 or 1). \n
                 periodic_dim: the periodic dimension (defaults to 1). \n
                 pole_dim: the pole dimension (defaults to 2). \n
@@ -75,14 +75,33 @@ class Grid(object):
                         TypeKind.I8\n
                         TypeKind.R4\n
                         (default) TypeKind.R8\n
-        Grid from file: \n
-            Required arguments for creating a Grid from file: \n
+        The following arguments apply to a Grid created either from file
+        or in memory. \n
+            Optional arguments: \n
+                staggerloc: the stagger location of the coordinate data. \n
+                    Argument values are: \n
+                        2D: \n
+                        (default) StaggerLoc.CENTER\n
+                        StaggerLoc.EDGE1\n
+                        StaggerLoc.EDGE2\n
+                        StaggerLoc.CORNER\n
+                        3D: \n
+                        (default) StaggerLoc.CENTER_VCENTER\n
+                        StaggerLoc.EDGE1_VCENTER\n
+                        StaggerLoc.EDGE2_VCENTER\n
+                        StaggerLoc.CORNER_VCENTER\n
+                        StaggerLoc.CENTER_VFACE\n
+                        StaggerLoc.EDGE1_VFACE\n
+                        StaggerLoc.EDGE2_VFACE\n
+                        StaggerLoc.CORNER_VFACE\n
+        The following argument applies only to a Grid created from file: \n
+            Required arguments: \n
                 filename: the name of NetCDF file containing the Grid. \n
                 filetype: the input file type of the Grid. \n
                     Argument values are: \n
                         FileFormat.SCRIP \n
                         FileFormat.GRIDSPEC \n
-            Optional arguments for creating a Grid from file: \n
+            Optional arguments: \n
                 reg_decomp: A 2 element integer list specifying how the grid
                             is decomposed.  Each entry is the number of decounts
                             for that dimension.  The total decounts cannot
@@ -120,24 +139,6 @@ class Grid(object):
                              are multiple coordinates defined in the file. This 
                              argument is only supported with filetype 
                              FileFormat.GRIDSPEC.  Defaults to None. \n
-        The following optional arguments apply to a Grid created either from file 
-        or in memory. \n
-            staggerloc: the stagger location of the coordinate data. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-                    StaggerLoc.CORNER_VFACE\n
         Returns: \n
             Grid \n
         """
@@ -362,22 +363,37 @@ class Grid(object):
 
     @property
     def type(self):
+        """
+        :return: the ESMF typekind of the Grid coordinates
+        """
         return self._type
 
     @property
     def areatype(self):
+        """
+        :return: the ESMF typekind of the Grid area
+        """
         return self._areatype
 
     @property
     def periodic_dim(self):
+        """
+        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
         return self._periodic_dim
 
     @property
     def pole_dim(self):
+        """
+        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
         return self._pole_dim
 
     @property
     def coord_sys(self):
+        """
+        :return: the type of the coordinate system for this Grid
+        """
         return self._coord_sys
 
     @property
@@ -386,10 +402,16 @@ class Grid(object):
 
     @property
     def num_peri_dims(self):
+        """
+        :return: the total number of periodic dimensions in the Grid
+        """
         return self._num_peri_dims
 
     @property
     def rank(self):
+        """
+        :return: the rank of the Grid
+        """
         return self._rank
 
     @property
@@ -398,14 +420,23 @@ class Grid(object):
 
     @property
     def staggerloc(self):
+        """
+        :return: a boolean list of the stagger locations that have been allocated for this Grid
+        """
         return self._staggerloc
 
     @property
     def lower_bounds(self):
+        """
+        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
+        """
         return self._lower_bounds
 
     @property
     def upper_bounds(self):
+        """
+        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
+        """
         return self._upper_bounds
 
     @property
@@ -414,6 +445,11 @@ class Grid(object):
 
     @property
     def coords(self):
+        """
+        :return: grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
+        representing the stagger location and the second representing the coordinate dimension will return a numpy
+        array of size given by upper_bounds - lower_bounds
+        """
         return self._coords
 
     @property
@@ -422,10 +458,16 @@ class Grid(object):
 
     @property
     def mask(self):
+        """
+        :return: the grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
+        """
         return self._mask
 
     @property
     def area(self):
+        """
+        :return: the grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
+        """
         return self._area
 
     @property
@@ -443,16 +485,6 @@ class Grid(object):
     @property
     def singlestagger(self):
         return self._singlestagger
-
-
-    # @size.setter
-    # def size(self, value):
-    #     self._size = value
-    #
-    # @size.deleter
-    # def size(self):
-    #     self._size = None
-
 
     # manual destructor
     def destroy(self):
@@ -607,22 +639,19 @@ class Grid(object):
                        return (coordinates will not be returned if
                        coord_dim is not specified and staggerlocs is
                        a list with more than one element). \n
+            from_file: boolean for internal use to determine whether Grid has already been created from file. \n
         Returns: \n
-            None \n
+            A numpy array of coordinate values if staggerloc and coord_dim are specified, otherwise return None. \n
         """
-   
-        # handle the default case
-        staggerlocs = 0
         if staggerloc is None:
-            staggerlocs = [StaggerLoc.CENTER]
-        elif type(staggerloc) is list:
-            staggerlocs = staggerloc
-        elif type(staggerloc) is tuple:
-            staggerlocs = list(staggerloc)
+            staggerloc = [StaggerLoc.CENTER]
         else:
-            staggerlocs = [staggerloc]
+            try:
+                staggerloc = list(staggerloc)
+            except TypeError:
+                staggerloc = [staggerloc]
 
-        for stagger in staggerlocs:
+        for stagger in staggerloc:
             if self.coords[stagger][0] is not None:
                 warnings.warn("This coordinate has already been added.")
             else:
@@ -636,8 +665,8 @@ class Grid(object):
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
 
-        if len(staggerlocs) == 1 and coord_dim is not None:
-            return self.coords[staggerlocs[0]][coord_dim]
+        if len(staggerloc) == 1 and coord_dim is not None:
+            return self.coords[staggerloc[0]][coord_dim]
 
     def add_item(self, item, staggerloc=None, from_file=False):
         """
@@ -664,23 +693,20 @@ class Grid(object):
                     StaggerLoc.CENTER_VFACE\n
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
+            from_file: boolean for internal use to determine whether Grid has already been created from file. \n
         Returns: \n
-            None \n
+            A numpy array of the mask or area values if a single staggerloc is given, otherwise return None. \n
         """
-
-        # handle the default case
-        staggerlocs = 0
         if staggerloc is None:
-            staggerlocs = [StaggerLoc.CENTER]
-        elif type(staggerloc) is list:
-            staggerlocs = staggerloc
-        elif type(staggerloc) is tuple:
-            staggerlocs = list(staggerloc)
+            staggerloc = [StaggerLoc.CENTER]
         else:
-            staggerlocs = [staggerloc]
+            try:
+                staggerloc = list(staggerloc)
+            except TypeError:
+                staggerloc = [staggerloc]
 
         done = True
-        for stagger in staggerlocs:
+        for stagger in staggerloc:
             # check to see if they are done
             if item == GridItem.MASK:
                 if self.mask[stagger] is not None:
@@ -701,11 +727,11 @@ class Grid(object):
                 # and now for Python..
                 self._allocate_items_(item, stagger, from_file=from_file)
 
-        if len(staggerlocs) is 1:
+        if len(staggerloc) is 1:
             if item == GridItem.MASK:
-                return self.mask[staggerlocs[0]]
+                return self.mask[staggerloc[0]]
             elif item == GridItem.AREA:
-                return self.area[staggerlocs[0]]
+                return self.area[staggerloc[0]]
             else:
                 raise GridItemNotSupported
 
@@ -734,7 +760,7 @@ class Grid(object):
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
         Returns: \n
-            None \n
+            A numpy array of coordinate values at the specified staggerloc. \n
         """
 
         ret = None
@@ -782,7 +808,7 @@ class Grid(object):
                     StaggerLoc.EDGE1_VFACE\n
                     StaggerLoc.EDGE2_VFACE\n
         Returns: \n
-            None \n
+            A numpy array of mask or area values at the specified staggerloc. \n
         """
 
         ret = None
@@ -894,16 +920,13 @@ class Grid(object):
         self.verify_grid_bounds(stagger)
 
         # allocate space for the coordinates on the Python side
-        self._coords[stagger][0] = np.zeros(\
-                                           shape = (self.size[stagger]),
-                                           dtype = constants._ESMF2PythonType[self.type])
-        self._coords[stagger][1] = np.zeros(\
-                                           shape = (self.size[stagger]),
-                                           dtype = constants._ESMF2PythonType[self.type])
+        self._coords[stagger][0] = np.zeros(shape = (self.size[stagger]),
+                                            dtype = constants._ESMF2PythonType[self.type])
+        self._coords[stagger][1] = np.zeros(shape = (self.size[stagger]),
+                                            dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
-            self._coords[stagger][2] = np.zeros(\
-                                        shape = (self.size[stagger]),
-                                        dtype = constants._ESMF2PythonType[self.type])
+            self._coords[stagger][2] = np.zeros(shape = (self.size[stagger]),
+                                                dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         [x, y, z] = [0, 1, 2]

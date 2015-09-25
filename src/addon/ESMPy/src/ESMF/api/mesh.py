@@ -197,10 +197,16 @@ class Mesh(object):
 
     @property
     def size(self):
+        """
+        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
+        """
         return self._size
 
     @property
     def size_local(self):
+        """
+        :return: a 2 element list containing the number of owned nodes and element in the Mesh on the current processor
+        """
         return self._size_local
 
     @property
@@ -213,6 +219,9 @@ class Mesh(object):
 
     @property
     def rank(self):
+        """
+        :return: the rank of the Mesh
+        """
         return self._rank
 
     @property
@@ -261,6 +270,9 @@ class Mesh(object):
 
     @property
     def coords(self):
+        """
+        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and element of the Mesh
+        """
         return self._coords
 
     @property
@@ -309,15 +321,13 @@ class Mesh(object):
         Return a string containing a printable representation of the object
         """
         string = ("Mesh:\n"
-                  "    parametric_dim = %r\n"
-                  "    spatial_dim = %r\n"
+                  "    rank = %r\n"
                   "    size = %r\n"
                   "    size_local = %r\n" 
                   "    coords = %r\n"
                   %
                   (
-                   self.parametric_dim,
-                   self.spatial_dim,
+                   self.rank,
                    self.size,
                    self.size_local,
                    self.coords))
@@ -557,7 +567,7 @@ class Mesh(object):
                     node=0 (default) \n
                     element=1 (not implemented) \n
         Returns: \n
-            None \n
+            A numpy array of coordinate values at the specified meshloc. \n
         """
 
         ret = None
@@ -586,15 +596,6 @@ class Mesh(object):
         ESMP_MeshWrite(self, filename)
 
     def _link_coords_(self):
-        """
-        Link Python Mesh to ESMC Mesh coordinates.
-        Required Arguments: \n
-           None \n
-        Optional Arguments: \n
-             None \n
-        Returns: \n
-            None \n
-        """
         elemcoords = True
 
         # get the pointer to the underlying ESMF data array for coordinates

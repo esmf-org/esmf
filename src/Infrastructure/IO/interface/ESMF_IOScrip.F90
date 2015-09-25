@@ -59,6 +59,8 @@
   public ESMF_EsmfGetElement
   public ESMF_OutputScripVarFile
   public ESMF_EsmfInq
+  public ESMF_EsmfInqUnits
+  public ESMF_EsmfGetCoords
 
 !==============================================================================
 
@@ -2953,7 +2955,6 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
           endif
        endif
 
-       
     !endif
     
     ! get nodeMask
@@ -3316,6 +3317,95 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
 #endif
 end subroutine ESMF_EsmfGetVerts
 
+
+!
+!  Get either the NodeCoords or centerCoords from the ESMF unstructured file on all the PETs.
+!  It is used in ESMF_LocStreamCreate().  If faceflag is .TRUE., get centerCoords.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "EsmfGetCoords"
+subroutine ESMF_EsmfGetCoords(filename, coordBuffer, maskBuffer, start, count, &
+	        faceflag, rc)
+     character(len=*), intent(in) :: filename
+     real(ESMF_KIND_R8), intent(out) :: coordBuffer(:,:)
+     integer(ESMF_KIND_I4), intent(out) :: maskBuffer(:)
+     integer,          intent(in) :: start
+     integer,          intent(in) :: count
+     logical, intent(in), optional :: faceflag
+     integer, intent(out)          :: rc
+ 
+    integer, parameter :: nf90_noerror = 0
+    logical            :: localfaceflag
+    integer            :: ncStatus
+    integer            :: ncid, varid
+    integer            :: coorddim
+    character(len=256) :: coordVar, maskVar, errmsg
+
+    if (present(faceflag)) then
+        localfaceflag = faceflag
+    else
+        localfaceflag = .FALSE.
+    endif
+#ifdef ESMF_NETCDF
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+
+    if (localfaceflag) then
+       coordVar = "centerCoords"
+       maskVar = "elementMask"
+    else
+      coordVar = "nodeCoords"
+       maskVar = "nodeMask"
+    endif 
+    coorddim = size(coordBuffer,1)
+    ncStatus = nf90_inq_varid(ncid, coordVar, varid)
+    if (ncStatus /= nf90_noerror) then
+       errmsg = "- error reading "// trim(coordVar)//" from "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD,  &
+            ESMF_SRCLINE, errmsg, &
+            rc)) return
+    else
+       ncStatus = nf90_get_var(ncid, varid, coordBuffer, start=(/1,start/), &
+	     count=(/coorddim,count/))
+       errmsg = "- error reading "// trim(coordVar)//" from "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD,  &
+            ESMF_SRCLINE, errmsg, &
+            rc)) return
+    endif
+
+    ncStatus = nf90_inq_varid(ncid, maskVar, varid)
+    if (ncStatus /= nf90_noerror) then
+         ! no mask defined, set it to 1
+       maskBuffer(:) = 1
+    else
+       ncStatus = nf90_get_var(ncid, varid, maskBuffer, start=(/start/), &
+	     count=(/count/))
+       errmsg = "- error reading "//trim(maskVar)//" from "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD,  &
+            ESMF_SRCLINE, errmsg, &
+            rc)) return
+    endif
+
+    ncStatus = nf90_close (ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end subroutine ESMF_EsmfGetCoords    
 !-----------------------------------------------------------------------
 
 !

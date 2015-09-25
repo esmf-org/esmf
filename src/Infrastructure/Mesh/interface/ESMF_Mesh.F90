@@ -2022,39 +2022,51 @@ end function ESMF_MeshCreateFromFile
          if (haveElmtMask .and. localAddUserArea) then 
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          elseif (haveElmtMask) then
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
-	 			 centerCoords=faceCoords, rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          elseif (localAddUserArea) then
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          else
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
-                                 centerCoords=faceCoords, rc=localrc)
-        endif
-        if (associated(faceCoords)) then
+                                 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
+         endif
+         if (associated(faceCoords)) then
           hasFaceCoords = .true.
-        endif
-      else 
+         endif
+       else 
          if (haveElmtMask .and. localAddUserArea) then 
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          elseif (haveElmtMask) then
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
-	 			 rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          elseif (localAddUserArea) then
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-	 			 rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          else
               call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
-                                 rc=localrc)
+	 			 centerCoords=faceCoords, &
+				 convertToDeg=convertToDeg, rc=localrc)
          endif
+         ! cannot add center coordinates if maxedges > 4
+         ! if (associated(faceCoords)) then
+         ! hasFaceCoords = .true.
+         ! endif
       endif
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return

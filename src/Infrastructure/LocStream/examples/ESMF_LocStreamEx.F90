@@ -293,7 +293,7 @@ program ESMF_LocStreamEx
 
 
 !BOE
-!\subsubsection{Create a LocStream from a background Grid}
+!\subsubsection{Create a LocStream with distribution based on a background Grid}
 !
 ! The following is an example of creating a LocStream object from another LocStream object 
 ! using a background Grid. The new LocStream contains the data present in the old LocStream, 

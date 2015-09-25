@@ -915,7 +915,7 @@ module ESMF_ComplianceICMod
 
       ! set NUOPC convention and purpose specifiers
       convention = "NUOPC"
-      purpose = "General"
+      purpose = "Instance"
       
       call ESMF_LogWrite(trim(prefix)//" State level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1228,7 +1228,7 @@ module ESMF_ComplianceICMod
     
       ! set NUOPC convention and purpose specifiers
       convention = "NUOPC"
-      purpose = "General"
+      purpose = "Instance"
     
       call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1470,7 +1470,7 @@ module ESMF_ComplianceICMod
 
       ! set NUOPC convention and purpose specifiers
       convention = "NUOPC"
-      purpose = "General"
+      purpose = "Instance"
     
       call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1691,7 +1691,7 @@ module ESMF_ComplianceICMod
     
     ! set NUOPC convention and purpose specifiers
     convention = "NUOPC"
-    purpose = "General"
+    purpose = "Instance"
     
     call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
       "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &

@@ -568,11 +568,15 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
     }
   }
 
+
   int plist_rend_size=srcplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
+
+  // Create source rendezvous point list (create outside of if, so will work even if 0-sized)
+  srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
   if (plist_rend_size > 0) {
 
-    srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+    // srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
     int orig_srcpointlist_size = srcplist->get_curr_num_pts();
     for (int i=0; i<orig_srcpointlist_size; i++) {
@@ -802,9 +806,12 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 
   int plist_rend_size=dstplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
 
+  // Create destination rendezvous point list (create outside of if, so will work even if 0-sized)
+  dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+
   if (plist_rend_size >= 0) {
 
-    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+    //    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
     int orig_dstpointlist_size = dstplist->get_curr_num_pts();
     for (int i=0; i<orig_dstpointlist_size; i++) {
