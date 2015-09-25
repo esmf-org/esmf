@@ -468,8 +468,8 @@ contains
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName. Once a key has been added, a pointer 
+! to its internally allocated memory can be retrieved and used to set key values. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -563,8 +563,9 @@ contains
     integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required ESMF_Array.  The 
+! user is responsible for the creation of the ESMF_Array to enable the setting of 
+! the key values.
 !
 ! The arguments are:
 ! \begin{description}
@@ -716,8 +717,9 @@ contains
 !    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Add a key to a locstream. Once a key has been added its internal data
-!    can be retrieved and used to set key values. 
+!    Add a key to a locstream with a required keyName and a required Fortran array.  The 
+!    user is responsible for the creation of the Fortran array to enable the setting of 
+!    the key values, including the maintenance of any allocated memory.
 !
 !    Supported values for <farray> are:
 !    \begin{description}
@@ -774,8 +776,9 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+!  Add a key to a locstream with a required keyName and a required Fortran array.  The 
+!  user is responsible for the creation of the Fortran array to enable the setting of 
+!  the key values, including the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -864,8 +867,9 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required Fortran array.  The 
+! user is responsible for the creation of the Fortran array to enable the setting of 
+! the key values, including the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -954,8 +958,9 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required Fortran array.  The 
+! user is responsible for the creation of the Fortran array to enable the setting of 
+! the key values, including the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1834,7 +1839,6 @@ contains
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
 !     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
 !     how the LocStream is distributed. 
-!     at a later time. 
 !
 !     The arguments are:
 !     \begin{description}
