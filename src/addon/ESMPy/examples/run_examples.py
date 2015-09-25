@@ -17,7 +17,7 @@ datafilelist = ["ll1deg_grid.nc", "ll2.5deg_grid.nc", "mpas_uniform_10242_dual_c
                 "GRIDSPEC_ACCESS1.nc", "tx0.1v2_070911.nc", "T42_grid.nc", "so_Omon_GISS-E2.nc"]
 
 # download the test files
-if (ESMF.local_pet() == 0):
+if not parallel:
 
     # Create data subdirectory if it doesn't exist.
     datadir = "examples/data"
