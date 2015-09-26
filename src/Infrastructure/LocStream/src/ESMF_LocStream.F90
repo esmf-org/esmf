@@ -468,8 +468,9 @@ contains
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream with a required keyName. Once a key has been added, a pointer 
-! to its internally allocated memory can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName. Once a key has 
+! been added, a pointer to its internally allocated memory can be 
+! retrieved and used to set key values. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -563,9 +564,9 @@ contains
     integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream with a required keyName and a required ESMF_Array.  The 
-! user is responsible for the creation of the ESMF_Array to enable the setting of 
-! the key values.
+! Add a key to a locstream with a required keyName and a required 
+! ESMF_Array.  The user is responsible for the creation of the 
+! ESMF_Array to enable the setting of the key values.
 !
 ! The arguments are:
 ! \begin{description}
@@ -717,9 +718,10 @@ contains
 !    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Add a key to a locstream with a required keyName and a required Fortran array.  The 
-!    user is responsible for the creation of the Fortran array to enable the setting of 
-!    the key values, including the maintenance of any allocated memory.
+!    Add a key to a locstream with a required keyName and a required 
+!    Fortran array.  The user is responsible for the creation of the 
+!    Fortran array to enable the setting of the key values, including 
+!    the maintenance of any allocated memory.
 !
 !    Supported values for <farray> are:
 !    \begin{description}
@@ -776,9 +778,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Add a key to a locstream with a required keyName and a required Fortran array.  The 
-!  user is responsible for the creation of the Fortran array to enable the setting of 
-!  the key values, including the maintenance of any allocated memory.
+!  Add a key to a locstream with a required keyName and a required 
+!  Fortran array.  The user is responsible for the creation of the 
+!  Fortran array to enable the setting of the key values, including 
+!  the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -867,9 +870,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream with a required keyName and a required Fortran array.  The 
-! user is responsible for the creation of the Fortran array to enable the setting of 
-! the key values, including the maintenance of any allocated memory.
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array to enable the setting of the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -958,9 +962,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream with a required keyName and a required Fortran array.  The 
-! user is responsible for the creation of the Fortran array to enable the setting of 
-! the key values, including the maintenance of any allocated memory.
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array to enable the setting of the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
