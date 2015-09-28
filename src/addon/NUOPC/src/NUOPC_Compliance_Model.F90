@@ -1275,7 +1275,7 @@ contains
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
-        purpose = "General"
+        purpose = "Instance"
 
         !    call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
         !      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &

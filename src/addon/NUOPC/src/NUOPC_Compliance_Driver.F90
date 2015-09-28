@@ -379,6 +379,15 @@ contains
             !    file=FILENAME)) &
             !    return  ! bail out
 
+            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+                attributeName="InternalInitializePhaseMap", &
+                convention="NUOPC", purpose="Instance", &
+                warnIfMissing=.false., rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
             ! check Component statistics
             call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -442,6 +451,16 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
+            call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+                attributeName="InternalInitializePhaseMap", &
+                convention="NUOPC", purpose="Instance", &
+                warnIfMissing=.false., rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+
             ! check Component statistics
             call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -455,23 +474,27 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            ! turning these on in driver for now
-
-            ! compliance check importState
-            call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+            ! drivers are allowed to have invalid import/export states, if they are not
+            ! participating in the exchange of fields
+            if (ESMF_StateIsCreated(importState)) then
+                ! compliance check importState
+                call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
+                    rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+            endif
     
-            ! compliance check exportState
-            call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+            if (ESMF_StateIsCreated(exportState)) then
+                ! compliance check exportState
+                call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
+                    rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, &
+                    file=FILENAME)) &
+                    return  ! bail out
+            endif
 
             ! compliance check clock usage
             !call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
@@ -1076,7 +1099,7 @@ contains
 
         ! set NUOPC convention and purpose specifiers
         convention = "NUOPC"
-        purpose = "General"
+        purpose = "Instance"
 
         call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
           "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &

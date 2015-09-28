@@ -39,7 +39,7 @@ module NUOPC_Compliance_Connector
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
     character(*), parameter :: &
-        event_CplListEstablished = "IPDv00p1|IPDv01p1|IPDv02p1|IPDv03p1|IPDv04p1a|IPDv05p2a"
+        event_CplListEstablished = "IPDv00p1|IPDv01p1|IPDv02p1|IPDv03p1|IPDv04p1b|IPDv05p2b"
 
 
     public setvmIC, registerIC
@@ -935,7 +935,7 @@ contains
         integer, intent(out)               :: rc
 
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-            attributeName="CplList", convention="NUOPC", purpose="General", &
+            attributeName="CplList", convention="NUOPC", purpose="Instance", &
             rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &

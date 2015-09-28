@@ -110,14 +110,14 @@ contains
             return  ! bail out
 
         ! Applies only to NUOPC Drivers
-        attributeName = "InternalInitializePhaseMap"
-        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+        !attributeName = "InternalInitializePhaseMap"
+        !call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+        !    attributeName=attributeName, convention=convention, purpose=purpose, &
+        !    rc=rc)
+        !if (ESMF_LogFoundError(rc, &
+        !    line=__LINE__, &
+        !    file=FILENAME)) &
+        !    return  ! bail out
 
         attributeName = "RunPhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
@@ -507,7 +507,7 @@ contains
 
         stateValid = .true.
         ! Ensure that the State is a valid object
-        if (ESMF_StateGetInit(state) /= ESMF_INIT_CREATED) then
+        if (.not. ESMF_StateIsCreated(state)) then
             call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
                 " is invalid!", &
                 ESMF_LOGMSG_WARNING, rc=rc)
@@ -715,12 +715,13 @@ contains
     end subroutine
 
     recursive subroutine NUOPC_CheckGridComponentAttribute(prefix, comp, attributeName, &
-        convention, purpose, rc)
+        convention, purpose, warnIfMissing, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_GridComp)                   :: comp
         character(*), intent(in)              :: attributeName
         character(*), intent(in)              :: convention
         character(*), intent(in)              :: purpose
+        logical,      intent(in), optional    :: warnIfMissing
         integer,      intent(out), optional   :: rc
 
         type(ESMF_AttPack)                    :: attpack
@@ -730,6 +731,13 @@ contains
         character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+        logical                               :: warn
+
+        if (present(warnIfMissing)) then
+            warn = warnIfMissing
+        else
+            warn = .true.
+        endif
 
         call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
             convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
@@ -755,7 +763,9 @@ contains
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-        if (.not.isPresent) then
+        if (.not.warn .and. (.not.isPresent .or. itemCount==0)) then
+            return
+        else if (.not.isPresent) then
             ! attribute not present
             call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
