@@ -565,8 +565,8 @@ contains
 !
 ! !DESCRIPTION:
 ! Add a key to a locstream with a required keyName and a required 
-! ESMF_Array.  The user is responsible for the creation of the 
-! ESMF_Array to enable the setting of the key values.
+! {\tt ESMF\_Array}.  The user is responsible for the creation of the 
+! {\tt ESMF\_Array} to enable the setting of the key values.
 !
 ! The arguments are:
 ! \begin{description}
