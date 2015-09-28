@@ -1096,6 +1096,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_CoordSysEqual
+  module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
 end interface
 
@@ -1114,6 +1115,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_CoordSysNotEqual
+  module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
 end interface
 
@@ -1816,6 +1818,77 @@ end function
                                  NormType2%normtype)
 
       end function ESMF_NormTypeNotEqual
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LineTypeEqual"
+!BOPI
+! !IROUTINE: ESMF_LineTypeEqual - Equality of Coordinate Systems
+!
+! !INTERFACE:
+      function ESMF_LineTypeEqual(LineType1, LineType2)
+
+! !RETURN VALUE:
+      logical :: ESMF_LineTypeEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_LineType_Flag), intent(in) :: &
+         LineType1,      &! Two igrid statuses to compare for
+         LineType2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF LineType statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[LineType1, LineType2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_LineTypeEqual = (LineType1%linetype == &
+                              LineType2%linetype)
+
+      end function ESMF_LineTypeEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LineTypeNotEqual"
+!BOPI
+! !IROUTINE: ESMF_LineTypeNotEqual - Non-equality of LineType statuses
+!
+! !INTERFACE:
+      function ESMF_LineTypeNotEqual(LineType1, LineType2)
+
+! !RETURN VALUE:
+      logical :: ESMF_LineTypeNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_LineType_Flag), intent(in) :: &
+         LineType1,      &! Two LineType Statuses to compare for
+         LineType2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF LineType statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[LineType1, LineType2]
+!          Two statuses of LineTypes to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_LineTypeNotEqual = (LineType1%linetype /= &
+                                 LineType2%linetype)
+
+      end function ESMF_LineTypeNotEqual
+
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

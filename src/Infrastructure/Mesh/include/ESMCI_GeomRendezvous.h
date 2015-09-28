@@ -46,7 +46,7 @@ public:
 
   GeomRend(Mesh *srcmesh, PointList *_srcplist, 
 	   Mesh *dstmesh, PointList *_dstplist,
-	   const DstConfig &config, bool freeze_src_=false);
+	   const DstConfig &config, bool freeze_src_=false, bool on_sph=false);
   ~GeomRend();
 
   /*

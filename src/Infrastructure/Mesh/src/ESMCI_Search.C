@@ -801,10 +801,6 @@ BBox bbox_from_pl(PointList &dst_pl) {
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
 
-    // Set spherical map type                                                                      
-    bool old_is_map_sph=is_map_sph;
-    is_map_sph=src.is_sph;
-        
     // Set global map_type
     // TODO: pass this directly to is_in_cell mapping function
     MAP_TYPE old_sph_map_type=sph_map_type;
@@ -815,9 +811,6 @@ BBox bbox_from_pl(PointList &dst_pl) {
     
     // Reset global map_type
     sph_map_type=old_sph_map_type;
-
-    // Reset                                                                                       
-    is_map_sph=old_is_map_sph;
 
     // process output from search
     if (!si.investigated) {

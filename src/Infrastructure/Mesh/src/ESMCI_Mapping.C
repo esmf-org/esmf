@@ -32,8 +32,6 @@ namespace ESMCI {
   // eventually could be broadened to specify other types
   MAP_TYPE sph_map_type=MAP_TYPE_CART_APPROX;
 
-  bool is_map_sph=false;
-
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::classInstance = NULL;
 
