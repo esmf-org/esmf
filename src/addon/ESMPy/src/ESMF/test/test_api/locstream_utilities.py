@@ -111,13 +111,13 @@ def create_locstream_spherical_16_parallel(coord_sys=ESMF.CoordSys.SPH_DEG, doma
         locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
         locstream["ESMF:Lat"] = [deg_rad/-2.0, deg_rad/-2.0, -0.25*deg_rad, -0.25*deg_rad]
         if domask:
-            locstream["ESMF:Mask"] = np.array([1, 0, 0, 1], dtype=np.int32)
+            locstream["ESMF:Mask"] = np.array([1, 0, 1, 1], dtype=np.int32)
     elif ESMF.local_pet() is 1:
         locstream = ESMF.LocStream(4, coord_sys=coord_sys)
         locstream["ESMF:Lon"] = [1.5*deg_rad, 2*deg_rad, 1.5*deg_rad, 2*deg_rad]
         locstream["ESMF:Lat"] = [deg_rad/-2.0, deg_rad/-2.0, -0.25*deg_rad, -0.25*deg_rad]
         if domask:
-            locstream["ESMF:Mask"] = np.array([1, 1, 1, 1], dtype=np.int32)
+            locstream["ESMF:Mask"] = np.array([0, 1, 1, 1], dtype=np.int32)
     elif ESMF.local_pet() is 2:
         locstream = ESMF.LocStream(4, coord_sys=coord_sys)
         locstream["ESMF:Lon"] = [0.0, 0.5*deg_rad, 0.0, 0.5*deg_rad]
