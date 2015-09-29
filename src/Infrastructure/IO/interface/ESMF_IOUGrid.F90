@@ -114,7 +114,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
       errmsg = "Dummy Variable "//trim(meshname)//" does not exist in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
-        ESMF_SRCLINE, trim(meshname), &
+        ESMF_SRCLINE, errmsg, &
         rc)) return
     else 
        ! find the mesh name using attribute "cf_role"
@@ -122,7 +122,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
        errmsg = "inquiry error with "//trim(filename)
        if (CDFCheckError (ncStatus, &
            ESMF_METHOD,  &
-           ESMF_SRCLINE, trim(meshname), &
+           ESMF_SRCLINE, errmsg, &
            rc)) return
        do i=1,nvars
 	  ncStatus=nf90_get_att(ncid, i, 'cf_role', attvalue)
@@ -1292,7 +1292,6 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     nodeCoordNames(2) = nodeCoordString(pos1+1:pos1+pos2-1)
     nodeCoordNames(3)=nodeCoordString(pos1+pos2+1:len)
 
-    ! print *, pos1, pos2, trim(nodeCoordNames(1)), ' ', trim(nodeCoordNames(2)), ' ', trim(nodeCoordNames(3))
     ! Get face coordinates if faceCoords argument is given
     if (present(faceCoords)) then
        ncStatus = nf90_inquire_attribute(ncid, meshId, "face_coordinates", len=len)
@@ -1611,7 +1610,6 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
       return
     endif
 
-    !print *, PetNo, 'Before nf90_get_att()'
     ! Get mesh dimension
     ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
     if (ncStatus /= nf90_noerror) then    

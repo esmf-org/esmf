@@ -48,11 +48,9 @@ mask[...] = 0
 mask[numpy.where(numpy.sqrt(dx*dx+dy*dy) < 10.0)] = 2
 
 # Create a field on the centers of the source grid with the mask applied.
-srcfield = ESMF.Field(srcgrid, name="srcfield", staggerloc=ESMF.StaggerLoc.CENTER,
-                      mask_values=mask)
+srcfield = ESMF.Field(srcgrid, name="srcfield", staggerloc=ESMF.StaggerLoc.CENTER)
 
 srcfield.data[...] = 0
-srcfield.data[numpy.where(srcfield.mask)] = -1000
 
 # Create a destination grid from a SCRIP formatted file.
 dstgrid = ESMF.Grid(filename=gridfile,

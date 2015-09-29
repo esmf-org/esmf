@@ -137,7 +137,7 @@ class TestRegrid(TestBase):
         srcfield = Field(mesh, meshloc=MeshLoc.ELEMENT)
 
         # initialize the source field
-        for i in range(srcfield.shape[0]):
+        for i in range(srcfield.data.shape[0]):
             srcfield.data[i] = 20.0
 
         # create grid
@@ -146,7 +146,7 @@ class TestRegrid(TestBase):
         [x, y] = [0, 1]
 
         # create a Field on the Grid
-        dstfield = Field(grid, mask_values=[0])
+        dstfield = Field(grid)
 
         # initialize the destination field according to the mask
         dstfield.data[:, :] = -100
@@ -157,9 +157,9 @@ class TestRegrid(TestBase):
         dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
         # validate that the masked values were not zeroed out
-        for i in range(dstfield.mask.shape[x]):
-            for j in range(dstfield.mask.shape[y]):
-                if dstfield.mask[i, j] == True:
+        for i in range(dstfield.data.shape[x]):
+            for j in range(dstfield.data.shape[y]):
+                if dstfield.grid.mask[i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
     def test_field_regrid_area(self):
@@ -192,13 +192,13 @@ class TestRegrid(TestBase):
         srcarea = Field(grid, name="SOURCE AREAS!")
         srcarea.get_area()
 
-        for i in range(srcarea.shape[x]):
-            for j in range(srcarea.shape[y]):
+        for i in range(srcarea.data.shape[x]):
+            for j in range(srcarea.data.shape[y]):
                 if (srcarea.data[i, j] != 5):
                     print "Cell area is {0}, but expected 5".format(srcarea[i, j])
 
         # subtract two because the last two cells of mesh are triangles with half area
-        for i in range(dstarea.shape[0]):
+        for i in range(dstarea.data.shape[0]):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
@@ -214,7 +214,7 @@ class TestRegrid(TestBase):
         dstgrid = grid_create_periodic(55, 28, corners=True)
 
         # create the Fields
-        srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
         exactfield = ESMF.Field(dstgrid, name='exactfield')
 
@@ -301,7 +301,7 @@ class TestRegrid(TestBase):
         dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
-        srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
@@ -347,7 +347,7 @@ class TestRegrid(TestBase):
         dstgrid = grid_create([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
 
         # create Field objects on the Meshes
-        srcfield = ESMF.Field(srcgrid, name='srcfield', mask_values=[0])
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
         srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
         dstfield = ESMF.Field(dstgrid, name='dstfield')
         dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
@@ -502,8 +502,8 @@ class TestRegrid(TestBase):
 
         # create Field objects
         srcfield = ESMF.Field(mesh, name='srcfield')
-        dstfield = ESMF.Field(grid, name='dstfield', mask_values=[0])
-        exactfield = ESMF.Field(grid, name='exactfield', mask_values=[0])
+        dstfield = ESMF.Field(grid, name='dstfield')
+        exactfield = ESMF.Field(grid, name='exactfield')
 
         # initialize the Fields to an analytic function
         srcfield = initialize_field_mesh(srcfield, nodeCoord, nodeOwner, elemType, elemConn)

@@ -25,15 +25,15 @@ grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.GRIDSPEC,
                                 add_corner_stagger=True, add_mask=True, varname="so")
 
 # create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(grid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER, mask_values=[0])
+srcfield = ESMF.Field(grid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
 # create a tripole grid
 tripole = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP,
                     add_corner_stagger=True, add_mask=True, varname="grid_imask")
 
 # create fields on the center stagger locations of the tripole grid
-dstfield = ESMF.Field(tripole, name='dstfield', meshloc=ESMF.StaggerLoc.CENTER, mask_values=[0])
-xctfield = ESMF.Field(tripole, name='xctfield', meshloc=ESMF.StaggerLoc.CENTER, mask_values=[0])
+dstfield = ESMF.Field(tripole, name='dstfield', meshloc=ESMF.StaggerLoc.CENTER)
+xctfield = ESMF.Field(tripole, name='xctfield', meshloc=ESMF.StaggerLoc.CENTER)
 
 # create fields needed to analyze accuracy of conservative regridding
 srcfracfield = ESMF.Field(grid, name='srcfracfield')
@@ -84,11 +84,11 @@ if dstmass is not 0:
 
 # compute the mean relative interpolation and conservation error
 from operator import mul
-num_nodes = reduce(mul, xctfield.shape)
+num_nodes = reduce(mul, xctfield.data.shape)
 relerr = 0
 meanrelerr = 0
 if num_nodes is not 0:
-    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0) & (dstfracfield.data > .999))
+    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0) & (dstfracfield.data > .999))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data[ind]/dstfracfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
     meanrelerr = relerr / num_nodes
 

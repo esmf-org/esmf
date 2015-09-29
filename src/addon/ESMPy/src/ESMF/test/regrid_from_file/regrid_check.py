@@ -85,25 +85,19 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
     lats = np.radians(lats)
     return lons,lats
         
-def create_field(grid, name, regrid_method=None, domask=False):
+def create_field(grid, name, regrid_method=None):
     '''
     PRECONDITIONS: A Mesh or Grid has been created, and 'name' is a string that
                    will be used to initialize the name of a new Field.
     POSTCONDITIONS: A Field has been created.
     '''
-    mask_values = None
-    if domask:
-        mask_values = [0]
-
     if isinstance(grid,ESMF.Mesh):
         if regrid_method == ESMF.RegridMethod.CONSERVE:
-            field = ESMF.Field(grid, name=name, meshloc=ESMF.MeshLoc.ELEMENT,
-                                mask_values=mask_values)
+            field = ESMF.Field(grid, name=name, meshloc=ESMF.MeshLoc.ELEMENT)
         else:
-            field = ESMF.Field(grid, name=name, meshloc=ESMF.MeshLoc.NODE,
-                                mask_values=mask_values)
+            field = ESMF.Field(grid, name=name, meshloc=ESMF.MeshLoc.NODE)
     else:
-        field = ESMF.Field(grid, name=name, mask_values=mask_values)
+        field = ESMF.Field(grid, name=name)
 
     return field
 
@@ -154,7 +148,8 @@ def run_regridding(srcfield, dstfield, src_mask, dst_mask,
 
 def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
                    parallel=False, dstfracfield=None, mass1=None, mass2=None, 
-                   regrid_method=ESMF.RegridMethod.CONSERVE, uninitval=422397696.):
+                   regrid_method=ESMF.RegridMethod.CONSERVE, uninitval=422397696.,
+                   mask_values=[0]):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'srcfield' and 'dstfield'.
@@ -164,11 +159,11 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
 
     correct = False
     # verify that the fields are the same size
-    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+    assert field1.data.shape == field2.data.shape, 'compare_fields: Fields must be the same size!'
     
     # deal with default values for fracfield
     if dstfracfield is None:
-        dstfracfield = ma.ones(field1.shape)
+        dstfracfield = ma.ones(field1.data.shape)
 
     # compute pointwise error measures
     totalErr = 0.0
@@ -179,8 +174,12 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
     # allow fields of all dimensions
     field1_flat = np.ravel(field1.data)
     field2_flat = np.ravel(field2.data)
-    field2mask_flat = np.ravel(field2.mask)
     dstfracfield_flat = np.ravel(dstfracfield.data)
+    # setup mask, no Mask on a Mesh (yet) so need to look at the type first
+    field2mask_flat = np.ravel(np.zeros_like(field2.data))
+    if type(field2.grid) is ESMF.Grid:
+        if (field2.grid.mask is not None):
+            field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask.flatten().tolist()]
 
     for i in range(field2_flat.size):     
         if ((not field2mask_flat[i]) and 
@@ -368,12 +367,9 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
                                                       regrid_method)
     
     # create Field objects on the Grids
-    srcfield = create_field(srcgrid, 'srcfield', 
-                            regrid_method=regrid_method, domask=src_mask)
-    dstfield = create_field(dstgrid, 'dstfield', 
-                            regrid_method=regrid_method, domask=dst_mask)
-    dstfield2 = create_field(dstgrid, 'dstfield_exact', 
-                            regrid_method=regrid_method, domask=dst_mask)
+    srcfield = create_field(srcgrid, 'srcfield', regrid_method=regrid_method)
+    dstfield = create_field(dstgrid, 'dstfield', regrid_method=regrid_method)
+    dstfield2 = create_field(dstgrid, 'dstfield_exact', regrid_method=regrid_method)
 
     #create the frac fields
     srcfracfield = create_field(srcgrid, 'src_frac_field', 
