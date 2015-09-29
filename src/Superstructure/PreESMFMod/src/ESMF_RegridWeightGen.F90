@@ -252,7 +252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This flag is only used for the GRIDSPEC file format.  The default is .FALSE.
 !   \item [{[srcCoordinateVars]}]
 !     If {\tt useSrcCoordFlag} is .TRUE., this argument defines the longitude and
-!     latitude variables in the source grid file to be used for the regrid.
+ !     latitude variables in the source grid file to be used for the regrid.
 !     This argument is only used when the grid file is in GRIDSPEC format.
 !     {\tt srcCoordinateVars} should be a array of 2 elements.
 !   \item [{[useDstCoordFlag]}]
@@ -266,7 +266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt dstCoordinateVars} should be a array of 2 elements.
 !   \item [{[useSrcCornerFlag]}]
 !     If {\tt useSrcCornerFlag} is .TRUE., the corner coordinates of the source file
-!     will be used for regridding. Otherwise, the center coordinates will be used.
+!     will be used for regridding. Otherwise, the center coordinates will be us ed.
 !     The default is .FALSE.
 !   \item [{[useDstCornerFlag]}]
 !     If {\tt useDstCornerFlag} is .TRUE., the corner coordinates of the destination file
@@ -283,7 +283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If .TRUE., the output weight file is in NetCDF4 file format. 
 !     The default is .FALSE.
 !   \item [{[verboseFlag]}]
-!     If .TRUE., it will print summary information about the regrid parameters,
+ !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -302,7 +302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: localVerboseFlag
     integer            :: localrc
     type(ESMF_VM)      :: vm
-    integer            :: PetNo, PetCnt
+     integer            :: PetNo, PetCnt
     type(ESMF_Mesh)    :: srcMesh, dstMesh
     type(ESMF_Grid)    :: srcGrid, dstGrid
     type(ESMF_Field)   :: srcField, dstField
@@ -342,6 +342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle) :: rhandle
     real(ESMF_KIND_R8), pointer :: fptr1D(:), fptr2D(:,:)
 #endif
+    type(ESMF_LineType_Flag) :: localLineType
     type(ESMF_NormType_Flag):: localNormType
     logical            :: localIgnoreDegenerate
     logical            :: srcUseLocStream, dstUseLocStream
@@ -390,7 +391,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     if (present(poleMethod)) then
-    	 localPoleMethod = poleMethod
+     	 localPoleMethod = poleMethod
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
        localPoleMethod = ESMF_POLEMETHOD_NONE
     else
@@ -418,7 +419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(srcFileType)) then
        localSrcFileType = srcFileType
-    endif
+     endif
 
     if (present(dstFileType)) then
        localDstFileType = dstFileType
@@ -429,6 +430,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        localNormType=normType
     else     
        localNormType=ESMF_NORMTYPE_DSTAREA
+    endif
+
+
+    ! Handle optional lineType argument
+    if (present(lineType)) then
+       localLineType=lineType
+    else     
+       if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+          localLineType=ESMF_LINETYPE_GREAT_CIRCLE
+       else 
+          localLineType=ESMF_LINETYPE_CART
+       endif
     endif
 
 
@@ -858,10 +871,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (localUserAreaFlag) then
 	 print *, "  Use user defined cell area for both the source and destination grids"
       endif
-      if (lineType .eq. ESMF_LINETYPE_CART) then
-	  print *, "  Line Type: cartesian"
-      elseif (lineType .eq. ESMF_LINETYPE_GREAT_CIRCLE) then
-	  print *, "  Line Type: greatcircle"
+      if (localLineType .eq. ESMF_LINETYPE_CART) then
+         print *, "  Line Type: cartesian"
+      elseif (localLineType .eq. ESMF_LINETYPE_GREAT_CIRCLE) then
+         print *, "  Line Type: greatcircle"
       endif
       if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
 	  print *, "  Norm Type: dstarea"
@@ -1267,7 +1280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=localLineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1282,7 +1295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=localLineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1297,7 +1310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1311,7 +1324,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1570,7 +1583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      routehandle=rhandle, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1584,7 +1597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      routehandle=rhandle, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1598,7 +1611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      routehandle=rhandle, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1611,7 +1624,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      routehandle=rhandle, &
         regridmethod = localRegridMethod, &
         polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1840,7 +1853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     type(ESMF_RegridMethod_Flag) :: localRegridMethod
     logical            :: localUserAreaFlag
-    logical            :: localLargefileFlag
+     logical            :: localLargefileFlag
     logical            :: localNetcdf4fileFlag
     logical            :: localVerboseFlag
     integer            :: localrc
@@ -1869,6 +1882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
     character(len=256) :: argStr
     !real(ESMF_KIND_R8) :: starttime, endtime
+    type(ESMF_LineType_Flag) :: localLineType
     type(ESMF_NormType_Flag):: localNormType
     logical            :: localIgnoreDegenerate
 
@@ -1896,7 +1910,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localIgnoreDegenerate = .false.
 
     if (present(regridMethod)) then
-      localRegridMethod = regridMethod
+        localRegridMethod = regridMethod
     endif
     
     if (present(unmappedaction)) then
@@ -1931,6 +1945,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else     
        localNormType=ESMF_NORMTYPE_DSTAREA
     endif
+
+    ! Handle optional lineType argument
+    if (present(lineType)) then
+       localLineType=lineType
+    else     
+       if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+          localLineType=ESMF_LINETYPE_GREAT_CIRCLE
+       else 
+          localLineType=ESMF_LINETYPE_CART
+       endif
+    endif
+
 
     ! user area only needed for conservative regridding
     if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
@@ -1970,6 +1996,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 	    if (localUserAreaFlag) then
 	       print *, "  Use user defined cell area for both the source and destination grids"
+      endif
+      if (localLineType .eq. ESMF_LINETYPE_CART) then
+         print *, "  Line Type: cartesian"
+      elseif (localLineType .eq. ESMF_LINETYPE_GREAT_CIRCLE) then
+         print *, "  Line Type: greatcircle"
       endif
       if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
 	      print *, "  Norm Type: dstarea"
@@ -2106,7 +2137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = ESMF_POLEMETHOD_NONE, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
     else
@@ -2118,7 +2149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcFracField=srcFracField, dstFracField=dstFracField, &
         regridmethod = localRegridMethod, &
         polemethod = ESMF_POLEMETHOD_NONE, &
-        lineType=lineType, &
+        lineType=locallineType, &
         normType=localNormType, &
 	      rc=localrc)
     endif
