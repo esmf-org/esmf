@@ -72,9 +72,13 @@ from operator import mul
 num_nodes = reduce(mul, xctfield.data.shape)
 relerr = 0
 meanrelerr = 0
+
+dstfield = numpy.ravel(dstfield.data)
+xctfield = numpy.ravel(xctfield.data)
+
 if num_nodes is not 0:
-    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
-    relerr = numpy.sum(numpy.abs(dstfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
+    ind = numpy.where((dstfield != 1e20) & (xctfield != 0))[0]
+    relerr = numpy.sum(numpy.abs(dstfield[ind] - xctfield[ind]) / numpy.abs(xctfield[ind]))
     meanrelerr = relerr / num_nodes
 
 # handle the parallel case
