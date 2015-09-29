@@ -64,12 +64,12 @@ program ESMF_LocStreamCreateUTest
   character, pointer :: buf(:)
   integer :: pntCount
   type(ESMF_Mesh) :: mesh
-  real(ESMF_KIND_R8), pointer :: X(:),Y(:)
+  real(ESMF_KIND_R8), allocatable :: X(:),Y(:)
   real(ESMF_KIND_R8), pointer :: tstX(:),tstY(:)
-  integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  integer, allocatable :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
   integer :: numNodes, numElems
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
   logical:: locstreamBool
 
 
@@ -2279,7 +2279,7 @@ contains
   real(ESMF_KIND_R8) :: de_minlon, de_maxlon
   real(ESMF_KIND_R8) :: de_minlat, de_maxlat
   integer :: pntCount
-  real(ESMF_KIND_R8), pointer :: Lon(:),Lat(:)
+  real(ESMF_KIND_R8), allocatable :: Lon(:),Lat(:)
   real(ESMF_KIND_R8), pointer :: tstLon(:),tstLat(:)
   type(ESMF_LocStream) :: locstream,  newlocstream
   real(ESMF_KIND_R8) :: tmpLonC, tmpLatC

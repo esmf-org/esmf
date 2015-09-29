@@ -20479,6 +20479,7 @@ return
     endif
   enddo
 
+  deallocate(temperature)
 
   ! Destroy the Fields
    call ESMF_FieldDestroy(srcField, rc=localrc)
@@ -20549,9 +20550,9 @@ return
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
 
-  integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
   integer :: numNodes, numElems
   integer :: numQuadElems,numTriElems, numTotElems
 
@@ -21104,7 +21105,7 @@ return
    deallocate(elemTypes)
    deallocate(elemConn)
 
-
+   deallocate(temperature)
 
 
 #if 0
@@ -22870,9 +22871,9 @@ return
 
   integer :: localPet, petCount
 
-  integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
   integer :: numNodes, numElems
   integer :: numQuadElems,numTriElems, numTotElems
 
@@ -23540,9 +23541,9 @@ return
   real(ESMF_KIND_R8) :: x,y
   integer :: decompX,decompY
 
-  integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
   integer :: numNodes, numElems
   integer :: numQuadElems,numTriElems, numTotElems
 
