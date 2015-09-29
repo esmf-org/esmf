@@ -33,14 +33,15 @@ program ESMF_RegridWeightGenApp
   character(ESMF_MAXPATHLEN) :: srcfile, dstfile, wgtfile
   character(ESMF_MAXPATHLEN) :: srcmeshname, dstmeshname
   character(ESMF_MAXPATHLEN) :: cwd
-  character(len=40)  :: method, flag
+  character(len=40)  :: method, flag, lineTypeStr
+  type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
   integer            :: poleptrs
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
   character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(19)
+  integer            :: commandbuf2(20)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -182,6 +183,28 @@ program ESMF_RegridWeightGenApp
         write(*,*)
         print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
         print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif    
+    endif
+
+   ! Get Line Type
+    call ESMF_UtilGetArgIndex('-l', argindex=ind, rc=rc)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--line_type', argindex=ind, rc=rc)
+    if (ind == -1) then
+      !  Use default lineType based on method
+      if (trim(method) .eq. 'conserve') then
+         lineTypeStr = 'greatcircle'
+      else
+         lineTypeStr = 'cartesian'
+      endif
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=lineTypeStr)
+      if ((trim(lineTypeStr) .ne. 'cartesian') .and. &
+          (trim(lineTypeStr) .ne. 'greatcircle')) then
+        write(*,*)
+        print *, 'ERROR: The line type "', trim(lineTypeStr), '" is not supported'
+        print *, '  The supported line types are "cartesian", and "greatcircle"'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif    
@@ -671,6 +694,8 @@ program ESMF_RegridWeightGenApp
       if (ignoreDegenerate) commandbuf2(17) = 1
       if (useSrcCorner) commandbuf2(18) = 1
       if (useDstCorner) commandbuf2(19) = 1
+      if (trim(lineTypeStr) .eq. 'cartesian') commandbuf2(20) = 1
+      if (trim(lineTypeStr) .eq. 'greatcircle') commandbuf2(20) = 2
     endif 
 
 
@@ -804,6 +829,8 @@ program ESMF_RegridWeightGenApp
     else
       useDstCorner=.false.
     endif
+
+
     call ESMF_VMBroadcast(vm, commandbuf1, len (commandbuf1)*size (commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len (commandbuf3)*size (commandbuf3), 0, rc=rc)
@@ -838,10 +865,20 @@ program ESMF_RegridWeightGenApp
   else
     unmappedaction = ESMF_UNMAPPEDACTION_ERROR
   endif
+
+
+  write(*,*) "lineType=",commandbuf2(20)
+  if (commandbuf2(20)==1) then
+     lineType=ESMF_LINETYPE_CART
+  else if (commandbuf2(20)==2) then
+     lineType=ESMF_LINETYPE_GREAT_CIRCLE
+  endif
+
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
                             srcFileType = srcFileType, dstFileType = dstFileType, &
 			    ignoreDegenerate = ignoreDegenerate, &
+                            lineType=lineType, &
                             normType=normType, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
@@ -897,6 +934,7 @@ contains
     print *, "                      --weight|-w out_weight_file "
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
+    print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
@@ -933,6 +971,11 @@ contains
     print *, "                 used.  The default method is bilinear."
     print *, "--pole or -p - an optional argument indicating what to do with the pole."
     print *, "                 The default value is all."
+    print *, "--line_type or -l - an optional argument indicating the type of path"
+    print *, " 			  lines (e.g. cell edges) follow on a spherical"
+    print *, "                    surface. The default value depends on the regrid"
+    print *, "                    method. For non-conservative methods the default is"
+    print *, "                    cartesian. For conservative methods the default is greatcircle." 
     print *, "--norm_type - an optional argument indicating the type of normalization to"
     print *, "              do when generating conserative weights. The default value is dstarea."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
