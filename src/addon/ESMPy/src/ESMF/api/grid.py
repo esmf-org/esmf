@@ -303,6 +303,7 @@ class Grid(object):
 
             # grid rank
             self._rank = self.max_index.size
+            self._ndims = self._rank
 
         # grid type
         if coord_typekind is None:
@@ -929,11 +930,16 @@ class Grid(object):
                                                 dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
-        [x, y, z] = [0, 1, 2]
-        self._link_coord_buffer_(x, stagger)
-        self._link_coord_buffer_(y, stagger)
-        if self.rank == 3:
-            self._link_coord_buffer_(z, stagger)
+        # first if number of coordinate dimensions is equivalent to the grid rank
+        if self.ndims == self.rank:
+            for xyz in range(self.rank):
+                self._link_coord_buffer_(xyz, stagger)
+        # and this way if we have 1d coordinates
+        elif self.ndims < self.rank:
+            if not (self.ndims == 1):
+                raise ValueError("Grid does not know how to handle coordinate arrays that are either 1 dimensional"
+                                 "  or have dimensionality equivalent to the number coordinate dimensions of the Grid")
+            self._link_coord_buffer_1Dcoords(stagger)
 
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
@@ -943,10 +949,6 @@ class Grid(object):
                self._coords[stagger][2][...] = 0
 
     def _link_coord_buffer_(self, coord_dim, stagger):
-
-        # if self.coords[stagger][coord_dim] is not None:
-        #     raise GridCoordsAlreadyLinked
-
         # get the data pointer and bounds of the ESMF allocation
         data = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
@@ -955,6 +957,26 @@ class Grid(object):
 
         # alias the coordinates to a grid property
         self._coords[stagger][coord_dim] = gridCoordP.view()
+
+    def _link_coord_buffer_1Dcoords(self, stagger):
+        # get the data pointer and bounds of the ESMF allocation
+        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+
+        gc0 = esmf_array1D(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger), self.type, (ub - lb)[0])
+        gc1 = esmf_array1D(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger), self.type, (ub - lb)[1])
+        if self.rank == 3:
+            gc2 = esmf_array1D(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger), self.type, (ub - lb)[2])
+            gc00, gc11, gc22 = np.meshgrid(gc0, gc1, gc2, indexing="ij")
+        elif self.rank == 2:
+            gc00, gc11 = np.meshgrid(gc0, gc1, indexing="ij")
+        else:
+            raise ValueError("Grid rank must be 2 or 3")
+
+        # alias the coordinates to a grid property
+        self._coords[stagger][0] = gc00
+        self._coords[stagger][1] = gc11
+        if self.rank == 3:
+            self._coords[stagger][2] = gc22
 
     def _allocate_items_(self, item, stagger, from_file=False):
         # this could be one of several entry points to the grid,
