@@ -15,9 +15,9 @@ wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : bilinear : -i --
 wr50a_090614.nc : mpas_uniform_10242_dual_counterclockwise.nc : patch    : -i --src_regional --dst_type ESMF : 10E-06 : 10E-06 : 10E-16
 
 # FVCOM_grid2d.nc:  unstructured grid in UGRID format
-FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+FVCOM_grid2d_20120314.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-14
 scrip_regional_1140x690.nc : FVCOM_grid2d_20120314.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
-FVCOM_grid2d_20130228.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+FVCOM_grid2d_20130228.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-14
 scrip_regional_1140x690.nc : FVCOM_grid2d_20130228.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
 
 # global grids with pole options
@@ -79,7 +79,7 @@ ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -p all -i  : 10E-05 : 1
 # cubed sphere to regional, conservative with masking
 ne30np4-t2.nc : wr50a_090614.nc : bilinear : --dst_regional -i : 10E-05 : 10E-04 : 10E-16
 ne30np4-t2.nc : wr50a_090614.nc : patch    : --dst_regional -i : 10E-05 : 10E-05 : 10E-16
-ne30np4-t2.nc : ar9v4_100920.nc : conserve : --dst_regional -i : 10E-03 : 10E-02 : 10E-14
+ne30np4-t2.nc : ar9v4_100920.nc : conserve : --dst_regional -i : 10E-03 : 10E-02 : 10E-13
 
 # regional to cubed sphere, conservative with masking
 wr50a_090614.nc : ne30np4-t2.nc : bilinear : --src_regional -i : 10E-06 : 10E-05 : 10E-16
@@ -150,7 +150,7 @@ GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : bilinear : -t GRIDSPEC --src_missingv
 GRIDSPEC_ACCESS1.nc : so_Omon_GISS-E2.nc : conserve : -t GRIDSPEC --src_missingvalue so --dst_missingvalue so -i : 10E-05 : 10E-04 : 10E-13
 
 # UGRID
-FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-15
+FVCOM_grid2d.nc : scrip_regional_1140x690.nc : conserve : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-04 : 10E-03 : 10E-14
 FVCOM_grid2d.nc : scrip_regional_1140x690.nc : bilinear : --src_type UGRID -r --src_meshname fvcom_mesh -i : 10E-07 : 10E-06 : 10E-16
 scrip_regional_1140x690.nc : FVCOM_grid2d.nc : conserve : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-05 : 10E-04 : 10E-14
 scrip_regional_1140x690.nc : FVCOM_grid2d.nc : bilinear : --dst_type UGRID -r --dst_meshname fvcom_mesh : 10E-08 : 10E-07 : 10E-16
