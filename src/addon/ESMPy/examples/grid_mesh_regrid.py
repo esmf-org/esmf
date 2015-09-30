@@ -63,11 +63,11 @@ dstfield = regrid(srcfield, dstfield)
 
 # compute the mean relative error
 from operator import mul
-num_nodes = reduce(mul, xctfield.shape)
+num_nodes = reduce(mul, xctfield.data.shape)
 relerr = 0
 meanrelerr = 0
 if num_nodes is not 0:
-    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))
+    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
     meanrelerr = relerr / num_nodes
 
@@ -86,3 +86,5 @@ if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
     print "ESMPy Grid Mesh Regridding Example"
     print "  interpolation mean relative error = {0}".format(meanrelerr)
+
+    assert (meanrelerr < 2e-3)

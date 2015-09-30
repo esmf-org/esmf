@@ -7,21 +7,23 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-A location stream (LocStream) is used to represent the locations of
-a set of data points (for example, in the data assimilation world, 
-LocStreams can be thought of as a set of observations).  The values 
+A location stream (LocStream) can be used to represent the locations of
+a set of data points.  For example, in the data assimilation world, 
+LocStreams can be used to represent a set of observations.  The values 
 of the data points are stored within a Field or FieldBundle created 
 using the LocStream.
 
-The locations are generally
-described using Cartesian (x, y, z), or (lat, lon, radius) coordinates.
-There is no assumption of any regularity in the positions of the points.
-To make the concept more general, the locations for each data point are
-represented using a construct called {\it keys}. Keys are essentially 
-vectors containing point descriptors.  They may include 
-other information besides location (a mask, for example) or a second 
-set of coordinates.  Each key must contain the same number of elements 
-as there are locations in the LocStream.
+The locations are generally described using Cartesian (x, y, z), or 
+(lat, lon, radius) coordinates.  The coordinates are stored using 
+constructs called {\it keys}.  A Key is essentially a list of point 
+descriptors, one for each data point.  They may hold other information 
+besides the coordinates - a mask, for example.  They may also hold a 
+second set of coordinates.    Keys are referenced by name - see 
+\ref{const:coordkeyname} and \ref{const:maskkeyname} for specific 
+keynames required in regridding.  Each key must contain the same 
+number of elements as there are data points in the LocStream.  While 
+there is no assumption in the ordering of the points, the order 
+chosen must be maintained in each of the keys.
 
 LocStreams can be very large. Data assimilation systems might use
 LocStreams with up to $10^{8}$ observations, so efficiency is critical.
@@ -35,7 +37,7 @@ For example, LocStreams allow users to:
 \item Regrid data in Fields defined on LocStreams
 \item Redistribute data between Fields defined on LocStreams
 \item Gather or scatter a FieldBundle defined on a LocStream from/to a root DE
-\item Extract Fortran array from Field which was defined by a LocStream
+\item Extract Fortran array from Field which was defined on a LocStream
 \end{enumerate}
 
 
@@ -53,6 +55,6 @@ of which other point).
 
 A LocStream is similar to a Mesh in that both are collections of irregularly positioned 
 points.  However, the two structures differ because a Mesh also has connectivity: 
-each data point has a set of neighboring data points. There is no requirement that the
+each data point represents either a center or corner of a cell. There is no requirement that the
 points in a LocStream have connectivity, in fact there is no requirement that any two points 
 have any particular spatial relationship at all.

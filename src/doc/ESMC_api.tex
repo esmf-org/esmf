@@ -233,12 +233,19 @@ in the DistGrid is associated with the VAS of each PET. This association
 considers the type, kind and rank of the indexed data. Fields are
 defined on Arrays.
 
-\item {\bf Grid}  A Grid is an abstraction of a physical space.  
-It associates a coordinate system, a set of coordinates, and 
-a topology to a collection of grid cells.  Grids in ESMF are
-comprised of DistGrids plus additional coordinate information. 
+\item {\bf Grid}  A Grid is an abstraction for a logically rectangular
+region in physical space.  It associates a coordinate system, a set of
+coordinates, and a topology to a collection of grid cells.  Grids in ESMF
+are comprised of DistGrids plus additional coordinate information.
 
-The current ESMF C API does not provide user access to the Grid class.
+\item {\bf Mesh}  A Mesh provides an abstraction for an unstructured 
+grid.  Coordinate information is set in nodes, which represent
+vertices or corners.  Together the nodes establish the boundaries
+of mesh elements or cells.
+
+\item {\bf LocStream}  A LocStream is an abstraction for a set of 
+unstructured data points without any topological relationship to each 
+other.
 
 \item {\bf Field}  A Field may contain more dimensions than the 
 Grid that it is discretized on.  For example, for convenience 

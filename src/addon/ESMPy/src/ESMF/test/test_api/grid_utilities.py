@@ -326,7 +326,7 @@ def compute_mass_grid(valuefield, dofrac=False, fracfield=None,
 
 def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False, 
                         dstfracfield=None, mass1=None, mass2=None, 
-                        regrid_method=ESMF.RegridMethod.CONSERVE):
+                        regrid_method=ESMF.RegridMethod.CONSERVE, mask_values=[0]):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'field1' and 
@@ -339,11 +339,11 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
 
     correct = False
     # verify that the fields are the same size
-    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+    assert field1.data.shape == field2.data.shape, 'compare_fields: Fields must be the same size!'
     
     # deal with default values for fracfield
     if dstfracfield is None:
-        dstfracfield = ma.ones(field1.shape)
+        dstfracfield = ma.ones(field1.data.shape)
 
     # compute pointwise error measures
     totalErr = 0.0
@@ -354,8 +354,12 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     # allow fields of all dimensions
     field1_flat = np.ravel(field1.data)
     field2_flat = np.ravel(field2.data)
-    field2mask_flat = np.ravel(field2.mask)
     dstfracfield_flat = np.ravel(dstfracfield.data)
+    # TODO:  test for evaluating field2mask into an array of True/False values based on field2.grid.mask
+    if field2.grid.mask is not None:
+        field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask.flatten().tolist()]
+    else:
+        field2mask_flat = np.ravel(np.zeros_like(field2.data))
 
     # TODO: would be nice to add a condition to ignore where original value is unchanged
     for i in range(field2_flat.size):     
@@ -367,8 +371,6 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
             err = abs(field1_flat[i]/dstfracfield_flat[i] - \
                         field2_flat[i])/abs(field2_flat[i])
 
-            if err > 1:
-                print "PET #{0}, {1}, {2}, {3}".format(ESMF.local_pet(), field1_flat[i], field2_flat[i], dstfracfield_flat[i])
             num_nodes += 1
             totalErr += err
             if (err > max_error):

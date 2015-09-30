@@ -56,26 +56,30 @@ xctfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 *
 dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
-dst_mask_values=None
+mask_values=None
 if domask:
-    dst_mask_values=numpy.array([0])
+    mask_values=numpy.array([0])
 
 regrid = ESMF.Regrid(srcfield, dstfield,
                      regrid_method=ESMF.RegridMethod.NEAREST_DTOS,
                      unmapped_action=ESMF.UnmappedAction.ERROR,
-                     dst_mask_values=dst_mask_values)
+                     src_mask_values=mask_values)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
 # compute the mean relative error
 from operator import mul
-num_nodes = reduce(mul, xctfield.shape)
+num_nodes = reduce(mul, xctfield.data.shape)
 relerr = 0
 meanrelerr = 0
+
+dstfield = numpy.ravel(dstfield.data)
+xctfield = numpy.ravel(xctfield.data)
+
 if num_nodes is not 0:
-    ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))
-    relerr = numpy.sum(numpy.abs(dstfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
+    ind = numpy.where((dstfield != 1e20) & (xctfield != 0))[0]
+    relerr = numpy.sum(numpy.abs(dstfield[ind] - xctfield[ind]) / numpy.abs(xctfield[ind]))
     meanrelerr = relerr / num_nodes
 
 # handle the parallel case
@@ -93,3 +97,5 @@ if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
     print "ESMPy LocStream Grid Regridding Example"
     print "  interpolation mean relative error = {0}".format(meanrelerr)
+
+    assert (meanrelerr < 9e-5)

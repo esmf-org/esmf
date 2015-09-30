@@ -128,16 +128,8 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
  // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
  UInt sdim = grid.getCartCoordDimCount();
  // if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
-
  mesh.set_spatial_dimension(sdim);
 
- // Tell Mesh if it's a sphere
- ESMC_CoordSys_Flag coordSys=grid.getCoordSys();
- if ((coordSys==ESMC_COORDSYS_SPH_DEG) || (coordSys==ESMC_COORDSYS_SPH_RAD)) {
-   mesh.is_sph=true;
- } else {
-   mesh.is_sph=false;
- }
 
  // See if this is for conservative regridding
  bool isConserve=false;

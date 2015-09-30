@@ -464,37 +464,6 @@ For example, if Fields built on StaggerLoc.CENTER are
 passed into the Regrid() call then the masking
 should also be set in StaggerLoc.CENTER.
 
-~~~~~~~~~~~~~
-Field Masking
-~~~~~~~~~~~~~
-
-The ESMPy Field is derived from
-`numpy.MaskedArray <http://docs.scipy.org/doc/numpy/reference/maskedarray.generic.html>`_.
-Therefore, it contains all of the associated functionality, advantages and pitfalls.
-Some specific things to keep in mind are:
-
-- Hardening and softening of masks do not apply when you specifically
-  set values of Field.mask, only when you make assignments to the more
-  general Field.
-
-- As with slices of MaskedArrays, Field masks
-  are a copy of the underlying Grid mask to avoid propagation of any
-  modification of the Field mask to the Grid mask (which may be shared
-  by multiple fields).
-
-- When setting the values of a Field, the mask will be overridden if care is not taken
-  to only set the _data_ of the Field.  For instance:
-
-  field[...] = 7
-
-  will set all field data values to 7 regardless of whether they have been masked
-  or not, but:
-
-  field.data[...] = 7
-
-  will only set the unmasked data points of the Field.
-
-
 ---------------------
 Spherical coordinates
 ---------------------
@@ -525,8 +494,8 @@ extrapolation to destination points outside the unmasked source Field.
 Numpy Slicing and Indexing
 --------------------------
 
-Numpy arrays are used to represent Grid and Mesh coordinates and Field data
-and masks, among other things.  Standard numpy conventions for array indexing
+Numpy arrays are used to represent Grid and Mesh coordinates and Field data,
+among other things.  Standard numpy conventions for array indexing
 and slicing can be expected.  There are some exceptions when it comes to fancy
 indexing, index arrays, and multi-dimensional slicing.  Significant effort has
 been put into raising exceptions where inappropriate indexing or slicing

@@ -111,6 +111,25 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
+    def test_mesh_50_mask(self):
+        parallel = False
+        elemCoord = None
+        if pet_count() > 1:
+            if pet_count() > 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask = \
+                mesh_create_50_parallel(domask=True)
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask = \
+                mesh_create_50(domask=True)
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+
+        self.assertNumpyAll(mesh.mask[1], elemMask, check_arr_dtype=False)
+
     @attr('data')
     def test_mesh_create_from_file_scrip(self):
         try:

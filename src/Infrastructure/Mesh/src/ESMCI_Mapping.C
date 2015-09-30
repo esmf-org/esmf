@@ -32,8 +32,6 @@ namespace ESMCI {
   // eventually could be broadened to specify other types
   MAP_TYPE sph_map_type=MAP_TYPE_CART_APPROX;
 
-  bool is_map_sph=false;
-
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::classInstance = NULL;
 
@@ -316,7 +314,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
         return false;
       }
   } else {
-    Throw() << "Unrecognized spherical map type. \n";
+    Throw() << "Unrecognized line type. \n";
   }
 
   // Shouldn't be able to get here, but just in case...
@@ -480,7 +478,8 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
   // Is this spherical and 3D, then use Spherical mapping
   // TODO: ORGANIZE THIS BETTER
   // ALSO NEED TO MAKE SURE IS HEX.
-  if (is_map_sph) {
+
+  if (sph_map_type==MAP_TYPE_GREAT_CIRCLE) {
     double p[3];
 
     // Only support hexes in spherical right now
@@ -510,7 +509,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
     pcoord[2]=2.0*p[2]-1.0;
 
 
-  } else { // Cartesian method
+  } else if (sph_map_type==MAP_TYPE_CART_APPROX) { // Cartesian method
 #endif
 
   // Newton's method
@@ -589,6 +588,8 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(co
     return false;
   }
 #ifdef SPH_MAP
+  } else {
+    Throw() << "Unrecognized line type. \n";
   }
 #endif
   // check parametric bounds.

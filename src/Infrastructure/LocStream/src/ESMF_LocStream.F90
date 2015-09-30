@@ -468,8 +468,9 @@ contains
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName. Once a key has 
+! been added, a pointer to its internally allocated memory can be 
+! retrieved and used to set key values. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -563,8 +564,9 @@ contains
     integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! {\tt ESMF\_Array}.  The user is responsible for the creation of the 
+! {\tt ESMF\_Array} that will hold the key values.
 !
 ! The arguments are:
 ! \begin{description}
@@ -716,8 +718,10 @@ contains
 !    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Add a key to a locstream. Once a key has been added its internal data
-!    can be retrieved and used to set key values. 
+!    Add a key to a locstream with a required keyName and a required 
+!    Fortran array.  The user is responsible for the creation of the 
+!    Fortran array that will hold the key values, including 
+!    the maintenance of any allocated memory.
 !
 !    Supported values for <farray> are:
 !    \begin{description}
@@ -774,8 +778,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+!  Add a key to a locstream with a required keyName and a required 
+!  Fortran array.  The user is responsible for the creation of the 
+!  Fortran array that will hold the key values, including 
+!  the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -864,8 +870,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array that will hold the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -954,8 +962,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array that will hold the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1006,7 +1016,6 @@ contains
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
 
    ! Add key to structure
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
@@ -1209,8 +1218,8 @@ contains
       integer :: keyCount,i,regrid_dims,idx,idx_cart
       integer :: localrc
       integer :: pntDim, pntCount
-      real(ESMF_KIND_R8),  pointer  :: pntList(:)
-      real(ESMF_KIND_R8),  pointer  :: pntList_cart(:)
+      real(ESMF_KIND_R8), pointer  :: pntList(:)
+      real(ESMF_KIND_R8), pointer  :: pntList_cart(:)
       integer, pointer :: petList(:)
       character (len=ESMF_MAXSTR)            :: coordKeyNames
       type(ESMF_CoordSys_Flag) :: coordSysLocal, coordSys_ofBkgMesh
@@ -1351,6 +1360,7 @@ contains
 
       ! Can now get rid of pntList
       deallocate(pntList)
+      deallocate(pntList_cart)
 
       ! Create a new location stream by shifting the entries between 
       ! the pets based on petList
@@ -1834,7 +1844,6 @@ contains
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
 !     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
 !     how the LocStream is distributed. 
-!     at a later time. 
 !
 !     The arguments are:
 !     \begin{description}
