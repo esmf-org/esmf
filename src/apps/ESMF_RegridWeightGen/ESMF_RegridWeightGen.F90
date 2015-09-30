@@ -16,7 +16,7 @@ program ESMF_RegridWeightGenApp
   use ESMF
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
-  use ESMF_RegridWeightGenMod
+   use ESMF_RegridWeightGenMod
   use ESMF_RegridWeightGenCheckMod
 
   implicit none
@@ -36,7 +36,7 @@ program ESMF_RegridWeightGenApp
   character(len=40)  :: method, flag, lineTypeStr
   type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
-  integer            :: poleptrs
+   integer            :: poleptrs
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(3)
@@ -56,7 +56,7 @@ program ESMF_RegridWeightGenApp
   logical            :: terminateProg
   !real(ESMF_KIND_R8) :: starttime, endtime
   logical            :: checkFlag
-  type(ESMF_LogKind_Flag) :: msgbuf(1)
+   type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i
@@ -866,8 +866,7 @@ program ESMF_RegridWeightGenApp
     unmappedaction = ESMF_UNMAPPEDACTION_ERROR
   endif
 
-
-  write(*,*) "lineType=",commandbuf2(20)
+  ! Set lineType
   if (commandbuf2(20)==1) then
      lineType=ESMF_LINETYPE_CART
   else if (commandbuf2(20)==2) then
