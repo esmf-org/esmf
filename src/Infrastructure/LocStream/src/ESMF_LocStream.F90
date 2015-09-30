@@ -566,7 +566,7 @@ contains
 ! !DESCRIPTION:
 ! Add a key to a locstream with a required keyName and a required 
 ! {\tt ESMF\_Array}.  The user is responsible for the creation of the 
-! {\tt ESMF\_Array} to enable the setting of the key values.
+! {\tt ESMF\_Array} that will hold the key values.
 !
 ! The arguments are:
 ! \begin{description}
@@ -720,7 +720,7 @@ contains
 ! !DESCRIPTION:
 !    Add a key to a locstream with a required keyName and a required 
 !    Fortran array.  The user is responsible for the creation of the 
-!    Fortran array to enable the setting of the key values, including 
+!    Fortran array that will hold the key values, including 
 !    the maintenance of any allocated memory.
 !
 !    Supported values for <farray> are:
@@ -780,7 +780,7 @@ contains
 ! !DESCRIPTION:
 !  Add a key to a locstream with a required keyName and a required 
 !  Fortran array.  The user is responsible for the creation of the 
-!  Fortran array to enable the setting of the key values, including 
+!  Fortran array that will hold the key values, including 
 !  the maintenance of any allocated memory.
 !
 ! The arguments are:
@@ -872,7 +872,7 @@ contains
 ! !DESCRIPTION:
 ! Add a key to a locstream with a required keyName and a required 
 ! Fortran array.  The user is responsible for the creation of the 
-! Fortran array to enable the setting of the key values, including 
+! Fortran array that will hold the key values, including 
 ! the maintenance of any allocated memory.
 !
 ! The arguments are:
@@ -964,7 +964,7 @@ contains
 ! !DESCRIPTION:
 ! Add a key to a locstream with a required keyName and a required 
 ! Fortran array.  The user is responsible for the creation of the 
-! Fortran array to enable the setting of the key values, including 
+! Fortran array that will hold the key values, including 
 ! the maintenance of any allocated memory.
 !
 ! The arguments are:
@@ -1016,7 +1016,6 @@ contains
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
 
    ! Add key to structure
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
@@ -1219,8 +1218,8 @@ contains
       integer :: keyCount,i,regrid_dims,idx,idx_cart
       integer :: localrc
       integer :: pntDim, pntCount
-      real(ESMF_KIND_R8),  pointer  :: pntList(:)
-      real(ESMF_KIND_R8),  pointer  :: pntList_cart(:)
+      real(ESMF_KIND_R8), pointer  :: pntList(:)
+      real(ESMF_KIND_R8), pointer  :: pntList_cart(:)
       integer, pointer :: petList(:)
       character (len=ESMF_MAXSTR)            :: coordKeyNames
       type(ESMF_CoordSys_Flag) :: coordSysLocal, coordSys_ofBkgMesh
@@ -1361,6 +1360,7 @@ contains
 
       ! Can now get rid of pntList
       deallocate(pntList)
+      deallocate(pntList_cart)
 
       ! Create a new location stream by shifting the entries between 
       ! the pets based on petList
