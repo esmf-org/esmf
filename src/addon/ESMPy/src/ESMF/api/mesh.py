@@ -145,6 +145,7 @@ class Mesh(object):
         self._spatial_dim = None
         self._rank = 1
         self._coords = None
+        self._mask = [None, None]
 
         if not fromfile:
             # initialize not fromfile variables
@@ -287,6 +288,11 @@ class Mesh(object):
     def singlestagger(self):
         return self._singlestagger
 
+    @property
+    def mask(self):
+        warnings.warn("The Mesh mask cannot yet be retrieved through the Python layer in all cases "
+                      "(e.g. Meshes created from file)", SyntaxWarning)
+        return self._mask
 
     # manual destructor
     def destroy(self):
@@ -463,6 +469,7 @@ class Mesh(object):
                 self._element_mask = np.array(element_mask, dtype=np.int32)
             else:
                 self._element_mask = element_mask
+            self._mask[1] = self._element_mask
         if element_area is not None:
             if element_area.dtype is not np.float64:
                 self._element_area = np.array(element_area, dtype=np.float64)
