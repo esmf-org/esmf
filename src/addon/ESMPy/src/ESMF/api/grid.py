@@ -31,6 +31,128 @@ class Grid(object):
     For more information about the ESMF Grid class, please see the `ESMF Grid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
     """
+
+    @property
+    def area(self):
+        """
+        :return: the Grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
+        """
+        return self._area
+
+    @property
+    def areatype(self):
+        """
+        :return: the ESMF typekind of the Grid area
+        """
+        return self._areatype
+
+    @property
+    def coords(self):
+        """
+        :return: Grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
+        representing the stagger location and the second representing the coordinate dimension will return a numpy
+        array of size given by upper_bounds - lower_bounds
+        """
+        return self._coords
+
+    @property
+    def coord_sys(self):
+        """
+        :return: the type of the coordinate system for this Grid
+        """
+        return self._coord_sys
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
+        """
+        return self._lower_bounds
+
+    @property
+    def mask(self):
+        """
+        :return: the Grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
+        """
+        return self._mask
+
+    @property
+    def max_index(self):
+        return self._max_index
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def ndims(self):
+        return self._ndims
+
+    @property
+    def num_peri_dims(self):
+        """
+        :return: the total number of periodic dimensions in the Grid
+        """
+        return self._num_peri_dims
+
+    @property
+    def periodic_dim(self):
+        """
+        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
+        return self._periodic_dim
+
+    @property
+    def pole_dim(self):
+        """
+        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
+        return self._pole_dim
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Grid
+        """
+        return self._rank
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def staggerloc(self):
+        """
+        :return: a boolean list of the stagger locations that have been allocated for this Grid
+        """
+        return self._staggerloc
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def type(self):
+        """
+        :return: the ESMF typekind of the Grid coordinates
+        """
+        return self._type
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
+        """
+        return self._upper_bounds
+
     @initialize
     def __init__(self, max_index=None,
                  num_peri_dims=0,
@@ -353,139 +475,6 @@ class Grid(object):
 
         # set the single stagger flag
         self._singlestagger = False
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def max_index(self):
-        return self._max_index
-
-    @property
-    def type(self):
-        """
-        :return: the ESMF typekind of the Grid coordinates
-        """
-        return self._type
-
-    @property
-    def areatype(self):
-        """
-        :return: the ESMF typekind of the Grid area
-        """
-        return self._areatype
-
-    @property
-    def periodic_dim(self):
-        """
-        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
-        """
-        return self._periodic_dim
-
-    @property
-    def pole_dim(self):
-        """
-        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
-        """
-        return self._pole_dim
-
-    @property
-    def coord_sys(self):
-        """
-        :return: the type of the coordinate system for this Grid
-        """
-        return self._coord_sys
-
-    @property
-    def ndims(self):
-        return self._ndims
-
-    @property
-    def num_peri_dims(self):
-        """
-        :return: the total number of periodic dimensions in the Grid
-        """
-        return self._num_peri_dims
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Grid
-        """
-        return self._rank
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def staggerloc(self):
-        """
-        :return: a boolean list of the stagger locations that have been allocated for this Grid
-        """
-        return self._staggerloc
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
-        """
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
-        """
-        return self._upper_bounds
-
-    @property
-    def bounds_done(self):
-        return self._bounds_done
-
-    @property
-    def coords(self):
-        """
-        :return: grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
-        representing the stagger location and the second representing the coordinate dimension will return a numpy
-        array of size given by upper_bounds - lower_bounds
-        """
-        return self._coords
-
-    @property
-    def coords_done(self):
-        return self._coords_done
-
-    @property
-    def mask(self):
-        """
-        :return: the grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
-        """
-        return self._mask
-
-    @property
-    def area(self):
-        """
-        :return: the grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
-        """
-        return self._area
-
-    @property
-    def item_done(self):
-        return self._item_done
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
 
     # manual destructor
     def destroy(self):

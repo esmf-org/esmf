@@ -38,6 +38,117 @@ class Mesh(object):
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
 
     """
+
+    @property
+    def area(self):
+        """
+        :return: the Mesh area represented as a numpy array of floats of the same number of entries as Mesh elements
+        """
+        return self._area
+
+    @property
+    def coords(self):
+        """
+        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and elements of the Mesh
+        """
+        return self._coords
+
+    @property
+    def element_area(self):
+        return self._element_area
+
+    @property
+    def element_conn(self):
+        return self._element_conn
+
+    @property
+    def element_coords(self):
+        return self._element_coords
+
+    @property
+    def element_count(self):
+        return self._element_count
+
+    @property
+    def element_ids(self):
+        return self._element_ids
+
+    @property
+    def element_mask(self):
+        return self._element_mask
+
+    @property
+    def element_types(self):
+        return self._element_types
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def mask(self):
+        """
+        :return: A 2 element list of numpy arrays representing the masked values on the nodes and elements of the Mesh
+        """
+        return self._mask
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def node_coords(self):
+        return self._node_coords
+
+    @property
+    def node_count(self):
+        return self._node_count
+
+    @property
+    def node_ids(self):
+        return self._node_ids
+
+    @property
+    def node_owners(self):
+        return self._node_owners
+
+    @property
+    def parametric_dim(self):
+        return self._parametric_dim
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Mesh, (i.e. the number of dimensions of the coordinate arrays (always 1)
+        """
+        return self._rank
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def size(self):
+        """
+        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
+        """
+        return self._size
+
+    @property
+    def size_owned(self):
+        """
+        :return: a 2 element list containing the number of owned nodes and elements in the Mesh on the current processor
+        """
+        return self._size_owned
+
+    @property
+    def spatial_dim(self):
+        return self._spatial_dim
+
+    @property
+    def struct(self):
+        return self._struct
+
     @initialize
     def __init__(self, parametric_dim=None,
                  spatial_dim=None,
@@ -140,12 +251,13 @@ class Mesh(object):
     
         # bookkeeping
         self._size = [None, None]
-        self._size_local = [None, None]
+        self._size_owned = [None, None]
         self._parametric_dim = None
         self._spatial_dim = None
         self._rank = 1
         self._coords = None
         self._mask = [None, None]
+        self._area = None
 
         if not fromfile:
             # initialize not fromfile variables
@@ -174,9 +286,9 @@ class Mesh(object):
                                                   mask_flag, varname)
             # get the sizes
             self._size[node] = ESMP_MeshGetLocalNodeCount(self)
-            self._size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+            self._size_owned[node] = ESMP_MeshGetOwnedNodeCount(self)
             self._size[element] = ESMP_MeshGetLocalElementCount(self)
-            self._size_local[element] = ESMP_MeshGetOwnedElementCount(self)
+            self._size_owned[element] = ESMP_MeshGetOwnedElementCount(self)
 
             # link the coords here for meshes created from file, in add_elements for others
             self._link_coords_()
@@ -191,108 +303,6 @@ class Mesh(object):
 
         # set the single stagger flag
         self._singlestagger = False
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def size(self):
-        """
-        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
-        """
-        return self._size
-
-    @property
-    def size_local(self):
-        """
-        :return: a 2 element list containing the number of owned nodes and element in the Mesh on the current processor
-        """
-        return self._size_local
-
-    @property
-    def parametric_dim(self):
-        return self._parametric_dim
-
-    @property
-    def spatial_dim(self):
-        return self._spatial_dim
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Mesh
-        """
-        return self._rank
-
-    @property
-    def element_count(self):
-        return self._element_count
-
-    @property
-    def element_ids(self):
-        return self._element_ids
-
-    @property
-    def element_types(self):
-        return self._element_types
-
-    @property
-    def element_conn(self):
-        return self._element_conn
-
-    @property
-    def element_mask(self):
-        return self._element_mask
-
-    @property
-    def element_area(self):
-        return self._element_area
-
-    @property
-    def element_coords(self):
-        return self._element_coords
-
-    @property
-    def node_count(self):
-        return self._node_count
-
-    @property
-    def node_ids(self):
-        return self._node_ids
-
-    @property
-    def node_coords(self):
-        return self._node_coords
-
-    @property
-    def node_owners(self):
-        return self._node_owners
-
-    @property
-    def coords(self):
-        """
-        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and element of the Mesh
-        """
-        return self._coords
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
-
-    @property
-    def mask(self):
-        warnings.warn("The Mesh mask cannot yet be retrieved through the Python layer in all cases "
-                      "(e.g. Meshes created from file)", SyntaxWarning)
-        return self._mask
 
     # manual destructor
     def destroy(self):
@@ -329,13 +339,13 @@ class Mesh(object):
         string = ("Mesh:\n"
                   "    rank = %r\n"
                   "    size = %r\n"
-                  "    size_local = %r\n" 
+                  "    size_owned = %r\n" 
                   "    coords = %r\n"
                   %
                   (
                    self.rank,
                    self.size,
-                   self.size_local,
+                   self.size_owned,
                    self.coords))
 
         return string
@@ -362,7 +372,7 @@ class Mesh(object):
 
         # size is "sliced" by taking the shape of the coords
         ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
-        ret._size_local = ret.size
+        ret._size_owned = ret.size
 
         return ret
 
@@ -373,7 +383,7 @@ class Mesh(object):
 
         # preslice the size to only return the meshloc of this field
         ret._size = get_none_or_slice(self.size, meshloc)
-        ret._size_local = ret.size
+        ret._size_owned = ret.size
 
         ret._singlestagger = True
 
@@ -391,7 +401,7 @@ class Mesh(object):
 
         # size is "sliced" by taking the shape of the coords
         ret._size = get_none_or_bound_list(ret.coords, 0)
-        ret._size_local = ret.size
+        ret._size_owned = ret.size
 
         return ret
 
@@ -475,6 +485,7 @@ class Mesh(object):
                 self._element_area = np.array(element_area, dtype=np.float64)
             else:
                 self._element_area = element_area
+            self._area = self._element_area
         if element_coords is not None:
             if element_coords.dtype is not np.float64:
                 self._element_coords = np.array(element_coords, dtype=np.float64)
@@ -489,9 +500,9 @@ class Mesh(object):
         
         # get the sizes
         self.size[node] = ESMP_MeshGetLocalNodeCount(self)
-        self.size_local[node] = ESMP_MeshGetOwnedNodeCount(self)
+        self.size_owned[node] = ESMP_MeshGetOwnedNodeCount(self)
         self.size[element] = ESMP_MeshGetLocalElementCount(self)
-        self.size_local[element] = ESMP_MeshGetOwnedElementCount(self)
+        self.size_owned[element] = ESMP_MeshGetOwnedElementCount(self)
         
         # link the coords here for meshes not created from file
         self._link_coords_()

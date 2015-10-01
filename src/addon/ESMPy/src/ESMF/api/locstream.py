@@ -60,6 +60,56 @@ class LocStream(dict):
     CoordSys.CART        ESMF:X       ESMF:Y       ESMF:Z
     ===================  ===========  ===========  ===========
     """
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the LocStream
+        """
+        return self._lower_bounds
+
+    @property
+    def mask(self):
+        """
+        :return: the mask of the LocStream
+        """
+        try:
+            return self["ESMF:Mask"]
+        except:
+            return None
+    @property
+    def name(self):
+        """
+        :return: the name of the LocStream
+        """
+        return self._name
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the LocStream
+        """
+        return self._rank
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the LocStream
+        """
+        return self._upper_bounds
+
     @initialize
     def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
         '''
@@ -223,43 +273,3 @@ class LocStream(dict):
         ret._finalized = True
 
         return ret
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the LocStream
-        """
-        return self._rank
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def name(self):
-        """
-        :return: the name of the LocStream
-        """
-        return self._name
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds of the LocStream
-        """
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds of the LocStream
-        """
-        return self._upper_bounds
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
