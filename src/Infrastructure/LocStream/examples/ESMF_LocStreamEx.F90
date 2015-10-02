@@ -74,8 +74,6 @@ program ESMF_LocStreamEx
       finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm,  defaultlogfilename="LocStreamEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #if 1
 !BOE
@@ -87,10 +85,23 @@ program ESMF_LocStreamEx
 !
 !EOE
 
+!BOC
+
+   !-------------------------------------------------------------------
+   ! Get parallel information. Here petCount is the total number of 
+   ! running PETS, and localPet is the number of this particular PET.
+   !-------------------------------------------------------------------
+   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
+
    !-------------------------------------------------------------------
-   ! Allocate and set example location information
+   ! Allocate and set example location information. Locations on a PET
+   ! are wrapped around sphere. Each PET occupies a different latitude
+   ! ranging from +50.0 to -50.0.
    !-------------------------------------------------------------------
    numLocationsOnThisPet = 20
    allocate(lon(numLocationsOnThisPet))
@@ -98,7 +109,7 @@ program ESMF_LocStreamEx
 
    do i=1,numLocationsOnThisPet
       lon(i)=360.0/numLocationsOnThisPet
-      lat(i)=0.0
+      lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
    !-------------------------------------------------------------------
@@ -107,15 +118,14 @@ program ESMF_LocStreamEx
    allocate(temperature(numLocationsOnThisPet))
 
    do i=1,numLocationsOnThisPet
-      temperature(i)=90.0
+      temperature(i)=80.0
    enddo
-
 
    !-------------------------------------------------------------------
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
+   locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
                                   localCount=numLocationsOnThisPet, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
@@ -187,6 +197,17 @@ program ESMF_LocStreamEx
 !
 !EOE
 
+!BOC
+
+   !-------------------------------------------------------------------
+   ! Get parallel information. Here petCount is the total number of 
+   ! running PETS, and localPet is the number of this particular PET.
+   !-------------------------------------------------------------------
+   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOC
    !-------------------------------------------------------------------
@@ -203,7 +224,7 @@ program ESMF_LocStreamEx
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
+   locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
                                   localCount=numLocationsOnThisPet, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
@@ -238,7 +259,6 @@ program ESMF_LocStreamEx
    ! Get key data. 
    !-------------------------------------------------------------------
    call ESMF_LocStreamGetKey(locstream,                    &
-                             localDE=0,                    &
                              keyName="ESMF:Lat",           &
                              farray=lat,                   &
                              rc=rc)
@@ -247,7 +267,6 @@ program ESMF_LocStreamEx
 !BOC
 
    call ESMF_LocStreamGetKey(locstream,                    &
-                             localDE=0,                    &
                              keyName="ESMF:Lon",           &
                              farray=lon,                   &
                              rc=rc)
@@ -256,11 +275,13 @@ program ESMF_LocStreamEx
 !BOC
 
    !-------------------------------------------------------------------
-   ! Set key data. 
+   ! Set example location information. Locations on a PET are wrapped 
+   ! around sphere. Each PET occupies a different latitude ranging 
+   ! from +50.0 to -50.0.
    !-------------------------------------------------------------------
    do i=1,numLocationsOnThisPet
       lon(i)=360.0/numLocationsOnThisPet
-      lat(i)=0.0
+      lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
 
@@ -302,13 +323,24 @@ program ESMF_LocStreamEx
 !
 !EOE
 
+!BOC
+
+   !-------------------------------------------------------------------
+   ! Get parallel information. Here petCount is the total number of 
+   ! running PETS, and localPet is the number of this particular PET.
+   !-------------------------------------------------------------------
+   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOC
    !-------------------------------------------------------------------
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
+   locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
                                   localCount=numLocationsOnThisPet, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
@@ -342,10 +374,8 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Get Fortran arrays which hold the key data, so that it can be set. 
-   ! Using localDE=0, because the locstream was created with 1 DE per PET. 
    !-------------------------------------------------------------------
    call ESMF_LocStreamGetKey(locstream,                    &
-                             localDE=0,                    &
                              keyName="ESMF:Lon",           &
                              farray=lon,                   &
                              rc=rc)
@@ -354,7 +384,6 @@ program ESMF_LocStreamEx
 !BOC
 
    call ESMF_LocStreamGetKey(locstream,                    &
-                             localDE=0,                    &
                              keyName="ESMF:Lat",           &
                              farray=lat,                   &
                              rc=rc)
@@ -364,12 +393,13 @@ program ESMF_LocStreamEx
 !BOC
 
    !-------------------------------------------------------------------
-   ! Set the longitude and latitude coordinates of the points in the 
-   ! LocStream. Each PET contains points scattered around the equator. 
+   ! Set example location information. Locations on a PET are wrapped 
+   ! around sphere. Each PET occupies a different latitude ranging 
+   ! from +50.0 to -50.0.
    !-------------------------------------------------------------------
    do i=1,numLocationsOnThisPet
-      lon(i)=0.5+REAL(i-1)*360.0/numLocationsOnThisPet
-      lat(i)=0.0
+      lon(i)=360.0/numLocationsOnThisPet
+      lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
    !-------------------------------------------------------------------
@@ -601,7 +631,6 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Longitudes
    call ESMF_LocStreamGetKey(locstream,           &
-                             localDE=0,           &
                              keyName="ESMF:Lon",  &
                              farray=lonArray,     &
                              rc=rc)
@@ -610,7 +639,6 @@ program ESMF_LocStreamEx
 !BOC
    ! Latitudes
    call ESMF_LocStreamGetKey(locstream,           &
-                             localDE=0,           &
                              keyName="ESMF:Lat",  &
                              farray=latArray,     &
                              rc=rc)
