@@ -6,13 +6,10 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-from copy import copy
-
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 from ESMF.api.locstream import *
-from ESMF.api.array import *
-import ESMF.api.constants as constants
+from ESMF.util.esmpyarray import *
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
@@ -32,6 +29,89 @@ class Field(object):
     For more information about the ESMF Field class, please see the `ESMF Field documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
     """
+
+    @property
+    def data(self):
+        """
+        :return: the data of the Field
+        """
+        return self._data
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def grid(self):
+        """
+        :return: the Grid, Mesh or LocStream upon which this Field is built
+        """
+        return self._grid
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the Field
+        """
+        return self._lower_bounds
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def name(self):
+        """
+        :return: the name of the Field
+        """
+        return self._name
+
+    @property
+    def ndbounds(self):
+        """
+        :return: the bounds of the extra dimensions in the Field
+        """
+        return self._ndbounds
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Field
+        """
+        return self._rank
+
+    @property
+    def staggerloc(self):
+        """
+        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        """
+        return self._staggerloc
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def type(self):
+        """
+        :return: the type of the data in the Field
+        """
+        return self._type
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the Field
+        """
+        return self._upper_bounds
+
+    @property
+    def xd(self):
+        """
+        :return: the number of extra (ungridded) dimensions of the Field
+        """
+        return self._xd
+
     @initialize
     def __init__(self, grid, name=None,
                 typekind=None,
@@ -173,88 +253,6 @@ class Field(object):
         import atexit
         atexit.register(self.__del__)
         self._finalized = False
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def data(self):
-        """
-        :return: the data of the Field
-        """
-        return self._data
-
-    @property
-    def name(self):
-        """
-        :return: the name of the Field
-        """
-        return self._name
-
-    @property
-    def type(self):
-        """
-        :return: the type of the data in the Field
-        """
-        return self._type
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Field
-        """
-        return self._rank
-
-    @property
-    def xd(self):
-        """
-        :return: the number of extra (ungridded) dimensions of the Field
-        """
-        return self._xd
-
-    @property
-    def staggerloc(self):
-        """
-        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
-        """
-        return self._staggerloc
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds of the Field
-        """
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds of the Field
-        """
-        return self._upper_bounds
-
-    @property
-    def ndbounds(self):
-        """
-        :return: the bounds of the extra dimensions in the Field
-        """
-        return self._ndbounds
-
-    @property
-    def grid(self):
-        """
-        :return: the Grid, Mesh or LocStream upon which this Field is built
-        """
-        return self._grid
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
 
     # manual destructor
     def destroy(self):

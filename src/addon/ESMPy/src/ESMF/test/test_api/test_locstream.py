@@ -26,6 +26,17 @@ class TestLocStream(TestBase):
         # test the deleting a LocStream has no ill effects
         del locstream
 
+    def test_mask(self):
+        locstream = LocStream(5, name="Test LocStream")
+        locstream["ESMF:X"] = (1, 2, 3, 4, 5)
+        locstream["ESMF:Y"] = np.array([7, 7, 7, 7, 7])
+
+        assert (locstream.mask == None)
+
+        locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
+
+        self.assertNumpyAll(locstream.mask, np.array([0, 0, 1, 1, 1]))
+
     def test_copy(self):
         # LocStream creation and simple validation
         locstream = LocStream(5, name="Test LocStream")

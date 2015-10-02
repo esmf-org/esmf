@@ -72,14 +72,14 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
         lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
 
         if grid_or_mesh.ndims == 1:
-            lons_1d = ESMF.esmf_array1D(lonptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0])
-            lats_1d = ESMF.esmf_array1D(latptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1])
+            lons_1d = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0],))
+            lats_1d = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1],))
 
             lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
             lats = np.array([lats_1d for lon in lons_1d])
         else:
-            lons = ESMF.esmf_array(lonptr, grid_or_mesh.type, ub - lb)
-            lats = ESMF.esmf_array(latptr, grid_or_mesh.type, ub - lb)
+            lons = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, ub - lb)
+            lats = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, ub - lb)
 
     lons = np.radians(lons)
     lats = np.radians(lats)

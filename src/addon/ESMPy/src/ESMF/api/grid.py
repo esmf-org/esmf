@@ -10,7 +10,7 @@ import warnings
 from copy import copy
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import *
+from ESMF.util.esmpyarray import ndarray_from_esmf
 import ESMF.api.constants as constants
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound, get_none_or_ssslice
 
@@ -31,6 +31,128 @@ class Grid(object):
     For more information about the ESMF Grid class, please see the `ESMF Grid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
     """
+
+    @property
+    def area(self):
+        """
+        :return: the Grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
+        """
+        return self._area
+
+    @property
+    def areatype(self):
+        """
+        :return: the ESMF typekind of the Grid area
+        """
+        return self._areatype
+
+    @property
+    def coords(self):
+        """
+        :return: Grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
+        representing the stagger location and the second representing the coordinate dimension will return a numpy
+        array of size given by upper_bounds - lower_bounds
+        """
+        return self._coords
+
+    @property
+    def coord_sys(self):
+        """
+        :return: the type of the coordinate system for this Grid
+        """
+        return self._coord_sys
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
+        """
+        return self._lower_bounds
+
+    @property
+    def mask(self):
+        """
+        :return: the Grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
+        """
+        return self._mask
+
+    @property
+    def max_index(self):
+        return self._max_index
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def ndims(self):
+        return self._ndims
+
+    @property
+    def num_peri_dims(self):
+        """
+        :return: the total number of periodic dimensions in the Grid
+        """
+        return self._num_peri_dims
+
+    @property
+    def periodic_dim(self):
+        """
+        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
+        return self._periodic_dim
+
+    @property
+    def pole_dim(self):
+        """
+        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
+        """
+        return self._pole_dim
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Grid
+        """
+        return self._rank
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def staggerloc(self):
+        """
+        :return: a boolean list of the stagger locations that have been allocated for this Grid
+        """
+        return self._staggerloc
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def type(self):
+        """
+        :return: the ESMF typekind of the Grid coordinates
+        """
+        return self._type
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
+        """
+        return self._upper_bounds
+
     @initialize
     def __init__(self, max_index=None,
                  num_peri_dims=0,
@@ -142,7 +264,6 @@ class Grid(object):
         Returns: \n
             Grid \n
         """
-        from operator import mul
 
         # initialize the from_file flag to False
         from_file = False
@@ -303,6 +424,7 @@ class Grid(object):
 
             # grid rank
             self._rank = self.max_index.size
+            self._ndims = self._rank
 
         # grid type
         if coord_typekind is None:
@@ -352,139 +474,6 @@ class Grid(object):
 
         # set the single stagger flag
         self._singlestagger = False
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def max_index(self):
-        return self._max_index
-
-    @property
-    def type(self):
-        """
-        :return: the ESMF typekind of the Grid coordinates
-        """
-        return self._type
-
-    @property
-    def areatype(self):
-        """
-        :return: the ESMF typekind of the Grid area
-        """
-        return self._areatype
-
-    @property
-    def periodic_dim(self):
-        """
-        :return: the periodic dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
-        """
-        return self._periodic_dim
-
-    @property
-    def pole_dim(self):
-        """
-        :return: the pole dimension of the Grid (e.g. 0 for x or longitude, 1 for y or latitude, etc.)
-        """
-        return self._pole_dim
-
-    @property
-    def coord_sys(self):
-        """
-        :return: the type of the coordinate system for this Grid
-        """
-        return self._coord_sys
-
-    @property
-    def ndims(self):
-        return self._ndims
-
-    @property
-    def num_peri_dims(self):
-        """
-        :return: the total number of periodic dimensions in the Grid
-        """
-        return self._num_peri_dims
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Grid
-        """
-        return self._rank
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def staggerloc(self):
-        """
-        :return: a boolean list of the stagger locations that have been allocated for this Grid
-        """
-        return self._staggerloc
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
-        """
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds, a numpy array with an entry for every dimension of the Grid
-        """
-        return self._upper_bounds
-
-    @property
-    def bounds_done(self):
-        return self._bounds_done
-
-    @property
-    def coords(self):
-        """
-        :return: grid coordinates represented as a 2D list of numpy arrays, indexing with the first dimension
-        representing the stagger location and the second representing the coordinate dimension will return a numpy
-        array of size given by upper_bounds - lower_bounds
-        """
-        return self._coords
-
-    @property
-    def coords_done(self):
-        return self._coords_done
-
-    @property
-    def mask(self):
-        """
-        :return: the grid mask represented as a numpy array of integers of size given by upper_bounds - lower_bounds
-        """
-        return self._mask
-
-    @property
-    def area(self):
-        """
-        :return: the grid area represented as a numpy array of floats of size given by upper_bounds - lower_bounds
-        """
-        return self._area
-
-    @property
-    def item_done(self):
-        return self._item_done
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
 
     # manual destructor
     def destroy(self):
@@ -929,11 +918,16 @@ class Grid(object):
                                                 dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
-        [x, y, z] = [0, 1, 2]
-        self._link_coord_buffer_(x, stagger)
-        self._link_coord_buffer_(y, stagger)
-        if self.rank == 3:
-            self._link_coord_buffer_(z, stagger)
+        # first if number of coordinate dimensions is equivalent to the grid rank
+        if self.ndims == self.rank:
+            for xyz in range(self.rank):
+                self._link_coord_buffer_(xyz, stagger)
+        # and this way if we have 1d coordinates
+        elif self.ndims < self.rank:
+            if not (self.ndims == 1):
+                raise ValueError("Grid does not know how to handle coordinate arrays that are either 1 dimensional"
+                                 "  or have dimensionality equivalent to the number coordinate dimensions of the Grid")
+            self._link_coord_buffer_1Dcoords(stagger)
 
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
@@ -943,18 +937,34 @@ class Grid(object):
                self._coords[stagger][2][...] = 0
 
     def _link_coord_buffer_(self, coord_dim, stagger):
-
-        # if self.coords[stagger][coord_dim] is not None:
-        #     raise GridCoordsAlreadyLinked
-
         # get the data pointer and bounds of the ESMF allocation
         data = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
 
-        gridCoordP = esmf_array(data, self.type, ub-lb)
+        gridCoordP = ndarray_from_esmf(data, self.type, ub-lb)
 
         # alias the coordinates to a grid property
-        self._coords[stagger][coord_dim] = gridCoordP.view()
+        self._coords[stagger][coord_dim] = gridCoordP
+
+    def _link_coord_buffer_1Dcoords(self, stagger):
+        # get the data pointer and bounds of the ESMF allocation
+        lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
+
+        gc0 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger), self.type, ((ub - lb)[0],))
+        gc1 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger), self.type, ((ub - lb)[1],))
+        if self.rank == 3:
+            gc2 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger), self.type, ((ub - lb)[2],))
+            gc00, gc11, gc22 = np.meshgrid(gc0, gc1, gc2, indexing="ij")
+        elif self.rank == 2:
+            gc00, gc11 = np.meshgrid(gc0, gc1, indexing="ij")
+        else:
+            raise ValueError("Grid rank must be 2 or 3")
+
+        # alias the coordinates to a grid property
+        self._coords[stagger][0] = gc00
+        self._coords[stagger][1] = gc11
+        if self.rank == 3:
+            self._coords[stagger][2] = gc22
 
     def _allocate_items_(self, item, stagger, from_file=False):
         # this could be one of several entry points to the grid,
@@ -1005,8 +1015,8 @@ class Grid(object):
 
         # create Array of the appropriate type the appropriate type
         if item == GridItem.MASK:
-            self._mask[stagger] = esmf_array(data, TypeKind.I4, ub-lb)
+            self._mask[stagger] = ndarray_from_esmf(data, TypeKind.I4, ub-lb)
         elif item == GridItem.AREA:
-            self._area[stagger] = esmf_array(data, TypeKind.R8, ub-lb)
+            self._area[stagger] = ndarray_from_esmf(data, TypeKind.R8, ub-lb)
         else:
             raise GridItemNotSupported
