@@ -293,12 +293,13 @@ program ESMF_LocStreamEx
 
 
 !BOE
-!\subsubsection{Create a LocStream with distribution based on a background Grid}
+!\subsubsection{Create a LocStream with a distribution based on a Grid}
 !
-! The following is an example of creating a LocStream object from another LocStream object 
-! using a background Grid. The new LocStream contains the data present in the old LocStream, 
-! but is redistributed so that entries with a given set of coordinates are on the same PET 
-! as the piece of the background Grid which contains those coordinates. 
+! The following is an example of using the LocStream create from background
+! Grid capability. Using this capability, the newly created LocStream 
+! is a copy of the old LocStream, but with a new distribution. The new LocStream 
+! is distributed such that if the coordinates of a location in the LocStream lie 
+! within a Grid cell, then that location is put on the same PET as the Grid cell. 
 !
 !EOE
 
