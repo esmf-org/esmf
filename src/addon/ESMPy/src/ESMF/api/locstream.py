@@ -7,9 +7,8 @@ The LocStream API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import esmf_array1D
+from ESMF.util.esmpyarray import ndarray_from_esmf
 import ESMF.api.constants as constants
-from copy import copy
 from ESMF.util.slicing import get_formatted_slice
 
 
@@ -253,8 +252,8 @@ class LocStream(dict):
         # get a pointer to the Fortran buffer to the key
         key_ptr = ESMP_LocStreamGetKeyPtr(self.struct, key_name)
 
-        # create an Array1D object out of the pointer
-        keyvals = esmf_array1D(key_ptr, dtype=typekind, size=self.size)
+        # create a numpy array out of the pointer
+        keyvals = ndarray_from_esmf(key_ptr, typekind, (self.size,))
 
         return keyvals
 

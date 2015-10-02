@@ -6,7 +6,7 @@ The Mesh API
 
 #### IMPORT LIBRARIES #########################################################
 
-from copy import copy, deepcopy
+from copy import copy
 
 from ESMF.api.constants import *
 from ESMF.interface.cbindings import *

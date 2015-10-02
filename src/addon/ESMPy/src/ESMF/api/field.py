@@ -6,13 +6,10 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-from copy import copy
-
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 from ESMF.api.locstream import *
-from ESMF.api.array import *
-import ESMF.api.constants as constants
+from ESMF.util.esmpyarray import *
 
 #### Field class ##############################################################
 [node, element] = [0, 1]

@@ -10,7 +10,7 @@ import warnings
 from copy import copy
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import *
+from ESMF.util.esmpyarray import ndarray_from_esmf
 import ESMF.api.constants as constants
 from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_or_bound, get_none_or_ssslice
 
@@ -264,7 +264,6 @@ class Grid(object):
         Returns: \n
             Grid \n
         """
-        from operator import mul
 
         # initialize the from_file flag to False
         from_file = False
@@ -942,19 +941,19 @@ class Grid(object):
         data = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
 
-        gridCoordP = esmf_array(data, self.type, ub-lb)
+        gridCoordP = ndarray_from_esmf(data, self.type, ub-lb)
 
         # alias the coordinates to a grid property
-        self._coords[stagger][coord_dim] = gridCoordP.view()
+        self._coords[stagger][coord_dim] = gridCoordP
 
     def _link_coord_buffer_1Dcoords(self, stagger):
         # get the data pointer and bounds of the ESMF allocation
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
 
-        gc0 = esmf_array1D(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger), self.type, (ub - lb)[0])
-        gc1 = esmf_array1D(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger), self.type, (ub - lb)[1])
+        gc0 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 0, staggerloc=stagger), self.type, ((ub - lb)[0],))
+        gc1 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 1, staggerloc=stagger), self.type, ((ub - lb)[1],))
         if self.rank == 3:
-            gc2 = esmf_array1D(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger), self.type, (ub - lb)[2])
+            gc2 = ndarray_from_esmf(ESMP_GridGetCoordPtr(self, 2, staggerloc=stagger), self.type, ((ub - lb)[2],))
             gc00, gc11, gc22 = np.meshgrid(gc0, gc1, gc2, indexing="ij")
         elif self.rank == 2:
             gc00, gc11 = np.meshgrid(gc0, gc1, indexing="ij")
@@ -1016,8 +1015,8 @@ class Grid(object):
 
         # create Array of the appropriate type the appropriate type
         if item == GridItem.MASK:
-            self._mask[stagger] = esmf_array(data, TypeKind.I4, ub-lb)
+            self._mask[stagger] = ndarray_from_esmf(data, TypeKind.I4, ub-lb)
         elif item == GridItem.AREA:
-            self._area[stagger] = esmf_array(data, TypeKind.R8, ub-lb)
+            self._area[stagger] = ndarray_from_esmf(data, TypeKind.R8, ub-lb)
         else:
             raise GridItemNotSupported
