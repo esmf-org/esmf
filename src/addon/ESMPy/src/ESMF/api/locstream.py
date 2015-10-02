@@ -7,9 +7,8 @@ The LocStream API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import esmf_array1D
+from ESMF.util.esmpyarray import ndarray_from_esmf
 import ESMF.api.constants as constants
-from copy import copy
 from ESMF.util.slicing import get_formatted_slice
 
 
@@ -60,6 +59,56 @@ class LocStream(dict):
     CoordSys.CART        ESMF:X       ESMF:Y       ESMF:Z
     ===================  ===========  ===========  ===========
     """
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the LocStream
+        """
+        return self._lower_bounds
+
+    @property
+    def mask(self):
+        """
+        :return: the mask of the LocStream
+        """
+        try:
+            return self["ESMF:Mask"]
+        except:
+            return None
+    @property
+    def name(self):
+        """
+        :return: the name of the LocStream
+        """
+        return self._name
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the LocStream
+        """
+        return self._rank
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the LocStream
+        """
+        return self._upper_bounds
+
     @initialize
     def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
         '''
@@ -203,8 +252,8 @@ class LocStream(dict):
         # get a pointer to the Fortran buffer to the key
         key_ptr = ESMP_LocStreamGetKeyPtr(self.struct, key_name)
 
-        # create an Array1D object out of the pointer
-        keyvals = esmf_array1D(key_ptr, dtype=typekind, size=self.size)
+        # create a numpy array out of the pointer
+        keyvals = ndarray_from_esmf(key_ptr, typekind, (self.size,))
 
         return keyvals
 
@@ -223,43 +272,3 @@ class LocStream(dict):
         ret._finalized = True
 
         return ret
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the LocStream
-        """
-        return self._rank
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def name(self):
-        """
-        :return: the name of the LocStream
-        """
-        return self._name
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds of the LocStream
-        """
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds of the LocStream
-        """
-        return self._upper_bounds
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
