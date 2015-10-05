@@ -40,7 +40,7 @@ program ESMF_LocStreamEx
       type(ESMF_RouteHandle) :: routeHandle
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Grid) :: grid
-      integer :: localPet, petCount, numLocationsOnThisPet
+      integer :: localPet, petCount, numLocations, numLocationsOnThisPet
       integer :: i
       integer,parameter :: GridLatSize=20
       integer,parameter :: GridLonSize=20
@@ -103,22 +103,22 @@ program ESMF_LocStreamEx
    ! are wrapped around sphere. Each PET occupies a different latitude
    ! ranging from +50.0 to -50.0.
    !-------------------------------------------------------------------
-   numLocationsOnThisPet = 20
-   allocate(lon(numLocationsOnThisPet))
-   allocate(lat(numLocationsOnThisPet))
+   numLocations = 20
+   allocate(lon(numLocations))
+   allocate(lat(numLocations))
 
-   do i=1,numLocationsOnThisPet
-      lon(i)=360.0/numLocationsOnThisPet
+   do i=1,numLocations
+      lon(i)=360.0*i/numLocations
       lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
    !-------------------------------------------------------------------
    ! Allocate and set example Field data
    !-------------------------------------------------------------------
-   allocate(temperature(numLocationsOnThisPet))
+   allocate(temperature(numLocations))
 
-   do i=1,numLocationsOnThisPet
-      temperature(i)=80.0
+   do i=1,numLocations
+      temperature(i)= 300 - abs(lat(i))
    enddo
 
    !-------------------------------------------------------------------
@@ -126,7 +126,7 @@ program ESMF_LocStreamEx
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
    locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
-                                  localCount=numLocationsOnThisPet, &
+                                  localCount=numLocations, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
@@ -213,10 +213,11 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Allocate and set example Field data
    !-------------------------------------------------------------------
-   allocate(temperature(numLocationsOnThisPet))
+   numLocations = 20
+   allocate(temperature(numLocations))
 
-   do i=1,numLocationsOnThisPet
-      temperature(i)=80.0
+   do i=1,numLocations
+      temperature(i)= 300 - abs(lat(i))
    enddo
 
 
@@ -225,7 +226,7 @@ program ESMF_LocStreamEx
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
    locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
-                                  localCount=numLocationsOnThisPet, &
+                                  localCount=numLocations, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
@@ -279,8 +280,8 @@ program ESMF_LocStreamEx
    ! around sphere. Each PET occupies a different latitude ranging 
    ! from +50.0 to -50.0.
    !-------------------------------------------------------------------
-   do i=1,numLocationsOnThisPet
-      lon(i)=360.0/numLocationsOnThisPet
+   do i=1,numLocations
+      lon(i)=360.0*i/numLocations
       lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
@@ -341,8 +342,9 @@ program ESMF_LocStreamEx
    ! Create the LocStream:  Allocate space for the LocStream object, 
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
+   numLocations = 20
    locstream=ESMF_LocStreamCreate(name="Temperature Measurements",   &
-                                  localCount=numLocationsOnThisPet, &
+                                  localCount=numLocations, &
                                   coordSys=ESMF_COORDSYS_SPH_DEG,   &
                                   rc=rc)
 !EOC
@@ -398,8 +400,8 @@ program ESMF_LocStreamEx
    ! around sphere. Each PET occupies a different latitude ranging 
    ! from +50.0 to -50.0.
    !-------------------------------------------------------------------
-   do i=1,numLocationsOnThisPet
-      lon(i)=360.0/numLocationsOnThisPet
+   do i=1,numLocations
+      lon(i)=360.0*i/numLocations
       lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
@@ -574,6 +576,7 @@ program ESMF_LocStreamEx
       y = sin(theta)*sin(phi)
       z = cos(phi)
 
+      
       farrayPtr(i1,i2) = x+y+z+15.0
 !BOC
    enddo
