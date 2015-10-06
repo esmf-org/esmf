@@ -69,7 +69,6 @@ program ESMF_LocStreamEx
 ! ------------------------------------------------------------------------------
 
 
-
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm,  defaultlogfilename="LocStreamEx.Log", &
@@ -186,6 +185,7 @@ program ESMF_LocStreamEx
    deallocate(lat)
    deallocate(temperature)
 
+
 !BOE
 !\subsubsection{Create a LocStream with internally allocated memory}
 !
@@ -216,9 +216,6 @@ program ESMF_LocStreamEx
    numLocations = 20
    allocate(temperature(numLocations))
 
-   do i=1,numLocations
-      temperature(i)= 300 - abs(lat(i))
-   enddo
 
 
    !-------------------------------------------------------------------
@@ -285,6 +282,10 @@ program ESMF_LocStreamEx
       lat(i)=100*REAL(localPet,ESMF_KIND_R8)/REAL(petCount,ESMF_KIND_R8)-50.0
    enddo
 
+
+   do i=1,numLocations
+      temperature(i)= 300 - abs(lat(i))
+   enddo
 
    !-------------------------------------------------------------------
    ! Create a Field on the Location Stream. In this case the 
@@ -484,6 +485,7 @@ program ESMF_LocStreamEx
    ! on locstream and Fields built on newLocstream.
    !-------------------------------------------------------------------
 !EOC
+
 
 !BOE
 !\subsubsection{Regridding from a Grid to a LocStream}
