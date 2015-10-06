@@ -210,13 +210,7 @@ program ESMF_LocStreamEx
 
 
 !BOC
-   !-------------------------------------------------------------------
-   ! Allocate and set example Field data
-   !-------------------------------------------------------------------
    numLocations = 20
-   allocate(temperature(numLocations))
-
-
 
    !-------------------------------------------------------------------
    ! Create the LocStream:  Allocate space for the LocStream object, 
@@ -283,6 +277,10 @@ program ESMF_LocStreamEx
    enddo
 
 
+   !-------------------------------------------------------------------
+   ! Allocate and set example Field data
+   !-------------------------------------------------------------------
+   allocate(temperature(numLocations))
    do i=1,numLocations
       temperature(i)= 300 - abs(lat(i))
    enddo
