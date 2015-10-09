@@ -212,7 +212,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        if (mass1 and mass2):
+        if (mass1 is not None) and (mass2 is not None):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
@@ -220,7 +220,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = num_nodes
         max_error_global = max_error
         min_error_global = min_error
-        if (mass1 and mass2):
+        if (mass1 is not None) and (mass2 is not None):
             mass1_global = mass1
             mass2_global = mass2
 
@@ -415,7 +415,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
                              mass1=srcmass, mass2=dstmass, 
                              regrid_method=regrid_method, uninitval=UNINITVAL)
 
-       # Destroy ESMF objects
+    # Destroy ESMF objects
     srcfield.destroy()
     dstfield.destroy()
     dstfield2.destroy()
