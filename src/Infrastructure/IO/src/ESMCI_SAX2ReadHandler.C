@@ -133,7 +133,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       if (cname != "convention" && cname != "purpose") {
         if (!this->convention.empty() && !this->purpose.empty()) {
           // string attPackInstanceName;
-          attPackAttr = this->attr->AttPackGetAttribute(cname);
+          attPackAttr = this->attr->AttPackGetAttribute(cname, ESMC_ATTNEST_ON);
           status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
 //          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
 //                                          &valueVector, this->convention,
@@ -213,7 +213,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       // Set the attribute on the object
       if (!this->convention.empty() && !this->purpose.empty()) {
         // string attPackInstanceName;
-        attPackAttr = this->attr->AttPackGetAttribute(this->qname);
+        attPackAttr = this->attr->AttPackGetAttribute(this->qname, ESMC_ATTNEST_ON);
         status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
 //        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
 //                                        &valueVector, this->convention,
