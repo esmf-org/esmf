@@ -1435,7 +1435,7 @@ static GeomRend::DstConfig get_dst_config(int imethod) {
 
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, bool freeze_src_, int imethod, MAP_TYPE mtype, int unmappedaction) :
 sres(),
-grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_),
+grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
 is_parallel(Par::Size() > 1),
 srcF(),
 dstF(),

@@ -6,22 +6,17 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-from copy import copy
-
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 from ESMF.api.locstream import *
-from ESMF.api.array import *
-import ESMF.api.constants as constants
+from ESMF.util.esmpyarray import *
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
 
-class Field(MaskedArray):
+class Field(object):
     """
-    The Field class is a Python wrapper object for the ESMF Field.  Field is a derived type of the
-    numpy.MaskedArray.  This means that it has built in masking functionality,
-    as well as native numpy Array operations.
+    The Field class is a Python wrapper object for the ESMF Field.
     The individual values of all data arrays are referenced to those of the underlying Fortran ESMF object.
 
     A Field represents a physical field, such as temperature.   The Field class contains distributed and
@@ -34,19 +29,97 @@ class Field(MaskedArray):
     For more information about the ESMF Field class, please see the `ESMF Field documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
     """
-    """
-    The ESMPy Field is a derived class of numpy.MaskedArray.  This means that it has built in masking functionality,
-    as well as native numpy Array operations.  All data is referenced to the underlying Fortran ESMF objects.
-    """
+
+    @property
+    def data(self):
+        """
+        :return: the data of the Field
+        """
+        return self._data
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def grid(self):
+        """
+        :return: the Grid, Mesh or LocStream upon which this Field is built
+        """
+        return self._grid
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the Field
+        """
+        return self._lower_bounds
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def name(self):
+        """
+        :return: the name of the Field
+        """
+        return self._name
+
+    @property
+    def ndbounds(self):
+        """
+        :return: the bounds of the extra dimensions in the Field
+        """
+        return self._ndbounds
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Field
+        """
+        return self._rank
+
+    @property
+    def staggerloc(self):
+        """
+        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        """
+        return self._staggerloc
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def type(self):
+        """
+        :return: the type of the data in the Field
+        """
+        return self._type
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the Field
+        """
+        return self._upper_bounds
+
+    @property
+    def xd(self):
+        """
+        :return: the number of extra (ungridded) dimensions of the Field
+        """
+        return self._xd
+
     @initialize
-    def __new__(cls, grid, name=None,
+    def __init__(self, grid, name=None,
                 typekind=None,
                 staggerloc=None,
                 meshloc=None,
-                ndbounds=None,
-                mask_values=None):
+                ndbounds=None):
         """
-        Create a Field from a Grid or Mesh. \n
+        Create a Field from a Grid, Mesh or LocStream. \n
         Required Arguments: \n
             grid: a Grid, Mesh or LocStream with coordinates allocated on
                   at least one stagger location. \n
@@ -84,9 +157,6 @@ class Field(MaskedArray):
             ndbounds: the number of entries in an extra field dimension. This
                       is represented as a single value, a list or a tuple containing
                       a number of entries for each desired extra dimension of a field.\n
-            mask_values: Python list of integer values to use for masking. \n
-                type: Python list \n
-                shape: [grid.shape, 1] \n
         Returns: \n
             Field \n
         """
@@ -123,43 +193,12 @@ class Field(MaskedArray):
             grid_to_field_map = np.array([i+xd+1 for i in range(grid.rank)], dtype=np.int32)
             rank += len(local_ndbounds)
 
-        data = None
-        mask = None
         if isinstance(grid, Grid):
             # call into ctypes layer
             struct = ESMP_FieldCreateGrid(grid, name, typekind, staggerloc,
                                           grid_to_field_map,
                                           ungridded_lower_bound,
                                           ungridded_upper_bound)
-
-            # set the grid mask
-            domask = False
-            if grid._singlestagger:
-                if (grid.mask is not None):
-                    domask = True
-            else:
-                if (grid.mask[staggerloc] is not None):
-                    domask = True
-
-            if domask:
-                lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
-                # verify that grid mask is the same shape as the extra field dimensions
-                # if (np.all(grid.mask[staggerloc].shape == ubounds[xd:xd + rank] - lbounds[xd:xd + rank])):
-                # initialize the mask to all unmasked values
-                mask = np.ones(ubounds - lbounds, dtype=np.int32)
-                # reset the mask with integer values according to what is in the grid mask,
-                # taking care to propagate masked values through the extra field dimensions
-                if grid.rank == 2:
-                    mask[..., :, :] = grid.mask[staggerloc]
-                elif grid.rank == 3:
-                    mask[..., :, :, :] = grid.mask[staggerloc]
-                else:
-                    raise IndexError("Grid with rank less than 2 or greater than 3 is not allowed")
-                # else:
-                #     raise IndexError(
-                #         "grid mask bounds do not match field bounds: grid.mask.shape != ubounds - lbounds (" \
-                #         + str(grid.mask[staggerloc].shape) + " != "
-                #         + str(ubounds[xd:xd + rank] - lbounds[xd:xd + rank]) + ")")
 
         elif isinstance(grid, Mesh):
             # deal with the wacky ESMF node/element convention
@@ -176,8 +215,6 @@ class Field(MaskedArray):
                                       ungridded_lower_bound,
                                       ungridded_upper_bound)
 
-            # No masking on a Mesh
-            mask = None
         elif isinstance(grid, LocStream):
             # call into ctypes layer
             struct = ESMP_FieldCreateLocStream(grid, name, typekind,
@@ -185,147 +222,37 @@ class Field(MaskedArray):
                                       ungridded_lower_bound,
                                       ungridded_upper_bound)
 
-            if "ESMF:Mask" in grid:
-                mask = grid["ESMF:Mask"]
         else:
             raise FieldDOError
 
         # get data and bounds to create a new instance of this object
-        data = ESMP_FieldGetPtr(struct)
         lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
 
-        # set field_mask based on the grid mask and the mask_values input argument
-        if mask is None:
-            size = reduce(mul, ubounds - lbounds)
-            mask = [False] * size
-        else:
-            # handle mask values
-            if mask_values is None:
-                maskvals = np.array([])
-            else:
-                maskvals = mask_values
-            # set mask
-            mask = [True if x in maskvals else False for x in mask.flatten().tolist()]
-
-        obj = super(Field, cls).__new__(cls, data, mask=mask,
-                                           dtype=typekind, shape=ubounds-lbounds)
-
         # initialize field data
-        obj._name = name
-        obj._type = typekind
-        obj._rank = rank
-        obj._struct = struct
-        obj._xd = xd
-        obj._staggerloc = staggerloc
-        obj._lower_bounds = lbounds
-        obj._upper_bounds = ubounds
-        obj._ndbounds = local_ndbounds
+        #TODO: MaskedArray gives better interpolation values than Array
+        self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
+        self._name = name
+        self._type = typekind
+        self._rank = rank
+        self._struct = struct
+        self._xd = xd
+        self._staggerloc = staggerloc
+        self._lower_bounds = lbounds
+        self._upper_bounds = ubounds
+        self._ndbounds = local_ndbounds
+
         if not grid.singlestagger:
-            obj._grid = grid._preslice_(staggerloc)
+            self._grid = grid._preslice_(staggerloc)
         else:
-            obj._grid = grid
+            self._grid = grid
 
         # for arbitrary metadata
-        obj._meta = {}
+        self._meta = {}
 
         # register function with atexit
         import atexit
-        atexit.register(obj.__del__)
-        obj._finalized = False
-
-        # load all metadata into _optinfo to appease np.MaskedArray
-        obj._optinfo["_name"] = obj._name
-        obj._optinfo["_type"] = obj._type
-        obj._optinfo["_rank"] = obj._rank
-        obj._optinfo["_struct"] = obj._struct
-        obj._optinfo["_xd"] = obj._xd
-        obj._optinfo["_staggerloc"] = obj._staggerloc
-        obj._optinfo["_lower_bounds"] = obj._lower_bounds
-        obj._optinfo["_upper_bounds"] = obj._upper_bounds
-        obj._optinfo["_ndbounds"] = obj._ndbounds
-        obj._optinfo["_grid"] = obj._grid
-        obj._optinfo["_meta"] = obj._meta
-        obj._optinfo["_finalized"] = obj._finalized
-
-        return obj
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        super(Field, self).__array_finalize__(obj)
-        self._name = getattr(obj, 'name', None)
-        self._type = getattr(obj, 'type', None)
-        self._rank = getattr(obj, 'rank', None)
-        self._struct = getattr(obj, 'struct', None)
-        self._xd = getattr(obj, 'xd', None)
-        self._staggerloc = getattr(obj, 'staggerloc', None)
-        self._lower_bounds = getattr(obj, 'lower_bounds', None)
-        self._upper_bounds = getattr(obj, 'upper_bounds', None)
-        self._ndbounds = getattr(obj, 'ndbounds', None)
-        self._grid = getattr(obj, 'grid', None)
-        self._meta = getattr(obj, 'meta', None)
-
-    def flatten(self, *args, **kwargs):
-        flattened = super(Field, self).flatten(*args, **kwargs)
-        flattened._finalized = True
-        return flattened
-
-    def reshape(self, *args, **kwargs):
-        reshaped = super(Field, self).reshape(*args, **kwargs)
-        reshaped._finalized = True
-        return reshaped
-
-    def transpose(self, *args, **kwargs):
-        transposed = super(Field, self).transpose(*args, **kwargs)
-        transposed._finalized = True
-        return transposed
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def rank(self):
-        return self._rank
-
-    @property
-    def xd(self):
-        return self._xd
-
-    @property
-    def staggerloc(self):
-        return self._staggerloc
-
-    @property
-    def lower_bounds(self):
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        return self._upper_bounds
-
-    @property
-    def ndbounds(self):
-        return self._ndbounds
-
-    @property
-    def grid(self):
-        return self._grid
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
+        atexit.register(self.__del__)
+        self._finalized = False
 
     # manual destructor
     def destroy(self):
@@ -368,9 +295,8 @@ class Field(MaskedArray):
                   "    lower bounds = %r\n"
                   "    upper bounds = %r\n"
                   "    extra bounds = %r\n"
-                  "    grid = \n%r\n"
-                  "    mask = %r\n"
                   "    data = %r\n"
+                  "    grid = \n%r\n"
                   ")"
                   %
                   (self.name,
@@ -381,10 +307,9 @@ class Field(MaskedArray):
                    self.lower_bounds,
                    self.upper_bounds,
                    self.ndbounds,
+                   self.data,
                    self.grid,
-                   self.mask,
-                   self.data
-                  ))
+        ))
 
         return string
 
@@ -396,39 +321,21 @@ class Field(MaskedArray):
 
         return ret
 
-    def _merge_(self, obj):
-        # initialize field data
-        obj._struct = self.struct
-        obj._name = self.name
-        obj._rank = self.rank
-        obj._xd = self.xd
-        obj._type = self.type
-        obj._staggerloc = self.staggerloc
-        obj._lower_bounds = self.lower_bounds
-        obj._upper_bounds = self.upper_bounds
-        obj._ndbounds = self.ndbounds
-        obj._meta = self.meta
-
-        # set slice to be finalized so it doesn't call the ESMF garbage collector
-        obj._finalized = True
-
-        return obj
-
     def __getitem__(self, slc):
         if pet_count() > 1:
             raise SerialMethod
 
-        slc_field = get_formatted_slice(slc, self.rank)
-        ret = super(Field, self).__getitem__(slc_field)
+        slc = get_formatted_slice(slc, self.rank)
 
-        # have to "merge" ret and self
-        ret = self._merge_(ret)
+        ret = self._copy_()
+
+        ret._data = self._data.__getitem__(slc)
 
         # set grid to the last two dims of the slice
         if self.xd > 0:
-            slc_grid = [slc_field[-1*x] for x in range(self.rank-self.xd, 0, -1)]
+            slc_grid = [slc[-1*x] for x in range(self.rank-self.xd, 0, -1)]
         else:
-            slc_grid = slc_field
+            slc_grid = slc
         ret._grid = self.grid._slice_onestagger_(slc_grid)
 
         # upper bounds are "sliced" by taking the shape of the data

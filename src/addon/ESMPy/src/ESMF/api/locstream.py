@@ -7,9 +7,8 @@ The LocStream API
 #### IMPORT LIBRARIES #########################################################
 
 from ESMF.api.esmpymanager import *
-from ESMF.api.array import esmf_array1D
+from ESMF.util.esmpyarray import ndarray_from_esmf
 import ESMF.api.constants as constants
-from copy import copy
 from ESMF.util.slicing import get_formatted_slice
 
 
@@ -37,8 +36,14 @@ class LocStream(dict):
 
         locstream["ESMF:X"] = [1, 2, 3]
         x = locstream["ESMF:X"]
+        locstream["ESMF:Y"] = [1, 2, 3]
+        y = locstream["ESMF:Y"]
+        locstream["ESMF:Mask"] = [0, 1, 0]
+        mask = locstream["ESMF:Mask"]
 
     NOTE: Setting keys of lists of mixed types can result in errors due to type mismatches from the ESMF library.
+
+    NOTE: Mask must be of type TypeKind.I4, and coordinates must by of type TypeKind.R8
 
     For ESMF to be able to recognize coordinates specified in a LocStream key they need to be named with the
     appropriate identifiers. The particular identifiers depend on the coordinate system (i.e. coord_sys argument)
@@ -54,6 +59,56 @@ class LocStream(dict):
     CoordSys.CART        ESMF:X       ESMF:Y       ESMF:Z
     ===================  ===========  ===========  ===========
     """
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the LocStream
+        """
+        return self._lower_bounds
+
+    @property
+    def mask(self):
+        """
+        :return: the mask of the LocStream
+        """
+        try:
+            return self["ESMF:Mask"]
+        except:
+            return None
+    @property
+    def name(self):
+        """
+        :return: the name of the LocStream
+        """
+        return self._name
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the LocStream
+        """
+        return self._rank
+
+    @property
+    def singlestagger(self):
+        return self._singlestagger
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the LocStream
+        """
+        return self._upper_bounds
+
     @initialize
     def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
         '''
@@ -131,13 +186,11 @@ class LocStream(dict):
         """
         string = ("LocStream:\n"
                   "    name = %r \n"
-                  "    size = %r \n"
                   "    lower_bounds = %r \n"
                   "    upper_bounds = %r \n"
                   "    keys = %r \n"
                   %
                   (self.name,
-                   self.size,
                    self.lower_bounds,
                    self.upper_bounds,
                    self.items(),
@@ -193,27 +246,14 @@ class LocStream(dict):
         return ret
 
     def _add_(self, key_name, typekind=None):
-        '''
-        Add a key to a LocStream. \n
-        Required Arguments: \n
-            key_name: the name of the key. \n
-        Optional Arguments: \n
-            typekind: the type of the LocStream key data. \n
-                Argument values are: \n
-                    TypeKind.I4 \n
-                    TypeKind.I8 \n
-                    TypeKind.R4 \n
-                    (default) TypeKind.R8 \n
-        '''
-
-        # allocation the key
+        # allocate the key
         ESMP_LocStreamAddKeyAlloc(self.struct, key_name, keyTypeKind=typekind)
 
         # get a pointer to the Fortran buffer to the key
         key_ptr = ESMP_LocStreamGetKeyPtr(self.struct, key_name)
 
-        # create an Array1D object out of the pointer
-        keyvals = esmf_array1D(key_ptr, dtype=typekind, size=self.size)
+        # create a numpy array out of the pointer
+        keyvals = ndarray_from_esmf(key_ptr, typekind, (self.size,))
 
         return keyvals
 
@@ -232,31 +272,3 @@ class LocStream(dict):
         ret._finalized = True
 
         return ret
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def rank(self):
-        return self._rank
-
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def lower_bounds(self):
-        return self._lower_bounds
-
-    @property
-    def upper_bounds(self):
-        return self._upper_bounds
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger

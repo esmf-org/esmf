@@ -56,6 +56,7 @@ module ESMF_StateMod
       public operator(/=)
 
       public ESMF_StateCreate, ESMF_StateDestroy
+      public ESMF_StateIsCreated
       
       public ESMF_StateDestruct    ! for ESMF garbage collection
 

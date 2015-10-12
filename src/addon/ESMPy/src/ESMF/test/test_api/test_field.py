@@ -34,12 +34,10 @@ class TestField(TestBase):
             assert (type(field.ndbounds) is list)
             assert (len(field.ndbounds) == field.xd)
 
-        # ~~~~~~~~~~~~~~~~~~~~~~  MASK, DATA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        assert (type(field.mask) is np.ndarray)
+        # ~~~~~~~~~~~~~~~~~~~~~~  DATA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.data) is np.ndarray)
-        assert (field.mask.shape == field.data.shape)
 
-    def make_maskedfield(self, array, ndbounds=True):
+    def make_field(self, array, ndbounds=True):
         '''
         :param self: TestMaskedArray class type
         :param array: maxindices of a 2- or 3d array
@@ -53,59 +51,38 @@ class TestField(TestBase):
         mask[0, 1] = 0
 
         if ndbounds:
-            field = Field(grid, ndbounds=[2, 5], mask_values=[0])
-            assert (np.all(field.mask[:, :, 0, 1]))
+            field = Field(grid, ndbounds=[2, 5])
         else:
-            field = Field(grid, mask_values=[0])
-            assert (np.all(field.mask[0, 1]))
-
-
+            field = Field(grid)
 
         field.data[...] = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
 
         return field
 
     def test_meta_del(self):
-        self.maskedfield = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
-        self.maskedfield.meta["test"] = "testmetaobject"
-        assert (self.maskedfield.meta["test"] ==  "testmetaobject")
-        del (self.maskedfield)
-        assert (not hasattr(self, 'maskedfield'))
+        self.field = self.make_field(np.array([10, 10], dtype=np.int32))
+        self.field.meta["test"] = "testmetaobject"
+        assert (self.field.meta["test"] ==  "testmetaobject")
+        del (self.field)
+        assert (not hasattr(self, 'field'))
 
     @attr('serial')
     def test_numpy_funcs(self):
-        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        field = self.make_field(np.array([10, 10], dtype=np.int32))
 
         field.data[...] = 4
 
-        assert ((field.T == 4).all())
-        assert ((field.flatten() == 4).all())
+        assert ((field.data.T == 4).all())
+        assert ((field.data.flatten() == 4).all())
 
         # TODO: np.empty_like gives a segfault, waiting for support request to implement empty_like functionality
         #       for Field that actually allocates a new ESMF Field underneath
         # assert (type(np.empty_like(field)) == Field)
 
-        field.harden_mask()
-        field[0, 0, 0, 1] = 7
-        # hardened mask should silently fail unmasking values
-        assert (field.mask[0, 0, 0, 1] == True)
-
-        # this doesn't seem to work either
-        field.mask = ma.nomask
-        assert (field.mask[0, 0, 0, 1] == True)
-
-        # soften mask and unset all masked values
-        field.soften_mask()
-        field.mask = ma.nomask
-        assert (field.mask.all() == False)
-
-        # however, Field.harden_mask() does not protect from directly setting mask values
-        field.harden_mask()
-        field[0, 0, 0, 1].mask = True
-        assert (field.mask[0, 0, 0, 1] == True)
-
-        # the value of single masked element should be ma.masked
-        assert (field[0, 0, 0, 1] == ma.masked)
+        # extended slices
+        for i in range(10):
+            field.data[:, :, :, i] = i
+        assert field.data[0, 0, 0, ::2].all() == np.array([0, 2, 4, 6, 8]).all()
 
     @attr('serial')
     @attr('slow')
@@ -120,7 +97,6 @@ class TestField(TestBase):
             # staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
             # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
             typekind_grid=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
-            # mask_values = [None, [2], [2, 3, 4]],
             typekind_field=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
             # ndbounds=[None, [2], [2, 5]]
             )
@@ -138,7 +114,7 @@ class TestField(TestBase):
                         grid.mask[a.staggerloc][:, b] = b
 
                 field = Field(grid, name="test_field_grid_2d", typekind=a.typekind_field,
-                              staggerloc=a.staggerloc, ndbounds=a.ndbounds, mask_values=a.mask_values)
+                              staggerloc=a.staggerloc, ndbounds=a.ndbounds)
 
                 field2 = None
                 if a.ndbounds is not None:
@@ -191,7 +167,7 @@ class TestField(TestBase):
                         grid.mask[a.staggerloc][:, :, b] = b
 
                 field = Field(grid, name="test_field_grid_2d", typekind=a.typekind_field,
-                              staggerloc=a.staggerloc, ndbounds=a.ndbounds, mask_values=a.mask_values)
+                              staggerloc=a.staggerloc, ndbounds=a.ndbounds)
                 self.examine_field_attributes(field)
                 field2 = None
                 if a.ndbounds is not None:
@@ -256,7 +232,7 @@ class TestField(TestBase):
 
     # copy constructorish
     def test_field_create_from_gridfield(self):
-        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        field = self.make_field(np.array([10, 10], dtype=np.int32))
         self.examine_field_attributes(field)
         data = np.random.rand(*tuple(field.upper_bounds - field.lower_bounds))
         field.data[...] = data
@@ -270,7 +246,7 @@ class TestField(TestBase):
         assert np.all(field.data[0,0,...] == field2.data)
 
     def test_field_grid_copy(self):
-        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32))
+        field = self.make_field(np.array([10, 10], dtype=np.int32))
         self.examine_field_attributes(field)
 
         field2 = field._copy_()
@@ -290,92 +266,6 @@ class TestField(TestBase):
         field = ESMF.Field(gml, name=name)
 
         return field
-
-    def test_field_mask(self):
-
-        max_index = np.array([12, 20])
-
-        grid = Grid(max_index)
-
-        # Add coordinates
-        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
-
-        # Add Mask
-        mask = grid.add_item(GridItem.MASK)
-
-        [x, y] = [0, 1]
-        for i in xrange(mask.shape[x]):
-            for j in xrange(mask.shape[y]):
-                if (i == 2.0):
-                    mask[i, j] = 2
-                elif (i == 3.0):
-                    mask[i, j] = 3
-                else:
-                    mask[i, j] = 0
-
-        # create a Field on the Grid, should inherit the mask
-        field = Field(grid, mask_values=[2, 3])
-        self.examine_field_attributes(field)
-
-        if pet_count() == 0:
-            assert (all(field.mask[2, :]))
-            assert (all(field.mask[3, :]))
-
-    def test_field_mask_with_xd(self):
-
-        grid = Grid(np.array([10, 10], dtype=np.int32), coord_sys=CoordSys.CART)
-
-        mask = grid.add_item(GridItem.MASK)
-        mask[:] = 1
-        mask[0, 1] = 0
-
-        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
-        self.examine_field_attributes(field)
-
-        assert (np.all(field.mask[:, :, 0, 1]))
-
-    def test_field_mask_3D(self):
-
-        max_index = np.array([10, 20, 30])
-
-        grid = Grid(max_index)
-
-        # Add coordinates
-        grid.add_coords(staggerloc=[StaggerLoc.CENTER])
-
-        # Add Mask
-        mask = grid.add_item(GridItem.MASK)
-
-        [x, y, z] = [0, 1, 2]
-        for i in xrange(mask.shape[x]):
-            for j in xrange(mask.shape[y]):
-                for k in xrange(mask.shape[z]):
-                    if (i == 1.0):
-                        mask[i, j, k] = 2
-                    elif (j == 2.0):
-                        mask[i, j, k] = 3
-                    else:
-                        mask[i, j, k] = 0
-
-        # create a Field on the Grid, should inherit the mask
-        field = Field(grid, mask_values=[2, 3])
-        self.examine_field_attributes(field)
-
-        assert (np.all(field.mask[1, :, :]))
-        assert (np.all(field.mask[:, 2, :]))
-
-    def test_field_mask_3D_with_xd(self):
-
-        grid = Grid(np.array([10, 10, 10], dtype=np.int32), coord_sys=CoordSys.CART)
-
-        mask = grid.add_item(GridItem.MASK)
-        mask[...] = 1
-        mask[0, 1, 0] = 0
-
-        field = Field(grid, ndbounds=[2, 5], mask_values=[0])
-        self.examine_field_attributes(field)
-
-        assert (np.all(field.mask[:, :, 0, 1, 0]))
 
     def test_field_uniqueness(self):
         # create mesh
@@ -399,10 +289,10 @@ class TestField(TestBase):
         field2 = Field(mesh, typekind=TypeKind.I4, meshloc=MeshLoc.ELEMENT)
         self.examine_field_attributes(field2)
 
-        for i in range(field.shape[0]):
+        for i in range(field.data.shape[0]):
             field.data[i] = 10
 
-        for i in range(field2.shape[0]):
+        for i in range(field2.data.shape[0]):
             field2.data[i] = 10
 
         assert (field.struct.ptr != field2.struct.ptr)
@@ -416,7 +306,7 @@ class TestField(TestBase):
         locstream["ESMF:Y"] = [7, 7, 7, 7, 7]
         locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
 
-        field = Field(locstream, mask_values=[1])
+        field = Field(locstream)
         field.data[...] = 7
         self.examine_field_attributes(field)
 
@@ -512,9 +402,9 @@ class TestField(TestBase):
         field3 = field2[2:4, 2:4]
         self.examine_field_attributes(field3)
 
-        assert (field.shape == (100, 100))
-        assert (field2.shape == (5, 5))
-        assert (field3.shape == (2, 2))
+        assert (field.data.shape == (100, 100))
+        assert (field2.data.shape == (5, 5))
+        assert (field3.data.shape == (2, 2))
 
         assert (field.upper_bounds.tolist() == [100, 100])
         assert (field2.upper_bounds.tolist() == [5, 5])
@@ -550,9 +440,9 @@ class TestField(TestBase):
         field3 = field2[2:4]
         self.examine_field_attributes(field3)
 
-        assert (field.shape == (64,))
-        assert (field2.shape == (5,))
-        assert (field3.shape == (2,))
+        assert (field.data.shape == (64,))
+        assert (field2.data.shape == (5,))
+        assert (field3.data.shape == (2,))
 
         assert (field.upper_bounds.tolist() == [64])
         assert (field2.upper_bounds.tolist() == [5])
@@ -580,7 +470,7 @@ class TestField(TestBase):
 
         for i in range(2):
             for j in range(5):
-                field[i,j,...] = i+j
+                field.data[i,j,...] = i+j
 
         field2 = field[0:1, 0:2, 0:5, 0:5]
         self.examine_field_attributes(field2)
@@ -588,9 +478,9 @@ class TestField(TestBase):
         field3 = field2[0:1, 0:1, 2:4, 2:4]
         self.examine_field_attributes(field3)
 
-        assert field.shape == (2, 5, 10, 10)
-        assert field2.shape == (1, 2, 5, 5)
-        assert field3.shape == (1, 1, 2, 2)
+        assert field.data.shape == (2, 5, 10, 10)
+        assert field2.data.shape == (1, 2, 5, 5)
+        assert field3.data.shape == (1, 1, 2, 2)
 
         assert (field.upper_bounds.tolist() == [2, 5, 10, 10])
         assert (field2.upper_bounds.tolist() == [1, 2, 5, 5])
@@ -631,18 +521,18 @@ class TestField(TestBase):
         field3 = field2[0:1, 1:2, 2:4]
         self.examine_field_attributes(field3)
 
-        assert field.shape == (2, 5, 10)
-        assert field2.shape == (1, 2, 5)
-        assert field3.shape == (1, 1, 2)
+        assert field.data.shape == (2, 5, 10)
+        assert field2.data.shape == (1, 2, 5)
+        assert field3.data.shape == (1, 1, 2)
 
     @attr('serial')
     def test_field_reshape(self):
-        field = self.make_maskedfield(np.array([10, 10], dtype=np.int32), ndbounds=False)
+        field = self.make_field(np.array([10, 10], dtype=np.int32), ndbounds=False)
 
         field.data[...] = 4
 
-        field2 = field.reshape(5, 20)
+        field2 = field.data.reshape(5, 20)
 
-        assert type(field2) == Field
+        assert type(field2) == np.ndarray
         assert field2.shape == (5,20)
-        self.examine_field_attributes(field2)
+        # self.examine_field_attributes(field2)

@@ -8,7 +8,7 @@
 For ESMF to be able to use coordinates specified in a LocStream key (e.g. in regridding) 
 they need to be named with the appropriate identifiers. The particular identifiers depend 
 on the coordinate system (i.e. coordSys argument) used to create the LocStream containing 
-the keys. 
+the keys.  ESMF regridding expects these keys to be of type ESMF\_TYPEKIND\_R8. 
 
 The valid values are:
 \newline
@@ -31,7 +31,8 @@ Coordinate System & {\bf dimension 1}  & {\bf dimension 2} & {\bf dimension 3 (i
 {\sf DESCRIPTION:\\}
 Points within a LocStream can be marked and then potentially ignored during certain 
 operations, like regridding.  This masking information must be contained in a key 
-named with the appropriate identifier.
+named with the appropriate identifier.  ESMF regridding expects this key to be 
+of type ESMF\_TYPEKIND\_I4.
 
 The valid value is:
 \begin{description}

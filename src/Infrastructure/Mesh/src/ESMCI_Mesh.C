@@ -61,8 +61,7 @@ namespace ESMCI {
 Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                sghost(NULL),
                committed(false),
-               is_split(false),
-               is_sph(false)
+               is_split(false)
 {
 
    GetCommRel(MeshObj::NODE).Init("node_sym", *this, *this, true);

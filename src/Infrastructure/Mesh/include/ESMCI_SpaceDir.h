@@ -70,7 +70,7 @@ class SpaceDir {    // inherits from ESMC_Base class
  public:
 
   // SpaceDir Construct 
-  SpaceDir(double proc_min[3], double proc_max[3], OTree *otree);
+  SpaceDir(double proc_min[3], double proc_max[3], OTree *otree, bool searchThisProc=true);
 
   // SpaceDir Destruct (Does not delete OTree)
   ~SpaceDir();

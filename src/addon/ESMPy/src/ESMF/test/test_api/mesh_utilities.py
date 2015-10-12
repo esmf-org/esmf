@@ -1348,7 +1348,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size_local):
+        for i in range(field.grid.size_owned):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -1386,7 +1386,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
             y = nodeCoord[i*2+1]
 
             if (nodeOwner[i] == ESMF.local_pet()):
-                if ind > field.grid.size_local:
+                if ind > field.grid.size_owned:
                     raise ValueError("Overstepped the mesh bounds!")
                 field.data[ind] = 20.0 + x**2 +x*y + y**2
                 #print '[{0},{1}] = {2}'.format(x,y,field.data[ind])
@@ -1402,7 +1402,8 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     return field
 
-def compute_mass_mesh(valuefield, dofrac=False, fracfield=None):
+def compute_mass_mesh(valuefield, dofrac=False, fracfield=None,
+                      uninitval=422397696.):
     '''
     PRECONDITIONS: 'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
@@ -1416,16 +1417,18 @@ def compute_mass_mesh(valuefield, dofrac=False, fracfield=None):
     areafield = ESMF.Field(valuefield.grid, name='areafield',
                            meshloc=ESMF.MeshLoc.ELEMENT)
     areafield.get_area()
+
+    ind = np.where(valuefield.data != uninitval)
     if dofrac:
-        mass = np.sum(areafield.data * valuefield.data * fracfield.data)
+        mass = np.sum(areafield.data[ind[0]] * valuefield.data[ind[0]] * fracfield.data[ind[0]])
     else:
-        mass = np.sum(areafield.data * valuefield.data)
+        mass = np.sum(areafield.data[ind[0]] * valuefield.data[ind[0]])
 
     return mass
 
 def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False, 
                         dstfracfield=None, mass1=None, mass2=None, 
-                        regrid_method=ESMF.RegridMethod.CONSERVE):
+                        regrid_method=ESMF.RegridMethod.CONSERVE, mask_values=[0]):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
                    the values is desired between 'field1' and 
@@ -1437,7 +1440,7 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     import numpy.ma as ma
 
     # verify that the fields are the same size
-    assert field1.shape == field2.shape, 'compare_fields: Fields must be the same size!'
+    assert field1.data.shape == field2.data.shape, 'compare_fields: Fields must be the same size!'
 
     # deal with default values for fracfield
     if dstfracfield is None:
@@ -1448,14 +1451,27 @@ def compare_fields_mesh(field1, field2, itrp_tol, csrv_tol, parallel=False,
     max_error = 0.0
     min_error = 1000000.0
     num_nodes = 0
-    for i in range(field1.shape[0]):
-        if ((not field2.mask[i]) and 
+
+    # allow fields of all dimensions
+    field1_flat = np.ravel(field1.data)
+    field2_flat = np.ravel(field2.data)
+    dstfracfield_flat = np.ravel(dstfracfield.data)
+    # TODO currently don't have mask saved on the mesh.. (but it used to live on fields built on a mesh)
+    # # TODO:  test for evaluating field2mask into an array of True/False values based on field2.grid.mask
+    # if field2.grid.mask is not None:
+    #     field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask.flatten().tolist()]
+    # else:
+    #     field2mask_flat = np.ravel(np.zeros_like(field2.data))
+
+    for i in range(field1.data.shape[0]):
+        #TODO currently don't have mask saved on the mesh.. (but it used to live on fields built on a mesh)
+        if (# (not field2mask_flat[i]) and
             (regrid_method != ESMF.RegridMethod.CONSERVE or
-            dstfracfield.data[i] >= 0.999)):
-            if (field2.data[i] != 0.0):
-                err = abs(field1.data[i]/dstfracfield.data[i] - field2.data[i])/abs(field2.data[i])
+            dstfracfield_flat[i] >= 0.999)):
+            if (field2_flat[i] != 0.0):
+                err = abs(field1_flat[i]/dstfracfield_flat[i] - field2_flat[i])/abs(field2_flat[i])
             else:
-                err = abs(field1.data[i]/dstfracfield.data[i]) - field2.data[i]
+                err = abs(field1_flat[i]/dstfracfield_flat[i]) - field2_flat[i]
             num_nodes += 1
             totalErr += err
             if (err > max_error):

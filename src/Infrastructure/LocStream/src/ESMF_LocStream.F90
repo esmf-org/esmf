@@ -61,6 +61,7 @@ module ESMF_LocStreamMod
   use ESMF_InitMacrosMod
   use ESMF_MeshMod
   use ESMF_IOScripMod
+  use ESMF_IOUGridMod
 
   implicit none
 
@@ -467,8 +468,9 @@ contains
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName. Once a key has 
+! been added, a pointer to its internally allocated memory can be 
+! retrieved and used to set key values. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -562,8 +564,9 @@ contains
     integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! {\tt ESMF\_Array}.  The user is responsible for the creation of the 
+! {\tt ESMF\_Array} that will hold the key values.
 !
 ! The arguments are:
 ! \begin{description}
@@ -715,8 +718,10 @@ contains
 !    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!    Add a key to a locstream. Once a key has been added its internal data
-!    can be retrieved and used to set key values. 
+!    Add a key to a locstream with a required keyName and a required 
+!    Fortran array.  The user is responsible for the creation of the 
+!    Fortran array that will hold the key values, including 
+!    the maintenance of any allocated memory.
 !
 !    Supported values for <farray> are:
 !    \begin{description}
@@ -773,8 +778,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+!  Add a key to a locstream with a required keyName and a required 
+!  Fortran array.  The user is responsible for the creation of the 
+!  Fortran array that will hold the key values, including 
+!  the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -863,8 +870,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array that will hold the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -953,8 +962,10 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Add a key to a locstream. Once a key has been added its internal data
-! can be retrieved and used to set key values. 
+! Add a key to a locstream with a required keyName and a required 
+! Fortran array.  The user is responsible for the creation of the 
+! Fortran array that will hold the key values, including 
+! the maintenance of any allocated memory.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1005,7 +1016,6 @@ contains
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
 
    ! Add key to structure
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
@@ -1208,8 +1218,8 @@ contains
       integer :: keyCount,i,regrid_dims,idx,idx_cart
       integer :: localrc
       integer :: pntDim, pntCount
-      real(ESMF_KIND_R8),  pointer  :: pntList(:)
-      real(ESMF_KIND_R8),  pointer  :: pntList_cart(:)
+      real(ESMF_KIND_R8), pointer  :: pntList(:)
+      real(ESMF_KIND_R8), pointer  :: pntList_cart(:)
       integer, pointer :: petList(:)
       character (len=ESMF_MAXSTR)            :: coordKeyNames
       type(ESMF_CoordSys_Flag) :: coordSysLocal, coordSys_ofBkgMesh
@@ -1350,6 +1360,7 @@ contains
 
       ! Can now get rid of pntList
       deallocate(pntList)
+      deallocate(pntList_cart)
 
       ! Create a new location stream by shifting the entries between 
       ! the pets based on petList
@@ -1548,10 +1559,11 @@ contains
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[minIndex]}] 
-!          Number to start the index ranges at. If not present, defaults
-!          to 1.
+!          If indexflag={\tt ESMF\_INDEX\_DELOCAL}, this setting is used to indicate
+!          the number to start the index ranges at. If not present, defaults to 1.
 !     \item[{countsPerDE}] 
-!          This array specifies the number of locations per DE.
+!          This array has an element for each DE, specifying the number of locations 
+!          for that DE.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -1680,14 +1692,14 @@ contains
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
 !     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
-!     how the LocStream is distributed. 
+!     how the LocStream is distributed. The assumed layout is one DE per PET.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[localCount]
-!          Number of grid cells to be distributed to this DE.
+!          Number of grid cells to be distributed to this DE/PET.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -1833,7 +1845,6 @@ contains
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
 !     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
 !     how the LocStream is distributed. 
-!     at a later time. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -1849,8 +1860,9 @@ contains
 !          see Section~\ref{const:decompflag} for a full description of the 
 !          possible options. 
 !          \end{sloppypar}
-!     \item{[[minIndex]}]
-!          The minimum index across all PETs. If not set defaults to 1. 
+!     \item[{[minIndex]}] 
+!          If indexflag={\tt ESMF\_INDEX\_DELOCAL}, this setting is used to indicate
+!          the number to start the index ranges at. If not present, defaults to 1.
 !     \item[maxIndex]
 !          The maximum index across all PETs.
 !     \item[{[indexflag]}]
@@ -1953,42 +1965,55 @@ contains
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamCreate"
+#define ESMF_METHOD "ESMF_LocStreamCreateFromFile"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a SCRIP format grid file
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a grid file
+!\label{locstream:createfromfile}
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromFile(name, filename, indexflag, rc)
+      function ESMF_LocStreamCreateFromFile(name, filename, fileformatflag, indexflag, centerflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
 
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in), optional    :: name
-      character (len=*), intent(in)         :: filename
-      type(ESMF_Index_Flag), intent(in), optional      :: indexflag
-      integer, intent(out), optional                  :: rc
+      character (len=*), intent(in), optional     :: name
+      character (len=*), intent(in)               :: filename
+      type(ESMF_FileFormat_Flag), intent(in), optional  :: fileformatflag
+      type(ESMF_Index_Flag), intent(in), optional :: indexflag
+      logical, intent(in), optional               :: centerflag
+      integer, intent(out), optional              :: rc
 
 ! !DESCRIPTION:
 !     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
-!     to the LocStream using the variables {\tt grid\_center\_lon}, {\tt grid\_center\_lat},
-!     and {\tt grid\_imask} defined in the SCRIP format grid file.  The data is distributed
-!     evenly on all the PETs with the extra elements on the lower PETs.  
+!     to the LocStream using the coordinates defined in a grid file.  Currently, it 
+!     supports the SCRIP format, the ESMF unstructured grid format and the UGRID format.
+!     For a grid in ESMF or UGRID format, it can construct the LocStream using either 
+!     the center coordinates or the corner coordinates.  For a SCRIP format grid file, the
+!     LocStream can only be constructed using the center coordinates.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[filename]
-!          Name of grid file to be used to create the location stream.  Currently, only
-!          the SCRIP file format is supported.
+!          Name of grid file to be used to create the location stream.  
+!     \item[{[fileformatflag]}]
+!          Flag that indicates the file format of the grid file.  Please see
+!          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
+!          list of valid options.  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
 !          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
+!     \item[{[centerflag]}]
+!          Flag that indicates whether to use the center coordinates to construct the location stream.
+!          If true, use center coordinates, otherwise, use the corner coordinates.  If not specified,
+!          use center coordinates as default.  For SCRIP files, only center coordinate 
+!          is supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2002,20 +2027,45 @@ contains
     integer :: localrc
     integer :: PetNo, PetCnt
     type(ESMF_Index_Flag) :: indexflagLocal
-    real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
+    real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:), coordZ(:)
+    real(ESMF_KIND_R8), pointer :: coord2D(:,:)
     integer(ESMF_KIND_I4), pointer :: imask(:)
     integer :: starti, count, localcount, index
     integer :: remain, i
+    integer :: meshid
     type(ESMF_CoordSys_Flag) :: coordSys
     type(ESMF_LocStream) :: locStream
+    type(ESMF_FileFormat_Flag) :: localfileformatflag
+    logical :: localcenterflag, haveface
     character(len=16) :: units
 
     if (present(indexflag)) then
-         indexflagLocal=indexflag
+       indexflagLocal=indexflag
     else
-         indexflagLocal=ESMF_INDEX_DELOCAL
+       indexflagLocal=ESMF_INDEX_DELOCAL
     endif
     
+    if (present(fileformatflag)) then
+       localfileformatflag = fileformatflag
+    else
+       localfileformatflag = ESMF_FILEFORMAT_SCRIP
+    endif
+
+    if (present(centerflag)) then
+       localcenterflag = centerflag
+    else
+       localcenterflag = .TRUE.
+    endif
+
+    if ((localfileformatflag == ESMF_FILEFORMAT_SCRIP .or. &
+         localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) .and. &
+       .NOT. localcenterflag) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="Only allow center coordinates if the file is in SCRIP or GRIDSPEC format", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif   
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2031,42 +2081,71 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (PetNo == 0) then
+    if (localfileformatflag == ESMF_FILEFORMAT_SCRIP) then 
+       ! totaldims represent grid_ranks in SCRIP - 1 for unstructured and
+       ! 2 for logically rectangular
        call ESMF_ScripInq(filename, grid_rank=totaldims, &
-			  grid_size=totalpoints, rc=localrc)
+		  grid_size=totalpoints, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
+             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ScripInqUnits(filename, units=units, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! broadcast the values to other PETs
-       msgbuf(1)=totaldims
-       msgbuf(2)=totalpoints
-       if (units .eq. 'radians') then
-       	  msgbuf(3)=1
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       if (units == 'degrees') then
+          coordSys = ESMF_COORDSYS_SPH_DEG
        else
-          msgbuf(3)=0
+          coordSys = ESMF_COORDSYS_SPH_RAD
+       endif   
+#if 0
+    elseif (localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) then
+       ! totaldims is the dimension of the lat/lon variable: 1 for regular
+       ! grid and 2 for curvilinear
+       call ESMF_GridspecInq(filename, ndims=totaldims, &
+	       	     grid_dims = grid_dims, coordids=varids, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       totalpoints=grid_dims(1)*grid_dims(2)
+#endif
+    elseif (localfileformatflag == ESMF_FILEFORMAT_ESMFMESH) then
+       ! totaldims is the coordDim, 2 for 2D and 3 for 3D
+       if (localcenterflag) then
+           call ESMF_EsmfInq(filename, elementCount=totalpoints, & 
+	        coordDim=totaldims, rc=localrc)
+       else
+           call ESMF_EsmfInq(filename, nodeCount=totalpoints, &
+	        coordDim=totaldims, rc=localrc)
        endif
-       call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      totaldims = msgbuf(1)
-      totalpoints=msgbuf(2)
-    endif  
-
-    if (msgbuf(3) .eq. 0) then
+             ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_EsmfInqUnits(filename, units, rc=localrc)
+       if (units == 'degrees') then
+          coordSys = ESMF_COORDSYS_SPH_DEG
+       elseif (units == 'radians') then
+          coordSys = ESMF_COORDSYS_SPH_RAD
+       else
+          coordSys = ESMF_COORDSYS_CART
+       endif   
+    elseif (localfileformatflag == ESMF_FILEFORMAT_UGRID) then
+       ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
+       if (localcenterflag) then
+          call ESMF_UGridInq(filename, elementCount=totalpoints, meshid=meshid, &
+	     	  nodeCoordDim=totaldims, faceCoordFlag=haveface, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          if (.not. haveface) then
+             call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                    msg="The grid file does not have face coordinates", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
+       else
+          call ESMF_UGridInq(filename, nodeCount=totalpoints, meshid=meshid, &
+	          nodeCoordDim=totaldims, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
        coordSys = ESMF_COORDSYS_SPH_DEG
-       units = 'degrees'
-    else
-       coordSys = ESMF_COORDSYS_SPH_RAD
-       units = 'radians'
-    endif   
+    endif             
 
     localcount = totalpoints/PetCnt
     remain = totalpoints - (localcount*PetCnt)
@@ -2078,9 +2157,48 @@ contains
     endif
 
     allocate(coordX(localcount), coordY(localcount),imask(localcount))
-    call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
+    if (localfileformatflag == ESMF_FILEFORMAT_SCRIP) then 
+       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
                           grid_imask=imask, start=starti, count=localcount, rc=localrc)
-    
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
+    elseif (localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) then 
+       if (totaldims == 1) then
+          call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
+          !construct 2D arrays and do the distribution
+          xdim=size(coordX)
+          ydim=size(coordY)
+#endif
+    elseif (localfileformatflag == ESMF_FILEFORMAT_ESMFMESH) then
+       allocate(coord2D(totaldims,localcount))
+       call ESMF_EsmfGetCoords(filename, coord2D, imask, &
+	       starti, localcount, localcenterflag, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       coordX(:) = coord2D(1,:)
+       coordY(:) = coord2D(2,:)
+       if (totaldims == 3) then
+         allocate(coordZ(localcount))
+         coordZ(:) = coord2D(3,:)
+       endif
+       deallocate(coord2D)
+    elseif (localfileformatflag == ESMF_FILEFORMAT_UGRID) then
+       allocate(coord2D(localcount, totaldims))
+       call ESMF_UGridGetCoords(filename, meshid, coord2D, &
+       	    starti, localcount, localcenterflag, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       coordX(:) = coord2D(:,1)
+       coordY(:) = coord2D(:,2)
+       if (totaldims == 3) then
+          allocate(coordZ(localcount))
+          coordZ(:) = coord2D(:,3)
+       endif
+       deallocate(coord2D)
+       ! no mask for UGRID
+       imask(:)=1
+    endif
     ! create Location Stream
     locStream = ESMF_LocStreamCreate(name=name, localcount=localcount, indexflag=indexflagLocal,&
                 coordSys = coordSys, rc=localrc)
@@ -2099,6 +2217,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !If 3D grid, add the height coordinates
+    if (totaldims == 3) then
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
+    	 		      keyLongName='Height', rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
     	 		      keyLongName='Mask', rc=localrc)
@@ -2585,7 +2710,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !      type(ESMF_LocStream), intent(in) :: locstream
-!      integer, intent(in) :: localDE
+!      integer, intent(in), optional :: localDE
 !      character (len=*),    intent(in)              :: keyName
 !      integer,                intent(out), optional :: exclusiveLBound
 !      integer,                intent(out), optional :: exclusiveUBound
@@ -2617,7 +2742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{localDE}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -2697,7 +2822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{]localDE]}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -3401,7 +3526,6 @@ end subroutine ESMF_LocStreamGetBounds
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LocStreamPrint
-
 
 #define FINISH_LATER
 #ifdef FINISH_LATER

@@ -4,22 +4,6 @@ Appendices
 ==========
 
 ----------
-References
-----------
-
-.. commented out the Regrid.bib for now because sphinxcontrib-bibtex doesn't seem to handle techreports
-.. ../../../Infrastructure/Regrid/doc/Regrid.bib
-
-.. bibliography:: ../../../Infrastructure/Mesh/doc/Mesh.bib
-    :style: unsrt
-
-..
-    Jones, P.W.
-    SCRIP: A Spherical Coordinate Remapping and Interpolation Package.
-    http://www.acl.lanl.gov/climate/software/SCRIP/.
-    Los Alamos National Laboratory Software Release LACC 98-45.
-
-----------
 Class APIs
 ----------
 
@@ -51,3 +35,13 @@ Named Constants
     StaggerLoc
     TypeKind
     UnmappedAction
+
+----------
+References
+----------
+
+.. commented out the Regrid.bib for now because sphinxcontrib-bibtex doesn't seem to handle techreports
+.. ../../../Infrastructure/Regrid/doc/Regrid.bib
+
+.. bibliography:: ../../../Infrastructure/Mesh/doc/Mesh.bib ../../../doc/ESMF_packages.bib
+    :style: unsrt

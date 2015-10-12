@@ -574,6 +574,15 @@ class TestGrid(TestBase):
             assert(np.all(area[...] == 12*np.ones([10, 20, 30])))
 
     @attr('data')
+    def test_grid_create_from_file_gridspec1D(self):
+        esmfdir = os.path.dirname(inspect.getfile(ESMF))
+        grid = Grid(filename=os.path.join(esmfdir, "test/data/gridspec1Dcoords.nc"),
+                    filetype=FileFormat.GRIDSPEC, add_corner_stagger=True,
+                    coord_names=["longitude", "latitude"])
+
+        self.examine_grid_attributes(grid)
+
+    @attr('data')
     def test_grid_create_from_file_scrip(self):
         reg_decomp = [pet_count(), 1]
         try:

@@ -26,6 +26,63 @@ class Regrid(object):
     For more information about the ESMF Regridding functionality, please see the `ESMF Regrid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
     """
+
+    @property
+    def dstfield(self):
+        return self._dstfield
+
+    @property
+    def dst_frac_field(self):
+        return self._dst_frac_field
+
+    @property
+    def dst_mask_values(self):
+        return self._dst_mask_values
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def ignore_degenerate(self):
+        return self._ignore_degenerate
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def norm_type(self):
+        return self._norm_type
+
+    @property
+    def pole_method(self):
+        return self._pole_method
+
+    @property
+    def regrid_method(self):
+        return self._regrid_method
+
+    @property
+    def regrid_pole_npoints(self):
+        return self._regrid_pole_npoints
+
+    @property
+    def srcfield(self):
+        return self._srcfield
+
+    @property
+    def src_frac_field(self):
+        return self._src_frac_field
+
+    @property
+    def src_mask_values(self):
+        return self._src_mask_values
+
+    @property
+    def unmapped_action(self):
+        return self._unmapped_action
+
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield,
@@ -42,10 +99,10 @@ class Regrid(object):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
-            srcfield: source Field associated with an underlying Grid 
-                      or Mesh. \n
+            srcfield: source Field associated with an underlying Grid,
+                      Mesh or LocStream. \n
             dstfield: destination Field associated with an underlying 
-                      Grid or Mesh.  The data in this Field may be 
+                      Grid, Mesh or LocStream.  The data in this Field may be
                       overwritten by this call.\n
         Optional Arguments: \n
             src_mask_values: a numpy array (internally cast to 
@@ -110,27 +167,19 @@ class Regrid(object):
         self.routehandle = 0
 
         # type checking
-        local_src_mask_values = None
         if src_mask_values is not None:
-            if src_mask_values.dtype is not np.int32:
-                local_src_mask_values = np.array(src_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_src_mask_values = src_mask_values
+            src_mask_values = np.array(src_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
-        local_dst_mask_values = None
         if dst_mask_values is not None:
-            if dst_mask_values.dtype is not np.int32:
-                local_dst_mask_values = np.array(dst_mask_values, 
-                                                 dtype=np.int32)
-            else:
-                local_dst_mask_values = dst_mask_values
+            dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
+
         # else case handled by initialization to None
 
         # call into the ctypes layer
         self.routehandle = ESMP_FieldRegridStore(srcfield, dstfield,
-                           srcMaskValues=local_src_mask_values,
-                           dstMaskValues=local_dst_mask_values,
+                           srcMaskValues=src_mask_values,
+                           dstMaskValues=dst_mask_values,
                            regridmethod=regrid_method,
                            polemethod=pole_method,
                            regridPoleNPnts=regrid_pole_npoints,
@@ -160,65 +209,7 @@ class Regrid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    @property
-    def srcfield(self):
-        return self._srcfield
-
-    @property
-    def dstfield(self):
-        return self._dstfield
-
-    @property
-    def src_mask_values(self):
-        return self._src_mask_values
-
-    @property
-    def dst_mask_values(self):
-        return self._dst_mask_values
-
-    @property
-    def regrid_method(self):
-        return self._regrid_method
-
-    @property
-    def pole_method(self):
-        return self._pole_method
-
-    @property
-    def regrid_pole_npoints(self):
-        return self._regrid_pole_npoints
-
-    @property
-    def norm_type(self):
-        return self._norm_type
-
-    @property
-    def unmapped_action(self):
-        return self._unmapped_action
-
-    @property
-    def ignore_degenerate(self):
-        return self._ignore_degenerate
-
-    @property
-    def src_frac_field(self):
-        return self._src_frac_field
-
-    @property
-    def dst_frac_field(self):
-        return self._dst_frac_field
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-
-    def __call__(self, srcfield, dstfield,
-                 zero_region=None):
+    def __call__(self, srcfield, dstfield, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield. \n
         Required Arguments: \n

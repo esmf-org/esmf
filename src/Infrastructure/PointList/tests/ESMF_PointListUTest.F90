@@ -758,9 +758,9 @@ contains
     type(ESMF_Mesh) :: myMesh
     integer :: numNodes
     integer :: numTriElems, numQuadElems, numTotElems
-    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-    integer, pointer :: nodeIds(:), nodeOwners(:)
-    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, allocatable :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
     integer :: petCount,localPet
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
@@ -1060,6 +1060,7 @@ contains
     ! deallocated.
     deallocate(nodeIds)
     deallocate(nodeCoords)
+    deallocate(nodeOwners)
     deallocate(elemIds)
     deallocate(elemTypes)
     deallocate(elemConn)
@@ -1146,11 +1147,11 @@ contains
     type(ESMF_Mesh) :: myMesh
     integer :: numNodes
     integer :: numTriElems, numQuadElems, numTotElems
-    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-    integer, pointer :: nodeIds(:), nodeOwners(:)
-    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, allocatable :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
     integer :: petCount,localPet
-    integer, pointer :: nodeMask(:)
+    integer, allocatable :: nodeMask(:)
     integer(ESMF_KIND_I4) :: maskValues(2)
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
@@ -1485,6 +1486,7 @@ contains
     ! deallocated.
     deallocate(nodeIds)
     deallocate(nodeCoords)
+    deallocate(nodeOwners)
     deallocate(nodeMask)
     deallocate(elemIds)
     deallocate(elemTypes)
@@ -1578,10 +1580,10 @@ contains
     type(ESMF_Mesh) :: myMesh
     integer :: numNodes
     integer :: numTriElems, numQuadElems, numTotElems
-    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-    integer, pointer :: nodeIds(:), nodeOwners(:)
-    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-    real(ESMF_KIND_R8), pointer :: elemCoords(:)
+    integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, allocatable :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+    real(ESMF_KIND_R8), allocatable :: elemCoords(:)
     integer :: petCount,localPet
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
@@ -1909,6 +1911,7 @@ contains
     ! deallocated.
     deallocate(nodeIds)
     deallocate(nodeCoords)
+    deallocate(nodeOwners)
     deallocate(elemCoords)
     deallocate(elemIds)
     deallocate(elemTypes)
@@ -1995,12 +1998,12 @@ contains
     type(ESMF_Mesh) :: myMesh
     integer :: numNodes
     integer :: numTriElems, numQuadElems, numTotElems
-    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-    integer, pointer :: nodeIds(:), nodeOwners(:)
-    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-    real(ESMF_KIND_R8), pointer :: elemCoords(:)
+    integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, allocatable :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+    real(ESMF_KIND_R8), allocatable :: elemCoords(:)
     integer :: petCount,localPet
-    integer, pointer :: elemMask(:)
+    integer, allocatable :: elemMask(:)
     integer(ESMF_KIND_I4) :: maskValues(2)
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
@@ -2353,6 +2356,7 @@ contains
     ! deallocated.
     deallocate(nodeIds)
     deallocate(nodeCoords)
+    deallocate(nodeOwners)
     deallocate(elemMask)
     deallocate(elemCoords)
     deallocate(elemIds)
@@ -2461,8 +2465,8 @@ contains
     real(ESMF_KIND_R8), dimension(3) :: test_coords
     real(ESMF_KIND_R8) my_err1,my_err2,my_err3
 
-    real(ESMF_KIND_R8), pointer :: lon(:),lat(:)
     real(ESMF_KIND_R8), pointer :: temperature(:)
+    real(ESMF_KIND_R8), allocatable :: lat(:),lon(:)
     integer :: i
     type(ESMF_LocStream) :: myLocStream
     type(ESMF_Field) :: field_temperature
@@ -2492,11 +2496,14 @@ contains
     ! Allocate and set example Field data
     !-------------------------------------------------------------------
     allocate(temperature(local_pts))
+    allocate(lat(local_pts))
+    allocate(lon(local_pts))
 
     do i=1,local_pts
       temperature(i)=80.0+i
+      lon(i)=(i-1)*360.0/local_pts
+      lat(i)=0.0
     enddo
-
 
     !-------------------------------------------------------------------
     ! Create the LocStream:  Allocate space for the LocStream object, 
@@ -2518,7 +2525,8 @@ contains
     !-------------------------------------------------------------------
     call ESMF_LocStreamAddKey(myLocStream,                  &
                               keyName="ESMF:Lat",           &
-                              KeyTypeKind=ESMF_TYPEKIND_R8, &
+                              farray=lat,                   &
+                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                               keyUnits="Degrees",           &
                               keyLongName="Latitude", rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -2528,7 +2536,8 @@ contains
     endif
     call ESMF_LocStreamAddKey(myLocStream,                  &
                               keyName="ESMF:Lon",           &
-                              KeyTypeKind=ESMF_TYPEKIND_R8, &
+                              farray=lon,                   &
+                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                               keyUnits="Degrees",           &
                               keyLongName="Longitude", rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -2536,36 +2545,6 @@ contains
       rc=ESMF_FAILURE
       return
     endif
-    !-------------------------------------------------------------------
-    ! Get key data.   
-    !-------------------------------------------------------------------
-    call ESMF_LocStreamGetKey(myLocStream,                  &
-                              localDE=0,                    &
-                              keyName="ESMF:Lat",           &
-                              farray=lat,                   &
-                              rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      print*,'ERROR:  trouble getting LocStream key for Lat'
-      rc=ESMF_FAILURE
-      return
-    endif
-    call ESMF_LocStreamGetKey(myLocStream,                  &
-                              localDE=0,                    &
-                              keyName="ESMF:Lon",           &
-                              farray=lon,                   &
-                              rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      print*,'ERROR:  trouble getting LocStream key for Lon'
-      rc=ESMF_FAILURE
-      return
-    endif
-    !-------------------------------------------------------------------
-    ! Set key data. 
-    !-------------------------------------------------------------------
-    do i=1,local_pts
-       lon(i)=(i-1)*360.0/local_pts
-       lat(i)=0.0
-    enddo
 
 
     !-------------------------------------------------------------------
@@ -2635,6 +2614,10 @@ contains
         return
       endif
     endif
+
+    deallocate(temperature)
+    deallocate(lon)
+    deallocate(lat)
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -2877,6 +2860,8 @@ contains
 
     endif
 
+    deallocate(temperature)
+
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
       print*,'ERROR:  trouble destroying pointlist'
@@ -2907,9 +2892,9 @@ contains
     type(ESMF_Mesh) :: myMesh
     integer :: numNodes
     integer :: numTriElems, numQuadElems, numTotElems
-    integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-    integer, pointer :: nodeIds(:), nodeOwners(:)
-    real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+    integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
+    integer, allocatable :: nodeIds(:), nodeOwners(:)
+    real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
     integer :: petCount,localPet
     integer :: local_pts
     real(ESMF_KIND_R8), dimension(2) :: test_coords
@@ -3126,6 +3111,7 @@ contains
     ! deallocated.
     deallocate(nodeIds)
     deallocate(nodeCoords)
+    deallocate(nodeOwners)
     deallocate(elemIds)
     deallocate(elemTypes)
     deallocate(elemConn)

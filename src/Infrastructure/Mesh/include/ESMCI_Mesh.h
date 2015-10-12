@@ -127,10 +127,6 @@ void resolve_cspec_delete_owners(UInt obj_type);
  std::map<UInt,UInt> split_to_orig_id;
  std::map<UInt,double> split_id_to_frac;
 
-
- // Spherical Mesh
- bool is_sph;
-
   private:
 void assign_new_ids();
 CommReg *sghost;

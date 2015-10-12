@@ -755,6 +755,7 @@ int getComputationalUBound(
 
     void setDEBnds(int localDE);
     void getDEBnds(int localDE,int *uBnd,int *lBnd);
+    bool advToNonEmptyDE(int *_localDE);
 
   public:
 
@@ -779,7 +780,7 @@ int getComputationalUBound(
   }; 
 
 
-  // class for iterating through the cells in a grid stagger location
+   // class for iterating through the cells in a grid stagger location
   class GridCellIter {
   private:
     Grid *grid;     // grid being iterated through
@@ -817,6 +818,8 @@ int getComputationalUBound(
     int minInd[ESMF_MAXDIM];  // minimum of tile
     int maxInd[ESMF_MAXDIM];  // maximum of tile
 
+    bool advToNonEmptyDE(int *_localDE);
+
   public:
 
   bool isDone(void) const {return done;}
@@ -842,7 +845,7 @@ class ProtoGrid {
   int nameLen; 
   char *name;  
   ESMC_TypeKind_Flag *typekind;
-  DistGrid *distgrid;     
+   DistGrid *distgrid;     
   InterfaceInt *gridEdgeLWidth;
   InterfaceInt *gridEdgeUWidth;
   InterfaceInt *gridAlign;   

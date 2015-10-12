@@ -63,6 +63,7 @@ program ESMF_ArrayIOUTest
   integer, allocatable                    :: minIndexNew(:), maxIndexNew(:)
   integer, allocatable                    :: undistLBound(:), undistUBound(:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4(:,:,:,:)
+  real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4_r(:,:,:,:)
   type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
@@ -957,13 +958,12 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2/0 DE read Array - DE 0 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  print *, 'Pet', localPet, ': associated Farray3D_DE0_r = ', associated (Farray3D_DE0_r)
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray3D_DE0_r == localPet*100))
 #else
-  call ESMF_Test((rc == ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+  rc = ESMF_SUCCESS
 #endif
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1040,6 +1040,19 @@ program ESMF_ArrayIOUTest
           name="myData", rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array with undistributed dimensions get and fill Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  ! access the pointer to the allocated memory on each DE
+  call ESMF_ArrayGet(array_undist, farrayPtr=arrayPtrR8D4, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! initialize data
+  arrayPtrR8D4 = 12345._ESMF_KIND_R8*localPet
+
+#define TEST_WORKAROUND
+#if defined(TEST_WORKAROUND)
 !!!! Calling ArrayWrite on array directly does not work because it has 
 !!!! undistributed dimensions!!  
 
@@ -1093,13 +1106,6 @@ program ESMF_ArrayIOUTest
   distgrid_tmp = ESMF_DistGridCreate(minIndex=minIndexNew, &
     maxIndex=maxIndexNew, regDecomp=regDecomp, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  ! access the pointer to the allocated memory on each DE
-  call ESMF_ArrayGet(array_undist, farrayPtr=arrayPtrR8D4, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  ! initialize data
-  arrayPtrR8D4 = 12345._ESMF_KIND_R8
 
   ! finally create the fixed up Array, passing in same memory allocation ptr
   array_tmp = ESMF_ArrayCreate(distgrid=distgrid_tmp, &
@@ -1123,11 +1129,12 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+#endif
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
-  write(name, *) "Write ESMF_Array with undistributed dimensions to NetCDF Test"
+  write(name, *) "Array with undistributed dimensions write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_undist, file="Array_undist.nc",         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
@@ -1151,7 +1158,7 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, read the netCDF file.
-  write(name, *) "Read ESMF_Array with undistributed dimensions from NetCDF Test"
+  write(name, *) "Array with undistributed dimensions read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead (array_undist_r, file='Array_undist.nc',         &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
@@ -1161,6 +1168,22 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Access read-in Array
+  write(name, *) "Array with undistributed dimensions access read-in data Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet (array_undist, farrayPtr=arrayPtrR8D4_r, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Compare read-in Array to expected
+  write(name, *) "Array with undistributed dimensions comparison Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  passfail = all (arrayPtrR8D4_r == 12345.0_ESMF_KIND_R8*localPet)
+  call ESMF_Test(passfail, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

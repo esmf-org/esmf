@@ -12,16 +12,16 @@ Regridding between Fields is accomplished with the Regrid class.  All of these
 classes are explained in more detail in the sections provided by the links in
 the following table.
 
-=======================================  =============================================================================
+=======================================  ==============================================================================
 Class                                    Description
-=======================================  =============================================================================
+=======================================  ==============================================================================
 :class:`~ESMF.api.esmpymanager.Manager`  A manager class to initialize and finalize ESMF
-:class:`~ESMF.api.field.Field`           A data field built on a Grid or Mesh
-:class:`~ESMF.api.grid.Grid`             A structured grid for coordinate representation
-:class:`~ESMF.api.mesh.Mesh`             An unstructured grid for coordinate representation
-:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of unconnected points
+:class:`~ESMF.api.field.Field`           A data field built on a Grid, Mesh, or LocStream
+:class:`~ESMF.api.grid.Grid`             A class to represent a logically rectangular grid
+:class:`~ESMF.api.mesh.Mesh`             A calss to represent an unstructured grid
+:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of disconnected points
 :class:`~ESMF.api.regrid.Regrid`         The regridding utility
-=======================================  =============================================================================
+=======================================  ==============================================================================
 
 
 ---------------
@@ -69,7 +69,7 @@ formats.  Grid files can be in SCRIP and GRIDSPEC format.
 SCRIP
 +++++
 
-This file format is used by the SCRIP :cite:`SCRIP`, :cite:`Jones1999` package, grid files that
+This file format is used by the SCRIP :cite:`ref:SCRIP`, package, grid files that
 work with that package should also work here.  SCRIP format files are
 capable of storing either 2D logically rectangular grids or 2D
 unstructured grids.  More information can be found in the ESMF reference
@@ -417,83 +417,34 @@ contain coordinates describing the outer perimeter of the Grid cells.
 Masking
 -------
 
-**THIS SECTION IS OUT OF DATE, WAITING ON UPDATE TO ESMF REFDOC**
+Masking is the process whereby parts of a Grid, Mesh or LocStream can be marked to be ignored
+during an operation, such as when they are used in regridding. Masking can be used on a Field
+created from a regridding source to indicate that certain portions should not be used to generate
+regridded data. This is useful, for example, if a portion of the source contains unusable values.
+Masking can also be used on a Field created from a regridding destination to indicate that a certain
+portion should not receive regridded data. This is useful, for example, when part of the destination
+isn't being used (e.g. the land portion of an ocean grid).
 
-Masking is the process whereby parts of an object can be marked to be
-ignored during an operation, such as regridding.  Masking can be
-used on a source grid to indicate that certain portions of the grid
-should not be used to generate regridded data.  This is useful, for
-example, if a portion of a source grid contains unusable values.
-Masking can also be used on a destination grid to indicate that the
-portion of the field built on that part of the grid should not
-receive regridded data.  This is useful, for example, when part of
-the grid isn't being used (e.g. the land portion of an ocean grid).
+The user may mask out points in the source Field or destination Field or both. To do masking the user
+sets mask information in the Grid, Mesh, or LocStream upon
+which the Fields passed into the Regrid call are built. The src_mask_values and
+dst_mask_values arguments to that call can then be used to specify which values in that mask information
+indicate that a location should be masked out. For example, if dstMaskValues is set to (/1,2/), then any
+location that has a value of 1 or 2 in the mask information of the Grid, Mesh or LocStream upon which
+the destination Field is built will be masked out.
 
-ESMPy currently supports masking for Fields built on structured
-Grids and element masking for Fields built on unstructured Meshes.
-A Grid mask is initialized by setting mask values in the
-Numpy Array returned from the Grid.get_item() call using the 'item'
-variable.  A Mesh mask is initialized by passing mask values into
-the Mesh.add_elements() call using the 'element_mask' variable.  The
-Field mask can then be setup by indicating the values to use for
-the mask in the 'mask_values' variable of the Field constructor.  However,
-the Field mask does not need to be setup to mask values in the
-regridding operation.  Regrid masking is handled by passing the
-mask values into the 'src_mask_values' or 'dst_mask_values'
-variables of the Regrid constructor.  For example, if
-'dst_mask_values' is set to (/1,2/), then any location
-in the Grid or Mesh that has a value of 1 or 2 will be masked.
-
-Masking behavior differs slightly between regridding methods. For
-non-conservative regridding methods (e.g. bilinear or high-order
-patch), masking is done on points. For these methods, masking a
-destination point means that the point won't participate in
-regridding (e.g. won't receive an interpolated value). For these methods,
-masking a source point means that the entire source cell using
-that point is masked out. In other words, if any corner point
-making up a source cell is masked then the whole cell is masked. For
-conservative regridding methods (e.g. first-order conservative)
-masking is done on cells. Masking a destination cell means that
-the cell won't participate in regridding (e.g. won't receive an
-interpolated value). Similarly, masking a source cell means that the
-cell won't participate in regridding (e.g. won't contribute to
-interpolation).  For any type of interpolation method (conservative or
-non-conservative) the masking is set on the location upon
-which the Fields passed into the regridding call are built.
-For example, if Fields built on StaggerLoc.CENTER are
-passed into the Regrid() call then the masking
-should also be set in StaggerLoc.CENTER.
-
-~~~~~~~~~~~~~
-Field Masking
-~~~~~~~~~~~~~
-
-The ESMPy Field is derived from
-`numpy.MaskedArray <http://docs.scipy.org/doc/numpy/reference/maskedarray.generic.html>`_.
-Therefore, it contains all of the associated functionality, advantages and pitfalls.
-Some specific things to keep in mind are:
-
-- Hardening and softening of masks do not apply when you specifically
-  set values of Field.mask, only when you make assignments to the more
-  general Field.
-
-- As with slices of MaskedArrays, Field masks
-  are a copy of the underlying Grid mask to avoid propagation of any
-  modification of the Field mask to the Grid mask (which may be shared
-  by multiple fields).
-
-- When setting the values of a Field, the mask will be overridden if care is not taken
-  to only set the _data_ of the Field.  For instance:
-
-  field[...] = 7
-
-  will set all field data values to 7 regardless of whether they have been masked
-  or not, but:
-
-  field.data[...] = 7
-
-  will only set the unmasked data points of the Field.
-
+Masking behavior differs slightly between regridding methods. For non-conservative regridding methods
+(e.g. bilinear or high-order patch), masking is done on points. For these methods, masking a destination
+point means that that point won't participate in regridding (e.g. won't be interpolated to). For these
+methods, masking a source point means that the entire source cell using that point is masked out.
+In other words, if any corner point making up a source cell is masked then the cell is masked.
+For conservative regridding methods (e.g. first-order conservative) masking is done on cells.
+Masking a destination cell means that the cell won't participate in regridding (e.g. won't be
+interpolated to). Similarly, masking a source cell means that the cell won't participate in regridding
+(e.g. won't be interpolated from). For any type of interpolation method (conservative or non-conservative)
+the masking is set on the location upon which the Fields passed into the regridding call are built.
+For example, if Fields built on StaggerLoc.CENTER are passed into the ESMF_FieldRegridStore()
+call then the masking should also be set on StaggerLoc.CENTER.
 
 ---------------------
 Spherical coordinates
@@ -525,8 +476,8 @@ extrapolation to destination points outside the unmasked source Field.
 Numpy Slicing and Indexing
 --------------------------
 
-Numpy arrays are used to represent Grid and Mesh coordinates and Field data
-and masks, among other things.  Standard numpy conventions for array indexing
+Numpy arrays are used to represent Grid and Mesh coordinates and Field data,
+among other things.  Standard numpy conventions for array indexing
 and slicing can be expected.  There are some exceptions when it comes to fancy
 indexing, index arrays, and multi-dimensional slicing.  Significant effort has
 been put into raising exceptions where inappropriate indexing or slicing

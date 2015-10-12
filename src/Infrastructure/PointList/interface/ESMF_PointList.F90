@@ -369,7 +369,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)  :: locstream
-    integer(ESMF_KIND_I4), optional   :: maskValues(:)
+    integer(ESMF_KIND_I4), intent(in), optional   :: maskValues(:)
     integer, intent(out), optional    :: rc               
 !
 ! !DESCRIPTION:
@@ -397,9 +397,9 @@ contains
     character(len=ESMF_MAXSTR), pointer  :: myKeyNames(:)
     type(ESMF_Array),pointer           :: myKeyArrays(:)
     type(ESMF_Array),pointer           :: thisKeyArray
-    integer,pointer           :: seqInd(:)
+    integer,allocatable           :: seqInd(:)
     real(ESMF_KIND_R8), pointer :: farrayPtrX(:),farrayPtrY(:),farrayPtrZ(:)
-    real(ESMF_KIND_R8), pointer :: mycoords(:), cart_coords(:)
+    real(ESMF_KIND_R8), allocatable :: mycoords(:), cart_coords(:)
     integer(ESMF_KIND_I4), pointer :: maskarray(:)
     type(ESMF_DistGrid) :: distgridOut
     integer :: seqCount
@@ -521,7 +521,10 @@ contains
 
       do j=cl,cu
         masked_value=.false.
-        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
+
+        !redundant if statement here is needed to avoid bug in Intel optimizer, which 
+        !occurs with versions 15.0.3, 16.0.0 and possibly others
+        if (num_maskValues .gt. 0) then
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.
@@ -540,15 +543,18 @@ contains
     !now we add the points
     do lDE=0,localDECount-1
       call ESMF_ArrayGet(XArr, localDE=lDE, farrayPtr=farrayPtrX, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_ArrayGet(YArr, localDE=lDE, farrayPtr=farrayPtrY, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if (dimcount .eq. 3) then
         call ESMF_ArrayGet(ZArr, localDE=lDE, farrayPtr=farrayPtrZ, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, &
+          msg="expecting coordinate keys to be REAL*8", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       !Allocate space for seqInd 
@@ -585,7 +591,8 @@ contains
 
       if (maskPresent) then
         call ESMF_ArrayGet(MArr, localDE=lDE, farrayPtr=maskarray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, &
+            msg="expecting mask key to be INTEGER*4", &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (size(maskarray) .ne. size(farrayPtrX)) then
@@ -598,7 +605,10 @@ contains
 
       do j=cl,cu
         masked_value=.false.
-        if (num_maskValues .gt. 0) then  !needed to foil compiler optimizer (mvr)
+
+        !redundant if statement here is needed to avoid bug in Intel optimizer, which 
+        !occurs with versions 15.0.3, 16.0.0 and possibly others
+        if (num_maskValues .gt. 0) then
         do k=1,num_maskValues
           if (maskArray(j) .eq. maskValues(k)) then
             masked_value=.true.

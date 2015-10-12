@@ -175,7 +175,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 
   GeomRend::GeomRend(Mesh *_srcmesh, PointList *_srcplist, 
 		     Mesh *_dstmesh, PointList *_dstplist, 
-		     const DstConfig &cfg, bool freeze_src_) :
+		     const DstConfig &cfg, bool freeze_src_, bool _on_sph) :
 srcmesh(_srcmesh),
 srcplist(_srcplist),
 dstmesh(_dstmesh),
@@ -188,7 +188,8 @@ sdim(),
 iter_is_obj(cfg.iter_obj_type == cfg.obj_type),
 freeze_src(freeze_src_),
 srcplist_rend(NULL),
-dstplist_rend(NULL)
+dstplist_rend(NULL),
+on_sph(_on_sph)
 {
 
   if (_srcplist != NULL) {
@@ -322,7 +323,7 @@ void GeomRend::build_src(const BBox &dstBound, ZoltanUD &zud) {
 
     MeshObj &elem = *ei;
 
-    BBox ebox(coord, elem, 0.25, srcmesh->is_sph);
+    BBox ebox(coord, elem, 0.25, on_sph);
 
     if (BBoxIntersect(ebox, dstBound, dcfg.geom_tol)) 
       zud.srcObj.push_back(&elem);
@@ -351,7 +352,7 @@ void GeomRend::set_zolt_param(Zoltan_Struct *zz) {
 }
 
 static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist,
-                      std::vector<CommRel::CommNode> &mignode, double geom_tol, UInt sdim, bool is_sph=false) {
+                      std::vector<CommRel::CommNode> &mignode, double geom_tol, UInt sdim, bool on_sph=false) {
   Trace __trace("rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*> &objlist, std::vector<CommRel::CommNode> &res)");
 
   UInt csize = Par::Size();
@@ -367,7 +368,7 @@ static void rcb_isect(Zoltan_Struct *zz, MEField<> &coord, std::vector<MeshObj*>
 
     MeshObj &elem = **si;
 
-    BBox ebox(coord, elem, geom_tol, is_sph);
+    BBox ebox(coord, elem, geom_tol, on_sph);
 
     // Insersect with the cuts
     Zoltan_LB_Box_Assign(zz, ebox.getMin()[0]-geom_tol,
@@ -448,7 +449,7 @@ void GeomRend::build_src_mig(Zoltan_Struct *zz, ZoltanUD &zud) {
 
   std::vector<CommRel::CommNode> mignode;
 
-  rcb_isect(zz, coord, zud.srcObj, mignode, dcfg.geom_tol, sdim);
+  rcb_isect(zz, coord, zud.srcObj, mignode, dcfg.geom_tol, sdim, on_sph);
 
   // Add our result to the migspec
   CommRel &src_migration = srcComm.GetCommRel(MeshObj::ELEMENT);
@@ -568,11 +569,15 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
     }
   }
 
+
   int plist_rend_size=srcplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
+
+  // Create source rendezvous point list (create outside of if, so will work even if 0-sized)
+  srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
   if (plist_rend_size > 0) {
 
-    srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+    // srcplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
     int orig_srcpointlist_size = srcplist->get_curr_num_pts();
     for (int i=0; i<orig_srcpointlist_size; i++) {
@@ -643,7 +648,7 @@ void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
 
     std::vector<CommRel::CommNode> mignode;
 
-    rcb_isect(zz, coord, zud.dstObj, mignode, dcfg.geom_tol, sdim, false);
+    rcb_isect(zz, coord, zud.dstObj, mignode, dcfg.geom_tol, sdim, on_sph);
 
     // Add results to the migspec
     CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type); 
@@ -802,9 +807,12 @@ void GeomRend::build_dst_mig_plist(ZoltanUD &zud, int numExport,
 
   int plist_rend_size=dstplist->get_curr_num_pts() - num_snd_pts + num_rcv_pts;
 
+  // Create destination rendezvous point list (create outside of if, so will work even if 0-sized)
+  dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+
   if (plist_rend_size >= 0) {
 
-    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
+    //    dstplist_rend = new ESMCI::PointList(plist_rend_size,sdim);
 
     int orig_dstpointlist_size = dstplist->get_curr_num_pts();
     for (int i=0; i<orig_dstpointlist_size; i++) {
@@ -1390,12 +1398,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   // Now migrate the meshes.
   migrate_meshes();
   
-  // Set is_sph
-  if (srcplist == NULL)
-    srcmesh_rend.is_sph=srcmesh->is_sph;
-  if (dstplist == NULL)
-    dstmesh_rend.is_sph=dstmesh->is_sph;
-
   //WriteMesh(srcmesh_rend, "srcrend");
 
   // Now, IMPORTANT: We transpose the destination comm since this is how is will be

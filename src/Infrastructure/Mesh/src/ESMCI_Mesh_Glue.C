@@ -105,15 +105,6 @@ void ESMCI_meshcreate(Mesh **meshpp,
     (*meshpp)->set_parametric_dimension(*pdim);
     (*meshpp)->set_spatial_dimension(cart_sdim);
 
-
-    // Set Spherical 
-    // (TODO: make a function: ESMCI_CoordSys_IsSpherical())
-    if ((*coordSys==ESMC_COORDSYS_SPH_DEG) || (*coordSys==ESMC_COORDSYS_SPH_RAD)) {
-      (*meshpp)->is_sph=true;
-    } else {
-      (*meshpp)->is_sph=false;
-    }
-
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
