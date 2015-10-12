@@ -18,7 +18,7 @@
 #include <Mesh/include/ESMCI_CommReg.h>
 #include "Util/include/ESMCI_F90Interface.h"
 #include "PointList/include/ESMCI_PointList.h"
-#include "ESMCI_Field.h"
+ #include "ESMCI_Field.h"
 #include "ESMCI_CoordSys.h"
 
 #include <map>
@@ -33,12 +33,17 @@
  */
 
 namespace ESMCI {
-/**
- * Basic parallel mesh operations.  Aggregates the serial meshes,
- * the list of fields, and the parallel communiation relations.
- * 
- * @ingroup mesh
- */
+
+
+  // Defines for Mesh
+#define MESH_POLYBREAK_IND -1
+
+  /**
+   * Basic parallel mesh operations.  Aggregates the serial meshes,
+   * the list of fields, and the parallel communiation relations.
+   * 
+   * @ingroup mesh
+   */
 class Mesh : public MeshDB, public FieldReg, public CommReg {
 public:
 friend void WriteExMesh(const MeshDB &mesh, const std::string &filename,int,double);
