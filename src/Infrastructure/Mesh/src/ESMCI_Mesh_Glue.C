@@ -623,7 +623,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int num_elems=*_num_elems;
 
     int num_elemConn=*_num_elemConn;
-
+ 
     InterfaceInt *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
@@ -671,7 +671,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         "- element connectivity list doesn't contain the right number of entries ",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
-
+ 
 
     // Error check size of elements
     if (parametric_dim==2) {
@@ -719,7 +719,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int num_extra_elem=0;
     int max_num_conn=0;
     int max_num_elemtris=0;
-    if (parametric_dim==2) {
+     if (parametric_dim==2) {
       int conn_pos=0;
       for (int e = 0; e < num_elems; ++e) {
         
@@ -748,7 +748,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           }
 
           // record this elem         
-          num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+           num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
           num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
           if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
           if (subelem_size > max_num_conn) max_num_conn=subelem_size;
@@ -767,7 +767,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if (tot_num_extra_elem>0) {
         mesh.is_split=true;
       } else {
-        mesh.is_split=false;
+         mesh.is_split=false;
       }
     } else {
       mesh.is_split=false;
@@ -796,7 +796,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,Par::Comm());
 
       // Remove this processor's number from the sum to get the beginning
-      beg_extra_ids=beg_extra_ids-num_extra_elem;
+       beg_extra_ids=beg_extra_ids-num_extra_elem;
 
       // Start 1 up from max
       beg_extra_ids=beg_extra_ids+global_max_id+1;
@@ -821,7 +821,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     std::vector<int> node_used;
     node_used.resize(num_nodes, 0);
 
-
     // Error check elemConn array
     int c = 0;
     for (int e = 0; e < num_elems; ++e) {
@@ -834,8 +833,14 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         // Get 0-based node index
         int node_index=elemConn[c]-1;
 
+        // Skip the polybreak indicator
+        if (node_index+1 == MESH_POLYBREAK_IND) {
+          c++;
+          continue;
+        }
+
         // Check elemConn
-        if ((node_index < 0) && (node_index+1 != MESH_POLYBREAK_IND)) {
+        if (node_index < 0) {
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be less than 1 ",
@@ -844,7 +849,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
         if (node_index > num_nodes-1) {
 	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+ 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be greater than number of nodes on processor ",
            ESMC_CONTEXT, &localrc)) throw localrc;
 	}
@@ -911,6 +916,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         
       all_nodes[seq] = &*ni;
     }
+
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -1004,7 +1010,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
             for (int j=0; j<sdim; j++) {
               subelem_coords[crd_pos]=crd[j];
               crd_pos++;
-            }
+             }
  
             // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
           }
@@ -1051,7 +1057,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
             tI_pos +=3;           
            }
 
-          // Advance to next elemConn position 
+           // Advance to next elemConn position 
           conn_pos +=subelem_size;
 
            } // end of loop through sub elems
@@ -1095,11 +1101,10 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
       
-      
       // Allocate some temporary variables for splitting
       delete [] subelem_coords;
       delete [] subelem_dbl_buf;
-      delete [] subelem_int_buf;
+       delete [] subelem_int_buf;
       delete [] subelem_tri_ind;
       delete [] subelem_tri_area;
       delete [] elemtris_area;
@@ -1116,6 +1121,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         elemMaskII=elemMaskII_wsplit;
       }
     }
+
 
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
@@ -1283,7 +1289,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     if (coordSys == ESMC_COORDSYS_CART) {
       // Get Field
-      MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
+       MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
       
       // Get some useful information
       int sdim = mesh.spatial_dim(); 
@@ -1330,7 +1336,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         // Convert and save Cartesian coordinates
         double *coords = elem_coords->data(elem);
         ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
-                                     orig_coords, coords);
+                                      orig_coords, coords);
 
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
       }
@@ -1343,7 +1349,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 
   // Get rid of extra memory for split elements
-  if (mesh.is_split) {
+  if (is_split_local) {
     if (elemConn_wsplit != NULL) delete [] elemConn_wsplit;
     if (elemType_wsplit != NULL) delete [] elemType_wsplit;
     if (elemId_wsplit != NULL) delete [] elemId_wsplit;
@@ -1356,7 +1362,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if (elemMaskIIArray_wsplit != NULL) delete [] elemMaskIIArray_wsplit;
       if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
     }
-
   }
 
   } catch(std::exception &x) {
