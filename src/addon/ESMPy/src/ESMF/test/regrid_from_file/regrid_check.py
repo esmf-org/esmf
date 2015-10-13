@@ -41,7 +41,6 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
                                   missingvalue=None):
     is_mesh = False
     if nc_is_mesh(filename, filetype):
-        print "Creating ESMF.Mesh object"
         grid_or_mesh = ESMF.Mesh(filename=filename,
                          filetype=filetype,
                          meshname=meshname,
@@ -49,7 +48,6 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
         is_mesh = True
         add_mask = False
     else:
-        print "Creating ESMF.Grid object"
         add_mask = (missingvalue is not None) and (len(missingvalue) > 0)
         grid_or_mesh = ESMF.Grid(filename=filename, filetype=filetype, 
                                  add_corner_stagger=add_corner_stagger,
@@ -72,14 +70,14 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
         lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
 
         if grid_or_mesh.ndims == 1:
-            lons_1d = ESMF.esmf_array1D(lonptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0])
-            lats_1d = ESMF.esmf_array1D(latptr, grid_or_mesh.type, grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1])
+            lons_1d = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0],))
+            lats_1d = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1],))
 
             lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
             lats = np.array([lats_1d for lon in lons_1d])
         else:
-            lons = ESMF.esmf_array(lonptr, grid_or_mesh.type, ub - lb)
-            lats = ESMF.esmf_array(latptr, grid_or_mesh.type, ub - lb)
+            lons = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, ub - lb)
+            lats = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, ub - lb)
 
     lons = np.radians(lons)
     lats = np.radians(lats)
@@ -212,7 +210,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
         max_error_global = comm.reduce(max_error, op=MPI.MAX)
         min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        if (mass1 and mass2):
+        if (mass1 is not None) and (mass2 is not None):
             mass1_global = comm.reduce(mass1, op=MPI.SUM)
             mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
@@ -220,7 +218,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = num_nodes
         max_error_global = max_error
         min_error_global = min_error
-        if (mass1 and mass2):
+        if (mass1 is not None) and (mass2 is not None):
             mass1_global = mass1
             mass2_global = mass2
 
@@ -415,7 +413,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options,
                              mass1=srcmass, mass2=dstmass, 
                              regrid_method=regrid_method, uninitval=UNINITVAL)
 
-       # Destroy ESMF objects
+    # Destroy ESMF objects
     srcfield.destroy()
     dstfield.destroy()
     dstfield2.destroy()

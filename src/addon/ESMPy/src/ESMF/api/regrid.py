@@ -26,6 +26,63 @@ class Regrid(object):
     For more information about the ESMF Regridding functionality, please see the `ESMF Regrid documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
     """
+
+    @property
+    def dstfield(self):
+        return self._dstfield
+
+    @property
+    def dst_frac_field(self):
+        return self._dst_frac_field
+
+    @property
+    def dst_mask_values(self):
+        return self._dst_mask_values
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def ignore_degenerate(self):
+        return self._ignore_degenerate
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def norm_type(self):
+        return self._norm_type
+
+    @property
+    def pole_method(self):
+        return self._pole_method
+
+    @property
+    def regrid_method(self):
+        return self._regrid_method
+
+    @property
+    def regrid_pole_npoints(self):
+        return self._regrid_pole_npoints
+
+    @property
+    def srcfield(self):
+        return self._srcfield
+
+    @property
+    def src_frac_field(self):
+        return self._src_frac_field
+
+    @property
+    def src_mask_values(self):
+        return self._src_mask_values
+
+    @property
+    def unmapped_action(self):
+        return self._unmapped_action
+
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield,
@@ -152,65 +209,7 @@ class Regrid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    @property
-    def srcfield(self):
-        return self._srcfield
-
-    @property
-    def dstfield(self):
-        return self._dstfield
-
-    @property
-    def src_mask_values(self):
-        return self._src_mask_values
-
-    @property
-    def dst_mask_values(self):
-        return self._dst_mask_values
-
-    @property
-    def regrid_method(self):
-        return self._regrid_method
-
-    @property
-    def pole_method(self):
-        return self._pole_method
-
-    @property
-    def regrid_pole_npoints(self):
-        return self._regrid_pole_npoints
-
-    @property
-    def norm_type(self):
-        return self._norm_type
-
-    @property
-    def unmapped_action(self):
-        return self._unmapped_action
-
-    @property
-    def ignore_degenerate(self):
-        return self._ignore_degenerate
-
-    @property
-    def src_frac_field(self):
-        return self._src_frac_field
-
-    @property
-    def dst_frac_field(self):
-        return self._dst_frac_field
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-
-    def __call__(self, srcfield, dstfield,
-                 zero_region=None):
+    def __call__(self, srcfield, dstfield, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield. \n
         Required Arguments: \n

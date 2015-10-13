@@ -1559,10 +1559,11 @@ contains
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[{[minIndex]}] 
-!          Number to start the index ranges at. If not present, defaults
-!          to 1.
+!          If indexflag={\tt ESMF\_INDEX\_DELOCAL}, this setting is used to indicate
+!          the number to start the index ranges at. If not present, defaults to 1.
 !     \item[{countsPerDE}] 
-!          This array specifies the number of locations per DE.
+!          This array has an element for each DE, specifying the number of locations 
+!          for that DE.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -1691,14 +1692,14 @@ contains
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
 !     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
-!     how the LocStream is distributed. 
+!     how the LocStream is distributed. The assumed layout is one DE per PET.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
 !          Name of the location stream
 !     \item[localCount]
-!          Number of grid cells to be distributed to this DE.
+!          Number of grid cells to be distributed to this DE/PET.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -1859,8 +1860,9 @@ contains
 !          see Section~\ref{const:decompflag} for a full description of the 
 !          possible options. 
 !          \end{sloppypar}
-!     \item{[[minIndex]}]
-!          The minimum index across all PETs. If not set defaults to 1. 
+!     \item[{[minIndex]}] 
+!          If indexflag={\tt ESMF\_INDEX\_DELOCAL}, this setting is used to indicate
+!          the number to start the index ranges at. If not present, defaults to 1.
 !     \item[maxIndex]
 !          The maximum index across all PETs.
 !     \item[{[indexflag]}]
@@ -2708,7 +2710,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !      type(ESMF_LocStream), intent(in) :: locstream
-!      integer, intent(in) :: localDE
+!      integer, intent(in), optional :: localDE
 !      character (len=*),    intent(in)              :: keyName
 !      integer,                intent(out), optional :: exclusiveLBound
 !      integer,                intent(out), optional :: exclusiveUBound
@@ -2740,7 +2742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{localDE}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
@@ -2820,7 +2822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{]localDE]}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.

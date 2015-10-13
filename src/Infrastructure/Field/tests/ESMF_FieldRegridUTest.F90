@@ -55,9 +55,9 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
+
+! This #if surrounds all the tests to enable turning on just one test
 #if 1
-
-
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -622,7 +622,6 @@
       !------------------------------------------------------------------------
 #endif
 
-#if 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between Fields where srcGrid has holes in index space"
@@ -638,7 +637,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#endif
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -657,7 +655,7 @@
 
       !------------------------------------------------------------------------
 
-#endif
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -873,7 +871,7 @@
 !      call ESMF_LogFlush()
 !      call ESMF_UtilIOUnitFlush (6)
 
-
+#endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 

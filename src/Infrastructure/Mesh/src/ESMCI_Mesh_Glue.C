@@ -32,7 +32,7 @@
 #include "ESMCI_ParEnv.h"
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
-#include "ESMCI_VM.h"
+ #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
@@ -66,7 +66,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
 }
 
@@ -100,7 +100,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
     localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, *sdim, &cart_sdim);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception    
-
+ 
     // Set dimensions
     (*meshpp)->set_parametric_dimension(*pdim);
     (*meshpp)->set_spatial_dimension(cart_sdim);
@@ -125,7 +125,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
-
+ 
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
@@ -158,7 +158,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
     // Get petCount for error checking
     int localrc;
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
 
     // Check node owners
@@ -514,6 +514,84 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 }
 
 
+
+// triangulate > 4 sided
+// sdim = spatial dim
+// num_p = number of points in poly
+// p     = poly coords size=num_p*sdim
+// td    = temporary buffer size=num_p*sdim
+// ti    = temporary integer buffer size = num_p
+// tri_ind = output array  size = 3*(nump-2)
+// tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
+static void triangulate_warea(int sdim, int num_p, double *p, 
+                              double *td, int *ti, int *tri_ind, 
+                              double *tri_area) {
+          int localrc;
+          
+          // Call into triagulation routines
+          int ret;
+          if (sdim==2) {
+            ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                              ti, tri_ind);
+          } else if (sdim==3) {
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+                                               ti, tri_ind);
+          } else {
+            if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                          " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
+          }
+
+          // Check return code
+          if (ret != ESMCI_TP_SUCCESS) {
+            if (ret == ESMCI_TP_DEGENERATE_POLY) {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   " - can't triangulate a polygon with less than 3 sides", 
+                                                ESMC_CONTEXT, &localrc)) throw localrc;
+            } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   " - clockwise polygons not supported in triangulation routine",
+                                                ESMC_CONTEXT, &localrc)) throw localrc;
+            } else {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                                " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
+            }
+          }
+
+
+          // Calculate triangule areas
+          int ti_pos=0;
+          for (int i=0; i<num_p-2; i++) {
+            // Copy triangle coordinates into td
+            int td_pos=0;
+            for (int j=0; j<3; j++) {
+              double *pnt=p+sdim*tri_ind[ti_pos+j];
+              for (int k=0; k<sdim; k++) {
+                td[td_pos]=pnt[k];
+                td_pos++;
+              }
+            }
+
+            // compute area of triangle
+            double area;
+            if (sdim == 2) {
+              area = area_of_flat_2D_polygon(3, td);
+            } else if (sdim == 3) {
+              area = great_circle_area(3, td);
+            } // Other sdim caught above
+
+            // Save areas to use for computing fractions
+            tri_area[i]=area;
+           
+            // Advance to next triangle
+            ti_pos +=3;
+          }
+
+    return;
+}
+
+
+
 void ESMCI_meshaddelements(Mesh **meshpp, 
                                               int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
@@ -537,7 +615,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int localrc;
 
     // Set some convient variables
-    Mesh *meshp = *meshpp;
+     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
 
     Mesh &mesh = *meshp;
@@ -560,20 +638,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     // Error check input
     //// Check element type
-    if (parametric_dim==2) {
-      // DONT DO THE CHECK BECAUSE WE NOW SUPPORT 
-      // ANY NUMBER OF CORNERS WITH PDIM=2
-#if 0
-      for (int i=0; i< num_elems; i++) {
-        if ((elemType[i] != 5) && (elemType[i] != 9)) {
-          int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-            "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ",
-                                           ESMC_CONTEXT, &localrc)) throw localrc;
-        }
-      }
-#endif
-    } else if (parametric_dim==3) {
+    ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT 
+    //// ANY NUMBER OF CORNERS WITH PDIM=2)
+    if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
         if ((elemType[i] != 10) && (elemType[i] != 12)) {
           int localrc;
@@ -595,7 +662,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       for (int i=0; i< num_elems; i++) {
         if (elemType[i]==10) expected_conn_size += 4;   
         else if (elemType[i]==12) expected_conn_size += 8;   
-      }
+       }
     }
       
     if (expected_conn_size != num_elemConn) {
@@ -606,17 +673,92 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
+    // Error check size of elements
+    if (parametric_dim==2) {
+      int conn_pos=0;
+      for (int e = 0; e < num_elems; ++e) {
+        
+        // Loop here through each set of connection looking for polybreaks to 
+        // figure out the size of each sub-elem
+        int elem_size=0;
+        for (int i=0; i<elemType[e]; i++) {
+          
+          // Advance size of element, or start a new one
+          if (elemConn[conn_pos] != MESH_POLYBREAK_IND) { 
+            elem_size++;
+          } else {
+            // Complain if element is less than a triangle
+            if (elem_size < 3) {
+              int localrc;
+              if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+               " element connectivity list contains elems with less than 3 sides.",
+                                               ESMC_CONTEXT, &localrc)) throw localrc;
+            }
+            elem_size=0;
+          }
+          
+          // next connection     
+          conn_pos++;
+        }
+
+        // Complain if element is less than a triangle
+        if (elem_size < 3) {
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+             " element connectivity list contains elems with less than 3 sides.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      }
+     }
+
+
+    // Variable indicating if any of the elements on this PET are split
+    bool is_split_local=false;
+
     // Count the number of extra elements we need for splitting
     int num_extra_elem=0;
     int max_num_conn=0;
+    int max_num_elemtris=0;
     if (parametric_dim==2) {
+      int conn_pos=0;
       for (int e = 0; e < num_elems; ++e) {
-        if (elemType[e] >4) {
-          num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
-        }
+        
+        // Only count split elements
+        if (elemType[e] > 4) {
 
-        if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
+          // Loop here through each set of connection looking for polybreaks to 
+          // figure out the size of each sub-elem
+          int subelem_size=0;
+          int num_elemtris=0;
+          for (int i=0; i<elemType[e]; i++) {
+            
+            // Advance size of element, or start a new one
+            if (elemConn[conn_pos] != MESH_POLYBREAK_IND) { 
+              subelem_size++;
+            } else {
+              // record this elem
+              num_extra_elem += (subelem_size-2); // num tri = # sides-2 
+              num_elemtris += (subelem_size-2); // num tri = # sides-2 
+              if (subelem_size > max_num_conn) max_num_conn=subelem_size;
+              subelem_size=0;
+            }
+
+            // next connection     
+            conn_pos++;
+          }
+
+          // record this elem         
+          num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+          num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
+          if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
+          if (subelem_size > max_num_conn) max_num_conn=subelem_size;
+        } else {
+          conn_pos += elemType[e];
+        }
       }
+
+      // mark if mesh on this particular PET is split
+      if (num_extra_elem > 0) is_split_local=true;
 
       int tot_num_extra_elem=0;
       MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,Par::Comm());
@@ -672,7 +814,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
-    // Get number of nodes
+     // Get number of nodes
     int num_nodes = mesh.num_nodes();
 
     // Allocate array to make sure that there are no local nodes without a home
@@ -693,7 +835,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         int node_index=elemConn[c]-1;
 
         // Check elemConn
-        if (node_index < 0) {
+        if ((node_index < 0) && (node_index+1 != MESH_POLYBREAK_IND)) {
 	  int localrc;
 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
 	   "- elemConn entries should not be less than 1 ",
@@ -711,7 +853,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         node_used[node_index]=1;
 
         // Advance to next
-        c++;
+        c++ ;
       }
     } // for e
 
@@ -719,7 +861,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     bool every_node_used=true;
     for (int i=0; i<num_nodes; i++) {
       if (node_used[i] == 0) {
-        every_node_used=false;
+         every_node_used=false;
         break;
       }
     }
@@ -729,7 +871,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- there are nodes on this PET that were not used in the element connectivity list ",
           ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+     }
 
     // If they exist, error check mask 
     if (present(elemMaskII)) { // if masks exist
@@ -747,7 +889,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       }
     }
 
-
+ 
     // Before setting up connectivity store all nodes in a flat array since elemConn
     // will index into this array.
     std::vector<MeshObj*> all_nodes;
@@ -766,12 +908,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
             "- node index is larger or equal to num_nodes", 
             ESMC_CONTEXT, &localrc))  throw localrc;
          }
-      
+        
       all_nodes[seq] = &*ni;
     }
-
-
- /* XMRKX */
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -783,17 +922,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int *elemMaskIIArray_wsplit=NULL;
     InterfaceInt *elemMaskII_wsplit=NULL;
 
+    // If the piece of mesh on this proc is split, then generate the split elems
+    if (is_split_local) {
 
-    if (mesh.is_split) {
       // New number of elements
-      num_elems_wsplit=num_elems+num_extra_elem;
+       num_elems_wsplit=num_elems+num_extra_elem;
 
       // Allocate arrays to hold split lists
       elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
       elemType_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
       if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
-
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
@@ -809,13 +948,15 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         elemMaskII_wsplit=new InterfaceInt(elemMaskIIArray_wsplit,1,extent);
       }
 
-
       // Allocate some temporary variables for splitting
-      double *polyCoords=new double[3*max_num_conn];
-      double *polyDblBuf=new double[3*max_num_conn];
-      int    *polyIntBuf=new int[max_num_conn];
-      int    *triInd=new int[3*(max_num_conn-2)];
-      double *triFrac=new double[max_num_conn-2];
+      double *subelem_coords=new double[3*max_num_conn];
+      double *subelem_dbl_buf=new double[3*max_num_conn];
+      int    *subelem_int_buf=new int[max_num_conn];
+      int    *subelem_tri_ind=new int[3*(max_num_conn-2)];
+      double *subelem_tri_area=new double[max_num_conn-2];
+
+      double *elemtris_area=new double[max_num_elemtris];
+      int *elemtris_split_elem_pos=new int[max_num_elemtris];
 
       // new id counter
       int curr_extra_id=beg_extra_ids;
@@ -828,68 +969,117 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       int split_conn_pos = 0;
       int split_elem_pos = 0;
       for (int e = 0; e < num_elems; ++e) {
-        
-        // More than 4 side, split
+         
+        // More than 4 sides, split
         if (elemType[e]>4) {
+
+          // Init for frac calc
+          int    num_elemtris=0;
+          double tot_elemtris_area=0.0;
+
+          // Loop while we're still in this element
+          bool first_elem=true;
+          int end_of_elem=conn_pos+elemType[e];
+          while (conn_pos < end_of_elem) {
+
+            // Skip poly breaks
+            if (elemConn[conn_pos] == MESH_POLYBREAK_IND) conn_pos++;
+
+            // Find sub-elements (may be only one)
+            int subelem_size=0;
+            for (int i=conn_pos; i<end_of_elem; i++) {
+              if (elemConn[i] == MESH_POLYBREAK_IND) break;
+              subelem_size++;
+            }
+
+            //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
+ 
 
           // Get coordinates
           int crd_pos=0;
-          for (int i=0; i<elemType[e]; i++) {
+          for (int i=0; i<subelem_size; i++) {
             MeshObj *node=all_nodes[elemConn[conn_pos+i]-1];
             double *crd=mesh.node_coord->data(*node);
             
             for (int j=0; j<sdim; j++) {
-              polyCoords[crd_pos]=crd[j];
+              subelem_coords[crd_pos]=crd[j];
               crd_pos++;
             }
-
-            // printf("id=%d coord=%f %f \n",elemId[e],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
+ 
+            // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
-                      triInd, triFrac); 
+          triangulate_warea(sdim, subelem_size, subelem_coords,
+                            subelem_dbl_buf, subelem_int_buf, 
+                            subelem_tri_ind, subelem_tri_area); 
           
-
           // Create split element list
           int tI_pos=0;
-          for (int i=0; i<elemType[e]-2; i++) {
-            // First id is same, others are from new ids
-            if (i==0) {
-              elemId_wsplit[split_elem_pos]=elemId[e];
-              mesh.split_id_to_frac[elemId[e]]=triFrac[i];
-            } else {
-              elemId_wsplit[split_elem_pos]=curr_extra_id;
-              mesh.split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
-              mesh.split_id_to_frac[curr_extra_id]=triFrac[i];
-              curr_extra_id++;
-            }
+           for (int i=0; i<subelem_size-2; i++) {
+             // First id is same, others are from new ids
+             if (first_elem) {
+               elemId_wsplit[split_elem_pos]=elemId[e];
+               first_elem=false;
+             } else {
+               elemId_wsplit[split_elem_pos]=curr_extra_id;
+               mesh.split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+               curr_extra_id++;
+             }
 
             // Type is triangle
             elemType_wsplit[split_elem_pos]=3; 
 
-            // Set area to fraction of original area
-            if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e]*triFrac[i];
-
             // Set mask (if it exists)
-            if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+             if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+             // Set triangle corners based on subelem_tri_ind
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+subelem_tri_ind[tI_pos]];
+            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+subelem_tri_ind[tI_pos+1]];
+            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+subelem_tri_ind[tI_pos+2]];
 
-            // Next split element
-            split_elem_pos++;
-
-            // Set triangle corners based on triInd
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
-            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
-            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+            // Acumulate over sub-elems in one element
+            elemtris_split_elem_pos[num_elemtris]=split_elem_pos;
+            elemtris_area[num_elemtris]=subelem_tri_area[i];  
+            tot_elemtris_area += elemtris_area[num_elemtris];  
+            num_elemtris++;
 
             // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+ 
+            // Advance
+            split_elem_pos++;
             split_conn_pos +=3;
-            tI_pos +=3;
-
-          }
+            tI_pos +=3;           
+           }
 
           // Advance to next elemConn position 
-          conn_pos +=elemType[e];
+          conn_pos +=subelem_size;
+
+           } // end of loop through sub elems
+
+           // Loop over elem setting fracs
+           if (tot_elemtris_area > 0.0) {
+             for (int i=0; i<num_elemtris; i++) {
+               double frac=elemtris_area[i]/tot_elemtris_area;
+               int sep=elemtris_split_elem_pos[i];
+
+               // Add frac to mesh split information
+               mesh.split_id_to_frac[elemId_wsplit[sep]]=frac;
+                 
+               // Set area to fraction of original area
+               if (areaPresent==1) elemArea_wsplit[sep]=elemArea[e]*frac;
+             }
+           } else {
+             for (int i=0; i<num_elemtris; i++) {
+               double frac=elemtris_area[i]/tot_elemtris_area;
+               int sep=elemtris_split_elem_pos[i];
+
+               // Add frac to mesh split information
+               mesh.split_id_to_frac[elemId_wsplit[sep]]=0.0;
+                 
+               // Set area to fraction of original area
+               if (areaPresent==1) elemArea_wsplit[sep]=0.0;
+             }
+           }
 
         } else { // just copy
           elemId_wsplit[split_elem_pos]=elemId[e];
@@ -907,11 +1097,13 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       
       
       // Allocate some temporary variables for splitting
-      delete [] polyCoords;
-      delete [] polyDblBuf;
-      delete [] polyIntBuf;
-      delete [] triInd;
-      delete [] triFrac;
+      delete [] subelem_coords;
+      delete [] subelem_dbl_buf;
+      delete [] subelem_int_buf;
+      delete [] subelem_tri_ind;
+      delete [] subelem_tri_area;
+      delete [] elemtris_area;
+      delete [] elemtris_split_elem_pos;
 
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
@@ -923,7 +1115,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if (present(elemMaskII)) { 
         elemMaskII=elemMaskII_wsplit;
       }
-    }   
+    }
 
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
@@ -950,6 +1142,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         // Setup connectivity list
         nconnect[n] = all_nodes[node_index];
 
+        // printf("elem id=%d type=%d node_id[%d]=%d\n",eid,elemType[e],n,nconnect[n]->get_id());
+
+
         // Advance to next
         cur_conn++;
       }
@@ -957,7 +1152,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       mesh.add_element(elem, nconnect, topo->number, topo);
 
     } // for e
-
+ 
 
   // Register the frac field
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
@@ -1004,7 +1199,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   } 
 
 
-  // Handle element coords
+   // Handle element coords
   bool has_elem_coords=false;
   if (coordsPresent == 1) { // if coords exist
 
@@ -1051,7 +1246,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
       // Set mask value to input array
       double *mv=elem_mask_val->data(elem);
-      int data_index = elem.get_data_index();
+       int data_index = elem.get_data_index();
       *mv=(double)elemMask[data_index];
 
         // Init mask to 0.0
@@ -1098,7 +1293,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       // is set as the position in the local array above
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
+         MeshObj &elem = *ei;
         if (!GetAttr(elem).is_locally_owned()) continue;
         
         // Set coordinate value to input array
@@ -1143,9 +1338,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     }
 
-
-
- /* XMRKX */
+  /* XMRKX */
   }
 
 
