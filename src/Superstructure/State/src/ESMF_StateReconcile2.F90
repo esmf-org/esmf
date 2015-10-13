@@ -1720,6 +1720,12 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    deallocate (buffer_send, counts_send, offsets_send,  &
+        stat=memstat)
+    if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
     ! Copy recv buffers into recv_items
 
     do, i=0, npets-1
