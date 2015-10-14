@@ -2885,6 +2885,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! alternative exit condition if driver itself matches compLabel
     if (.not.foundFlag) then
+      !TODO: Fix this, I don't think that works yet because Driver never stores
+      ! CompLabel Attribute.
       call NUOPC_CompAttributeGet(driver, name="CompLabel", &
         value=driverCompLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
