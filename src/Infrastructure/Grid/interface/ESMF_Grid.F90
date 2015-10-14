@@ -40,7 +40,7 @@
       use ESMF_ArrayBundleMod
       use ESMF_RHandleMod
       use ESMF_LocalArrayMod    ! ESMF local array class
-      use ESMF_InitMacrosMod    ! ESMF initializer macros
+       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
       use ESMF_DELayoutMod
@@ -60,7 +60,7 @@
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+       private
 
 !------------------------------------------------------------------------------
 ! ! ESMF_Grid
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! ! ESMF_GridStatus_Flag
 !
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
   type ESMF_GridStatus_Flag
 #ifndef ESMF_NO_SEQUENCE
   sequence
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! ! ESMF_GridItem_Flag
 !
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 ! There is an assignment operator for the flag, please check that
 ! if you are making changes to this flag.
   type ESMF_GridItem_Flag
@@ -832,7 +832,7 @@ end interface
 !BOPI
 ! !INTERFACE:
       interface operator (==)
-
+ 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PoleTypeEqual
 
@@ -1024,8 +1024,8 @@ end interface
 ! !DESCRIPTION:
 !   Test whether grid1 and grid2 are valid aliases to the same ESMF
 !   Grid object in memory. For a more general comparison of two ESMF Grids,
-!   going beyond the simple alias test, the ESMF\_GridMatch() function (not yet
-!   fully implemented) must be used.
+!   going beyond the simple alias test, the ESMF\_GridMatch() function
+!   must be used.
 !
 !   The arguments are:
 !   \begin{description}
