@@ -9,12 +9,12 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/src/NUOPC_Compliance_Model.F90"
+#define FILENAME "src/addon/NUOPC/src/NUOPC_Compliance_Connector.F90"
 !==============================================================================
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-! Compliance Interface Component for NUOPC_Model components.
+! Compliance Interface Component for NUOPC_Connector components.
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@
 !  Interface Component
 !-------------------------------------------------------------------------
 
-module NUOPC_Compliance_Model
+module NUOPC_Compliance_Connector
 
     use ESMF
     use NUOPC_Base, only: NUOPC_PhaseMapStringLength  ! change this?
@@ -39,11 +39,8 @@ module NUOPC_Compliance_Model
     ! these map NUOPC events to the phase when it should occur
     ! therefore, we can check after the phase to verify
     character(*), parameter :: &
-        event_AdvertiseFields = "IPDv00p1|IPDv01p1|IPDv02p1|IPDv03p1|IPDv04p1"
-    character(*), parameter :: &
-        event_RealizeFields = "IPDv00p2"  ! TODO: deal with other versions of realize
-    character(*), parameter :: &
-        event_InternalClockSet = "IPDv00p3|IPDv01p4|IPDv02p4|IPDv03p6|IPDv04p6"
+        event_CplListEstablished = "IPDv00p1|IPDv01p1|IPDv02p1|IPDv03p1|IPDv04p1b|IPDv05p2b"
+
 
     public setvmIC, registerIC
         
@@ -78,23 +75,18 @@ contains
     !   !   private to the module.
  
     recursive subroutine registerIC(comp, rc)
-        type(ESMF_GridComp)   :: comp
+        type(ESMF_CplComp)   :: comp
         integer, intent(out)  :: rc
 
         character(ESMF_MAXSTR)  :: prefix
         character(ESMF_MAXSTR)  :: output
         integer                 :: phaseCount, phase
         logical                 :: phaseZeroFlag
-        logical                 :: regAdvertise, regRealize
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
     
-        ! methods user must provide
-        regAdvertise = .false.
-        regRealize = .false.
-
         ! IMPORTANT: As an InterfaceComponent the code must ensure:
         ! 1) That the return code from the actual child method is returned to the
         !    parent (note that this is not currently possible for the register)
@@ -129,7 +121,7 @@ contains
                 return  ! bail out
     
             ! check Initialize registration
-            call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, phaseCount, &
+            call ESMF_CplCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, phaseCount, &
                 phaseZeroFlag, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -142,7 +134,7 @@ contains
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
-                call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
+                call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
                     userRoutine=ic_init, phase=0, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -176,45 +168,34 @@ contains
                     file=FILENAME)) &
                     return  ! bail out
                 do phase=1, phaseCount
-                    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
+                    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
                         userRoutine=ic_init, phase=phase, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
                         file=FILENAME)) &
                         return  ! bail out
 
-                    call NUOPC_CompSearchPhaseMapByIndex(comp, ESMF_METHOD_INITIALIZE, &
-                        phase, phaseLabel, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-
-                    if (index(event_AdvertiseFields, trim(phaseLabel)) > 0) then
-                        !print *, "Found advertise: "//phaseLabel, "phase=", phase
-                        regAdvertise = .true.
-                    endif
-                    if (index(event_RealizeFields, trim(phaseLabel)) > 0) then
-                        regRealize = .true.
-                    endif
+!                    call NUOPC_CplCompSearchPhaseMapByIndex(comp, ESMF_METHOD_INITIALIZE, &
+!                        phase, phaseLabel, rc)
+!                    if (ESMF_LogFoundError(rc, &
+!                        line=__LINE__, &
+!                        file=FILENAME)) &
+!                        return  ! bail out
+!
+!                    if (index(event_AdvertiseFields, trim(phaseLabel)) > 0) then
+!                        !print *, "Found advertise: "//phaseLabel, "phase=", phase
+!                        regAdvertise = .true.
+!                    endif
+!                    if (index(event_RealizeFields, trim(phaseLabel)) > 0) then
+!                        regRealize = .true.
+!                    endif
 
                 enddo
             endif
     
-            ! report missing phases
-            ! this does NOT appear to work because it looks like these
-            ! phases are defaulted in the InitializePhaseMap
-            if (.not. regAdvertise) then
-                call ESMF_LogWrite(trim(prefix)//" missing advertise phase.", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-            endif
-            if (.not. regRealize) then
-                call ESMF_LogWrite(trim(prefix)//" missing realize phase.", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-            endif
 
             ! check Run registration
-            call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_RUN, phaseCount, &
+            call ESMF_CplCompGetEPPhaseCount(comp, ESMF_METHOD_RUN, phaseCount, &
                 phaseZeroFlag, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -227,7 +208,7 @@ contains
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
-                call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
+                call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
                     userRoutine=ic_run, phase=0, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -254,7 +235,7 @@ contains
                     file=FILENAME)) &
                     return  ! bail out
                 do phase=1, phaseCount
-                    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
+                    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
                         userRoutine=ic_run, phase=phase, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
@@ -264,7 +245,7 @@ contains
             endif
 
             ! check Finalize registration
-            call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_FINALIZE, phaseCount, &
+            call ESMF_CplCompGetEPPhaseCount(comp, ESMF_METHOD_FINALIZE, phaseCount, &
                 phaseZeroFlag, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -277,7 +258,7 @@ contains
                     line=__LINE__, &
                     file=FILENAME)) &
                     return  ! bail out
-                call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
+                call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
                     userRoutine=ic_final, phase=0, rc=rc)
                 if (ESMF_LogFoundError(rc, &
                     line=__LINE__, &
@@ -304,7 +285,7 @@ contains
                     file=FILENAME)) &
                     return  ! bail out
                 do phase=1, phaseCount
-                    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
+                    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
                         userRoutine=ic_final, phase=phase, rc=rc)
                     if (ESMF_LogFoundError(rc, &
                         line=__LINE__, &
@@ -332,7 +313,7 @@ contains
     !   !   Initialization routine.
     
     recursive subroutine ic_init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp)   :: comp
+        type(ESMF_CplComp)   :: comp
         type(ESMF_State)      :: importState, exportState
         type(ESMF_Clock)      :: clock
         integer, intent(out)  :: rc
@@ -354,7 +335,7 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_CplCompGet(comp, currentPhase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -397,20 +378,20 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
-            ! compliance check Component metadata
+             ! compliance check Component metadata
             call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -440,7 +421,7 @@ contains
 
         ! Call the actual Initialize routine
 
-        call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
+        call ESMF_CplCompInitializeAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
@@ -467,11 +448,11 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! compliance check Component metadata
             call NUOPC_CheckComponentMetadata(prefix, comp=comp, rc=rc)
@@ -497,31 +478,13 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
-            ! compliance check internal Clock
-            ! REMOVED - moved to phase specific check (checkPhaseEpilogue_InternalClockSet)
-            !call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
-            !    mustMatchCurr=.false., mustReachStop=.false., rc=rc)
-            !if (ESMF_LogFoundError(rc, &
-            !    line=__LINE__, &
-            !    file=FILENAME)) &
-            !    return  ! bail out
-
-            ! Component Attributes should be set up -> ready to output
-            !    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
-            !      purpose='ModelComp', &
-            !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-            !    if (ESMF_LogFoundError(rc, &
-            !      line=__LINE__, &
-            !      file=FILENAME)) &
-            !      return  ! bail out
-
-            call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
+             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
                 phase, importState, exportState, clock, .false., rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -553,7 +516,7 @@ contains
     !   !  Run routine
  
     recursive subroutine ic_run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp)   :: comp
+        type(ESMF_CplComp)   :: comp
         type(ESMF_State)      :: importState, exportState
         type(ESMF_Clock)      :: clock
         integer, intent(out)  :: rc
@@ -574,7 +537,7 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_CplCompGet(comp, currentPhase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -609,26 +572,26 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! compliance check internal Clock
-            call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
-                mustMatchCurr=.true., mustReachStop=.false., rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
+!                mustMatchCurr=.true., mustReachStop=.false., rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             write(output,*) ">STOP RunPrologue for phase=", phase
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -644,7 +607,7 @@ contains
         ccfDepth = ccfDepth + 1
 
         ! Call the actual Run routine
-        call ESMF_GridCompRunAct(comp, importState, exportState, clock, &
+        call ESMF_CplCompRunAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
@@ -671,11 +634,11 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
@@ -694,19 +657,19 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! compliance check internal Clock
-            call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
-                mustMatchCurr=.false., mustReachStop=.true., rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
+!                mustMatchCurr=.false., mustReachStop=.true., rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             write(output,*) ">STOP RunEpilogue for phase=", phase
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -731,7 +694,7 @@ contains
     !   !  Finalize routine
  
     recursive subroutine ic_final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp)   :: comp
+        type(ESMF_CplComp)   :: comp
         type(ESMF_State)      :: importState, exportState
         type(ESMF_Clock)      :: clock
         integer, intent(out)  :: rc
@@ -752,7 +715,7 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
-        call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+        call ESMF_CplCompGet(comp, currentPhase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -787,18 +750,18 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             write(output,*) ">STOP FinalizePrologue for phase=", phase
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -814,7 +777,7 @@ contains
         ccfDepth = ccfDepth + 1
 
         ! Call the actual Finalize routine
-        call ESMF_GridCompFinalizeAct(comp, importState, exportState, clock, &
+        call ESMF_CplCompFinalizeAct(comp, importState, exportState, clock, &
             phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
@@ -841,11 +804,11 @@ contains
                 return  ! bail out
 
             ! check Component statistics
-            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckComponentStatistics(prefix, comp=comp, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             ! compliance check importState
             call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
@@ -864,11 +827,11 @@ contains
                 return  ! bail out
 
             ! compliance check clock usage
-            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+!            call NUOPC_CheckClockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+!            if (ESMF_LogFoundError(rc, &
+!                line=__LINE__, &
+!                file=FILENAME)) &
+!                return  ! bail out
 
             write(output,*) ">STOP FinalizeEpilogue for phase=", phase
             call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -894,7 +857,7 @@ contains
     !-------------------------------------------------------------------------
 
     recursive subroutine prefixString(comp, prefix, forward, rc)
-        type(ESMF_GridComp)                       :: comp
+        type(ESMF_CplComp)                        :: comp
         character(*),       intent(inout)         :: prefix
         logical,            intent(in),  optional :: forward
         integer,            intent(out), optional :: rc
@@ -911,7 +874,7 @@ contains
             if (.not.forward) arrow = "|<-"
         endif
 
-        call ESMF_GridCompGet(comp, name=compName, rc=rc)
+        call ESMF_CplCompGet(comp, name=compName, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -928,7 +891,7 @@ contains
         phaseIndex, importState, exportState, clock, prologue, rc)
 
         character(*), intent(in)           :: prefix
-        type(ESMF_GridComp)                :: comp
+        type(ESMF_CplComp)                :: comp
         type(ESMF_Method_Flag), intent(in) :: methodflag
         integer,                intent(in) :: phaseIndex
         type(ESMF_State)                   :: importState, exportState
@@ -942,7 +905,7 @@ contains
         rc = ESMF_SUCCESS
 
         call NUOPC_CompSearchPhaseMapByIndex(comp, &
-            methodflag, phaseIndex, phaseLabel, rc=rc)
+            methodflag, phaseIndex, phaseLabel, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -951,12 +914,10 @@ contains
         if (prologue) then
             ! nothing yet
         else ! epilogue
+            ! nothing yet
             if (methodflag==ESMF_METHOD_INITIALIZE) then
-                if (index(event_AdvertiseFields, trim(phaseLabel)) > 0) then
-                    call checkPhaseEpilogue_Advertise(prefix, comp, importState, &
-                        exportState, clock, rc)
-                elseif (index(event_InternalClockSet, trim(phaseLabel)) > 0) then
-                    call checkPhaseEpilogue_InternalClockSet(prefix, comp, importState, &
+                if (index(event_CplListEstablished, trim(phaseLabel)) > 0) then
+                    call checkPhaseEpilogue_CplListEstablished(prefix, comp, importState, &
                         exportState, clock, rc)
                 endif
             endif
@@ -964,431 +925,17 @@ contains
 
     end subroutine dispatchPhaseChecks
 
-    !
-    ! Checks related to field advertise initialize
-    !
-    recursive subroutine checkPhaseEpilogue_Advertise(prefix, comp, &
+    recursive subroutine checkPhaseEpilogue_CplListEstablished(prefix, comp, &
         importState, exportState, clock, rc)
 
         character(*), intent(in)           :: prefix
-        type(ESMF_GridComp)                :: comp
+        type(ESMF_CplComp)                 :: comp
         type(ESMF_State)                   :: importState, exportState
         type(ESMF_Clock)                   :: clock
         integer, intent(out)               :: rc
 
-        ! local variables
-        integer  :: importFieldCount, exportFieldCount
-
-        rc = ESMF_SUCCESS
-
-        !print *, "Inside checkPhaseEpilogue_Advertise()"
-
-        importFieldCount = 0
-        exportFieldCount = 0
-
-        call checkStateFieldMetadataAfterAdvertise(prefix, &
-            importState, importFieldCount, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        call checkStateFieldMetadataAfterAdvertise(prefix, &
-            exportState, exportFieldCount, rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        if (importFieldCount + exportFieldCount == 0) then
-            call ESMF_LogWrite(trim(prefix)// &
-                " does not advertise any fields (import or export).", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-        endif
-
-
-    end subroutine
-
-    !
-    ! Checks after internal clock should be set
-    !
-    recursive subroutine checkPhaseEpilogue_InternalClockSet(prefix, comp, &
-        importState, exportState, clock, rc)
-
-        character(*), intent(in)           :: prefix
-        type(ESMF_GridComp)                :: comp
-        type(ESMF_State)                   :: importState, exportState
-        type(ESMF_Clock)                   :: clock
-        integer, intent(out)               :: rc
-
-        rc = ESMF_SUCCESS
-
-        call NUOPC_CheckInternalClock(prefix, comp=comp, clock=clock, &
-                mustMatchCurr=.false., mustReachStop=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-    end subroutine
-
-
-
-    recursive subroutine checkStateFieldMetadataAfterAdvertise(prefix, &
-        state, totalFields, rc)
-
-        character(*), intent(in)              :: prefix
-        type(ESMF_State)                      :: state
-        integer,      intent(out), optional   :: totalFields
-        integer,      intent(out), optional   :: rc
-
-        ! local variables
-        integer :: item, itemCount
-        character(ESMF_MAXSTR), allocatable    :: itemNameList(:)
-        type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
-        type(ESMF_Field)                       :: field
-        type(ESMF_Field), allocatable          :: fields(:)
-        type(ESMF_FieldBundle)                 :: fieldbundle
-        integer                                :: fieldCount, fitem
-
-        totalFields = 0
-
-        call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        if (itemCount > 0) then
-            allocate(itemNameList(itemCount))
-            allocate(stateitemtypeList(itemCount))
-            call ESMF_StateGet(state, itemNameList=itemNameList, &
-                itemtypeList=stateitemtypeList, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
-
-            do item=1, itemCount
-
-                if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
-                    totalFields = totalFields + 1
-                    call ESMF_StateGet(state, itemName=itemNameList(item), &
-                        field=field, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                    call checkFieldMetadataAfterAdvertise(prefix, field=field, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
-                    call ESMF_StateGet(state, itemName=itemNameList(item), &
-                        fieldbundle=fieldbundle, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                    allocate(fields(fieldCount))
-                    call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
-                        line=__LINE__, &
-                        file=FILENAME)) &
-                        return  ! bail out
-                    do fitem=1, fieldCount
-                        totalFields = totalFields + 1
-                        field = fields(fitem)
-                        call checkFieldMetadataAfterAdvertise(prefix, field=field, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
-                            line=__LINE__, &
-                            file=FILENAME)) &
-                            return  ! bail out
-                    enddo
-                    deallocate(fields)
-                endif
-
-            enddo
-
-            deallocate(stateitemtypeList)
-            deallocate(itemNameList)
-        endif
-
-    end subroutine
-
-
-    !-------------------------------------------------------------------------
-
-    !  recursive subroutine checkFieldMetadata(prefix, field, rc)
-    !    character(*), intent(in)              :: prefix
-    !    type(ESMF_Field)                      :: field
-    !    integer,      intent(out), optional   :: rc
-    !
-    !    character(ESMF_MAXSTR)                :: attributeName
-    !    character(ESMF_MAXSTR)                :: convention
-    !    character(ESMF_MAXSTR)                :: purpose
-    !
-    !    if (present(rc)) rc = ESMF_SUCCESS
-    !
-    !    ! set NUOPC convention and purpose specifiers
-    !    convention = "NUOPC"
-    !    purpose = "General"
-    !
-    !    call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
-    !      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-    !      ESMF_LOGMSG_INFO, rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "StandardName"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "Units"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "LongName"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "ShortName"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "Intent"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "Connected"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "TimeStamp"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "ProducerConnection"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "ConsumerConnection"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "Updated"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "TransferOfferGeomObject"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !    attributeName = "TransferActionGeomObject"
-    !    call checkFieldAttribute(prefix, field=field, &
-    !      attributeName=attributeName, convention=convention, purpose=purpose, &
-    !      rc=rc)
-    !    if (ESMF_LogFoundError(rc, &
-    !      line=__LINE__, &
-    !      file=FILENAME)) &
-    !      return  ! bail out
-    !
-    !  end subroutine
-
-    recursive subroutine checkFieldMetadataAfterAdvertise(prefix, field, rc)
-        character(*), intent(in)              :: prefix
-        type(ESMF_Field)                      :: field
-        integer,      intent(out), optional   :: rc
-
-        character(ESMF_MAXSTR)                :: attributeName
-        character(ESMF_MAXSTR)                :: convention
-        character(ESMF_MAXSTR)                :: purpose
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        ! set NUOPC convention and purpose specifiers
-        convention = "NUOPC"
-        purpose = "Instance"
-
-        !    call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
-        !      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-        !      ESMF_LOGMSG_INFO, rc=rc)
-        !    if (ESMF_LogFoundError(rc, &
-        !      line=__LINE__, &
-        !      file=FILENAME)) &
-        !      return  ! bail out
-
-        attributeName = "StandardName"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "Units"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "LongName"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "ShortName"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        !      How is this used by NUOPC?
-
-        !      attributeName = "Intent"
-        !      call NUOPC_CheckFieldAttribute(prefix, field=field, &
-        !          attributeName=attributeName, convention=convention, purpose=purpose, &
-        !          rc=rc)
-        !      if (ESMF_LogFoundError(rc, &
-        !          line=__LINE__, &
-        !          file=FILENAME)) &
-        !          return  ! bail out
-
-        attributeName = "Connected"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "TimeStamp"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "ProducerConnection"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "ConsumerConnection"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "Updated"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "TransferOfferGeomObject"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
-
-        attributeName = "TransferActionGeomObject"
-        call NUOPC_CheckFieldAttribute(prefix, field=field, &
-            attributeName=attributeName, convention=convention, purpose=purpose, &
+        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+            attributeName="CplList", convention="NUOPC", purpose="Instance", &
             rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
@@ -1396,25 +943,6 @@ contains
             return  ! bail out
 
     end subroutine
-    
-    
-!-------------------------------------------------------------------------
-
-!  recursive function zeroTerminatedString(string)
-!    logical :: zeroTerminatedString
-!    character(len=*), intent(in)        :: string
-!    integer(kind=selected_int_kind(2))  :: vbyte, mbyte
-!
-!    zeroTerminatedString = .false. ! initialize
-!    vbyte = transfer(string, mbyte)
-!
-!    print *, "In function zeroTerminatedString", vbyte
-!
-!    if (vbyte==0) zeroTerminatedString = .true.
-!
-!  end function
- 
-!-------------------------------------------------------------------------
 
 
-end module NUOPC_Compliance_Model
+end module NUOPC_Compliance_Connector

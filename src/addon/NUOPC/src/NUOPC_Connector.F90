@@ -97,42 +97,47 @@ module NUOPC_Connector
     ! InitializePhaseMap.
 
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv05p1"/), &
+      userRoutine=Initialize05P1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
       userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
+      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2", "IPDv05p3"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
+      phaseLabelList=(/"IPDv03p3", "IPDv04p3", "IPDv05p4"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p4", "IPDv04p4"/), &
+      phaseLabelList=(/"IPDv03p4", "IPDv04p4", "IPDv05p5"/), &
       userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
+      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a", "IPDv05p6a"/), &
       userRoutine=InitializeP5a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
+      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b", "IPDv05p6b"/), &
       userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1a"/), &
+      phaseLabelList=(/"IPDv04p1a", "IPDv05p2a"/), &
       userRoutine=InitializeP1a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1b"/), &
+      phaseLabelList=(/"IPDv04p1b", "IPDv05p2b"/), &
       userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -180,14 +185,151 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! filter all other entries but those of type IPDv04
+    ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
-      acceptStringList=(/"IPDv04p"/), rc=rc)
+      acceptStringList=(/"IPDv05p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
+   !-----------------------------------------------------------------------------
+
+  subroutine Initialize05P1(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! get transfer policy for both states
+    call NUOPC_AttributeGet(importState, name="FieldTransferPolicy", &
+        value=importXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call NUOPC_AttributeGet(exportState, name="FieldTransferPolicy", &
+        value=exportXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+!    print *, "importState xferPolicy = ", importXferPolicy
+!    print *, "exportState xferPolicy = ", exportXferPolicy
+
+    ! States on both sides must accept transfer
+    if (trim(exportXferPolicy)=="transferAll" .and. &
+        trim(importXferPolicy)=="transferAll") then
+
+        call doTransfer(exportState, importState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        call doTransfer(importState, exportState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    end if
+
+    contains
+
+    subroutine doTransfer(fromState, toState, rc)
+
+      type(ESMF_State), intent(inout) :: fromState
+      type(ESMF_State), intent(inout) :: toState
+      integer, intent(out) :: rc
+
+      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
+      integer                :: itemCount, i, stat
+      character (ESMF_MAXSTR), allocatable :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
+      type(ESMF_Field)       :: field
+
+      rc = ESMF_SUCCESS
+
+      call ESMF_StateGet(fromState, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      allocate(itemNameList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      allocate(itemTypeList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      call ESMF_StateGet(fromState, itemNameList=itemNameList, &
+        itemTypeList=itemTypeList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      ! WARNING: does not currently deal with nested states or field bundles
+      do i=lbound(itemNameList,1), ubound(itemNameList,1)
+        !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
+        if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
+
+          ! do not transfer if it already exists in the destination state
+          call ESMF_StateGet(toState, &
+            itemSearch=itemNameList(i), itemCount=itemCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (itemCount > 0) then
+            cycle
+          endif
+
+          ! reverse TransferOfferGeomObject attribute, e.g., if a component
+          ! providing a field wants to provide a grid, then the accepting
+          ! component should not try to provide its own grid
+          call ESMF_StateGet(fromState, &
+            itemNameList(i), field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          call NUOPC_FieldAttributeGet(field, name="TransferOfferGeomObject", &
+             value=oldTransferGeom, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! default
+          newTransferGeom = "cannot provide"
+          if (trim(oldTransferGeom)=="will provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="can provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="cannot provide") then
+            newTransferGeom = "will provide"
+          end if
+
+          ! transfer to toState
+          call NUOPC_Advertise(toState, StandardName=itemNameList(i), &
+            TransferOfferGeomObject=newTransferGeom, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        end if
+     end do
+
+     deallocate(itemNameList)
+     deallocate(itemTypeList)
+
+    end subroutine
+
+  end subroutine
+
+
   !-----------------------------------------------------------------------------
   
   subroutine InitializeP1a(cplcomp, importState, exportState, clock, rc)

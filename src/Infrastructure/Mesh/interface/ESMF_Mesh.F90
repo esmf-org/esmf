@@ -18,7 +18,7 @@ module ESMF_MeshMod
 !==============================================================================
 !
 ! This file contains the F90 wrapper code for the C++ implementation of
-!  the Mesh class.
+ !  the Mesh class.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -38,7 +38,7 @@ module ESMF_MeshMod
 !
 !------------------------------------------------------------------------------
 
-! !USES:
+ ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -58,7 +58,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+       
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -77,7 +77,7 @@ module ESMF_MeshMod
     logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
     integer :: numOwnedNodes
     integer :: numOwnedElements
-    integer :: spatialDim
+     integer :: spatialDim
     integer :: parametricDim
 
     type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
@@ -95,7 +95,7 @@ module ESMF_MeshMod
     integer :: origElemStart
     integer :: origElemCount
 
-    ESMF_INIT_DECLARE
+     ESMF_INIT_DECLARE
   end type
 
   type ESMF_MeshElement
@@ -114,12 +114,17 @@ module ESMF_MeshMod
 !!        ESMF_MESHELEMTYPE_HEX = ESMF_MeshElement(2), &
 !!        ESMF_MESHELEMTYPE_TET = ESMF_MeshElement(3)
 !!!!
-
+ 
   integer, parameter :: &
         ESMF_MESHELEMTYPE_TRI    = 3,  &  ! Triangle
         ESMF_MESHELEMTYPE_QUAD   = 4,  &  ! Quadralateral
         ESMF_MESHELEMTYPE_TETRA  = 10, &  ! Tetrahedron
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
+
+
+! Needs to be kept in line with MESH_POLYBREAK_IND
+! in ESMCI_Mesh.h
+  integer, parameter :: ESMF_MESH_POLYBREAK=-1
 
   type ESMF_MeshLoc
 #ifndef ESMF_NO_SEQUENCE
@@ -134,7 +139,7 @@ module ESMF_MeshMod
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2), &
 	ESMF_MESHLOC_NONE = ESMF_MeshLoc(3)
 
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
 !------------------------------------------------------------------------------
@@ -144,8 +149,10 @@ module ESMF_MeshMod
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
+  public ESMF_MESH_POLYBREAK
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
+
 
 !------------------------------------------------------------------------------
 

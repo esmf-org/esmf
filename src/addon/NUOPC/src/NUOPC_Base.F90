@@ -738,12 +738,14 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(1)
+    character(ESMF_MAXSTR)            :: attrList(2)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Namespace"           ! namespace of this State
+    attrList(2) = "FieldTransferPolicy" ! indicates to connectors to transfer/mirror fields:
+                                        !    one of transferNone, transferAll
     
     ! add Attribute packages
     call ESMF_AttributeAdd(state, convention="NUOPC", purpose="Instance", &
@@ -752,7 +754,10 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! set Attributes to defaults
-    ! <no defaults currently>
+    call ESMF_AttributeSet(state, attrList(2), "transferNone", &
+        convention="NUOPC", purpose="Instance", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
