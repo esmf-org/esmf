@@ -943,9 +943,8 @@ namespace ESMCI {
 //     return code rc.
 //
 // !ARGUMENTS:
-      ESMC_Base* base,                 //  in - location for read-in Attributes
-      int fileNameLen,                 //  in - file name length
-      const char* fileName) {          //  in - file name
+      ESMC_Base* base,              //  in - location for read-in Attributes
+          const string &fileName) { //  in - file name
 //
 // !DESCRIPTION:
 //      Read data items for the State from a file.  Currently limited to
@@ -973,7 +972,7 @@ namespace ESMCI {
 
       // read the NetCDF file, placing contents into this State object, with
       // Attributes placed on the State's base node
-      localrc = io_netcdf->read(string(fileName, fileNameLen));
+      localrc = io_netcdf->read(fileName);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
@@ -1002,8 +1001,7 @@ namespace ESMCI {
 //
 // !ARGUMENTS:
       ESMC_Base* base,               //  in - location to write Attributes from
-      int fileNameLen,                 //  in - file name length
-      const char* fileName) {          //  in - file name
+          const string &fileName) {  //  in - file name
 //
 // !DESCRIPTION:
 //      Write data items for the State from a file.  Currently limited to
@@ -1031,7 +1029,7 @@ namespace ESMCI {
 
       // write the NetCDF file, taking contents from this State object, with
       // Attributes taken from the State's base node
-      localrc = io_netcdf->write(string(fileName, fileNameLen));
+      localrc = io_netcdf->write(fileName);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
