@@ -1219,6 +1219,24 @@ contains
             file=FILENAME)) &
             return  ! bail out
 
+        attributeName = "UngriddedLBound"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            warnIfMissing=.false., rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        attributeName = "UngriddedUBound"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            warnIfMissing=.false., rc=rc)
+        if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
     end subroutine
 
 
