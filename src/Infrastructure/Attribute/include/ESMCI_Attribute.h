@@ -160,8 +160,8 @@ class Attribute
 
     // accessors for private member variables
     inline const std::string getName() const {return this->attrName;}
-    inline const ESMC_TypeKind_Flag getTypeKind() const {return this->tk;}
-    inline const int getItemCount() const {return this->items;}
+    inline       ESMC_TypeKind_Flag getTypeKind() const {return this->tk;}
+    inline       int getItemCount() const {return this->items;}
     inline const std::string getConvention() const {return this->attrConvention;}
     inline const std::string getPurpose() const {return this->attrPurpose;}
     inline const std::string getObject() const {return this->attrObject;}
