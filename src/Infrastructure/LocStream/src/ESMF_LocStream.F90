@@ -1972,7 +1972,8 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromFile(name, filename, fileformatflag, indexflag, centerflag, rc)
+      function ESMF_LocStreamCreateFromFile(name, filename, fileformatflag, &
+      	       meshname, varname, indexflag, centerflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
@@ -1982,6 +1983,8 @@ contains
       character (len=*), intent(in), optional     :: name
       character (len=*), intent(in)               :: filename
       type(ESMF_FileFormat_Flag), intent(in), optional  :: fileformatflag
+      character (len=*), intent(in), optional     :: meshname
+      character(len=*),  intent(in),  optional    :: varname
       type(ESMF_Index_Flag), intent(in), optional :: indexflag
       logical, intent(in), optional               :: centerflag
       integer, intent(out), optional              :: rc
@@ -2004,6 +2007,16 @@ contains
 !          Flag that indicates the file format of the grid file.  Please see
 !          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
 !          list of valid options.  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
+!     \item[{[meshname]}]
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         is {\tt ESMF\_FILEFORMAT\_UGRID}.  This argument is optional.
+!     \item[{[varname]}]
+!         An optional variable name stored in the UGRID file to be used to
+!         generate the mask using the missing value of the data value of
+!         this variable.  The first two dimensions of the variable has to be the
+!         the longitude and the latitude dimension and the mask is derived from the
+!         first 2D values of this variable even if this data is 3D, or 4D array. If not 
+!         specified, no mask is used for a UGRID file.
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -2028,16 +2041,17 @@ contains
     integer :: PetNo, PetCnt
     type(ESMF_Index_Flag) :: indexflagLocal
     real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:), coordZ(:)
-    real(ESMF_KIND_R8), pointer :: coord2D(:,:)
+    real(ESMF_KIND_R8), pointer :: coord2D(:,:), varbuffer(:)
     integer(ESMF_KIND_I4), pointer :: imask(:)
     integer :: starti, count, localcount, index
     integer :: remain, i
     integer :: meshid
+    real(ESMF_KIND_R8) :: missingvalue
     type(ESMF_CoordSys_Flag) :: coordSys
     type(ESMF_LocStream) :: locStream
     type(ESMF_FileFormat_Flag) :: localfileformatflag
     logical :: localcenterflag, haveface
-    character(len=16) :: units
+    character(len=16) :: units, location
 
     if (present(indexflag)) then
        indexflagLocal=indexflag
@@ -2057,15 +2071,34 @@ contains
        localcenterflag = .TRUE.
     endif
 
-    if ((localfileformatflag == ESMF_FILEFORMAT_SCRIP .or. &
-         localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) .and. &
-       .NOT. localcenterflag) then
+    if (localcenterflag) then
+       location = 'face'
+    else
+       location = 'node'
+    endif
+    if (localfileformatflag == ESMF_FILEFORMAT_GRIDSPEC) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-          msg="Only allow center coordinates if the file is in SCRIP or GRIDSPEC format", &
+          msg="Create LocStream from a GRIDSPEC file is not supported.", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
     endif   
 
+    if ( localfileformatflag == ESMF_FILEFORMAT_SCRIP .and. &
+       .NOT. localcenterflag) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="Only allow center coordinates if the file is in SCRIP format", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif   
+
+    if (localfileformatflag /= ESMF_FILEFORMAT_UGRID .and. &
+       (present(meshname) .or. present(varname))) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="Only UGRID file need the optional arguments meshname or varname", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+   
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2128,8 +2161,9 @@ contains
     elseif (localfileformatflag == ESMF_FILEFORMAT_UGRID) then
        ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
        if (localcenterflag) then
-          call ESMF_UGridInq(filename, elementCount=totalpoints, meshid=meshid, &
-	     	  nodeCoordDim=totaldims, faceCoordFlag=haveface, rc=localrc)
+          call ESMF_UGridInq(filename, meshname=meshname, elementCount=totalpoints, &
+	     	  meshid=meshid, nodeCoordDim=totaldims, faceCoordFlag=haveface, &
+		  rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (.not. haveface) then
@@ -2139,8 +2173,8 @@ contains
              return
           endif
        else
-          call ESMF_UGridInq(filename, nodeCount=totalpoints, meshid=meshid, &
-	          nodeCoordDim=totaldims, rc=localrc)
+          call ESMF_UGridInq(filename, meshname=meshname, nodeCount=totalpoints, &
+	          meshid=meshid, nodeCoordDim=totaldims, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
        endif
@@ -2196,8 +2230,20 @@ contains
           coordZ(:) = coord2D(:,3)
        endif
        deallocate(coord2D)
-       ! no mask for UGRID
+       ! Get mask from varname
        imask(:)=1
+       if (present(varname)) then
+          allocate(varbuffer(localcount))
+          call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+	       startind=starti, count=localcount, location=location, &
+	       missingvalue=missingvalue, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+	  do i=1,localcount
+            if (varbuffer(i)==missingvalue) imask(i)=0
+          enddo
+	  deallocate(varbuffer)
+       endif
     endif
     ! create Location Stream
     locStream = ESMF_LocStreamCreate(name=name, localcount=localcount, indexflag=indexflagLocal,&
