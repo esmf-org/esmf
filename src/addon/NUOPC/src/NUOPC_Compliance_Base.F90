@@ -1146,12 +1146,13 @@ contains
 
 
     recursive subroutine NUOPC_CheckFieldAttribute(prefix, field, attributeName, &
-        convention, purpose, rc)
+        convention, purpose, warnIfMissing, rc)
         character(*), intent(in)              :: prefix
         type(ESMF_Field)                      :: field
         character(*), intent(in)              :: attributeName
         character(*), intent(in)              :: convention
         character(*), intent(in)              :: purpose
+        logical,      intent(in), optional    :: warnIfMissing
         integer,      intent(out), optional   :: rc
 
         type(ESMF_AttPack)                    :: attpack
@@ -1161,6 +1162,13 @@ contains
         character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+        logical                               :: warn
+
+        if (present(warnIfMissing)) then
+            warn = warnIfMissing
+        else
+            warn = .true.
+        endif
 
         call ESMF_AttributeGetAttPack(field, attpack=attpack, &
             convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
@@ -1186,7 +1194,9 @@ contains
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-        if (.not.isPresent) then
+        if (.not.warn .and. (.not.isPresent .or. itemCount==0)) then
+            return
+        else if (.not.isPresent) then
             ! attribute not present
             call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
