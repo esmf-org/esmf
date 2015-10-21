@@ -292,7 +292,7 @@ namespace ESMCI {
 
     if (strlen(filename)+4 > MAX_W3PTV_STR_LEN) {
       printf("ERROR: filename too long!!!\n");
-      return;
+      return ESMF_FAILURE;
     }
 
     sprintf(new_filename,"%s.vtk",filename);
