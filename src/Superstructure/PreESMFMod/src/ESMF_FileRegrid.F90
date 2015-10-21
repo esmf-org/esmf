@@ -48,6 +48,7 @@ module ESMF_FileRegridMod
   use ESMF_IO_NCPutGetMod
   use ESMF_IOUGridMod
   use ESMF_RHandleMod
+  use ESMF_LocStreamMod
 
 #ifdef ESMF_NETCDF
       use netcdf
@@ -182,6 +183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle) :: routehandle
     type(ESMF_Mesh)    :: srcMesh, dstMesh
     type(ESMF_Grid)    :: srcGrid, dstGrid
+    type(ESMF_LocStream) :: srcLocStream, dstLocStream
     type(ESMF_Field)   :: srcField, dstField
     type(ESMF_Array)  :: srcArray, dstArray
     type(ESMF_ArraySpec) :: arrayspec
@@ -779,23 +781,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! if srcfile is not GRIDSPEC, it is UGRID 
-      if (useSrcMask) then 
-        srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-            meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
-            addUserArea=localUserAreaFlag, &
-	    convertToDual= .not. useSrcCorner, &
-  	    varname=trim(srcVarName), rc=localrc)
-      else
-        srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
-            meshname = trim(srcVarStr), &
-	    convertToDual=.not. useSrcCorner, &
-            addUserArea=localUserAreaFlag, &
-  	    rc=localrc)
-      endif
-      if (ESMF_LogFoundError(localrc, &
+      if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+        if (useSrcMask) then 
+          srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
+              meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
+              addUserArea=localUserAreaFlag, &
+	      convertToDual= .not. useSrcCorner, &
+  	      varname=trim(srcVarName), rc=localrc)
+        else
+          srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
+              meshname = trim(srcVarStr), &
+	      convertToDual=.not. useSrcCorner, &
+              addUserArea=localUserAreaFlag, &
+  	      rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
+      else
+        srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
+       		      fileformatflag=localSrcFileType, &
+		      indexflag=ESMF_INDEX_GLOBAL, & 
+		      meshname=trim(srcVarStr), &
+		      varname=trim(srcVarName), &
+		      centerflag=.not. useSrcCorner, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -852,22 +865,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! dstfile is UGRID
-      if (useDstMask) then
-        dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
-          meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
-	  convertToDual= .not. useDstCorner, &
-          addUserArea=localUserAreaFlag, &
-          varname=trim(dstVarName), rc=localrc)
-      else  
-        dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
-          meshname = trim(dstVarStr), &
-	  convertToDual=.not. useDstCorner, &
-          addUserArea=localUserAreaFlag, &
-          rc=localrc)
-      endif
-      if (ESMF_LogFoundError(localrc, &
+      if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+          localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+        if (useDstMask) then
+          dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
+            meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
+	    convertToDual= .not. useDstCorner, &
+            addUserArea=localUserAreaFlag, &
+            varname=trim(dstVarName), rc=localrc)
+        else  
+          dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
+            meshname = trim(dstVarStr), &
+	    convertToDual=.not. useDstCorner, &
+            addUserArea=localUserAreaFlag, &
+            rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+      else 
+        dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
+       		      fileformatflag=localDstFileType, &
+		      indexflag=ESMF_INDEX_GLOBAL, & 
+		      meshname=trim(dstVarStr), &
+		      varname=trim(dstVarName), &
+		      centerflag=.not. useDstCorner, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1433,7 +1459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-      
+#if 0      
       if (PetNo==0) then
         ! Open the grid and mosaic files
         ncStatus = nf90_open (path=trim(dstFile), mode=nf90_write, ncid=gridid)
@@ -1535,18 +1561,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    	            call ESMF_ArrayGather(tmpArray, varbuffer, 0, rc=localrc)
 		 enddo
                enddo
-         else 
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_SYS, &
-	        msg = " Undistributed dimension > 2 is not supported", &
-                ESMF_CONTEXT, rcToReturn=rc)
-	    return
-	 endif
-	 call ESMF_ArrayDestroy(tmpArray)
-     endif
-      
-
-
-    endif
+            else 
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_SYS, &
+	          msg = " Undistributed dimension > 2 is not supported", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+	       return
+	    endif
+	    call ESMF_ArrayDestroy(tmpArray)
+       endif
+#endif
+       call ESMF_ArrayWrite(dstArray, dstFile, variableName=dstVarName, &
+            overwrite=.TRUE., iofmt=ESMF_IOFMT_NETCDF, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+    endif  ! UGRID
     if (ungridrank > 0) deallocate(lbnd, ubnd)
     if (allocated(srcdims)) deallocate(srcdims)    
     if (allocated(dstdims)) deallocate(dstdims)    
