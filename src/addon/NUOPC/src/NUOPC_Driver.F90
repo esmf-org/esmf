@@ -1054,14 +1054,14 @@ module NUOPC_Driver
             write (jString, *) j
             if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
               if (i==0) then
-                ! connect to the driver's export State
-                imState=exportState
+                ! connect to the driver's import State
+                imState=importState
               else
                 imState=is%wrap%modelES(i)
               endif
               if (j==0) then
-                ! connect to the driver's import State
-                exState=importState
+                ! connect to the driver's export State
+                exState=exportState
               else
                 exState=is%wrap%modelIS(j)
               endif
@@ -1644,14 +1644,14 @@ module NUOPC_Driver
           write (jString, *) j
           write (pString, *) phase
           if (i==0) then
-            ! connect to the driver's export State
-            imState=exportState
+            ! connect to the driver's import State
+            imState=importState
           else
             imState=is%wrap%modelES(i)
           endif
           if (j==0) then
-            ! connect to the driver's import State
-            exState=importState
+            ! connect to the driver's export State
+            exState=exportState
           else
             exState=is%wrap%modelIS(j)
           endif

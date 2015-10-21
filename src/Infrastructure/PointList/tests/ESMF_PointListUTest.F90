@@ -332,7 +332,7 @@ contains
 !       return
 !    endif	
 
-!    call ESMF_PointListWriteVTK(pointlist,"myohmy")
+!    call ESMF_PointListWriteVTK(pointlist,"TestPointList")
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
