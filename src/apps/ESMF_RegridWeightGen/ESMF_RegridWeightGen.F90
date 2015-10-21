@@ -380,13 +380,6 @@ program ESMF_RegridWeightGenApp
         print *, '       UGRID or GRIDSPEC format.'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-        write(*,*)
-        print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
-        print *, '       it only works with the conservative regridding if the src grid is'
-        print *, '       a UGRID'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
     endif
 
@@ -407,13 +400,6 @@ program ESMF_RegridWeightGenApp
         write(*,*)
         print *, 'ERROR: --dst_missingvalue is supported only when the source grid is in'
         print *, '       UGRID or GRIDSPEC format.'
-        print *, "Use the --help argument to see an explanation of usage."
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-        write(*,*)
-        print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
-        print *, '       with the conservative regridding when the dst grid is'
-        print *, '       a UGRID'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
