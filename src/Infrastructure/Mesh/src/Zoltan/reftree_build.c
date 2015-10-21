@@ -88,7 +88,7 @@ char *val)                      /* value of variable */
     int status, i;
     PARAM_UTYPE result;         /* value returned from Check_Param */
     int index;                  /* index returned from Check_Param */
-    char *valid_methods[] = {   /* methods for initial path */
+    const char *valid_methods[] = {   /* methods for initial path */
        "CONNECTED", "HILBERT", "SIERPINSKI", "REFTREE_DEFAULT", NULL };
 
     status = Zoltan_Check_Param(name, val, REFTREE_params, &result, &index);

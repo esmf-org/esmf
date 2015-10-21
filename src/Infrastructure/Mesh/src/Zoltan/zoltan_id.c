@@ -41,7 +41,7 @@ extern "C" {
  *  Routines for allocating and initializing IDs.
  */
 
-ZOLTAN_ID_PTR ZOLTAN_Malloc_ID(int n, char *file, int line)
+ZOLTAN_ID_PTR ZOLTAN_Malloc_ID(int n, const char *file, int line)
 {
 /*
  * Allocates an array of size n of ZOLTAN_ID_TYPEs and initializes them.
