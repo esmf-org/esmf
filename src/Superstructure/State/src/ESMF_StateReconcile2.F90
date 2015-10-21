@@ -854,13 +854,33 @@ contains
       ! For each needed Id/VMId pair, select an offering PET and set it in
       ! the id_info_array.
 
-      ! TODO: Initially, simply select the first offering PET.  Eventually
-      ! try to load balance by looking for nearest offering neighbor, etc.
-
       type(needsList_t), pointer :: needslist_p
-      integer :: i
+      integer :: i, idx
+      real :: rand_nos(0:npets-1)
 
       needslist_p => needs_list_1
+
+#if 1
+      ! Try to load distribute by starting at a point in the offerer list
+      ! indicated by the PETs position in a random number table - essentially
+      ! a hash.
+      call random_number (rand_nos)
+      do
+        if (.not. associated (needslist_p)) exit
+        idx = rand_nos(myPet) * npets
+        do, i=0, npets-1
+          if (needslist_p%offerers(idx)) then
+! print *, 'pet', mypet, ': needs_list_select: setting position', idx, ' to true'
+            id_info_1(idx)%needed(needslist_p%position(idx)) = .true.
+            exit
+          end if
+          idx = mod (idx+1, npets)
+        end do
+        needslist_p => needslist_p%next
+      end do
+
+#else
+      ! Simply select the first offering PET.
       do
         if (.not. associated (needslist_p)) exit
         do, i=0, npets-1
@@ -872,6 +892,7 @@ contains
         end do
         needslist_p => needslist_p%next
       end do
+#endif
       
     end subroutine needs_list_select
 
