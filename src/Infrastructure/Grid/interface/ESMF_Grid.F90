@@ -5567,7 +5567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      .false.
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_DEGLOBAL}
+!      to {\tt ESMF\_INDEX\_DELOCAL}
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. 
 !      This flag is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
@@ -5615,7 +5615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(indexflag)) then
         localIndexFlag = indexflag
     else
-        localIndexFlag = ESMF_INDEX_GLOBAL
+        localIndexFlag = ESMF_INDEX_DELOCAL
     endif
 
     if (present(isSphere)) then
@@ -5808,7 +5808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      .false.
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_GLOBAL}
+!      to {\tt ESMF\_INDEX\_DELOCAL}
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. This flag
 !      is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
@@ -5883,7 +5883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(indexflag)) then
         localIndexFlag = indexflag
     else
-        localIndexFlag = ESMF_INDEX_GLOBAL
+        localIndexFlag = ESMF_INDEX_DELOCAL
     endif
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, &

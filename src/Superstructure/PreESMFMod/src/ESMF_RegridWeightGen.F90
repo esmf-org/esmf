@@ -990,22 +990,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (useSrcCoordVar) then
            if (srcMissingValue) then
 	      srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
 		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
 		        coordNames = srcCoordinateVars, rc=localrc)
            else
              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
              isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
 	   endif
         else 
  	   if (srcMissingValue) then
 	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
 		        addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
            else
               srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
               isSphere=srcIsSphere, rc=localrc)
 	   endif
 	 endif
@@ -1023,7 +1023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
 	 if(srcIsReg) then
            srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
-			    addCornerStagger=addCorners, &
+			    addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                             isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1131,22 +1131,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (useDstCoordVar) then
           if (dstMissingValue) then
              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
 		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
 		        coordNames = dstCoordinateVars, rc=localrc)
           else
              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-			  addCornerStagger=addCorners, &
+			  addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                           isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
 	  endif
       else
  	  if (dstMissingValue) then
 	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-		        addCornerStagger=addCorners, &
+		        addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
 		        addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
           else
               dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
-			      addCornerStagger=addCorners, &
+			      addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                               isSphere=dstIsSphere, rc=localrc)
 	  endif
       endif
@@ -1164,7 +1164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localDstFileType == ESMF_FILEFORMAT_SCRIP) then
         if (dstIsReg) then
            dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
-			    addCornerStagger=addCorners, &
+			    addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
            isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
