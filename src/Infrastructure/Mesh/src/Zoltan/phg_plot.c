@@ -116,7 +116,7 @@ void Zoltan_PHG_Plot(
   int *vedge,       /* Hyperedges for each vertex */
   int *part,        /* Partition to which vertices are assigned; if NULL,
                        partition information is not plotted. */
-  char *str         /* String included as comment in output files. */
+  const char *str   /* String included as comment in output files. */
 )
 {
 /* Routine that produces gnuplot output of hypergraph in form of matrix.

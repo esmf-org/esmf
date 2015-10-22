@@ -28,7 +28,7 @@ extern "C" {
 
 int       Zoltan_Bind_Param(
 PARAM_VARS *params,		/* parameter structure */
-char *name,			/* parameter name */
+const char *name,		/* parameter name */
 void *var 			/* pointer to variable to be associated 
 				   with the parameter name */
 )
@@ -38,7 +38,7 @@ void *var 			/* pointer to variable to be associated
 
 int       Zoltan_Bind_Param_Vec(
 PARAM_VARS *params,		/* parameter structure */
-char *name,			/* parameter name */
+const char *name,		/* parameter name */
 void *var,			/* pointer to variable to be associated 
 				   with the parameter name */
 int dim				/* dimension of parameter vector */

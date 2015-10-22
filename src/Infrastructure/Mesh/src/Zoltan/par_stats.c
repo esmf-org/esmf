@@ -35,7 +35,7 @@ extern "C" {
 /*****************************************************************************/
 /*****************************************************************************/
 
-void Zoltan_Print_Stats (MPI_Comm communicator, int debug_proc, double x, char *msg)
+void Zoltan_Print_Stats (MPI_Comm communicator, int debug_proc, double x, const char *msg)
 {
 /****************************************************************/
 /* Print max, sum, and imbalance for a variable over all procs. */
