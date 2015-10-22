@@ -196,6 +196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: addCorners
     type(ESMF_MeshLoc) :: srcmeshloc, dstmeshloc
     logical            :: srcIsReg, dstIsReg
+    logical            :: srcIsLocStream, dstIsLocStream
     logical            :: srcIsRegional, dstIsRegional, typeSetFlag
     character(len=256) :: methodStr
     real(ESMF_KIND_R8), pointer :: srcArea(:)
@@ -266,6 +267,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localVerboseFlag = .false.
     srcIsRegional = .false.
     dstIsRegional = .false.
+    srcIsLocStream = .false.
+    dstIsLocStream = .false.
     localUserAreaflag = .false.
     localPoleNPnts = 0
     localIgnoreDegenerate = .false.
@@ -766,7 +769,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       srcGrid = ESMF_GridCreate(srcfile, localsrcfiletype, (/xpart,ypart/), &
 	        addCornerStagger=addCorners, &
 	        addMask=useSrcMask, varname=trim(srcVarName), isSphere=srcIsSphere, &
-	        coordNames = srcCoordNames, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+	        coordNames = srcCoordNames, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -781,7 +784,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! if srcfile is not GRIDSPEC, it is UGRID 
-      if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+          localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+        srcIsLocStream = .TRUE.
+        if (useSrcMask) then 
+          srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
+       		      fileformatflag=localSrcFileType, &
+		      indexflag=ESMF_INDEX_DELOCAL, & 
+		      meshname=trim(srcVarStr), &
+		      varname=trim(srcVarName), &
+		      centerflag=.not. useSrcCorner, rc=localrc)
+        else
+          srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
+       		      fileformatflag=localSrcFileType, &
+		      indexflag=ESMF_INDEX_DELOCAL, & 
+		      meshname=trim(srcVarStr), &
+		      centerflag=.not. useSrcCorner, rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        srcField=ESMF_FieldCreate(srcLocStream,arrayspec,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
         if (useSrcMask) then 
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
               meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
@@ -798,25 +829,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      fileformatflag=localSrcFileType, &
-		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname=trim(srcVarStr), &
-		      varname=trim(srcVarName), &
-		      centerflag=.not. useSrcCorner, rc=localrc)
+        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=srcmeshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-      srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=srcmeshloc,rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     !Read in the dstfile and create the corresponding ESMF object (either
@@ -851,7 +868,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       dstGrid = ESMF_GridCreate(dstfile, localdstfiletype, (/xpart,ypart/), &
          addCornerStagger=addCorners, &
          addMask=useDstMask, varname=trim(dstVarName), isSphere=dstIsSphere, &
-         coordNames = dstCoordNames, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+         coordNames = dstCoordNames, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -865,8 +882,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! dstfile is UGRID
-      if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
-          localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+        dstIsLocStream = .TRUE.
+        if (useDstMask) then
+           dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
+       		      fileformatflag=localDstFileType, &
+		      indexflag=ESMF_INDEX_DELOCAL, & 
+		      meshname=trim(dstVarStr), &
+		      varname=trim(dstVarName), &
+		      centerflag=.not. useDstCorner, rc=localrc)
+        else 
+           dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
+       		      fileformatflag=localDstFileType, &
+		      indexflag=ESMF_INDEX_DELOCAL, & 
+		      meshname=trim(dstVarStr), &
+		      centerflag=.not. useDstCorner, rc=localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        dstField=ESMF_FieldCreate(dstLocStream,arrayspec,rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
         if (useDstMask) then
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
             meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
@@ -883,26 +926,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-      else 
-        dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
-       		      fileformatflag=localDstFileType, &
-		      indexflag=ESMF_INDEX_GLOBAL, & 
-		      meshname=trim(dstVarStr), &
-		      varname=trim(dstVarName), &
-		      centerflag=.not. useDstCorner, rc=localrc)
+        dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=dstmeshloc,rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=dstmeshloc,rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     !call ESMF_VMBarrier(vm)
@@ -981,10 +1009,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			  gridToFieldMap=(/ungridrank+1, ungridrank+2/), rc=localrc)
       else 
           !! UGRID file
-          srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+          if (srcIsLocStream) then
+            srcField = ESMF_FieldCreate(srcLocStream, arrayspec, &
+			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
+			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
+          else
+            srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
 			  meshloc =srcmeshloc, & 
 			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
 			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
+	  endif		  
       endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -996,9 +1030,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			  rc=localrc)
       else 
           !! UGRID file
-          srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
+          if (srcIsLocStream) then
+            srcField = ESMF_FieldCreate(srcLocStream, arrayspec, &
+			  rc=localrc)
+          else			  
+            srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
 			  meshloc = srcmeshloc, & 
 			  rc=localrc)
+          endif			        
       endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -1088,32 +1127,51 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_MeshGet(srcMesh, nodalDistgrid=nodalDG, elementDistgrid=elementDG, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
+      if (srcIsLocStream) then
+         call ESMF_LocStreamGet(srcLocStream, distgrid=distgrid, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         tmpArray=ESMF_ArrayCreate(distgrid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else
+         call ESMF_MeshGet(srcMesh, nodalDistgrid=nodalDG, elementDistgrid=elementDG, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
      	    
-       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-       if (srcmeshloc == ESMF_MESHLOC_NODE) then
-       	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+         if (srcmeshloc == ESMF_MESHLOC_NODE) then
+       	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
+         else
+       	    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+       endif  
+       if (useSrcCorner) then
 	    if (PetNo==0)  allocate(varbuffer(totalnodecnt))
 	    location='node'
-	    totalcount = totalnodecnt
+            totalcount = totalnodecnt
        else
-       	    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
 	    if (PetNo==0)  allocate(varbuffer(totalelmtcnt))
 	    location='face'
 	    totalcount = totalelmtcnt
-       endif      
+       endif
+    
        call ESMF_ArrayGet(tmpArray, farrayPtr=tmpfptr, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1275,10 +1333,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			  gridToFieldMap=(/ungridrank+1, ungridrank+2/), rc=localrc)
        else 
            !! UGRID file
-           dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+	   if (dstIsLocStream) then
+             dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
+			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
+			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
+           else
+             dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
 			  meshloc = dstmeshloc, & 
 			  ungriddedLBound = lbnd, ungriddedUBound = ubnd, &
 			  gridToFieldMap=(/ungridrank+1/), rc=localrc)
+           endif			  
        endif
        if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
@@ -1290,8 +1354,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			  rc=localrc)
       else 
            !! UGRID file
-           dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
+	   if (dstIsLocStream) then
+             dstField = ESMF_FieldCreate(dstLocStream, arrayspec, &
+			  rc=localrc)
+           else
+             dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
 			  meshloc = dstmeshloc, rc=localrc)
+           endif
       endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -1343,9 +1412,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !call ESMF_ArrayWrite(dstArray, dstFile, variableName = dstVarName, &
-    !	 			   overwrite=.TRUE., rc=localrc)
     ! write out the destination array sequentially
     if (localdstfiletype == ESMF_FILEFORMAT_GRIDSPEC) then
       allocate(tlbound(dstRank,petCnt),tubound(dstRank, petCnt))
@@ -1420,37 +1486,55 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(tlbound, tubound)
     else ! for UGRID
       ! Gather every slice into the root and write out from the root one slice at a time
-       call ESMF_UGridInq(dstFile, trim(dstVarStr) , nodeCount=totalnodecnt, &
+      call ESMF_UGridInq(dstFile, trim(dstVarStr) , nodeCount=totalnodecnt, &
        	    			       elementCount=totalelmtcnt, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_MeshGet(dstMesh, nodalDistgrid=nodalDG, elementDistgrid=elementDG, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
+      if (dstIsLocStream) then
+         call ESMF_LocStreamGet(dstLocStream, distgrid=distgrid, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         tmpArray=ESMF_ArrayCreate(distgrid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+      else !Mesh code
+         call ESMF_MeshGet(dstMesh, nodalDistgrid=nodalDG, elementDistgrid=elementDG, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
      	    
-       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
+         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-       if (dstmeshloc == ESMF_MESHLOC_NODE) then
-       	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+         if (dstmeshloc == ESMF_MESHLOC_NODE) then
+       	    tmpArray=ESMF_ArrayCreate(nodalDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
+         else
+       	    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         endif      
+      endif
+      if (useDstCorner) then
 	    if (PetNo==0)  allocate(varbuffer(totalnodecnt))
 	    location='node'
             totalcount = totalnodecnt
-       else
-       	    tmpArray=ESMF_ArrayCreate(elementDG, arrayspec, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
+      else
 	    if (PetNo==0)  allocate(varbuffer(totalelmtcnt))
 	    location='face'
 	    totalcount = totalelmtcnt
-      endif      
+      endif
       call ESMF_ArrayGet(tmpArray, farrayPtr=tmpfptr, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -1459,7 +1543,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0      
       if (PetNo==0) then
         ! Open the grid and mosaic files
         ncStatus = nf90_open (path=trim(dstFile), mode=nf90_write, ncid=gridid)
@@ -1569,12 +1652,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    endif
 	    call ESMF_ArrayDestroy(tmpArray)
        endif
-#endif
-       call ESMF_ArrayWrite(dstArray, dstFile, variableName=dstVarName, &
-            overwrite=.TRUE., iofmt=ESMF_IOFMT_NETCDF, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
     endif  ! UGRID
     if (ungridrank > 0) deallocate(lbnd, ubnd)
     if (allocated(srcdims)) deallocate(srcdims)    
@@ -1586,12 +1663,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_FieldDestroy(srcField)
     call ESMF_FieldDestroy(dstField)
 
-    if (srcIsReg) then
+    if (srcIsLocStream) then
+       call ESMF_LocStreamDestroy(srcLocStream)
+    elseif (srcIsReg) then
        call ESMF_GridDestroy(srcGrid)
     else
        call ESMF_MeshDestroy(srcMesh)
     endif   
-    if (dstIsReg) then
+    if (dstIsLocStream) then
+       call ESMF_LocStreamDestroy(dstLocStream)
+    else if (dstIsReg) then
        call ESMF_GridDestroy(dstGrid)
     else
        call ESMF_MeshDestroy(dstMesh)
