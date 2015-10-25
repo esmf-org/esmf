@@ -61,6 +61,7 @@ program ESMF_NUOPC_UTest
   type(ESMF_State)        :: stateA, stateB, stateC
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
+  integer                 :: valueInt
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
   type(ESMF_Grid)         :: grid
   integer                 :: i, j
@@ -205,6 +206,76 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - no blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt("123", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - no blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==123), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - leading blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt("   456", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==456), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - trailing blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt("789   ", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - trailing blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==789), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string missing - Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt(" bla ", (/" bla ", "bla  "/), &
+    rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt("bla", (/"aha", "bla"/), &
+    (/1,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==2), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FieldAttributeInit() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldAttributeInit(field, "sea_surface_temperature", rc=rc)
@@ -317,9 +388,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCreateSimpleSph() Test"
+  write(name, *) "NUOPC_CreateSimpleSphGrid() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_GridCreateSimpleSph(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
+  grid = NUOPC_CreateSimpleSphGrid(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
     360._ESMF_KIND_R8, 85._ESMF_KIND_R8, 500, 400, &
     scheme=ESMF_REGRID_SCHEME_FULL3D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -412,9 +483,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCreateSimpleXY() Test"
+  write(name, *) "NUOPC_CreateSimpleXYGrid() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_GridCreateSimpleXY( &
+  grid = NUOPC_CreateSimpleXYGrid( &
     0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8, &
     -1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8, &
     100, 100, rc=rc)
@@ -475,9 +546,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateIsAllConnected() Test"
+  write(name, *) "NUOPC_IsConnected() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsAllConnected(stateA, rc=rc)
+  flag = NUOPC_IsConnected(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
