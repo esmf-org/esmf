@@ -891,11 +891,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           else if (lregridmethod .eq. ESMF_REGRIDMETHOD_BILINEAR .or. &
                    lregridmethod .eq. ESMF_REGRIDMETHOD_PATCH) then
-
+               
              if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
                 if (srcMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
                    ! Create a dual of the Mesh
-                   srcMeshDual=ESMF_MeshCreateDual(tempMesh, rc)
+                   srcMeshDual=ESMF_MeshCreateDual(tempMesh, rc=localrc)
                    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
                    
