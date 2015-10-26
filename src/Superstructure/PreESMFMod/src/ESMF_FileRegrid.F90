@@ -355,8 +355,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! by default, variables are located at the center of the grid
     useSrcCorner = .FALSE.
     useDstCorner = .FALSE.
-    srcmeshloc=ESMF_MESHLOC_ELEMENT
-    dstmeshloc=ESMF_MESHLOC_ELEMENT
+    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+       srcmeshloc=ESMF_MESHLOC_ELEMENT
+       dstmeshloc=ESMF_MESHLOC_ELEMENT
+    else
+       srcmeshloc=ESMF_MESHLOC_NODE
+       dstmeshloc=ESMF_MESHLOC_NODE
+    endif
     ! Find out the grid dimension at the root processor and broadcast to the rest
     if (PetNo == 0) then
       ! find file type
@@ -378,7 +383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            goto 1110
       endif
 
-      if (srcLocStr .eq. 'node' .and. (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+      if (trim(srcLocStr) .eq. 'node' .and. (localsrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
           localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
   	        msg = " The source variable has to be located at the center of the grid ", &
@@ -387,10 +392,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            goto 1110
       endif
       if (localsrcFileType == ESMF_FILEFORMAT_UGRID .and.  &
-          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE .and. srcLocStr .eq. 'node') then	      
+          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE .and. trim(srcLocStr) .eq. 'node') then	      
 	   useSrcCorner = .TRUE.
            dstLocStr = 'node'  !in case the dest variable is not defined
-	   srcmeshloc=ESMF_MESHLOC_NODE
       else
            dstLocStr = 'face'
       endif
@@ -415,7 +419,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   useDstCorner = .TRUE.
 	   dstmeshloc=ESMF_MESHLOC_NODE
       endif
-      !print *, trim(dstLocStr), ' ', trim(dstVarStr)
       if (localsrcfiletype == ESMF_FILEFORMAT_GRIDSPEC) then
         allocate(srcdims(2))
         ! The coordinates string can be either longitude, latitude, or latitude, longitude.
@@ -457,7 +460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! create one and create the dstvar as well
          call CreateDstVar(srcFile, dstFile, localdstFileType, srcVarName, &
 	   	    dstVarName, dstVarDims, dstVarRank, dstVarStr, &
-		    dstLocStr,dstDimids, rc)
+		    dstLocStr,dstDimids, localrc)
          if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) then
@@ -585,11 +588,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif        
       if (commandbuf(11) == 1) then
          useSrcCorner = .true.
-         srcmeshloc = ESMF_MESHLOC_NODE
       endif
       if (commandbuf(12) == 1) then
          useDstCorner = .true.
-         dstmeshloc = ESMF_MESHLOC_NODE
       endif
       srcVarRank = commandbuf(13)
       do i=1, srcVarRank
@@ -1184,7 +1185,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        !! Read in the variable in PET 0 and redistribute it, read one 2D slice at a time to save memory
        if (PetNo==0) then
         ! Open the grid and mosaic files
-        ncStatus = nf90_open (path=trim(srcFile), mode=nf90_write, ncid=gridid)
+        ncStatus = nf90_open (path=trim(srcFile), mode=nf90_nowrite, ncid=gridid)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
@@ -1203,8 +1204,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_SRCLINE,&
             errmsg, &
             rc)) return
-	 if (attstr .ne. location) then
-  	    errmsg = "- variable "//srcVarName//" is not defined on location "//location
+	 if (attstr(1:4) .ne. location) then
+  	    errmsg = "- variable "//trim(srcVarName)//" is not defined on location "//trim(location)
             call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -1564,8 +1565,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_SRCLINE,&
             errmsg, &
             rc)) return
-	 if (attstr .ne. location) then
-  	    errmsg = "- variable "//dstVarName//" is not defined on location "//location
+	 if (attstr(1:4) .ne. location) then
+  	    errmsg = "- variable "//trim(dstVarName)//" is not defined on location "//trim(location)
             call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -1714,16 +1715,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer ::  gridid, varid, tempids(1), varids(2), meshid, len
     character(len=128) :: attvalue, locallocstr, varnames(2)
     integer :: i, nvars, pos
+    character(len=128) :: errmsg
     integer, parameter :: nf90_noerror = 0
     
     varexist = .true.
 #ifdef ESMF_NETCDF
     rc = ESMF_FAILURE
     ncStatus = nf90_open (path=filename, mode=nf90_nowrite, ncid=gridid)
-    if (ncStatus /= nf90_noerror) then
-       print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-       return
-    endif 
+    errmsg = 'Fail to open '//trim(filename)
+    if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg, &
+            rc)) return
     ncStatus = nf90_inq_varid(gridid, varname, varid)
     if (ncStatus /= nf90_noerror) then
        varexist = .false.
@@ -1734,22 +1738,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ncStatus = nf90_inquire_attribute(gridid, varid, "mesh", len=len)
       if (ncStatus == nf90_noerror) then
          filetype = ESMF_FILEFORMAT_UGRID
-  	   ncStatus = nf90_get_att(gridid, varid, "mesh", attstr)
-           !attstr(len+1)=''
-	   if (ncStatus /= nf90_noerror) then
-      	      print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-              return
-	   endif
+  	 ncStatus = nf90_get_att(gridid, varid, "mesh", attstr)
+         !attstr(len+1)=''
+	 errmsg = 'fail to get attribute mesh '//trim(varname)
+	 if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg, &
+              rc)) return
 	 ! get location attribute
 	 ncStatus = nf90_inquire_attribute(gridid, varid, "location", len=len)
          if (ncStatus == nf90_noerror) then
    	    ncStatus = nf90_get_att(gridid, varid, "location", locallocstr)
-	    if (ncStatus /= nf90_noerror) then
-      	       print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-               return
-	    endif
+	    errmsg = 'Fail to get attribute location '//trim(varname)
+	    if (CDFCheckError (ncStatus, &
+              ESMF_METHOD, &
+              ESMF_SRCLINE,&
+              errmsg, &
+              rc)) return
 	    if (present(locstr)) then
-	       locstr = locallocstr
+	       locstr = locallocstr(1:4)
             endif      
 !	    if (locallocstr .ne. locstr) then
 !              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -1770,13 +1778,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            filetype = ESMF_FILEFORMAT_GRIDSPEC 
 	   ncStatus = nf90_get_att(gridid, varid, "coordinates", attstr)
            !attstr(len+1)=''
-	   if (ncStatus /= nf90_noerror) then
-      	      print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-              return
-	   endif
+           errmsg = 'fail to get attribute coordinates for '//trim(varname)
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,&
+               errmsg, &
+               rc)) return
          else
-          print *, trim(filename), ' is not a GRIDSPEC or a UGRID file'
-          return
+	   call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg=trim(filename)//' is not a GRIDSPEC or a UGRID file', &
+                 ESMF_CONTEXT, rcToReturn=rc) 
+           return
          endif
        endif
        ! Get missing value attribute
@@ -1797,25 +1809,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        else
          ncStatus = nf90_inquire_variable(gridid, varid, ndims=ndims, dimids=dimids)
        endif
-       if (ncStatus /= nf90_noerror) then
-   	 print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-         return
-       endif
+       errmsg = 'nf90_inquire_variable failed '//trim(varname)
+       if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,&
+               errmsg, &
+               rc)) return
        do i=1, ndims
          ncStatus = nf90_inquire_dimension(gridid, dimids(i), len=dims(i))
-         if (ncStatus /= nf90_noerror) then
-            print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-            return
-         endif
+         errmsg = 'nf90_inquire_dimension failed '//trim(filename)
+         if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,&
+               errmsg, &
+               rc)) return
        enddo
      else !the variable does not exist, -- need to find the file type w/o var
          !Seach for a variable with cf_role or standard_name = 'mesh_topology'
          !find out how many variables are in the file
          ncStatus = nf90_inquire(gridid, nVariables=nvars)
-         if (ncStatus /= nf90_noerror) then
-            print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-            return
-	 endif
+         errmsg = 'nf90_inquire failed '//trim(filename)
+         if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE,&
+               errmsg, &
+               rc)) return
 	 fileType = ESMF_FILEFORMAT_GRIDSPEC
 	 do i=1,nvars
 	    ncStatus=nf90_get_att(gridid, i, 'cf_role', attvalue)
@@ -1834,12 +1852,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	         meshid=i
 		 !find mesh variable name
 		 ncStatus = nf90_inquire_variable(gridid, i, name=attstr)
- 	         if (ncStatus /= nf90_noerror) then
-       	             print '("NETCDF Error: " A " inquire mesh variable name")', &
-		     trim(nf90_strerror(ncStatus))
-            	     return
-	         endif
-                 exit
+                 errmsg = 'nf90_inquire_variable failed '//trim(filename)
+                 if (CDFCheckError (ncStatus, &
+                   ESMF_METHOD, &
+                   ESMF_SRCLINE,&
+                   errmsg, &
+                   rc)) return
                endif 
             endif
          enddo
@@ -1850,18 +1868,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	    if (present(locStr)) then
 	       if (locStr .eq. 'face') then
 	          ncStatus=nf90_get_att(gridid, meshid, 'face_coordinates', locallocstr)
-	          if (ncStatus /= nf90_noerror) then
-       	             print '("NETCDF Error: " A " face_coordinates atrribute does not exist")', &
-		     trim(nf90_strerror(ncStatus))
-            	     return
-	          endif
+		  errmsg = 'face_coordinates attribute does not exist '//trim(attstr)
+                  if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
 	       else !default non-conservative
 	          ncStatus=nf90_get_att(gridid, meshid, 'node_coordinates', locallocstr)
-                  if (ncStatus /= nf90_noerror) then
-       	             print '("NETCDF Error: " A " node_coordinates atrribute does not exist")', &
-		     trim(nf90_strerror(ncStatus))
-            	     return
-	          endif
+		  errmsg = 'node_coordinates attribute does not exist '//trim(attstr)
+                  if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
                endif
             else
                ! signal an error if the variable does not exist and locStr is not present
@@ -1876,29 +1896,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             varnames(1)=locallocstr(1:pos-1)
             varnames(2)=locallocstr(pos+1:)
             ncStatus=nf90_inq_varid(gridid, varnames(1), varids(1))
-	    if (ncStatus /= nf90_noerror) then
-	        print '("NETCDF Error:" 2A "does not exist")', &
-	           trim(nf90_strerror(ncStatus)), varnames(1)
-		return
-	    endif
+	    errmsg = trim(varnames(1))//' does not exist '
+            if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
             ncStatus=nf90_inq_varid(gridid, varnames(2), varids(2))
-	    if (ncStatus /= nf90_noerror) then
-	        print '("NETCDF Error:" 2A "does not exist")', &
-	           trim(nf90_strerror(ncStatus)), varnames(2)
-		return
-	    endif
+	    errmsg = trim(varnames(2))//' does not exist '
+            if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
 	 else  !GRIDSPEC, find the coordinate variables using units
   	    !Check if the optional coordinate argument exist
 	    if (present(coordnames)) then
 	      ! check if the coordinate variables exist or not
 	      ncStatus=nf90_inq_varid(gridid, coordnames(1), varids(1))
-	      if (ncStatus /= nf90_noerror) then
-	       	  print '("NETCDF Error:" 2A "does not exist")', &
-		  trim(nf90_strerror(ncStatus)), coordnames(1)
-		  return
-              endif
+	      errmsg = trim(coordnames(1))//' does not exist '
+              if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
+	      ncStatus=nf90_inq_varid(gridid, coordnames(2), varids(2))
+	      errmsg = trim(coordnames(2))//' does not exist '
+              if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
 	      ! check the unit attribute and make sure it is a latitude var
- 	      ncStatus=nf90_get_att(gridid, varids(2), 'units', attvalue)
+ 	      ncStatus=nf90_get_att(gridid, varids(1), 'units', attvalue)
 	      if (ncStatus == nf90_noerror) then
                 if (attvalue(len:len) .eq. achar(0)) len = len-1
   	        if (.not. (attvalue(1:len) .eq. "degrees_north" .or. &
@@ -2004,20 +2034,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ncStatus=nf90_inquire_variable(gridid, varids(1), ndims=ndims, dimids=dimids)
          do i=1, ndims
               ncStatus = nf90_inquire_dimension(gridid, dimids(i), len=dims(i))
-              if (ncStatus /= nf90_noerror) then
-                  print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-                  return
-              endif
+	      errmsg = 'nf90_inquire_dimension '//trim(filename)
+              if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
          enddo
 	 if (filetype == ESMF_FILEFORMAT_GRIDSPEC .and. ndims==1) then
 	       ! find the dimension of the latitude coordinate
              ncStatus=nf90_inquire_variable(gridid, varids(2), ndims=ndims, dimids=tempids)
 	     dimids(2)=tempids(1)
              ncStatus = nf90_inquire_dimension(gridid, dimids(2), len=dims(2))
-             if (ncStatus /= nf90_noerror) then
-                  print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
-                  return
-             endif
+	      errmsg = 'nf90_inquire_dimension '//trim(filename)
+              if (CDFCheckError (ncStatus, &
+                     ESMF_METHOD, &
+                     ESMF_SRCLINE,&
+                     errmsg, &
+                     rc)) return
              ndims=2
          endif
      endif ! not varExist 
@@ -2077,10 +2111,10 @@ subroutine CreateDstVar(srcFile, dstFile, fileType, srcVarName, dstVarName, &
     if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
-           trim(srcFile), &
+           trim(dstFile), &
            rc)) return
     
-    ncStatus = nf90_open (path=trim(srcFile), mode=nf90_write, ncid=gridid)
+    ncStatus = nf90_open (path=trim(srcFile), mode=nf90_nowrite, ncid=gridid)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
