@@ -50,7 +50,7 @@ program ESMF_MeshUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
-  !LOCAL VARIABLES:
+   !LOCAL VARIABLES:
   type(ESMF_Mesh) :: mesh, mesh2, meshAlias, meshDual
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
@@ -63,7 +63,7 @@ program ESMF_MeshUTest
   real(ESMF_KIND_R8), pointer :: ownedElemCoords(:)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
   integer(ESMF_KIND_I4) :: localNumOwnedElems(1), globalNumOwnedElems(1)
-  integer :: numElems,numOwnedElemsTst
+  integer :: numElems,numOwnedElemsTst,numOwnedElems
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field, areaField
@@ -1779,13 +1779,64 @@ endif
 
   !  call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
 
-  ! Get rid of Meshs
+  ! Get element coords to make sure that that works
+  call ESMF_MeshGet(mesh, numOwnedElements=numOwnedElems, &
+       spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Allocate
+  allocate(ownedElemCoords(spatialDim*numOwnedElems))
+
+  ! Get coords
+  call ESMF_MeshGet(mesh, ownedElemCoords=ownedElemCoords, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+!  write(*,*) localPet," owned elem Coords=",ownedElemCoords
+
+  ! Deallocate
+  deallocate(ownedElemCoords)
+
+  ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh Create Dual with a pentagon and hexagon element"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMeshPH(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create dual mesh
+  meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
+
+  call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
+
+  call ESMF_MeshDestroy(meshDual, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
 
@@ -2702,7 +2753,7 @@ subroutine createTestMeshPH(mesh, rc)
                    1.0, 2.1, & ! node id 9
                    1.5, 2.5, & ! node id 10
                    2.5, 2.5, & ! node id 11
-                   2.5, 2.1/)  ! node id 12
+                    2.5, 2.1/)  ! node id 12
 
       ! Allocate and fill the node owner array.
       ! Since this Mesh is all on PET 0, it's just set to all 0.
@@ -2735,12 +2786,12 @@ subroutine createTestMeshPH(mesh, rc)
      ! Allocate and fill elem coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
      ! number of nodes.
-   !  allocate(elemCoords(2*numTotElems))
-   !  elemCoords=(/ 0.45, 0.45, & ! elem id 1
-   !                1.37, 0.27, & ! elem id 2
-   !                1.73, 0.63, & ! elem id 3
-   !                0.46, 1.74, & ! elem id 4
-   !                1.76, 1.87/)  ! elem id 5
+     allocate(elemCoords(2*numTotElems))
+     elemCoords=(/ 0.45, 0.45, & ! elem id 1
+                   1.37, 0.27, & ! elem id 2
+                   1.73, 0.63, & ! elem id 3
+                   0.46, 1.74, & ! elem id 4
+                   1.76, 1.87/)  ! elem id 5
 
 
 
@@ -2804,8 +2855,8 @@ subroutine createTestMeshPH(mesh, rc)
      ! Allocate and fill elem coordinate array.
      ! Since this is a 2D Mesh the size is 2x the
      ! number of nodes.
-  !   allocate(elemCoords(2*numTotElems))
-  !   elemCoords=(/ 0.45, 0.45/)  ! elem id 1
+     allocate(elemCoords(2*numTotElems))
+     elemCoords=(/ 0.45, 0.45/)  ! elem id 1
 
 
        ! Allocate and fill the element connection type array.
@@ -2858,9 +2909,9 @@ subroutine createTestMeshPH(mesh, rc)
        ! Allocate and fill elem coordinate array.
        ! Since this is a 2D Mesh the size is 2x the
        ! number of nodes.
- !      allocate(elemCoords(2*numTotElems))
- !      elemCoords=(/1.37, 0.27, & ! elem id 2
- !                   1.73, 0.63/) ! elem id 3
+       allocate(elemCoords(2*numTotElems))
+       elemCoords=(/1.37, 0.27, & ! elem id 2
+                    1.73, 0.63/) ! elem id 3
 
        ! Allocate and fill the element connection type array.
        allocate(elemConn(numElemConn))
@@ -2914,8 +2965,8 @@ subroutine createTestMeshPH(mesh, rc)
         ! Allocate and fill elem coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
         ! number of nodes.
-!        allocate(elemCoords(2*numTotElems))
-!        elemCoords=(/0.46, 1.74/)  ! elem id 4
+        allocate(elemCoords(2*numTotElems))
+        elemCoords=(/0.46, 1.74/)  ! elem id 4
 
         ! Allocate and fill the element connection type array.
         allocate(elemConn(numElemConn))
@@ -2971,8 +3022,8 @@ subroutine createTestMeshPH(mesh, rc)
         ! Allocate and fill elem coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
         ! number of nodes.
-!        allocate(elemCoords(2*numTotElems))
-!        elemCoords=(/1.76, 1.87/)  ! elem id 5
+        allocate(elemCoords(2*numTotElems))
+        elemCoords=(/1.76, 1.87/)  ! elem id 5
 
 
         ! Allocate and fill the element connection type array.
@@ -2986,7 +3037,7 @@ subroutine createTestMeshPH(mesh, rc)
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
-!        elementCoords=elemCoords, &
+        elementCoords=elemCoords, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
