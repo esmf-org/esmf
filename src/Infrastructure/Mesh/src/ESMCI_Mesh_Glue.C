@@ -50,7 +50,7 @@
 
 using namespace ESMCI;
 
-
+ 
 void ESMCI_meshcreate(Mesh **meshpp,
                       int *pdim, int *sdim, 
                       ESMC_CoordSys_Flag *coordSys, int *rc)
@@ -595,7 +595,7 @@ static void triangulate_warea(int sdim, int num_p, double *p,
 void ESMCI_meshaddelements(Mesh **meshpp, 
                                               int *_num_elems, int *elemId, int *elemType, InterfaceInt *_elemMaskII ,
                                               int *_areaPresent, double *elemArea, 
-                                              int *_coordsPresent, double *elemCoords, 
+                                              int *_elemCoordsPresent, double *elemCoords, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc) 
@@ -628,7 +628,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     int areaPresent=*_areaPresent;
 
-    int coordsPresent=*_coordsPresent;
+    int elemCoordsPresent=*_elemCoordsPresent;
 
     ESMC_CoordSys_Flag coordSys=*_coordSys;
     int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
@@ -748,7 +748,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           }
 
           // record this elem         
-           num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+          num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
           num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
           if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
           if (subelem_size > max_num_conn) max_num_conn=subelem_size;
@@ -804,15 +804,15 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
     }
 
-
+#if 0
     // Don't currently support split elements with element coords
-    if (mesh.is_split && coordsPresent) {
+    if (mesh.is_split && elemCoordsPresent) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          "- ESMF doesn't currently support both element coords and polygons with >4 sides in the same Mesh.",
             ESMC_CONTEXT, &localrc)) throw localrc;
     }
-
+#endif
 
      // Get number of nodes
     int num_nodes = mesh.num_nodes();
@@ -833,7 +833,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         // Get 0-based node index
         int node_index=elemConn[c]-1;
 
-        // Skip the polybreak indicator
+         // Skip the polybreak indicator
         if (node_index+1 == MESH_POLYBREAK_IND) {
           c++;
           continue;
@@ -885,7 +885,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-      }
+       }
       
       if (elemMaskII->extent[0] != num_elems) {
         int localrc;
@@ -925,6 +925,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int *elemType_wsplit=NULL;
     int *elemId_wsplit=NULL;
     double *elemArea_wsplit=NULL;
+    double *elemCoords_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
     InterfaceInt *elemMaskII_wsplit=NULL;
 
@@ -939,6 +940,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       elemType_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
       if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
+      if (elemCoordsPresent==1) elemCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
@@ -959,7 +961,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       double *subelem_dbl_buf=new double[3*max_num_conn];
       int    *subelem_int_buf=new int[max_num_conn];
       int    *subelem_tri_ind=new int[3*(max_num_conn-2)];
-      double *subelem_tri_area=new double[max_num_conn-2];
+       double *subelem_tri_area=new double[max_num_conn-2];
 
       double *elemtris_area=new double[max_num_elemtris];
       int *elemtris_split_elem_pos=new int[max_num_elemtris];
@@ -1011,7 +1013,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
               subelem_coords[crd_pos]=crd[j];
               crd_pos++;
              }
- 
+  
             // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
           }
 
@@ -1038,6 +1040,16 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
             // Set mask (if it exists)
              if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+ 
+             // Set element coords. (if it exists)
+             if (elemCoordsPresent==1) {
+               double *elem_pnt=elemCoords+orig_sdim*e;
+               double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
+               for (int j=0; j<orig_sdim; j++) {
+                 elem_pnt_wsplit[j]=elem_pnt[j];
+               }
+             }
+
              // Set triangle corners based on subelem_tri_ind
             elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+subelem_tri_ind[tI_pos]];
             elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+subelem_tri_ind[tI_pos+1]];
@@ -1091,6 +1103,13 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           elemId_wsplit[split_elem_pos]=elemId[e];
           elemType_wsplit[split_elem_pos]=elemType[e];
           if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e];
+          if (elemCoordsPresent==1) {
+            double *elem_pnt=elemCoords+orig_sdim*e;
+            double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
+            for (int j=0; j<orig_sdim; j++) {
+              elem_pnt_wsplit[j]=elem_pnt[j];
+            }
+          }
           if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
           split_elem_pos++;
           for (int i=0; i<elemType[e]; i++) {
@@ -1104,7 +1123,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       // Allocate some temporary variables for splitting
       delete [] subelem_coords;
       delete [] subelem_dbl_buf;
-       delete [] subelem_int_buf;
+      delete [] subelem_int_buf;
       delete [] subelem_tri_ind;
       delete [] subelem_tri_area;
       delete [] elemtris_area;
@@ -1116,6 +1135,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
       if (areaPresent==1) elemArea=elemArea_wsplit;
+      if (elemCoordsPresent==1) elemCoords=elemCoords_wsplit;
 
       if (present(elemMaskII)) { 
         elemMaskII=elemMaskII_wsplit;
@@ -1207,7 +1227,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
    // Handle element coords
   bool has_elem_coords=false;
-  if (coordsPresent == 1) { // if coords exist
+  if (elemCoordsPresent == 1) { // if coords exist
 
     // Context for new fields
     Context ctxt; ctxt.flip();
@@ -1307,6 +1327,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         int data_index = sdim*elem.get_data_index();
         for (int i = 0; i < sdim; ++i) {
           coords[i] = elemCoords[data_index+i];    
+          // printf("AE %d %f \n",elem.get_id(),coords[i]);
+
         }    
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
       }
@@ -1340,11 +1362,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
       }
-
-
     }
-
-  /* XMRKX */
   }
 
 
@@ -1355,6 +1373,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     if (elemId_wsplit != NULL) delete [] elemId_wsplit;
     if (areaPresent==1) {
       if (elemArea_wsplit != NULL) delete [] elemArea_wsplit;
+    }
+    if (elemCoordsPresent==1) {
+      if (elemCoords_wsplit != NULL) delete [] elemCoords_wsplit;
     }
 
     //// Setup for split mask
@@ -1701,7 +1722,7 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
-
+ 
   // Declare id vectors
   std::vector<int> ngids; 
   
@@ -1753,7 +1774,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
     
     int *indices = (nsize==0)?NULL:&ngids[0];
 
-    FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
+     FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
@@ -1805,7 +1826,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
-  } catch(...){
+   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
@@ -1857,7 +1878,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
       *ip++ = *intMeshFreed;
     }
 
-    // Adjust offset
+     // Adjust offset
     *offset += size;
 
     // return success
@@ -1909,7 +1930,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
      }
-
+ 
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
@@ -1961,7 +1982,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
     if (nvalSetSizes != NULL)
       for (int i=0; i<numSets; i++) {
-	size +=nvalSetSizes[i]*sizeof(UInt);
+ 	size +=nvalSetSizes[i]*sizeof(UInt);
       }
 
     if (nvalSetObjSizes != NULL)
@@ -2178,7 +2199,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     if (fields_present[2]) meshp->RegisterNodalField(*meshp, "node_mask_val", 1);
     if (fields_present[3]) meshp->RegisterField("elem_mask",MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     if (fields_present[4]) meshp->RegisterField("elem_mask_val", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-    if (fields_present[5]) meshp->RegisterField("elem_area", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+     if (fields_present[5]) meshp->RegisterField("elem_area", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     if (fields_present[6]) meshp->RegisterField("elem_frac2", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     if (fields_present[7]) meshp->RegisterField("elem_frac", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
@@ -2229,7 +2250,7 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
 					double *pnts, int *pets, int *rc){
 
    try {
-
+ 
   // Initialize the parallel environment for mesh (if not already done)
     {
  int localrc;
@@ -2281,7 +2302,7 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
-  }
+   }
 
   // Set return code 
   if(rc != NULL) *rc = ESMF_SUCCESS;
@@ -2319,7 +2340,11 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
         for (; ei != ee; ++ei) {
             MeshObj &elem = *ei;
 
-            if (!GetAttr(elem).is_locally_owned()) continue;
+            // See if locally owned
+           if (!GetAttr(elem).is_locally_owned()) continue;
+
+           // If it's a split element, then skip
+           if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
 
             int idx = elem.get_data_index();
             index_to_elem.push_back(std::make_pair(idx,&elem));
@@ -2344,7 +2369,7 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
                 //printf("\nESMCI:getlocalelemcoords, coords = [");
                 for (int j = 0; j < sdim; ++j) {
                     ecoords[elemCoordPos++] = coords[j];
-                    //printf("%f, ", coords[j]);
+                    //                    printf("GEC %d %f \n ",elem.get_id(),coords[j]);
                 }
                 //printf("]\n");
             }
@@ -2393,7 +2418,7 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
             throw localrc;
 
-        // Get some info
+         // Get some info
         int num_nodes = mesh.num_nodes();
 
         // Choose which coords field and dimension to use
@@ -2445,7 +2470,7 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
    			    x.what(), ESMC_CONTEXT, rc);
         } else {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   			    "UNKNOWN", ESMC_CONTEXT, rc);
+    			    "UNKNOWN", ESMC_CONTEXT, rc);
         }
 
         return;

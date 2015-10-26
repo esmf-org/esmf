@@ -32,7 +32,7 @@
 
 #include <limits>
 #include <vector>
-
+ 
 #include <cstdio>
 
 //-----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ namespace ESMCI {
 
   void set_elem_data_indices(Mesh *output_mesh, int num_elem_gids, int *elem_gids);
 
-  void set_node_owners_wo_list(Mesh *output_mesh);
+   void set_node_owners_wo_list(Mesh *output_mesh);
 
   void set_elem_data_indices_wo_list(Mesh *output_mesh);
 
@@ -1957,7 +1957,7 @@ namespace ESMCI {
     gids_orig= new UInt[num_gids];
     
     // Loop through list putting into arrays
-    int pos=0;
+     int pos=0;
     Mesh::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
@@ -1991,7 +1991,7 @@ namespace ESMCI {
   // Put into a DDir
   DDir<> id_map_dir;
   id_map_dir.Create(num_gids,gids_orig,gids_split);
-
+ 
   // Clean up 
   if (num_gids>0) {
     if (gids_split!= NULL) delete [] gids_split;
@@ -2025,7 +2025,7 @@ namespace ESMCI {
   id_map_dir.RemoteGID(num_elem_gids, elem_gids_u, lookups);
 
   // Don't need anymore so clean up 
-  if (num_elem_gids>0) {
+   if (num_elem_gids>0) {
     if (elem_gids_u != NULL) delete [] elem_gids_u;
   }
 
