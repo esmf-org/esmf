@@ -94,7 +94,6 @@ module NUOPC
   public NUOPC_SetAttribute               ! method
 
   ! -- PRELIM. NEED REVIEW utility methods following the new v7 scheme
-  public NUOPC_IsCreated
   public NUOPC_Nop
   public NUOPC_Print
   public NUOPC_Realize

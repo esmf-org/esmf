@@ -501,14 +501,6 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_IsCreated() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_IsCreated(clockA, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
   write(name, *) "NUOPC_Advertise() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Advertise(stateA, "sea_surface_temperature", rc=rc)

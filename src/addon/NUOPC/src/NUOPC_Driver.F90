@@ -286,7 +286,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
-    if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
+    if (.not.clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
       call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1860,7 +1860,7 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    if (NUOPC_IsCreated(is%wrap%driverClock)) then
+    if (ESMF_ClockIsCreated(is%wrap%driverClock)) then
       ! check and set the model clock against the driver clock
       call NUOPC_CompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
