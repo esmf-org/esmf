@@ -775,11 +775,10 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
   recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
-    guard, ConnectedList, NamespaceList, itemNameList, fieldList, rc)
+    ConnectedList, NamespaceList, itemNameList, fieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
     character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
-    logical, optional :: guard
     character(ESMF_MAXSTR), pointer, optional     :: ConnectedList(:)
     character(ESMF_MAXSTR), pointer, optional     :: NamespaceList(:)
     character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
@@ -1426,19 +1425,20 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsAtTime - Check if Fields in a State are at the given Time
+! !IROUTINE: NUOPC_IsAtTime - Check if Field(s) in a State are at the given Time
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsAtTime
-  function NUOPC_IsAtTimeState(state, time, fieldName, rc)
+  function NUOPC_IsAtTimeState(state, time, fieldName, count, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsAtTimeState
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     type(ESMF_Time),  intent(in)            :: time
     character(*),     intent(in),  optional :: fieldName
+    integer,          intent(out), optional :: count
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the Fields in {\tt state} have a timestamp 
+!   Return {\tt .true.} if the field(s) in {\tt state} have a timestamp 
 !   attribute that matches {\tt time}. Otherwise return {\tt .false.}.
 !
 !   The arguments are:
@@ -1448,11 +1448,14 @@ module NUOPC_Base
 !   \item[time]
 !     The time to compare against.
 !   \item[{[fieldName]}]
-!     The name of the Field in {\tt state} to be checked. If provided, and 
-!     the State does not contain a Field with {\tt fieldName}, return an 
+!     The name of the field in {\tt state} to be checked. If provided, and 
+!     the state does not contain a field with {\tt fieldName}, return an 
 !     error in {\tt rc}. If not provided, check {\em all} the fields contained
 !     in {\tt state} and return {\tt .true.} if all the fields are at the 
 !     correct time.
+!   \item[{[count]}]
+!     If provided, the number of fields that are at time are returned. If 
+!     {\tt fieldName} is present then {\tt count} cannot be greater than 1.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1464,10 +1467,12 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer       :: itemNameList(:)
     type(ESMF_Field),       pointer       :: fieldList(:)
     type(ESMF_Field)                      :: field
-    integer                 :: i
-    character(ESMF_MAXSTR)  :: iString, msgString
+    logical                               :: isAtTime
+    integer                               :: i
+    character(ESMF_MAXSTR)                :: iString, msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
+    if (present(count)) count = 0
     
     if (present(fieldName)) then
     
@@ -1478,6 +1483,8 @@ module NUOPC_Base
         return  ! bail out
 
       NUOPC_IsAtTimeState = NUOPC_IsAtTime(field, time, rc=rc)
+      
+      if (NUOPC_IsAtTimeState.and.present(count)) count = 1
     
     else
 
@@ -1499,17 +1506,20 @@ module NUOPC_Base
           write (iString, *) i
           write (msgString, *) "Failure in NUOPC_IsAtTimeState() for item "// &
             trim(adjustl(iString))//": "//trim(itemNameList(i))
-          field=fieldList(i)
-          NUOPC_IsAtTimeState = NUOPC_IsAtTime(field, time, rc=rc)
+          field = fieldList(i)
+          isAtTime = NUOPC_IsAtTime(field, time, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          if (.not.NUOPC_IsAtTimeState) then
+          if (.not.isAtTime) then
+            NUOPC_IsAtTimeState = .false.
             write (msgString, *) "Field not at expected time for item "// &
               trim(adjustl(iString))//": "//trim(itemNameList(i))
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-            exit
+            if (.not.present(count)) exit ! no need to keep going
+          elseif (present(count)) then
+            count = count + 1
           endif
         enddo
       endif
@@ -1525,7 +1535,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsConnected - Check if the Field is connected
+! !IROUTINE: NUOPC_IsConnected - Check if a Field is connected
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsConnected
   function NUOPC_IsConnectedField(field, rc)
@@ -1571,15 +1581,16 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsConnected - Test if Fields in a State are connected
+! !IROUTINE: NUOPC_IsConnected - Check if Field(s) in a State are connected
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsConnected
-  function NUOPC_IsConnectedState(state, fieldName, rc)
+  function NUOPC_IsConnectedState(state, fieldName, count, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsConnectedState
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     character(*),     intent(in),  optional :: fieldName
+    integer,          intent(out), optional :: count
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the field(s) in {\tt state} are connected. Otherwise
@@ -1590,10 +1601,13 @@ module NUOPC_Base
 !   \item[state]
 !     The {\tt ESMF\_State} object to be checked.
 !   \item[{[fieldName]}]
-!     The name of the Field in {\tt state} to be checked. If provided, and 
-!     the State does not contain a Field with {\tt fieldName}, return an 
+!     The name of the field in {\tt state} to be checked. If provided, and 
+!     the state does not contain a field with {\tt fieldName}, return an 
 !     error in {\tt rc}. If not provided, check {\em all} the fields contained
 !     in {\tt state} and return {\tt .true.} if all the fields are connected.
+!   \item[{[count]}]
+!     If provided, the number of fields that are connected are returned. If 
+!     {\tt fieldName} is present then {\tt count} cannot be greater than 1.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1605,10 +1619,12 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer   :: StandardNameList(:)
     character(ESMF_MAXSTR), pointer   :: ConnectedList(:)
     logical                           :: allConnected
+    logical                           :: isConnected
     integer                           :: i
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+    if (present(count)) count = 0
+
     if (present(fieldName)) then
     
       call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
@@ -1619,6 +1635,8 @@ module NUOPC_Base
 
       NUOPC_IsConnectedState = NUOPC_IsConnected(field, rc=rc)
     
+      if (NUOPC_IsConnectedState.and.present(count)) count = 1
+
     else
     
       nullify(StandardNameList)
@@ -1634,9 +1652,12 @@ module NUOPC_Base
       allConnected = .true.  ! initialize
       if (associated(ConnectedList)) then
         do i=1, size(ConnectedList)
-          if (ConnectedList(i) /= "true") then
+          isConnected = (ConnectedList(i) == "true")
+          if (.not.isConnected) then
             allConnected = .false.
-            exit
+            if (.not.present(count)) exit ! no need to keep going
+          elseif (present(count)) then
+            count = count + 1
           endif
         enddo
       endif
@@ -1653,7 +1674,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsUpdated - Check if the Field is marked as updated
+! !IROUTINE: NUOPC_IsUpdated - Check if a Field is marked as updated
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsUpdated
   function NUOPC_IsUpdatedField(field, rc)
@@ -1695,27 +1716,33 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_IsUpdated - Check if all the Fields in a State are marked as updated
+! !IROUTINE: NUOPC_IsUpdated - Check if Field(s) in a State are marked as updated
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsUpdated
-  function NUOPC_IsUpdatedState(state, count, rc)
+  function NUOPC_IsUpdatedState(state, fieldName, count, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsUpdatedState
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
+    character(*),     intent(in),  optional :: fieldName
     integer,          intent(out), optional :: count
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Return {\tt .true.} if all the fields in {\tt state} have their "Updated"
+!   Return {\tt .true.} if the field(s) in {\tt state} have the "Updated"
 !   attribute set to "true". Otherwise return {\tt .false.}. 
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
 !     The {\tt ESMF\_State} object to be checked.
+!   \item[{[fieldName]}]
+!     The name of the field in {\tt state} to be checked. If provided, and 
+!     the state does not contain a field with {\tt fieldName}, return an 
+!     error in {\tt rc}. If not provided, check {\em all} the fields contained
+!     in {\tt state} and return {\tt .true.} if all the fields are updated.
 !   \item[{[count]}]
-!     If provided, the number of fields with "Updated" attribute set to "true"
-!     is returned.
+!     If provided, the number of fields that are updated are returned. If 
+!     {\tt fieldName} is present then {\tt count} cannot be greater than 1.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1732,41 +1759,58 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: iString, msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
-    
-    nullify(StandardNameList)
-    nullify(itemNameList)
-    nullify(fieldList)
-    
-    if (present(count)) count = 0 ! reset
-    
-    NUOPC_IsUpdatedState = .true. ! initialize 
+    if (present(count)) count = 0
 
-    call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
-      itemNameList=itemNameList, fieldList=fieldList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    if (associated(itemNameList)) then
-      do i=1, size(itemNameList)
-        write (iString, *) i
-        write (msgString, *) "Failure in NUOPC_IsUpdatedState() for item "// &
-          trim(adjustl(iString))//": "//trim(itemNameList(i))
-        field=fieldList(i)
-        isUpdated = NUOPC_IsUpdated(field, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
-        if (present(count) .and. isUpdated) then
-          count = count + 1
-        else if (.not.isUpdated) then
-          NUOPC_IsUpdatedState = .false. ! toggle
-          if (.not.present(count)) exit ! no need to continue looking
-        endif
-      enddo
-    endif
+    if (present(fieldName)) then
     
-    if (associated(StandardNameList)) deallocate(StandardNameList)
-    if (associated(itemNameList)) deallocate(itemNameList)
-    if (associated(fieldList)) deallocate(fieldList)
+      call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      NUOPC_IsUpdatedState = NUOPC_IsUpdated(field, rc=rc)
+    
+      if (NUOPC_IsUpdatedState.and.present(count)) count = 1
+
+    else
+    
+      nullify(StandardNameList)
+      nullify(itemNameList)
+      nullify(fieldList)
+      
+      if (present(count)) count = 0 ! reset
+      
+      NUOPC_IsUpdatedState = .true. ! initialize 
+
+      call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
+        itemNameList=itemNameList, fieldList=fieldList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+        
+      if (associated(itemNameList)) then
+        do i=1, size(itemNameList)
+          write (iString, *) i
+          write (msgString, *) "Failure in NUOPC_IsUpdatedState() for item "// &
+            trim(adjustl(iString))//": "//trim(itemNameList(i))
+          field=fieldList(i)
+          isUpdated = NUOPC_IsUpdated(field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+          if (present(count) .and. isUpdated) then
+            count = count + 1
+          else if (.not.isUpdated) then
+            NUOPC_IsUpdatedState = .false. ! toggle
+            if (.not.present(count)) exit ! no need to continue looking
+          endif
+        enddo
+      endif
+      
+      if (associated(StandardNameList)) deallocate(StandardNameList)
+      if (associated(itemNameList)) deallocate(itemNameList)
+      if (associated(fieldList)) deallocate(fieldList)
+      
+    endif
     
   end function
   !-----------------------------------------------------------------------------
