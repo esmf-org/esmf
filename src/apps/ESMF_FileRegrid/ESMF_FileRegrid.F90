@@ -55,12 +55,12 @@ program ESMF_FileRegridApp
 #ifndef ESMF_MPIUNI
   call MPI_Init(rc)
   if (rc /= MPI_SUCCESS) then
-      write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
+      write(*,*) "ERROR: ESMF_FileRegrid initialization error."
       stop 1
   endif
   call MPI_Comm_rank(MPI_COMM_WORLD, PetNo, rc) 
   if (rc /= MPI_SUCCESS) then
-      write(*,*) "ERROR: ESMF_RegridWeightGen initialization error."
+      write(*,*) "ERROR: ESMF_FileRegrid initialization error."
       call MPI_Finalize(rc)
       stop 1
   endif
@@ -417,9 +417,9 @@ contains
     integer ::  localPet
   
     if (localPet >= 0) then
-      write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.RegridWeightGen.Log files for a traceback."
+      write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.FileRegrid.Log files for a traceback."
     else
-      write(*,*) "ERROR: Please see the PET*.RegridWeightGen.Log files for a traceback."
+      write(*,*) "ERROR: Please see the PET*.FileRegrid.Log files for a traceback."
     endif
   
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

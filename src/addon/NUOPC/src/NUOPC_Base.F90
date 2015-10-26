@@ -528,7 +528,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(7)
+    character(ESMF_MAXSTR)            :: attrList(9)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -545,6 +545,8 @@ module NUOPC_Base
     attrList(6) = "TransferOfferGeomObject" ! values: "cannot provide",
                                             !   "can provide", "will provide"
     attrList(7) = "TransferActionGeomObject" ! values: "provide", "accept"
+    attrList(8) = "UngriddedLBound"
+    attrList(9) = "UngriddedUBound"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)

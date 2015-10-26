@@ -24,7 +24,7 @@ extern "C" {
 
 extern void Zoltan_Print_Sync_Start(MPI_Comm, int);
 extern void Zoltan_Print_Sync_End(MPI_Comm, int);
-extern void Zoltan_Print_Stats (MPI_Comm, int, double, char *);
+extern void Zoltan_Print_Stats (MPI_Comm, int, double, const char *);
 
 #ifdef __cplusplus
 } /* closing bracket for extern "C" */

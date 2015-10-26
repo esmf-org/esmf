@@ -332,6 +332,12 @@ contains
 !       return
 !    endif	
 
+!    call ESMF_PointListWriteVTK(pointlist,"TestPointList")
+!    if (localrc /= ESMF_SUCCESS) then
+!       rc=ESMF_FAILURE
+!       return
+!    endif	
+
     
     !locations values are zero based
     call ESMF_PointListGetForLoc(pointlist,2,id=myid,rc=localrc)

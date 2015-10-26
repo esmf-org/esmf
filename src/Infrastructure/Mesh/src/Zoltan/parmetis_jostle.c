@@ -1646,7 +1646,7 @@ char *val)                      /* value of variable */
     int status, i;
     PARAM_UTYPE result;         /* value returned from Check_Param */
     int index;                  /* index returned from Check_Param */
-    char *valid_methods[] = {
+    const char *valid_methods[] = {
         "PARTKWAY", "PARTGEOMKWAY", "PARTGEOM", 
         "REPARTLDIFFUSION", "REPARTGDIFFUSION",
         "REPARTREMAP", "REPARTMLREMAP",

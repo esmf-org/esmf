@@ -1054,14 +1054,14 @@ module NUOPC_Driver
             write (jString, *) j
             if (NUOPC_CompAreServicesSet(is%wrap%connectorComp(i,j))) then
               if (i==0) then
-                ! connect to the driver's export State
-                imState=exportState
+                ! connect to the driver's import State
+                imState=importState
               else
                 imState=is%wrap%modelES(i)
               endif
               if (j==0) then
-                ! connect to the driver's import State
-                exState=importState
+                ! connect to the driver's export State
+                exState=exportState
               else
                 exState=is%wrap%modelIS(j)
               endif
@@ -1269,14 +1269,14 @@ module NUOPC_Driver
               if (phase == 0) cycle ! skip to next j
               write (pString, *) phase
               if (i==0) then
-                ! connect to the driver's export State
-                imState=exportState
+                ! connect to the driver's import State
+                imState=importState
               else
                 imState=is%wrap%modelES(i)
               endif
               if (j==0) then
-                ! connect to the driver's import State
-                exState=importState
+                ! connect to the driver's export State
+                exState=exportState
               else
                 exState=is%wrap%modelIS(j)
               endif
@@ -1644,14 +1644,14 @@ module NUOPC_Driver
           write (jString, *) j
           write (pString, *) phase
           if (i==0) then
-            ! connect to the driver's export State
-            imState=exportState
+            ! connect to the driver's import State
+            imState=importState
           else
             imState=is%wrap%modelES(i)
           endif
           if (j==0) then
-            ! connect to the driver's import State
-            exState=importState
+            ! connect to the driver's export State
+            exState=exportState
           else
             exState=is%wrap%modelIS(j)
           endif
@@ -2987,6 +2987,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! alternative exit condition if driver itself matches compLabel
     if (.not.foundFlag) then
+      !TODO: Fix this, I don't think that works yet because Driver never stores
+      ! CompLabel Attribute.
       call NUOPC_CompAttributeGet(driver, name="CompLabel", &
         value=driverCompLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

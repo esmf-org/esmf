@@ -40,7 +40,7 @@
       use ESMF_ArrayBundleMod
       use ESMF_RHandleMod
       use ESMF_LocalArrayMod    ! ESMF local array class
-      use ESMF_InitMacrosMod    ! ESMF initializer macros
+       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
       use ESMF_DELayoutMod
@@ -60,7 +60,7 @@
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+       private
 
 !------------------------------------------------------------------------------
 ! ! ESMF_Grid
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! ! ESMF_GridStatus_Flag
 !
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
   type ESMF_GridStatus_Flag
 #ifndef ESMF_NO_SEQUENCE
   sequence
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! ! ESMF_GridItem_Flag
 !
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 ! There is an assignment operator for the flag, please check that
 ! if you are making changes to this flag.
   type ESMF_GridItem_Flag
@@ -832,7 +832,7 @@ end interface
 !BOPI
 ! !INTERFACE:
       interface operator (==)
-
+ 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PoleTypeEqual
 
@@ -1024,8 +1024,8 @@ end interface
 ! !DESCRIPTION:
 !   Test whether grid1 and grid2 are valid aliases to the same ESMF
 !   Grid object in memory. For a more general comparison of two ESMF Grids,
-!   going beyond the simple alias test, the ESMF\_GridMatch() function (not yet
-!   fully implemented) must be used.
+!   going beyond the simple alias test, the ESMF\_GridMatch() function
+!   must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -5567,7 +5567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      .false.
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_DEGLOBAL}
+!      to {\tt ESMF\_INDEX\_DELOCAL}
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. 
 !      This flag is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
@@ -5615,7 +5615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(indexflag)) then
         localIndexFlag = indexflag
     else
-        localIndexFlag = ESMF_INDEX_GLOBAL
+        localIndexFlag = ESMF_INDEX_DELOCAL
     endif
 
     if (present(isSphere)) then
@@ -5808,7 +5808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      .false.
 ! \item[{[indexflag]}]
 !      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_GLOBAL}
+!      to {\tt ESMF\_INDEX\_DELOCAL}
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. This flag
 !      is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
@@ -5883,7 +5883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(indexflag)) then
         localIndexFlag = indexflag
     else
-        localIndexFlag = ESMF_INDEX_GLOBAL
+        localIndexFlag = ESMF_INDEX_DELOCAL
     endif
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, &

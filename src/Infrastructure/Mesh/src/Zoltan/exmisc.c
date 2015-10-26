@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 
-void exShowError(int val, char *s, int me)
+void exShowError(int val, const char *s, int me)
 {
   if (s)
     {

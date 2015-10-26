@@ -42,7 +42,7 @@ static void divide_interval(int from, int to,
 
 /* Very serious hypergraph, a non-space is a pin */
 
-static char *hg[NROWS]={
+static const char *hg[NROWS]={
 "                        b                         .$                    ",
 "                        4r                       .$$                    ",
 "                        4$r                     z$$$                    ",

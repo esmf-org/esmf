@@ -476,7 +476,7 @@ void Zoltan_HG_Print(
   HGraph *hg,
   Partition parts,
   FILE *fp,
-  char *str
+  const char *str
 )
 {
 /* Routine to print hypergraph weights and edges. Assumes serial execution;

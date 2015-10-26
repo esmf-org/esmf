@@ -60,7 +60,7 @@ extern "C" {
  *  Prototypes for ID functions in id.c
  */
 
-extern ZOLTAN_ID_PTR ZOLTAN_Malloc_ID(int n, char *file, int line);
+extern ZOLTAN_ID_PTR ZOLTAN_Malloc_ID(int n, const char *file, int line);
 extern void ZOLTAN_PRINT_ID(int n, ZOLTAN_ID_PTR a);
 extern int ZOLTAN_EQ_ID(int n, ZOLTAN_ID_PTR a, ZOLTAN_ID_PTR b);
 
