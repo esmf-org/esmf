@@ -380,7 +380,7 @@ call ESMF_VMLogMemInfo("aftP1a Reconcile")
     nullify(exportNamespaceList)
     
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -390,7 +390,7 @@ call printStringList("importNamespaceList", importNamespaceList)
 #endif
       
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -528,7 +528,7 @@ call ESMF_VMLogMemInfo("aftP1b Reconcile")
     nullify(exportNamespaceList)
     
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -538,7 +538,7 @@ call printStringList("importNamespaceList", importNamespaceList)
 #endif
       
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -777,11 +777,11 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1089,11 +1089,11 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1419,11 +1419,11 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1721,11 +1721,11 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
     endif
     ! get the importState and exportState std lists
     call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     

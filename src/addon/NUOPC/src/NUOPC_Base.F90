@@ -785,15 +785,16 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
-  recursive subroutine NUOPC_GetStateMemberLists(state, stdAttrNameList, &
-    stdItemNameList, stdConnectedList, namespaceList, stdFieldList, rc)
+  recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
+    guard, ConnectedList, NamespaceList, itemNameList, fieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: state
-    character(ESMF_MAXSTR), pointer, optional     :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer, optional     :: stdItemNameList(:)
-    character(ESMF_MAXSTR), pointer, optional     :: stdConnectedList(:)
-    character(ESMF_MAXSTR), pointer, optional     :: namespaceList(:)
-    type(ESMF_Field),       pointer, optional     :: stdFieldList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
+    logical, optional :: guard
+    character(ESMF_MAXSTR), pointer, optional     :: ConnectedList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: NamespaceList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
+    type(ESMF_Field),       pointer, optional     :: fieldList(:)
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Construct lists containing the StandardNames, field names, and connected 
@@ -808,15 +809,15 @@ module NUOPC_Base
 !   \begin{description}
 !   \item[state]
 !     The {\tt ESMF\_State} object to be queried.
-!   \item[{[stdAttrNameList]}]
+!   \item[{[StandardNameList]}]
 !     If present, return a list of the "StandardName" attribute of each member.
-!   \item[{[stdItemNameList]}]
-!     If present, return a list of each member name.
-!   \item[{[stdConnectedList]}]
+!   \item[{[ConnectedList]}]
 !     If present, return a list of the "Connected" attribute of each member.
-!   \item[{[namespaceList]}]
+!   \item[{[NamespaceList]}]
 !     If present, return a list of the namespace of each member.
-!   \item[{[stdFieldList]}]
+!   \item[{[itemNameList]}]
+!     If present, return a list of each member name.
+!   \item[{[fieldList]}]
 !     If present, return a list of the member fields.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -827,14 +828,14 @@ module NUOPC_Base
     ! local variables
     integer           :: item, itemCount, fieldCount, stat, i
     type(ESMF_Field)  :: field
-    character(ESMF_MAXSTR), allocatable     :: itemNameList(:)
+    character(ESMF_MAXSTR), allocatable     :: ll_itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable  :: stateitemtypeList(:)
     type(ESMF_State)                        :: nestedState
-    character(ESMF_MAXSTR), pointer         :: l_stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer         :: l_stdItemNameList(:)
-    character(ESMF_MAXSTR), pointer         :: l_stdConnectedList(:)
-    character(ESMF_MAXSTR), pointer         :: l_namespaceList(:)
-    type(ESMF_Field),       pointer         :: l_stdFieldList(:)
+    character(ESMF_MAXSTR), pointer         :: l_StandardNameList(:)
+    character(ESMF_MAXSTR), pointer         :: l_itemNameList(:)
+    character(ESMF_MAXSTR), pointer         :: l_ConnectedList(:)
+    character(ESMF_MAXSTR), pointer         :: l_NamespaceList(:)
+    type(ESMF_Field),       pointer         :: l_fieldList(:)
     character(ESMF_MAXSTR)                  :: namespace
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -846,9 +847,9 @@ module NUOPC_Base
       return  ! bail out
           
     if (itemCount > 0) then
-      allocate(itemNameList(itemCount))
+      allocate(ll_itemNameList(itemCount))
       allocate(stateitemtypeList(itemCount))
-      call ESMF_StateGet(state, itemNameList=itemNameList, &
+      call ESMF_StateGet(state, itemNameList=ll_itemNameList, &
         itemtypeList=stateitemtypeList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -861,104 +862,104 @@ module NUOPC_Base
           fieldCount = fieldCount + 1
         else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
           ! recursively parse the nested state
-          nullify(l_stdAttrNameList)
-          call ESMF_StateGet(state, itemName=itemNameList(item), &
+          nullify(l_StandardNameList)
+          call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, l_stdAttrNameList, rc=rc)
+          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          if (associated(l_stdAttrNameList)) then
-            fieldCount = fieldCount + size(l_stdAttrNameList)
-            deallocate(l_stdAttrNameList)
+          if (associated(l_StandardNameList)) then
+            fieldCount = fieldCount + size(l_StandardNameList)
+            deallocate(l_StandardNameList)
           endif
         endif
       enddo
       
-      if (present(stdAttrNameList)) then
-        if (associated(stdAttrNameList)) then
+      if (present(StandardNameList)) then
+        if (associated(StandardNameList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stdAttrNameList must enter unassociated", &
+            msg="StandardNameList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(stdAttrNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
+          allocate(StandardNameList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating StandardNameList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
         endif
       endif
       
-      if (present(stdItemNameList)) then
-        if (associated(stdItemNameList)) then
+      if (present(itemNameList)) then
+        if (associated(itemNameList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stdItemNameList must enter unassociated", &
+            msg="itemNameList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(stdItemNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stdItemNameList", &
+          allocate(itemNameList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating itemNameList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
         endif
       endif
 
-      if (present(stdConnectedList)) then
-        if (associated(stdConnectedList)) then
+      if (present(ConnectedList)) then
+        if (associated(ConnectedList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stdConnectedList must enter unassociated", &
+            msg="ConnectedList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(stdConnectedList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stdConnectedList", &
+          allocate(ConnectedList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating ConnectedList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
         endif
       endif
 
-      if (present(namespaceList)) then
-        if (associated(namespaceList)) then
+      if (present(NamespaceList)) then
+        if (associated(NamespaceList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="namespaceList must enter unassociated", &
+            msg="NamespaceList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(namespaceList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating namespaceList", &
+          allocate(NamespaceList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating NamespaceList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
         endif
       endif
 
-      if (present(stdFieldList)) then
-        if (associated(stdFieldList)) then
+      if (present(fieldList)) then
+        if (associated(fieldList)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stdFieldList must enter unassociated", &
+            msg="fieldList must enter unassociated", &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)
           return  ! bail out
         else
-          allocate(stdFieldList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stdFieldList", &
+          allocate(fieldList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating fieldList", &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
@@ -975,88 +976,91 @@ module NUOPC_Base
           file=FILENAME)) &
           return  ! bail out
         if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
-          call ESMF_StateGet(state, itemName=itemNameList(item), &
+          call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             field=field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          if (present(stdAttrNameList)) then
+          if (present(StandardNameList)) then
             call NUOPC_GetAttribute(field, name="StandardName", &
-              value=stdAttrNameList(fieldCount), rc=rc)
+              value=StandardNameList(fieldCount), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
           endif
-          if (present(stdItemNameList)) then
-            stdItemNameList(fieldCount)=itemNameList(item)
+          if (present(itemNameList)) then
+            itemNameList(fieldCount)=ll_itemNameList(item)
           endif
-          if (present(stdConnectedList)) then
+          if (present(ConnectedList)) then
             call NUOPC_GetAttribute(field, name="Connected", &
-              value=stdConnectedList(fieldCount), rc=rc)
+              value=ConnectedList(fieldCount), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
           endif
-          if (present(namespaceList)) then
+          if (present(NamespaceList)) then
             NamespaceList(fieldCount)=trim(namespace)
           endif
-          if (present(stdFieldList)) then
-            stdFieldList(fieldCount)=field
+          if (present(fieldList)) then
+            fieldList(fieldCount)=field
           endif
           fieldCount = fieldCount + 1
         else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
           ! recursively parse the nested state
-          nullify(l_stdAttrNameList)
-          nullify(l_stdItemNameList)
-          nullify(l_stdConnectedList)
-          nullify(l_namespaceList)
-          nullify(l_stdFieldList)
-          call ESMF_StateGet(state, itemName=itemNameList(item), &
+          nullify(l_StandardNameList)
+          nullify(l_itemNameList)
+          nullify(l_ConnectedList)
+          nullify(l_NamespaceList)
+          nullify(l_fieldList)
+          call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, l_stdAttrNameList, &
-            l_stdItemNameList, l_stdConnectedList, l_namespaceList, &
-            l_stdFieldList, rc=rc)
+          call NUOPC_GetStateMemberLists(nestedState, &
+            StandardNameList=l_StandardNameList, &
+            itemNameList=l_itemNameList, &
+            ConnectedList=l_ConnectedList, &
+            NamespaceList=l_NamespaceList, &
+            fieldList=l_fieldList, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-          if (associated(l_stdAttrNameList)) then
-            do i=1, size(l_stdAttrNameList)
-              if (present(stdAttrNameList)) then
-                stdAttrNameList(fieldCount) = l_stdAttrNameList(i)
+          if (associated(l_StandardNameList)) then
+            do i=1, size(l_StandardNameList)
+              if (present(StandardNameList)) then
+                StandardNameList(fieldCount) = l_StandardNameList(i)
               endif
-              if (present(stdItemNameList)) then
-                stdItemNameList(fieldCount) = l_stdItemNameList(i)
+              if (present(itemNameList)) then
+                itemNameList(fieldCount) = l_itemNameList(i)
               endif
-              if (present(stdConnectedList)) then
-                stdConnectedList(fieldCount) = l_stdConnectedList(i)
+              if (present(ConnectedList)) then
+                ConnectedList(fieldCount) = l_ConnectedList(i)
               endif
-              if (present(namespaceList)) then
-                namespaceList(fieldCount) = trim(namespace)//":"// &
-                  trim(l_namespaceList(i))
+              if (present(NamespaceList)) then
+                NamespaceList(fieldCount) = trim(namespace)//":"// &
+                  trim(l_NamespaceList(i))
               endif
-              if (present(stdFieldList)) then
-                stdFieldList(fieldCount) = l_stdFieldList(i)
+              if (present(fieldList)) then
+                fieldList(fieldCount) = l_fieldList(i)
               endif
               fieldCount = fieldCount + 1
             enddo
-            deallocate(l_stdAttrNameList)
-            deallocate(l_stdItemNameList)
-            deallocate(l_stdConnectedList)
-            deallocate(l_namespaceList)
-            deallocate(l_stdFieldList)
+            deallocate(l_StandardNameList)
+            deallocate(l_itemNameList)
+            deallocate(l_ConnectedList)
+            deallocate(l_NamespaceList)
+            deallocate(l_fieldList)
           endif
         endif
       enddo
         
-      deallocate(itemNameList)
+      deallocate(ll_itemNameList)
       deallocate(stateitemtypeList)
     endif
     
@@ -1467,9 +1471,9 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
-    type(ESMF_Field),       pointer       :: stdFieldList(:)
+    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
+    type(ESMF_Field),       pointer       :: fieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i
     character(ESMF_MAXSTR)  :: iString, msgString
@@ -1490,23 +1494,23 @@ module NUOPC_Base
 
       NUOPC_IsAtTimeState = .true.  ! initialize
       
-      nullify(stdAttrNameList)
-      nullify(stdItemNameList)
-      nullify(stdFieldList)
+      nullify(StandardNameList)
+      nullify(itemNameList)
+      nullify(fieldList)
 
-      call NUOPC_GetStateMemberLists(state, stdAttrNameList=stdAttrNameList, &
-        stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+      call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
+        itemNameList=itemNameList, fieldList=fieldList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
         
-      if (associated(stdItemNameList)) then
-        do i=1, size(stdItemNameList)
+      if (associated(itemNameList)) then
+        do i=1, size(itemNameList)
           write (iString, *) i
           write (msgString, *) "Failure in NUOPC_IsAtTimeState() for item "// &
-            trim(adjustl(iString))//": "//trim(stdItemNameList(i))
-          field=stdFieldList(i)
+            trim(adjustl(iString))//": "//trim(itemNameList(i))
+          field=fieldList(i)
           NUOPC_IsAtTimeState = NUOPC_IsAtTime(field, time, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
             line=__LINE__, &
@@ -1514,16 +1518,16 @@ module NUOPC_Base
             return  ! bail out
           if (.not.NUOPC_IsAtTimeState) then
             write (msgString, *) "Field not at expected time for item "// &
-              trim(adjustl(iString))//": "//trim(stdItemNameList(i))
+              trim(adjustl(iString))//": "//trim(itemNameList(i))
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             exit
           endif
         enddo
       endif
       
-      if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-      if (associated(stdItemNameList)) deallocate(stdItemNameList)
-      if (associated(stdFieldList)) deallocate(stdFieldList)
+      if (associated(StandardNameList)) deallocate(StandardNameList)
+      if (associated(itemNameList)) deallocate(itemNameList)
+      if (associated(fieldList)) deallocate(fieldList)
       
     endif
     
@@ -1609,8 +1613,8 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Field)                  :: field
-    character(ESMF_MAXSTR), pointer   :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer   :: stdConnectedList(:)
+    character(ESMF_MAXSTR), pointer   :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer   :: ConnectedList(:)
     logical                           :: allConnected
     integer                           :: i
 
@@ -1628,28 +1632,28 @@ module NUOPC_Base
     
     else
     
-      nullify(stdAttrNameList)
-      nullify(stdConnectedList)
+      nullify(StandardNameList)
+      nullify(ConnectedList)
 
-      call NUOPC_GetStateMemberLists(state, stdAttrNameList=stdAttrNameList, &
-        stdConnectedList=stdConnectedList, rc=rc)
+      call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
+        ConnectedList=ConnectedList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
         
       allConnected = .true.  ! initialize
-      if (associated(stdConnectedList)) then
-        do i=1, size(stdConnectedList)
-          if (stdConnectedList(i) /= "true") then
+      if (associated(ConnectedList)) then
+        do i=1, size(ConnectedList)
+          if (ConnectedList(i) /= "true") then
             allConnected = .false.
             exit
           endif
         enddo
       endif
 
-      if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-      if (associated(stdConnectedList)) deallocate(stdConnectedList)
+      if (associated(StandardNameList)) deallocate(StandardNameList)
+      if (associated(ConnectedList)) deallocate(ConnectedList)
 
       NUOPC_IsConnectedState = allConnected
       
@@ -1822,9 +1826,9 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
-    type(ESMF_Field),       pointer       :: stdFieldList(:)
+    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
+    type(ESMF_Field),       pointer       :: fieldList(:)
     type(ESMF_Field)                      :: field
     logical                               :: isUpdated
     integer                 :: i
@@ -1832,25 +1836,25 @@ module NUOPC_Base
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    nullify(stdAttrNameList)
-    nullify(stdItemNameList)
-    nullify(stdFieldList)
+    nullify(StandardNameList)
+    nullify(itemNameList)
+    nullify(fieldList)
     
     if (present(count)) count = 0 ! reset
     
     NUOPC_IsUpdatedState = .true. ! initialize 
 
-    call NUOPC_GetStateMemberLists(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+    call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
+      itemNameList=itemNameList, fieldList=fieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    if (associated(stdItemNameList)) then
-      do i=1, size(stdItemNameList)
+    if (associated(itemNameList)) then
+      do i=1, size(itemNameList)
         write (iString, *) i
         write (msgString, *) "Failure in NUOPC_IsUpdatedState() for item "// &
-          trim(adjustl(iString))//": "//trim(stdItemNameList(i))
-        field=stdFieldList(i)
+          trim(adjustl(iString))//": "//trim(itemNameList(i))
+        field=fieldList(i)
         isUpdated = NUOPC_IsUpdated(field, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
@@ -1863,9 +1867,9 @@ module NUOPC_Base
       enddo
     endif
     
-    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-    if (associated(stdItemNameList)) deallocate(stdItemNameList)
-    if (associated(stdFieldList)) deallocate(stdFieldList)
+    if (associated(StandardNameList)) deallocate(StandardNameList)
+    if (associated(itemNameList)) deallocate(itemNameList)
+    if (associated(fieldList)) deallocate(fieldList)
     
   end function
   !-----------------------------------------------------------------------------
@@ -2890,7 +2894,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field),       pointer       :: stdFieldList(:)
+    type(ESMF_Field),       pointer       :: fieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
@@ -2908,7 +2912,7 @@ module NUOPC_Base
     time0=timeBase
 #endif
 
-    nullify(stdFieldList)
+    nullify(fieldList)
 
 #ifdef PROFILE_on
     ! PROFILE
@@ -2919,7 +2923,7 @@ module NUOPC_Base
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
 
-    call NUOPC_GetStateMemberLists(state, stdFieldList=stdFieldList, rc=rc)
+    call NUOPC_GetStateMemberLists(state, fieldList=fieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -2955,9 +2959,9 @@ module NUOPC_Base
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
 
-    if (associated(stdFieldList)) then
-      do i=1, size(stdFieldList)
-        field=stdFieldList(i)
+    if (associated(fieldList)) then
+      do i=1, size(fieldList)
+        field=fieldList(i)
         call ESMF_AttributeGet(field, &
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="Instance", &
@@ -3009,7 +3013,7 @@ module NUOPC_Base
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
 
-    if (associated(stdFieldList)) deallocate(stdFieldList)
+    if (associated(fieldList)) deallocate(fieldList)
     
 #ifdef PROFILE_on
     ! PROFILE
@@ -3055,9 +3059,9 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
-    type(ESMF_Field),       pointer       :: stdFieldList(:)
+    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
+    type(ESMF_Field),       pointer       :: fieldList(:)
     character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     type(ESMF_Time)         :: time
@@ -3080,20 +3084,20 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
   
-    nullify(stdAttrNameList)
-    nullify(stdItemNameList)
-    nullify(stdFieldList)
+    nullify(StandardNameList)
+    nullify(itemNameList)
+    nullify(fieldList)
   
-    call NUOPC_GetStateMemberLists(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+    call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
+      itemNameList=itemNameList, fieldList=fieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    if (associated(stdItemNameList)) then
-      do i=1, size(stdItemNameList)
-        field=stdFieldList(i)
+    if (associated(itemNameList)) then
+      do i=1, size(itemNameList)
+        field=fieldList(i)
         if (present(selective)) then
           if (selective) then
             call ESMF_AttributeGet(field, &
@@ -3128,9 +3132,9 @@ module NUOPC_Base
       enddo
     endif
     
-    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-    if (associated(stdItemNameList)) deallocate(stdItemNameList)
-    if (associated(stdFieldList)) deallocate(stdFieldList)
+    if (associated(StandardNameList)) deallocate(StandardNameList)
+    if (associated(itemNameList)) deallocate(itemNameList)
+    if (associated(fieldList)) deallocate(fieldList)
     
   end subroutine
   !-----------------------------------------------------------------------------
