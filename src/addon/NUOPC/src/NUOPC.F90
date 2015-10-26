@@ -69,27 +69,11 @@ module NUOPC
   public NUOPC_CompSpecialize             ! method
 
   ! public Utility API
-  public NUOPC_ClockCheckSetClock         ! method
-  public NUOPC_ClockInitialize            ! method
   public NUOPC_ClockPrintCurrTime         ! method
   public NUOPC_ClockPrintStartTime        ! method
   public NUOPC_ClockPrintStopTime         ! method
-  public NUOPC_FieldAttributeInit         ! method
-  public NUOPC_FieldAttributeGet          ! method
-  public NUOPC_FieldAttributeSet          ! method
   public NUOPC_FieldBundleUpdateTime      ! method
-  public NUOPC_FieldIsAtTime              ! method
   public NUOPC_FieldWrite                 ! method
-  public NUOPC_StateAdvertiseField        ! method
-  public NUOPC_StateAdvertiseFields       ! method
-  public NUOPC_StateAttributeInit         ! method
-  public NUOPC_StateAttributeGet          ! method
-  public NUOPC_StateAttributeSet          ! method
-  public NUOPC_StateBuildStdList          ! method
-  public NUOPC_StateIsAtTime              ! method
-  public NUOPC_StateIsFieldConnected      ! method
-  public NUOPC_StateIsUpdated             ! method
-  public NUOPC_StateNamespaceAdd          ! method
   public NUOPC_StateRealizeField          ! method
   public NUOPC_StateReconcile             ! method
   public NUOPC_StateSetTimestamp          ! method
@@ -97,18 +81,20 @@ module NUOPC
   public NUOPC_StateWrite                 ! method
   public NUOPC_TimePrint                  ! method
   ! -- v7 DONE
+  public NUOPC_AddNamespace               ! method
+  public NUOPC_AdjustClock                ! method
+  public NUOPC_Advertise                  ! method
+  public NUOPC_CheckSetClock              ! method
+  public NUOPC_GetAttribute               ! method
+  public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_InitAttributes             ! method, internal use only
+  public NUOPC_IsAtTime                   ! method
+  public NUOPC_IsConnected                ! method
+  public NUOPC_IsUpdated                  ! method
+  public NUOPC_SetAttribute               ! method
 
   ! -- PRELIM. NEED REVIEW utility methods following the new v7 scheme
-  public NUOPC_Add
-  public NUOPC_Advertise
-  public NUOPC_AttributeGet
-  public NUOPC_AttributeSet
-  public NUOPC_CheckSet
-  public NUOPC_Get
-  public NUOPC_IsAtTime
-  public NUOPC_IsConnected
   public NUOPC_IsCreated
-  public NUOPC_IsUpdated
   public NUOPC_Nop
   public NUOPC_Print
   public NUOPC_Realize

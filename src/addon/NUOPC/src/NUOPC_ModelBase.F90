@@ -494,7 +494,7 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_StateIsAtTime(importState, time, rc=rc)
+    allCurrent = NUOPC_IsAtTime(importState, time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

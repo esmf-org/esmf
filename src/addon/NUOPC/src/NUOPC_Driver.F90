@@ -535,11 +535,11 @@ module NUOPC_Driver
       endif
       ! add State level attributes, set the namespace according to comp label
       if (ESMF_StateIsCreated(is%wrap%modelIS(i))) then
-        call NUOPC_StateAttributeInit(is%wrap%modelIS(i), rc=rc)
+        call NUOPC_InitAttributes(is%wrap%modelIS(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        call NUOPC_StateAttributeSet(is%wrap%modelIS(i), &
+        call NUOPC_SetAttribute(is%wrap%modelIS(i), &
           name="Namespace", value=trim(namespace), &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -548,11 +548,11 @@ module NUOPC_Driver
       endif
       ! add State level attributes, set the namespace according to comp label
       if (ESMF_StateIsCreated(is%wrap%modelES(i))) then
-        call NUOPC_StateAttributeInit(is%wrap%modelES(i), rc=rc)
+        call NUOPC_InitAttributes(is%wrap%modelES(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        call NUOPC_StateAttributeSet(is%wrap%modelES(i), &
+        call NUOPC_SetAttribute(is%wrap%modelES(i), &
           name="Namespace", value=trim(namespace), &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

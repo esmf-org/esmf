@@ -140,7 +140,7 @@ module NUOPC_Auxiliary
 ! !IROUTINE: NUOPC_CreateSimpleSphGrid - Create a simple spherical grid
 ! !INTERFACE:
   function NUOPC_CreateSimpleSphGrid(x_min, y_min, x_max, y_max, &
-    i_count, j_count, half_polar_cell, area_adj, tag, scheme, rc)
+    i_count, j_count, half_polar_cell, area_adj, regional, rc)
 ! !RETURN VALUE:
     type(ESMF_Grid):: NUOPC_CreateSimpleSphGrid
 ! !ARGUMENTS:
@@ -148,8 +148,7 @@ module NUOPC_Auxiliary
     integer,            intent(in)            :: i_count, j_count
     logical,            intent(in),  optional :: half_polar_cell
     real(ESMF_KIND_R4), intent(in),  optional :: area_adj
-    character(len=*),   intent(in),  optional :: tag
-    integer,            intent(in) , optional :: scheme
+    logical,            intent(in) , optional :: regional
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Return a simple spherical Grid.
@@ -172,10 +171,9 @@ module NUOPC_Auxiliary
 !     {\em Need documentation.}
 !   \item[{[area\_adj]}]
 !     {\em Need documentation.}
-!   \item[{[tag]}]
-!     {\em Need documentation.}
-!   \item[{[scheme]}]
-!     {\em Need documentation.}
+!   \item[{[regional]}]
+!     When set to .true., consider this a regional grid. Otherwise apply 
+!     periodic boundary conditions (default).
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -190,7 +188,7 @@ module NUOPC_Auxiliary
     real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:)
     real(ESMF_KIND_R8), pointer               :: o_area(:,:)
     real(ESMF_KIND_R8)                        :: startx, starty
-    integer                                   :: l_scheme
+    logical                                   :: l_regional
     type(ESMF_Mesh)                           :: mesh
     type(ESMF_Field)                          :: field
     logical                                   :: l_half_polar_cell
@@ -213,10 +211,10 @@ module NUOPC_Auxiliary
     endif
     
     ! scheme
-    l_scheme = ESMF_REGRID_SCHEME_REGION3D
-    if(present(scheme)) l_scheme = scheme
+    l_regional = .false.
+    if(present(regional)) l_regional = regional
 
-    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+    if(.not.l_regional) then
       NUOPC_CreateSimpleSphGrid = ESMF_GridCreate1PeriDim(maxIndex=(/nx, ny/), &
         indexflag=ESMF_INDEX_GLOBAL, &
         gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
