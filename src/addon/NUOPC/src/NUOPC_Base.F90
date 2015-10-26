@@ -12,9 +12,6 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
 
-!TODO: make this macros available through ESMF as parameter or find other way
-#define ESMF_INIT_CREATED 82949521
-
 #define PROFILE_off
 
 module NUOPC_Base
