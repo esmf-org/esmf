@@ -1010,6 +1010,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
+    type(ESMF_LocStream)            :: locstream
     type(ESMF_DistGrid)             :: providerDG, acceptorDG
     type(ESMF_DistGrid)             :: providerDG_nodal, acceptorDG_nodal
     type(ESMF_VM)                   :: vm
@@ -1286,6 +1287,27 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           call ESMF_FieldEmptySet(acceptorField, mesh=mesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LocStreamGet(locstream, distgrid=providerDG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!TODO: the following LocStreamCreate does NOT exist yet. Transfer will not work
+!TODO: without that call being available.
+!          locstream = ESMF_LocStreamCreate(acceptorDG, vm=vm, rc=rc)
+!          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid or Mesh.", &
@@ -1342,6 +1364,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: providerGrid, acceptorGrid
     type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
+    type(ESMF_LocStream)            :: providerLocstream, acceptorLocstream
     logical                         :: meshNoConnections
     type(ESMF_DistGrid)             :: distgrid, eDistgrid, nDistgrid
     type(ESMF_VM)                   :: vm
@@ -1572,6 +1595,26 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
           call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LocStreamGet(acceptorLocstream, distgrid=distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!TODO: the following LocStreamCreate does NOT exist yet. Transfer will not work
+!TODO: without that call being available.
+!          acceptorLocstream = ESMF_LocStreamCreate(providerLocstream, &
+!            distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, locstream=acceptorLocstream, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
