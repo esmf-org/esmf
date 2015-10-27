@@ -16,7 +16,7 @@ TESTS_RUN     = \
 
 TESTS_RUN_UNI = \
 		RUN_ESMF_RegridWeightGenUTestUNI \
-		RUN_ESMF_FileRegridGenUTestUNI
+		RUN_ESMF_FileRegridUTestUNI
 
 include ${ESMF_DIR}/makefile
 
