@@ -6,6 +6,7 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/PreESMFMod/tests
 
+.NOTPARALLEL:
 TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_RegridWeightGenUTest \
 		$(ESMF_TESTDIR)/ESMF_FileRegridUTest
@@ -16,7 +17,7 @@ TESTS_RUN     = \
 
 TESTS_RUN_UNI = \
 		RUN_ESMF_RegridWeightGenUTestUNI \
-		RUN_ESMF_FileRegridGenUTestUNI
+		RUN_ESMF_FileRegridUTestUNI
 
 include ${ESMF_DIR}/makefile
 

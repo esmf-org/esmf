@@ -158,7 +158,7 @@ module NUOPC_Model
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
+    if (.not.clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
       call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -174,8 +174,8 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! query if all import Fields are connected
-    call NUOPC_StateBuildStdList(importState, stdAttrNameList=impStdNameList, &
-      stdItemNameList=impItemNameList, stdConnectedList=impConnectedList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, StandardNameList=impStdNameList, &
+      ConnectedList=impConnectedList, itemNameList=impItemNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allConnected = .true.  ! initialize
@@ -279,7 +279,7 @@ module NUOPC_Model
     
     ! check how many Fields in the exportState have the "Updated" Attribute set
     ! to "true" BEFORE calling the DataInitialize
-    allUpdated = NUOPC_StateIsUpdated(exportState, count=oldUpdatedCount, rc=rc)
+    allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -312,7 +312,7 @@ module NUOPC_Model
 
     ! check how many Fields in the exportState have the "Updated" Attribute set
     ! to "true" AFTER calling the DataInitialize
-    allUpdated = NUOPC_StateIsUpdated(exportState, count=newUpdatedCount, rc=rc)
+    allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       

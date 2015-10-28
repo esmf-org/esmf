@@ -734,7 +734,7 @@ module NUOPC_RunSequenceDef
         return
       endif
       ! check and set time keeping conditions between clocks
-      call NUOPC_ClockCheckSetClock(setClock=clock, &
+      call NUOPC_CheckSetClock(setClock=clock, &
         checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
