@@ -4248,7 +4248,7 @@ Grid::Grid(
 //-----------------------------------------------------------------------------
 
   // Init lat lon flag
-  coordSys=ESMC_COORDSYS_CART;
+  coordSys=ESMC_COORDSYS_SPH_DEG;
   
   // Start out with connections unforced
   forceConn=false;
@@ -4348,7 +4348,7 @@ Grid::Grid(
   proto = ESMC_NULL_POINTER; 
   
   // Init lat lon flag
-  coordSys=ESMC_COORDSYS_CART;
+  coordSys=ESMC_COORDSYS_SPH_DEG;
 
   forceConn=false;
 
@@ -6082,7 +6082,7 @@ int construct(
   // If coordSys wasn't passed in then use default, otherwise 
   // copy passed in value
   if (coordSysArg==NULL) {
-    coordSys=ESMC_COORDSYS_CART;
+    coordSys=ESMC_COORDSYS_SPH_DEG;
   } else {
     coordSys=*coordSysArg;
   }
@@ -6599,7 +6599,7 @@ int construct(
   // If coordSys wasn't passed in then use default, otherwise 
   // copy passed in value
   if (coordSysArg==NULL) {
-    coordSys=ESMC_COORDSYS_CART;
+    coordSys=ESMC_COORDSYS_SPH_DEG;
   } else {
     coordSys=*coordSysArg;
   }

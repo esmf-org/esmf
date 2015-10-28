@@ -4692,6 +4692,7 @@ write(*,*) "LOCALRC=",localrc
 
     ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -5370,6 +5371,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -5826,6 +5828,7 @@ write(*,*) "LOCALRC=",localrc
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -6120,6 +6123,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -6615,6 +6619,7 @@ write(*,*) "LOCALRC=",localrc
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -10725,6 +10730,7 @@ write(*,*) "LOCALRC=",localrc
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -13943,6 +13949,7 @@ write(*,*) "LOCALRC=",localrc
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -14237,6 +14244,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -15230,6 +15238,7 @@ return
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, nodeMask=nodeMask, &
          elementIds=elemIds, elementTypes=elemTypes, &
@@ -15565,6 +15574,7 @@ return
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, nodeMask=nodeMask, &
          elementIds=elemIds, elementTypes=elemTypes, &
@@ -16690,6 +16700,7 @@ return
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -17000,6 +17011,7 @@ return
 
   ! Create Mesh structure in 1 step
   dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -17605,6 +17617,7 @@ return
    
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -18059,6 +18072,7 @@ return
    ! Create Mesh structure in 1 step
    dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
         elementCoords=elemCoords, elementMask=elemMasks, &
@@ -21028,6 +21042,7 @@ return
 
    ! Create Mesh structure in 1 step
    dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
            nodeIds=nodeIds, nodeCoords=nodeCoords, &
            nodeOwners=nodeOwners, elementIds=elemIds,&
            elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -23161,6 +23176,7 @@ return
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
@@ -26088,6 +26104,7 @@ return
 
    ! Create Mesh structure in 1 step
    srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &

@@ -145,6 +145,7 @@
 
       ! Create Mesh structure in 1 step
       srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+           coordSys=ESMF_CoordSYS_CART, & 
                     nodeIds=nodeIds, nodeCoords=nodeCoords, &
                     nodeOwners=nodeOwners, elementIds=elemIds,&
                     elementTypes=elemTypes, elementConn=elemConn, rc=localrc)

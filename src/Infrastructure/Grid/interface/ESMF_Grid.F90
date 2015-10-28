@@ -4327,7 +4327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
-!     If not specified then defaults to ESMF\_COORDSYS\_CART.  
+!     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals.  
@@ -4616,7 +4616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
-!     If not specified then defaults to ESMF\_COORDSYS\_CART.  
+!     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals.  

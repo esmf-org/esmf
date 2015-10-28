@@ -476,7 +476,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (dimCount .ne. 2) correct=.false.
-  if (coordSys .ne. ESMF_COORDSYS_CART) correct=.false.
+  if (coordSys .ne. ESMF_COORDSYS_SPH_DEG) correct=.false.
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
   !TODO: what to do about undistLBound and undistUBound
   if ((coordDimCount(1) .ne. 2) .or. (coordDimCount(2) .ne. 2)) correct=.false.
