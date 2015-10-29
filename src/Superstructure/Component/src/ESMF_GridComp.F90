@@ -70,6 +70,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompGetEPPhaseCount
   public ESMF_GridCompInitialize
   public ESMF_GridCompInitializeAct
+  public ESMF_GridCompIsCreated
   public ESMF_GridCompIsPetLocal
   public ESMF_GridCompPrint
   public ESMF_GridCompReadRestart
@@ -1272,6 +1273,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompInitializeAct
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompIsCreated()"
+!BOP
+! !IROUTINE: ESMF_GridCompIsCreated - Check whether a GridComp object has been created
+
+! !INTERFACE:
+  function ESMF_GridCompIsCreated(scicomp, rc)
+! !RETURN VALUE:
+    logical :: ESMF_GridCompIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)            :: scicomp
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt scicomp} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ESMF_GridCompIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_GridCompGetInit(scicomp)==ESMF_INIT_CREATED) &
+      ESMF_GridCompIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 
