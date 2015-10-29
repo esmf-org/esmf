@@ -2025,59 +2025,31 @@ end function ESMF_MeshCreateFromFile
 	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        endif			      			       
 
-       if (maxEdges <= 4) then
-         if (haveElmtMask .and. localAddUserArea) then 
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       if (haveElmtMask .and. localAddUserArea) then 
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (haveElmtMask) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       elseif (haveElmtMask) then
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (localAddUserArea) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       elseif (localAddUserArea) then
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         else
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
+       else
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
                                  centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         endif
-         if (associated(faceCoords)) then
-          hasFaceCoords = .true.
-         endif
-       else 
-         if (haveElmtMask .and. localAddUserArea) then 
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (haveElmtMask) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (localAddUserArea) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         else
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         endif
-         ! cannot add center coordinates if maxedges > 4
-         ! if (associated(faceCoords)) then
-         ! hasFaceCoords = .true.
-         ! endif
-      endif
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       endif
+       if (associated(faceCoords)) then
+            hasFaceCoords = .true.
+       endif
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-      
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
        haveElmtMask = .false.
        haveNodeMask = .false.
@@ -2098,12 +2070,6 @@ end function ESMF_MeshCreateFromFile
 
        ! Check elementConn to find out the max edges
        maxEdges = ubound(elementConn,1)
-       if (localConvertToDual .and. maxEdges > 4) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
-       endif
        if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
