@@ -2104,7 +2104,7 @@ end function ESMF_MeshCreateFromFile
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
-       if (maxEdges <= 4 .and. associated(faceCoords)) then
+       if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
        	  
