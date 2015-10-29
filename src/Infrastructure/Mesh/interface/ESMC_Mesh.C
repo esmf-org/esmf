@@ -52,7 +52,7 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
   mesh.ptr = NULL;
 
   // call into ESMCI method
-  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, ESMC_COORDSYS_CART, &localrc);
+  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, ESMC_COORDSYS_SPH_DEG, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 
