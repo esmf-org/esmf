@@ -87,10 +87,10 @@
 !  Misc methods
       public :: ESMF_Array2String
       public :: ESMF_String2Array
-      public :: ESMF_String2Int
+      public :: ESMF_UtilString2Int
       public :: ESMF_StringConcat
-      public :: ESMF_StringLowerCase
-      public :: ESMF_StringUpperCase
+      public :: ESMF_UtilStringLowerCase
+      public :: ESMF_UtilStringUpperCase
 
 !  Misc type-to-string methods
       public :: ESMF_StatusString
@@ -800,12 +800,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end function ESMF_String2Array
 
 !-----------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_String2Int - Convert a string to an integer
+!BOP
+! !IROUTINE: ESMF_UtilString2Int - Convert a string to an integer
 ! !INTERFACE:
-  function ESMF_String2Int(string, specialStringList, specialValueList, rc)
+  function ESMF_UtilString2Int(string, specialStringList, specialValueList, rc)
 ! !RETURN VALUE:
-    integer :: ESMF_String2Int
+    integer :: ESMF_UtilString2Int
 ! !ARGUMENTS:
     character(len=*), intent(in)            :: string
     character(len=*), intent(in),  optional :: specialStringList(:)
@@ -852,7 +852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ESMF_String2Int = 0 ! initialize
+    ESMF_UtilString2Int = 0 ! initialize
     
     ! checking consistency of inputs provided
     ssL = present(specialStringList)
@@ -882,7 +882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do i=1, size(specialStringList)
         if (trim(string)==trim(specialStringList(i))) then
           ! found a matching special string
-          ESMF_String2Int = specialValueList(i)
+          ESMF_UtilString2Int = specialValueList(i)
           return ! successful early return
         endif
       enddo
@@ -890,7 +890,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (verify(trim(adjustl(string)),"-+0123456789") == 0) then
       ! should convert to integer just fine
-      read (string, "(i12)", iostat=ioerr) ESMF_String2Int
+      read (string, "(i12)", iostat=ioerr) ESMF_UtilString2Int
       if (ioerr /= 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="The string '"//trim(string)//"' could not be converted to integer.", &
@@ -910,7 +910,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return ! bail out
     endif
     
-  end function ESMF_String2Int
+  end function ESMF_UtilString2Int
   !-----------------------------------------------------------------------------
 
 
@@ -944,7 +944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
       ESMF_StringConcat(:len (string1))    = string1
       ESMF_StringConcat( len (string1)+1:) = string2
@@ -953,16 +953,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StringLowerCase"
-!BOPI
-!  !IROUTINE:  ESMF_StringLowerCase - convert string to lowercase
+#define ESMF_METHOD "ESMF_UtilStringLowerCase"
+!BOP
+!  !IROUTINE:  ESMF_UtilStringLowerCase - convert string to lowercase
 !  
 ! !INTERFACE: 
-      subroutine ESMF_StringLowerCase(string, rc) 
+    function ESMF_UtilStringLowerCase(string, rc) 
 !
 ! !ARGUMENTS:
-      character(len=*), intent(inout) :: string
+      character(len=*), intent(in) :: string
       integer, intent(out), optional  :: rc  
+! !RETURN VALUE:
+      character(len (string)) :: ESMF_UtilStringLowerCase
 
 !
 ! !DESCRIPTION:
@@ -977,35 +979,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
-      integer :: shift, i
+      integer :: i
       character(len=1) :: c
+      integer, parameter :: shift = ichar('a') - ichar('A')
 
-      shift = ichar('a') - ichar('A')
       do i = 1, len(string)
         c = string(i:i)
-        if(c .ge. 'A' .and. c .le. 'Z') then
-          string(i:i) = char(ichar(c) + shift)
+        if(c >= 'A' .and. c <= 'Z') then
+          c = char(ichar(c) + shift)
         endif
+        ESMF_UtilStringLowerCase(i:i) = c
       enddo
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StringLowerCase
+      end function ESMF_UtilStringLowerCase
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StringUpperCase"
-!BOPI
-!  !IROUTINE:  ESMF_StringUpperCase - convert string to uppercase
+#define ESMF_METHOD "ESMF_UtilStringUpperCase"
+!BOP
+!  !IROUTINE:  ESMF_UtilStringUpperCase - convert string to uppercase
 !  
 ! !INTERFACE: 
-      subroutine ESMF_StringUpperCase(string, rc) 
+      function ESMF_UtilStringUpperCase(string, rc) 
 !
 ! !ARGUMENTS:
-      character(len=*), intent(inout) :: string
+      character(len=*), intent(in) :: string
       integer, intent(out), optional  :: rc  
+! !RETURN VALUE:
+      character(len (string)) :: ESMF_UtilStringUpperCase
 
 !
 ! !DESCRIPTION:
@@ -1020,22 +1025,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \end{description}
 !
 !
-!EOPI
+!EOP
 
-      integer :: shift, i
+      integer :: i
       character(len=1) :: c
+      integer, parameter :: shift = ichar('a') - ichar('A')
 
-      shift = ichar('a') - ichar('A')
       do i = 1, len(string)
         c = string(i:i)
         if(c .ge. 'a' .and. c .le. 'z') then
-          string(i:i) = char(ichar(c) - shift)
+          c = char(ichar(c) - shift)
         endif
+        ESMF_UtilStringUpperCase(i:i) = c
       enddo
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StringUpperCase
+      end function ESMF_UtilStringUpperCase
 
 !------------------------------------------------------------------------- 
 !------------------------------------------------------------------------- 

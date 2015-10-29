@@ -2624,8 +2624,7 @@ print *, "found match:"// &
       nullify(dstMaskValues)    ! reset
 
       ! use a temporary string and convert the cplList(i) to lower characters
-      tempString = trim(cplList(i))
-      call ESMF_StringLowerCase(tempString, rc=rc)
+      tempString = ESMF_UtilStringLowerCase(cplList(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       

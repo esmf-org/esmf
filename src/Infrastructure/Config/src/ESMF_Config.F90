@@ -2002,7 +2002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if ( localrc == ESMF_SUCCESS ) then
 
         ! Convert string to lower case
-         call ESMF_StringLowerCase(string, localrc)
+         string = ESMF_UtilStringLowerCase(string)
 
          ! Check if valid true/false keyword
          if (string == 't'      .or. string == 'true' .or. &
@@ -3405,8 +3405,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         end if
 #endif
 
-        Ustat = status
-        call ESMF_StringUpperCase (string=Ustat)
+        Ustat = ESMF_UtilStringUpperCase (string=status)
         select case(Ustat)
 
         case ('APPEND')

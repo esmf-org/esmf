@@ -216,7 +216,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
           ESMF_SRCLINE,&
           errmsg,&
           rc)) return
-        call ESMF_StringLowerCase(units(1:len))
+        units = ESMF_UtilStringLowerCase(units(1:len))
         if (units(len:len) .eq. achar(0)) len = len-1
 	units = units(1:7)
       endif
@@ -1050,7 +1050,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         rc)) return
       ! if units is not "degrees" or "radians" return errors
      if (units(len:len) .eq. achar(0)) len = len-1
-      call ESMF_StringLowerCase(units(1:len))
+      units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -1163,7 +1163,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           rc)) return
           ! if units is not "degrees" or "radians" return errors
           if (units(len:len) .eq. achar(0)) len = len-1
-          call ESMF_StringLowerCase(units(1:len))
+          units = ESMF_UtilStringLowerCase(units(1:len))
           if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                     msg="- units attribute is not degrees or radians", & 
@@ -1367,7 +1367,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           rc)) return
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
-        call ESMF_StringLowerCase(units(1:len))
+        units = ESMF_UtilStringLowerCase(units(1:len))
 	if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
@@ -1925,7 +1925,7 @@ subroutine ESMF_GetNodeFromUGridFile (filename, meshname, nodeCoords,  &
       if (units(len:len) .eq. achar(0)) len = len-1
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
-        call ESMF_StringLowerCase(units(1:len))
+        units = ESMF_UtilStringLowerCase(units(1:len))
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -2103,7 +2103,7 @@ subroutine ESMF_UGridGetCoords (filename, meshid, coords,  &
           rc)) return
       if (i==1 .or. i==2) then
         ! if units is not "degrees" or "radians" return errors
-        call ESMF_StringLowerCase(units(1:len))
+        units = ESMF_UtilStringLowerCase(units(1:len))
 	if (units(len:len) .eq. achar(0)) len = len-1
         if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
