@@ -1507,6 +1507,7 @@ program ESMF_LocStreamCreateUTest
   ! Create Mesh structure in 1 step
   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         coordSys=ESMF_COORDSYS_SPH_DEG, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
          rc=localrc)
@@ -1574,14 +1575,14 @@ program ESMF_LocStreamCreateUTest
 
 
   ! Add key X
-  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:X", farray=X,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lon", farray=X,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     goto 100
   endif
 
   ! Add key Y
-  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Y", farray=Y,  rc=localrc)
+  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lat", farray=Y,  rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     goto 100
@@ -1614,7 +1615,7 @@ program ESMF_LocStreamCreateUTest
   endif
 
   !!!!!!!!! Check results !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:X", &
+  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lon", &
          farray=tstX, &
          exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
@@ -1622,7 +1623,7 @@ program ESMF_LocStreamCreateUTest
     goto 100
   endif
 
-  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Y", &
+  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lat", &
          farray=tstY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1842,7 +1843,9 @@ contains
 
 
   ! Create LocStream
-  locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
+  locstream=ESMF_LocStreamCreate(localCount=pntCount, &
+                                 coordSys=ESMF_COORDSYS_CART, &
+                                 rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
   ! Allocate X array
@@ -2110,7 +2113,9 @@ contains
 
 
   ! Create LocStream
-  locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
+  locstream=ESMF_LocStreamCreate(localCount=pntCount, &
+                                 coordSys=ESMF_COORDSYS_CART, &
+                                 rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
   ! Allocate X array
@@ -2377,7 +2382,7 @@ contains
 
 
   ! Create LocStream
-  locstream=ESMF_LocStreamCreate(localCount=pntCount, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
+  locstream=ESMF_LocStreamCreate(localCount=pntCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
 

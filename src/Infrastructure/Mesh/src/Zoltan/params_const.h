@@ -39,9 +39,9 @@ extern "C" {
  */
 
 typedef struct Param_Vars {
-  char *name;			/* Parameter variable name (all CAPS) */
+  const char *name;		/* Parameter variable name (all CAPS) */
   void *ptr;			/* Pointer to parameter variable */
-  char *type;			/* type of parameter: */
+  const char *type;		/* type of parameter: */
 				/* INT, FLOAT, DOUBLE, LONG, STRING, or CHAR */
   int length;			/* length of vector; 0 if scalar */
 } PARAM_VARS;
@@ -78,8 +78,8 @@ typedef int ZOLTAN_SET_PARAM_VEC_FN(char *, int, char *);
 /* function declarations for parameter modification routines */
 
 extern int Zoltan_Assign_Param_Vals(PARAM_LIST *, PARAM_VARS *, int, int, int);
-extern int Zoltan_Bind_Param(PARAM_VARS *, char *, void *);
-extern int Zoltan_Bind_Param_Vec(PARAM_VARS *, char *, void *, int);
+extern int Zoltan_Bind_Param(PARAM_VARS *, const char *, void *);
+extern int Zoltan_Bind_Param_Vec(PARAM_VARS *, const char *, void *, int);
 extern void Zoltan_Print_Params(PARAM_LIST *ptr);
 extern int Zoltan_Check_Param(const char *, const char *, PARAM_VARS *,
     PARAM_UTYPE *, int *);

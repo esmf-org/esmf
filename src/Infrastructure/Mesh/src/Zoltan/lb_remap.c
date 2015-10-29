@@ -40,7 +40,7 @@ static int local_HEs_from_import_lists(ZZ *, int, int, int *, int *, int *,
   int *, int **);
 static int local_HEs_from_export_lists(ZZ *, int, int, int *, int *, int *,
   int *, int **);
-static float measure_stays(ZZ *, HGraph *, int, char *);
+static float measure_stays(ZZ *, HGraph *, int, const char *);
 
 /******************************************************************************/
 
@@ -699,7 +699,7 @@ static float measure_stays(
   ZZ *zz,
   HGraph *hg, 
   int max0,
-  char *when
+  const char *when
 )
 {
 /* Routine that measures and prints the amount of data that doesn't move

@@ -209,8 +209,7 @@ void FTN_X(c_esmc_stateread)(State *ptr,
 
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::read(*base, // always present
-                          fn.size(),        // always present internal argument.
-                          fn.c_str());      // always present
+                          fn);              // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }
@@ -231,8 +230,7 @@ void FTN_X(c_esmc_statewrite)(State *ptr,
 
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::write(*base, // always present
-                          fn.size(),         // always present internal argument.
-                          fn.c_str());       // always present
+                          fn);               // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }

@@ -18,7 +18,7 @@ module ESMF_MeshMod
 !==============================================================================
 !
 ! This file contains the F90 wrapper code for the C++ implementation of
-!  the Mesh class.
+ !  the Mesh class.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -38,7 +38,7 @@ module ESMF_MeshMod
 !
 !------------------------------------------------------------------------------
 
-! !USES:
+ ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -58,7 +58,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+       
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -77,7 +77,7 @@ module ESMF_MeshMod
     logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
     integer :: numOwnedNodes
     integer :: numOwnedElements
-    integer :: spatialDim
+     integer :: spatialDim
     integer :: parametricDim
 
     type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
@@ -95,7 +95,7 @@ module ESMF_MeshMod
     integer :: origElemStart
     integer :: origElemCount
 
-    ESMF_INIT_DECLARE
+     ESMF_INIT_DECLARE
   end type
 
   type ESMF_MeshElement
@@ -114,12 +114,17 @@ module ESMF_MeshMod
 !!        ESMF_MESHELEMTYPE_HEX = ESMF_MeshElement(2), &
 !!        ESMF_MESHELEMTYPE_TET = ESMF_MeshElement(3)
 !!!!
-
+ 
   integer, parameter :: &
         ESMF_MESHELEMTYPE_TRI    = 3,  &  ! Triangle
         ESMF_MESHELEMTYPE_QUAD   = 4,  &  ! Quadralateral
         ESMF_MESHELEMTYPE_TETRA  = 10, &  ! Tetrahedron
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
+
+
+! Needs to be kept in line with MESH_POLYBREAK_IND
+! in ESMCI_Mesh.h
+  integer, parameter :: ESMF_MESH_POLYBREAK=-1
 
   type ESMF_MeshLoc
 #ifndef ESMF_NO_SEQUENCE
@@ -134,7 +139,7 @@ module ESMF_MeshMod
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2), &
 	ESMF_MESHLOC_NONE = ESMF_MeshLoc(3)
 
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
 !------------------------------------------------------------------------------
@@ -144,8 +149,10 @@ module ESMF_MeshMod
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
+  public ESMF_MESH_POLYBREAK
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
+
 
 !------------------------------------------------------------------------------
 
@@ -888,7 +895,7 @@ contains
 ! \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
 !         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -906,7 +913,7 @@ contains
     if (present(coordSys)) then
        coordSysLocal=coordSys
     else 
-       coordSysLocal=ESMF_COORDSYS_CART
+       coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
 
     ! Create C++ Mesh
@@ -1084,7 +1091,7 @@ contains
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
 !         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1130,7 +1137,7 @@ contains
    if (present(coordSys)) then
       coordSysLocal=coordSys
    else 
-      coordSysLocal=ESMF_COORDSYS_CART
+      coordSysLocal=ESMF_COORDSYS_SPH_DEG
    endif
 
     ! Create C++ Mesh
@@ -1347,7 +1354,7 @@ num_elems, &
 !   \item[{[coordSys]}] 
 !         The coordinate system of the grid coordinate data. 
 !         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1366,7 +1373,7 @@ num_elems, &
     if (present(coordSys)) then
        coordSysLocal=coordSys
     else 
-       coordSysLocal=ESMF_COORDSYS_CART
+       coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
 
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
@@ -1993,14 +2000,6 @@ end function ESMF_MeshCreateFromFile
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Check maxEdges and convertToDual
-       if (localConvertToDual .and. maxEdges > 4) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
-               ESMF_CONTEXT, rcToReturn=rc)
-        return
-       endif
-
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
           convertToDeg = .true.
@@ -2018,59 +2017,31 @@ end function ESMF_MeshCreateFromFile
 	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        endif			      			       
 
-       if (maxEdges <= 4) then
-         if (haveElmtMask .and. localAddUserArea) then 
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       if (haveElmtMask .and. localAddUserArea) then 
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (haveElmtMask) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       elseif (haveElmtMask) then
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (localAddUserArea) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+       elseif (localAddUserArea) then
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
 	 			 centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         else
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
+       else
+            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
                                  centerCoords=faceCoords, &
 				 convertToDeg=convertToDeg, rc=localrc)
-         endif
-         if (associated(faceCoords)) then
-          hasFaceCoords = .true.
-         endif
-       else 
-         if (haveElmtMask .and. localAddUserArea) then 
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (haveElmtMask) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementMask=elementMask, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         elseif (localAddUserArea) then
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
-                                 startElmt, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         else
-              call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
-         endif
-         ! cannot add center coordinates if maxedges > 4
-         ! if (associated(faceCoords)) then
-         ! hasFaceCoords = .true.
-         ! endif
-      endif
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       endif
+       if (associated(faceCoords)) then
+            hasFaceCoords = .true.
+       endif
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-      
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
        haveElmtMask = .false.
        haveNodeMask = .false.
@@ -2091,13 +2062,7 @@ end function ESMF_MeshCreateFromFile
 
        ! Check elementConn to find out the max edges
        maxEdges = ubound(elementConn,1)
-       if (localConvertToDual .and. maxEdges > 4) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
-       endif
-       if (maxEdges <= 4 .and. associated(faceCoords)) then
+       if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
        	  
@@ -2664,7 +2629,7 @@ end function ESMF_MeshCreateFromScrip
     ESMF_MeshCreateFromPointer%isFullyCreated=.true.
 
     ! Set default coordsys
-    ESMF_MeshCreateFromPointer%coordSys=ESMF_COORDSYS_CART
+    ESMF_MeshCreateFromPointer%coordSys=ESMF_COORDSYS_SPH_DEG
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2745,7 +2710,7 @@ end function ESMF_MeshCreateFromScrip
     ESMF_MeshCreateFromIntPtr%isFullyCreated=.true.
 
     ! Set default coordsys
-    ESMF_MeshCreateFromIntPtr%coordSys=ESMF_COORDSYS_CART
+    ESMF_MeshCreateFromIntPtr%coordSys=ESMF_COORDSYS_SPH_DEG
 
     if(present(rc)) rc = ESMF_SUCCESS
 

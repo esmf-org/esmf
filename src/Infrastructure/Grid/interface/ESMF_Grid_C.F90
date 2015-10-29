@@ -311,18 +311,20 @@
         if (vnpresent == 0 .and. cnpresent == 0) then
     	   !print *,'v=0,c=0'
 	   grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, &
-           	                   isSphere=isSphere_loc, &
-                		   addCornerStagger=addCornerStagger_loc, &
-                                   addUserArea=addUserArea_loc, rc=rc)
+           	                  isSphere=isSphere_loc, &
+                		      addCornerStagger=addCornerStagger_loc, &
+                              addUserArea=addUserArea_loc, &
+                              indexflag=ESMF_INDEX_GLOBAL, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         elseif (vnpresent == 0 .and. cnpresent == 1) then
            !print *,'v=0,c=1'
            grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, &
                                   isSphere=isSphere_loc, &
-               			  addCornerStagger=addCornerStagger_loc, &
+               			          addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
-                                  coordNames=coordNames, rc=rc)
+                                  coordNames=coordNames, &
+                                  indexflag=ESMF_INDEX_GLOBAL, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
         elseif (vnpresent == 1 .and. cnpresent == 0) then
@@ -331,7 +333,8 @@
                                   isSphere=isSphere_loc, &
                                   addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
-                                  addMask=addMask_loc, varname=varname,rc=rc)
+                                  addMask=addMask_loc, varname=varname, &
+                                  indexflag=ESMF_INDEX_GLOBAL, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
         elseif (vnpresent == 1 .and. cnpresent == 1) then
@@ -341,7 +344,8 @@
                                   addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
                                   addMask=addMask_loc, varname=varname, &
-                                  coordNames=coordNames, rc=rc)
+                                  coordNames=coordNames, &
+                                  indexflag=ESMF_INDEX_GLOBAL, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -350,18 +354,20 @@
     	   !print *,'v=0,c=0'
 	   grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, &
           	                  decompflag=decompflag, &
-				  isSphere=isSphere_loc, &
-                		  addCornerStagger=addCornerStagger_loc, &
-                                  addUserArea=addUserArea_loc, rc=rc)
+				              isSphere=isSphere_loc, &
+                		      addCornerStagger=addCornerStagger_loc, &
+                              addUserArea=addUserArea_loc, &
+                              indexflag=ESMF_INDEX_GLOBAL, rc=rc)
         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         elseif (vnpresent == 0 .and. cnpresent == 1) then
            !print *,'v=0,c=1'
            grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, &
-          	                  decompflag=decompflag, &
+          	                      decompflag=decompflag, &
                                   isSphere=isSphere_loc, &
-               			  addCornerStagger=addCornerStagger_loc, &
+               			          addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
+                                  indexflag=ESMF_INDEX_GLOBAL, &
                                   coordNames=coordNames, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -372,7 +378,8 @@
                                   isSphere=isSphere_loc, &
                                   addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
-                                  addMask=addMask_loc, varname=varname,rc=rc)
+                                  indexflag=ESMF_INDEX_GLOBAL, &
+                                  addMask=addMask_loc, varname=varname, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
         elseif (vnpresent == 1 .and. cnpresent == 1) then
@@ -382,6 +389,7 @@
                                   isSphere=isSphere_loc, &
                                   addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
+                                  indexflag=ESMF_INDEX_GLOBAL, &
                                   addMask=addMask_loc, varname=varname, &
                                   coordNames=coordNames, rc=rc)
            if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &

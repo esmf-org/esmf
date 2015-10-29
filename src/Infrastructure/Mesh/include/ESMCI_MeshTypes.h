@@ -23,7 +23,6 @@ typedef unsigned long ULong;
 
 typedef Sacado::Fad::DFad<double> fad_type;
 
-
 // Some promotion traits
 template<typename T1, typename T2>
 struct richest_type {

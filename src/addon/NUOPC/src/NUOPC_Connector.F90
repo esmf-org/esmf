@@ -97,42 +97,47 @@ module NUOPC_Connector
     ! InitializePhaseMap.
 
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv05p1"/), &
+      userRoutine=Initialize05P1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1"/), &
       userRoutine=InitializeP1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2"/), &
+      phaseLabelList=(/"IPDv01p2", "IPDv02p2", "IPDv03p2", "IPDv04p2", "IPDv05p3"/), &
       userRoutine=InitializeP2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p3", "IPDv04p3"/), &
+      phaseLabelList=(/"IPDv03p3", "IPDv04p3", "IPDv05p4"/), &
       userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p4", "IPDv04p4"/), &
+      phaseLabelList=(/"IPDv03p4", "IPDv04p4", "IPDv05p5"/), &
       userRoutine=InitializeP4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a"/), &
+      phaseLabelList=(/"IPDv01p3a", "IPDv02p3a", "IPDv03p5a", "IPDv04p5a", "IPDv05p6a"/), &
       userRoutine=InitializeP5a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b"/), &
+      phaseLabelList=(/"IPDv01p3b", "IPDv02p3b", "IPDv03p5b", "IPDv04p5b", "IPDv05p6b"/), &
       userRoutine=InitializeP5b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1a"/), &
+      phaseLabelList=(/"IPDv04p1a", "IPDv05p2a"/), &
       userRoutine=InitializeP1a, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call NUOPC_CompSetEntryPoint(connector, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv04p1b"/), &
+      phaseLabelList=(/"IPDv04p1b", "IPDv05p2b"/), &
       userRoutine=InitializeP1b, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -180,14 +185,151 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! filter all other entries but those of type IPDv04
+    ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
-      acceptStringList=(/"IPDv04p"/), rc=rc)
+      acceptStringList=(/"IPDv05p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
+   !-----------------------------------------------------------------------------
+
+  subroutine Initialize05P1(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    character(ESMF_MAXSTR) :: name
+    character(ESMF_MAXSTR) :: importXferPolicy, exportXferPolicy
+
+    rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! get transfer policy for both states
+    call NUOPC_GetAttribute(importState, name="FieldTransferPolicy", &
+        value=importXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call NUOPC_GetAttribute(exportState, name="FieldTransferPolicy", &
+        value=exportXferPolicy, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+!    print *, "importState xferPolicy = ", importXferPolicy
+!    print *, "exportState xferPolicy = ", exportXferPolicy
+
+    ! States on both sides must accept transfer
+    if (trim(exportXferPolicy)=="transferAll" .and. &
+        trim(importXferPolicy)=="transferAll") then
+
+        call doTransfer(exportState, importState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        call doTransfer(importState, exportState, rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    end if
+
+    contains
+
+    subroutine doTransfer(fromState, toState, rc)
+
+      type(ESMF_State), intent(inout) :: fromState
+      type(ESMF_State), intent(inout) :: toState
+      integer, intent(out) :: rc
+
+      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: oldTransferGeom, newTransferGeom
+      integer                :: itemCount, i, stat
+      character (ESMF_MAXSTR), allocatable :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
+      type(ESMF_Field)       :: field
+
+      rc = ESMF_SUCCESS
+
+      call ESMF_StateGet(fromState, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      allocate(itemNameList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      allocate(itemTypeList(itemCount),stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      call ESMF_StateGet(fromState, itemNameList=itemNameList, &
+        itemTypeList=itemTypeList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+      ! WARNING: does not currently deal with nested states or field bundles
+      do i=lbound(itemNameList,1), ubound(itemNameList,1)
+        !print *, "conn export state item ", i, " = ", itemNameList(i), " type = ", itemTypeList(i)
+        if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
+
+          ! do not transfer if it already exists in the destination state
+          call ESMF_StateGet(toState, &
+            itemSearch=itemNameList(i), itemCount=itemCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (itemCount > 0) then
+            cycle
+          endif
+
+          ! reverse TransferOfferGeomObject attribute, e.g., if a component
+          ! providing a field wants to provide a grid, then the accepting
+          ! component should not try to provide its own grid
+          call ESMF_StateGet(fromState, &
+            itemNameList(i), field, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          call NUOPC_GetAttribute(field, name="TransferOfferGeomObject", &
+             value=oldTransferGeom, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! default
+          newTransferGeom = "cannot provide"
+          if (trim(oldTransferGeom)=="will provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="can provide") then
+            newTransferGeom = "cannot provide"
+          else if (trim(oldTransferGeom)=="cannot provide") then
+            newTransferGeom = "will provide"
+          end if
+
+          ! transfer to toState
+          call NUOPC_Advertise(toState, StandardName=itemNameList(i), &
+            TransferOfferGeomObject=newTransferGeom, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        end if
+     end do
+
+     deallocate(itemNameList)
+     deallocate(itemTypeList)
+
+    end subroutine
+
+  end subroutine
+
+
   !-----------------------------------------------------------------------------
   
   subroutine InitializeP1a(cplcomp, importState, exportState, clock, rc)
@@ -237,8 +379,8 @@ call ESMF_VMLogMemInfo("aftP1a Reconcile")
     nullify(exportFieldList)
     nullify(exportNamespaceList)
     
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -247,8 +389,8 @@ call printStringList("importStandardNameList", importStandardNameList)
 call printStringList("importNamespaceList", importNamespaceList)
 #endif
       
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -281,7 +423,7 @@ print *, "current bondLevel=", bondLevel
             
             ! -> get the current ConsumerConnection bondLevel highmark
             field = exportFieldList(j)
-            call NUOPC_FieldAttributeGet(field, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(field, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -289,7 +431,7 @@ print *, "current bondLevel=", bondLevel
             if (trim(connectionString)=="open") then
               ! first valid connection that was found
               write (connectionString, "(i10)") bondLevel
-              call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
+              call NUOPC_SetAttribute(field, name="ConsumerConnection", &
                 value=connectionString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -305,7 +447,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
 #endif
               if (bondLevel > bondLevelMax) then
                 write (connectionString, "(i10)") bondLevel
-                call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
+                call NUOPC_SetAttribute(field, name="ConsumerConnection", &
                   value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -385,8 +527,8 @@ call ESMF_VMLogMemInfo("aftP1b Reconcile")
     nullify(exportFieldList)
     nullify(exportNamespaceList)
     
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -395,8 +537,8 @@ call printStringList("importStandardNameList", importStandardNameList)
 call printStringList("importNamespaceList", importNamespaceList)
 #endif
       
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -436,7 +578,7 @@ print *, "current bondLevel=", bondLevel
             
             ! -> look at the current ConsumerConnection entry to see what to do
             field = exportFieldList(j)
-            call NUOPC_FieldAttributeGet(field, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(field, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -469,7 +611,7 @@ print *, "current bondLevel=", bondLevel
                 cplList(count) = importStandardNameList(i)
                 ! make the targeted entry to the ConsumerConnection attribute
                 write (connectionString, "('targeted:', i10)") bondLevel
-                call NUOPC_FieldAttributeSet(field, name="ConsumerConnection", &
+                call NUOPC_SetAttribute(field, name="ConsumerConnection", &
                   value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -634,12 +776,12 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -676,7 +818,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
             
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -710,53 +852,53 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         eField=exportFieldList(eMatch)
         
         ! set the connected Attribute on import Field
-        call NUOPC_FieldAttributeSet(iField, name="Connected", value="true", &
+        call NUOPC_SetAttribute(iField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
-        call NUOPC_FieldAttributeSet(eField, name="Connected", value="true", &
+        call NUOPC_SetAttribute(eField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
         ! coordinate the transfer of geomobjects between components
-        call NUOPC_FieldAttributeGet(iField, name="TransferOfferGeomObject", &
+        call NUOPC_GetAttribute(iField, name="TransferOfferGeomObject", &
           value=iTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="TransferOfferGeomObject", &
+        call NUOPC_GetAttribute(eField, name="TransferOfferGeomObject", &
           value=eTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (trim(iTransferOffer)=="will provide") then
           if (trim(eTransferOffer)=="will provide") then
             ! -> both sides must provide
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -764,31 +906,31 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         elseif (trim(iTransferOffer)=="can provide") then
           if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -796,21 +938,21 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
         else  ! iTransferOffer=="cannot provide"
           if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must accept, export side must provide
-            call NUOPC_FieldAttributeSet(iField, &
+            call NUOPC_SetAttribute(iField, &
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            call NUOPC_FieldAttributeSet(eField, &
+            call NUOPC_SetAttribute(eField, &
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -868,6 +1010,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: grid
     type(ESMF_Mesh)                 :: mesh
+    type(ESMF_LocStream)            :: locstream
     type(ESMF_DistGrid)             :: providerDG, acceptorDG
     type(ESMF_DistGrid)             :: providerDG_nodal, acceptorDG_nodal
     type(ESMF_VM)                   :: vm
@@ -878,6 +1021,8 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
     character(ESMF_MAXSTR)          :: name, valueString
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     integer                         :: verbosity
+    integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
+    integer                         :: fieldDimCount, gridDimCount
 
     rc = ESMF_SUCCESS
 
@@ -891,7 +1036,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -944,12 +1089,12 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -986,7 +1131,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
             
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1020,11 +1165,11 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
         eField=exportFieldList(eMatch)
         
         ! check if TransferAction of one side is "accept"
-        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+        call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
           value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+        call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1071,6 +1216,53 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           call ESMF_FieldEmptySet(acceptorField, grid=grid, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! bring over ungridded dim bounds as attributes
+          ! for use on receiving sides
+          call ESMF_FieldGet(providerField, grid=grid, &
+            dimCount=fieldDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_GridGet(grid, dimCount=gridDimCount, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!          print *, "fieldDimCount = ", fieldDimCount
+!          print *, "gridDimCount = ", gridDimCount
+          if (fieldDimCount - gridDimCount > 0) then
+            allocate(ungriddedLBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            allocate(ungriddedUBound(fieldDimCount-gridDimCount),stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedUBound failed.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_FieldGet(providerField, ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedLBound", valueList=ungriddedLBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            call ESMF_AttributeSet(acceptorField, &
+              name="UngriddedUBound", valueList=ungriddedUBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            deallocate(ungriddedLBound)
+            deallocate(ungriddedUBound)
+          endif
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1093,6 +1285,27 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, mesh=mesh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LocStreamGet(locstream, distgrid=providerDG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!TODO: the following LocStreamCreate does NOT exist yet. Transfer will not work
+!TODO: without that call being available.
+!          locstream = ESMF_LocStreamCreate(acceptorDG, vm=vm, rc=rc)
+!          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
@@ -1151,6 +1364,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_Grid)                 :: providerGrid, acceptorGrid
     type(ESMF_Mesh)                 :: providerMesh, acceptorMesh
+    type(ESMF_LocStream)            :: providerLocstream, acceptorLocstream
     logical                         :: meshNoConnections
     type(ESMF_DistGrid)             :: distgrid, eDistgrid, nDistgrid
     type(ESMF_VM)                   :: vm
@@ -1174,7 +1388,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1227,12 +1441,12 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1269,7 +1483,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
             
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1303,11 +1517,11 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
         eField=exportFieldList(eMatch)
 
         ! check if TransferAction of one side is "accept"
-        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+        call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
           value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+        call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1383,6 +1597,26 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
           call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldGet(acceptorField, locstream=acceptorLocstream, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LocStreamGet(acceptorLocstream, distgrid=distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+!TODO: the following LocStreamCreate does NOT exist yet. Transfer will not work
+!TODO: without that call being available.
+!          acceptorLocstream = ESMF_LocStreamCreate(providerLocstream, &
+!            distgrid, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_FieldEmptySet(acceptorField, locstream=acceptorLocstream, &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid or Mesh.", &
@@ -1411,7 +1645,7 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -1446,7 +1680,7 @@ call ESMF_VMLogMemInfo("befP5 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("aftP5 Reconcile")
 #endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -1491,7 +1725,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1529,12 +1763,12 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     ! get the importState and exportState std lists
-    call NUOPC_StateBuildStdList(importState, importStandardNameList, &
-      stdFieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(importState, importStandardNameList, &
+      fieldList=importFieldList, namespaceList=importNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateBuildStdList(exportState, exportStandardNameList, &
-      stdFieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
+    call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
+      fieldList=exportFieldList, namespaceList=exportNamespaceList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1579,7 +1813,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
             
             ! -> look at the current ConsumerConnection entry to see what to do
             eField = exportFieldList(eMatch)
-            call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            call NUOPC_GetAttribute(eField, name="ConsumerConnection", &
               value=connectionString, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1591,7 +1825,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
                 ! this is the targeted connection
                 foundFlag = .true.
                 write (connectionString, "('connected:', i10)") bondLevel
-                call NUOPC_FieldAttributeSet(eField, &
+                call NUOPC_SetAttribute(eField, &
                   name="ConsumerConnection", value=connectionString, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1629,12 +1863,12 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
         ! set the connected Attribute on import Field
-        call NUOPC_FieldAttributeSet(iField, name="Connected", value="true", &
+        call NUOPC_SetAttribute(iField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
-        call NUOPC_FieldAttributeSet(eField, name="Connected", value="true", &
+        call NUOPC_SetAttribute(eField, name="Connected", value="true", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1802,7 +2036,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = NUOPC_Convert(valueString, &
+    profiling = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1813,7 +2047,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2033,7 +2267,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

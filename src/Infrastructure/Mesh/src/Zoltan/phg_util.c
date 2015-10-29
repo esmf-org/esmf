@@ -37,7 +37,7 @@ char *Zoltan_PHG_uMe(PHGComm *hgc)
     return msg;
 }
 
-void Zoltan_PHG_uprintf(PHGComm *hgc, char *f_str,...)
+void Zoltan_PHG_uprintf(PHGComm *hgc, const char *f_str,...)
 {
 va_list argp;
 
@@ -53,7 +53,7 @@ fflush(stdout);
 /*************************************************************************
 * -------------------------- Error Exit ----------------------------------
 **************************************************************************/
-void Zoltan_PHG_errexit(char *f_str,...)
+void Zoltan_PHG_errexit(const char *f_str,...)
 {
 va_list argp;
 

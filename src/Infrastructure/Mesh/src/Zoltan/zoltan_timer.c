@@ -255,7 +255,7 @@ int Zoltan_Timer_Start(
   int ts_idx,            /* Index of the timer to use */
   MPI_Comm comm,         /* Communicator to use for synchronization, 
                             if requested */
-  char *filename,        /* Filename of file calling the Start */
+  const char *filename,  /* Filename of file calling the Start */
   int lineno             /* Line number where Start was called */
 )
 {
@@ -297,7 +297,7 @@ int Zoltan_Timer_Stop(
   int ts_idx,            /* Index of the timer to use */
   MPI_Comm comm,         /* Communicator to use for synchronization, 
                             if requested */
-  char *filename,        /* Filename of file calling the Stop */
+  const char *filename,  /* Filename of file calling the Stop */
   int lineno             /* Line number where Stop was called */
 )
 {

@@ -87,6 +87,7 @@
 !  Misc methods
       public :: ESMF_Array2String
       public :: ESMF_String2Array
+      public :: ESMF_String2Int
       public :: ESMF_StringConcat
       public :: ESMF_StringLowerCase
       public :: ESMF_StringUpperCase
@@ -740,7 +741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  !IROUTINE:  ESMF_Array2String - convert character array to string
 !  
 ! !INTERFACE: 
-      function ESMF_Array2String (charArray) 
+    function ESMF_Array2String (charArray) 
 !
 ! !ARGUMENTS:
       character(len=1), intent(in) :: charArray(:)
@@ -764,7 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ESMF_Array2String = transfer (charArray, mold=ESMF_Array2String)
 
-      end function ESMF_Array2String
+    end function ESMF_Array2String
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
@@ -797,6 +798,121 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_String2Array = transfer (string, mold=ESMF_String2Array)
 
       end function ESMF_String2Array
+
+!-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_String2Int - Convert a string to an integer
+! !INTERFACE:
+  function ESMF_String2Int(string, specialStringList, specialValueList, rc)
+! !RETURN VALUE:
+    integer :: ESMF_String2Int
+! !ARGUMENTS:
+    character(len=*), intent(in)            :: string
+    character(len=*), intent(in),  optional :: specialStringList(:)
+    integer,          intent(in),  optional :: specialValueList(:)
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return the numerical integer value represented by the {\tt string}.
+!   If {\tt string} matches a string in the optional {\tt specialStringList}, the
+!   corresponding special value will be returned instead.
+!
+!   If special strings are to be taken into account, both 
+!   {\tt specialStringList} and {\tt specialValueList} arguments must be
+!   present and of same size.
+!   
+!   An error is returned, and return value set to 0, if {\tt string} is not
+!   found in {\tt specialStringList}, and does not convert into an integer
+!   value.
+!
+!   Leading and trailing blanks in {\tt string} are ignored when directly
+!   converting into integers.
+!
+!   This procedure may fail when used in an expression in a {\tt write} statement
+!   with some older, pre-Fortran 2003, compiler environments that do not support
+!   re-entrant I/O calls.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!     The string to be converted
+!   \item[{[specialStringList]}]
+!     List of special strings.
+!   \item[{[specialValueList]}]
+!     List of values associated with special strings.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    logical                 :: ssL, svL
+    integer                 :: i
+    integer                 :: ioerr
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ESMF_String2Int = 0 ! initialize
+    
+    ! checking consistency of inputs provided
+    ssL = present(specialStringList)
+    svL = present(specialValueList)
+    
+    if (ssL.neqv.svL) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Both specialStringList and specialValueList must either be "// &
+        "present or absent.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+    if (ssL) then
+      ! special strings and values present
+      if (size(specialStringList) /= size(specialValueList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Both specialStringList and specialValueList must have "// &
+          "the same number of elements.", &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+      do i=1, size(specialStringList)
+        if (trim(string)==trim(specialStringList(i))) then
+          ! found a matching special string
+          ESMF_String2Int = specialValueList(i)
+          return ! successful early return
+        endif
+      enddo
+    endif
+    
+    if (verify(trim(adjustl(string)),"-+0123456789") == 0) then
+      ! should convert to integer just fine
+      read (string, "(i12)", iostat=ioerr) ESMF_String2Int
+      if (ioerr /= 0) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="The string '"//trim(string)//"' could not be converted to integer.", &
+            line=__LINE__, &
+            file=__FILE__, &
+            rcToReturn=rc)
+        return ! bail out
+      end if
+    else
+      ! the string contains characters besides numbers
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The string '"//trim(string)//"' contains characters besides "// &
+          "numbers, cannot convert to integer.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+  end function ESMF_String2Int
+  !-----------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

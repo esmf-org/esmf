@@ -205,7 +205,7 @@ static int matching_ipm(ZZ *zz, HGraph *hg, Matching match, int *limit)
     int   *adj = NULL;
     int   *order = NULL;
     float *ips = NULL; 
-    char  *yo = "matching_ipm";
+    const char  *yo = "matching_ipm";
 
     if (hg->nVtx && 
         (!(ips = (float*) ZOLTAN_MALLOC(hg->nVtx * sizeof(float))) 

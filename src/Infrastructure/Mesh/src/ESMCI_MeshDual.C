@@ -43,16 +43,17 @@ static const char *const version = "$Id: ESMCI_MeshDual.C,v 1.23 2012/01/06 20:1
 //-----------------------------------------------------------------------------
 
 
-
+ 
 namespace ESMCI {
 
   const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
 
   void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
-
+  
   void get_num_elems_around_node(MeshObj *node, int *_num_ids);
 
+  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh);
 
   struct MDSS {
     double angle;
@@ -65,7 +66,7 @@ namespace ESMCI {
 
     MDSS &operator= (const MDSS &rhs) {
       angle=rhs.angle;
-      id=rhs.id;
+       id=rhs.id;
     }
 
     bool operator< (const MDSS &rhs) const {
@@ -74,7 +75,7 @@ namespace ESMCI {
 
   };
 
-  void get_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
 
@@ -91,11 +92,6 @@ namespace ESMCI {
     Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.\n";
   }
 
-  // Don't currently support duals of 3D Meshes
-  if (src_mesh->is_split) {
-    Throw() <<" Creation of a dual mesh isn't supported when original Mesh contains cells with >4 sides.\n";
-  }
-
   // Need element coordinates
   if (!src_mesh->GetField("elem_coordinates")) {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
@@ -104,7 +100,7 @@ namespace ESMCI {
 
   // Add ghostcells to source mesh, because we need the surrounding 
   // cells
-  {
+   {
     int num_snd=0;
     MEField<> *snd[10],*rcv[10];
     
@@ -138,12 +134,15 @@ namespace ESMCI {
       num_snd++;
     }
 
-    // TODO: add elem mask fields and mask_val fields
-    
+    // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
     src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
+
+    // If src_mesh is split, add newly created ghost elements to split_to_orig map
+    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
   }
 
+ 
   // Get some useful info
   int sdim=src_mesh->spatial_dim();
   int pdim=src_mesh->parametric_dim();
@@ -164,13 +163,30 @@ namespace ESMCI {
 
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
-  int pos=0;
+   int pos=0;
   MeshDB::iterator ei = src_mesh->elem_begin_all(), ee = src_mesh->elem_end_all();
   for (; ei != ee; ++ei) {
     MeshObj &elem=*ei;
-    
-    // id to index map
-    id_to_index[elem.get_id()]=pos;
+
+    // Get element id
+    UInt elem_id=elem.get_id();
+
+    // Translate id if split
+    if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
+      std::map<UInt,UInt>::iterator soi =  src_mesh->split_to_orig_id.find(elem_id);
+      if (soi != src_mesh->split_to_orig_id.end()) {
+        elem_id=soi->second;
+      } else {
+        Throw() << "split elem id not found in map";
+      }
+    }
+
+    // Use insert because once a key is in the map, it doesn't change the entry.
+    // This means with a split elem, the orig elem id always points to the first
+    // split elem encountered. This make things a bit clearer and slighly more efficient
+    // than having it move around. Its possible that it may also work the other way, 
+    // but I haven't tested it. 
+    id_to_index.insert(std::make_pair(elem_id,pos));
     
     // Next pos
     pos++;
@@ -187,13 +203,12 @@ namespace ESMCI {
   }
 
 
-  // Sizes
-  int num_elems=0;
-  int num_elemConn=0;
-  int max_num_node_elems=0;
-
   // Iterate through src nodes counting sizes
-
+  // Note that the elems around the node are the maximum possible, it
+  // could be less when actually counted and uniqued. 
+  int max_num_elems=0;
+  int max_num_elemConn=0;
+  int max_num_node_elems=0;
   MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
   for (; ni != ne; ++ni) {
     MeshObj &node=*ni;
@@ -215,12 +230,12 @@ namespace ESMCI {
     if (num_node_elems > max_num_node_elems) max_num_node_elems = num_node_elems;
 
     // Count number of elements
-    num_elems++;
+    max_num_elems++;
 
     // Count number of connections
-    num_elemConn += num_node_elems;
+    max_num_elemConn += num_node_elems;
   }
-
+ 
 
   // Create temp arrays for getting ordered elem ids
   MDSS *tmp_mdss=NULL;
@@ -234,18 +249,18 @@ namespace ESMCI {
   int *elemType=NULL;
   UInt *elemId=NULL;
   UInt *elemOwner=NULL;
-  if (num_elems>0) {
-    elemType=new int[num_elems];
-    elemId=new UInt[num_elems];
-    elemOwner=new UInt[num_elems];
+  if (max_num_elems>0) {
+    elemType=new int[max_num_elems];
+    elemId=new UInt[max_num_elems];
+    elemOwner=new UInt[max_num_elems];
   }
   int *elemConn=NULL;
-  if (num_elemConn >0) {
-    elemConn=new int[num_elemConn];
+  if (max_num_elemConn >0) {
+    elemConn=new int[max_num_elemConn];
   }
 
   // Iterate through src nodes creating elements
-  int elem_pos=0;
+  int num_elems=0;
   int conn_pos=0;
   ni = src_mesh->node_begin();
   for (; ni != ne; ++ni) {
@@ -260,7 +275,7 @@ namespace ESMCI {
 
     // Get list of element ids
     int num_elems_around_node_ids=0;
-    get_elems_around_node(&node, src_mesh, tmp_mdss,
+    get_unique_elems_around_node(&node, src_mesh, tmp_mdss,
                           &num_elems_around_node_ids,
                           elems_around_node_ids);
     
@@ -268,18 +283,18 @@ namespace ESMCI {
     if (num_elems_around_node_ids < 3) continue;
     
     // Save elemType/number of connections 
-    elemType[elem_pos]=num_elems_around_node_ids;
+    elemType[num_elems]=num_elems_around_node_ids;
     
     // Save elemId
-    elemId[elem_pos]=node.get_id();
+    elemId[num_elems]=node.get_id();
 
     // Save owner
-    elemOwner[elem_pos]=node.get_owner();
+    elemOwner[num_elems]=node.get_owner();
 
-    // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[elem_pos],elemType[elem_pos]);
+    // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
     
     // Next elem
-    elem_pos++;
+    num_elems++;
 
     //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
 
@@ -319,20 +334,43 @@ namespace ESMCI {
   MeshObj **nodes=NULL;
   if (num_nodes>0) nodes=new MeshObj *[num_nodes];
   pos=0;
-  int data_index=0;
+   int data_index=0;
   ei = src_mesh->elem_begin_all();
   for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
 
-      //      double *coords=elem_coords->data(elem);
-      //printf("#%d E elem id=%d coords=%f %f owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),coords[0],coords[1],elem.get_owner(),GetAttr(elem).is_locally_owned(),
-      //     elem.get_data_index());
+      // Get element id
+      UInt elem_id=elem.get_id();
+
+      // Translate id if split
+      if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
+        std::map<UInt,UInt>::iterator soi =  src_mesh->split_to_orig_id.find(elem_id);
+        if (soi != src_mesh->split_to_orig_id.end()) {
+          elem_id=soi->second;
+        } else {
+          Throw() << "split elem id not found in map";
+        }
+      }
+
+      // Get owner
+      UInt owner=elem.get_owner();
+
+      // Translate owner if split
+      // (Interestingly we DON'T have to translate the owner for
+      // split elems (in a rare example of not having to do extra work :-))
+      // the reason is if elem is split, then it will have the same owner
+      // as the original elem/id that it was split from, so just getting owner from elem works
+      // even if it's split)
+
 
       // Only create if used
+      // (Note we are also using nodes_used to skip collapsed split elems, so unused here 
+      //  might also mean it was a split elem, that's not the original elem)
       if (nodes_used[pos]) {
+
         // Create node  
-        MeshObj *node = new MeshObj(MeshObj::NODE, elem.get_id(), data_index);
-        node->set_owner(elem.get_owner());
+        MeshObj *node = new MeshObj(MeshObj::NODE, elem_id, data_index);
+        node->set_owner(owner);
         dual_mesh->add_node(node, 0);
         data_index++;
 
@@ -481,7 +519,7 @@ namespace ESMCI {
     num_elems_wsplit=num_elems+num_extra_elem;
 
     // Allocate arrays to hold split lists
-    elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
+    elemConn_wsplit=new int[max_num_elemConn+3*num_extra_elem];
     elemType_wsplit=new int[num_elems_wsplit];
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
@@ -733,6 +771,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             Throw() <<" - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
           }
           
+
           // Check return code
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
@@ -813,6 +852,14 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
   }
 
+  // sort MDSS by id
+  bool less_by_ids(MDSS a, MDSS b) {
+    return (a.id < b.id);
+  }
+
+  bool equal_by_ids(MDSS a, MDSS b) {
+    return (a.id == b.id);
+  }
 
   // Get the element ids around a node
   // the ids should be in order around the node
@@ -822,11 +869,13 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   // around the node. The problem is this fails for some more common cases. E.g. where
   // there aren't elems completely surrounding the node. Eventually, maybe some comb. of
   // the methods could be used?
+  // Note that the list of ids returned her might be smaller than the number of elements around node
+  // (and the number returned by get_num_elems_around_node()) due to split elements merging.
   // tmp_mdss = temporary list of structures used to sort elems (needs to be allocated large enough to hold all the ids)
   // _num_ids = the number of ids
   // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
-  void get_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
-                                int *_num_ids, UInt *ids) {
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
+                                    int *_num_ids, UInt *ids) {
 
     // Get useful info
     int sdim=mesh->spatial_dim();
@@ -842,7 +891,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       Throw() <<" Creation of a dual mesh requires node coordinates. \n";
     }
 
-    // Center coordinates
+     // Center coordinates
     // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
     double center[3];
     double *nc=node_coords->data(*node);
@@ -875,8 +924,21 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
 
+      // Get id 
+      int elem_id=elem->get_id();
+
+      // Translate id if split
+      if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
+        std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(elem_id);
+        if (soi != mesh->split_to_orig_id.end()) {
+          elem_id=soi->second;
+        } else {
+          Throw() << "split elem id not found in map";
+        }
+      }
+ 
       // Check if max id if so switch max id and coordinates 
-      if (elem->get_id() > max_elem_id) {
+      if (elem_id > max_elem_id) {
         double *ec=elem_coords->data(*elem);
         double tmp_coords[3];
         tmp_coords[0]=ec[0];
@@ -887,9 +949,9 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         if ((tmp_coords[0]==center[0]) &&
             (tmp_coords[1]==center[1]) &&
             (tmp_coords[2]==center[2])) continue;
-
+   
         // Otherwise make this the new point
-        max_elem_id=elem->get_id();
+        max_elem_id=elem_id;
         max_elem_coords[0]=tmp_coords[0];
         max_elem_coords[1]=tmp_coords[1];
         max_elem_coords[2]=tmp_coords[2];
@@ -899,7 +961,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       ++el;
     }
 
-    // If this is a  cell with everything at the center, then just use the center
+     // If this is a  cell with everything at the center, then just use the center
     // this'll result in a degenerate cell which'll be handled later in the regridding with the flag. 
     if (max_elem_id==0) {
       max_elem_coords[0]=center[0];
@@ -926,12 +988,25 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
 
+      // Get id 
+      int elem_id=elem->get_id();
+
+      // Translate id if split
+      if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
+        std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(elem_id);
+        if (soi != mesh->split_to_orig_id.end()) {
+          elem_id=soi->second;
+        } else {
+          Throw() << "split elem id not found in map";
+        }
+      }
+
       // Get vector to current element 
       // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
       double vcurr[3];
       double *ec=elem_coords->data(*elem);
       vcurr[0]=ec[0];
-      vcurr[1]=ec[1];
+        vcurr[1]=ec[1];
       vcurr[2]= sdim > 2 ? ec[2]:0.0;
       MU_SUB_VEC3D(vcurr,vcurr,center);
 
@@ -946,8 +1021,8 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         Throw() <<" angle calc can't be used for vecs with spatial dimension not equal to 2 or 3";
       }
 
-      // Put this first into the list
-      tmp_mdss[num_ids].id=elem->get_id();
+      // Put this into the list
+      tmp_mdss[num_ids].id=elem_id;
       tmp_mdss[num_ids].angle=angle;
       num_ids++;
       
@@ -955,7 +1030,28 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       ++el;
     }
 
-    // Sort by angle
+
+
+    // Take out repeats due to split elements
+     //// Sort by id
+    std::sort(tmp_mdss, tmp_mdss+num_ids, less_by_ids);
+
+    //// Unique by id
+    int prev_id=tmp_mdss[0].id;
+    int new_num_ids=1;
+    for (int i=1; i<num_ids; i++) {
+ 
+      // if it has a different id, store it
+      if (tmp_mdss[i].id != prev_id) {
+        tmp_mdss[new_num_ids].id=tmp_mdss[i].id;
+        tmp_mdss[new_num_ids].angle=tmp_mdss[i].angle;
+        prev_id=tmp_mdss[i].id;
+        new_num_ids++;
+      }
+    }
+    num_ids=new_num_ids;
+
+    // Now Sort the uniqued list by angle
     std::sort(tmp_mdss, tmp_mdss+num_ids);
 
     // Output
@@ -965,87 +1061,155 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     }
   }
 
-#if 0
-  // MAYBE DO THE BELOW FIRST AND IF IT DOESN'T WORK THEN GO TO JUST THE ANGLE
 
-  // Get the element ids around a node
-  // the ids should be in order around the node
-  // _num_ids = the number of ids
-  // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
-  void get_elem_ids_around_node(MeshObj *node, int max_size_ids, int *_num_ids, UInt *ids) {
-    
-    // Get beginning element 
-    MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
-    if (el == node.Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
-      Throw() << "No element attached to node!";
-    }
-    MeshObj *beg_elem=el->obj;
+  // Add the elements in the ghost to the local split_orig_id map
+  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh) {
 
+    // Only do this if mesh is split
+    if (!mesh->is_split) return;
 
-    // Set current element
-    MeshObj *curr_elem=beg_elem;
-    int curr_elem_pos=0;
+    // Get number of split elements
+    int num_gids=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
  
-    // Loop nodes attached to element to find the next element
-    do {      
+      // Only do local 
+      if (!GetAttr(elem).is_locally_owned()) continue;
 
-      // Save element id to list
-      if (curr_elem_pos > max_size_ids) Throw() << "number of ids bigger than maximum array size";
-      ids[curr_elem_pos]=curr_elem->get_id();
-      curr_elem_pos++;
+      // Get element id
+      UInt elem_id=elem.get_id();
 
-      // Loop nodes around element
-      MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(curr_elem, MeshObj::NODE);
-      while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
-	MeshObj *curr_elem_node = nl->ob;
+      // If it's less than or equal to the maximum non split id then its not split
+      if (elem_id <=  mesh->max_non_split_id) continue;
 
-        // Skip input node
-        if (curr_elem_node == node) continue;
-
-        // Loop elements attached to curr_elem_node to find the next element
-        MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(curr_elem_node, MeshObj::ELEMENT);
-        while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
-          MeshObj *elem=el->obj;
+      // It's split, so count this one     
+      num_gids++;
+    }
+     
+    // Get list of split and orig element gids
+    UInt *gids_split=NULL;
+    UInt *gids_orig=NULL;
+    if (num_gids>0) {
+      
+      // Allocate space
+      gids_split= new UInt[num_gids];
+      gids_orig= new UInt[num_gids];
+      
+      // Loop through list putting into arrays
+      int pos=0;
+      ei = mesh->elem_begin();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
         
-          // Skip current elem
-          if (curr_elem == elem) continue;
-
-          // See if this elem contains the original node
-          bool on_orig_node=false;
-          MeshObjRelationList::const_iterator tmp_nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
-          while (tmp_nl != elem.Relations.end() && tmp_nl->obj->get_type() == MeshObj::NODE){
-            MeshObj *tmp_node = tmp_nl->ob;
-            
-            // See if this is still attached to original node
-            if (tmp_node == node) {
-              on_orig_node=true;
-              break;
-            }
-          }
-
-          // 
-          if (on_orig_node) {
-
-          }
-
-          // Next element
-          ++el;
+        // Only do local
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get element id
+        UInt elem_id=elem.get_id();
+        
+        // If it's less than or equal to the maximum non split id then its not split
+        if (elem_id <=  mesh->max_non_split_id) continue;
+        
+        // See if this is a split id
+        std::map<UInt,UInt>::iterator soi=mesh->split_to_orig_id.find(elem_id);
+        
+        // If this is a split set it to the original, otherwise just set it to the elem id
+        UInt orig_id;
+        if (soi != mesh->split_to_orig_id.end()) {
+          orig_id=soi->second;
+        } else {
+          Throw() << "split id not in split id to orig id map!";
         }
-
-
-	++nl;
+        
+        // Put into arrays
+        gids_orig[pos]=orig_id;
+        gids_split[pos]=elem_id;
+        
+        // Next
+        pos++;
       }
+    }
+    
+    // Put into a DDir
+  DDir<> id_map_dir;
+  id_map_dir.Create(num_gids,gids_split,gids_orig);
+ 
+  // Clean up 
+  if (num_gids>0) {
+    if (gids_split!= NULL) delete [] gids_split;
+    if (gids_orig != NULL) delete [] gids_orig;
+  }
+ 
+ 
+  // Get number of ghost split elements
+  int num_ghost_gids=0;
+  ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
+  for (; ei != ee; ++ei) {
+    MeshObj &elem = *ei;
+    
+    // Only do non-local
+    if (GetAttr(elem).is_locally_owned()) continue;
+    
+    // Get element id
+    UInt elem_id=elem.get_id();
+    
+    // If it's less than or equal to the maximum non split id then its not split
+    if (elem_id <=  mesh->max_non_split_id) continue;
+    
+    // It's split, so count this one     
+    num_ghost_gids++;
+  }
+  
+  // Allocate array to hold ghost gids
+  UInt *ghost_gids=NULL;
+  if (num_ghost_gids>0) {
+    ghost_gids=new UInt[num_ghost_gids];
+  }
+  
+  // Get ghost gids
+  int pos=0;
+  ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
+  for (; ei != ee; ++ei) {
+    MeshObj &elem = *ei;
+    
+    // Only do non-local
+    if (GetAttr(elem).is_locally_owned()) continue;
+    
+    // Get element id
+    UInt elem_id=elem.get_id();
+    
+    // If it's less than or equal to the maximum non split id then its not split
+    if (elem_id <=  mesh->max_non_split_id) continue;
 
-      // STOPPED HERE
+    //    printf("%d# p=%d ghost gid=%d\n",Par::Rank(),pos,elem_id);
 
+    // Put in list
+    ghost_gids[pos]=elem_id;
 
+    // It's split, so count this one     
+    pos++;
+  }
+ 
+  // Do a look up of the input ids
+  std::vector<DDir<>::dentry> lookups;
+  id_map_dir.RemoteGID(num_ghost_gids, ghost_gids, lookups);
+  
+  // Don't need anymore so clean up 
+  if (num_ghost_gids>0) {
+    if (ghost_gids != NULL) delete [] ghost_gids;
+  }
 
-
-    } while (curr_elem != beg_elem); 
-
-  // Output
-  *_num_ids=num_ids;
+  // Loop through lookups and add to map
+  for (int i=0; i<lookups.size(); i++) {
+    
+    // If split put into map
+    if (lookups[i].gid != lookups[i].origin_lid) {
+      mesh->split_to_orig_id[lookups[i].gid]=lookups[i].origin_lid;
+    }
+  }
   
   }
-#endif
+
+
   } // namespace
