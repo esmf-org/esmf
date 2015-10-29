@@ -2000,14 +2000,6 @@ end function ESMF_MeshCreateFromFile
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Check maxEdges and convertToDual
-       if (localConvertToDual .and. maxEdges > 4) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-               msg="- Cannot create dual with meshes containing cells with more than 4 sides", &
-               ESMF_CONTEXT, rcToReturn=rc)
-        return
-       endif
-
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
           convertToDeg = .true.
