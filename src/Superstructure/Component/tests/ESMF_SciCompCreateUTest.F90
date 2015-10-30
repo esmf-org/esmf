@@ -35,6 +35,7 @@
     character(ESMF_MAXSTR) :: cname
     type(ESMF_SciComp) :: comp1, scicompAlias
     logical:: scicompBool
+    logical:: isCreated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -58,12 +59,40 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_SciCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_SciCompIsCreated(comp1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
     comp1 = ESMF_SciCompCreate(name=cname, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Science Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for created object"
+    write(failMsg, *) "Did not return .true."
+    isCreated = ESMF_SciCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for created object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_SciCompIsCreated(comp1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -87,6 +116,20 @@
     write(name, *) "SciCompDestroy Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_SciCompDestroy(comp1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_SciCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing SciComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_SciCompIsCreated(comp1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
     !------------------------------------------------------------------------
