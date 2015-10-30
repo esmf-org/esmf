@@ -308,9 +308,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldBundleUpdateTime() Test"
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldBundleUpdateTime(fieldBundleA, fieldBundleB, rc=rc)
+  call NUOPC_UpdateTimestamp(fieldBundleA, fieldBundleB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -430,9 +430,9 @@ program ESMF_NUOPC_UTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldWrite() Test"
+  write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldWrite(field, file="field_test.nc", &
+  call NUOPC_Write(field, file="field_test.nc", &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
@@ -576,33 +576,33 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateRealizeField() Test"
+  write(name, *) "NUOPC_Realize() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateRealizeField(stateA, field, rc=rc)
+  call NUOPC_Realize(stateA, field, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateSetTimestamp() Test"
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateSetTimestamp(stateA, clockA, rc=rc)
+  call NUOPC_UpdateTimestamp(stateA, clockA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateUpdateTimestamp() Test"
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateUpdateTimestamp(stateA, rootPet=0, rc=rc)
+  call NUOPC_UpdateTimestamp(stateA, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateWrite() Test"
+  write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateWrite(stateA, fieldNameList=(/"sea_surface_temperature"/), &
+  call NUOPC_Write(stateA, fieldNameList=(/"sea_surface_temperature"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------

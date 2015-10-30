@@ -745,7 +745,7 @@ module NUOPC_Auxiliary
 !   \begin{description}
 !   \item[time]
 !     The {\tt ESMF\_Time} object to be printed
-!   \item[{[string]}]
+!   \item[{[preString]}]
 !     Optionally prepended string. Default to empty string.
 !   \item[{[unit]}]
 !     Internal unit, i.e. a string. Default to printing to stdout.
@@ -827,7 +827,7 @@ module NUOPC_Auxiliary
     if (present(rc)) rc = ESMF_SUCCESS
     
     if (present(selection)) then
-      selectionOpt=trim(selectionOpt)
+      selectionOpt=trim(selection)
     else
       selectionOpt="currTime"
     endif
@@ -995,13 +995,35 @@ module NUOPC_Auxiliary
 !   \item[file]
 !     The name of the file to write to.
 !   \item[{[overwrite]}]
-!     {\em Need documentation.}
+!      A logical flag, the default is .false., i.e., existing Field data may
+!      {\em not} be overwritten. If .true., the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
 !   \item[{[status]}]
-!     {\em Need documentation.}
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
+!      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
 !   \item[{[timeslice]}]
-!     {\em Need documentation.}
+!     Time slice counter. Must be positive. The behavior of this
+!     option may depend on the setting of the {\tt overwrite} flag:
+!     \begin{description}
+!     \item[{\tt overwrite = .false.}:]\ If the timeslice value is
+!     less than the maximum time already in the file, the write will fail.
+!     \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!     \end{description}
+!     By default, i.e. by omitting the {\tt timeslice} argument, no
+!     provisions for time slicing are made in the output file,
+!     however, if the file already contains a time axis for the variable,
+!     a timeslice one greater than the maximum will be written.
 !   \item[{[iofmt]}]
-!     {\em Need documentation.}
+!    The IO format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and 
+!    {\tt ESMF\_IOFMT\_NETCDF}. If not present, file names with a {\tt .bin} 
+!    extension will use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc}
+!    extension will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
+!    {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -1078,11 +1100,29 @@ module NUOPC_Auxiliary
 !   \item[{[filePrefix]}]
 !     File name prefix, common to all the files written.
 !   \item[{[overwrite]}]
-!     {\em Need documentation.}
+!      A logical flag, the default is .false., i.e., existing Field data may
+!      {\em not} be overwritten. If .true., the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
 !   \item[{[status]}]
-!     {\em Need documentation.}
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
+!      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
 !   \item[{[timeslice]}]
-!     {\em Need documentation.}
+!     Time slice counter. Must be positive. The behavior of this
+!     option may depend on the setting of the {\tt overwrite} flag:
+!     \begin{description}
+!     \item[{\tt overwrite = .false.}:]\ If the timeslice value is
+!     less than the maximum time already in the file, the write will fail.
+!     \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!     \end{description}
+!     By default, i.e. by omitting the {\tt timeslice} argument, no
+!     provisions for time slicing are made in the output file,
+!     however, if the file already contains a time axis for the variable,
+!     a timeslice one greater than the maximum will be written.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
