@@ -362,10 +362,10 @@ module NUOPC_Connector
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP1a Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -503,10 +503,10 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP1b Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -749,10 +749,10 @@ print *, "current bondLevel=", bondLevel
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP2 Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -1062,10 +1062,10 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP3 Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -1414,10 +1414,10 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP4 Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on
@@ -1671,10 +1671,10 @@ call ESMF_VMLogMemInfo("aftP4 Reconcile")
 #ifdef RECONCILE_MEMORY_DEBUG_on
 call ESMF_VMLogMemInfo("befP5 Reconcile")
 #endif
-    call NUOPC_StateReconcile(importState, rc=rc)
+    call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call NUOPC_StateReconcile(exportState, rc=rc)
+    call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #ifdef RECONCILE_MEMORY_DEBUG_on

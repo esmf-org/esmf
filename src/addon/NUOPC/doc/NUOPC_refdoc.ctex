@@ -267,14 +267,8 @@
 
 \subsection{Auxiliary Routines}
 Auxiliary routines are provided with the NUOPC Layer as a convenience to the
-user. They are not considered core functionality of the NUOPC Layer.
-\newline\newline
-
-The auxiliary routines often simplify tasks that are typical in ESMF and NUOPC
-user code, and otherwise would require several lines of ESMF calls.  In many 
-cases the functionality provided by the auxiliary routines will be provided by
-ESMF directly in the long term.
-
+user. Typically more work is needed on these methods before considering them
+NUOPC core functionality.
 #ifdef STANDALONE
 \input{NUOPC_Auxiliary_fapi}
 #elif defined(CONSTITUENT)

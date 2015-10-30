@@ -296,7 +296,7 @@ module NUOPC_ModelBase
       ! by default update the timestamp on Fields in exportState to the 
       ! currTime. This timestamp can then be overridded in Advance() or 
       ! in TimestampExport() after the timestepping loop.
-      call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
+      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       

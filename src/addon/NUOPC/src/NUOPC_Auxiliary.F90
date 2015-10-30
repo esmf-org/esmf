@@ -25,12 +25,31 @@ module NUOPC_Auxiliary
   public NUOPC_CreateSimpleXYGrid         ! method
   public NUOPC_FillField                  ! method
 
+  public NUOPC_ClockPrintCurrTime
+  public NUOPC_ClockPrintStartTime
+  public NUOPC_ClockPrintStopTime
+
+  public NUOPC_TimePrint
+  public NUOPC_Print
+  public NUOPC_Write
+
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 !
 !==============================================================================
 
+  interface NUOPC_Print  
+    module procedure NUOPC_TimePrint
+    module procedure NUOPC_ClockPrint
+  end interface
+
+  interface NUOPC_Write
+    module procedure NUOPC_WriteWeights
+    module procedure NUOPC_FieldWrite
+    module procedure NUOPC_StateWrite
+  end interface
+  
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
@@ -702,6 +721,521 @@ module NUOPC_Auxiliary
         rcToReturn=rc)
       return ! bail out
     endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Print - Formatted print ot Time information
+! !INTERFACE:
+  subroutine NUOPC_TimePrint(time, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Time), intent(in)            :: time
+    character(*),    intent(in),  optional :: string
+    character(*),    intent(out), optional :: unit
+    integer,         intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write a formatted time with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[time]
+!     The {\tt ESMF\_Time} object to be printed
+!   \item[{[string]}]
+!     Optionally prepended string. Default to empty string.
+!   \item[{[unit]}]
+!     Internal unit, i.e. a string. Default to printing to stdout.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: yy, mm, dd, h, m, s, ms
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  
+    if (present(unit)) then
+      if (present(string)) then
+        write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
+    else
+      if (present(string)) then
+        write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Print - Formatted print ot time information
+! !INTERFACE:
+  subroutine NUOPC_ClockPrint(clock, selection, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: selection
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the formatted time info of {\tt clock} to {\tt unit}. Prepend 
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[clock]
+!     The {\tt ESMF\_Clock} object to be printed
+!   \item[{[selection]}]
+!     Selection of information printed. Three options are implemented:
+!     "currTime" (default), "startTime", and "stopTime".
+!   \item[{[string]}]
+!     Optionally prepended string. Default to empty string.
+!   \item[{[unit]}]
+!     Internal unit, i.e. a string. Default to printing to stdout.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(len=80)       :: selectionOpt
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(selection)) then
+      selectionOpt=trim(selectionOpt)
+    else
+      selectionOpt="currTime"
+    endif
+    
+    if (trim(selectionOpt)=="currTime") then
+      call NUOPC_ClockPrintCurrTime(clock, string, unit, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else if (trim(selectionOpt)=="startTime") then
+      call NUOPC_ClockPrintStartTime(clock, string, unit, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else if (trim(selectionOpt)=="stopTime") then
+      call NUOPC_ClockPrintStopTime(clock, string, unit, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unknown selection requested.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return ! bail out
+    endif    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ClockPrintCurrTime - Formatted print ot current time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintCurrTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the formatted current time of {\tt clock} to {\tt unit}. Prepend
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: currTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(currTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ClockPrintStartTime - Formatted print ot start time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintStartTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the formatted start time of {\tt clock} to {\tt unit}. Prepend
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: startTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(startTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_ClockPrintStopTime - Formatted print ot stop time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintStopTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the formatted stop time of {\tt clock} to {\tt unit}. Prepend
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: stopTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(stopTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write Field data to file
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_FieldWrite(field, file, overwrite, status, timeslice, &
+    iofmt, relaxedflag, rc)
+! !ARGUMENTS:
+    type(ESMF_Field),           intent(in)            :: field 
+    character(*),               intent(in)            :: file 
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    logical,                    intent(in),  optional :: relaxedflag
+    integer,                    intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the data in {\tt field} to {\tt file} under the field's "StandardName" 
+!   attribute if supported by the {\tt iofmt}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object whose data is to be written.
+!   \item[file]
+!     The name of the file to write to.
+!   \item[{[overwrite]}]
+!     {\em Need documentation.}
+!   \item[{[status]}]
+!     {\em Need documentation.}
+!   \item[{[timeslice]}]
+!     {\em Need documentation.}
+!   \item[{[iofmt]}]
+!     {\em Need documentation.}
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: standardName
+    logical                 :: ioCapable
+    logical                 :: doItFlag
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ioCapable = (ESMF_IO_PIO_PRESENT .and. &
+      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
+    
+    doItFlag = .true. ! default
+    if (present(relaxedFlag)) then
+      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
+    endif
+    
+    if (doItFlag) then
+      
+      call ESMF_AttributeGet(field, name="StandardName", &
+        value=standardName, convention="NUOPC", purpose="Instance", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    
+      call ESMF_FieldWrite(field, file=file, variableName=standardName, &
+        overwrite=overwrite, status=status, timeslice=timeslice, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write the Fields within a State to NetCDF files
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_StateWrite(state, fieldNameList, filePrefix, overwrite, &
+    status, timeslice, relaxedflag, rc)
+! !ARGUMENTS:
+    type(ESMF_State),           intent(in)            :: state
+    character(len=*),           intent(in),  optional :: fieldNameList(:)
+    character(len=*),           intent(in),  optional :: filePrefix
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    logical,                    intent(in),  optional :: relaxedflag
+    integer,                    intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the data of the fields within a {\tt state} to NetCDF files. Each 
+!   field is written to an individual file using the "StandardName" attribute
+!   as NetCDF attribute.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object containing the fields.
+!   \item[{[fieldNameList]}]
+!     List of names of the fields to be written. By default write all the fields
+!     in {\tt state}.
+!   \item[{[filePrefix]}]
+!     File name prefix, common to all the files written.
+!   \item[{[overwrite]}]
+!     {\em Need documentation.}
+!   \item[{[status]}]
+!     {\em Need documentation.}
+!   \item[{[timeslice]}]
+!     {\em Need documentation.}
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: i, itemCount
+    type(ESMF_Field)                :: field
+    type(ESMF_StateItem_Flag)       :: itemType
+    character(len=80)               :: fileName
+    character(len=80), allocatable  :: fieldNameList_loc(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(fieldNameList)) then
+      allocate(fieldNameList_loc(size(fieldNameList)))
+      do i=1, size(fieldNameList)
+        fieldNameList_loc(i) = trim(fieldNameList(i))
+      enddo
+    else
+      call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      allocate(fieldNameList_loc(itemCount))
+      call ESMF_StateGet(state, itemNameList=fieldNameList_loc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+
+    do i=1, size(fieldNameList_loc)
+      call ESMF_StateGet(state, itemName=fieldNameList_loc(i), &
+        itemType=itemType, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (itemType == ESMF_STATEITEM_FIELD) then
+        ! field is available in the state
+        call ESMF_StateGet(state, itemName=fieldNameList_loc(i), field=field, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! -> output to file
+        if (present(filePrefix)) then
+          write (fileName,"(A)") filePrefix//trim(fieldNameList_loc(i))//".nc"
+        else
+          write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+        endif
+        call NUOPC_FieldWrite(field, file=trim(fileName), overwrite=overwrite, &
+          status=status, timeslice=timeslice, relaxedflag=relaxedflag, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed writing file: "// &
+          trim(fileName), &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      endif
+    enddo
+    
+    deallocate(fieldNameList_loc)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_WriteWeights(factorList, fileName, rc)
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), pointer               :: factorList(:)
+    character(*),       intent(in)            :: fileName
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the destributed {\tt factorList} to file. Each PET calls with its 
+!   local list of factors. The call then writes the distributed factors into
+!   a single file. The order of the factors in the file is first by PET, and 
+!   within each PET the PET-local order is preserved. Changing the number of 
+!   PETs for the same regrid operation will likely change the order of factors
+!   across PETs, and therefore files written will differ.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[factorList]
+!     The distributed factor list.
+!   \item[fileName]
+!     The name of the file to be written to.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
+    type(ESMF_VM)                   :: vm
+    type(ESMF_DistGrid)             :: dg
+    type(ESMF_Array)                :: array
+    integer                         :: localPet, petCount
+    integer                         :: j
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(weightsPerPet(petCount))
+    call ESMF_VMAllGather(vm, (/size(factorList)/), weightsPerPet, &
+      count=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(deBlockList(1,2,petCount))
+    do j=1, petCount
+      if (j==1) then
+        deBlockList(1,1,j) = 1
+        deBlockList(1,2,j) = weightsPerPet(1)
+      else
+        deBlockList(1,1,j) = deBlockList(1,2,j-1) + 1
+        deBlockList(1,2,j) = deBlockList(1,1,j) + weightsPerPet(j) - 1
+      endif
+    enddo
+    dg = ESMF_DistGridCreate(minIndex=(/1/), &
+      maxIndex=(/deBlockList(1,2,petCount)/), &
+      deBlockList=deBlockList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    array = ESMF_ArrayCreate(dg, factorList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayWrite(array, fileName, variableName="weights", &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_DistGridDestroy(dg, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(weightsPerPet, deBlockList)
     
   end subroutine
   !-----------------------------------------------------------------------------
