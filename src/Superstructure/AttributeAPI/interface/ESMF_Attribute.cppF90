@@ -2259,15 +2259,17 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
 !     subroutine ESMF_AttributeGetAPinstNamesAP(<object>, attpack, &
-!       attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, rc)
+!       attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, &
+!       attnestflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     type(ESMF_AttPack),  intent(inout)         :: attpack
-!     character (len = *), intent(out)           :: attPackInstanceNameList(:)
-!     integer,             intent(out)           :: attPackInstanceNameCount
+!     type(ESMF_AttPack),      intent(inout)         :: attpack
+!     character (len = *),     intent(out)           :: attPackInstanceNameList(:)
+!     integer,                 intent(out)           :: attPackInstanceNameCount
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     integer,             intent(out), optional :: rc
+!     type(ESMF_AttNest_Flag), intent(in),  optional :: attnestflag
+!     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get the Attribute package instance names of the ESMF\_AttPack.  
@@ -2292,6 +2294,9 @@ contains
 !           convention and purpose.
 !     \item [attPackInstanceNameCount]
 !           The number of Attribute package instance names.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2305,15 +2310,16 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
 !     subroutine ESMF_AttributeGetAPinstNames(<object>, convention, purpose, &
-!       attPackInstanceNameList, attPackInstanceNameCount, rc)
+!       attPackInstanceNameList, attPackInstanceNameCount, attnestflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in),           :: convention
-!     character (len = *), intent(in),           :: purpose
-!     character (len = *), intent(out)           :: attPackInstanceNameList(:)
-!     integer,             intent(out)           :: attPackInstanceNameCount
-!     integer,             intent(out), optional :: rc
+!     character (len = *),     intent(in),           :: convention
+!     character (len = *),     intent(in),           :: purpose
+!     character (len = *),     intent(out)           :: attPackInstanceNameList(:)
+!     integer,                 intent(out)           :: attPackInstanceNameCount
+!     type(ESMF_AttNest_Flag), intent(in),  optional :: attnestflag
+!     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Get the Attribute package instance names of the specified convention
@@ -2341,6 +2347,9 @@ contains
 !           convention and purpose.
 !     \item [attPackInstanceNameCount]
 !           The number of Attribute package instance names.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2354,15 +2363,16 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
 !     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer,
-!       attpack, isPresent, rc)
+!       attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *),   intent(in)              :: specList(:)
+!     character (len = *),     intent(in)              :: specList(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type(ESMF_AttPack),    intent(inout), optional :: attpack
-!     logical,               intent(out),   optional :: isPresent
-!     integer,               intent(out),   optional :: rc
+!     type(ESMF_AttPack),      intent(inout), optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     logical,                 intent(out),   optional :: isPresent
+!     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
@@ -2387,10 +2397,13 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object
 !     \item [specList]
-!           A character list of values which identify the Attribute package, such as
-!           convention, purpose, and instancename.
+!           A character list of values which identify the Attribute package, 
+!           such as convention, purpose, and instancename
 !     \item [{[attpack]}]
 !           A handle to the Attribute package
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute package is present or not
 !     \item [{[rc]}]
@@ -2406,17 +2419,18 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
 !     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer
-!       attPackInstanceName, attpack, isPresent, rc)
+!       attPackInstanceName, attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in)              :: convention
-!     character (len = *), intent(in)              :: purpose
+!     character (len = *),     intent(in)               :: convention
+!     character (len = *),     intent(in)               :: purpose
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len = *), intent(in),    optional :: attPackInstanceName
-!     type(ESMF_AttPack),  intent(inout), optional :: attpack
-!     logical,             intent(out),   optional :: isPresent
-!     integer,             intent(out),   optional :: rc
+!     character (len = *),     intent(in),     optional :: attPackInstanceName
+!     type(ESMF_AttPack),      intent(inout),  optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),     optional :: attnestflag
+!     logical,                 intent(out),    optional :: isPresent
+!     integer,                 intent(out),    optional :: rc
 !
 ! !DESCRIPTION:
 !     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
@@ -2451,6 +2465,9 @@ contains
 !           first instance.
 !     \item [{[attpack]}]
 !           A handle to the Attribute package
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute package is present or not
 !     \item [{[rc]}]
@@ -3534,7 +3551,7 @@ contains
       ! Private name; call using ESMF_AttributeGetAttPack() @\
       subroutine mclass##AttGetAttPack(mthis, & @\
         convention, purpose, keywordEnforcer, attPackInstanceName, & @\
-        attpack, isPresent, rc) @\
+        attpack, attnestflag, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: convention @\
@@ -3542,6 +3559,7 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3564,6 +3582,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           first instance.  @\
 !     \item [{[attpack]}] @\
 !           The Attribute package to return. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
@@ -3580,12 +3601,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=max(len(convention), len(purpose))), dimension(3) :: specList @\
       integer, dimension(size(specList)+1) :: lens @\
       character(len=(max(len(specList),len(object))*(size(specList)+1))) :: specString @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
       count = 3 @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
  @\
       ! guard against a situation which cannot be prevented with the use of optional arguments @\
       if (present(attpackInstanceName)) then @\
@@ -3604,7 +3632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         specList(3) = trim(attpackInstanceName) @\
         count = 4 @\
       else @\
-        specList(3) = " " @\
+        specList(3) = "" @\
       endif @\
  @\
       ! collapse the specList into a string to pass down to the C glue layer @\
@@ -3621,7 +3649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackGet(mthisfield, lattpack, & @\
                              count, specString, lens, & @\
-                             lisPresent, localrc) @\
+                             lattnestflag, lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -3654,12 +3682,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Private name; call using ESMF_AttributeGetAttPack() @\
       subroutine mclass##AttGetAttPackSL(mthis, & @\
         specList, keywordEnforcer, & @\
-        attpack, isPresent, rc) @\
+        attpack, attnestflag, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), dimension(:), intent(in) :: specList @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3676,6 +3705,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           convention, purpose, and instancename. @\
 !     \item [{[attpack]}] @\
 !           The Attribute package to return. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
@@ -3691,6 +3723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(specList)+1) :: lens @\
       character(len=(max(len(specList),len(object))*(size(specList)+1))) :: specString @\
       type(ESMF_AttPack) :: lattpack @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3699,6 +3732,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
  @\
       ! verify that the specList has some minimum requirements @\
       if (size(specList) < 2) then @\
@@ -3734,7 +3773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackGet(mthisfield, lattpack, & @\
                              size(lens), specString, lens, & @\
-                             lisPresent, localrc) @\
+                             lattnestflag, lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -5010,7 +5049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5340,7 +5379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5619,7 +5658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5949,7 +5988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6267,7 +6306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6566,7 +6605,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6846,7 +6885,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7128,7 +7167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7406,7 +7445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7688,7 +7727,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7965,7 +8004,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -8264,7 +8303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -8442,7 +8481,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call mclass##AttGetAttPack(mthis, & @\
                                   convention, purpose, & @\
                                   attPackInstanceName=attPackInstanceName, & @\
-                                  attpack=attpack, rc=localrc) @\
+                                  attpack=attpack, attnestflag=lattnestflag, & @\
+                                  rc=localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -8747,7 +8787,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -9009,7 +9049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresentIndex(mthisfield, attributeIndex, & @\
@@ -9070,7 +9110,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetAPinstNamesAP(mthis, attpack, & @\
-        attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, rc) @\
+        attPackInstanceNameList, attPackInstanceNameCount, & @\
+        keywordEnforcer, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis @\
@@ -9078,6 +9119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), dimension(:), intent(out) :: attPackInstanceNameList @\
       integer, intent(out) :: attPackInstanceNameCount @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -9096,6 +9138,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      convention and purpose. @\
 !     \item [attPackInstanceNameCount] @\
 !      The number of Attribute package instance names. @\
+!     \item [{[attnestflag]}] @\
+!      A flag to determine whether to descend the @\
+!      Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9106,12 +9151,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc, i, j, APinstNameSize @\
       integer, dimension(size(attPackInstanceNameList)) :: APinstNameLens @\
       character(len=(size(attPackInstanceNameList)*len(attPackInstanceNameList))) :: APinstNameString @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
  @\
       ! pack widths of NameList elements @\
       APinstNameSize = size(attPackInstanceNameList) @\
@@ -9121,7 +9173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackGetAPinstNames(mthisfield, attpack, & @\
         APinstNameString, APinstNameLens, APinstNameSize, & @\
-        attPackInstanceNameCount, localrc) @\
+        attPackInstanceNameCount, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -9147,7 +9199,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetAPinstNames(mthis, convention, purpose, & @\
-        attPackInstanceNameList, attPackInstanceNameCount, rc) @\
+        attPackInstanceNameList, attPackInstanceNameCount, & @\
+        attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis @\
@@ -9155,6 +9208,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in) :: purpose @\
       character (len = *), dimension(:), intent(out) :: attPackInstanceNameList @\
       integer, intent(out) :: attPackInstanceNameCount @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -9175,6 +9229,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      convention and purpose. @\
 !     \item [attPackInstanceNameCount] @\
 !      The number of Attribute package instance names. @\
+!     \item [{[attnestflag]}] @\
+!      A flag to determine whether to descend the @\
+!      Attribute hierarchy when searching for this Attribute package @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9186,12 +9243,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(attPackInstanceNameList)) :: APinstNameLens @\
       character(len=(size(attPackInstanceNameList)*len(attPackInstanceNameList))) :: APinstNameString @\
       type(ESMF_AttPack) :: attpack @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
  @\
       ! pack widths of NameList elements @\
       APinstNameSize = size(attPackInstanceNameList) @\
@@ -9201,12 +9265,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call mclass##AttGetAttPack(mthis, & @\
                               convention, purpose, & @\
-                              attpack=attpack, rc=localrc) @\
+                              attpack=attpack, attnestflag=lattnestflag, & @\
+                              rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
       call c_ESMC_AttPackGetAPinstNames(mthisfield, attpack, & @\
         APinstNameString, APinstNameLens, APinstNameSize, & @\
-        attPackInstanceNameCount, localrc) @\
+        attPackInstanceNameCount, lattnestflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -9603,13 +9668,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRemove() @\
       subroutine mclass##AttRemoveAP(mthis, keywordEnforcer, name, & @\
-        attpack, rc) @\
+        attpack, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: name @\
       type(ESMF_AttPack), intent(inout) :: attpack @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -9619,10 +9685,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description} @\
 !     \item [mthis] @\
 !           An ESMF object. @\
-!     \item [name] @\
+!     \item [{[name]}] @\
 !           The name of the Attribute to destroy. @\
 !     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9631,6 +9700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9640,8 +9710,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
+ @\
       if (present(name)) then @\
-        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpack, localrc) @\
+        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpack, & @\
+                                           lattnestflag, localrc) @\
       else @\
         call c_ESMC_AttPackRemove(mthisfield, attpack, localrc) @\
         ESMF_INIT_SET_DELETED(attpack) @\
@@ -9662,7 +9739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRemove() @\
       subroutine mclass##AttRemove(mthis, name, convention, purpose, & @\
-                                   attPackInstanceName, rc) @\
+                                   attPackInstanceName, attnestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -9670,6 +9747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -9679,7 +9757,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description} @\
 !     \item [mthis] @\
 !           An ESMF object. @\
-!     \item [name] @\
+!     \item [{[name]}] @\
 !           The name of the Attribute to destroy. @\
 !     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
@@ -9690,6 +9768,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance. @\
+!     \item [{[attnestflag]}] @\
+!           A flag to determine whether to descend the @\
+!           Attribute hierarchy when searching for this Attribute @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9699,6 +9780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc @\
       type(ESMF_Logical) :: attpack @\
+      type(ESMF_AttNest_Flag) :: lattnestflag @\
       type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
@@ -9708,6 +9790,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(attnestflag)) then @\
+        lattnestflag = attnestflag @\
+      else @\
+        lattnestflag = ESMF_ATTNEST_ON @\
+      endif @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -9722,21 +9810,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
         call mclass##AttGetAttPack(mthis, & @\
-                                convention, purpose, attpack=attpackobj, &@\
+                                convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackRemove(mthisfield, attpackobj, localrc) @\
+        call c_ESMC_AttPackRemove(mthisfield, attpackobj, lattnestflag, localrc) @\
         ESMF_INIT_SET_DELETED(attpackobj) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
         call mclass##AttGetAttPack(mthis, & @\
-                                convention, purpose, attpack=attpackobj, &@\
+                                convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
-        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpackobj, localrc) @\
+        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpackobj, & @\
+                                           lattnestflag, localrc) @\
       else if (present(name)) then @\
         call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
       endif @\
@@ -9952,9 +10041,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (attpack == ESMF_TRUE) then @\
         call mclass##AttGetAttPack(mthis, & @\
-                                convention, purpose, attpack=attpackobj, &@\
+                                convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -10211,7 +10300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -10433,7 +10522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -10690,7 +10779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -10911,7 +11000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -11176,7 +11265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -11525,7 +11614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -11795,7 +11884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
-                                rc=localrc) @\
+                                attnestflag=lattnestflag, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\

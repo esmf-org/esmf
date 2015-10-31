@@ -558,21 +558,19 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
-^if 0 @\
-      !mtag_disable @\
+      !mtag @\
       ! Remove an Attribute using a nested AttPack object on mobj Test @\
-      call ESMF_AttributeRemove(mname, name="ESMF_Character_list", & @\
+      call ESMF_AttributeRemove(mname, name="ESMF_Character", & @\
         attpack=attpack, attnestflag=ESMF_ATTNEST_ON, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Removing an Char list Attribute using a nested AttPack object on ", mobj, " Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
- !!!!!!!!!!!!!!!!!!!!!! THIS IS AN INSTANCE NAMES CALL !!!!!!!!!!!!!!!!!!!!! @\
-      !mtag_disable @\
+      !mtag @\
       isPresent = .false. @\
       ! Test for the presence of a nested AttPack2 on mobj @\
-      call ESMF_AttributeGet(mname, conv, purp, isPresent=isPresent, & @\
+      call ESMF_AttributeGetAttPack(mname, conv, purp, isPresent=isPresent, & @\
         attnestflag=ESMF_ATTNEST_ON, rc=rc)      @\
       write(failMsg, *) "Did not return isPresent=True" @\
       write(name, *) "Test for the presence of a nested AttPack2 on mobj" @\
@@ -580,7 +578,7 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
-      !mtag_disable @\
+      !mtag @\
       ! Get a character Attribute using a nested AttPack object on mobj Test @\
       call ESMF_AttributeGet(mname, name="ESMF_Character", attpack=attpack, & @\
         attnestflag=ESMF_ATTNEST_OFF, value=outChar, rc=rc) @\
@@ -590,8 +588,6 @@
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
-^endif @\
- @\
       !mtag @\
       isPresent = .false. @\
       ! Test for the presence of a nested AttPack on mobj @\
@@ -599,7 +595,7 @@
         attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc) @\
       write(failMsg, *) "Did not return isPresent=True" @\
       write(name, *) "Test for the presence of a nested AttPack on mobj" @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), & @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..false.), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
@@ -613,10 +609,6 @@
       call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
- @\
-     !getinfobyname, should have failed before the rebuild @\
-     !getinfobynum @\
- @\
  @\
     !------------------------------------------------------------------------- @\
     !  Attribute package counts @\
@@ -671,7 +663,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
                      " nested Attpack, count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.11), & @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.10), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\
@@ -729,7 +721,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Test for getting the count of Attributes in a ", & @\
                      "nested Attpack, count = ", count @\
-      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.22), & @\
+      call ESMF_Test((rc==ESMF_SUCCESS .and. count.eq.21), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !------------------------------------------------------------------------ @\
  @\

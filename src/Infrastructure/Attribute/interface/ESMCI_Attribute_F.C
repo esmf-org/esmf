@@ -75,7 +75,8 @@ extern "C" {
       int *count,                    // in - number of value(s)
       char *specList,                // in - char string
       int *lens,                     // in - lengths
-      ESMC_Logical *present,         // out/out - present flag 
+      ESMC_AttNest_Flag *anflag,     // in - attnest flag
+	  ESMC_Logical *present,         // out/out - present flag
       int *rc,                       // in - return code
       ESMCI_FortranStrLenArg slen) { // hidden/in - strlen count for specList
 // 
@@ -117,6 +118,14 @@ extern "C" {
       return;
   }
 
+  // check the attnestflag
+  if (!anflag) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad ESMC_AttNest_Flag", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
   // until Attribute class is changed, must have convention, purpose, object minimum
   if (*count < 3) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -151,7 +160,8 @@ extern "C" {
   }
 
   //TODO: make this more general, for now order is object, convention, purpose, instname
-  *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0], cvalue[3]);
+  *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0],
+		                              cvalue[3], *anflag);
   if (!(*attpack)) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
 
@@ -875,6 +885,14 @@ extern "C" {
     return;
   }
 
+  // get the Attribute package
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
   // Remove the attribute package from the object.
   status = (**base).root.AttPackRemove(*attpack);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
@@ -899,7 +917,8 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,              // in/out - base object
       char *name,                    // in - F90, non-null terminated string
-      ESMCI::Attribute ** attpack,   // in - attribute package
+      ESMCI::Attribute **attpack,    // in - attribute package
+      ESMC_AttNest_Flag *anflag,     // in - attnest flag
       int *rc,                       // in - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
@@ -920,6 +939,22 @@ extern "C" {
     return;
   }
 
+  // get the Attribute package
+  if (!(*attpack)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // check the attnestflag
+  if (!anflag) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad ESMC_AttNest_Flag", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
 
@@ -931,7 +966,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.AttPackRemoveAttribute(cname, *attpack);
+  status = (**base).root.AttPackRemoveAttribute(cname, *attpack, *anflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -1292,6 +1327,7 @@ extern "C" {
       int *attPackInstanceNameSize,      // in - number of elements in 
                                          //      attPackInstanceNameList
       int *attPackInstanceNameCount,     // out - number of attpack instance names
+      ESMC_AttNest_Flag *anflag,         // in - attnest flag
       int *rc,                           // in - return code
       ESMCI_FortranStrLenArg napinlen) { // hidden/in - strlen count for attPackInstanceNameList
 // 
@@ -1352,6 +1388,14 @@ extern "C" {
       return;
   }
   
+  // simple sanity check before doing any more work
+  if (!anflag) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad ESMC_AttNest_Flag", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // local buffer for returned attpack instance names and count
   vector<string> capinamelist;
   capinamelist.reserve(*attPackInstanceNameSize);
@@ -1361,7 +1405,8 @@ extern "C" {
   status = (**base).root.AttPackGet((*attpack)->getConvention(), 
                                     (*attpack)->getPurpose(), 
                                     (*attpack)->getObject(),
-                                    capinamelist, capinamecount);
+                                    capinamelist, capinamecount,
+									*anflag);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 

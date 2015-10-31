@@ -157,7 +157,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // Search for the attpack, make it if not found
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if(!attpack) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Cannot find the specified Attribute package\n", ESMC_CONTEXT, &localrc);
@@ -328,7 +329,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       // add Attributes to the grids Attribute package
       // and set the Attributes in this Attpack to have links to internal info
       string attPackInstanceName;
-      attpack = AttPackGet(convention, GRIDS_PURP, object, attPackInstanceName);
+      attpack = AttPackGet(convention, GRIDS_PURP, object, attPackInstanceName,
+    		               ESMC_ATTNEST_ON);
   
       string name, value;
       vector<string> vv;
@@ -1017,7 +1019,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   for(i=0; i<nestCount; i++) {
     string attPackInstanceName;
     nestpack[i] = AttPackGet(nestConvention[i], nestPurpose[i], object,
-                             attPackInstanceName);
+                             attPackInstanceName, ESMC_ATTNEST_ON);
     if(!nestpack[i]) {
       // TODO:  more detailed error message including conv,purp,object
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND,
@@ -1105,11 +1107,12 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //    {\tt Attribute} pointer to requested object or NULL on early exit.
 // 
 // !ARGUMENTS:
-      const string &convention,        // in - Attribute convention to retrieve
-      const string &purpose,           // in - Attribute purpose to retrieve
-      const string &object,            // in - Attribute object type to retrieve
-      const string &attPackInstanceName) const { // in - attPack name
-                                       // specifying which one of multiple packs
+      const string &convention,          // in - Attribute convention to retrieve
+      const string &purpose,             // in - Attribute purpose to retrieve
+      const string &object,              // in - Attribute object type to retrieve
+      const string &attPackInstanceName, // in - attPack name
+	  ESMC_AttNest_Flag anflag) const {
+
 // !DESCRIPTION:
 //    Get an attpack on an {\tt Attribute} given it's convention, 
 //    purpose, object type, and optional attPackInstanceName
@@ -1118,17 +1121,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   int i;
   Attribute *ap=NULL;
-  
-//printf("AttPackGet(): packList.size() = %d\n", packList.size()); fflush(stdout);
 
+  // look for the attpack on this Attribute, at this level, and return the
+  // first one if any matches there, or the desired attPackInstanceName one
   for (i=0; i<packList.size(); i++) {
     ap = packList.at(i);
-    // look for the attpack on this Attribute, at this level, and return the
-    // first one if any matches there, or the desired attPackInstanceName one
-//printf("packList.at(%d)->attrConvention = %s\n", i, ap->attrConvention.c_str());
-//printf("packList.at(%d)->attrPurpose = %s\n", i, ap->attrPurpose.c_str());
-//printf("packList.at(%d)->attrObject = %s\n", i, ap->attrObject.c_str());
-//printf("packList.at(%d)->attrName = %s\n", i, ap->attrName.c_str());
     if (convention.compare(ap->attrConvention) == 0 && 
         purpose.compare(ap->attrPurpose) == 0 &&
         object.compare(ap->attrObject) == 0 &&
@@ -1139,14 +1136,18 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     }
   }
 
-  // if not found at this level, recurse through the nested Attribute packages,
-  // one level at a time, right-to-left, to find right-most package
-//printf("AttPackGet(): going down a level, packList.size()=%d\n", packList.size());
-  for (i=packList.size(); i > 0; i--) {
-//printf("i=%d\n", i);
-    ap = packList.at(i-1)->AttPackGet(convention, purpose, object,
-                                    attPackInstanceName);
-    if (ap) return ap;
+  // if not found at this level, and anflag is ON,
+  // recurse through the nested Attribute packages, one level at a time,
+  // right-to-left, to find right-most package
+  //RLO: not sure why this is right to left (post order), but for some reason
+  //     the newest block of nesting related code does everything post instead
+  //     of pre-order.  this can conflict with old search code is some cases
+  if (anflag == ESMC_ATTNEST_ON) {
+    for (i=packList.size(); i > 0; i--) {
+      ap = packList.at(i-1)->AttPackGet(convention, purpose, object,
+                                        attPackInstanceName, anflag);
+      if (ap) return ap;
+    }
   }
   
   return ap;
@@ -1183,7 +1184,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // first check if given attpack is set on *this* esmf object's attribute tree
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack) {
     if (attpack->AttributeGet(name)->isSet()) {
       attpack->AttributeGet(name)->get(&vv);
@@ -1223,7 +1225,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       const string &purpose,           // in - Attribute purpose to retrieve
       const string &object,            // in - Attribute object type to retrieve
       vector<string> &attPackInstanceNameList, // out - Attribute package instance names
-      int &attPackInstanceNameCount) const { // out - # of attPack instance names
+      int &attPackInstanceNameCount,            // out - # of attPack instance names
+	  ESMC_AttNest_Flag anflag) const {        // in - attnestflag
 // !DESCRIPTION:
 //    Get the attpack instance names given its convention, 
 //    purpose, and object type.  Looks for all the instance names to be 
@@ -1249,11 +1252,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // if not found at this level, recurse through the nested Attribute packages,
   // one level at a time, right-to-left, to find right-most package
-  for (i=packList.size(); i > 0; i--) {
-    packList.at(i-1)->AttPackGet(convention, purpose, object,
-                               attPackInstanceNameList, 
-                               attPackInstanceNameCount);
-    if (attPackInstanceNameCount > 0) return ESMF_SUCCESS;
+  if (anflag == ESMC_ATTNEST_ON) {
+    for (i=packList.size(); i > 0; i--) {
+      packList.at(i-1)->AttPackGet(convention, purpose, object,
+                                   attPackInstanceNameList,
+                                   attPackInstanceNameCount, anflag);
+      if (attPackInstanceNameCount > 0) return ESMF_SUCCESS;
+    }
   }
 
   // none found
@@ -1554,7 +1559,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   string attPackInstanceName;
 
   // first check if given attpack is set on *this* esmf object's attribute tree
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack != NULL) {
     if (attpack->AttPackIsSet(inNestedAttPacks)) return true;
   }
@@ -1700,8 +1706,9 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name
-      ESMCI::Attribute *attpack) {   // in - attPack name
+      const string &name,         // in - name
+      ESMCI::Attribute *attpack,  // in - attPack name
+	  ESMC_AttNest_Flag anflag) { // in - attnestflag
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} from an {\tt Attribute} package
@@ -1725,7 +1732,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     return localrc;
   }
   
-  attr = attpack->AttPackGetAttribute(name, ESMC_ATTNEST_ON);
+  attr = attpack->AttPackGetAttribute(name, anflag);
   if(!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute in this Attribute Package", ESMC_CONTEXT, &localrc);
@@ -2112,7 +2119,7 @@ if (attrRoot == ESMF_TRUE) {
     attpack = source.packList.at(i);
     string empty("");
     attr = AttPackGet(attpack->attrConvention, attpack->attrPurpose,
-                      attpack->attrObject, empty);
+                      attpack->attrObject, empty, ESMC_ATTNEST_ON);
     if (!attr) {
       attr = new Attribute(ESMF_FALSE);
 
@@ -2196,7 +2203,7 @@ if (attrRoot == ESMF_TRUE) {
     attpack = source.packList.at(i);
     string empty("");
     attr = AttPackGet(attpack->attrConvention, attpack->attrPurpose, 
-                      attpack->attrObject, empty);
+                      attpack->attrObject, empty, ESMC_ATTNEST_ON);
     if (!attr) {
       attr = new Attribute(ESMF_FALSE);
       newattr = true;
@@ -2321,7 +2328,8 @@ if (attrRoot == ESMF_TRUE) {
   localrc = ESMC_RC_NOT_IMPL;
  
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack) {
     numattrs = 0;
     objcount++;
@@ -2415,7 +2423,8 @@ if (attrRoot == ESMF_TRUE) {
   localrc = ESMC_RC_NOT_IMPL;
   
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack) {
     index = 0;
     localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
@@ -2895,8 +2904,8 @@ if (attrRoot == ESMF_TRUE) {
 //    number of {\tt Attributes} in this attrList
 //
 // !ARGUMENTS:
-      ESMC_AttGetCountFlag gcflag,  // in - attgetcount flag
-      ESMC_AttNest_Flag anflag,      // in - attgetcount flag
+      ESMC_AttGetCountFlag gcflag,   // in - attgetcount flag
+      ESMC_AttNest_Flag anflag,      // in - attnestflag
 	  int *count                     // out - the count to return
 	  ) const {
 //
