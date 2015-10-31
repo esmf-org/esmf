@@ -258,6 +258,7 @@ program ESMF_MeshEx
 
   ! Create Mesh structure in 1 step
   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
@@ -310,7 +311,10 @@ program ESMF_MeshEx
 !BOC
 
   ! Create the mesh structure setting the dimensions
-  mesh = ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  ! and coordinate system
+  mesh = ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+                         coordSys=ESMF_COORDSYS_CART, &
+                         rc=localrc)
 
   ! Set number of nodes
   numNodes=9
@@ -645,6 +649,7 @@ program ESMF_MeshEx
   
   ! Create Mesh structure in 1 step
   mesh=ESMF_MeshCreate(parametricDim=2, spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
@@ -963,6 +968,7 @@ if (petCount .eq. 1) then
 
   ! Create Mesh structure in 1 step
   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &

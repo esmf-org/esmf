@@ -1422,7 +1422,7 @@ contains
 !     \item[{[coordSys]}]
 !         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1464,7 +1464,7 @@ contains
       if (present(coordSys)) then
          coordSysLocal=coordSys
       else
-         coordSysLocal=ESMF_COORDSYS_CART
+         coordSysLocal=ESMF_COORDSYS_SPH_DEG
       endif
 
       if (present(destroyDistgrid)) then
@@ -1572,7 +1572,7 @@ contains
 !     \item[{[coordSys]}]
 !         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1602,7 +1602,7 @@ contains
       if (present(coordSys)) then
          coordSysLocal=coordSys
       else
-         coordSysLocal=ESMF_COORDSYS_CART
+         coordSysLocal=ESMF_COORDSYS_SPH_DEG
       endif
 
       if (present(minIndex)) then
@@ -1708,7 +1708,7 @@ contains
 !     \item[{[coordSys]}]
 !         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1740,7 +1740,7 @@ contains
       if (present(coordSys)) then
          coordSysLocal=coordSys
       else
-         coordSysLocal=ESMF_COORDSYS_CART
+         coordSysLocal=ESMF_COORDSYS_SPH_DEG
       endif
 
       ! Get VM for this context
@@ -1873,7 +1873,7 @@ contains
 !     \item[{[coordSys]}]
 !         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
-!         If not specified then defaults to ESMF\_COORDSYS\_CART.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1908,7 +1908,7 @@ contains
       if (present(coordSys)) then
          coordSysLocal=coordSys
       else
-         coordSysLocal=ESMF_COORDSYS_CART
+         coordSysLocal=ESMF_COORDSYS_SPH_DEG
       endif
 
       if (present(minIndex)) then

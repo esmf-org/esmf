@@ -1050,6 +1050,7 @@ contains
 
     ! Create Mesh structure in 1 step
     myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, &
 	 elementIds=elemIds, elementTypes=elemTypes, &
@@ -1476,6 +1477,7 @@ contains
 
     ! Create Mesh structure in 1 step
     myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+                           coordSys=ESMF_COORDSYS_CART, &
                            nodeIds=nodeIds, nodeCoords=nodeCoords, &
                            nodeOwners=nodeOwners, nodeMask=nodeMask, &
 	                   elementIds=elemIds, elementTypes=elemTypes, &
@@ -1901,6 +1903,7 @@ contains
 
     ! Create Mesh structure in 1 step
     myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
@@ -2346,6 +2349,7 @@ contains
 
     ! Create Mesh structure in 1 step
     myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
@@ -3101,6 +3105,7 @@ contains
 
     ! Create Mesh structure in 1 step
     myMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, &
 	 elementIds=elemIds, elementTypes=elemTypes, &

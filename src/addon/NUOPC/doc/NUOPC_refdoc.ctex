@@ -265,6 +265,16 @@
 \input{../addon/NUOPC/doc/NUOPC_Base_fapi}
 #endif
 
+\subsection{Auxiliary Routines}
+Auxiliary routines are provided with the NUOPC Layer as a convenience to the
+user. Typically more work is needed on these methods before considering them
+NUOPC core functionality.
+#ifdef STANDALONE
+\input{NUOPC_Auxiliary_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Auxiliary_fapi}
+#endif
+
 \newpage
 
 % re-set to a standard paragraph style

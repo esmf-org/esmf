@@ -46,7 +46,7 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, rc)
@@ -57,7 +57,7 @@ module NUOPC_FieldDictionaryApi
 ! !DESCRIPTION:
 !   Add an entry to the NUOPC Field dictionary. If necessary the dictionary is
 !   first set up.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 

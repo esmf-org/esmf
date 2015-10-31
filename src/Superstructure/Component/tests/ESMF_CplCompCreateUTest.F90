@@ -36,6 +36,7 @@
     character(ESMF_MAXSTR) :: cplname
     type(ESMF_CplComp) :: cpl, cplcompAlias
     logical:: cplcompBool
+    logical:: isCreated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -77,12 +78,41 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_CplCompIsCreated(cpl)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     !------------------------------------------------------------------------
     !NEX_UTest
     cplname = "One Way Coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for created object"
+    write(failMsg, *) "Did not return .true."
+    isCreated = ESMF_CplCompIsCreated(cpl)
+    call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for created object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -106,6 +136,20 @@
     write(name, *) "CplCompDestroy Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_CplCompDestroy(cpl, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_CplCompIsCreated(cpl)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
     !------------------------------------------------------------------------

@@ -5,7 +5,7 @@ ALL: build_here
 SOURCEC	  = 
 SOURCEF	  = NUOPC_FreeFormatDef.F90 \
             NUOPC_FieldDictionaryDef.F90 NUOPC_FieldDictionaryApi.F90 \
-            NUOPC_Base.F90 \
+            NUOPC_Auxiliary.F90 NUOPC_Base.F90 \
             NUOPC_Compliance_Base.F90 \
             NUOPC_Compliance_Driver.F90 NUOPC_Compliance_Model.F90 \
             NUOPC_Compliance_Connector.F90 \

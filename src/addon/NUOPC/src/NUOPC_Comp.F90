@@ -1377,7 +1377,7 @@ module NUOPC_Comp
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_ClockCheckSetClock(setClock=internalClock, &
+    call NUOPC_CheckSetClock(setClock=internalClock, &
       checkClock=externalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -1884,8 +1884,13 @@ module NUOPC_Comp
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
-      rc=rc)
+    internalClock = ESMF_ClockCreate(externalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_AdjustClock(internalClock, stabilityTimeStep, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &

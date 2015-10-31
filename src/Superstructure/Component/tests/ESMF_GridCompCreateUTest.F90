@@ -35,6 +35,7 @@
     character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp) :: comp1, gridcompAlias
     logical:: gridcompBool
+    logical:: isCreated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -74,12 +75,40 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_GridCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for uncreated object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_GridCompIsCreated(comp1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for created object"
+    write(failMsg, *) "Did not return .true."
+    isCreated = ESMF_GridCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for created object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_GridCompIsCreated(comp1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -103,6 +132,20 @@
     write(name, *) "GridCompDestroy Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_GridCompDestroy(comp1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return .false."
+    isCreated = ESMF_GridCompIsCreated(comp1)
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing GridComp IsCreated for destroyed object"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    isCreated = ESMF_GridCompIsCreated(comp1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
     !------------------------------------------------------------------------

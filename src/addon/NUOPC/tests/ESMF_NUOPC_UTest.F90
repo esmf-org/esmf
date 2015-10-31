@@ -61,6 +61,7 @@ program ESMF_NUOPC_UTest
   type(ESMF_State)        :: stateA, stateB, stateC
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
+  integer                 :: valueInt
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
   type(ESMF_Grid)         :: grid
   integer                 :: i, j
@@ -133,17 +134,25 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_ClockCheckSetClock() Test"
+  write(name, *) "NUOPC_CheckSetClock() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_ClockCheckSetClock(clockA, clockB, rc=rc)
+  call NUOPC_CheckSetClock(clockA, clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_ClockInitialize() Test"
+  write(name, *) "NUOPC_AdjustClock() - first create clockB - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  clockB = NUOPC_ClockInitialize(clockA, rc=rc)
+  clockB = ESMF_ClockCreate(clockA, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_AdjustClock() - adjust clockB - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_AdjustClock(clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -205,33 +214,103 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldAttributeInit() Test"
+  write(name, *) "NUOPC_ConvertStringToInt() - no blanks - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldAttributeInit(field, "sea_surface_temperature", rc=rc)
+  valueInt = NUOPC_ConvertStringToInt("123", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldAttributeGet() Test"
+  write(name, *) "NUOPC_ConvertStringToInt() - no blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==123), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - leading blanks - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldAttributeGet(field, "StandardName", value, rc=rc)
+  valueInt = NUOPC_ConvertStringToInt("   456", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldAttributeSet() Test"
+  write(name, *) "NUOPC_ConvertStringToInt() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==456), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - trailing blanks - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldAttributeSet(field, "StandardName", "bottom_depth", rc=rc)
+  valueInt = NUOPC_ConvertStringToInt("789   ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldBundleUpdateTime() Test"
+  write(name, *) "NUOPC_ConvertStringToInt() - trailing blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==789), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string missing - Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  valueInt = NUOPC_ConvertStringToInt(" bla ", (/" bla ", "bla  "/), &
+    rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldBundleUpdateTime(fieldBundleA, fieldBundleB, rc=rc)
+  valueInt = NUOPC_ConvertStringToInt("bla", (/"aha", "bla"/), &
+    (/1,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConvertStringToInt() - special string - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt==2), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_InitAttributes() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_InitAttributes(field, "sea_surface_temperature", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_GetAttribute() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_GetAttribute(field, "StandardName", value, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_SetAttribute() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_SetAttribute(field, "StandardName", "bottom_depth", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_UpdateTimestamp(fieldBundleA, fieldBundleB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -309,19 +388,18 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldIsAtTime() Test"
+  write(name, *) "NUOPC_IsAtTime() for Field Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_FieldIsAtTime(field, startTime, rc=rc)
+  flag = NUOPC_IsAtTime(field, startTime, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCreateSimpleSph() Test"
+  write(name, *) "NUOPC_CreateSimpleSphGrid() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_GridCreateSimpleSph(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
-    360._ESMF_KIND_R8, 85._ESMF_KIND_R8, 500, 400, &
-    scheme=ESMF_REGRID_SCHEME_FULL3D, rc=rc)
+  grid = NUOPC_CreateSimpleSphGrid(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
+    360._ESMF_KIND_R8, 85._ESMF_KIND_R8, 500, 400, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -352,9 +430,9 @@ program ESMF_NUOPC_UTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldWrite() Test"
+  write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldWrite(field, file="field_test.nc", &
+  call NUOPC_Write(field, file="field_test.nc", &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
@@ -412,9 +490,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_GridCreateSimpleXY() Test"
+  write(name, *) "NUOPC_CreateSimpleXYGrid() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_GridCreateSimpleXY( &
+  grid = NUOPC_CreateSimpleXYGrid( &
     0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8, &
     -1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8, &
     100, 100, rc=rc)
@@ -423,136 +501,127 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_IsCreated() Test"
+  write(name, *) "NUOPC_Advertise() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_IsCreated(clockA, rc=rc)
+  call NUOPC_Advertise(stateA, "sea_surface_temperature", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateAdvertiseField() Test"
+  write(name, *) "NUOPC_Advertise() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateAdvertiseField(stateA, "sea_surface_temperature", rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "NUOPC_StateAdvertiseFields() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateAdvertiseFields(stateA, &
-    (/"air_pressure_at_sea_level", &
+  call NUOPC_Advertise(stateA, (/"air_pressure_at_sea_level", &
       "precipitation_flux       "/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateAttributeInit() Test"
+  write(name, *) "NUOPC_InitAttributes() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateAttributeInit(stateA, rc=rc)
+  call NUOPC_InitAttributes(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateAttributeSet() Test"
+  write(name, *) "NUOPC_SetAttribute() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateAttributeSet(stateA, name="Namespace", value="xyz", rc=rc)
+  call NUOPC_SetAttribute(stateA, name="Namespace", value="xyz", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateBuildStdList() Test"
+  write(name, *) "NUOPC_GetStateMemberLists() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(stdAttrNameList)  ! prepare for the following call
-  call NUOPC_StateBuildStdList(stateA, stdAttrNameList, rc=rc)
+  call NUOPC_GetStateMemberLists(stateA, stdAttrNameList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (associated(stdAttrNameList)) deallocate(stdAttrNameList)  ! clean up
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateIsAllConnected() Test"
+  write(name, *) "NUOPC_IsConnected() - all fields in state - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsAllConnected(stateA, rc=rc)
+  flag = NUOPC_IsConnected(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateIsAtTime() Test"
+  write(name, *) "NUOPC_IsAtTime() - all fields in state - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsAtTime(stateB, startTime, rc=rc)
+  flag = NUOPC_IsAtTime(stateB, startTime, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateIsFieldConnected() Test"
+  write(name, *) "NUOPC_IsConnected() - specific field in state - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsFieldConnected(stateA, "sea_surface_temperature", rc=rc)
+  flag = NUOPC_IsConnected(stateA, "sea_surface_temperature", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateIsUpdated() Test"
+  write(name, *) "NUOPC_IsUpdated() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  flag = NUOPC_StateIsUpdated(stateA, rc=rc)
+  flag = NUOPC_IsUpdated(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateRealizeField() Test"
+  write(name, *) "NUOPC_Realize() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateRealizeField(stateA, field, rc=rc)
+  call NUOPC_Realize(stateA, field, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateSetTimestamp() Test"
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateSetTimestamp(stateA, clockA, rc=rc)
+  call NUOPC_UpdateTimestamp(stateA, clockA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateUpdateTimestamp() Test"
+  write(name, *) "NUOPC_UpdateTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateUpdateTimestamp(stateA, rootPet=0, rc=rc)
+  call NUOPC_UpdateTimestamp(stateA, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateWrite() Test"
+  write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateWrite(stateA, fieldNameList=(/"sea_surface_temperature"/), &
+  call NUOPC_Write(stateA, fieldNameList=(/"sea_surface_temperature"/), &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateNamespaceAdd() Test"
+  write(name, *) "NUOPC_AddNamespace() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_StateNamespaceAdd(stateA, namespace="abc", nestedState=stateC, &
+  call NUOPC_AddNamespace(stateA, namespace="abc", nestedState=stateC, &
     rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_StateBuildStdList() for nested State namespace Test"
+  write(name, *) "NUOPC_GetStateMemberLists() for nested State namespace Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(stdAttrNameList)  ! prepare for the following call
-  call NUOPC_StateBuildStdList(stateC, stdAttrNameList, rc=rc)
+  call NUOPC_GetStateMemberLists(stateC, stdAttrNameList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (associated(stdAttrNameList)) deallocate(stdAttrNameList)  ! clean up
   !------------------------------------------------------------------------

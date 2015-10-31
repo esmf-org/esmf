@@ -194,7 +194,7 @@ module NUOPC_ModelBase
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_Convert(valueString, &
+    verbosity = NUOPC_ConvertStringToInt(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -296,7 +296,7 @@ module NUOPC_ModelBase
       ! by default update the timestamp on Fields in exportState to the 
       ! currTime. This timestamp can then be overridded in Advance() or 
       ! in TimestampExport() after the timestepping loop.
-      call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
+      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -494,7 +494,7 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_StateIsAtTime(importState, time, rc=rc)
+    allCurrent = NUOPC_IsAtTime(importState, time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

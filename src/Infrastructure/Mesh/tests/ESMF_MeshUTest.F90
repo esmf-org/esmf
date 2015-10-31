@@ -202,7 +202,8 @@ program ESMF_MeshUTest
   if (petCount .eq. 1) then
 
   ! Create Mesh structure
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Fill in node data
@@ -257,7 +258,7 @@ program ESMF_MeshUTest
   allocate(elemAreas(numElems))
   elemAreas=(/2.0,3.0,4.0,5.0/)
 
-  !! elem conn
+   !! elem conn
   allocate(elemConn(numElems*4))
   elemConn=(/1,2,5,4, & 
              2,3,6,5, & 
@@ -304,7 +305,7 @@ program ESMF_MeshUTest
   ! endif for skip for >1 proc
   endif 
 
-  call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
+   call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -351,7 +352,7 @@ program ESMF_MeshUTest
   meshBool = .false.
 
   ! Only do this if we have 1 processor
-  if (petCount .eq. 1) then
+   if (petCount .eq. 1) then
  
   write(name, *) "Mesh equality after destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -398,7 +399,7 @@ program ESMF_MeshUTest
   !  2.0   7 ------- 8 -------- 9
   !        |         |          |
   !        |    3    |    4     |
-  !        |         |          |
+   !        |         |          |
   !  1.0   4 ------- 5 -------- 6
   !        |         |          |
   !        |    1    |    2     |
@@ -445,7 +446,7 @@ program ESMF_MeshUTest
        !! node ids
        allocate(nodeIds(numNodes))
        nodeIds=(/1,2,4,5/) 
-
+ 
        !! node Coords
        allocate(nodeCoords(numNodes*2))
        nodeCoords=(/0.0,0.0, &
@@ -492,7 +493,7 @@ program ESMF_MeshUTest
                     1.0,1.0, &
                     2.0,1.0/)
 
-       !! node owners
+        !! node owners
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,1,0,1/) 
 
@@ -539,7 +540,7 @@ program ESMF_MeshUTest
 
        !! elem ids
        allocate(elemIds(numElems))
-       elemIds=(/3/) 
+        elemIds=(/3/) 
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -586,7 +587,7 @@ program ESMF_MeshUTest
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)  
-
+ 
        !! elem coords
         allocate(elemCoords(numElems*2))
        elemCoords=(/1.5,1.5/)
@@ -597,7 +598,8 @@ program ESMF_MeshUTest
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
-         elementCoords=elemCoords, rc=localrc)
+         elementCoords=elemCoords, coordSys=ESMF_COORDSYS_CART, &
+         rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -737,7 +739,8 @@ program ESMF_MeshUTest
   if (petCount .eq. 1) then
 
   ! Create Mesh structure
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Fill in node data
@@ -1045,7 +1048,8 @@ endif
   if (petCount .eq. 1) then
 
   ! Create Mesh structure
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Fill in node data
@@ -1822,9 +1826,8 @@ endif
   meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   
-  call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
-
-  call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
+ ! call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
+ ! call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
 
   call ESMF_MeshDestroy(meshDual, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2075,8 +2078,8 @@ endif
   deallocate(elemAreas)
 
   !! Write mesh for debugging
-  call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  !call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   
 !  call ESMF_MeshDestroy(mesh, rc=rc)
 
@@ -2383,6 +2386,7 @@ subroutine createTestMesh1(mesh, rc)
    
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -3034,6 +3038,7 @@ subroutine createTestMeshPH(mesh, rc)
 
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -3342,6 +3347,7 @@ subroutine createTestMeshForDual(mesh, rc)
    
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -3763,6 +3769,7 @@ subroutine createTestMesh3x3(mesh, rc)
    
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
@@ -4093,6 +4100,7 @@ subroutine createTestMeshMultiElem(mesh, rc)
 
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &

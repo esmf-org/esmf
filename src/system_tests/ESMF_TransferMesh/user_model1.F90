@@ -260,6 +260,7 @@ module user_model1
 
     ! Create the Mesh
     mesh = ESMF_MeshCreate(parametricDim=2,spatialDim=2, nodeIds=nodeIds, &
+      coordSys=ESMF_COORDSYS_CART, &
       nodeCoords=nodeCoords, nodeOwners=nodeOwners, elementIds=elemIds, &
       elementTypes=elemTypes, elementConn=elemConn, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
