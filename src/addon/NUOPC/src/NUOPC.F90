@@ -86,16 +86,10 @@ module NUOPC
   public NUOPC_UpdateTimestamp            ! method, internal use only
 
   ! public Auxiliary API
-  public NUOPC_ConvertStringToInt         ! method
-  public NUOPC_CreateSimpleSphGrid        ! method
-  public NUOPC_CreateSimpleXYGrid         ! method
-  public NUOPC_FillField                  ! method
-  public NUOPC_Print                      ! method
+  public NUOPC_ConvertStringToInt         ! method TODO: to cover by ESMF
+  public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
+  public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
+  public NUOPC_FillField                  ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
-  ! -- rough stuff kept for now TODO: remove
-  public NUOPC_ClockPrintCurrTime         ! method
-  public NUOPC_ClockPrintStartTime        ! method
-  public NUOPC_ClockPrintStopTime         ! method
-  public NUOPC_TimePrint                  ! method
 
 end module

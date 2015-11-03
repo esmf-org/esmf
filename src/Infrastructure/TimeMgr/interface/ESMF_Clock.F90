@@ -1375,11 +1375,13 @@
 ! !IROUTINE:  ESMF_ClockPrint - Print Clock information
 
 ! !INTERFACE:
-      subroutine ESMF_ClockPrint(clock, options, rc)
+      subroutine ESMF_ClockPrint(clock, options, preString, unit, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(in)            :: clock
       character (len=*), intent(in),  optional :: options
+      character(*),      intent(in),  optional :: preString
+      character(*),      intent(out), optional :: unit
       integer,           intent(out), optional :: rc
 
 !
@@ -1407,6 +1409,10 @@
 !          "startTime"    - print the clock's start time. \\
 !          "stopTime"     - print the clock's stop time. \\
 !          "timeStep"     - print the clock's time step. \\
+!     \item[{[preString]}]
+!          Optionally prepended string. Default to empty string.
+!     \item[{[unit]}]
+!          Internal unit, i.e. a string. Default to printing to stdout.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1415,6 +1421,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
+      character(len=80)       :: optionsOpt
+      type(ESMF_Time)         :: time
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1423,14 +1431,54 @@
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-      ! invoke C to C++ entry point
-      call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (present(unit)) then
+      
+        if (present(options)) then
+          optionsOpt=trim(options)
+        else
+          optionsOpt="currTime"
+        endif
 
-      call c_ESMC_ClockPrint(clock, options, localrc)   
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+        if (trim(optionsOpt)=="currTime") then
+          call ESMF_ClockGet(clock, currTime=time, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (trim(optionsOpt)=="startTime") then
+          call ESMF_ClockGet(clock, startTime=time, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (trim(optionsOpt)=="stopTime") then
+          call ESMF_ClockGet(clock, stopTime=time, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown selection requested.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif    
+
+      else
+        ! print to STDOUT
+
+        ! invoke C to C++ entry point
+        call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call c_ESMC_ClockPrint(clock, options, localrc)   
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS

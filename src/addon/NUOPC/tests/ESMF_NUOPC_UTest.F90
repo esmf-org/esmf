@@ -67,6 +67,7 @@ program ESMF_NUOPC_UTest
   integer                 :: i, j
   real(ESMF_KIND_R8),      pointer  :: xPtr(:,:), yPtr(:,:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
+  character(len=120)      :: tempString
 !TODO: completely remove after CSC okay:  type(NUOPC_RunSequence), pointer  :: runSeq(:)
 !TODO: completely remove after CSC okay:  type(NUOPC_RunElement),  pointer  :: runE
   
@@ -158,25 +159,55 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_ClockPrintCurrTime() Test"
+  write(name, *) "ESMF_ClockPrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_ClockPrintCurrTime(clockA, rc=rc)
+  call ESMF_ClockPrint(clockA, options="currTime", &
+    preString="Printing currTime to stdout: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_ClockPrintStartTime() Test"
+  write(name, *) "ESMF_ClockPrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_ClockPrintStartTime(clockA, rc=rc)
+  call ESMF_ClockPrint(clockA, options="currTime", &
+    preString="Printing currTime to tempString: ", unit=tempString, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_ClockPrintStopTime() Test"
+  write(name, *) "ESMF_ClockPrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_ClockPrintStopTime(clockA, rc=rc)
+  call ESMF_ClockPrint(clockA, options="startTime", &
+    preString="Printing startTime to stdout: ", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_ClockPrint() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ClockPrint(clockA, options="startTime", &
+    preString="Printing startTime to tempString: ", unit=tempString, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_ClockPrint() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ClockPrint(clockA, options="stopTime", &
+    preString="Printing stopTime to stdout: ", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_ClockPrint() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ClockPrint(clockA, options="stopTime", &
+    preString="Printing stopTime to tempString: ", unit=tempString, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -628,109 +659,21 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_TimePrint() Test"
+  write(name, *) "ESMF_TimePrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_TimePrint(startTime, rc=rc)
+  call ESMF_TimePrint(startTime, &
+    preString="Printing time to stdout: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-
-!TODO: completely remove after CSC okay:
-#if 0
   !------------------------------------------------------------------------
-  ! -> NUOPC RunSequence methods
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequenceAdd() Test"
+  !NEX_UTest
+  write(name, *) "ESMF_TimePrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(runSeq)
-  call NUOPC_RunSequenceAdd(runSeq, 1, rc=rc)
+  call ESMF_TimePrint(startTime, &
+    preString="Printing time to tempString: ", unit=tempString, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunElementAdd() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunElementAdd(runSeq(1), i=2, j=1, phase=1, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunElementAddComp() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunElementAddComp(runSeq(1), i=2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunElementAddLink() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunElementAddLink(runSeq(1), slot=1, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunElementPrint() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunElementPrint(runSeq(1)%first, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequenceSet() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunSequenceSet(runSeq(1), clockA, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequenceIterate() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(runE)
-  flag = NUOPC_RunSequenceIterate(runSeq, runSeqIndex=1, runElement=runE, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequencePrint() single element Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunSequencePrint(runSeq(1), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequencePrint() entire vector Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunSequencePrint(runSeq, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequenceSingleDeall() single element Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunSequenceDeallocate(runSeq(1), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
- 
-  !------------------------------------------------------------------------
-  !NEX_disabled_UTest
-  write(name, *) "NUOPC_RunSequenceSingleDeall() entire vector Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_RunSequenceDeallocate(runSeq, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-#endif
 
   !------------------------------------------------------------------------
   ! clean-ups

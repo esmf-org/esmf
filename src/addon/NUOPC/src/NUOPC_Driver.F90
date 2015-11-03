@@ -1547,8 +1547,9 @@ module NUOPC_Driver
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-        trim(name)//" - entered Run with current time: ", msgString, rc=rc)
+      call ESMF_ClockPrint(internalClock, options="currTime", &
+        preString=">>>"//trim(name)//" - entered Run with current time: ", &
+        unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1794,8 +1795,9 @@ module NUOPC_Driver
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-        trim(name)//" - leaving Run with current time: ", msgString, rc=rc)
+      call ESMF_ClockPrint(internalClock, options="currTime", &
+        preString="<<<"//trim(name)//&
+        " - leaving Run with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
