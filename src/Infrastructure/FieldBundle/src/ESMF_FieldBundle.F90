@@ -3214,7 +3214,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                            srcMaskValues, dstMaskValues, &
                                            regridmethod, polemethod, &
                                            regridPoleNPnts,  &
-                                           unmappedaction, routehandle, rc)
+                                           lineType, normType, &
+                                           unmappedaction,  ignoreDegenerate, &
+                                           routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),        intent(in)             :: srcFieldBundle
@@ -3224,7 +3226,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RegridMethod_Flag),  intent(in),   optional :: regridmethod
     type(ESMF_PoleMethod_Flag),    intent(in),   optional :: polemethod
     integer,                       intent(in),   optional :: regridPoleNPnts
+    type(ESMF_LineType_Flag),       intent(in),  optional :: lineType
+    type(ESMF_NormType_Flag),       intent(in),  optional :: normType
     type(ESMF_UnmappedAction_Flag),intent(in),   optional :: unmappedaction
+    logical,                        intent(in),  optional :: ignoreDegenerate 
     type(ESMF_RouteHandle),        intent(inout),optional :: routehandle
     integer,                       intent(out),  optional :: rc
 !
@@ -3245,7 +3250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Congruent Fields possess matching DistGrids, and the shape of the local
 !   array tiles matches between the Fields for every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
+ !   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
 !   of similar Fields that differ in the number of elements in the left most
 !   undistributed dimensions.
@@ -3274,12 +3279,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     In other words, a location is masked if and only if the value for that location in the mask information matches
 !     one of the values listed in {\tt dstMaskValues}.  
 !     If {\tt dstMaskValues} is not specified, no masking will occur. 
-!  \item [{[unmappedaction]}]
-!    Specifies what should happen if there are destination points that
-!    can't be mapped to a source cell. Options are 
-!    {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!    to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[regridmethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
 !     valid options. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
@@ -3292,9 +3291,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    This parameter indicates how many points should be averaged
 !    over. Must be specified if {\tt polemethod} is 
 !    {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!   \item [{[lineType]}]
+!           This argument controls the path of the line which connects two points on a sphere surface. This in
+!           turn controls the path along which distances are calculated and the shape of the edges that make
+!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
+!           list of valid options for this argument. If not specified, the default depends on the 
+!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
+!  \item [{[normType]}] 
+!           This argument controls the type of normalization used when generating conservative weights. This option
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
+!           Section~\ref{opt:normType} for a 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!  \item [{[unmappedaction]}]
+!    Specifies what should happen if there are destination points that
+!    can't be mapped to a source cell. Options are 
+!    {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!    to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[ignoreDegenerate]}]
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
+!           always skip degenerate cells. 
 !   \item [{[routehandle]}]
 !     Handle to the precomputed Route.
-!   \item [{[rc]}]
+ !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -3448,6 +3472,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                      regridmethod=regridmethod, &
                      polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
                      unmappedaction=unmappedaction, &
+                     lineType=lineType, &
+                     normType=normType, &
+                     ignoreDegenerate=ignoreDegenerate, &
                      routehandle=rh, &
                      factorIndexList=prev_indices, factorList=prev_weights, &
                      rc=localrc)
@@ -3467,6 +3494,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   regridmethod=regridmethod, &
                   polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
                   unmappedaction=unmappedaction, &
+                  lineType=lineType, &
+                  normType=normType, &
+                  ignoreDegenerate=ignoreDegenerate, &
                   routehandle=rh,rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
