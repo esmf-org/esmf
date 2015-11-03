@@ -53,6 +53,7 @@ module ESMF_FieldGatherMod
 !
 ! !PUBLIC MEMBER FUNCTIONS:
     public ESMF_FieldGather
+    public ESMF_FieldFill
 !
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.

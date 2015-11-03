@@ -89,7 +89,6 @@ module NUOPC
   public NUOPC_ConvertStringToInt         ! method TODO: to cover by ESMF
   public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
   public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
-  public NUOPC_FillField                  ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
 
 end module
