@@ -69,18 +69,6 @@ module NUOPC
   public NUOPC_CompSpecialize             ! method
 
   ! public Utility API
-  public NUOPC_ClockPrintCurrTime         ! method
-  public NUOPC_ClockPrintStartTime        ! method
-  public NUOPC_ClockPrintStopTime         ! method
-  public NUOPC_FieldBundleUpdateTime      ! method
-  public NUOPC_FieldWrite                 ! method
-  public NUOPC_StateRealizeField          ! method
-  public NUOPC_StateReconcile             ! method
-  public NUOPC_StateSetTimestamp          ! method
-  public NUOPC_StateUpdateTimestamp       ! method
-  public NUOPC_StateWrite                 ! method
-  public NUOPC_TimePrint                  ! method
-  ! -- v7 DONE
   public NUOPC_AddNamespace               ! method
   public NUOPC_AdjustClock                ! method
   public NUOPC_Advertise                  ! method
@@ -91,20 +79,16 @@ module NUOPC
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
+  public NUOPC_NoOp                       ! method
+  public NUOPC_Realize                    ! method
+  public NUOPC_Reconcile                  ! method, internal use only 
   public NUOPC_SetAttribute               ! method
+  public NUOPC_UpdateTimestamp            ! method, internal use only
 
-  ! -- PRELIM. NEED REVIEW utility methods following the new v7 scheme
-  public NUOPC_Nop
-  public NUOPC_Print
-  public NUOPC_Realize
-  public NUOPC_Reconcile
-  public NUOPC_UpdateTimestamp
-  public NUOPC_Write
-  
   ! public Auxiliary API
-  public NUOPC_ConvertStringToInt         ! method
-  public NUOPC_CreateSimpleSphGrid        ! method
-  public NUOPC_CreateSimpleXYGrid         ! method
-  public NUOPC_FillField                  ! method
+  public NUOPC_ConvertStringToInt         ! method TODO: to cover by ESMF
+  public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
+  public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
+  public NUOPC_Write                      ! method
 
 end module

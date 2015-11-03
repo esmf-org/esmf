@@ -37,6 +37,7 @@ module ESMF_FieldGatherMod
     use ESMF_InitMacrosMod
     use ESMF_LogErrMod
     use ESMF_VMMod
+    use ESMF_GridMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
     use ESMF_ArrayMod
@@ -52,6 +53,7 @@ module ESMF_FieldGatherMod
 !
 ! !PUBLIC MEMBER FUNCTIONS:
     public ESMF_FieldGather
+    public ESMF_FieldFill
 !
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -65,6 +67,238 @@ module ESMF_FieldGatherMod
     end interface
 !------------------------------------------------------------------------------
 contains
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldFill()"
+^define ESMF_FILE "ESMF_FieldGather.F90"
+!BOP
+! !IROUTINE: ESMF_FieldFill - Fill data into a Field
+! !INTERFACE:
+  subroutine ESMF_FieldFill(field, dataFillScheme, member, step, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout) :: field
+    character(len=*), intent(in)    :: dataFillScheme
+    integer, intent(in)             :: member
+    integer, intent(in)             :: step
+    integer, intent(out), optional  :: rc
+! !DESCRIPTION:
+!   \label{ESMF_FieldFill}
+!   Fill {\tt field} with data according to {\tt dataFillScheme}. Depending
+!   on the chosen fill scheme, the {\tt member} and {\tt step} arguments are
+!   used to provide differing fill data patterns.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to fill with data.
+!   \item[dataFillScheme]
+!     The fill scheme. The available options are "sincos", and "one".
+!   \item[member]
+!     Member incrementor.
+!   \item[step]
+!     Step incrementor.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_TypeKind_Flag)        :: typekind
+    integer                         :: rank
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: dataPtrR8D3(:,:,:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D1(:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D2(:,:)
+    real(ESMF_KIND_R4), pointer     :: dataPtrR4D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: coord2PtrR8D2(:,:)
+    real(ESMF_KIND_R8), pointer     :: coord1PtrR8D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
+    real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
+    integer                         :: i, j, k
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_FieldGet(field, typekind=typekind, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+      line=__LINE__, &
+      file=ESMF_FILE)) &
+      return  ! bail out
+
+    if (trim(dataFillScheme)=="sincos") then
+      if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+        ! 1D sin pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+          dataPtrR8D1(i) = &
+            sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.)
+        enddo
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+        ! 2D sin*cos pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+        do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+          dataPtrR8D2(i,j) = &
+            sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
+            cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+        enddo
+        enddo
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+        ! 3D sin*cos*sin pattern
+        ! TODO: support Meshes
+        call ESMF_FieldGet(field, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=3, farrayPtr=coord3PtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        do k=lbound(dataPtrR8D3,3),ubound(dataPtrR8D3,3)
+        do j=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
+        do i=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
+          dataPtrR8D3(i,j,k) = &
+            sin(real(member)*3.1416*(coord1PtrR8D3(i,j,k)+real(step))/180.) * &
+            cos(real(member)*3.1416*(coord2PtrR8D3(i,j,k)+real(step))/180.) * &
+            sin(real(member)*3.1416*(coord3PtrR8D3(i,j,k)+real(step))/180.)
+        enddo
+        enddo
+        enddo
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported typekind-rank and scheme combination requested.", &
+          line=__LINE__, &
+          file=ESMF_FILE, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    else if (trim(dataFillScheme)=="one") then
+      if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+        ! 1D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D1 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+        ! 1D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D1, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D1 = 1._ESMF_KIND_R4
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+        ! 2D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D2 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+        ! 2D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D2 = 1._ESMF_KIND_R4
+      elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+        ! 3D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR8D3 = 1._ESMF_KIND_R8
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+        ! 3D all 1.
+        call ESMF_FieldGet(field, farrayPtr=dataPtrR4D3, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          line=__LINE__, &
+          file=ESMF_FILE)) &
+          return  ! bail out
+        ! initialize the entire array
+        dataPtrR4D3 = 1._ESMF_KIND_R4
+      endif
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unknown dataFillScheme requested.", &
+        line=__LINE__, &
+        file=ESMF_FILE, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+    
+  end subroutine
+^undef ESMF_FILE
+!------------------------------------------------------------------------------
+
+
 
 #define FieldGatherDoc() \
 !---------------------------------------------------------------------------- @\

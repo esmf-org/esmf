@@ -253,9 +253,10 @@ module NUOPC_ModelBase
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
       write (pString,*) phase
-      call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-        trim(modelName)//" entered Run (phase="//trim(adjustl(pString))// &
-        ") with current time: ", msgString, rc=rc)
+      call ESMF_ClockPrint(internalClock, options="currTime", &
+        preString=">>>"//trim(modelName)//&
+        " entered Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -296,7 +297,7 @@ module NUOPC_ModelBase
       ! by default update the timestamp on Fields in exportState to the 
       ! currTime. This timestamp can then be overridded in Advance() or 
       ! in TimestampExport() after the timestepping loop.
-      call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
+      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -357,9 +358,9 @@ module NUOPC_ModelBase
     
       ! conditionally output diagnostic to Log file
       if (btest(verbosity,0)) then
-        call NUOPC_ClockPrintCurrTime(internalClock, &
-          trim(modelName)//" time stepping loop, current time: ", &
-          msgString, rc=rc)
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=trim(modelName)//" time stepping loop, current time: ", &
+          unit=msgString, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -399,9 +400,10 @@ module NUOPC_ModelBase
 
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
-      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
-        ") with current time: ", msgString, rc=rc)
+      call ESMF_ClockPrint(internalClock, options="currTime", &
+        preString="<<<"//trim(modelName)//&
+        " leaving Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)

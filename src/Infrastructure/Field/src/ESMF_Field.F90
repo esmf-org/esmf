@@ -134,7 +134,7 @@ module ESMF_FieldMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_FieldIsCreated
+   public ESMF_FieldIsCreated          ! Check if a Field object is created
    public ESMF_FieldValidate           ! Check internal consistency
    public operator(==), operator(/=)
 
@@ -172,6 +172,9 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! -------------------------- ESMF-public method -------------------------------
+
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldIsCreated()"
 !BOP

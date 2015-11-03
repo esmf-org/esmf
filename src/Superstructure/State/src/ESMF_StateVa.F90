@@ -44,7 +44,6 @@
       use ESMF_StateContainerMod
       use ESMF_InitMacrosMod
       use ESMF_UtilTypesMod
-      use ESMF_UtilMod,        only: ESMF_StringLowerCase
       
       implicit none
       

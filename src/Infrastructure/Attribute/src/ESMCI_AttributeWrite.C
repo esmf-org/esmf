@@ -308,7 +308,8 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
   
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, "field", attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, "field", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack) {
     localrc = attpack->AttributeWriteTabBuffer(tab,index,columns,attrLens,attrNames);
     if (localrc != ESMF_SUCCESS) {
@@ -558,7 +559,8 @@ namespace ESMCI {
   if (object.compare("comp")==0) {
     // get value of attribute 0 or set to N/A if not present
     string attPackInstanceName;
-    attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+    attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		                 ESMC_ATTNEST_ON);
     localrc = AttPackIsPresent("ComponentShortName", attpack, ESMC_ATTNEST_ON,
     		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
@@ -570,7 +572,9 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName", ESMC_ATTNEST_ON));
+      attr = (AttPackGet(convention, purpose, object,attPackInstanceName,
+		                 ESMC_ATTNEST_ON)->AttPackGetAttribute(
+		                 "ComponentShortName", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) modelcompname = "N/A";
         else modelcompname = attr->vcpp.at(0);
@@ -587,7 +591,8 @@ namespace ESMCI {
     }
   
     // get value of attribute 1 or set to N/A if not present
-    attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+    attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		                 ESMC_ATTNEST_ON);
     localrc = AttPackIsPresent("ComponentLongName", attpack, ESMC_ATTNEST_ON,
     		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
@@ -599,7 +604,9 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName", ESMC_ATTNEST_ON));
+      attr = (AttPackGet(convention,purpose,object,attPackInstanceName,
+		                 ESMC_ATTNEST_ON)->AttPackGetAttribute(
+		                 "ComponentLongName", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) fullname = "N/A";
         else fullname = attr->vcpp.at(0);
@@ -616,7 +623,8 @@ namespace ESMCI {
     }
   
     // get value of attribute 2 or set to N/A if not present
-    attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+    attpack = AttPackGet(convention, purpose, object, attPackInstanceName,
+		                 ESMC_ATTNEST_ON);
     localrc = AttPackIsPresent("Version", attpack, ESMC_ATTNEST_ON,
     		                   &presentflag);
     if (localrc != ESMF_SUCCESS) {
@@ -628,7 +636,9 @@ namespace ESMCI {
     }
     if (presentflag == ESMF_TRUE) {
       string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version", ESMC_ATTNEST_ON));
+      attr = (AttPackGet(convention,purpose,object,attPackInstanceName,
+		                 ESMC_ATTNEST_ON)->AttPackGetAttribute(
+		                 "Version", ESMC_ATTNEST_ON));
       if (attr != NULL) {
         if (attr->vcpp.empty()) version = "N/A";
         else version = attr->vcpp.at(0);
@@ -840,7 +850,8 @@ namespace ESMCI {
 //       instances of attpack parents?
     string attPackInstanceName;
 //printf("XMLtraverse(): looking for 1st attpack\n");
-    attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName);
+    attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName,
+		                 ESMC_ATTNEST_ON);
     if (attpack != NULL) {
 //    while (attpack != NULL) {
 //printf("XMLtraverse(): found attPackInstanceName %s match\n",
@@ -854,7 +865,8 @@ namespace ESMCI {
       }
       // get next occurence of this attpack, if any
 //      ordinal++;
-//      attpack = AttPackGet(convention, purpose, "comp", &ordinal);
+//      attpack = AttPackGet(convention, purpose, "comp", &ordinal,
+//                           ESMC_ATTNEST_ON);
     }
 //printf("XMLtraverse(): here3\n");
     compdone = true;
@@ -890,7 +902,8 @@ namespace ESMCI {
   // do grid write
   if (!griddone) {
     string attPackInstanceName;
-    attpack = AttPackGet(convention, purpose, "grid", attPackInstanceName);
+    attpack = AttPackGet(convention, purpose, "grid", attPackInstanceName,
+		                 ESMC_ATTNEST_ON);
     if (attpack) {
       // write the grid header
       localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
@@ -2063,8 +2076,8 @@ namespace ESMCI {
   callCount++;
 
   string attPackInstanceName;
-  attpack = AttPackGet(convention, MODEL_COMP_PURP,
-                       "comp", attPackInstanceName);
+  attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack == NULL) return ESMF_SUCCESS;  // if package not found, return 
 
   localrc = io_xml->writeStartElement("modelComponent", "", indent++, 0);
@@ -2506,8 +2519,8 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   string attPackInstanceName;
-  attpack = AttPackGet(convention, MODEL_COMP_PURP,
-                       "comp", attPackInstanceName);
+  attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("simulationRun", "", 1, 0);
@@ -2781,8 +2794,8 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   string attPackInstanceName;
-  attpack = AttPackGet(convention, PLATFORM_PURP, "comp",
-                       attPackInstanceName);
+  attpack = AttPackGet(convention, PLATFORM_PURP, "comp", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("platform", "", 1, 0);
@@ -3069,8 +3082,8 @@ namespace ESMCI {
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // get CIM/Main package to retrieve MetadataVersion
-  attpackMain = AttPackGet(convention, MODEL_COMP_PURP,
-                           "comp", attPackInstanceName);
+  attpackMain = AttPackGet(convention, MODEL_COMP_PURP, "comp",
+		                   attPackInstanceName, ESMC_ATTNEST_ON);
   if (attpackMain == NULL) return ESMF_SUCCESS;  // if package not found, return 
   attr = attpackMain->AttPackGetAttribute("MetadataVersion", ESMC_ATTNEST_ON);
   if (attr->isSet()) {
@@ -3479,7 +3492,8 @@ namespace ESMCI {
 
   // Get the General or Scientific attpack, as specified by arg purpose
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Cannot find the specified Attribute package\n", ESMC_CONTEXT, &localrc);
@@ -4723,8 +4737,8 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   int ordinal=1;
-  attpack = AttPackGet(convention, MODEL_COMP_PURP,
-                       "comp", &ordinal);
+  attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", &ordinal,
+		               ESMC_ATTNEST_ON);
   while (attpack != NULL) {
     localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimDocType);
     if (localrc != ESMF_SUCCESS) {
@@ -4736,8 +4750,8 @@ namespace ESMCI {
 
     // get next occurence of this attpack, if any, on this component
     ordinal++;
-    attpack = AttPackGet(convention, MODEL_COMP_PURP,
-                         "comp", &ordinal);
+    attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", &ordinal,
+		                 ESMC_ATTNEST_ON);
   }
 
   // recurse across all linked ESMF objects (e.g. child components, states,
@@ -4785,7 +4799,8 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   string attPackInstanceName;
-  attpack = AttPackGet(convention, purpose, "field", attPackInstanceName);
+  attpack = AttPackGet(convention, purpose, "field", attPackInstanceName,
+		               ESMC_ATTNEST_ON);
   if (attpack) {
     // TODO: replace this prototype for WaterML TimeSeries
     if (convention.compare("WaterML")==0 && 

@@ -257,7 +257,9 @@ int IO::read(
 
   PRINTPOS;
   // Open the file
-  localrc1 = open(file, ESMC_FILESTATUS_OLD, iofmt);
+  bool overwrite = false;
+  bool readonly = true;
+  localrc1 = open(file, ESMC_FILESTATUS_OLD, iofmt, overwrite, readonly);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
     switch(rc) {

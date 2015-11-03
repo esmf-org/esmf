@@ -270,8 +270,7 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
         rc)) return
     
     if (buffer(len:len) .eq. achar(0)) len = len-1
-    call ESMF_StringLowerCase(buffer(1:len), rc=rc)
-    units = buffer(1:len)
+    units = ESMF_UtilStringLowerCase(buffer(1:len), rc=rc)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -383,7 +382,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is not "degrees" or "radians" return errors
       if (units(len:len) .eq. achar(0)) len = len-1
-      call ESMF_StringLowerCase(units(1:len), rc=rc)
+      units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -428,7 +427,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is not "degrees" or "radians" return errors
      if (units(len:len) .eq. achar(0)) len = len-1
-      call ESMF_StringLowerCase(units(1:len), rc=rc)
+      units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -491,7 +490,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is not "degrees" or "radians" return errors
      if (units(len:len) .eq. achar(0)) len = len-1
-      call ESMF_StringLowerCase(units(1:len), rc=rc)
+      units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -536,7 +535,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is not "degrees" or "radians" return errors
      if (units(len:len) .eq. achar(0)) len = len-1
-      call ESMF_StringLowerCase(units(1:len), rc=rc)
+      units = ESMF_UtilStringLowerCase(units(1:len))
       if (units(1:len) .ne. 'degrees' .and. units(1:len) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -2804,8 +2803,7 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
         rc)) return
 
     if (buffer(len:len) .eq. achar(0)) len = len-1
-    call ESMF_StringLowerCase(buffer(1:len), rc=rc)
-    units = buffer(1:len)
+    units = ESMF_UtilStringLowerCase(buffer(1:len))
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -2931,7 +2929,7 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
        ! with Degres/degrees/Radians/radians, ignore the garbage after the
        ! word.  Otherwise, return the whole thing
        if (units(len:len) .eq. achar(0)) len = len-1
-       call ESMF_StringLowerCase(units(1:len), rc=rc)
+       units = ESMF_UtilStringLowerCase(units(1:len))
        ! if the units is meters, kilometers, or km, make it Cartisian 2D
        if (units(1:len) .eq. "meters" .or. &
            units(1:len) .eq. "km" .or. units(1:len) .eq. "kilometers") then	
@@ -3198,7 +3196,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
            ! with Degres/degrees/Radians/radians, ignore the garbage after the
            ! word.  Otherwise, return the whole thing
            if (units(len:len) .eq. achar(0)) len = len-1
-           call ESMF_StringLowerCase(units(1:len), rc=rc)
+           units = ESMF_UtilStringLowerCase(units(1:len))
            if (units(1:len) .ne. 'degrees' .and. &
                  units(1:len) .ne. 'radians') then
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 

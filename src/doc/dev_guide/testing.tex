@@ -214,6 +214,124 @@ so that they are not found by the Perl script that analyzes the test results.
 The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus NEX\_UTest becomes
 NEX\_disable\_UTest. 
 
+\paragraph{Benchmarking Unit Tests}
+Benchmark testing is included in the ESMF regression tests to detect any unexpected
+change in the performance of the software. This capability is available to developers.
+Developers can run the unit tests and save their execution
+times to be used as a benchmark for future unit test runs.
+
+The following section now appears in the output of "gmake info".
+
+\begin{verbatim}
+ 
+--------------------------------------------------------------
+ * ESMF Benchmark directory and parameters *
+ESMF_BENCHMARK_PREFIX:    ./DEFAULTBENCHMARKDIR
+ESMF_BENCHMARK_TOLERANCE: 3%
+ESMF_BENCHMARK_THRESHOLD_MSEC: 500
+ 
+--------------------------------------------------------------
+
+\end{verbatim}
+
+The steps for using the benchmarking test tool are as follows:
+
+\begin{sloppypar}
+\begin{itemize}
+\item After building the unit tests, execute "gmake run\_unit\_tests" and 
+verify that all tests pass. It not recommended that failing tests be benchmarked.
+\item Set "BENCHMARKINSTALL = YES" and execute "gmake run\_unit\_tests\_benchmark".
+This will cause the unit tests stdout files to be copied to the "DEFAULTBENCHMARKDIR"
+directory. The elapsed times of these unit tests are the now the benchmark. 
+The default of DEFAULTBENCHMARKDIR is \$ESMF\_DIR/DEFAULTBENCHMARKDIR.
+It is advised that the benchmarking directory be outside the ESMF structure, to allow
+the developer to benchmark different versions of the software. The benchmark directory
+can be changed by setting ESMF\_BENCHMARK\_PREFIX.
+\item Run the unit test a second time.
+\item To compare the elapsed times of this unit test run to the benchmared run, set
+"BENCHMARKINSTALL = NO", and execute "gmake run\_unit\_tests\_benchmark".
+\end{itemize} 
+
+According to the default settings above, the benchmarking test will only analyze unit tests that run 
+500 msecs (ESMF\_BENCHMARK\_THRESHOLD\_MSEC)
+or longer. If a unit test runs 3 percent (ESMF\_BENCHMARK\_TOLERANCE) or more beyond the benchmarked
+unit test, it will be flagged as failing the benchmark test. The developer may change these parameters
+as desired. The following is an example of the output of running "gmake run\_unit\_tests\_benchmark":
+
+\end{sloppypar}
+\begin{verbatim} 
+
+
+
+The following unit tests with a threshold of 500 msecs. passed the 3% 
+ tolerance benchmark test:
+
+PASS: src/Infrastructure/DELayout/tests/ESMF_DELayoutWorkQueueUTest.F90
+PASS: src/Infrastructure/Field/tests/ESMF_FieldCreateGetUTest.F90
+PASS: src/Infrastructure/Field/tests/ESMF_FieldRegridCsrvUTest.F90
+PASS: src/Infrastructure/Field/tests/ESMF_FieldRegridXGUTest.F90
+PASS: src/Infrastructure/Field/tests/ESMF_FieldStressUTest.F90
+PASS: src/Infrastructure/TimeMgr/tests/ESMF_CalRangeUTest.F90
+PASS: src/Infrastructure/VM/tests/ESMF_VMBarrierUTest.F90
+PASS: src/Infrastructure/VM/tests/ESMF_VMUTest.F90
+PASS: src/Infrastructure/XGrid/tests/ESMF_XGridMaskingUTest.F90
+PASS: src/Infrastructure/XGrid/tests/ESMF_XGridUTest.F90
+PASS: src/Superstructure/Component/tests/ESMF_CompTunnelUTest.F90
+
+
+The following unit tests with a threshold of 500 msecs. failed the 3% 
+ tolerance benchmark test:
+
+FAIL: src/Infrastructure/Field/tests/ESMF_FieldRegridUTest.F90
+      Test elapsed time: 4331.446 msec.
+      Benchmark elapsed time: 2958.47675 msec.
+      Increase: 46.41%
+
+FAIL: src/Infrastructure/FieldBundle/tests/ESMF_FieldBundleRegridUTest.F90
+      Test elapsed time: 2051.05675 msec.
+      Benchmark elapsed time: 1920.42125 msec.
+      Increase: 6.8%
+
+FAIL: src/Infrastructure/LogErr/tests/ESMF_LogErrUTest.F90
+      Test elapsed time: 2986.40425 msec.
+      Benchmark elapsed time: 2583.36775 msec.
+      Increase: 15.6%
+
+
+
+Found 167 exhaustive multi-processor unit tests files, of those with a 
+ threshold of 500 msecs. 11 passed the 3% tolerance benchmark test, and 3 failed.
+
+Benchmark install date: Thu Jun  4 13:26:55 MDT 2015
+
+\end{verbatim}
+
+Note that only the unit tests that have an elapsed time of 500 msecs. or greater are listed. In addition, the date when
+the benchmark install was completed is displayed.
+
+\begin{sloppypar}
+When a unit test run it benchmarked it is written to a directory such as 
+ "BENCHMARKDIR/test/testg/Darwin.gfortran.64.mpich2.default/".
+Therefore you can only compare unit tests elapsed between the identical configurations. 
+
+To implement the benchmarking tool, the unit tests were modified to record the elapsed time of each PET.
+The stdout file of each unit test has the following lines i.e.
+\end{sloppypar}
+
+\begin{verbatim}
+
+ESMF_GridItemUTest.stdout: PET 0 Test Elapsed Time 5.7840000000000007 msec.
+ESMF_GridItemUTest.stdout: PET 1 Test Elapsed Time 5.7259999999999982 msec.
+ESMF_GridItemUTest.stdout: PET 2 Test Elapsed Time 6.6200000000000010 msec.
+ESMF_GridItemUTest.stdout: PET 3 Test Elapsed Time 5.7190000000000021 msec.
+
+\end{verbatim}
+
+
+The benchmarking tool uses the average of the four elapsed times to determine the test results
+since the elapsed times of each PET can vary.
+
+
 \subsubsection{Examples}
 The examples are written to help users understand a specific use of an
 ESMF capability. The examples appear as text in the ESMF Reference Manual, therefore
@@ -263,6 +381,7 @@ the tags are used:
 Note that any code or text that is not contained within the tag pairs does not appear in the
 Reference Manual.
 
+\begin{sloppypar}
 Most examples can be run on multiple processors or a single processor. Those examples should
 have the tag, "ESMF\_EXAMPLE" as a comment in the body of the example file. If the example
 can only run on multiple processors then use the tag, "ESMF\_MULTI\_PROC\_EXAMPLE".
@@ -274,7 +393,7 @@ tags must be modified so that the example is not flagged as failed.
 The recommended way to modify these tags is to replace the first underscore with "\_disable\_", 
 thus "ESMF\_EXAMPLE" becomes
 "ESMF\_disable\_EXAMPLE".
-
+\end{sloppypar}
 
 \subsubsection{System Tests}
 
@@ -327,6 +446,7 @@ http://www.earthsystemmodeling.org/developers/test/system/
 \end{verbatim}
 
 
+\begin{sloppypar}
 \paragraph{Disabling system tests}
 When a system test is removed from the makefile, the "ESMF\_SYSTEM\_TEST" or 
 "ESMF\_MULTI\_PROC\_SYSTEM\_TEST"
@@ -334,6 +454,7 @@ tags must be modified so that the system test is not counted as failed.
 The recommended way to modify these tags is to replace the first underscore with "\_disable\_", thus 
 ESMF\_SYSTEM\_TEST becomes 
 ESMF\_disable\_SYSTEM\_TEST.
+\end{sloppypar}
 
 \subsubsection{Test Harness}
 The Test Harness is a highly configurable test control system for conducting 

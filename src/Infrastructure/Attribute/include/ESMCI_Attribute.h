@@ -256,14 +256,14 @@ class Attribute
       int &nestAttPackInstanceNameCount);
     Attribute *AttPackGet(const std::string &convention, 
       const std::string &purpose, const std::string &object,
-      const std::string &attPackInstanceName) const;
+      const std::string &attPackInstanceName, ESMC_AttNest_Flag anflag) const;
     Attribute *AttPackGet(const std::string &convention,
       const std::string &purpose, const std::string &object,
       const std::string &name, const std::string &value) const;
     int AttPackGet(const std::string &convention, 
       const std::string &purpose, const std::string &object,
       std::vector<std::string> &attPackInstanceNameList, 
-      int &attPackInstanceNameCount) const;
+      int &attPackInstanceNameCount, ESMC_AttNest_Flag anflag) const;
     Attribute *AttPackGetAttribute(const std::string &name) const;
     Attribute *AttPackGetAttribute(const int &num) const;
     Attribute *AttPackGetAttribute(const std::string &name,
@@ -290,7 +290,9 @@ class Attribute
       int nestCount, const std::vector<std::string> &nestConvention,
                      const std::vector<std::string> &nestPurpose);
     int AttPackRemove(ESMCI::Attribute *attpack);
-    int AttPackRemoveAttribute(const std::string &name, ESMCI::Attribute *attpack);
+    int AttPackRemoveAttribute(const std::string &name,
+    			               ESMCI::Attribute *attpack,
+							   ESMC_AttNest_Flag anflag);
     int AttPackSet(Attribute *attr);
     
 
@@ -425,6 +427,7 @@ extern "C" {
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   int *count, char *specList, int *lens,
+								  ESMC_AttNest_Flag *anflag,
                                   ESMC_Logical *present, int *rc,
                                   ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackremove)(ESMC_Base **base,
@@ -432,6 +435,7 @@ extern "C" {
                                   int *rc);
   void FTN_X(c_esmc_attpackremoveattribute)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,
+								  ESMC_AttNest_Flag *anflag,
                                   int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name,
@@ -453,7 +457,8 @@ extern "C" {
                                   int *attPackInstanceNameLens,
                                   int *attPackInstanceNameSize,
                                   int *attPackInstanceNameCount,
-                                  int *rc, 
+                                  ESMC_AttNest_Flag *anflag,
+								  int *rc,
                                   ESMCI_FortranStrLenArg napinlen);
   void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
                                   ESMCI::Attribute **attpack,

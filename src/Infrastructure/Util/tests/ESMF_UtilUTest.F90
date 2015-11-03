@@ -689,6 +689,129 @@
     call ESMF_UtilIOGetCWD (pathname_tooshort, rc=rc)
     call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
+! String utilities
+!=================
+
+  !------------------------------------------------------------------------
+    !EX_UTest
+    ! Test converting string to UPPER case
+    write (name, *) "Testing converting string to UPPER case"
+    write (failMsg, *) "conversion failure"
+    str = ESMF_UtilStringUpperCase ("aBcDeFg123+-*/")
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'ABCDEFG123+-*/')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+
+  !------------------------------------------------------------------------
+    !EX_UTest
+    ! Test converting string to lower case
+    write (name, *) "Testing converting string to lower case"
+    write (failMsg, *) "conversion failure"
+    str = ESMF_UtilStringLowerCase ("aBcDeFg123+-*/")
+    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'abcdefg123+-*/')
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  ! Test converting numeric string to integer
+  write(name, *) "ESMF_UtilString2Int() - no blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("123", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - no blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == 123), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - negative value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("-1234567890", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - negative value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == -1234567890), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - explicit positive value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("+987654321", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - explicit positive value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == 987654321), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - leading blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("   456", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == 456), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - trailing blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("789   ", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - trailing blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == 789), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - special string missing - Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int(" bla ", (/" bla ", "bla  "/), &
+    rc=rc)
+  call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - special string - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueInt = ESMF_UtilString2Int("bla", (/"aha", "bla"/), &
+    (/1,2/), rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Int() - special string - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((valueInt == 2), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
 ! Internal string utilities (NOT part of the external ESMF API)
 !==============================================================
 
@@ -699,27 +822,6 @@
     write (failMsg, *) "comparison failure"
     str = ESMF_StringConcat ("1234", "abcdefg")
     rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == '1234abcdefg')
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-    !EX_UTest
-    ! Test converting string to UPPER case
-    write (name, *) "Testing converting string to UPPER case"
-    write (failMsg, *) "conversion failure"
-    str = "aBcDeFg123+-*/"
-    call ESMF_StringUpperCase (str)
-    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'ABCDEFG123+-*/')
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-
-  !------------------------------------------------------------------------
-    !EX_UTest
-    ! Test converting string to lower case
-    write (name, *) "Testing converting string to lower case"
-    write (failMsg, *) "conversion failure"
-    str = "aBcDeFg123+-*/"
-    call ESMF_StringLowerCase (str)
-    rc = merge (ESMF_SUCCESS, ESMF_FAILURE, str == 'abcdefg123+-*/')
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -752,106 +854,6 @@
       end if
     end if
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - no blanks - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("123", rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - no blanks - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == 123), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - negative value - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("-1234567890", rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - negative value - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == -1234567890), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - explicit positive value - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("+987654321", rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - explicit positive value - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == 987654321), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - leading blanks - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("   456", rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - leading blanks - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == 456), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - trailing blanks - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("789   ", rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - trailing blanks - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == 789), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - special string missing - Test"
-  write(failMsg, *) "Did return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int(" bla ", (/" bla ", "bla  "/), &
-    rc=rc)
-  call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - special string - Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_String2Int("bla", (/"aha", "bla"/), &
-    (/1,2/), rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest
-  write(name, *) "ESMF_String2Int() - special string - Test"
-  write(failMsg, *) "Did not convert correctly"
-  call ESMF_Test((valueInt == 2), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
 
 #endif
 

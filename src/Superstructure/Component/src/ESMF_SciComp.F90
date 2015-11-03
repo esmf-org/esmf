@@ -58,6 +58,7 @@ module ESMF_SciCompMod
   public ESMF_SciCompCreate
   public ESMF_SciCompDestroy
   public ESMF_SciCompGet
+  public ESMF_SciCompIsCreated
   public ESMF_SciCompPrint
   public ESMF_SciCompSet
   public ESMF_SciCompValidate
@@ -488,6 +489,33 @@ print *, "Name: ", name
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_SciCompGet
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SciCompIsCreated()"
+!BOP
+! !IROUTINE: ESMF_SciCompIsCreated - Check whether a SciComp object has been created
+
+! !INTERFACE:
+  function ESMF_SciCompIsCreated(scicomp, rc)
+! !RETURN VALUE:
+    logical :: ESMF_SciCompIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_SciComp), intent(in)            :: scicomp
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt scicomp} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ESMF_SciCompIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_SciCompGetInit(scicomp)==ESMF_INIT_CREATED) &
+      ESMF_SciCompIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 
