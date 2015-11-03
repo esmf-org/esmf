@@ -165,6 +165,7 @@ interface ESMF_LocStreamCreate
 !
       module procedure ESMF_LocStreamCreateFromDG
       module procedure ESMF_LocStreamCreateFromLocal
+      module procedure ESMF_LocStreamCreateFromNewDG
       module procedure ESMF_LocStreamCreateReg
       module procedure ESMF_LocStreamCreateIrreg
       module procedure ESMF_LocStreamCreateByBkgMesh
@@ -1387,7 +1388,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateFromDG(name, distgrid, &
-                 destroyDistgrid, indexflag, coordSys, rc )
+                 indexflag, coordSys, rc )
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromDG
@@ -1396,7 +1397,6 @@ contains
 ! !ARGUMENTS:
       character (len=*),     intent(in),  optional :: name
       type(ESMF_DistGrid),   intent(in)            :: distgrid
-      logical,               intent(in), optional  :: destroyDistgrid
       type(ESMF_Index_Flag),  intent(in), optional  :: indexflag    
       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       integer,               intent(out), optional :: rc
@@ -1411,9 +1411,6 @@ contains
 !          Name of the location stream
 !     \item[distgrid]
 !          Distgrid specifying size and distribution. Only 1D distgrids are allowed.
-!     \item[{[destroyDistgrid]}]
-!          If .true. the locstream is responsible for destroying the distgrid.
-!          Defaults to .false. 
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
@@ -1435,7 +1432,6 @@ contains
       integer :: dimCount 
       type(ESMF_Index_Flag)  :: indexflagLocal
       type(ESMF_CoordSys_Flag) :: coordSysLocal
-      logical :: destroyDistgridLocal
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1467,12 +1463,6 @@ contains
          coordSysLocal=ESMF_COORDSYS_SPH_DEG
       endif
 
-      if (present(destroyDistgrid)) then
-          destroyDistgridLocal=destroyDistgrid
-      else
-          destroyDistgridLocal=.false.
-      endif
-
 
       ! Initialize pointers
       nullify(lstypep)
@@ -1494,7 +1484,7 @@ contains
       ! Set some remaining info into the struct      
       lstypep%indexflag=indexflagLocal
       lstypep%coordSys=coordSysLocal
-      lstypep%destroyDistgrid=destroyDistgridLocal
+      lstypep%destroyDistgrid=.false.
       lstypep%distgrid=distgrid
       lstypep%keyCount=0
 
@@ -1653,13 +1643,15 @@ contains
       ! Create LocStream using CreateFromDistGrid version
       ESMF_LocStreamCreateIrreg=ESMF_LocStreamCreateFromDG(name=name, &
                                                                distgrid=distgrid, &
-                                                               destroyDistgrid=.true., &
                                                                indexflag=indexflagLocal, &
                                                                coordSys=coordSysLocal, &
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Set distgrid to be destroyed, since ESMF created it
+      ESMF_LocStreamCreateIrreg%lstypep%destroyDistgrid=.true.
 
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1799,7 +1791,6 @@ contains
       ! Create LocStream using CreateFromDistGrid version
       ESMF_LocStreamCreateFromLocal=ESMF_LocStreamCreateFromDG(name=name, &
                                                                distgrid=distgrid, &
-                                                               destroyDistgrid=.true., &
                                                                indexflag=indexflagLocal, &
                                                                coordSys=coordSysLocal, &
                                                                rc=localrc )
@@ -1807,12 +1798,173 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Set distgrid to be destroyed, since ESMF created it
+      ESMF_LocStreamCreateFromLocal%lstypep%destroyDistgrid=.true.
+
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LocStreamCreateFromLocal
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD  
+#define ESMF_METHOD "ESMF_LocStreamCreateFromNewDG"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from an old one and a distgrid
+
+! !INTERFACE:  
+      ! Private name: call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateFromNewDG(locstream, name, distgrid, rc)
+
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateFromNewDG
+
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream), intent(in)                :: locstream
+      character (len=*),    intent(in), optional      :: name
+      type(ESMF_DistGrid),  intent(in)                :: distgrid
+      integer,              intent(out), optional     :: rc
+!
+! !DESCRIPTION:
+!
+!     Create a new location stream that is a copy of an old one, but with a new
+!     distribution. The new distribution is given by a distgrid passed into the call.
+!     Key and other class information is copied from the old locstream to the new one. 
+!     Information contained in Fields build on the location streams can be copied over
+!     by using the Field redistribution calls (e.g. {\tt ESMF\_FieldRedistStore()} 
+!     and {\tt ESMF\_FieldRedist()}).   
+!
+!     The arguments are:
+!     \begin{description}
+!      \item[locstream]
+!          Location stream from which the new location stream is to be created
+!      \item[{[name]}]
+!          Name of the resulting location stream
+!      \item[distgrid]
+!          Distgrid for new distgrid
+!      \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+      type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
+      type(ESMF_LocStream):: newLocStream
+      type(ESMF_ArrayBundle) :: oldAB, newAB
+      type(ESMF_RouteHandle) :: routehandle
+      type(ESMF_TypeKind_Flag) ::keyTypeKind
+      type(ESMF_CoordSys_Flag) :: coordSysLocal
+      character(len=ESMF_MAXSTR)    :: keytemp, string
+      integer :: keyCount,i
+      integer :: localrc
+
+
+! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Check Variables
+      ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
+
+      ! Get old locstream internal pointer
+      oldLStypep=>locstream%lstypep     
+
+      call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      ! Create new locStream
+      newLocStream=ESMF_LocStreamCreateFromDG(name=name, distgrid=distgrid, &
+                indexflag=oldLSTypep%indexFlag, &
+                coordSys=coordSysLocal,rc=localrc) 
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return     
+
+
+      ! Add keys to new Locstream
+      ! NOTE: We need a subroutine to add a list of keys. This is inefficient because of the allocations 
+      !       and searching for already in
+      keyCount=oldLStypep%keyCount
+      do i=1,keyCount
+
+         ! get key typeKind
+         call ESMF_ArrayGet(oldLStypep%keys(i), typekind=keyTypeKind, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+         call ESMF_LocStreamAddKey(newLocStream, oldLstypep%keyNames(i), keyTypeKind, &
+                       oldLstypep%keyUnits(i), oldLstypep%keyLongNames(i), rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+      enddo
+
+
+      ! Get new locstream internal pointer
+      newLStypep=>newLocStream%lstypep
+
+      ! NOTE THAT THIS ONLY WORKS BECAUSE THE LocStreamAddKey SUBROUTINE
+      ! ADDS KEYS AT THE END. IF THIS CHANGES THIS'LL STOP WORKING. 
+      ! FOR EFFICENCY REASONS I'LL LEAVE IT FOR NOW. IF IT CHANGES
+      ! REWRITE TO NOT DEPEND ON ORDER
+
+
+      ! Redistribute data from one locstream to another 
+
+      ! Create ArrayBundles for redistribution
+      oldAB=ESMF_ArrayBundleCreate(arrayList=oldLStypep%keys, rc=localrc)      
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      newAB=ESMF_ArrayBundleCreate(arrayList=newLStypep%keys, rc=localrc)      
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+
+      ! Setup for redist
+      call ESMF_ArrayBundleRedistStore(srcArrayBundle=oldAB, dstArrayBundle=newAB, &
+             routehandle=routeHandle, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      ! Do redist
+      call ESMF_ArrayBundleRedist(srcArrayBundle=oldAB, dstArrayBundle=newAB, &
+            routehandle=routeHandle, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      ! Get rid of routehandle
+      call  ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      ! Get rid of ArrayBundles
+      call ESMF_ArrayBundleDestroy(oldAB, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+      call ESMF_ArrayBundleDestroy(newAB, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return     
+
+     ! Output new locstream
+     ESMF_LocStreamCreateFromNewDG=newLocStream
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateFromNewDG
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1949,7 +2101,6 @@ contains
       ! Create LocStream using CreateFromDistGrid version
       ESMF_LocStreamCreateReg=ESMF_LocStreamCreateFromDG(name=name, &
                                                          distgrid=distgrid, &
-                                                         destroyDistgrid=.true., &
                                                          indexflag=indexflagLocal,&
                                                          coordSys=coordSysLocal, &
                                                          rc=localrc )
@@ -1957,6 +2108,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Set distgrid to be destroyed, since ESMF created it
+      ESMF_LocStreamCreateReg%lstypep%destroyDistgrid=.true.
 
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
@@ -5526,177 +5679,18 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Create new locStream
      ESMF_LocStreamCreatePetList=ESMF_LocStreamCreateFromNewDG(locstream, name, &
-                   distgrid=newDistgrid, destroyDistgrid=.true., rc=localrc)
+                   distgrid=newDistgrid, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return     
 
+      ! Set distgrid to be destroyed, since ESMF created it
+      ESMF_LocStreamCreatePetList%lstypep%destroyDistgrid=.true.
 
      ! Return success
      if (present(rc)) rc = ESMF_SUCCESS
 
      end function ESMF_LocStreamCreatePetList
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD  
-#define ESMF_METHOD "ESMF_LocStreamCreateFromNewDG"
-!BOPI
-! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from an old one and a distgrid
-
-! !INTERFACE:  
-      function ESMF_LocStreamCreateFromNewDG(locstream, name, distgrid, &
-                 destroyDistgrid, rc)
-
-!
-! !RETURN VALUE:
-      type(ESMF_LocStream) :: ESMF_LocStreamCreateFromNewDG
-
-!
-! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in)                :: locstream
-      character (len=*),    intent(in), optional      :: name
-      type(ESMF_DistGrid),  intent(in)                :: distgrid
-      logical,              intent(in)                :: destroyDistgrid
-      integer,              intent(out), optional     :: rc
-!
-! !DESCRIPTION:
-!
-!     Create a location stream from an existing one and a new distgrid.
-!     The data is copied from the old locstream to the new one. 
-!     Currently this is an internal subroutine not intended for public use. 
-!
-!     The arguments are:
-!     \begin{description}
-!      \item[locstream]
-!          Location stream from which the new location stream is to be created
-!      \item[{[name]}]
-!          Name of the resulting location stream
-!      \item[distgrid]
-!          Distgrid for new distgrid
-!      \item[destroyDistgrid]
-!          If true, then destroy the distgrid when the locstream is destroyed
-!      \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-      type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
-      type(ESMF_LocStream):: newLocStream
-      type(ESMF_ArrayBundle) :: oldAB, newAB
-      type(ESMF_RouteHandle) :: routehandle
-      type(ESMF_TypeKind_Flag) ::keyTypeKind
-      type(ESMF_CoordSys_Flag) :: coordSysLocal
-      character(len=ESMF_MAXSTR)    :: keytemp, string
-      integer :: keyCount,i
-      integer :: localrc
-
-
-! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! Check Variables
-      ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
-
-      ! Get old locstream internal pointer
-      oldLStypep=>locstream%lstypep     
-
-      call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      ! Create new locStream
-      newLocStream=ESMF_LocStreamCreateFromDG(name=name, distgrid=distgrid, &
-                destroyDistgrid=destroyDistgrid, indexflag=oldLSTypep%indexFlag, &
-                coordSys=coordSysLocal,rc=localrc) 
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return     
-
-
-      ! Add keys to new Locstream
-      ! NOTE: We need a subroutine to add a list of keys. This is inefficient because of the allocations 
-      !       and searching for already in
-      keyCount=oldLStypep%keyCount
-      do i=1,keyCount
-
-         ! get key typeKind
-         call ESMF_ArrayGet(oldLStypep%keys(i), typekind=keyTypeKind, rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-         call ESMF_LocStreamAddKey(newLocStream, oldLstypep%keyNames(i), keyTypeKind, &
-                       oldLstypep%keyUnits(i), oldLstypep%keyLongNames(i), rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-      enddo
-
-
-      ! Get new locstream internal pointer
-      newLStypep=>newLocStream%lstypep
-
-      ! NOTE THAT THIS ONLY WORKS BECAUSE THE LocStreamAddKey SUBROUTINE
-      ! ADDS KEYS AT THE END. IF THIS CHANGES THIS'LL STOP WORKING. 
-      ! FOR EFFICENCY REASONS I'LL LEAVE IT FOR NOW. IF IT CHANGES
-      ! REWRITE TO NOT DEPEND ON ORDER
-
-
-      ! Redistribute data from one locstream to another 
-
-      ! Create ArrayBundles for redistribution
-      oldAB=ESMF_ArrayBundleCreate(arrayList=oldLStypep%keys, rc=localrc)      
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      newAB=ESMF_ArrayBundleCreate(arrayList=newLStypep%keys, rc=localrc)      
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-
-      ! Setup for redist
-      call ESMF_ArrayBundleRedistStore(srcArrayBundle=oldAB, dstArrayBundle=newAB, &
-             routehandle=routeHandle, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      ! Do redist
-      call ESMF_ArrayBundleRedist(srcArrayBundle=oldAB, dstArrayBundle=newAB, &
-            routehandle=routeHandle, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      ! Get rid of routehandle
-      call  ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      ! Get rid of ArrayBundles
-      call ESMF_ArrayBundleDestroy(oldAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-      call ESMF_ArrayBundleDestroy(newAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return     
-
-     ! Output new locstream
-     ESMF_LocStreamCreateFromNewDG=newLocStream
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_LocStreamCreateFromNewDG
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
