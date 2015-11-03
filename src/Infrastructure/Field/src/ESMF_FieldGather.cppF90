@@ -70,6 +70,7 @@ contains
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldFill()"
+^define ESMF_FILE "ESMF_FieldGather.F90"
 !BOP
 ! !IROUTINE: ESMF_FieldFill - Fill data into a Field
 ! !INTERFACE:
@@ -125,7 +126,7 @@ contains
     call ESMF_FieldGet(field, typekind=typekind, rank=rank, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=ESMF_FILE)) &
       return  ! bail out
 
     if (trim(dataFillScheme)=="sincos") then
@@ -135,17 +136,17 @@ contains
         call ESMF_FieldGet(field, grid=grid, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
           dataPtrR8D1(i) = &
@@ -157,22 +158,22 @@ contains
         call ESMF_FieldGet(field, grid=grid, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
         do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
@@ -187,27 +188,27 @@ contains
         call ESMF_FieldGet(field, grid=grid, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_GridGetCoord(grid, coordDim=3, farrayPtr=coord3PtrR8D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         do k=lbound(dataPtrR8D3,3),ubound(dataPtrR8D3,3)
         do j=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
@@ -223,7 +224,7 @@ contains
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unsupported typekind-rank and scheme combination requested.", &
           line=__LINE__, &
-          file=__FILE__, &
+          file=ESMF_FILE, &
           rcToReturn=rc)
         return ! bail out
       endif
@@ -233,7 +234,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR8D1 = 1._ESMF_KIND_R8
@@ -242,7 +243,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR4D1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR4D1 = 1._ESMF_KIND_R4
@@ -251,7 +252,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR8D2 = 1._ESMF_KIND_R8
@@ -260,7 +261,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR4D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR4D2 = 1._ESMF_KIND_R4
@@ -269,7 +270,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR8D3 = 1._ESMF_KIND_R8
@@ -278,7 +279,7 @@ contains
         call ESMF_FieldGet(field, farrayPtr=dataPtrR4D3, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=ESMF_FILE)) &
           return  ! bail out
         ! initialize the entire array
         dataPtrR4D3 = 1._ESMF_KIND_R4
@@ -287,12 +288,13 @@ contains
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unknown dataFillScheme requested.", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=ESMF_FILE, &
         rcToReturn=rc)
       return ! bail out
     endif
     
   end subroutine
+^undef ESMF_FILE
 !------------------------------------------------------------------------------
 
 
