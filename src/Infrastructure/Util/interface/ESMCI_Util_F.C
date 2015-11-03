@@ -28,6 +28,7 @@
 #endif
 #include <map>
 #include <string>
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 using namespace std;
@@ -292,6 +293,37 @@ extern "C" {
   }
 #endif
 
+}
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_UtilSystem - Execute a command line
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_utilsystem)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      char *command,            // out - command line
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg command_l) { // in, hidden - command length
+//
+// !DESCRIPTION:
+//     Execute a command line.  Return when complete.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_UtilSystem"
+
+  string comnd = string (command, ESMC_F90lentrim (command, command_l));
+  int err = system (comnd.c_str());
+  if (rc)
+    if (err == 0)
+      *rc = ESMF_SUCCESS;
+    else
+      *rc = ESMF_FAILURE;
 }
 
 //-----------------------------------------------------------------------------
