@@ -158,7 +158,7 @@ Arg:
             "!CALLING SEQUENCE:",
             "!AUTHOR:",
             "!CALLED FROM:",
-            "!LOCAL VARIABLES:" );
+            "!LOCAL VARIABLES:");
 
 # Initialize these for clarity
 # ----------------------------
@@ -549,6 +549,16 @@ LINE:
 }#         end if
 }#      end if
 
+
+#       Anchor
+#       ----------------------------------
+        if ($Fld[2] eq '!ANCHOR:') {            # HTML anchor
+           if ($prologue) {
+	      printf("\\label{$Fld[3]}\n");
+              next LINE;
+}#         end if
+}#      end if
+
 #       A new INTERNAL subroutine/function
 #       ----------------------------------
         if ($Fld[2] eq '!IROUTINE:') {            # Internal routine
@@ -681,7 +691,7 @@ KEY:       foreach $key ( @keys ) {
                 if( /USES/ || /INPUT/ || /OUTPUT/ || /PARAMETERS/ || 
                     /VALUE/  || /ARGUMENTS/ ) {
                     printf "{\\em %s}\n", substr($k, 2, $ln - 1); } # italics
-                 else {
+		 else {
                     printf "{\\sf %s}\n", substr($k, 2, $ln - 1); # san serif
 }#               end if
 

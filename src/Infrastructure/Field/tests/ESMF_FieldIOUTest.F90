@@ -830,6 +830,14 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
+  ! Make sure read-only files can be read.
+  call ESMF_VMBarrier (vm)
+  if (localPet == 0) then
+    call c_ESMC_UtilSystem ("chmod 444 field_2DE.nc", rc)
+    call c_ESMC_UtilSystem ("ls -l field_2DE.nc", rc)
+  end if
+  call ESMF_VMBarrier (vm)
+
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! read array into Field.
@@ -844,6 +852,14 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
 !------------------------------------------------------------------------
+
+  ! change permission back to read-write to avoid issues with test cleanup.
+  call ESMF_VMBarrier (vm)
+  if (localPet == 0) then
+    call c_ESMC_UtilSystem ("chmod 644 field_2DE.nc", rc)
+    call c_ESMC_UtilSystem ("ls -l field_2DE.nc", rc)
+  end if
+  call ESMF_VMBarrier (vm)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
