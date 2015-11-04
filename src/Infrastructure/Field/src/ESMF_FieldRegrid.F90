@@ -330,7 +330,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
-                    srcFracField, dstFracField, unmappedDstList, rc)
+                     srcFracField, dstFracField, unmappedDstList, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_Field),               intent(in)              :: srcField
@@ -370,7 +370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              {\tt pipelineDepth}, and {\tt unmappedDstList}.
 !              The argument {\tt ignoreDegenerate} allows the user to skip degenerate
 !              cells in the regridding instead of stopping with an error. 
-!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
+ !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. The argument {\tt unmappedDstList} allows the user to 
 !              get a list of the destination items which the regridding couldn't 
@@ -402,10 +402,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       destination Field.  This is true even if the data in the Fields 
 !       changes. The routehandle may also be used to interpolate between any
 !       source and destination Field which are created on the same location 
-!       in the same Grid or Mesh as the original Fields.        
+!       in the same Grid, LocStream, or Mesh as the original Fields.        
 !
 !       When it's no longer needed the routehandle should be destroyed by 
 !       using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!
+!       Note, as a side effect, that this call may change the data in {\tt dstField}. If
+!       this is undesirable, then an easy work around is to create a second temporary field
+!       with the same structure as {\tt dstField} and pass that in instead. 
 !
 !     The arguments are:
 !     \begin{description}
