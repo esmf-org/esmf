@@ -37,6 +37,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Util.h"
+#include "ESMC_CoordSys.h"
 
 #if defined (__cplusplus)
 extern "C" {
