@@ -152,7 +152,6 @@ class Mesh(object):
     @initialize
     def __init__(self, parametric_dim=None,
                  spatial_dim=None,
-                 coord_sys=None,
                  filename=None,
                  filetype=None,
                  convert_to_dual=None,
@@ -180,11 +179,6 @@ class Mesh(object):
                             dimension (e.g. the 2D surface of a sphere in 3D space), but it
                             cannot be smaller. \n
                     Optional arguments for creating a Mesh in memory: \n
-                        coord_sys: the coordinate system for the Mesh. \n
-                            Argument values are:\n
-                                (default) CoordSys.CART\n
-                                CoordSys.SPH_DEG\n
-                                CoordSys.SPH_RAD\n
                         None \n
             Mesh from file: \n
                 Note that Meshes created from file do not have the parametric_dim and
@@ -251,9 +245,7 @@ class Mesh(object):
                 warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
             if spatial_dim is not None:
                 warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
-            if coord_sys is not None:
-                warning.warn("coord_sys is only used for meshes created in memory, this argument will be ignored.")
-
+        
         # ctypes stuff
         self._struct = None
     
@@ -262,7 +254,6 @@ class Mesh(object):
         self._size_owned = [None, None]
         self._parametric_dim = None
         self._spatial_dim = None
-        self._coord_sys = None
         self._rank = 1
         self._coords = None
         self._mask = [None, None]
@@ -284,11 +275,9 @@ class Mesh(object):
             
             # call into ctypes layer
             self._struct = ESMP_MeshCreate(parametricDim=parametric_dim,
-                                          spatialDim=spatial_dim,
-                                          coordSys=coord_sys)
+                                          spatialDim=spatial_dim)
             self._parametric_dim = parametric_dim
             self._spatial_dim = spatial_dim
-            self._coord_sys = coord_sys
         else:
             # call into ctypes layer
             self._struct = ESMP_MeshCreateFromFile(filename, filetype,

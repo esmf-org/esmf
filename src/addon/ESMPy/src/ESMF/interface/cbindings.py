@@ -809,26 +809,19 @@ def ESMP_MeshAddNodes(mesh, nodeCount,
                         constants._errmsg)
 
 _ESMF.ESMC_MeshCreate.restype = ESMP_Mesh
-_ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int,
-                                  OptionalNamedConstant, ct.POINTER(ct.c_int)]
+_ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int, ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_MeshCreate(parametricDim, spatialDim, coordSys):
+def ESMP_MeshCreate(parametricDim, spatialDim):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Mesh has been created.\n
     Arguments:\n
-        :RETURN: ESMP_Mesh    :: mesh\n
-        integer               :: parametricDim\n
-        integer               :: spatialDim\n
-        CoordSys (optional)   :: coordSys\n
-            Argument Values:\n
-                (default) CoordSys.CART\n
-                CoordSys.SPH_DEG\n
-                CoordSys.SPH_RAD\n
-
+        :RETURN: ESMP_Mesh :: mesh\n
+        integer            :: parametricDim\n
+        integer            :: spatialDim\n
     """
     lrc = ct.c_int(0)
-    mesh = _ESMF.ESMC_MeshCreate(parametricDim, spatialDim, coordSys, ct.byref(lrc))
+    mesh = _ESMF.ESMC_MeshCreate(parametricDim, spatialDim, ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshCreate() failed with rc = '+str(rc)+'.    '+

@@ -18,7 +18,7 @@ except:
 
 
 
-def mesh_create_5_pentahexa(coord_sys=None):
+def mesh_create_5_pentahexa():
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.
@@ -45,7 +45,7 @@ def mesh_create_5_pentahexa(coord_sys=None):
     Note: This mesh is not parallel, it can only be used in serial
     '''
     # Two parametric dimensions, and two spatial dimensions
-    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2, coord_sys=coord_sys)
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
     num_node = 12
     num_elem = 5
