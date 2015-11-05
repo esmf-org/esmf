@@ -1036,7 +1036,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1388,7 +1388,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1723,7 +1723,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2034,7 +2034,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = NUOPC_ConvertStringToInt(valueString, &
+    profiling = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2045,7 +2045,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2265,7 +2265,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

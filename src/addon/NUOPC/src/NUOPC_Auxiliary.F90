@@ -20,7 +20,6 @@ module NUOPC_Auxiliary
   
   private
   
-  public NUOPC_ConvertStringToInt         ! method TODO: to cover by ESMF
   public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
   public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
@@ -32,7 +31,7 @@ module NUOPC_Auxiliary
 !==============================================================================
 
   interface NUOPC_Write
-    module procedure NUOPC_WriteWeights
+    module procedure NUOPC_FactorsWrite
     module procedure NUOPC_FieldWrite
     module procedure NUOPC_StateWrite
   end interface
@@ -43,104 +42,6 @@ module NUOPC_Auxiliary
   contains
   !-----------------------------------------------------------------------------
   
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_ConvertStringToInt - Convert a string to an integer
-! !INTERFACE:
-  function NUOPC_ConvertStringToInt(string, specialStringList, specialValueList, rc)
-! !RETURN VALUE:
-    integer :: NUOPC_ConvertStringToInt
-! !ARGUMENTS:
-    character(len=*), intent(in)            :: string
-    character(len=*), intent(in),  optional :: specialStringList(:)
-    integer,          intent(in),  optional :: specialValueList(:)
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Return the numerical integer value represented by the {\tt string}. 
-!   If special strings are to be takein into account, both 
-!   {\tt specialStringList} and {\tt specialValueList} arguments must be
-!   present and of same size.
-!   
-!   An error is returned, and return value set to 0, if {\tt string} is not
-!   found in {\tt specialStringList}, and does not convert into an integer
-!   value.
-!
-!   Leading and trailing blanks in {\tt string} are ignored when directly
-!   converting into integers. 
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[string]
-!     The string to be converted
-!   \item[{[specialStringList]}]
-!     List of special strings.
-!   \item[{[specialValueList]}]
-!     List of values associated with special strings.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    logical                 :: ssL, svL
-    integer                 :: i
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    NUOPC_ConvertStringToInt = 0 ! initialize
-    
-    ! checking consistency of inputs provided
-    ssL = present(specialStringList)
-    svL = present(specialValueList)
-    
-    if (ssL.neqv.svL) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Both specialStringList and specialValueList must either be "// &
-        "present or absent.", &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
-      return ! bail out
-    endif
-    
-    if (ssL) then
-      ! special strings and values present
-      if (size(specialStringList) /= size(specialValueList)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Both specialStringList and specialValueList must have "// &
-          "the same number of elements.", &
-          line=__LINE__, &
-          file=__FILE__, &
-          rcToReturn=rc)
-        return ! bail out
-      endif
-      do i=1, size(specialStringList)
-        if (trim(string)==trim(specialStringList(i))) then
-          ! found a matching special string
-          NUOPC_ConvertStringToInt = specialValueList(i)
-          return ! successful early return
-        endif
-      enddo
-    endif
-    
-    if (verify(trim(adjustl(string)),"0123456789") == 0) then
-      ! should convert to integer just fine
-      read (string, "(i10)") NUOPC_ConvertStringToInt
-    else
-      ! the string contains characters besides numbers
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="The string '"//trim(string)//"' contains characters besides "// &
-          "numbers, cannot convert to integer.", &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
-      return ! bail out
-    endif
-    
-  end function
-  !-----------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CreateSimpleSphGrid - Create a simple spherical grid
@@ -488,6 +389,90 @@ module NUOPC_Auxiliary
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
+! !INTERFACE:
+  ! call using generic interface: NUOPC_Write
+  subroutine NUOPC_FactorsWrite(factorList, fileName, rc)
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), pointer               :: factorList(:)
+    character(*),       intent(in)            :: fileName
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the destributed {\tt factorList} to file. Each PET calls with its 
+!   local list of factors. The call then writes the distributed factors into
+!   a single file. The order of the factors in the file is first by PET, and 
+!   within each PET the PET-local order is preserved. Changing the number of 
+!   PETs for the same regrid operation will likely change the order of factors
+!   across PETs, and therefore files written will differ.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[factorList]
+!     The distributed factor list.
+!   \item[fileName]
+!     The name of the file to be written to.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
+    type(ESMF_VM)                   :: vm
+    type(ESMF_DistGrid)             :: dg
+    type(ESMF_Array)                :: array
+    integer                         :: localPet, petCount
+    integer                         :: j
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(weightsPerPet(petCount))
+    call ESMF_VMAllGather(vm, (/size(factorList)/), weightsPerPet, &
+      count=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allocate(deBlockList(1,2,petCount))
+    do j=1, petCount
+      if (j==1) then
+        deBlockList(1,1,j) = 1
+        deBlockList(1,2,j) = weightsPerPet(1)
+      else
+        deBlockList(1,1,j) = deBlockList(1,2,j-1) + 1
+        deBlockList(1,2,j) = deBlockList(1,1,j) + weightsPerPet(j) - 1
+      endif
+    enddo
+    dg = ESMF_DistGridCreate(minIndex=(/1/), &
+      maxIndex=(/deBlockList(1,2,petCount)/), &
+      deBlockList=deBlockList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    array = ESMF_ArrayCreate(dg, factorList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayWrite(array, fileName, variableName="weights", &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_DistGridDestroy(dg, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    deallocate(weightsPerPet, deBlockList)
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_Write - Write Field data to file
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
@@ -711,90 +696,6 @@ module NUOPC_Auxiliary
     
     deallocate(fieldNameList_loc)
 
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
-! !INTERFACE:
-  ! call using generic interface: NUOPC_Write
-  subroutine NUOPC_WriteWeights(factorList, fileName, rc)
-! !ARGUMENTS:
-    real(ESMF_KIND_R8), pointer               :: factorList(:)
-    character(*),       intent(in)            :: fileName
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Write the destributed {\tt factorList} to file. Each PET calls with its 
-!   local list of factors. The call then writes the distributed factors into
-!   a single file. The order of the factors in the file is first by PET, and 
-!   within each PET the PET-local order is preserved. Changing the number of 
-!   PETs for the same regrid operation will likely change the order of factors
-!   across PETs, and therefore files written will differ.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[factorList]
-!     The distributed factor list.
-!   \item[fileName]
-!     The name of the file to be written to.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer, allocatable            :: deBlockList(:,:,:), weightsPerPet(:)
-    type(ESMF_VM)                   :: vm
-    type(ESMF_DistGrid)             :: dg
-    type(ESMF_Array)                :: array
-    integer                         :: localPet, petCount
-    integer                         :: j
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    call ESMF_VMGetCurrent(vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    allocate(weightsPerPet(petCount))
-    call ESMF_VMAllGather(vm, (/size(factorList)/), weightsPerPet, &
-      count=1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    allocate(deBlockList(1,2,petCount))
-    do j=1, petCount
-      if (j==1) then
-        deBlockList(1,1,j) = 1
-        deBlockList(1,2,j) = weightsPerPet(1)
-      else
-        deBlockList(1,1,j) = deBlockList(1,2,j-1) + 1
-        deBlockList(1,2,j) = deBlockList(1,1,j) + weightsPerPet(j) - 1
-      endif
-    enddo
-    dg = ESMF_DistGridCreate(minIndex=(/1/), &
-      maxIndex=(/deBlockList(1,2,petCount)/), &
-      deBlockList=deBlockList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    array = ESMF_ArrayCreate(dg, factorList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_ArrayWrite(array, fileName, variableName="weights", &
-      status=ESMF_FILESTATUS_REPLACE, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_ArrayDestroy(array, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_DistGridDestroy(dg, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    deallocate(weightsPerPet, deBlockList)
-    
   end subroutine
   !-----------------------------------------------------------------------------
 
