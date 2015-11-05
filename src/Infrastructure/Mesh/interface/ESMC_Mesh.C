@@ -42,7 +42,8 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreate()"
-ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
+ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, enum ESMC_CoordSys_Flag *coordSys, 
+                          int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
@@ -51,8 +52,16 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
   ESMC_Mesh mesh;
   mesh.ptr = NULL;
 
+  // Set coordSys
+  ESMC_CoordSys_Flag localCoordSys;
+  if (coordSys != NULL) {
+    localCoordSys=*coordSys;
+  } else {
+    localCoordSys=ESMC_COORDSYS_SPH_DEG;
+  }
+
   // call into ESMCI method
-  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, ESMC_COORDSYS_CART, &localrc);
+  mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, localCoordSys, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 
