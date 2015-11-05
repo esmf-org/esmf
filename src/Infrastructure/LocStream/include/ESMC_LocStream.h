@@ -57,7 +57,7 @@ typedef struct{
 // !INTERFACE:
 ESMC_LocStream ESMC_LocStreamCreateLocal(
 				    int ls_size,   //size of the location stream
-				    ESMC_CoordSys_Flag *coordSys,
+				    enum ESMC_CoordSys_Flag *coordSys,
 				    int *rc                                   // out
 );
 
