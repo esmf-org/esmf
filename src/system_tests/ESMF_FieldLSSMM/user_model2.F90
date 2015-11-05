@@ -87,7 +87,7 @@
           rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      locs = ESMF_LocStreamCreate(distgrid=distgrid, destroyDistgrid=.true., &
+      locs = ESMF_LocStreamCreate(distgrid=distgrid, &
               indexflag=ESMF_INDEX_GLOBAL, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)

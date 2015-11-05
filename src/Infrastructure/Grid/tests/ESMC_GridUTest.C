@@ -132,10 +132,9 @@ int main(void){
   strcpy(name, "GridCreateFromFile_SCRIP");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
-  int regDecomp[2] = {petCount,1};
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc",
 					   ESMC_FILEFORMAT_SCRIP,
-					   regDecomp, NULL, NULL, NULL, NULL, 
+					   NULL, NULL, NULL, NULL, NULL, 
 					   NULL, NULL, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -155,6 +154,7 @@ int main(void){
   strcpy(name, "GridCreateFromFile_SCRIP_decomp_BALANCED_BALANCED");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
+  int regDecomp[2] = {petCount,1};
   int decompflag[2] = {ESMC_DECOMP_BALANCED, ESMC_DECOMP_BALANCED};
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", 
 					   ESMC_FILEFORMAT_SCRIP,
