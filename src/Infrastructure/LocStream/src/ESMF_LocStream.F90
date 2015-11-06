@@ -1387,19 +1387,20 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromDG(name, distgrid, &
-                 indexflag, coordSys, rc )
+      function ESMF_LocStreamCreateFromDG(name, distgrid, indexflag, coordSys, &
+        vm, rc )
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromDG
 
 !
 ! !ARGUMENTS:
-      character (len=*),     intent(in),  optional :: name
-      type(ESMF_DistGrid),   intent(in)            :: distgrid
-      type(ESMF_Index_Flag),  intent(in), optional  :: indexflag    
+      character (len=*),        intent(in),  optional :: name
+      type(ESMF_DistGrid),      intent(in)            :: distgrid
+      type(ESMF_Index_Flag),    intent(in),  optional :: indexflag    
       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
-      integer,               intent(out), optional :: rc
+      type(ESMF_VM),            intent(in),  optional :: vm
+      integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
@@ -1420,18 +1421,24 @@ contains
 !         The coordinate system of the location stream coordinate data.
 !         For a full list of options, please see Section~\ref{const:coordsys}.
 !         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     \item[{[vm]}]
+!         If present, the LocStream object is created on the specified 
+!         {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!         current context.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-      integer                            :: localrc  ! Error status
-      type (ESMF_LocStreamType), pointer :: lstypep
-      type(ESMF_LocStream)               :: locstream 
-      integer :: dimCount 
-      type(ESMF_Index_Flag)  :: indexflagLocal
-      type(ESMF_CoordSys_Flag) :: coordSysLocal
+      integer                             :: localrc  ! Error status
+      type (ESMF_LocStreamType), pointer  :: lstypep
+      type(ESMF_LocStream)                :: locstream 
+      integer                             :: dimCount 
+      type(ESMF_Index_Flag)               :: indexflagLocal
+      type(ESMF_CoordSys_Flag)            :: coordSysLocal
+      type(ESMF_Pointer)                  :: vmThis
+      logical                             :: actualFlag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1439,72 +1446,84 @@ contains
       ! Init check input types
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit,distgrid,rc)      
 
-      ! Make sure DistGrid is 1D
-      call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
+      ! Must make sure the local PET is associated with an actual member
+      actualFlag = .true.
+      if (present(vm)) then
+        call ESMF_VMGetThis(vm, vmThis)
+        if (vmThis == ESMF_NULL_POINTER) then
+          actualFlag = .false.  ! local PET is not for an actual member of Array
+        endif
+      endif
+
+      if (actualFlag) then
+        ! only actual member PETs actually create a LocStream object
+      
+        ! Make sure DistGrid is 1D
+        call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
-      if (dimCount .ne. 1) then
-         if (ESMF_LogFoundError(ESMF_RC_ARG_RANK, &
-           msg=" - DistGrid must be 1D", &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+        if (dimCount .ne. 1) then
+          if (ESMF_LogFoundError(ESMF_RC_ARG_RANK, &
+            msg=" - DistGrid must be 1D", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
 
-      ! Set defaults
-      if (present(indexflag)) then
-         indexflagLocal=indexflag
-      else
-         indexflagLocal=ESMF_INDEX_DELOCAL
-      endif
+        ! Set defaults
+        if (present(indexflag)) then
+          indexflagLocal=indexflag
+        else
+          indexflagLocal=ESMF_INDEX_DELOCAL
+        endif
 
-      if (present(coordSys)) then
-         coordSysLocal=coordSys
-      else
-         coordSysLocal=ESMF_COORDSYS_SPH_DEG
-      endif
+        if (present(coordSys)) then
+          coordSysLocal=coordSys
+        else
+          coordSysLocal=ESMF_COORDSYS_SPH_DEG
+        endif
 
+        ! Initialize pointers
+        nullify(lstypep)
+        nullify(ESMF_LocStreamCreateFromDG%lstypep)
 
-      ! Initialize pointers
-      nullify(lstypep)
-      nullify(ESMF_LocStreamCreateFromDG%lstypep)
-
-      ! allocate LocStream type
-      allocate(lstypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
+        ! allocate LocStream type
+        allocate(lstypep, stat=localrc)
+        if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      ! Allocate space for keys
-      nullify(lstypep%keyNames)
-      nullify(lstypep%keyUnits)
-      nullify(lstypep%keyLongNames)
-      nullify(lstypep%keys)
-      nullify(lstypep%destroyKeys)
+        ! Allocate space for keys
+        nullify(lstypep%keyNames)
+        nullify(lstypep%keyUnits)
+        nullify(lstypep%keyLongNames)
+        nullify(lstypep%keys)
+        nullify(lstypep%destroyKeys)
 
-      ! Set some remaining info into the struct      
-      lstypep%indexflag=indexflagLocal
-      lstypep%coordSys=coordSysLocal
-      lstypep%destroyDistgrid=.false.
-      lstypep%distgrid=distgrid
-      lstypep%keyCount=0
+        ! Set some remaining info into the struct      
+        lstypep%indexflag=indexflagLocal
+        lstypep%coordSys=coordSysLocal
+        lstypep%destroyDistgrid=.false.
+        lstypep%distgrid=distgrid
+        lstypep%keyCount=0
 
-      ! set Name
-      call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
-      if (ESMF_LogFoundError(localrc, &
+        ! set Name
+        call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
+        if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! Set pointer to internal locstream type
+        locstream%lstypep=>lstypep
 
-      ! Set pointer to internal locstream type
-      locstream%lstypep=>lstypep
-
-      ! Set return value.
-      ESMF_LocStreamCreateFromDG=locstream
+        ! Set return value.
+        ESMF_LocStreamCreateFromDG=locstream
       
-      ! Add reference to this object into ESMF garbage collection table
-      ! Only call this in those Create() methods that do not call other LSCreate()
-      call c_ESMC_VMAddFObject(locstream, &
-        ESMF_ID_LOCSTREAM%objectID)
+        ! Add reference to this object into ESMF garbage collection table
+        ! Only call this in those Create() methods that do not call other LSCreate()
+        call c_ESMC_VMAddFObject(locstream, &
+          ESMF_ID_LOCSTREAM%objectID)
+        
+      endif
 
       ! set init status to created
       ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateFromDG)
@@ -1736,7 +1755,7 @@ contains
       endif
 
       ! Get VM for this context
-      call ESMF_VMGetGlobal( vm, rc=localrc )
+      call ESMF_VMGetCurrent(vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2073,8 +2092,8 @@ contains
          regDecompLocal=regDecomp
       else
         ! By default set regdecomp to the number of PETs
-        !! Get VM for this conext
-        call ESMF_VMGetGlobal(vm, rc=localrc )
+        !! Get VM for this context
+        call ESMF_VMGetCurrent(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2597,19 +2616,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_LocStreamGet - Return object-wide information from a LocStream
 
 ! !INTERFACE:
-  subroutine ESMF_LocStreamGet(locstream, distgrid, keyCount, &
-               keyNames, localDECount, indexflag, coordSys, name, rc)
+  subroutine ESMF_LocStreamGet(locstream, distgrid, keyCount, keyNames, &
+    localDECount, indexflag, coordSys, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Locstream), intent(in)             :: locstream
-    type(ESMF_DistGrid), intent(out),  optional  :: distgrid
-    integer, intent(out),optional                :: keyCount
-    character(len=ESMF_MAXSTR),optional          :: keyNames(:) 
-    integer, intent(out),optional                :: localDECount
-    type(ESMF_Index_Flag), intent(out), optional  :: indexflag
-    type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
-    character(len=*), intent(out),     optional  :: name
-    integer, intent(out), optional               :: rc
+    type(ESMF_Locstream),         intent(in)            :: locstream
+    type(ESMF_DistGrid),          intent(out), optional :: distgrid
+    integer,                      intent(out), optional :: keyCount
+    character(len=ESMF_MAXSTR),                optional :: keyNames(:) 
+    integer,                      intent(out), optional :: localDECount
+    type(ESMF_Index_Flag),        intent(out), optional :: indexflag
+    type(ESMF_CoordSys_Flag),     intent(out), optional :: coordSys
+    character(len=*),             intent(out), optional :: name
+    integer,                      intent(out), optional :: rc
 
 
 !
@@ -3382,7 +3401,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetBounds"
 !BOP
-! !IROUTINE: ESMF_LocStreamGet - Get DE-local bounds of a LocStream
+! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
 
 ! !INTERFACE:
       subroutine ESMF_LocStreamGetBounds(locstream, localDE, & 
@@ -5469,7 +5488,7 @@ end subroutine ESMF_LocStreamGetBounds
      petListCount=size(petList)
 
      ! Get current VM
-     call ESMF_VMGetGlobal(vm, rc=localrc)
+     call ESMF_VMGetCurrent(vm, rc=localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
