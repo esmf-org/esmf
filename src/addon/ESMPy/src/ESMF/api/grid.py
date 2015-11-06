@@ -132,10 +132,6 @@ class Grid(object):
         return self._staggerloc
 
     @property
-    def singlestagger(self):
-        return self._singlestagger
-
-    @property
     def struct(self):
         return self._struct
 
@@ -472,9 +468,6 @@ class Grid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-        # set the single stagger flag
-        self._singlestagger = False
-
     # manual destructor
     def destroy(self):
         """
@@ -566,41 +559,6 @@ class Grid(object):
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
         return ret
-
-    def _preslice_(self, stagger):
-        # to be used to slice off one stagger location of a grid for a specific field
-        ret = self._copy_()
-
-        # bounds, coords, mask and area
-        ret._lower_bounds = get_none_or_slice(self.lower_bounds, stagger)
-        ret._upper_bounds = get_none_or_slice(self.upper_bounds, stagger)
-        ret._coords = get_none_or_slice(self.coords, stagger)
-        ret._mask = get_none_or_slice(self.mask, stagger)
-        ret._area = get_none_or_slice(self.area, stagger)
-
-        ret._singlestagger = True
-
-        return ret
-
-    def _slice_onestagger_(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
-
-        # to be used to slice the single stagger grid, one that has already been presliced
-        slc = get_formatted_slice(slc, self.rank)
-        ret = self._copy_()
-
-        # coords, mask and area
-        ret._coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.rank)]
-        ret._mask = get_none_or_slice(self.mask, slc)
-        ret._area = get_none_or_slice(self.area, slc)
-
-        # upper bounds are "sliced" by taking the shape of the coords at first coorddim
-        ret._upper_bounds = get_none_or_bound(ret.coords, 0)
-        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
-
-        return ret
-
 
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
@@ -753,20 +711,16 @@ class Grid(object):
         """
 
         ret = None
-        if not self._singlestagger:
-            # handle the default case
-            if staggerloc is None:
-                staggerloc = StaggerLoc.CENTER
-            elif type(staggerloc) is list:
-                raise GridSingleStaggerloc
-            elif type(staggerloc) is tuple:
-                raise GridSingleStaggerloc
+        # handle the default case
+        if staggerloc is None:
+            staggerloc = StaggerLoc.CENTER
+        elif type(staggerloc) is list:
+            raise GridSingleStaggerloc
+        elif type(staggerloc) is tuple:
+            raise GridSingleStaggerloc
 
-            assert (self.coords[staggerloc][coord_dim] is not None)
-            ret = self.coords[staggerloc][coord_dim]
-        else:
-            assert (self.coords[coord_dim] is not None)
-            ret = self.coords[coord_dim]
+        assert (self.coords[staggerloc][coord_dim] is not None)
+        ret = self.coords[staggerloc][coord_dim]
 
         return ret
 
@@ -801,33 +755,23 @@ class Grid(object):
         """
 
         ret = None
-        if not self._singlestagger:
-            # handle the default case
-            if staggerloc is None:
-                staggerloc = StaggerLoc.CENTER
-            elif type(staggerloc) is list:
-                raise GridSingleStaggerloc
-            elif type(staggerloc) is tuple:
-                raise GridSingleStaggerloc
+        # handle the default case
+        if staggerloc is None:
+            staggerloc = StaggerLoc.CENTER
+        elif type(staggerloc) is list:
+            raise GridSingleStaggerloc
+        elif type(staggerloc) is tuple:
+            raise GridSingleStaggerloc
 
-            # selec the grid item
-            if item == GridItem.MASK:
-                assert (self.mask[staggerloc] is not None)
-                ret = self.mask[staggerloc]
-            elif item == GridItem.AREA:
-                assert (self.area[staggerloc] is not None)
-                ret = self.area[staggerloc]
-            else:
-                raise GridItemNotSupported
+        # selec the grid item
+        if item == GridItem.MASK:
+            assert (self.mask[staggerloc] is not None)
+            ret = self.mask[staggerloc]
+        elif item == GridItem.AREA:
+            assert (self.area[staggerloc] is not None)
+            ret = self.area[staggerloc]
         else:
-            if item == GridItem.MASK:
-                assert (self.mask is not None)
-                ret = self.mask
-            elif item == GridItem.AREA:
-                assert (self.area is not None)
-                ret = self.area
-            else:
-                raise GridItemNotSupported
+            raise GridItemNotSupported
 
         return ret
 

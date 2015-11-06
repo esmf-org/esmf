@@ -241,10 +241,7 @@ class Field(object):
         self._upper_bounds = ubounds
         self._ndbounds = local_ndbounds
 
-        if not grid.singlestagger:
-            self._grid = grid._preslice_(staggerloc)
-        else:
-            self._grid = grid
+        self._grid = grid
 
         # for arbitrary metadata
         self._meta = {}
@@ -336,7 +333,7 @@ class Field(object):
             slc_grid = [slc[-1*x] for x in range(self.rank-self.xd, 0, -1)]
         else:
             slc_grid = slc
-        ret._grid = self.grid._slice_onestagger_(slc_grid)
+        ret._grid = self.grid.__getitem__(slc_grid)
 
         # upper bounds are "sliced" by taking the shape of the data
         ret._upper_bounds = np.array(ret.data.shape, dtype=np.int32)
