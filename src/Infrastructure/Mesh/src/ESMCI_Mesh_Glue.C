@@ -2369,7 +2369,7 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
                 //printf("\nESMCI:getlocalelemcoords, coords = [");
                 for (int j = 0; j < sdim; ++j) {
                     ecoords[elemCoordPos++] = coords[j];
-                    //                    printf("GEC %d %f \n ",elem.get_id(),coords[j]);
+                    //printf("GEC %d %f \n ",elem.get_id(),coords[j]);
                 }
                 //printf("]\n");
             }

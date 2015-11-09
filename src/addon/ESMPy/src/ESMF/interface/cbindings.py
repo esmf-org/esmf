@@ -86,8 +86,8 @@ class OptionalNamedConstant(object):
             if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_uint)
-                paramptr = ptr(ct.c_uint(param))
+                ptr = ct.POINTER(ct.c_int)
+                paramptr = ptr(ct.c_int(param))
                 return paramptr
 
 # this class allows optional arguments to be passed in place of
@@ -809,19 +809,28 @@ def ESMP_MeshAddNodes(mesh, nodeCount,
                         constants._errmsg)
 
 _ESMF.ESMC_MeshCreate.restype = ESMP_Mesh
-_ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int, ct.POINTER(ct.c_int)]
+_ESMF.ESMC_MeshCreate.argtypes = [ct.c_int, ct.c_int,
+                                  OptionalNamedConstant, ct.POINTER(ct.c_int)]
 @deprecated
-def ESMP_MeshCreate(parametricDim, spatialDim):
+def ESMP_MeshCreate(parametricDim, spatialDim, coordSys=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Mesh has been created.\n
     Arguments:\n
-        :RETURN: ESMP_Mesh :: mesh\n
-        integer            :: parametricDim\n
-        integer            :: spatialDim\n
+        :RETURN: ESMP_Mesh    :: mesh\n
+        integer               :: parametricDim\n
+        integer               :: spatialDim\n
+        CoordSys (optional)   :: coordSys\n
+            Argument Values:\n
+                (default) CoordSys.CART\n
+                CoordSys.SPH_DEG\n
+                CoordSys.SPH_RAD\n
+
     """
     lrc = ct.c_int(0)
-    mesh = _ESMF.ESMC_MeshCreate(parametricDim, spatialDim, ct.byref(lrc))
+    # NOTE: for some reason the default argument does not come through correctly
+    coordSys = coordSys or constants.CoordSys.CART
+    mesh = _ESMF.ESMC_MeshCreate(parametricDim, spatialDim, coordSys, ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshCreate() failed with rc = '+str(rc)+'.    '+
@@ -1130,6 +1139,9 @@ def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
 
     """
     lrc = ct.c_int(0)
+
+    # NOTE: for some reason the default argument does not come through correctly
+    coordSys = coordSys or constants.CoordSys.CART
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
     locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, coordSys, ct.byref(lrc))

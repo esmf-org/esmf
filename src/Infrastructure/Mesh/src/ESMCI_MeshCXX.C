@@ -676,8 +676,8 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int coordsPresent = (elemCoords != NULL);
 
   // Get parametric dimension
-  int parametric_dim=meshPointer->parametric_dim();
-  int spatial_dim=meshPointer->spatial_dim();
+  int parametric_dim=parametricDim;
+  int spatial_dim=spatialDim;
   
   // Check size of connectivity list
   int expected_conn_size=0;

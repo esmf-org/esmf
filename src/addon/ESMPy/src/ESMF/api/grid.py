@@ -67,6 +67,13 @@ class Grid(object):
         return self._finalized
 
     @property
+    def has_corners(self):
+        """
+        :return: a boolean value to tell whether or not a Grid has corners allocated
+        """
+        return self._has_corners
+
+    @property
     def lower_bounds(self):
         """
         :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
@@ -332,6 +339,7 @@ class Grid(object):
         self._pole_dim = pole_dim
         self._coord_sys = coord_sys
         self._ndims = None # Applies to Gridspec only
+        self._has_corners = False
 
         if num_peri_dims is None:
             self._num_peri_dims = 0
@@ -388,6 +396,7 @@ class Grid(object):
             if add_corner_stagger:
                 if StaggerLoc.CORNER not in staggerloc:
                     staggerloc.append(StaggerLoc.CORNER)
+                _has_corners = True
             
             # set the num_peri_dims so sizes are calculated correctly
             # is_sphere defaults to True
@@ -890,6 +899,9 @@ class Grid(object):
         # alias the coordinates to a grid property
         self._coords[stagger][coord_dim] = gridCoordP
 
+        if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
+            self._has_corners = True
+
     def _link_coord_buffer_1Dcoords(self, stagger):
         # get the data pointer and bounds of the ESMF allocation
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
@@ -909,6 +921,9 @@ class Grid(object):
         self._coords[stagger][1] = gc11
         if self.rank == 3:
             self._coords[stagger][2] = gc22
+
+        if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
+            self._has_corners = True
 
     def _allocate_items_(self, item, stagger, from_file=False):
         # this could be one of several entry points to the grid,

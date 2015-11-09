@@ -9,6 +9,8 @@ from ESMF.test.test_api.grid_utilities import *
 
 class TestRegrid(TestBase):
 
+    Manager(debug=True)
+
     # this is for the documentation, do not modify
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
         '''
