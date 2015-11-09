@@ -124,10 +124,6 @@ class Mesh(object):
         return self._rank
 
     @property
-    def singlestagger(self):
-        return self._singlestagger
-
-    @property
     def size(self):
         """
         :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
@@ -301,9 +297,6 @@ class Mesh(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-        # set the single stagger flag
-        self._singlestagger = False
-
     # manual destructor
     def destroy(self):
         """
@@ -372,35 +365,6 @@ class Mesh(object):
 
         # size is "sliced" by taking the shape of the coords
         ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
-        ret._size_owned = ret.size
-
-        return ret
-
-    def _preslice_(self, meshloc):
-        # to be used to slice off one stagger location of a grid for a specific field
-        ret = self._copy_()
-        ret._coords = get_none_or_slice(self.coords, meshloc)
-
-        # preslice the size to only return the meshloc of this field
-        ret._size = get_none_or_slice(self.size, meshloc)
-        ret._size_owned = ret.size
-
-        ret._singlestagger = True
-
-        return ret
-
-    def _slice_onestagger_(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
-
-        # to be used to slice the single stagger grid, one that has already been presliced
-        slc = get_formatted_slice(slc, self.rank)
-        ret = self._copy_()
-
-        ret._coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.parametric_dim)]
-
-        # size is "sliced" by taking the shape of the coords
-        ret._size = get_none_or_bound_list(ret.coords, 0)
         ret._size_owned = ret.size
 
         return ret
@@ -589,13 +553,8 @@ class Mesh(object):
         """
 
         ret = None
-        # only nodes for now
-        if not self._singlestagger:
-            assert(self.coords[meshloc][coord_dim] is not None)
-            ret = self.coords[meshloc][coord_dim]
-        else:
-            assert(self.coords[coord_dim] is not None)
-            ret = self.coords[coord_dim]
+        assert(self.coords[meshloc][coord_dim] is not None)
+        ret = self.coords[meshloc][coord_dim]
 
         return ret
 

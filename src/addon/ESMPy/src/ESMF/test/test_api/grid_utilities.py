@@ -356,8 +356,8 @@ def compare_fields_grid(field1, field2, itrp_tol, csrv_tol, parallel=False,
     field2_flat = np.ravel(field2.data)
     dstfracfield_flat = np.ravel(dstfracfield.data)
     # TODO:  test for evaluating field2mask into an array of True/False values based on field2.grid.mask
-    if field2.grid.mask is not None:
-        field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask.flatten().tolist()]
+    if field2.grid.mask[field2.staggerloc] is not None:
+        field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask[field2.staggerloc].flatten().tolist()]
     else:
         field2mask_flat = np.ravel(np.zeros_like(field2.data))
 

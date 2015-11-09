@@ -1348,7 +1348,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size_owned):
+        for i in range(field.grid.size_owned[element]):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -1381,7 +1381,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
     
     elif field.staggerloc == node:
         ind = 0
-        for i in range(field.grid.size):
+        for i in range(field.grid.size[node]):
             x = nodeCoord[i*2]
             y = nodeCoord[i*2+1]
 
