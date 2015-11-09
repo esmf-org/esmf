@@ -1431,7 +1431,8 @@
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-      if (present(unit)) then
+      if (present(unit).or.present(preString)) then
+        ! simple, single line print format
       
         if (present(options)) then
           optionsOpt=trim(options)
@@ -1443,21 +1444,21 @@
           call ESMF_ClockGet(clock, currTime=time, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          call ESMF_TimePrint(time, preString=preString, unit=unit, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if (trim(optionsOpt)=="startTime") then
           call ESMF_ClockGet(clock, startTime=time, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          call ESMF_TimePrint(time, preString=preString, unit=unit, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if (trim(optionsOpt)=="stopTime") then
           call ESMF_ClockGet(clock, stopTime=time, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_TimePrint(time, preString, unit, rc=localrc)
+          call ESMF_TimePrint(time, preString=preString, unit=unit, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
