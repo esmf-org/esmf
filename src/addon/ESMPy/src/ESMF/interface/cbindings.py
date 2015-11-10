@@ -389,8 +389,8 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
-					  ct.POINTER(ct.c_int),
-					  OptionalNumpyArrayInt32,
+                                          ct.POINTER(ct.c_int),
+                                          OptionalNumpyArrayInt32,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -402,7 +402,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
                             decompflag=None, isSphere=None, 
-			    addCornerStagger=None, addUserArea=None,
+                            addCornerStagger=None, addUserArea=None,
                             addMask=None, varname=None, coordNames=None):
     """
     Preconditions: ESMP has been initialized.\n
@@ -414,8 +414,8 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
             Argument Values:\n
                 SCRIP\n
                 GRIDSPEC\n
-	List of Integers                    :: regDecomp\n
-	List of Integers (optional)         :: decompflag\n
+        List of Integers                    :: regDecomp\n
+        List of Integers (optional)         :: decompflag\n
         Boolean (optional)                  :: isSphere\n
         Boolean (optional)                  :: addCornerStagger\n
         Boolean (optional)                  :: addUserArea\n
@@ -424,9 +424,8 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
         List of Strings (optional)          :: coordNames\n
     """
     lrc = ct.c_int(0)
-    lregDecomp = (ct.c_int * len(regDecomp))(*regDecomp)
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
-					       lregDecomp, decompflag,
+                                               None, decompflag,
                                                isSphere, addCornerStagger,
                                                addUserArea, addMask, varname, 
                                                coordNames, ct.byref(lrc))
