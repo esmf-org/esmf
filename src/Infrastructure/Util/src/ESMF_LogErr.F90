@@ -1609,7 +1609,7 @@ end subroutine ESMF_LogInitialize
     call f_ESMF_VMGlobalGet(alog%petNumber, petCount)
     ! Convert PET to contiguous character label
     digits = log10(real(petCount-1))+1
-    write(formatString, "('(i',i1,'.',i1,')')"), digits, digits
+    write(formatString, "('(i',i1,'.',i1,')')") digits, digits
     write(petNumChar, formatString) alog%petNumber
     alog%petNumLabel = "PET" // trim(adjustl(petNumChar))
 
