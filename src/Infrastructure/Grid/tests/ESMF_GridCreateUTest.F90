@@ -2326,8 +2326,88 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreateNoPeriDimUfrm with Cartesian"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Create Grid
+  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
+       minCoord=(/0.0,0.0/), &
+       maxCoord=(/1.0,1.0/), &
+       coordSys=ESMF_COORDSYS_CART, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
+  !                       rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreateNoPeriDimUfrm with Default CoordSys (Spherical)"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Create Grid
+  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
+       minCoord=(/0.0,0.0/), &
+       maxCoord=(/50.0,50.0/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+ ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
+ !                        rc=localrc)
+ ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreateNoPeriDimUfrm with Default CoordSys (Spherical)"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Create Grid
+  grid=ESMF_GridCreate1PeriDimUfrm(regDecomp=(/2,2/),maxIndex=(/10,12/), &
+       minCoord=(/0.0,-80.0/), &
+       maxCoord=(/350.0,80.0/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+ call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
+                         rc=localrc)
+ if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
