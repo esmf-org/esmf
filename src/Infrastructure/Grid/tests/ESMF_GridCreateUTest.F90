@@ -241,6 +241,21 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file with default RegDecomp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP,rc=localrc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file with non-default RegDecomp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP, &
+  			regDecomp=(/2,2/), rc=localrc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

@@ -1564,6 +1564,9 @@ end subroutine ESMF_LogInitialize
     character(len=ESMF_MAXPATHLEN)                         :: fname
     character(ESMF_MAXSTR)                                 :: petNumChar
     character(8)                                           :: position
+    integer                                                :: petCount
+    integer                                                :: digits
+    character(len=10)                                      :: formatString
 
     type(ESMF_LogPrivate),pointer     :: alog
 
@@ -1603,9 +1606,15 @@ end subroutine ESMF_LogInitialize
     alog%maxElements = 10
     alog%fIndex = 1
 
-    call f_ESMF_VMGlobalGet(alog%petNumber)
+    call f_ESMF_VMGlobalGet(alog%petNumber, petCount)
     ! Convert PET to contiguous character label
-    write(petNumChar, *) alog%petNumber
+    if (petCount>1) then
+      digits = log10(real(petCount-1))+1
+    else
+      digits = 1
+    endif
+    write(formatString, "('(i',i1,'.',i1,')')") digits, digits
+    write(petNumChar, formatString) alog%petNumber
     alog%petNumLabel = "PET" // trim(adjustl(petNumChar))
 
     alog%stopprogram = .false.

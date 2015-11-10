@@ -5791,8 +5791,8 @@ end function ESMF_GridCreateFrmNCFileDG
 
     character(len=*),       intent(in)             :: filename
     type(ESMF_FileFormat_Flag), intent(in)   :: fileformat
-    integer,                intent(in)             :: regDecomp(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(in), optional   :: regDecomp(:)
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
@@ -5822,11 +5822,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[fileformat]
 !     The Grid file format, please see Section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
-! \item[regDecomp] 
+! \item[{[regDecomp]}] 
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
 !      The total decounts cannot exceed the total number of PETs.  In other
 !      word, at most one DE is allowed per processor.
+!      If not specified, the default decomposition will be petCountx1. 
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
@@ -5870,6 +5871,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer         :: localrc
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    integer         :: regDecompLocal(2)
     type(ESMF_Index_Flag) :: localIndexFlag
     type(ESMF_VM) :: vm
     integer :: PetCnt
@@ -5886,18 +5888,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_VMGet(vm, petCount=PetCnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (size(RegDecomp,1) > 2) then
+
+    if (present(RegDecomp)) then
+      if (size(RegDecomp,1) > 2) then
 	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	    msg="- Only 2D grid is supported in ESMF_GridCreate from file interface", &
 	  ESMF_CONTEXT, rcToReturn=rc)
 	return
-    endif
-    if (PetCnt < RegDecomp(1)*RegDecomp(2)) then
+      endif
+      if (PetCnt < RegDecomp(1)*RegDecomp(2)) then
 	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	    msg="- The total number of DEs cannot be greater than total processor count", &
 	  ESMF_CONTEXT, rcToReturn=rc)
 	return
+      endif
+    endif
+
+    if (present(regDecomp)) then
+       regDecompLocal(:)=regDecomp(:)
+    else
+       regDecompLocal(1)=PetCnt
+       regDecompLocal(2)=1
     endif
 
     if (present(isSphere)) then
@@ -5924,7 +5935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localIndexFlag = ESMF_INDEX_DELOCAL
     endif
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
-	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, &
+	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDecompflag, &
 	        isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
@@ -5942,13 +5953,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 	if (present(addMask)) then
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, &
 		rc=localrc)
         else
-  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, &
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
 	        localIndexFlag, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)

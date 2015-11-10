@@ -1042,19 +1042,31 @@
       ! check input
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
 
-      if (present(unit)) then
+      if (present(unit).or.present(preString)) then
+        ! simple, single line print format
         call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        if (present(preString)) then
-          write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") preString, &
-            yy, mm, dd, h, m, s, ms
+        if (present(unit)) then
+          if (present(preString)) then
+            write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") preString, &
+              yy, mm, dd, h, m, s, ms
+          else
+            write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
+              yy, mm, dd, h, m, s, ms
+          endif
         else
-          write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
-            yy, mm, dd, h, m, s, ms
-        endif
-        
+          if (present(preString)) then
+            write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") preString, &
+              yy, mm, dd, h, m, s, ms
+          else
+            ! cannot really reach this branch -> cover this by the deeper
+            ! implementation in the bigger else block below.
+            write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
+              yy, mm, dd, h, m, s, ms
+          endif
+        endif        
       else
         ! print to STDOUT
         

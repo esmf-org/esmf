@@ -9,6 +9,8 @@ from ESMF.test.test_api.grid_utilities import *
 
 class TestRegrid(TestBase):
 
+    Manager(debug=True)
+
     # this is for the documentation, do not modify
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
         '''
@@ -159,7 +161,7 @@ class TestRegrid(TestBase):
         # validate that the masked values were not zeroed out
         for i in range(dstfield.data.shape[x]):
             for j in range(dstfield.data.shape[y]):
-                if dstfield.grid.mask[i, j] == 0:
+                if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
     def test_field_regrid_area(self):

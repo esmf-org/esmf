@@ -188,6 +188,13 @@
 \input{../addon/NUOPC/doc/NUOPC_TransferGeom}
 #endif
 
+\subsubsection{Field Mirroring}
+#ifdef STANDALONE
+\input{NUOPC_FieldMirror}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldMirror}
+#endif
+
 \newpage
 
 \section{API}

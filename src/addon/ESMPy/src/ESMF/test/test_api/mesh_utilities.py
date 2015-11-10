@@ -18,7 +18,7 @@ except:
 
 
 
-def mesh_create_5_pentahexa():
+def mesh_create_5_pentahexa(coord_sys=None):
     '''
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.
@@ -45,7 +45,7 @@ def mesh_create_5_pentahexa():
     Note: This mesh is not parallel, it can only be used in serial
     '''
     # Two parametric dimensions, and two spatial dimensions
-    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
+    mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2, coord_sys=coord_sys)
 
     num_node = 12
     num_elem = 5
@@ -1348,7 +1348,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
     if field.staggerloc == element:
         offset = 0
-        for i in range(field.grid.size_owned):
+        for i in range(field.grid.size_owned[element]):
             if (elemType[i] == ESMF.MeshElemType.TRI):
                 x1 = nodeCoord[(elemConn[offset])*2]
                 x2 = nodeCoord[(elemConn[offset+1])*2]
@@ -1381,7 +1381,7 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
     
     elif field.staggerloc == node:
         ind = 0
-        for i in range(field.grid.size):
+        for i in range(field.grid.size[node]):
             x = nodeCoord[i*2]
             y = nodeCoord[i*2+1]
 

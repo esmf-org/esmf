@@ -73,7 +73,8 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   printf("local ptr[0] = %g\n", ptr[0]);
   
   // Create a Mesh from VTK file
-  mesh = ESMC_MeshCreate(pdim, sdim, rc);
+  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
+  mesh = ESMC_MeshCreate(pdim, sdim, &local_coordSys, rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // Hold this to be deleted later, because getting a C mesh from a C field broken  

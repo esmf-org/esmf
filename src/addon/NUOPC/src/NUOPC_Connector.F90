@@ -1036,7 +1036,7 @@ call ESMF_VMLogMemInfo("aftP2 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1300,11 +1300,9 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
           acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-!TODO: the following LocStreamCreate does NOT exist yet. Transfer will not work
-!TODO: without that call being available.
-!          locstream = ESMF_LocStreamCreate(acceptorDG, vm=vm, rc=rc)
-!          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-!            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          locstream = ESMF_LocStreamCreate(distgrid=acceptorDG, vm=vm, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_FieldEmptySet(acceptorField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1367,7 +1365,6 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
     type(ESMF_LocStream)            :: providerLocstream, acceptorLocstream
     logical                         :: meshNoConnections
     type(ESMF_DistGrid)             :: distgrid, eDistgrid, nDistgrid
-    type(ESMF_VM)                   :: vm
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
@@ -1388,7 +1385,7 @@ call ESMF_VMLogMemInfo("aftP3 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1723,7 +1720,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2034,7 +2031,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = NUOPC_ConvertStringToInt(valueString, &
+    profiling = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2045,7 +2042,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2265,7 +2262,7 @@ call ESMF_VMLogMemInfo("aftP5 Reconcile")
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = NUOPC_ConvertStringToInt(valueString, &
+    verbosity = ESMF_UtilString2Int(valueString, &
       specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

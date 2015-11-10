@@ -410,9 +410,9 @@ class TestField(TestBase):
         assert (field2.upper_bounds.tolist() == [5, 5])
         assert (field3.upper_bounds.tolist() == [2, 2])
 
-        assert (field.grid.upper_bounds.tolist() == [100, 100])
-        assert (field2.grid.upper_bounds.tolist() == [5, 5])
-        assert (field3.grid.upper_bounds.tolist() == [2, 2])
+        assert (field.grid.upper_bounds[0].tolist() == [100, 100])
+        assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
+        assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
     @attr('serial')
     def test_field_slice_mesh(self):
@@ -448,9 +448,9 @@ class TestField(TestBase):
         assert (field2.upper_bounds.tolist() == [5])
         assert (field3.upper_bounds.tolist() == [2])
 
-        assert (field.grid.size == 64)
-        assert (field2.grid.size == 5)
-        assert (field3.grid.size == 2)
+        assert (field.grid.size[0] == 64)
+        assert (field2.grid.size[0] == 5)
+        assert (field3.grid.size[0] == 2)
 
     @attr('serial')
     def test_field_slice_grid_extraindices(self):
@@ -486,9 +486,9 @@ class TestField(TestBase):
         assert (field2.upper_bounds.tolist() == [1, 2, 5, 5])
         assert (field3.upper_bounds.tolist() == [1, 1, 2, 2])
 
-        assert (field.grid.upper_bounds.tolist() == [10, 10])
-        assert (field2.grid.upper_bounds.tolist() == [5, 5])
-        assert (field3.grid.upper_bounds.tolist() == [2, 2])
+        assert (field.grid.upper_bounds[0].tolist() == [10, 10])
+        assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
+        assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
     @attr('serial')
     def disable_est_field_slice_mesh_extraindices(self):

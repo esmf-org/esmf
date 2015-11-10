@@ -37,6 +37,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMC_Util.h"
+#include "ESMC_CoordSys.h"
 
 #if defined (__cplusplus)
 extern "C" {
@@ -212,6 +213,7 @@ int ESMC_MeshAddNodes(
 ESMC_Mesh ESMC_MeshCreate(
   int parametricDim,         // in
   int spatialDim,            // in
+  enum ESMC_CoordSys_Flag *coordSys, // in
   int *rc                    // out
 );
 // !RETURN VALUE:
@@ -235,6 +237,9 @@ ESMC_Mesh ESMC_MeshCreate(
 //  manifold, the spatial dimension can be larger than the parametric dim (e.g. the 2D 
 //  surface of a sphere in 3D space), 
 //   but it can't be smaller. 
+//  \item[{[coordSys]}]
+//  Set the coordinate system of the mesh. If not specified, then
+//  defaults to ESMC\_COORDSYS\_SPH\_DEG.
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}

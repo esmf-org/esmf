@@ -67,6 +67,13 @@ class Grid(object):
         return self._finalized
 
     @property
+    def has_corners(self):
+        """
+        :return: a boolean value to tell whether or not a Grid has corners allocated
+        """
+        return self._has_corners
+
+    @property
     def lower_bounds(self):
         """
         :return: the lower bounds, a numpy array with an entry for every dimension of the Grid
@@ -130,10 +137,6 @@ class Grid(object):
         :return: a boolean list of the stagger locations that have been allocated for this Grid
         """
         return self._staggerloc
-
-    @property
-    def singlestagger(self):
-        return self._singlestagger
 
     @property
     def struct(self):
@@ -336,6 +339,7 @@ class Grid(object):
         self._pole_dim = pole_dim
         self._coord_sys = coord_sys
         self._ndims = None # Applies to Gridspec only
+        self._has_corners = False
 
         if num_peri_dims is None:
             self._num_peri_dims = 0
@@ -392,6 +396,7 @@ class Grid(object):
             if add_corner_stagger:
                 if StaggerLoc.CORNER not in staggerloc:
                     staggerloc.append(StaggerLoc.CORNER)
+                _has_corners = True
             
             # set the num_peri_dims so sizes are calculated correctly
             # is_sphere defaults to True
@@ -471,9 +476,6 @@ class Grid(object):
         # regist with atexit
         import atexit; atexit.register(self.__del__)
         self._finalized = False
-
-        # set the single stagger flag
-        self._singlestagger = False
 
     # manual destructor
     def destroy(self):
@@ -566,41 +568,6 @@ class Grid(object):
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
         return ret
-
-    def _preslice_(self, stagger):
-        # to be used to slice off one stagger location of a grid for a specific field
-        ret = self._copy_()
-
-        # bounds, coords, mask and area
-        ret._lower_bounds = get_none_or_slice(self.lower_bounds, stagger)
-        ret._upper_bounds = get_none_or_slice(self.upper_bounds, stagger)
-        ret._coords = get_none_or_slice(self.coords, stagger)
-        ret._mask = get_none_or_slice(self.mask, stagger)
-        ret._area = get_none_or_slice(self.area, stagger)
-
-        ret._singlestagger = True
-
-        return ret
-
-    def _slice_onestagger_(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
-
-        # to be used to slice the single stagger grid, one that has already been presliced
-        slc = get_formatted_slice(slc, self.rank)
-        ret = self._copy_()
-
-        # coords, mask and area
-        ret._coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.rank)]
-        ret._mask = get_none_or_slice(self.mask, slc)
-        ret._area = get_none_or_slice(self.area, slc)
-
-        # upper bounds are "sliced" by taking the shape of the coords at first coorddim
-        ret._upper_bounds = get_none_or_bound(ret.coords, 0)
-        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
-
-        return ret
-
 
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
@@ -753,20 +720,16 @@ class Grid(object):
         """
 
         ret = None
-        if not self._singlestagger:
-            # handle the default case
-            if staggerloc is None:
-                staggerloc = StaggerLoc.CENTER
-            elif type(staggerloc) is list:
-                raise GridSingleStaggerloc
-            elif type(staggerloc) is tuple:
-                raise GridSingleStaggerloc
+        # handle the default case
+        if staggerloc is None:
+            staggerloc = StaggerLoc.CENTER
+        elif type(staggerloc) is list:
+            raise GridSingleStaggerloc
+        elif type(staggerloc) is tuple:
+            raise GridSingleStaggerloc
 
-            assert (self.coords[staggerloc][coord_dim] is not None)
-            ret = self.coords[staggerloc][coord_dim]
-        else:
-            assert (self.coords[coord_dim] is not None)
-            ret = self.coords[coord_dim]
+        assert (self.coords[staggerloc][coord_dim] is not None)
+        ret = self.coords[staggerloc][coord_dim]
 
         return ret
 
@@ -801,33 +764,23 @@ class Grid(object):
         """
 
         ret = None
-        if not self._singlestagger:
-            # handle the default case
-            if staggerloc is None:
-                staggerloc = StaggerLoc.CENTER
-            elif type(staggerloc) is list:
-                raise GridSingleStaggerloc
-            elif type(staggerloc) is tuple:
-                raise GridSingleStaggerloc
+        # handle the default case
+        if staggerloc is None:
+            staggerloc = StaggerLoc.CENTER
+        elif type(staggerloc) is list:
+            raise GridSingleStaggerloc
+        elif type(staggerloc) is tuple:
+            raise GridSingleStaggerloc
 
-            # selec the grid item
-            if item == GridItem.MASK:
-                assert (self.mask[staggerloc] is not None)
-                ret = self.mask[staggerloc]
-            elif item == GridItem.AREA:
-                assert (self.area[staggerloc] is not None)
-                ret = self.area[staggerloc]
-            else:
-                raise GridItemNotSupported
+        # selec the grid item
+        if item == GridItem.MASK:
+            assert (self.mask[staggerloc] is not None)
+            ret = self.mask[staggerloc]
+        elif item == GridItem.AREA:
+            assert (self.area[staggerloc] is not None)
+            ret = self.area[staggerloc]
         else:
-            if item == GridItem.MASK:
-                assert (self.mask is not None)
-                ret = self.mask
-            elif item == GridItem.AREA:
-                assert (self.area is not None)
-                ret = self.area
-            else:
-                raise GridItemNotSupported
+            raise GridItemNotSupported
 
         return ret
 
@@ -946,6 +899,9 @@ class Grid(object):
         # alias the coordinates to a grid property
         self._coords[stagger][coord_dim] = gridCoordP
 
+        if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
+            self._has_corners = True
+
     def _link_coord_buffer_1Dcoords(self, stagger):
         # get the data pointer and bounds of the ESMF allocation
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
@@ -965,6 +921,9 @@ class Grid(object):
         self._coords[stagger][1] = gc11
         if self.rank == 3:
             self._coords[stagger][2] = gc22
+
+        if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
+            self._has_corners = True
 
     def _allocate_items_(self, item, stagger, from_file=False):
         # this could be one of several entry points to the grid,

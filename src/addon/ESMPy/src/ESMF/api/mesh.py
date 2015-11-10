@@ -54,6 +54,13 @@ class Mesh(object):
         return self._coords
 
     @property
+    def coord_sys(self):
+        """
+        :return: the coordinate system of the mesh as defined by the CoordSys named constant
+        """
+        return self._coord_sys
+
+    @property
     def element_area(self):
         return self._element_area
 
@@ -124,10 +131,6 @@ class Mesh(object):
         return self._rank
 
     @property
-    def singlestagger(self):
-        return self._singlestagger
-
-    @property
     def size(self):
         """
         :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
@@ -152,6 +155,7 @@ class Mesh(object):
     @initialize
     def __init__(self, parametric_dim=None,
                  spatial_dim=None,
+                 coord_sys=None,
                  filename=None,
                  filetype=None,
                  convert_to_dual=None,
@@ -179,6 +183,11 @@ class Mesh(object):
                             dimension (e.g. the 2D surface of a sphere in 3D space), but it
                             cannot be smaller. \n
                     Optional arguments for creating a Mesh in memory: \n
+                        coord_sys: the coordinate system for the Mesh. \n
+                            Argument values are:\n
+                                (default) CoordSys.CART\n
+                                CoordSys.SPH_DEG\n
+                                CoordSys.SPH_RAD\n
                         None \n
             Mesh from file: \n
                 Note that Meshes created from file do not have the parametric_dim and
@@ -245,7 +254,9 @@ class Mesh(object):
                 warning.warn("parametric_dim is only used for meshes created in memory, this argument will be ignored.")
             if spatial_dim is not None:
                 warning.warn("spatial_dim is only used for meshes created in memory, this argument will be ignored.")
-        
+            if coord_sys is not None:
+                warning.warn("coord_sys is only used for meshes created in memory, this argument will be ignored.")
+
         # ctypes stuff
         self._struct = None
     
@@ -254,10 +265,11 @@ class Mesh(object):
         self._size_owned = [None, None]
         self._parametric_dim = None
         self._spatial_dim = None
+        self._coord_sys = None
         self._rank = 1
-        self._coords = None
+        self._coords = [None, None]
         self._mask = [None, None]
-        self._area = None
+        self._area = [None, None]
 
         if not fromfile:
             # initialize not fromfile variables
@@ -275,9 +287,11 @@ class Mesh(object):
             
             # call into ctypes layer
             self._struct = ESMP_MeshCreate(parametricDim=parametric_dim,
-                                          spatialDim=spatial_dim)
+                                          spatialDim=spatial_dim,
+                                          coordSys=coord_sys)
             self._parametric_dim = parametric_dim
             self._spatial_dim = spatial_dim
+            self._coord_sys = coord_sys
         else:
             # call into ctypes layer
             self._struct = ESMP_MeshCreateFromFile(filename, filetype,
@@ -300,9 +314,6 @@ class Mesh(object):
         # register with atexit
         import atexit; atexit.register(self.__del__)
         self._finalized = False
-
-        # set the single stagger flag
-        self._singlestagger = False
 
     # manual destructor
     def destroy(self):
@@ -372,35 +383,6 @@ class Mesh(object):
 
         # size is "sliced" by taking the shape of the coords
         ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
-        ret._size_owned = ret.size
-
-        return ret
-
-    def _preslice_(self, meshloc):
-        # to be used to slice off one stagger location of a grid for a specific field
-        ret = self._copy_()
-        ret._coords = get_none_or_slice(self.coords, meshloc)
-
-        # preslice the size to only return the meshloc of this field
-        ret._size = get_none_or_slice(self.size, meshloc)
-        ret._size_owned = ret.size
-
-        ret._singlestagger = True
-
-        return ret
-
-    def _slice_onestagger_(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
-
-        # to be used to slice the single stagger grid, one that has already been presliced
-        slc = get_formatted_slice(slc, self.rank)
-        ret = self._copy_()
-
-        ret._coords = [get_none_or_slice(get_none_or_slice(self.coords, x), slc) for x in range(self.parametric_dim)]
-
-        # size is "sliced" by taking the shape of the coords
-        ret._size = get_none_or_bound_list(ret.coords, 0)
         ret._size_owned = ret.size
 
         return ret
@@ -589,13 +571,8 @@ class Mesh(object):
         """
 
         ret = None
-        # only nodes for now
-        if not self._singlestagger:
-            assert(self.coords[meshloc][coord_dim] is not None)
-            ret = self.coords[meshloc][coord_dim]
-        else:
-            assert(self.coords[coord_dim] is not None)
-            ret = self.coords[coord_dim]
+        assert(self.coords[meshloc][coord_dim] is not None)
+        ret = self.coords[meshloc][coord_dim]
 
         return ret
 

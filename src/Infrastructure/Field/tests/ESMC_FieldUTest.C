@@ -69,7 +69,8 @@ int main(void){
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  mesh = ESMC_MeshCreate(pdim,sdim,&rc);
+  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
+  mesh = ESMC_MeshCreate(pdim,sdim,&local_coordSys,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

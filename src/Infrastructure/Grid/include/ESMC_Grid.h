@@ -167,6 +167,7 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 //      Each entry is the number of decounts for that dimension.
 //      The total decounts cannot exceed the total number of PETs.  In other
 //      word, at most one DE is allowed per processor.
+//      If not specified, the default decomposition will be petCountx1.
 // \item[{[decompflag]}]
 //      List of decomposition flags indicating how each dimension of the
 //      tile is to be divided between the DEs. The default setting

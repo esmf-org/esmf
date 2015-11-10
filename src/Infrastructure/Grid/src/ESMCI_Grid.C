@@ -79,7 +79,7 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
 
 void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, 
 				      const char *filename, int *fileTypeFlag, 
-				      int *regDecomp, 
+				      int *regDecomp, int *rdpresent,
 				      int *decompflag, int *dfpresent,
 				      int *isSphere, int *ispresent,
 				      int *addCornerStagger, int *acspresent,
@@ -376,11 +376,16 @@ int setDefaultsLUA(int dimCount,
     // handle the optional arguments
     int ispresent=0, acspresent=0, auapresent=0;
     int ampresent=0, vnpresent=0, cnpresent=0;
-    int dfpresent=0;
+    int dfpresent=0, rdpresent=0;
     int *df_loc = NULL;
+    int *rd_loc = NULL;
     char *vn_loc = (char *)"";
     int vn_len = 0;
 
+    if (regDecomp != NULL) {
+      rd_loc = regDecomp;
+      rdpresent = 1;
+    }
     if (decompflag != NULL) {
       df_loc = decompflag;
       dfpresent = 1;
@@ -437,7 +442,7 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
-				     regDecomp, df_loc, &dfpresent,
+				     rd_loc, &rdpresent, df_loc, &dfpresent,
 				     &is_loc, &ispresent, 
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
 				     &am_loc, &ampresent, vn_loc, &vnpresent, 

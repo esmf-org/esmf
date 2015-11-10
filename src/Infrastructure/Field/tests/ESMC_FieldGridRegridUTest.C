@@ -273,7 +273,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  dstmesh = ESMC_MeshCreate(pdim,sdim,&rc);
+  dstmesh = ESMC_MeshCreate(pdim,sdim,&coordsys,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
