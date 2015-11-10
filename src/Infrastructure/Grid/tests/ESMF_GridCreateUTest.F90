@@ -2411,9 +2411,9 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
- call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
-                         rc=localrc)
- if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
+ !                        rc=localrc)
+ !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
