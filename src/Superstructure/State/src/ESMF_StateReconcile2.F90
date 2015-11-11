@@ -266,6 +266,7 @@ contains
     integer :: i
 
     logical, parameter :: debug = .false.
+    logical, parameter :: meminfo = .false.
     logical, parameter :: trace = .false.
 
     localrc = ESMF_RC_NOT_IMPL
@@ -320,6 +321,8 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 1')
+
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
@@ -343,6 +346,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 2')
 
 
 ! At this point, each PET knows what items can be found on all of
@@ -368,6 +372,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 3')
 
 
     ! 4.) Communicate needs back to the offering PETs.
@@ -391,6 +396,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 4')
 
 
     ! 5.) Serialized needed objects
@@ -409,6 +415,8 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 5')
+
 
     ! 6.) Send/receive serialized objects to whoever needed them
 
@@ -430,6 +438,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 6')
 
 
     ! 7.) Deserialize received objects and create proxies (recurse on
@@ -468,6 +477,7 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 7 - Complete')
     end if
+    if (meminfo) call ESMF_VMLogMemInfo ('after Step 7')
 
 ! Clean up
 
@@ -693,6 +703,8 @@ contains
       end do
     end do
 
+    if (debug) call needs_list_print (needs_list)
+
     ! Go through the list of needed IDs/VMIds and select an offerer for each.
 
     call needs_list_select (needs_list, id_info)
@@ -847,6 +859,34 @@ contains
 
     end subroutine needs_list_insert
 
+    subroutine needs_list_print (needs_list_1)
+      type(NeedsList_t),  pointer :: needs_list_1  ! intent(in)
+
+      type(NeedsList_t), pointer :: needs_list_next
+      integer :: i
+
+      call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
+      call ESMF_VMBarrier (vm)
+      do, i=0, npets-1
+        if (i == mypet) then
+          if (associated (needs_list_1)) then
+            needs_list_next => needs_list_1
+            do
+              print *, 'PET', mypet, ': offerers =', needs_list_next%offerers,  &
+                  ', position =', needs_list_next%position
+              if (.not. associated (needs_list_next%next)) exit
+              needs_list_next => needs_list_next%next
+            end do
+          else
+            print *, 'PET', mypet, ': Needs list empty'
+          end if
+          call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
+        end if
+        call ESMF_VMBarrier (vm)
+      end do
+
+    end subroutine needs_list_print
+
     subroutine needs_list_select (needs_list_1, id_info_1)
       type(needsList_t),          pointer       :: needs_list_1  ! intent(in)
       type(ESMF_ReconcileIDInfo), intent(inout) :: id_info_1(0:)
@@ -856,18 +896,37 @@ contains
 
       type(needsList_t), pointer :: needslist_p
       integer :: i, idx
+      integer :: offer_first, offer_last
+      logical :: found_first
       real :: rand_nos(0:npets-1)
 
       needslist_p => needs_list_1
 
 #if 1
       ! Try to load distribute by starting at a point in the offerer list
-      ! indicated by the PETs position in a random number table - essentially
-      ! a hash.
+      ! bounded by the first and last offering PETs, and using a hash based
+      ! on PETs position in a pseudo-random number table.
       call random_number (rand_nos)
+
       do
         if (.not. associated (needslist_p)) exit
-        idx = rand_nos(myPet) * npets
+        ! Find first and last offering PETs
+        offer_first = 0
+        offer_last = npets-1
+        found_first = .false.
+        do, i=0, npets-1
+          if (needslist_p%offerers(i)) then
+            if (.not. found_first) then
+              offer_first = i
+              found_first = .true.
+            end if
+            offer_last = i
+          end if
+        end do
+
+        ! Use a hash to select a starting index between the bounds
+        idx = rand_nos(myPet) * (offer_last-offer_first) + offer_first
+! print *, 'pet', mypet, ': offer_first, offer_last, starting idx =', offer_first, offer_last, idx
         do, i=0, npets-1
           if (needslist_p%offerers(idx)) then
 ! print *, 'pet', mypet, ': needs_list_select: setting position', idx, ' to true'
