@@ -86,8 +86,6 @@ module NUOPC
   public NUOPC_UpdateTimestamp            ! method, internal use only
 
   ! public Auxiliary API
-  public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
-  public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
 
 end module
