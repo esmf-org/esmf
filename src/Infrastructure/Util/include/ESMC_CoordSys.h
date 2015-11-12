@@ -17,10 +17,5 @@
 #define ESMC_COORDSYS_H
 
 
-enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
-                    ESMC_COORDSYS_UNINIT,
-                    ESMC_COORDSYS_CART,
-                    ESMC_COORDSYS_SPH_DEG,
-                    ESMC_COORDSYS_SPH_RAD};
 
 #endif  // ESMC_COORDSYS_H

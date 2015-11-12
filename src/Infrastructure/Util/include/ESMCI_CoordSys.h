@@ -17,7 +17,7 @@
 #define ESMCI_COORDSYS_H
 
 // Definition of CoordSys flag and constants
-#include "ESMC_CoordSys.h"
+#include "ESMC_Util.h"
 
 // Constants for converting between radians and degrees
 // (These need to match the ones in ESMF_UtilTypes.F90) 
