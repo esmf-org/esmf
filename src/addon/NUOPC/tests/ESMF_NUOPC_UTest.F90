@@ -65,11 +65,9 @@ program ESMF_NUOPC_UTest
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
   type(ESMF_Grid)         :: grid
   integer                 :: i, j
-  real(ESMF_KIND_R8),      pointer  :: xPtr(:,:), yPtr(:,:), dataPtr(:,:)
+  real(ESMF_KIND_R8),      pointer  :: xPtr(:), yPtr(:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   character(len=120)      :: tempString
-!TODO: completely remove after CSC okay:  type(NUOPC_RunSequence), pointer  :: runSeq(:)
-!TODO: completely remove after CSC okay:  type(NUOPC_RunElement),  pointer  :: runE
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -357,10 +355,11 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CreateSimpleSphGrid() Test"
+  write(name, *) "ESMF_GridCreate1PeriDimUfrm() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_CreateSimpleSphGrid(0._ESMF_KIND_R8, -85._ESMF_KIND_R8, &
-    360._ESMF_KIND_R8, 85._ESMF_KIND_R8, 500, 400, rc=rc)
+  grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/500, 400/), &
+    minCoord=(/0._ESMF_KIND_R8, -85._ESMF_KIND_R8/), &
+    maxCoord=(/360._ESMF_KIND_R8, 85._ESMF_KIND_R8/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -384,7 +383,7 @@ program ESMF_NUOPC_UTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   do j=lbound(dataPtr,2),ubound(dataPtr,2)
   do i=lbound(dataPtr,1),ubound(dataPtr,1)
-    dataPtr(i,j) = sin(xPtr(i,j)*0.0174532925199)*cos(yPtr(i,j)*0.0174532925199)
+    dataPtr(i,j) = sin(xPtr(i)*0.0174532925199)*cos(yPtr(j)*0.0174532925199)
   enddo
   enddo
   !------------------------------------------------------------------------
@@ -451,12 +450,12 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CreateSimpleXYGrid() Test"
+  write(name, *) "ESMF_GridCreateNoPeriDimUfrm() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = NUOPC_CreateSimpleXYGrid( &
-    0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8, &
-    -1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8, &
-    100, 100, rc=rc)
+  grid = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/100, 100/), &
+    minCoord=(/0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8/), &
+    maxCoord=(/-1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8/), &
+    coordSys=ESMF_COORDSYS_CART, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

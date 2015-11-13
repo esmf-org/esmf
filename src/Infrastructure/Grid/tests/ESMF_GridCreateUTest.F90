@@ -2351,8 +2351,8 @@ program ESMF_GridCreateUTest
 
   ! Create Grid
   grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
-       minCoord=(/0.0,0.0/), &
-       maxCoord=(/1.0,1.0/), &
+       minCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCoord=(/1.0_ESMF_KIND_R8,1.0_ESMF_KIND_R8/), &
        coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2378,8 +2378,8 @@ program ESMF_GridCreateUTest
 
   ! Create Grid
   grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
-       minCoord=(/0.0,0.0/), &
-       maxCoord=(/50.0,50.0/), &
+       minCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCoord=(/50.0_ESMF_KIND_R8,50.0_ESMF_KIND_R8/), &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2405,8 +2405,8 @@ program ESMF_GridCreateUTest
 
   ! Create Grid
   grid=ESMF_GridCreate1PeriDimUfrm(regDecomp=(/2,2/),maxIndex=(/10,12/), &
-       minCoord=(/0.0,-80.0/), &
-       maxCoord=(/350.0,80.0/), &
+       minCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
+       maxCoord=(/350.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
