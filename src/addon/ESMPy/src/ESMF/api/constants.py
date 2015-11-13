@@ -152,6 +152,30 @@ class _GridItem(namedtuple('GridItem', ['INVALID', 'UNINIT', 'MASK', 'AREA'])):
 
 GridItem = _GridItem(INVALID=-2, UNINIT=-1, MASK=0, AREA=1)
 
+# LineType
+class _LineType(namedtuple('LineType', ['CART', 'GREAT_CIRCLE'])):
+    """
+    This argument controls the path of the line which connects two points on the surface of
+    the sphere. This in turn controls the path along which distances are calculated and the
+    shape of the edges that make up a cell. Both of these quantities can influence how
+    interpolation weights are calculated.  As would be expected, this argument is only
+    applicable with grids which lie on the surface of a sphere. \n
+    Values are:\n
+        CART = 0\n
+            Cartesian line. When this option is specified distances are calculated in a straight line through the
+            3D Cartesian space in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D
+            Cartesian lines between their corner vertices. When calculating regrid weights, this line type is
+            currently the default for the following all regrid methods except for conservative.\n
+        GREAT_CIRCLE = 1\n
+            Great circle line. When this option is specified distances are calculated along a great circle path
+            (the shortest distance between two points on a sphere surface). Cells are bounded by great circle
+            paths between their corner vertices. When calculating regrid weights, this line type is currently the
+            default for the conservative regrid method.\n
+    """
+    pass
+
+LineType = _LineType(CART=0, GREAT_CIRCLE=1)
+
 # LogKind
 class _LogKind(namedtuple('LogKind', ['MULTI', 'NONE'])):
     """

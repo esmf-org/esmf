@@ -85,6 +85,9 @@ typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
                        ESMF_IOFMT_NETCDF4P,
                        ESMF_IOFMT_NETCDF4C} ESMC_IOFmt_Flag;
 
+enum ESMC_LineType_Flag { ESMC_LINETYPE_CART=0,
+                          ESMC_LINETYPE_GREAT_CIRCLE};
+
 enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
 
@@ -154,5 +157,6 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
 
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
 			       ESMC_UNMAPPEDACTION_IGNORE};
+
 
 #endif  // ESMC_UTIL_H

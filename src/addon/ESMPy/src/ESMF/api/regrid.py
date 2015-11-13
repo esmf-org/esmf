@@ -91,6 +91,7 @@ class Regrid(object):
                  regrid_method=None,
                  pole_method=None,
                  regrid_pole_npoints=None,
+                 line_type=None,
                  norm_type=None,
                  unmapped_action=None,
                  ignore_degenerate=None,
@@ -133,6 +134,13 @@ class Regrid(object):
                     PoleMethod.TEETH\n
             regrid_pole_npoints: specifies how many points to average over 
                              if polemethod == PoleMethod.NPNTAVG\n
+            line_type:  this argument allows the user to select the path of the line which connects two points
+                        on the surface of a sphere.  This in turn controls the path along which distances are
+                        calculated and the shape of the edges that make up a cell.
+                Argument values are: \n
+                    NOTE: default value is dependent on the value of regridMethod
+                    LineType.CART \n
+                    LineType.GREAT_CIRCLE \n
             norm_type: control which type of normalization to do when generating conservative regridding weights. \n
                 Argument values are: \n
                     (default) NormType.DSTAREA \n

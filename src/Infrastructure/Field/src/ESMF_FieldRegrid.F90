@@ -449,7 +449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[lineType]}]
 !           This argument controls the path of the line which connects two points on a sphere surface. This in
 !           turn controls the path along which distances are calculated and the shape of the edges that make
- !           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+!           up a cell. Both of these quantities can influence how interpolation weights are calculated.
 !           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
 !           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
 !           list of valid options for this argument. If not specified, the default depends on the 
