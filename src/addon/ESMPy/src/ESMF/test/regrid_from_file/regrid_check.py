@@ -176,8 +176,8 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
     # setup mask, no Mask on a Mesh (yet) so need to look at the type first
     field2mask_flat = np.ravel(np.zeros_like(field2.data))
     if type(field2.grid) is ESMF.Grid:
-        if (field2.grid.mask is not None):
-            field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask.flatten().tolist()]
+        if (field2.grid.mask[field2.staggerloc] is not None):
+            field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask[field2.staggerloc].flatten().tolist()]
 
     for i in range(field2_flat.size):     
         if ((not field2mask_flat[i]) and 
