@@ -36,121 +36,7 @@ class Mesh(object):
 
     For more information about the ESMF Mesh class, please see the `ESMF Mesh documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
-
     """
-
-    @property
-    def area(self):
-        """
-        :return: the Mesh area represented as a numpy array of floats of the same number of entries as Mesh elements
-        """
-        return self._area
-
-    @property
-    def coords(self):
-        """
-        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and elements of the Mesh
-        """
-        return self._coords
-
-    @property
-    def coord_sys(self):
-        """
-        :return: the coordinate system of the mesh as defined by the CoordSys named constant
-        """
-        return self._coord_sys
-
-    @property
-    def element_area(self):
-        return self._element_area
-
-    @property
-    def element_conn(self):
-        return self._element_conn
-
-    @property
-    def element_coords(self):
-        return self._element_coords
-
-    @property
-    def element_count(self):
-        return self._element_count
-
-    @property
-    def element_ids(self):
-        return self._element_ids
-
-    @property
-    def element_mask(self):
-        return self._element_mask
-
-    @property
-    def element_types(self):
-        return self._element_types
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def mask(self):
-        """
-        :return: A 2 element list of numpy arrays representing the masked values on the nodes and elements of the Mesh
-        """
-        return self._mask
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def node_coords(self):
-        return self._node_coords
-
-    @property
-    def node_count(self):
-        return self._node_count
-
-    @property
-    def node_ids(self):
-        return self._node_ids
-
-    @property
-    def node_owners(self):
-        return self._node_owners
-
-    @property
-    def parametric_dim(self):
-        return self._parametric_dim
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Mesh, (i.e. the number of dimensions of the coordinate arrays (always 1)
-        """
-        return self._rank
-
-    @property
-    def size(self):
-        """
-        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
-        """
-        return self._size
-
-    @property
-    def size_owned(self):
-        """
-        :return: a 2 element list containing the number of owned nodes and elements in the Mesh on the current processor
-        """
-        return self._size_owned
-
-    @property
-    def spatial_dim(self):
-        return self._spatial_dim
-
-    @property
-    def struct(self):
-        return self._struct
 
     @initialize
     def __init__(self, parametric_dim=None,
@@ -315,22 +201,6 @@ class Mesh(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    # manual destructor
-    def destroy(self):
-        """
-        Release the memory associated with a Mesh. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
-        if hasattr(self, '_finalized'):
-            if not self._finalized:
-                ESMP_MeshDestroy(self)
-                self._finalized = True
-
     def __del__(self):
         """
         Release the memory associated with a Mesh. \n
@@ -342,6 +212,23 @@ class Mesh(object):
             None \n
         """
         self.destroy()
+
+    def __getitem__(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        slc = get_formatted_slice(slc, self.rank)
+        ret = self.copy()
+
+        # TODO: cannot get element coordinates, so the slice has them set to None
+        ret._coords = [[get_none_or_slice(get_none_or_slice(get_none_or_slice(self.coords, 0), coorddim), slc) for
+                        coorddim in range(self.parametric_dim)], [None for x in range(self.parametric_dim)]]
+
+        # size is "sliced" by taking the shape of the coords
+        ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
+        ret._size_owned = ret.size
+
+        return ret
 
     def __repr__(self):
         """
@@ -361,31 +248,118 @@ class Mesh(object):
 
         return string
 
-    def _copy_(self):
-        # shallow copy
-        ret = copy(self)
-        # don't call ESMF destructor twice on the same shallow Python object
-        # NOTE: the ESMF Mesh destructor is particularly unsafe in this situation
-        ret._finalized = True
+    @property
+    def area(self):
+        """
+        :return: the Mesh area represented as a numpy array of floats of the same number of entries as Mesh elements
+        """
+        return self._area
 
-        return ret
+    @property
+    def coords(self):
+        """
+        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and elements of the Mesh
+        """
+        return self._coords
 
-    def __getitem__(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
+    @property
+    def coord_sys(self):
+        """
+        :return: the coordinate system of the mesh as defined by the CoordSys named constant
+        """
+        return self._coord_sys
 
-        slc = get_formatted_slice(slc, self.rank)
-        ret = self._copy_()
+    @property
+    def element_area(self):
+        return self._element_area
 
-        # TODO: cannot get element coordinates, so the slice has them set to None
-        ret._coords = [[get_none_or_slice(get_none_or_slice(get_none_or_slice(self.coords, 0), coorddim), slc) for
-                       coorddim in range(self.parametric_dim)], [None for x in range(self.parametric_dim)]]
+    @property
+    def element_conn(self):
+        return self._element_conn
 
-        # size is "sliced" by taking the shape of the coords
-        ret._size = [get_none_or_bound_list(get_none_or_slice(ret.coords, stagger), 0) for stagger in range(2)]
-        ret._size_owned = ret.size
+    @property
+    def element_coords(self):
+        return self._element_coords
 
-        return ret
+    @property
+    def element_count(self):
+        return self._element_count
+
+    @property
+    def element_ids(self):
+        return self._element_ids
+
+    @property
+    def element_mask(self):
+        return self._element_mask
+
+    @property
+    def element_types(self):
+        return self._element_types
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def mask(self):
+        """
+        :return: A 2 element list of numpy arrays representing the masked values on the nodes and elements of the Mesh
+        """
+        return self._mask
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def node_coords(self):
+        return self._node_coords
+
+    @property
+    def node_count(self):
+        return self._node_count
+
+    @property
+    def node_ids(self):
+        return self._node_ids
+
+    @property
+    def node_owners(self):
+        return self._node_owners
+
+    @property
+    def parametric_dim(self):
+        return self._parametric_dim
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Mesh, (i.e. the number of dimensions of the coordinate arrays (always 1)
+        """
+        return self._rank
+
+    @property
+    def size(self):
+        """
+        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
+        """
+        return self._size
+
+    @property
+    def size_owned(self):
+        """
+        :return: a 2 element list containing the number of owned nodes and elements in the Mesh on the current processor
+        """
+        return self._size_owned
+
+    @property
+    def spatial_dim(self):
+        return self._spatial_dim
+
+    @property
+    def struct(self):
+        return self._struct
 
     def add_elements(self, element_count,
                      element_ids,
@@ -538,10 +512,42 @@ class Mesh(object):
                           self.node_coords, self.node_owners)
         # can't get the sizes until mesh is "committed" in element call
 
+    def copy(self):
+        """
+        Copy a Mesh in an ESMF-safe manner. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            A new Mesh copy. \n
+        """
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        # NOTE: the ESMF Mesh destructor is particularly unsafe in this situation
+        ret._finalized = True
+
+        return ret
+
+    def destroy(self):
+        """
+        Release the memory associated with a Mesh. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_MeshDestroy(self)
+                self._finalized = True
+
     def free_memory(self):
         """
-        Free memory associated with the creation of a Mesh which is no 
-        longer needed. \n
+        Free memory associated with the creation of a Mesh which is no longer needed. \n
         Required Arguments: \n
             None \n
         Optional Arguments: \n
@@ -575,20 +581,6 @@ class Mesh(object):
         ret = self.coords[meshloc][coord_dim]
 
         return ret
-
-    def _write_(self, filename):
-        """
-        Write the Mesh to a vtk formatted file. \n
-        Required Arguments: \n
-            filename: the name of the file, .vtk will be appended. \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
-
-        # call into ctypes layer
-        ESMP_MeshWrite(self, filename)
 
     def _link_coords_(self):
         elemcoords = True
@@ -631,3 +623,17 @@ class Mesh(object):
             self._coords[element][1] = np.array([coords_elem[2 * i + 1] for i in range(num_elems)])
             if num_dims == 3:
                 self._coords[element][2] = np.array([coords_elem[2 * i + 2] for i in range(num_elems)])
+
+    def _write_(self, filename):
+        """
+        Write the Mesh to a vtk formatted file. \n
+        Required Arguments: \n
+            filename: the name of the file, .vtk will be appended. \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+
+        # call into ctypes layer
+        ESMP_MeshWrite(self, filename)

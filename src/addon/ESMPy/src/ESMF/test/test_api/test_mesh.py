@@ -166,7 +166,7 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
-        mesh2 = mesh._copy_()
+        mesh2 = mesh.copy()
         self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
     @attr('serial')

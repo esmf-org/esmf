@@ -400,7 +400,7 @@ class TestGrid(TestBase):
         grid = self.make_grid_2d()
         self.examine_grid_attributes(grid)
 
-        grid2 = grid._copy_()
+        grid2 = grid.copy()
         self.examine_grid_attributes(grid2)
 
         assert np.all(grid.coords == grid2.coords)

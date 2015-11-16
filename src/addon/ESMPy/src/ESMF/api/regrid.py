@@ -27,62 +27,6 @@ class Regrid(object):
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
     """
 
-    @property
-    def dstfield(self):
-        return self._dstfield
-
-    @property
-    def dst_frac_field(self):
-        return self._dst_frac_field
-
-    @property
-    def dst_mask_values(self):
-        return self._dst_mask_values
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def ignore_degenerate(self):
-        return self._ignore_degenerate
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def norm_type(self):
-        return self._norm_type
-
-    @property
-    def pole_method(self):
-        return self._pole_method
-
-    @property
-    def regrid_method(self):
-        return self._regrid_method
-
-    @property
-    def regrid_pole_npoints(self):
-        return self._regrid_pole_npoints
-
-    @property
-    def srcfield(self):
-        return self._srcfield
-
-    @property
-    def src_frac_field(self):
-        return self._src_frac_field
-
-    @property
-    def src_mask_values(self):
-        return self._src_mask_values
-
-    @property
-    def unmapped_action(self):
-        return self._unmapped_action
-
     # call RegridStore
     @initialize
     def __init__(self, srcfield, dstfield,
@@ -240,22 +184,6 @@ class Regrid(object):
                          self.routehandle, zeroregion=zero_region)
         return dstfield
 
-    # manual destructor
-    def destroy(self):
-        """
-        Release the memory associated with a Regrid operation. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
-        if hasattr(self, '_finalized'):
-            if not self._finalized:
-                ESMP_FieldRegridRelease(self.routehandle)
-                self._finalized = True
-
     def __del__(self):
         """
         Release the memory associated with a Regrid operation. \n
@@ -294,3 +222,91 @@ class Regrid(object):
                    self.dstfield))
 
         return string
+
+    @property
+    def dstfield(self):
+        return self._dstfield
+
+    @property
+    def dst_frac_field(self):
+        return self._dst_frac_field
+
+    @property
+    def dst_mask_values(self):
+        return self._dst_mask_values
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def ignore_degenerate(self):
+        return self._ignore_degenerate
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def norm_type(self):
+        return self._norm_type
+
+    @property
+    def pole_method(self):
+        return self._pole_method
+
+    @property
+    def regrid_method(self):
+        return self._regrid_method
+
+    @property
+    def regrid_pole_npoints(self):
+        return self._regrid_pole_npoints
+
+    @property
+    def srcfield(self):
+        return self._srcfield
+
+    @property
+    def src_frac_field(self):
+        return self._src_frac_field
+
+    @property
+    def src_mask_values(self):
+        return self._src_mask_values
+
+    @property
+    def unmapped_action(self):
+        return self._unmapped_action
+
+    def copy(self):
+        """
+        Copy a Regrid object in an ESMF-safe manner. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            A new Regrid copy. \n
+        """
+        # shallow copy
+        ret = copy(self)
+        # don't call ESMF destructor twice on the same shallow Python object
+        ret._finalized = True
+
+        return ret
+
+    def destroy(self):
+        """
+        Release the memory associated with a Regrid operation. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if not self._finalized:
+                ESMP_FieldRegridRelease(self.routehandle)
+                self._finalized = True
