@@ -20,8 +20,8 @@ module NUOPC_Auxiliary
   
   private
   
-  public NUOPC_CreateSimpleSphGrid        ! method TODO: to cover by ESMF
-  public NUOPC_CreateSimpleXYGrid         ! method TODO: to cover by ESMF
+  public NUOPC_GridCreateSimpleSph        ! method TODO: to cover by ESMF
+  public NUOPC_GridCreateSimpleXY         ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
   
 !==============================================================================
@@ -44,12 +44,12 @@ module NUOPC_Auxiliary
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CreateSimpleSphGrid - Create a simple spherical grid
+! !IROUTINE: NUOPC_GridCreateSimpleSph - Create a simple spherical grid
 ! !INTERFACE:
-  function NUOPC_CreateSimpleSphGrid(x_min, y_min, x_max, y_max, &
+  function NUOPC_GridCreateSimpleSph(x_min, y_min, x_max, y_max, &
     i_count, j_count, half_polar_cell, area_adj, regional, rc)
 ! !RETURN VALUE:
-    type(ESMF_Grid):: NUOPC_CreateSimpleSphGrid
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleSph
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
     integer,            intent(in)            :: i_count, j_count
@@ -122,7 +122,7 @@ module NUOPC_Auxiliary
     if(present(regional)) l_regional = regional
 
     if(.not.l_regional) then
-      NUOPC_CreateSimpleSphGrid = ESMF_GridCreate1PeriDim(maxIndex=(/nx, ny/), &
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreate1PeriDim(maxIndex=(/nx, ny/), &
         indexflag=ESMF_INDEX_GLOBAL, &
         gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
         !regDecomp=(/npet, 1/), &
@@ -132,7 +132,7 @@ module NUOPC_Auxiliary
         file=FILENAME)) &
         return  ! bail out
     else
-      NUOPC_CreateSimpleSphGrid = ESMF_GridCreateNoPeriDim(maxIndex=(/nx, ny/),&
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreateNoPeriDim(maxIndex=(/nx, ny/),&
         indexflag=ESMF_INDEX_GLOBAL, &
         gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
         !regDecomp=(/npet, 1/), &
@@ -143,13 +143,13 @@ module NUOPC_Auxiliary
         return  ! bail out
     endif 
 
-    call ESMF_GridAddCoord(NUOPC_CreateSimpleSphGrid, &
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
       staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_GridAddCoord(NUOPC_CreateSimpleSphGrid, &
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
       staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -163,7 +163,7 @@ module NUOPC_Auxiliary
     starty = sy
     ! compute coord
     ! X center
-    call ESMF_GridGetCoord(NUOPC_CreateSimpleSphGrid, localDE=0, &
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -171,7 +171,7 @@ module NUOPC_Auxiliary
       file=FILENAME)) &
       return  ! bail out
     ! Y center
-    call ESMF_GridGetCoord(NUOPC_CreateSimpleSphGrid, localDE=0, &
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -195,7 +195,7 @@ module NUOPC_Auxiliary
     endif
     !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
     ! X corner
-    call ESMF_GridGetCoord(NUOPC_CreateSimpleSphGrid, localDE=0, &
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, farrayPtr=coordX, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -203,7 +203,7 @@ module NUOPC_Auxiliary
       file=FILENAME)) &
       return  ! bail out
     ! Y corner
-    call ESMF_GridGetCoord(NUOPC_CreateSimpleSphGrid, localDE=0, &
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, farrayPtr=coordY, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -233,7 +233,7 @@ module NUOPC_Auxiliary
     if(present(area_adj)) then
       ! retrieve area
 
-      !mesh = ESMF_GridToMesh(NUOPC_CreateSimpleSphGrid, &
+      !mesh = ESMF_GridToMesh(NUOPC_GridCreateSimpleSph, &
       !  ESMF_STAGGERLOC_CORNER, 0, &
       !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=rc)
       !if (ESMF_LogFoundError(rc, &
@@ -248,7 +248,7 @@ module NUOPC_Auxiliary
       !deallocate(f_area_m)
 
       ! find out original Grid cell area
-      field = ESMF_FieldCreate(NUOPC_CreateSimpleSphGrid, typekind=ESMF_TYPEKIND_R8, &
+      field = ESMF_FieldCreate(NUOPC_GridCreateSimpleSph, typekind=ESMF_TYPEKIND_R8, &
         staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -266,14 +266,14 @@ module NUOPC_Auxiliary
         return  ! bail out
 
       ! add area to Grid
-      call ESMF_GridAddItem(NUOPC_CreateSimpleSphGrid, ESMF_GRIDITEM_AREA, &
+      call ESMF_GridAddItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
         staggerloc=ESMF_STAGGERLOC_CENTER,  rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
 
-      call ESMF_GridGetItem(NUOPC_CreateSimpleSphGrid, ESMF_GRIDITEM_AREA, &
+      call ESMF_GridGetItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
         staggerloc=ESMF_STAGGERLOC_CENTER, farrayptr=f_area, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -293,12 +293,12 @@ module NUOPC_Auxiliary
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CreateSimpleXYGrid - Create a simple XY cartesian grid
+! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian grid
 ! !INTERFACE:
-  function NUOPC_CreateSimpleXYGrid(x_min, y_min, x_max, y_max, &
+  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
     i_count, j_count, rc)
 ! !RETURN VALUE:
-    type(ESMF_Grid):: NUOPC_CreateSimpleXYGrid
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
     integer,            intent(in)            :: i_count, j_count
@@ -382,7 +382,7 @@ module NUOPC_Auxiliary
       coordY(j) = coordY(j-1) + dy
     enddo
     
-    NUOPC_CreateSimpleXYGrid = grid
+    NUOPC_GridCreateSimpleXY = grid
     
   end function
   !-----------------------------------------------------------------------------
