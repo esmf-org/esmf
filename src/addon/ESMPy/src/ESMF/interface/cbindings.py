@@ -1644,6 +1644,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalNamedConstant,
                                         OptionalBool,
                                         OptionalField,
                                         OptionalField]
@@ -1652,7 +1653,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
-                          normType=None, unmappedaction=None,
+                          lineType=None, normType=None, unmappedaction=None,
                           ignoreDegenerate=None,
                           srcFracField=None, dstFracField=None):
     """
@@ -1673,23 +1674,28 @@ def ESMP_FieldRegridStore(srcField, dstField,
         ESMP_Field                          :: dstField\n
         Numpy.array(dtype=int32) (optional) :: srcMaskValues\n
         Numpy.array(dtype=int32) (optional) :: dstMaskValues\n
-        RegridMethod (optional)             :: regridmethod\n
+        regridMethod (optional)             :: regridmethod\n
             Argument values:\n
                 (default) RegridMethod.BILINEAR\n
                 RegridMethod.PATCH\n
                 RegridMethod.CONSERVE\n
-        PoleMethod (optional)               :: polemethod\n
+        poleMethod (optional)               :: polemethod\n
             Argument values:\n
                 (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
                 (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
                 PoleMethod.NPNTAVG\n
                 PoleMethod.TEETH\n
         integer (optional)                  :: regridPoleNPnts\n
-        NormType (optional)                 :: normType\n
+        lineType (optional)                 :: normType\n
+            Argument values:\n
+                NOTE: default is dependent on the value of regridMethod
+                LineType.CART \n
+                LineType.GREAT_CIRCLE \n
+        normType (optional)                 :: normType\n
             Argument values:\n
                 (default) NormType.DSTAREA \n
                 NormType.DSTFRAC \n
-        UnmappedAction (optional)           :: unmappedaction\n
+        unmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
@@ -1725,6 +1731,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridmethod,
                                      polemethod,
                                      regridPoleNPnts_ct,
+                                     lineType,
                                      normType,
                                      unmappedaction,
                                      ignoreDegenerate,

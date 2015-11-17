@@ -748,6 +748,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_RegridMethod_Flag *regridmethod,     // in
     enum ESMC_PoleMethod_Flag *polemethod,         // in
     int *regridPoleNPnts,                          // in
+    enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     ESMC_Logical *ignoreDegenerate,                        // in
@@ -791,6 +792,15 @@ int ESMC_FieldRegridStore(
 //    This parameter indicates how many points should be averaged
 //    over. Must be specified if {\tt polemethod} is 
 //    {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//  \item [{[lineType]}]
+//    This argument controls the path of the line which connects two points on a sphere surface. This in
+//    turn controls the path along which distances are calculated and the shape of the edges that make
+//    up a cell. Both of these quantities can influence how interpolation weights are calculated.
+//    As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+//    built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
+//    list of valid options for this argument. If not specified, the default depends on the
+//    regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+//    which line types are supported for each regrid method as well as showing the default line type by regrid method.
 //  \item[normType]
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.

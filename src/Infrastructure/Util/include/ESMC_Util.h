@@ -33,6 +33,42 @@ extern "C" {
 } // extern "C"
 #endif
 
+// ESMF platform-dependent data types
+  typedef long long ESMC_I8;
+  typedef int       ESMC_I4;
+  typedef short     ESMC_I2;
+  typedef char      ESMC_I1;
+  typedef double    ESMC_R8;
+  typedef float     ESMC_R4;
+#if (ESMC_POINTER_SIZE == 4)
+  // 32-bit machine
+  typedef unsigned long ESMC_POINTER;
+#else
+  // 64-bit machine
+  typedef unsigned long long ESMC_POINTER;
+#endif
+
+enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
+                    ESMC_COORDSYS_UNINIT,
+                    ESMC_COORDSYS_CART,
+                    ESMC_COORDSYS_SPH_DEG,
+                    ESMC_COORDSYS_SPH_RAD};
+
+enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
+		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
+
+enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
+			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
+			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
+			   ESMC_FILEFORMAT_GRIDSPEC};
+
+// File status flag (for IO write functions)
+typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
+                            ESMC_FILESTATUS_OLD = 1,
+                            ESMC_FILESTATUS_NEW = 2,
+                            ESMC_FILESTATUS_REPLACE = 3} ESMC_FileStatus_Flag;
+
 enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
                          ESMC_GRIDITEM_UNINIT,
                          ESMC_GRIDITEM_MASK,
@@ -43,17 +79,23 @@ enum ESMC_GridStatus_Flag {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_NOT_READY,
                       ESMC_GRIDSTATUS_SHAPE_READY};
 
-// general logical value - MUST MATCH F90
+// io format type
+typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
+                       ESMF_IOFMT_NETCDF,
+                       ESMF_IOFMT_NETCDF4P,
+                       ESMF_IOFMT_NETCDF4C} ESMC_IOFmt_Flag;
+
+enum ESMC_LineType_Flag { ESMC_LINETYPE_CART=0,
+                          ESMC_LINETYPE_GREAT_CIRCLE};
+
 enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
 
-// Values must match F90
 enum ESMC_LogKind_Flag{
                 ESMC_LOGKIND_SINGLE=1,
                 ESMC_LOGKIND_MULTI =2,
                 ESMC_LOGKIND_NONE  =3 };
 
-// Values must match F90
 enum ESMC_LogMsgType_Flag{
 		ESMC_LOGMSG_INFO =1,
 		ESMC_LOGMSG_WARN =2,
@@ -116,40 +158,5 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
 			       ESMC_UNMAPPEDACTION_IGNORE};
 
-enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
-			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
-			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
-			   ESMC_FILEFORMAT_GRIDSPEC};
-
-// File status flag (for IO write functions)
-typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
-                            ESMC_FILESTATUS_OLD = 1,
-                            ESMC_FILESTATUS_NEW = 2,
-                            ESMC_FILESTATUS_REPLACE = 3} ESMC_FileStatus_Flag;
-
-// io format type
-typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
-                       ESMF_IOFMT_NETCDF,
-                       ESMF_IOFMT_NETCDF4P,
-                       ESMF_IOFMT_NETCDF4C} ESMC_IOFmt_Flag;
-
-enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
-		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
-		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
-
-// ESMF platform-dependent data types
-  typedef long long ESMC_I8;
-  typedef int       ESMC_I4;
-  typedef short     ESMC_I2;
-  typedef char      ESMC_I1;
-  typedef double    ESMC_R8;
-  typedef float     ESMC_R4;
-#if (ESMC_POINTER_SIZE == 4)
-  // 32-bit machine
-  typedef unsigned long      ESMC_POINTER;
-#else
-  // 64-bit machine
-  typedef unsigned long long ESMC_POINTER;
-#endif
 
 #endif  // ESMC_UTIL_H

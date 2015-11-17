@@ -872,10 +872,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 srcMaskValues, len1, &
                                 dstMaskValues, len2, &
                                 routehandle, &
-				regridmethod, &
-				polemethod, &
-				regridPoleNPnts, &
-				normtype, &
+                                regridmethod, &
+                                polemethod, &
+                                regridPoleNPnts, &
+                                linetype, &
+                                normtype, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
                                 srcFracField, &
@@ -900,7 +901,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       type(ESMF_RegridMethod_Flag),optional   :: regridmethod
       type(ESMF_PoleMethod_Flag),optional     :: polemethod
       integer,optional                        :: regridPoleNPnts
-      
+
+      type(ESMF_LineType_Flag),optional       :: linetype
       type(ESMF_NormType_Flag),optional       :: normtype
       type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
       logical,optional                        :: ignoreDegenerate
@@ -922,6 +924,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                regridmethod=regridmethod, &
                                polemethod=polemethod, &
                                regridPoleNPnts=regridPoleNPnts, &
+                               lineType=linetype, &
                                normType=normtype, &
                                unmappedaction=unmappedaction, &
                                ignoreDegenerate=ignoreDegenerate, &
