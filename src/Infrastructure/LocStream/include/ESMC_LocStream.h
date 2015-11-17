@@ -56,9 +56,10 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_LocStream ESMC_LocStreamCreateLocal(
-				    int ls_size,   //size of the location stream
+				    int ls_size,
+				    enum ESMC_IndexFlag *indexflag,
 				    enum ESMC_CoordSys_Flag *coordSys,
-				    int *rc                                   // out
+				    int *rc
 );
 
 // !RETURN VALUE:
@@ -72,6 +73,12 @@ ESMC_LocStream ESMC_LocStreamCreateLocal(
 //  \begin{description}
 //  \item[{[ls_size]}]
 //    number of points in the location stream.
+//  \item[indexflag]
+//    Indicates the indexing scheme to be used in the new LocStream. If not present,
+//    defaults to ESMC\_INDEX\_DELOCAL.
+//  \item[coordSys]
+//    The coordinated system of the LocStream coordinate data. If not specified then
+//    defaults to ESMF\_COORDSYS\_SPH\_DEG.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}

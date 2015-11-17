@@ -1135,6 +1135,7 @@ def ESMP_MeshWrite(mesh, filename):
 _ESMF.ESMC_LocStreamCreateLocal.restype = ESMP_LocStream
 _ESMF.ESMC_LocStreamCreateLocal.argtypes = [ct.c_int,
                                             OptionalNamedConstant,
+                                            OptionalNamedConstant,
                                             ct.POINTER(ct.c_int)]
 def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
     """
@@ -1155,8 +1156,11 @@ def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
     # NOTE: for some reason the default argument does not come through correctly
     coordSys = coordSys or constants.CoordSys.CART
 
+    # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
+    indexflag = 1
+
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, coordSys, ct.byref(lrc))
+    locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, indexflag, coordSys, ct.byref(lrc))
 
     # check the return code from ESMF
     rc = lrc.value
