@@ -73,11 +73,6 @@ enum ESMC_Pin_Flag { ESMF_PIN_DE_TO_PET=1,
 enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,
                       ESMF_DIRECTION_REVERSE};
 
-// indexflag type
-enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
-                      ESMF_INDEX_GLOBAL,
-                      ESMF_INDEX_USER};
-
 // inquireonly flag type
 enum ESMC_InquireFlag { ESMF_INQUIREONLY=ESMF_TRUE,
                         ESMF_NOINQUIRE=ESMF_FALSE};

@@ -32,7 +32,8 @@
 #define ESMF_METHOD "f_esmf_gridcreatenoperidim"
   subroutine f_esmf_gridcreatenoperidim(gridp, maxIndex, len1, &
                                         coordSys, cspresent, &
-                                        coordTypeKind, ctkpresent, rc)
+                                        coordTypeKind, ctkpresent, &
+                                        indexflag, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -47,6 +48,7 @@
     integer                        :: cspresent, ctkpresent
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
+    type(ESMF_Index_Flag)          :: indexflag
     integer, intent(out)           :: rc              
 
     type(ESMF_Grid) :: grid
@@ -57,20 +59,20 @@
     ! handle the optional arguments
     if (cspresent == 0 .and. ctkpresent == 0) then
       grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                      indexflag=indexflag, rc=rc)    
     elseif (cspresent == 0 .and. ctkpresent == 1) then
       grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
                                       coordTypeKind=coordTypeKind, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                      indexflag=indexflag, rc=rc)    
     elseif (cspresent == 1 .and. ctkpresent == 0) then
       grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
                                       coordSys=coordSys, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                      indexflag=indexflag, rc=rc)    
     elseif (cspresent == 1 .and. ctkpresent == 1) then
       grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
                                       coordSys=coordSys, &
                                       coordTypeKind=coordTypeKind, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                      indexflag=indexflag, rc=rc)    
     endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -88,7 +90,8 @@
                                         poleDim, pldpresent, &
                                         coordSys, cspresent, &
                                         coordTypeKind, ctkpresent, &
-                                        poleKind, pkpresent, len2, rc)
+                                        poleKind, pkpresent, len2, &
+                                        indexflag, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -107,6 +110,7 @@
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
     type(ESMF_PoleKind_Flag)       :: poleKind(1:len2)
+    type(ESMF_Index_Flag)          :: indexflag
     integer, intent(out)           :: rc              
   
     type(ESMF_Grid) :: grid
@@ -127,75 +131,75 @@
       if (cspresent == 0 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 0 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         coordSys=coordSys, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         coordSys=coordSys, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       endif
     elseif ((pkpresent == 1) .and. (pdpresent == 0)) then
       if (cspresent == 0 .and. ctkpresent == 0) then 
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 0 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
                                         coordSys=coordSys, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
                                         coordSys=coordSys, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       endif
     elseif ((pkpresent == 0) .and. (pdpresent == 1)) then
       if (cspresent == 0 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 0 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         coordSys=coordSys, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         coordSys=coordSys, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       endif
     elseif ((pkpresent == 1) .and. (pdpresent == 1)) then
       if (cspresent == 0 .and. ctkpresent == 0) then
@@ -203,21 +207,21 @@
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 0 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 0) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
                                         poleDim=poleDim_Loc, &
                                         polekindflag=poleKind, &
                                         coordSys=coordSys, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       elseif (cspresent == 1 .and. ctkpresent == 1) then
         grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
                                         periodicDim=periodicDim, &
@@ -225,7 +229,7 @@
                                         polekindflag=poleKind, &
                                         coordSys=coordSys, &
                                         coordTypeKind=coordTypeKind, &
-                                        indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+                                        indexflag=indexflag, rc=rc)    
       endif
     endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -242,7 +246,7 @@
   subroutine f_esmf_gridcreatefromfile(gridp, filename, fileTypeFlag, &
       regDecomp, rdpresent, decompflag, dfpresent, &
       isSphere, ispresent, addCornerStagger, acspresent, &
-      addUserArea, auapresent, addMask, ampresent, varname, vnpresent, &
+      addUserArea, auapresent, indexflag, addMask, ampresent, varname, vnpresent, &
       coordNames, cnpresent, rc)
 
     use ESMF_UtilTypesMod
@@ -267,6 +271,7 @@
     integer                                :: acspresent
     logical                                :: addUserArea
     integer                                :: auapresent
+    type(ESMF_Index_Flag)                  :: indexflag
     logical                                :: addMask
     integer                                :: ampresent
     character(len=*)                       :: varname
@@ -318,7 +323,7 @@
                                       isSphere=isSphere_loc, &
                 	              addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 0 .and. cnpresent == 1) then
@@ -328,7 +333,7 @@
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
                                       coordNames=coordNames, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 1 .and. cnpresent == 0) then
@@ -338,7 +343,7 @@
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
                                       addMask=addMask_loc, varname=varname, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 1 .and. cnpresent == 1) then
@@ -349,7 +354,7 @@
                                       addUserArea=addUserArea_loc, &
                                       addMask=addMask_loc, varname=varname, &
                                       coordNames=coordNames, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             endif
@@ -362,7 +367,7 @@
   				  isSphere=isSphere_loc, &
                     		  addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
-                                  indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                  indexflag=indexflag, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 0 .and. cnpresent == 1) then
@@ -372,7 +377,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       coordNames=coordNames, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -383,7 +388,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       addMask=addMask_loc, varname=varname, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -394,7 +399,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       addMask=addMask_loc, varname=varname, &
                                       coordNames=coordNames, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -412,7 +417,7 @@
                                       isSphere=isSphere_loc, &
                 	              addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 0 .and. cnpresent == 1) then
@@ -423,7 +428,7 @@
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
                                       coordNames=coordNames, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 1 .and. cnpresent == 0) then
@@ -434,7 +439,7 @@
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
                                       addMask=addMask_loc, varname=varname, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 1 .and. cnpresent == 1) then
@@ -446,7 +451,7 @@
                                       addUserArea=addUserArea_loc, &
                                       addMask=addMask_loc, varname=varname, &
                                       coordNames=coordNames, &
-                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                      indexflag=indexflag, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
             endif
@@ -460,7 +465,7 @@
     				  isSphere=isSphere_loc, &
                     		  addCornerStagger=addCornerStagger_loc, &
                                   addUserArea=addUserArea_loc, &
-                                  indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+                                  indexflag=indexflag, rc=rc)
             if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
             elseif (vnpresent == 0 .and. cnpresent == 1) then
@@ -471,7 +476,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       coordNames=coordNames, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -483,7 +488,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       addMask=addMask_loc, varname=varname, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -495,7 +500,7 @@
                                       isSphere=isSphere_loc, &
                                       addCornerStagger=addCornerStagger_loc, &
                                       addUserArea=addUserArea_loc, &
-                                      indexflag=ESMF_INDEX_GLOBAL, &
+                                      indexflag=indexflag, &
                                       addMask=addMask_loc, varname=varname, &
                                       coordNames=coordNames, rc=rc)
                if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &

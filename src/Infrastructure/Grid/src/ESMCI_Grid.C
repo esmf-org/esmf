@@ -67,7 +67,7 @@ void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
     ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
-    int *rc);
+    ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, int *periodicDim, int *pd_present,
@@ -75,7 +75,7 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
     ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
-    int *rc);
+    ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, 
 				      const char *filename, int *fileTypeFlag, 
@@ -84,6 +84,7 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
 				      int *isSphere, int *ispresent,
 				      int *addCornerStagger, int *acspresent,
 				      int *addUserArea, int *auapresent,
+				      ESMC_IndexFlag *indexflag,
 				      int *addMask, int *ampresent, 
 				      const char *varname, int *vnpresent,
 				      const char *coordNames, int *cnpresent, int *rc, 
@@ -187,6 +188,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_InterfaceInt *maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
+    ESMC_IndexFlag *indexflag,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -237,7 +239,7 @@ int setDefaultsLUA(int dimCount,
                                       mi->array, &mi->extent[0],
                                       coordSys, &cs_present,
                                       coordTypeKind, &ctk_present,
-                                      &localrc);
+                                      indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return ESMC_NULL_POINTER;
   
@@ -266,6 +268,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_PoleKind_Flag *poleKind,
+    ESMC_IndexFlag *indexflag,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -323,7 +326,7 @@ int setDefaultsLUA(int dimCount,
                                      coordSys, &cs_present,
                                      coordTypeKind, &ctk_present,
                                      poleKind, &pk_present, &pksize,
-                                     &localrc);
+                                     indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
   
@@ -353,6 +356,7 @@ int setDefaultsLUA(int dimCount,
     int *isSphere,
     int *addCornerStagger,
     int *addUserArea,
+    ESMC_IndexFlag *indexflag,
     int *addMask,
     const char *varname,
     const char **coordNames,
@@ -445,7 +449,7 @@ int setDefaultsLUA(int dimCount,
 				     rd_loc, &rdpresent, df_loc, &dfpresent,
 				     &is_loc, &ispresent, 
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
-				     &am_loc, &ampresent, vn_loc, &vnpresent, 
+				     indexflag, &am_loc, &ampresent, vn_loc, &vnpresent,
 				     cn_buf, &cnpresent, &localrc,
 				     strlen(filename), vn_len, cn_len);
     if (vn_loc && (vn_len > 0)) {

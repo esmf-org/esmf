@@ -79,6 +79,11 @@ enum ESMC_GridStatus_Flag {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_NOT_READY,
                       ESMC_GRIDSTATUS_SHAPE_READY};
 
+// indexflag type
+enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
+                      ESMF_INDEX_GLOBAL,
+                      ESMF_INDEX_USER};
+
 // io format type
 typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
                        ESMF_IOFMT_NETCDF,

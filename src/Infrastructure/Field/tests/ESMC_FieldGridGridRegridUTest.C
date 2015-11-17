@@ -102,7 +102,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
   ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &rc);
+  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
@@ -204,7 +204,7 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex_d, &coordsys, &typekind, &rc);
+  dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex_d, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory

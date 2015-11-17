@@ -58,10 +58,11 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateNoPeriDim(
-  ESMC_InterfaceInt *maxIndex,  // in
+  ESMC_InterfaceInt *maxIndex,            // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
-  int *rc                      // out
+  enum ESMC_IndexFlag *indexflag,         // in
+  int *rc                                 // out
 );
 // !RETURN VALUE:
 //  type(ESMC_Grid)
@@ -73,15 +74,18 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //  The arguments are:
 //  \begin{description}
 //  \item[maxIndex]
-//  The upper extent of the grid array.
+//      The upper extent of the grid array.
 //  \item[coordSys]
-//  The coordinated system of the grid coordinate data. If not specified then
-//  defaults to ESMF\_COORDSYS\_SPH\_DEG.
+//      The coordinated system of the grid coordinate data. If not specified then
+//      defaults to ESMF\_COORDSYS\_SPH\_DEG.
 //  \item[coordTypeKind]
-//  The type/kind of the grid coordinate data.  If not specified then the
-//  type/kind will be 8 byte reals.
+//      The type/kind of the grid coordinate data.  If not specified then the
+//      type/kind will be 8 byte reals.
+//  \item[indexflag]
+//      Indicates the indexing scheme to be used in the new Grid. If not present,
+//      defaults to ESMC\_INDEX\_DELOCAL.
 //  \item[rc]
-//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
@@ -94,13 +98,14 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 //
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
-  ESMC_InterfaceInt *maxIndex,  // in
-  int *periodicDim, // in
-  int *poleDim, // in
+  ESMC_InterfaceInt *maxIndex,            // in
+  int *periodicDim,                       // in
+  int *poleDim,                           // in
   enum ESMC_CoordSys_Flag *coordSys,      // in
   enum ESMC_TypeKind_Flag *coordTypeKind, // in
-  enum ESMC_PoleKind_Flag *poleKind, // in
-  int *rc                      // out
+  enum ESMC_PoleKind_Flag *poleKind,      // in
+  enum ESMC_IndexFlag *indexflag,         // in
+  int *rc                                 // out
 );
 // !RETURN VALUE:
 //  type(ESMC_Grid)
@@ -112,26 +117,29 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  The arguments are:
 //  \begin{description}
 //  \item[maxIndex]
-//  The upper extent of the grid array.
+//      The upper extent of the grid array.
 //  \item[periodicDim]
-//  The periodic dimension.  If not specified, defaults to 1.
+//      The periodic dimension.  If not specified, defaults to 1.
 //  \item[poleDim]
-//  The dimension at which the poles are located at the ends.  If not
-//  specified, defaults to 2.
+//      The dimension at which the poles are located at the ends.  If not
+//      specified, defaults to 2.
 //  \item[coordSys]
-//  The coordinated system of the grid coordinate data. If not specified then
-//  defaults to ESMF\_COORDSYS\_SPH\_DEG.
+//      The coordinated system of the grid coordinate data. If not specified then
+//      defaults to ESMF\_COORDSYS\_SPH\_DEG.
 //  \item[coordTypeKind]
-//  The type/kind of the grid coordinate data.  If not specified then the
-//  type/kind will be 8 byte reals.
+//      The type/kind of the grid coordinate data.  If not specified then the
+//      type/kind will be 8 byte reals.
 //  \item[poleKind]
-//  Two item array which specifies the type of connection which occurs at the 
-//  pole. polekindflag(1) the connection that occurs at the minimum end of the 
-//  index dimension. polekindflag(2) the connection that occurs at the maximum 
-//  end of the index dimension. If not specified, the default is 
-//  ESMF\_POLETYPE\_MONOPOLE for both.
+//      Two item array which specifies the type of connection which occurs at the
+//      pole. polekindflag(1) the connection that occurs at the minimum end of the
+//      index dimension. polekindflag(2) the connection that occurs at the maximum
+//      end of the index dimension. If not specified, the default is
+//      ESMF\_POLETYPE\_MONOPOLE for both.
+//  \item[indexflag]
+//      Indicates the indexing scheme to be used in the new Grid. If not present,
+//      defaults to ESMC\_INDEX\_DELOCAL.
 //  \item[rc]
-//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
@@ -145,7 +153,8 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
 				  int *regDecomp, int *decompflag,
 				  int *isSphere, int *addCornerStagger,
-				  int *addUserArea, int *addMask, const char *varname,
+				  int *addUserArea, enum ESMC_IndexFlag *indexflag,
+				  int *addMask, const char *varname,
 				  const char **coordNames, int *rc);
 // !RETURN VALUE:
 //  type(ESMC_Grid)
@@ -183,6 +192,9 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 //      Set to 1 to read in the cell area from the Grid file; otherwise, ESMF will 
 //      calculate it.  This feature is only supported when the grid file is in the SCRIP
 //      format.  
+//  \item[indexflag]
+//      Indicates the indexing scheme to be used in the new Grid. If not present,
+//      defaults to ESMC\_INDEX\_DELOCAL.
 // \item[{[addMask]}]
 //      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'.
 //      This flag is only needed when the grid file is in the GRIDSPEC format.
