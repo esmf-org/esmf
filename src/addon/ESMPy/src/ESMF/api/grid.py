@@ -846,7 +846,7 @@ class Grid(object):
 
         # link the ESMF allocations to the Python grid properties
         # first if number of coordinate dimensions is equivalent to the grid rank
-        if self.ndims == self.rank:
+        if (self.ndims == self.rank) or (self.ndims == 0):
             for xyz in range(self.rank):
                 self._link_coord_buffer_(xyz, stagger)
         # and this way if we have 1d coordinates
