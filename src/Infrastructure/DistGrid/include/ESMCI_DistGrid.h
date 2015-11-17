@@ -115,7 +115,7 @@ namespace ESMCI {
       int *regDecompArg, InterfaceInt *connectionList,
       Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
       DELayout *delayout, bool delayoutCreator, VM *vm);
-    int destruct(bool followCreator=true);
+    int destruct(bool followCreator=true, bool noGarbage=false);
    public:
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,

@@ -1899,7 +1899,7 @@ int DistGrid::destroy(
 
   try{
     // destruct DistGrid object
-    (*distgrid)->destruct();
+    (*distgrid)->destruct(true, noGarbage);
     // mark as invalid object
     (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
@@ -2120,9 +2120,10 @@ int DistGrid::construct(
 // !IROUTINE:  ESMCI::DistGrid::destruct
 //
 // !INTERFACE:
-int DistGrid::destruct(bool followCreator){
+int DistGrid::destruct(bool followCreator, bool noGarbage){
 //
-// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: The followCreator flag is only needed until we have reference counting
+// TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
 // TODO: sequence problems during automatic garbage collection unitl reference
 // TODO: counting comes in to solve this problem in the final manner.
@@ -2185,7 +2186,7 @@ int DistGrid::destruct(bool followCreator){
       delete [] regDecomp;
     
     if (delayoutCreator && followCreator){
-      localrc = DELayout::destroy(&delayout); 
+      localrc = DELayout::destroy(&delayout, noGarbage); 
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
     }
