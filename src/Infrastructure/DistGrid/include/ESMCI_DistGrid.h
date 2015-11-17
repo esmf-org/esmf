@@ -148,7 +148,7 @@ namespace ESMCI {
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
-    static int destroy(DistGrid **distgrid);
+    static int destroy(DistGrid **distgrid, bool noGarbage=false);
     // is()
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
     bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;

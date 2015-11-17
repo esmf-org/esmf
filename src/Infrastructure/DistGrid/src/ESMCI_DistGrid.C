@@ -1879,7 +1879,8 @@ int DistGrid::destroy(
 //
 // !ARGUMENTS:
 //
-  DistGrid **distgrid){  // in - DistGrid to destroy
+  DistGrid **distgrid,          // in - DistGrid to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //
@@ -1896,14 +1897,28 @@ int DistGrid::destroy(
     return rc;
   }
 
-  // destruct DistGrid object
-  localrc = (*distgrid)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
+  try{
+    // destruct DistGrid object
+    (*distgrid)->destruct();
+    // mark as invalid object
+    (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
   
-  // mark as invalid object
-  (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*distgrid); // remove object from garbage collection
+    delete (*distgrid);      // completely delete the object, free heap
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

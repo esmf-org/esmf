@@ -59,7 +59,7 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //
 // constructor and destructor
 //
@@ -252,12 +252,12 @@ Array::Array(
 // !IROUTINE:  ESMCI::Array::destruct
 //
 // !INTERFACE:
-void Array::destruct(bool followCreator){
+void Array::destruct(bool followCreator, bool noGarbage){
 //
 // TODO: The followCreator flag is only needed until we have reference counting
 // TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
-// TODO: sequence problems during automatic garbage collection unit reference
+// TODO: sequence problems during automatic garbage collection until reference
 // TODO: counting comes in to solve this problem in the final manner.
 //
 // !DESCRIPTION:
@@ -308,7 +308,7 @@ void Array::destruct(bool followCreator){
     if (totalElementCountPLocalDe != NULL)
       delete [] totalElementCountPLocalDe;
     if (distgridCreator && followCreator){
-      int localrc = DistGrid::destroy(&distgrid);
+      int localrc = DistGrid::destroy(&distgrid, noGarbage);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
@@ -1830,7 +1830,8 @@ int Array::destroy(
 //
 // !ARGUMENTS:
 //
-  Array **array){  // in - ESMC_Array to destroy
+  Array **array,                // in - ESMC_Array to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //
@@ -1848,7 +1849,7 @@ int Array::destroy(
 
   try{
     // destruct Array object
-    (*array)->destruct();
+    (*array)->destruct(true, noGarbage);
     // mark as invalid object
     (*array)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
@@ -1862,6 +1863,12 @@ int Array::destroy(
     return rc;
   }
   
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*array); // remove object from garbage collection
+    delete (*array);      // completely delete the object, free heap
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

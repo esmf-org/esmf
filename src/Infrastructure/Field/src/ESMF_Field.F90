@@ -96,6 +96,8 @@ module ESMF_FieldMod
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
+    logical                       :: geomb_internal   ! .true. if field%geombase is
+                                                      ! internally allocated
     logical                       :: is_proxy         ! .true. for a proxy field
     integer                       :: dimCount         ! field dimension count
     integer                       :: gridToFieldMap(ESMF_MAXDIM)
@@ -734,6 +736,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ftypep%iostatus    = ESMF_STATUS_UNINIT
        
         ftypep%array_internal = .false. 
+        ftypep%geomb_internal = .false. 
         ftypep%is_proxy       = .false. 
         ftypep%gridToFieldMap = -1
         ftypep%ungriddedLBound = -1

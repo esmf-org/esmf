@@ -220,11 +220,12 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_BaseDestroy - Release resources from a Base object
 !
 ! !INTERFACE:
-  subroutine ESMF_BaseDestroy(base, rc)
+  subroutine ESMF_BaseDestroy(base, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Base)                         :: base                 
-    integer,        intent(out),  optional  :: rc     
+    type(ESMF_Base)                        :: base                 
+    logical,        intent(in),   optional :: noGarbage
+    integer,        intent(out),  optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -233,6 +234,24 @@ module ESMF_BaseMod
 !     \begin{description}
 !     \item [base]
 !           An {\tt ESMF\_Base} derived type to be deleted.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -241,6 +260,7 @@ module ESMF_BaseMod
 
     logical :: rcpresent                          ! Return code present   
     integer :: status
+    type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
     ! Initialize return code
     rcpresent = .FALSE.
@@ -252,7 +272,12 @@ module ESMF_BaseMod
     ! check input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit,base,rc)
 
-    call c_ESMC_BaseDestroy(base , status)
+    ! Set default flags
+    opt_noGarbage = ESMF_FALSE
+    if (present(noGarbage)) opt_noGarbage = noGarbage
+
+    ! Call into the C++ interface
+    call c_ESMC_BaseDestroy(base, opt_noGarbage, status)
     if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
