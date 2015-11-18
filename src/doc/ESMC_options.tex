@@ -42,6 +42,25 @@ This flag is documented in section \ref{const:cgriditem}.
 \subsection{ESMC\_GRIDSTATUS}
 This flag is documented in section \ref{const:cgridstatus}.
 
+\subsection{ESMC\_INDEX}
+{\sf DESCRIPTION:\\}
+Indicates whether index is local (per DE) or global (per object).
+
+The type of this flag is:
+
+{\tt type(ESMC\_IndexFlag)}
+\label{const:indexflag}
+The valid values are:
+\begin{description}
+\item [ESMC\_INDEX\_DELOCAL]
+      Indicates that DE-local index space starts at lower bound 1 for each DE.
+\item [ESMC\_INDEX\_GLOBAL]
+      Indicates that global indices are used. This means that DE-local index
+      space starts at the global lower bound for each DE.
+\item [ESMC\_INDEX\_USER]
+      Indicates that the DE-local index bounds are explicitly set by the user.
+\end{description}
+
 \subsection{ESMC\_LINETYPE}
 \label{opt:lineType}
 

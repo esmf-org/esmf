@@ -195,7 +195,7 @@ void FTN_X(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
     }
   }
 
-  if (indexflag==ESMF_INDEX_DELOCAL) {
+  if (indexflag==ESMC_INDEX_DELOCAL) {
     *exclusiveLBound = 1; // excl. region starts at (1,1,1...)                                  
   } else {
 
@@ -271,7 +271,7 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   int de = localDeToDeMap[localDE];
 
   // Set upper bound based on indexflag
-  if (indexflag==ESMF_INDEX_DELOCAL) {
+  if (indexflag==ESMC_INDEX_DELOCAL) {
     *exclusiveUBound = indexCountPDimPDe[de];
   } else {
 

@@ -80,7 +80,7 @@ IO_Handler::IO_Handler (
 //EOPI
 //-----------------------------------------------------------------------------
   localPet = 0;
-  indexflag = ESMF_INDEX_DELOCAL;
+  indexflag = ESMC_INDEX_DELOCAL;
   iofmtFlag = fmtArg;
   fileStatusFlag = ESMC_FILESTATUS_UNKNOWN;
   overwrite = false;

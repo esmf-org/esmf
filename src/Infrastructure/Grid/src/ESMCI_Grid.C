@@ -614,7 +614,7 @@ int Grid::addCoordArray(
   int *staggerMemLBoundIntIntArray=(int *)ESMC_NULL_POINTER;
 
   // Only setup membounds if index flag is user
-  if (indexflag==ESMF_INDEX_USER) {
+  if (indexflag==ESMC_INDEX_USER) {
     staggerMemLBoundIntIntArray=new int[dimCount];
     extent[0]=dimCount;
     staggerMemLBoundIntInt=new InterfaceInt(staggerMemLBoundIntIntArray,1,extent); 
@@ -667,7 +667,7 @@ int Grid::addCoordArray(
       DEBUG */
 
     //// Optionally fix the lower memory bounds of each DE's memory chunk
-    if (indexflag==ESMF_INDEX_USER) {
+    if (indexflag==ESMC_INDEX_USER) {
       // Set size of array based on coord dim
       staggerMemLBoundIntInt->extent[0]=coordDimCount[coord];
 
@@ -712,7 +712,7 @@ int Grid::addCoordArray(
   delete arrayspec;     
   delete [] distgridToArrayMapIntIntArray;
   delete distgridToArrayMapIntInt;
-  if (indexflag==ESMF_INDEX_USER) {
+  if (indexflag==ESMC_INDEX_USER) {
     delete [] staggerMemLBoundIntIntArray;
     delete staggerMemLBoundIntInt;
   }
@@ -1042,7 +1042,7 @@ int Grid::addItemArray(
   int *staggerMemLBoundIntIntArray=(int *)ESMC_NULL_POINTER;
 
   // Only setup membounds if index flag is user
-  if (indexflag==ESMF_INDEX_USER) {
+  if (indexflag==ESMC_INDEX_USER) {
     staggerMemLBoundIntIntArray=new int[dimCount];
     extent[0]=dimCount;
     staggerMemLBoundIntInt=new InterfaceInt(staggerMemLBoundIntIntArray,1,extent); 
@@ -1090,7 +1090,7 @@ int Grid::addItemArray(
       DEBUG */
 
     //// Optionally fix the lower memory bounds of each DE's memory chunk
-    if (indexflag==ESMF_INDEX_USER) {
+    if (indexflag==ESMC_INDEX_USER) {
       // Set size of array based on dimCount
       staggerMemLBoundIntInt->extent[0]=dimCount;
 
@@ -1127,7 +1127,7 @@ int Grid::addItemArray(
   delete arrayspec;     
   delete [] distgridToArrayMapIntIntArray;
   delete distgridToArrayMapIntInt;
-  if (indexflag==ESMF_INDEX_USER) {
+  if (indexflag==ESMC_INDEX_USER) {
     delete [] staggerMemLBoundIntIntArray;
     delete staggerMemLBoundIntInt;
   }
@@ -2063,7 +2063,7 @@ int Grid::getDistExclusiveLBound(
   }
 
   // Set lower bound based on indexflag
-  if ((indexflag==ESMF_INDEX_DELOCAL) || (indexflag==ESMF_INDEX_USER)) {
+  if ((indexflag==ESMC_INDEX_DELOCAL) || (indexflag==ESMC_INDEX_USER)) {
     for (int i=0; i<distDimCount; i++)
       lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
   } else {
@@ -2161,7 +2161,7 @@ int Grid::getDistExclusiveUBound(
       uBndArg[i]=indexCountPDimPDe[de*distDimCount+i];
 
   // Set upper bound based on indexflag
-  if (indexflag==ESMF_INDEX_GLOBAL) {
+  if (indexflag==ESMC_INDEX_GLOBAL) {
 
       for (int i=0; i<distDimCount; i++){
 
@@ -4310,7 +4310,7 @@ Grid::Grid(
   isDELBnd = ESMC_NULL_POINTER;
   isDEUBnd = ESMC_NULL_POINTER;
   
-  indexflag=ESMF_INDEX_DELOCAL;
+  indexflag=ESMC_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
   distgrid_wo_poles= ESMC_NULL_POINTER; 
 
@@ -4405,7 +4405,7 @@ Grid::Grid(
   isDELBnd = ESMC_NULL_POINTER;
   isDEUBnd = ESMC_NULL_POINTER;
   
-  indexflag=ESMF_INDEX_DELOCAL;
+  indexflag=ESMC_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
   distgrid_wo_poles= ESMC_NULL_POINTER; 
 
@@ -6100,7 +6100,7 @@ int construct(
   // If indexflag wasn't passed in then use default, otherwise 
   // copy passed in value
   if (indexflagArg==NULL) {
-    indexflag=ESMF_INDEX_DELOCAL;  // default
+    indexflag=ESMC_INDEX_DELOCAL;  // default
   } else {
     indexflag=*indexflagArg;
   }
@@ -6257,9 +6257,9 @@ int construct(
   // Error check gridMemLBound and fill in value
   gridMemLBound=new int[dimCount];
   if (present(gridMemLBoundArg)) {
-    if (indexflag != ESMF_INDEX_USER){
+    if (indexflag != ESMC_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER",
+        "- if gridMemLBound is set then indexflag must be ESMC_INDEX_USER",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -6278,9 +6278,9 @@ int construct(
       gridMemLBound[i]=gridMemLBoundArg->array[i];
     }
   } else {
-    if (indexflag == ESMF_INDEX_USER){
+    if (indexflag == ESMC_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        "- if indexflag=ESMF_INDEX_USER then gridMemLBound must be set",
+        "- if indexflag=ESMC_INDEX_USER then gridMemLBound must be set",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -6617,7 +6617,7 @@ int construct(
   // If indexflag wasn't passed in then use default, otherwise 
   // copy passed in value
   if (indexflagArg==NULL) {
-    indexflag=ESMF_INDEX_DELOCAL;  // default
+    indexflag=ESMC_INDEX_DELOCAL;  // default
   } else {
     indexflag=*indexflagArg;
   }
@@ -6697,9 +6697,9 @@ int construct(
   // Error check gridMemLBound and fill in value
   gridMemLBound=new int[dimCount];
   if (present(gridMemLBoundArg)) {
-    if (indexflag != ESMF_INDEX_USER){
+    if (indexflag != ESMC_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER",
+        "- if gridMemLBound is set then indexflag must be ESMC_INDEX_USER",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -6718,9 +6718,9 @@ int construct(
       gridMemLBound[i]=gridMemLBoundArg->array[i];
     }
   } else {
-    if (indexflag == ESMF_INDEX_USER){
+    if (indexflag == ESMC_INDEX_USER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        "- if indexflag=ESMF_INDEX_USER then gridMemLBound must be set",
+        "- if indexflag=ESMC_INDEX_USER then gridMemLBound must be set",
         ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -10312,7 +10312,7 @@ int Grid::getDistExclusiveUBound(
       uBndArg[i]=indexCountPDimPDe[de*distDimCount+i];
 
   // Set upper bound based on indexflag
-  if (indexflag==ESMF_INDEX_GLOBAL) {
+  if (indexflag==ESMC_INDEX_GLOBAL) {
 
       for (int i=0; i<distDimCount; i++){
 
@@ -10391,7 +10391,7 @@ int Grid::getDistExclusiveLBound(
   }
 
   // Set lower bound based on indexflag
-  if ((indexflag==ESMF_INDEX_DELOCAL) || (indexflag==ESMF_INDEX_USER)) {
+  if ((indexflag==ESMC_INDEX_DELOCAL) || (indexflag==ESMC_INDEX_USER)) {
     for (int i=0; i<distDimCount; i++)
       lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
   } else {
