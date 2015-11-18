@@ -393,7 +393,8 @@ int DELayout::destroy(
 //
 // !ARGUMENTS:
 //
-  DELayout **delayout){  // in - DELayout to destroy
+  DELayout **delayout,          // in - DELayout to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //
@@ -410,13 +411,27 @@ int DELayout::destroy(
     return rc;
   }
 
-  // destruct DELayout object
-  localrc = (*delayout)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
+  try{
+    // destruct DELayout object
+    (*delayout)->destruct();
+    // mark as invalid object
+    (*delayout)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
   
-  // mark as invalid object
-  (*delayout)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*delayout); // remove object from garbage collection
+    delete (*delayout);      // completely delete the object, free heap
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;

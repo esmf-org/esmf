@@ -346,7 +346,7 @@ int main(void){
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
                              NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -554,7 +554,7 @@ int main(void){
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, &i_maskValues,
                              &routehandle,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
                              NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

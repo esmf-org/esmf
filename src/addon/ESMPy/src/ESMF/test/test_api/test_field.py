@@ -249,7 +249,7 @@ class TestField(TestBase):
         field = self.make_field(np.array([10, 10], dtype=np.int32))
         self.examine_field_attributes(field)
 
-        field2 = field._copy_()
+        field2 = field.copy()
         self.examine_field_attributes(field2)
 
         assert np.all(field.grid.coords == field2.grid.coords)

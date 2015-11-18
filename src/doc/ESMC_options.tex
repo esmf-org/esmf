@@ -42,6 +42,30 @@ This flag is documented in section \ref{const:cgriditem}.
 \subsection{ESMC\_GRIDSTATUS}
 This flag is documented in section \ref{const:cgridstatus}.
 
+\subsection{ESMC\_LINETYPE}
+\label{opt:lineType}
+
+{\sf DESCRIPTION:\\}  This argument allows the user to select the path of the line which connects two points on the surface of a sphere.
+This in turn controls the path along which distances are calculated and the shape of the edges that make up a cell.
+
+The type of this flag is:
+
+{\tt type(ESMC\_LineType\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_LINETYPE\_CART]
+   Cartesian line. When this option is specified distances are calculated in a straight line through the 3D Cartesian space
+   in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines between their corner vertices.
+   When calculating regrid weights, this line type is currently the default for the following regrid methods: ESMC\_REGRIDMETHOD\_BILINEAR,
+   ESMC\_REGRIDMETHOD\_PATCH, ESMC\_REGRIDMETHOD\_NEAREST\_STOD, and  ESMC\_REGRIDMETHOD\_NEAREST\_DTOS.
+\item [ESMC\_LINETYPE\_GREAT\_CIRCLE]
+   Great circle line. When this option is specified distances are calculated along a great circle path (the shortest distance
+   between two points on a sphere surface). Cells are bounded by great circle paths between their corner vertices. When calculating regrid
+   weights, this line type is currently the default for the following regrid method: ESMC\_REGRIDMETHOD\_CONSERVE.
+\end{description}
+
+
 \subsection{ESMC\_LOGKIND}
 This flag is documented in section \ref{const:clogkindflag}.
 

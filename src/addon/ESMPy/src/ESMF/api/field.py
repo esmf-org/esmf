@@ -30,88 +30,6 @@ class Field(object):
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
     """
 
-    @property
-    def data(self):
-        """
-        :return: the data of the Field
-        """
-        return self._data
-
-    @property
-    def finalized(self):
-        return self._finalized
-
-    @property
-    def grid(self):
-        """
-        :return: the Grid, Mesh or LocStream upon which this Field is built
-        """
-        return self._grid
-
-    @property
-    def lower_bounds(self):
-        """
-        :return: the lower bounds of the Field
-        """
-        return self._lower_bounds
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def name(self):
-        """
-        :return: the name of the Field
-        """
-        return self._name
-
-    @property
-    def ndbounds(self):
-        """
-        :return: the bounds of the extra dimensions in the Field
-        """
-        return self._ndbounds
-
-    @property
-    def rank(self):
-        """
-        :return: the rank of the Field
-        """
-        return self._rank
-
-    @property
-    def staggerloc(self):
-        """
-        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
-        """
-        return self._staggerloc
-
-    @property
-    def struct(self):
-        return self._struct
-
-    @property
-    def type(self):
-        """
-        :return: the type of the data in the Field
-        """
-        return self._type
-
-    @property
-    def upper_bounds(self):
-        """
-        :return: the upper bounds of the Field
-        """
-        return self._upper_bounds
-
-    @property
-    def xd(self):
-        """
-        :return: the number of extra (ungridded) dimensions of the Field
-        """
-        return self._xd
-
     @initialize
     def __init__(self, grid, name=None,
                 typekind=None,
@@ -251,22 +169,6 @@ class Field(object):
         atexit.register(self.__del__)
         self._finalized = False
 
-    # manual destructor
-    def destroy(self):
-        """
-        Release the memory associated with a Field. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
-        if hasattr(self, '_finalized'):
-            if self._finalized is False:
-                ESMP_FieldDestroy(self)
-                self._finalized = True
-
     def __del__(self):
         """
         Release the memory associated with a Field. \n
@@ -278,6 +180,29 @@ class Field(object):
             None \n
         """
         self.destroy()
+
+    def __getitem__(self, slc):
+        if pet_count() > 1:
+            raise SerialMethod
+
+        slc = get_formatted_slice(slc, self.rank)
+
+        ret = self.copy()
+
+        ret._data = self._data.__getitem__(slc)
+
+        # set grid to the last two dims of the slice
+        if self.xd > 0:
+            slc_grid = [slc[-1 * x] for x in range(self.rank - self.xd, 0, -1)]
+        else:
+            slc_grid = slc
+        ret._grid = self.grid.__getitem__(slc_grid)
+
+        # upper bounds are "sliced" by taking the shape of the data
+        ret._upper_bounds = np.array(ret.data.shape, dtype=np.int32)
+        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
+
+        return ret
 
     def __repr__(self):
         """
@@ -306,11 +231,102 @@ class Field(object):
                    self.ndbounds,
                    self.data,
                    self.grid,
-        ))
+                   ))
 
         return string
 
-    def _copy_(self):
+    @property
+    def data(self):
+        """
+        :return: the data of the Field
+        """
+        return self._data
+
+    @property
+    def finalized(self):
+        return self._finalized
+
+    @property
+    def grid(self):
+        """
+        :return: the Grid, Mesh or LocStream upon which this Field is built
+        """
+        return self._grid
+
+    @property
+    def lower_bounds(self):
+        """
+        :return: the lower bounds of the Field
+        """
+        return self._lower_bounds
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def name(self):
+        """
+        :return: the name of the Field
+        """
+        return self._name
+
+    @property
+    def ndbounds(self):
+        """
+        :return: the bounds of the extra dimensions in the Field
+        """
+        return self._ndbounds
+
+    @property
+    def rank(self):
+        """
+        :return: the rank of the Field
+        """
+        return self._rank
+
+    @property
+    def staggerloc(self):
+        """
+        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        """
+        return self._staggerloc
+
+    @property
+    def struct(self):
+        return self._struct
+
+    @property
+    def type(self):
+        """
+        :return: the type of the data in the Field
+        """
+        return self._type
+
+    @property
+    def upper_bounds(self):
+        """
+        :return: the upper bounds of the Field
+        """
+        return self._upper_bounds
+
+    @property
+    def xd(self):
+        """
+        :return: the number of extra (ungridded) dimensions of the Field
+        """
+        return self._xd
+
+    def copy(self):
+        """
+        Copy a Field in an ESMF-safe manner. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            A new Field copy. \n
+        """
         # shallow copy
         ret = copy(self)
         # don't call ESMF destructor twice on the same shallow Python object
@@ -318,28 +334,20 @@ class Field(object):
 
         return ret
 
-    def __getitem__(self, slc):
-        if pet_count() > 1:
-            raise SerialMethod
-
-        slc = get_formatted_slice(slc, self.rank)
-
-        ret = self._copy_()
-
-        ret._data = self._data.__getitem__(slc)
-
-        # set grid to the last two dims of the slice
-        if self.xd > 0:
-            slc_grid = [slc[-1*x] for x in range(self.rank-self.xd, 0, -1)]
-        else:
-            slc_grid = slc
-        ret._grid = self.grid.__getitem__(slc_grid)
-
-        # upper bounds are "sliced" by taking the shape of the data
-        ret._upper_bounds = np.array(ret.data.shape, dtype=np.int32)
-        # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
-
-        return ret
+    def destroy(self):
+        """
+        Release the memory associated with a Field. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        if hasattr(self, '_finalized'):
+            if self._finalized is False:
+                ESMP_FieldDestroy(self)
+                self._finalized = True
 
     def get_area(self):
         """
@@ -363,11 +371,10 @@ class Field(object):
         Required Arguments: \n
             filename: the name of the NetCDF file. \n
             variable: the name of the data variable to read. \n
-            timeslice: the number of time slices to read. \n
         Optional Arguments: \n
-            format: unimplemented (defaults to NetCDF)\n
+            ndbounds: the number of ungridded dimensions to read.\n
         Returns: \n
-            Field \n
+            None \n
         """
 
         assert (type(filename) is str)

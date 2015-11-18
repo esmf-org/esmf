@@ -103,6 +103,7 @@ namespace ESMCI{
 			               ESMC_RegridMethod_Flag *regridMethod,
 			               ESMC_PoleMethod_Flag *polemethod,
 			               int *regridPoleNPnts,
+			               ESMC_LineType_Flag *lineType,
 			               ESMC_NormType_Flag *normType,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,

@@ -1888,6 +1888,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! remember that geombase was created internally
+    ESMF_FieldCreateGridArraySpec%ftypep%geomb_internal = .true.
+
     !  link the Attribute hierarchies
     linkChange = ESMF_TRUE 
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
@@ -2075,10 +2078,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, &
         totalUWidth, name, rc=localrc)
-
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
  
+    ! remember that geombase was created internally
+    ESMF_FieldCreateGridArray%ftypep%geomb_internal = .true.
+
     !  link the Attribute hierarchies
     linkChange = ESMF_TRUE
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
@@ -2319,6 +2324,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
+@\
     !  link the Attribute hierarchies @\
     linkChange = ESMF_TRUE @\
     call c_ESMC_AttributeLink( & @\
@@ -2529,6 +2537,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     !  link the Attribute hierarchies @\
     linkChange = ESMF_TRUE @\
@@ -2788,6 +2799,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! remember that geombase was created internally
+    ESMF_FieldCreateLSArraySpec%ftypep%geomb_internal = .true.
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateLSArraySpec
@@ -2906,10 +2920,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateLSArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name=name, rc=localrc)
-
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
  
+    ! remember that geombase was created internally
+    ESMF_FieldCreateLSArray%ftypep%geomb_internal = .true.
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateLSArray
@@ -3069,6 +3085,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateLSData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateLSData##mrank##D##mtypekind  @\
@@ -3202,6 +3220,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind  @\
@@ -3468,6 +3488,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! remember that geombase was created internally
+    ESMF_FieldCreateMeshArraySpec%ftypep%geomb_internal = .true.
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateMeshArraySpec
@@ -3591,13 +3614,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
-    ESMF_FieldCreateMeshArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name=name, rc=localrc)
-
+    ESMF_FieldCreateMeshArray=ESMF_FieldCreateGBArray(geombase, array, &
+      datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+      name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
+    ! remember that geombase was created internally
+    ESMF_FieldCreateMeshArray%ftypep%geomb_internal = .true.
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateMeshArray
@@ -3763,6 +3788,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateMeshData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateMeshData##mrank##D##mtypekind  @\
@@ -3902,6 +3929,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind  @\
@@ -4206,6 +4235,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! remember that geombase was created internally
+    ESMF_FieldCreateXGArraySpec%ftypep%geomb_internal = .true.
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateXGArraySpec
@@ -4348,13 +4380,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
-    ESMF_FieldCreateXGArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name=name, rc=localrc)
-
+    ESMF_FieldCreateXGArray=ESMF_FieldCreateGBArray(geombase, array, &
+      datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+      name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
+    ! remember that geombase was created internally
+    ESMF_FieldCreateXGArray%ftypep%geomb_internal = .true.
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_FieldCreateXGArray
@@ -4541,6 +4575,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateXGData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateXGData##mrank##D##mtypekind  @\
@@ -4683,6 +4719,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
+    ! remember that geombase was created internally @\
+    ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind  @\
@@ -4699,37 +4737,65 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 !BOP
 ! !IROUTINE: ESMF_FieldDestroy - Release resources associated with a Field
 ! !INTERFACE:
-  subroutine ESMF_FieldDestroy(field, keywordEnforcer, rc)
+  subroutine ESMF_FieldDestroy(field, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)          :: field       
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),   optional :: noGarbage
     integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Releases resources associated with the {\tt ESMF\_Field}.  If an 
-! {\tt ESMF\_Grid} is associated with {\tt field}, it will not be released.  If 
-! {\tt field} is not released with this call, it will be released by the
-! automatic garbage collection facility in the scope of the Component 
-! that created {\tt field}.
+!   Destroys the {\tt ESMF\_Field}, releasing the resources associated with
+!   the object.
+! 
+!   If an {\tt ESMF\_Grid} is associated with {\tt field}, it will not be 
+!   released. 
+!
+!   By default a small remnant of the object is kept in memory in order to 
+!   prevent problems with dangling aliases. The default garbage collection
+!   mechanism can be overridden with the {\tt noGarbage} argument.
 ! 
 ! The arguments are:
 ! \begin{description}
-! \item [field]
-!       {\tt ESMF\_Field} object.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \item[field]
+!      {\tt ESMF\_Field} object.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
+! \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! Local variables
-    integer :: localrc                         
+    integer                 :: localrc        ! local return code
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -4737,7 +4803,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
+    
+    ! more input checking
     if (.not.associated(field%ftypep)) then 
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg="Uninitialized or already destroyed Field: ftypep unassociated", &
@@ -4746,11 +4813,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Destruct all field internals and then free field memory.
-    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+    call ESMF_FieldDestruct(field%ftypep, noGarbage, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(noGarbage)) then
+      if (noGarbage) then
+        ! remove Base entry from garbage collection
+        call c_esmc_vmrmobject(field%ftypep%base)
+        ! destroy Base object
+        call ESMF_BaseDestroy(field%ftypep%base, noGarbage, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! remove reference to this object from ESMF garbage collection table
+        call c_ESMC_VMRmFObject(field)
+        ! deallocate the actual field data structure
+        deallocate(field%ftypep, stat=localrc)
+        if (ESMF_LogFoundDeallocError(localrc, msg="Allocating Field information", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+    
     nullify(field%ftypep)
 
     ESMF_INIT_SET_DELETED(field)
@@ -4767,26 +4852,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:   ESMF_FieldDestruct - Release Field memory allocated internally
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldDestruct(ftype, rc)
+  subroutine ESMF_FieldDestruct(ftype, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldType), pointer :: ftype        
-    integer, intent(out), optional :: rc         
+    type(ESMF_FieldType), pointer               :: ftype        
+    logical,              intent(in),  optional :: noGarbage
+    integer,              intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
 ! Releases all resources except the {\tt ESMF\_Field} itself.
 !
 ! The arguments are:
 ! \begin{description}
-! \item [ftype]
-!       Pointer to an {\tt ESMF\_Field} object.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \item[ftype]
+!      Pointer to an {\tt ESMF\_Field} object.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
+! \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc
-    type(ESMF_Status) :: basestatus
+    integer                 :: localrc        ! local return code
+    type(ESMF_Status)       :: basestatus
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -4798,14 +4902,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
         
     if (basestatus .eq. ESMF_STATUS_READY) then
-      if((ftype%is_proxy .or. ftype%array_internal) .and. &
-        ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+      if(ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+        if(ftype%is_proxy .or. ftype%array_internal) then
+          call ESMF_ArrayDestroy(ftype%array, noGarbage=noGarbage, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(ftype%is_proxy .or. ftype%geomb_internal) then
+          call ESMF_GeomBaseDestroy(ftype%geombase, noGarbage=noGarbage, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
                                 
-          ftype%status = ESMF_FIELDSTATUS_UNINIT  ! mark invalid
+        ftype%status = ESMF_FIELDSTATUS_UNINIT  ! mark invalid
           
       endif
     endif

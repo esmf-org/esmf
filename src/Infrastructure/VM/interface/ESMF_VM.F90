@@ -4487,8 +4487,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the number of Fortran objects held by the
 !     ESMF garbage collection for the current context.
 !   \item[objCount] 
-!     Upon return this holds the number of total objects (Fortran and C++)
+!     Upon return this holds the number of Base objects
 !     held by the ESMF garbage collection for the current context.
+!     Note that {\em every} C++ object in the garbage collection has a Base 
+!     object. However, for Fortran objects, {\em most} have also a Base object,
+!     but not all of them. E.g. no Base object is created for GeomBase objects!
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

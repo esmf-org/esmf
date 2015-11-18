@@ -73,7 +73,7 @@ class TestRegrid(TestBase):
         dstfield.data[:, :] = 10.
 
         # regridding
-        rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR)
+        rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR, line_type=LineType.GREAT_CIRCLE)
         dstfield = rh(srcfield, dstfield)
 
     def test_field_regrid_gridmesh(self):

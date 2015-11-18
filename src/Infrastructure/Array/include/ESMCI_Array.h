@@ -237,7 +237,7 @@ namespace ESMCI {
    public:
     ~Array(){destruct(false);}
    private:
-    void destruct(bool followCreator=true);
+    void destruct(bool followCreator=true, bool noGarbage=false);
    public:
     // helper
     int constructContiguousFlag(int redDimCount);
@@ -262,7 +262,7 @@ namespace ESMCI {
       InterfaceInt *distLBoundArg, InterfaceInt *undistLBoundArg,
       InterfaceInt *undistUBoundArg, int *rc, VM *vm=NULL);
     static Array *create(Array *array, int *rc=NULL);
-    static int destroy(Array **array);
+    static int destroy(Array **array, bool noGarbage=false);
     // data copy()
     int copy(Array const *arrayIn);
     // get() and set()

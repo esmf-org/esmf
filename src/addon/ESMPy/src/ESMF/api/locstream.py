@@ -60,6 +60,127 @@ class LocStream(dict):
     ===================  ===========  ===========  ===========
     """
 
+    @initialize
+    def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
+        '''
+        Create a LocStream. \n
+        Required Arguments: \n
+            location_count: the number of point in this stream. \n
+        Optional Arguments: \n
+            coord_sys: the coordinates system for the Grid. \n
+                    Argument values are:\n
+                        (default) CoordSys.CART\n
+                        CoordSys.SPH_DEG\n
+                        CoordSys.SPH_RAD\n
+            name: user friendly name for the LocStream. \n
+            esmf: internal parameter to allow "shallow" copies. \n
+        '''
+
+        # for ocgis compatibility
+        self._ocgis = {}
+
+        # bookkeeping
+        self._rank = 1
+        self._name = name
+        self._size = location_count
+
+        # call the ESMP layer
+        if esmf:
+            self._struct = ESMP_LocStreamCreateLocal(location_count,
+                                                     coordSys=coord_sys)
+
+            # get bounds
+            lbounds, ubounds = ESMP_LocStreamGetBounds(self.struct)
+            self._lower_bounds = lbounds
+            self._upper_bounds = ubounds
+
+        # regist with atexit
+        import atexit;
+        atexit.register(self.__del__)
+        self._finalized = False
+
+        # set the single stagger flag
+        self._singlestagger = True
+
+        super(LocStream, self).__init__()
+
+    def __del__(self):
+        """
+        Release the memory associated with a LocStream. \n
+        Required Arguments: \n
+            None \n
+        Optional Arguments: \n
+            None \n
+        Returns: \n
+            None \n
+        """
+        self.destroy()
+
+    def __getitem__(self, slc):
+        # initialize slc_ls
+        slc_ls = slc
+
+        # check that this is actually a slicing operation and not just regular item retrieval
+        if not isinstance(slc, basestring):
+            # parallel slicing is not yet enabled (collective operation)
+            if pet_count() > 1:
+                raise SerialMethod
+            # re-initialize slc_ls
+            slc_ls = get_formatted_slice(slc, self.rank)
+
+        # slice at will
+        try:
+            ret = super(LocStream, self).__getitem__(slc_ls)
+        except TypeError:
+            ret = self.copy()
+
+            # upper bounds and size
+            ret._upper_bounds = len(range(slc_ls.stop - slc_ls.start))
+            ret._size = ret.upper_bounds - ret.lower_bounds
+
+            # keys
+            for x in ret.iterkeys():
+                ret[x] = super(LocStream, self).__getitem__(x)[slc_ls]
+
+        return ret
+
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("LocStream:\n"
+                  "    name = %r \n"
+                  "    lower_bounds = %r \n"
+                  "    upper_bounds = %r \n"
+                  "    keys = %r \n"
+                  %
+                  (self.name,
+                   self.lower_bounds,
+                   self.upper_bounds,
+                   self.items(),
+                   ))
+
+        return string
+
+    def __setitem__(self, key, value):
+        # check types
+        if not isinstance(value, (list, tuple, np.ndarray)):
+            raise ValueError("type of value must be list, tuple, or numpy array")
+        if type(value) is not np.ndarray:
+            value = np.array(value)
+        if len(value) != self.size:
+            raise ValueError("value must be of length " + str(self.size))
+
+        keyvals = value
+        if key not in self:
+            keyvals = self._add_(key, typekind=constants._Python2ESMFType[type(value[0])])
+
+        ret = dict.__setitem__(self, key, keyvals)
+
+        keyvals[...] = value
+
+        return ret
+
     @property
     def lower_bounds(self):
         """
@@ -109,50 +230,31 @@ class LocStream(dict):
         """
         return self._upper_bounds
 
-    @initialize
-    def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
-        '''
-        Create a LocStream. \n
+    def copy(self):
+        """
+        Copy a LocStream in an ESMF-safe manner. \n
         Required Arguments: \n
-            location_count: the number of point in this stream. \n
+            None \n
         Optional Arguments: \n
-            coord_sys: the coordinates system for the Grid. \n
-                    Argument values are:\n
-                        (default) CoordSys.CART\n
-                        CoordSys.SPH_DEG\n
-                        CoordSys.SPH_RAD\n
-            name: user friendly name for the LocStream. \n
-            esmf: internal parameter to allow "shallow" copies. \n
-        '''
+            None \n
+        Returns: \n
+            A new LocStream copy. \n
+        """
+        # shallow copy
+        ret = LocStream(self._size, name=self._name, esmf=False)
 
-        # for ocgis compatibility
-        self._ocgis = {}
+        ret._struct = self._struct
+        ret._lower_bounds = self._lower_bounds
+        ret._upper_bounds = self._upper_bounds
 
-        # bookkeeping
-        self._rank = 1
-        self._name = name
-        self._size = location_count
+        for key, value in self.iteritems():
+            super(LocStream, ret).__setitem__(key, value)
 
-        # call the ESMP layer
-        if esmf:
-            self._struct = ESMP_LocStreamCreateLocal(location_count,
-                                                     coordSys=coord_sys)
+        # don't call ESMF destructor twice on the same shallow Python object
+        ret._finalized = True
 
-            # get bounds
-            lbounds, ubounds = ESMP_LocStreamGetBounds(self.struct)
-            self._lower_bounds = lbounds
-            self._upper_bounds = ubounds
+        return ret
 
-        # regist with atexit
-        import atexit; atexit.register(self.__del__)
-        self._finalized = False
-
-        # set the single stagger flag
-        self._singlestagger = True
-
-        super(LocStream, self).__init__()
-
-    # manual destructor
     def destroy(self):
         """
         Release the memory associated with a LocStream. \n
@@ -168,83 +270,6 @@ class LocStream(dict):
                 ESMP_LocStreamDestroy(self)
                 self._finalized = True
 
-    def __del__(self):
-        """
-        Release the memory associated with a LocStream. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
-        self.destroy()
-
-    def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
-        string = ("LocStream:\n"
-                  "    name = %r \n"
-                  "    lower_bounds = %r \n"
-                  "    upper_bounds = %r \n"
-                  "    keys = %r \n"
-                  %
-                  (self.name,
-                   self.lower_bounds,
-                   self.upper_bounds,
-                   self.items(),
-                   ))
-
-        return string
-
-    def __getitem__(self, slc):
-        # initialize slc_ls
-        slc_ls = slc
-
-        # check that this is actually a slicing operation and not just regular item retrieval
-        if not isinstance(slc, basestring):
-            # parallel slicing is not yet enabled (collective operation)
-            if pet_count() > 1:
-                raise SerialMethod
-            # re-initialize slc_ls
-            slc_ls = get_formatted_slice(slc, self.rank)
-
-        # slice at will
-        try:
-            ret = super(LocStream, self).__getitem__(slc_ls)
-        except TypeError:
-            ret = self.copy()
-
-            # upper bounds and size
-            ret._upper_bounds = len(range(slc_ls.stop - slc_ls.start))
-            ret._size = ret.upper_bounds - ret.lower_bounds
-
-            # keys
-            for x in ret.iterkeys():
-                ret[x] = super(LocStream, self).__getitem__(x)[slc_ls]
-
-        return ret
-
-    def __setitem__(self, key, value):
-        # check types
-        if not isinstance(value, (list, tuple, np.ndarray)):
-            raise ValueError("type of value must be list, tuple, or numpy array")
-        if type(value) is not np.ndarray:
-            value = np.array(value)
-        if len(value) != self.size:
-            raise ValueError("value must be of length "+str(self.size))
-
-        keyvals = value
-        if key not in self:
-            keyvals = self._add_(key, typekind=constants._Python2ESMFType[type(value[0])])
-
-        ret = dict.__setitem__(self, key, keyvals)
-
-        keyvals[...] = value
-
-        return ret
-
     def _add_(self, key_name, typekind=None):
         # allocate the key
         ESMP_LocStreamAddKeyAlloc(self.struct, key_name, keyTypeKind=typekind)
@@ -256,19 +281,3 @@ class LocStream(dict):
         keyvals = ndarray_from_esmf(key_ptr, typekind, (self.size,))
 
         return keyvals
-
-    def copy(self):
-        # shallow copy
-        ret = LocStream(self._size, name=self._name, esmf=False)
-
-        ret._struct = self._struct
-        ret._lower_bounds = self._lower_bounds
-        ret._upper_bounds = self._upper_bounds
-
-        for key, value in self.iteritems():
-            super(LocStream, ret).__setitem__(key, value)
-
-        # don't call ESMF destructor twice on the same shallow Python object
-        ret._finalized = True
-
-        return ret

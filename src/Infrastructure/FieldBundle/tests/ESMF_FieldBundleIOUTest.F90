@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test with timeslice
-  call ESMF_FieldBundleWrite(bundleTst, file="single_ts.nc", timeslice=0,  &
+  call ESMF_FieldBundleWrite(bundleTst, file="single_ts.nc", timeslice=1,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file with timeslice Test"

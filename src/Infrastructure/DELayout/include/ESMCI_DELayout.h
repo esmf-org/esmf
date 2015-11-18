@@ -124,7 +124,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     static DELayout *create(int *deCount=NULL,
       InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
       InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
-    static int destroy(ESMCI::DELayout **layout);
+    static int destroy(ESMCI::DELayout **layout, bool noGarbage=false);
     // get() and set()
     VM *getVM()                       const {return vm;}
     int getDeCount()                  const {return deCount;}
