@@ -611,7 +611,7 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - clockwise polygons not supported in triangulation routine",
+              " - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,

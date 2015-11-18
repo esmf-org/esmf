@@ -9350,18 +9350,143 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end function ESMF_GridCreateNoPeriDimA
 
 
+!------------------------------------------------------------------------------
+!!!!!!!!!!!!!! Internal Grid Method !!!!!!!!!!!!!!!!!
+#undef  ESMF_METHOD 
+#define ESMF_METHOD "ESMF_GridCreateXPeriDimUfrm"
+  ! NOTE: Right now this method has been setup to work with the 
+  !       default padding for all staggers (e.g. extra padding on
+  !       the top). If the input Grid becomes more general then 
+  !       this method will have to be made more general as well. 
+  subroutine ESMF_GridFillStaggerCoordsUfrm(grid, &
+        minCornerCoord, maxCornerCoord, staggerloc, &
+        rc)
+
+    type(ESMF_Grid),           intent(in) :: grid
+    real(ESMF_KIND_R8),        intent(in) :: minCornerCoord(:)
+    real(ESMF_KIND_R8),        intent(in) :: maxCornerCoord(:)
+    type(ESMF_StaggerLoc),     intent(in) :: staggerloc  
+    integer,                   intent(out), optional :: rc
+
+   
+    integer :: localrc
+    integer :: lDE, localDECount
+    integer :: clbnd(ESMF_MAXDIM), cubnd(ESMF_MAXDIM), i
+    real(ESMF_KIND_R8), pointer :: coordPtr(:)
+    integer :: d, dimCount, loc
+    real(ESMF_KIND_R8) :: p, p_plus1
+    real(ESMF_KIND_R8) :: hcornerIndexDiffR8
+    integer :: staggerMinIndex(ESMF_MAXDIM)
+    integer :: staggerMaxIndex(ESMF_MAXDIM)
+    integer :: hcornerMinIndex(ESMF_MAXDIM)
+    integer :: hcornerMaxIndex(ESMF_MAXDIM)
+    integer :: centerMinIndex(ESMF_MAXDIM)
+    integer :: centerMaxIndex(ESMF_MAXDIM)
+
+  
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+     ! Get number of local DEs and dimCount
+    call ESMF_GridGet(grid, localDECount=localDECount, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Calculate hypothetical span of corner index space without 
+    ! padding. To do this get corner min and add number of corners
+    ! (which is the number of cells (center stagger) plus 1 in each dimension) 
+     call ESMF_GridGet(grid,1,ESMF_STAGGERLOC_CENTER, &
+         minIndex=centerMinIndex, maxIndex=centerMaxIndex, &
+         rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+     call ESMF_GridGet(grid,1,ESMF_STAGGERLOC_CORNER, &
+         minIndex=hcornerMinIndex, &
+         rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+     ! Compute hypothetical corner span
+     ! use minCorners + off set of number of cells + 1
+     do d=1,dimCount
+        hcornerMaxIndex(d)=hcornerMinIndex(d)+ &
+             (centerMaxIndex(d)-centerMinIndex(d))+1
+     enddo
+
+    ! Add coordinates
+    call ESMF_GridAddCoord(grid, staggerloc=staggerloc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Get the min and max indices for this stagger
+    ! Assuming 1 tile (because we're building the grid that way above)
+     call ESMF_GridGet(grid,1,staggerloc, &
+         minIndex=staggerMinIndex, maxIndex=staggerMaxIndex, &
+         rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Loop through dimensions setting coordinates
+    do d=1,dimCount
+
+       ! Get the location in the cell of this dimension in the stagger 
+       call ESMF_StaggerLocGet(staggerloc, d, loc, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Compute width of corner index space
+       hcornerIndexDiffR8=REAL(hcornerMaxIndex(d)-hcornerMinIndex(d),ESMF_KIND_R8)
+
+       ! Loop through DEs setting coordinates
+       do lDE=0,localDECount-1
+
+          ! Get coordinate memory
+          call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=staggerloc, coordDim=d, &
+               computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=coordPtr, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+          ! Set each coordinates for this dim
+          do i=clbnd(1),cubnd(1)   
+
+             ! Compute [0.0,1.0] parametric position of this coord
+             p=REAL(i-hcornerMinIndex(d),ESMF_KIND_R8)/hcornerIndexDiffR8
+             
+             ! If stagger is in the center of this dim, then compute p in 
+             ! the center
+             if (loc .eq. 0) then
+                p_plus1=REAL(i+1-hcornerMinIndex(d),ESMF_KIND_R8)/hcornerIndexDiffR8
+                p=(p+p_plus1)/2.0_ESMF_KIND_R8
+             endif
+
+              ! Compute value of coord based on parametric position
+             coordPtr(i)=minCornerCoord(d)*(1.0-p)+maxCornerCoord(d)*p
+          enddo
+       enddo
+    enddo
+
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridFillStaggerCoordsUfrm
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_GridCreate1PeriDimUfrmR"
-!BOP
+ !BOP
 ! !IROUTINE: ESMF_GridCreate1PeriDimUfrm - Create a Uniform Grid with one periodic dim and a regular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate1PeriDimUfrm()
       function ESMF_GridCreate1PeriDimUfrmR(regDecomp, decompFlag, &
-        minIndex, maxIndex, minCoord, maxCoord, keywordEnforcer,   &
-        polekindflag, coordSys, petMap, name, rc)
+        minIndex, maxIndex, minCornerCoord, maxCornerCoord, &
+        keywordEnforcer, polekindflag, coordSys, &
+        staggerLocList, petMap, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -9372,13 +9497,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
-       real(ESMF_KIND_R8),        intent(in)            :: minCoord(:)
-       real(ESMF_KIND_R8),        intent(in)            :: maxCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: minCornerCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: maxCornerCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
+       type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
        integer,                   intent(in),  optional :: petMap(:,:,:)
-            character (len=*),         intent(in),  optional :: name 
+       character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9389,7 +9515,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The resulting grid has it's coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
 ! Currently, this method only fills the center stagger with coordinates, and
-! the {\tt minCoord} and {\tt maxCoord} arguments give the boundaries of 
+! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
 ! the center stagger.
 !
 ! To specify the distribution, the user passes in an array 
@@ -9435,25 +9561,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[maxIndex] 
 !      The upper extent of the grid array.
-! \item[minCoord] 
+! \item[minCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
-!      size(minCoord) must be equal to size(maxIndex).
-! \item[maxCoord] 
+!      size(minCornerCoord) must be equal to size(maxIndex).
+! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
-!      size(maxCoord) must be equal to size(maxIndex).
-! \item[{[polekindflag]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
-!      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
- ! \item[{[coordSys]}] 
+!      size(maxCornerCoord) must be equal to size(maxIndex).
+! \item[{[polekindflag]}] 
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
+!      the connection that occurs at the maximum end of the index dimension. Please see 
+!      Section~\ref{const:polekind} for a full list of options. If not specified, the default
+!      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
-! \item[{[coordTypeKind]}] 
-!      The type/kind of the grid coordinate data. 
-!      If not specified then the type/kind will be 8 byte reals. 
+! \item[{[staggerLocList]}]
+!     The list of staggerLocs to fill with coordinates. If not passed, then 
+!      no staggers are added or filled.  
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -9467,15 +9592,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
    type(ESMF_Grid)  :: grid
     integer :: localrc
-    integer :: lDE, localDECount
-    integer :: clbnd(ESMF_MAXDIM), cubnd(ESMF_MAXDIM), i
-    real(ESMF_KIND_R8), pointer :: coordPtr(:)
-    integer :: d, dimCount
-    real(ESMF_KIND_R8) :: p
-    real(ESMF_KIND_R8) :: minCoordR8(ESMF_MAXDIM)
-    real(ESMF_KIND_R8) :: maxCoordR8(ESMF_MAXDIM)
-    integer :: staggerMinIndex(ESMF_MAXDIM)
-    integer :: staggerMaxIndex(ESMF_MAXDIM)
+    integer :: dimCount
+    integer :: s
   
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -9515,73 +9633,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! XMRKX
 
-    ! Get number of local DEs and dimCount
-    call ESMF_GridGet(grid, localDECount=localDECount, dimCount=dimCount, rc=localrc)
+    ! Get  dimCount
+    call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check size of coordinate arrays
-    if (size(minCoord) .ne. dimCount) then
+    if (size(minCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-            msg="- minCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+            msg="- minCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
             ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (size(maxCoord) .ne. dimCount) then
+    if (size(maxCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-             msg="- maxCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+             msg="- maxCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
             ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    ! Copy input into internal arrays
-    do d=1,dimCount
-       minCoordR8(d)=minCoord(d)
-       maxCoordR8(d)=maxCoord(d)
-    enddo
-
-    ! Add coordinates
-    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
- 
-
-    ! Get the min and max indices for this stagger
-    ! Assuming 1 tile (because we're building the grid that way above)
-    call ESMF_GridGet(grid,1,ESMF_STAGGERLOC_CENTER, &
-         minIndex=staggerMinIndex, maxIndex=staggerMaxIndex, &
-         rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Loop through DEs setting coordinates
-    do lDE=0,localDECount-1
-
-       ! Loop through dimensions setting coordinates
-       do d=1,dimCount
-
-          ! Get coordinate memory
-          call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=d, &
-               computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=coordPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ! Fill staggers
+    if (present(staggerLocList)) then
+       do s=1, size(staggerLocList) 
+          call ESMF_GridFillStaggerCoordsUfrm(grid, &
+               minCornerCoord, maxCornerCoord, &
+               staggerloc=staggerLocList(s), &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! Set each coordinates for this dim
-          do i=clbnd(1),cubnd(1)   
-
-             ! Compute [0.0,1.0] parametric position of this coord
-             p=REAL(i-staggerMinIndex(d),ESMF_KIND_R8)/ &
-               REAL(staggerMaxIndex(d)-staggerMinIndex(d),ESMF_KIND_R8)
-             
-              ! Compute value of coord based on parametric position
-             coordPtr(i)=minCoordR8(d)*(1.0-p)+maxCoordR8(d)*p
-          enddo
        enddo
-    enddo
+    endif
+
 
     ! Set Grid
     ESMF_GridCreate1PeriDimUfrmR=grid   
@@ -9601,8 +9685,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateNoPeriDimUfrm()
       function ESMF_GridCreateNoPeriDimUfrmR(regDecomp, decompFlag, &
-        minIndex, maxIndex, minCoord, maxCoord, keywordEnforcer,    &
-        coordSys, petMap, name, rc)
+        minIndex, maxIndex, minCornerCoord, maxCornerCoord, keywordEnforcer,    &
+        coordSys, staggerLocList, petMap, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -9613,10 +9697,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
-       real(ESMF_KIND_R8),        intent(in)            :: minCoord(:)
-       real(ESMF_KIND_R8),        intent(in)            :: maxCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: minCornerCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: maxCornerCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
+       type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
        integer,                   intent(in),  optional :: petMap(:,:,:)
        character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
@@ -9629,15 +9714,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The resulting grid has it's coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
 ! Currently, this method only fills the center stagger with coordinates, and
-! the {\tt minCoord} and {\tt maxCoord} arguments give the boundaries of 
+! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
 ! the center stagger. 
 !
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible. Currently this call
-! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
-!
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3.!
 ! {\bf CAUTION:} This method is still volatile and can be expected to change
 !  over the next couple of releases. 
 !      
@@ -9675,16 +9759,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[maxIndex] 
 !      The upper extent of the grid array.
-! \item[minCoord] 
+! \item[minCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
-!      size(minCoord) must be equal to size(maxIndex).
-! \item[maxCoord] 
+!      size(minCornerCoord) must be equal to size(maxIndex).
+! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
-!      size(maxCoord) must be equal to size(maxIndex).
+!      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+! \item[{[staggerLocList]}]
+!     The list of staggerLocs to fill with coordinates. If not passed, then 
+!      no staggers are added or filled.  
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -9698,16 +9785,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
     type(ESMF_Grid)  :: grid
     integer :: localrc
-    integer :: lDE, localDECount
-    integer :: clbnd(ESMF_MAXDIM), cubnd(ESMF_MAXDIM), i
-    real(ESMF_KIND_R8), pointer :: coordPtr(:)
-    integer :: d, dimCount
-    real(ESMF_KIND_R8) :: p
-    real(ESMF_KIND_R8) :: minCoordR8(ESMF_MAXDIM)
-    real(ESMF_KIND_R8) :: maxCoordR8(ESMF_MAXDIM)
-    integer :: staggerMinIndex(ESMF_MAXDIM)
-    integer :: staggerMaxIndex(ESMF_MAXDIM)
-  
+    integer :: dimCount
+    integer :: s
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -9744,73 +9824,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! XMRKX
 
-    ! Get number of local DEs and dimCount
-    call ESMF_GridGet(grid, localDECount=localDECount, dimCount=dimCount, rc=localrc)
+    ! Get  dimCount
+    call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check size of coordinate arrays
-    if (size(minCoord) .ne. dimCount) then
+    if (size(minCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-            msg="- minCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+            msg="- minCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
             ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (size(maxCoord) .ne. dimCount) then
+    if (size(maxCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-             msg="- maxCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
+             msg="- maxCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
             ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    ! Copy input into internal arrays
-    do d=1,dimCount
-       minCoordR8(d)=minCoord(d)
-       maxCoordR8(d)=maxCoord(d)
-    enddo
-
-    ! Add coordinates
-    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Get the min and max indices for this stagger
-    ! Assuming 1 tile (because we're building the grid that way above)
-    call ESMF_GridGet(grid,1,ESMF_STAGGERLOC_CENTER, &
-         minIndex=staggerMinIndex, maxIndex=staggerMaxIndex, &
-         rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Loop through DEs setting coordinates
-    do lDE=0,localDECount-1
-
-       ! Loop through dimensions setting coordinates
-       do d=1,dimCount
-
-          ! Get coordinate memory
-          call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=d, &
-               computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=coordPtr, rc=localrc)
+    ! Fill staggers
+    if (present(staggerLocList)) then
+       do s=1, size(staggerLocList) 
+          call ESMF_GridFillStaggerCoordsUfrm(grid, &
+               minCornerCoord, maxCornerCoord, &
+               staggerloc=staggerLocList(s), &
+               rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! Set each coordinates for this dim
-          do i=clbnd(1),cubnd(1)   
-
-             ! Compute [0.0,1.0] parametric position of this coord
-             p=REAL(i-staggerMinIndex(d),ESMF_KIND_R8)/ &
-               REAL(staggerMaxIndex(d)-staggerMinIndex(d),ESMF_KIND_R8)
-             
-              ! Compute value of coord based on parametric position
-             coordPtr(i)=minCoordR8(d)*(1.0-p)+maxCoordR8(d)*p
-          enddo
        enddo
-    enddo
+    endif
 
     ! Set Grid
     ESMF_GridCreateNoPeriDimUfrmR=grid   

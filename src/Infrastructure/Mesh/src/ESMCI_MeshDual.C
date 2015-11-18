@@ -777,7 +777,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               Throw() << " - can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() << " - clockwise polygons not supported in triangulation routine";
+              Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
             } else {
               Throw() <<" - unknown error in triangulation";
             }
