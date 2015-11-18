@@ -231,6 +231,25 @@ subroutine f_esmf_fortranudtpointercopy(dst, src)
 end subroutine
 
 
+subroutine f_esmf_fortranudtpointercompare(ptr1, ptr2, flag)
+  ! C callable routine that compares two pointers to a UDT.
+  implicit none
+  type simple_udt
+    sequence
+    real :: a, b, c
+    integer :: i, j, k
+  end type
+  type wrapper
+    sequence
+    type(simple_udt), pointer:: udt
+  end type
+  
+  type (wrapper):: ptr1
+  type (wrapper):: ptr2
+  integer       :: flag
+  flag = 0
+  if (associated(ptr1%udt,ptr2%udt)) flag = 1
+end subroutine
 
 
 #define FortranTKRPtrCopyDoc() \

@@ -80,8 +80,11 @@ program ESMF_ArrayBundleIOUTest
   
   !------------------------------------------------------------------------
   ! this unit test requires to be run on exactly 4 PETs
-  if (petCount /= 4) goto 10
-  
+  if (petCount /= 4) then
+    print *, 'PET count must be 4'
+    goto 10
+  end if
+
   !------------------------------------------------------------------------
   ! preparations
   call ESMF_ArraySpecSet(arrayspec1, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -110,7 +113,7 @@ program ESMF_ArrayBundleIOUTest
   write(name, *) "Obtain real Fortran Array Pointer for array 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array_w(1), localDe=0, farrayPtr=farrayPtr1, rc=rc)
-  farrayPtr1 = 0.4
+  farrayPtr1 = 0.4_ESMF_KIND_R8
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -159,6 +162,19 @@ program ESMF_ArrayBundleIOUTest
   write(name, *) "ArrayBundleWrite Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc",         &
+                             status=ESMF_FILESTATUS_REPLACE, rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleWrite Single file with timeslice Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle_ts.nc", timeslice=1,  &
                              status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

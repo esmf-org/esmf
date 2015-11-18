@@ -759,23 +759,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Destroys an {\tt ESMF\_ArrayBundle} object. The member Arrays are not
-! touched by this operation and remain valid objects that need to be 
-! destroyed individually if necessary.
+!   Destroys an {\tt ESMF\_ArrayBundle} object. The member Arrays are not
+!   touched by this operation and remain valid objects that need to be 
+!   destroyed individually if necessary. 
+!
+!   By default a small remnant of the object is kept in memory in order to 
+!   prevent problems with dangling aliases. The default garbage collection
+!   mechanism can be overridden with the {\tt noGarbage} argument.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[arraybundle]
 !      {\tt ESMF\_ArrayBundle} object to be destroyed.
-! \item [{[noGarbage]}]
+! \item[{[noGarbage]}]
 !      If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!      from the garbage collection system. In this case there is no protection
-!      against following a dangling alias, which may lead to hard to debug
-!      application crashes. The default is {\tt .FALSE.}, i.e. keep a reference
-!      of the object in the garbage collection system.
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}

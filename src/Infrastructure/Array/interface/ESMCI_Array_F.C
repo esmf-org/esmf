@@ -165,13 +165,18 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
-  void FTN_X(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){
+  void FTN_X(c_esmc_arraydestroy)(ESMCI::Array **ptr, ESMC_Logical *noGarbage, 
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydestroy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool noGarbageOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
+      if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
     // call into C++
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::destroy(ptr),
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::destroy(ptr, noGarbageOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

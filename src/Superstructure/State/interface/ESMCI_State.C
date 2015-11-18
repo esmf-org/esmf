@@ -26,9 +26,9 @@
 // associated header file
 #include "ESMCI_State.h"
 
-//insert any higher level, 3rd party or system includes here
-#include <string.h>         // strlen()
-
+#if defined (xxESMF_PIO)
+#include "ESMCI_IO.h"
+#endif
 #include "ESMCI_IO_NetCDF.h"
 #include "ESMCI_LogErr.h"
 
@@ -956,6 +956,12 @@ namespace ESMCI {
       int rc = ESMF_SUCCESS;
       int localrc = ESMC_RC_NOT_IMPL;
 
+      if (fileName.empty()) {
+        ESMC_LogDefault.Write("filename argument required",
+            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        return ESMF_RC_ARG_BAD;
+      }
+
       // TODO:  Assumes netcdf file; handle other file formats.
       //        Put switch into an IO master class?  would be in one central
       //        location, rather than replicated in each ESMF data class.
@@ -1013,16 +1019,55 @@ namespace ESMCI {
       int rc = ESMF_SUCCESS;
       int localrc = ESMC_RC_NOT_IMPL;
 
+      if (fileName.empty()) {
+        ESMC_LogDefault.Write("filename argument required",
+            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+        return ESMF_RC_ARG_BAD;
+      }
+
       // TODO:  Assumes netcdf file; handle other file formats.
       //        Put switch into an IO master class?  would be in one central
       //        location, rather than replicated in each ESMF data class.
 
       // instantiate IO object; initialize with pointer to this State's
       // base, to write attributes from.
+#if defined (xxESMF_PIO)
+      IO *newIO = IO::create (&localrc);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+      // From here out, we need to be sure to clean up before returning
+
+      std::vector<string> arrayNames = (this)->getArrayNames();
+
+      for (int i=0; i<arrayNames.size(); i++) {
+        Array* thisArray;
+        // std::cout << ESMC_METHOD << ": getting arrayName" << i << "] = " << arrayNames[i] << std::endl;
+        (this)->getArray (arrayNames[i].c_str (), &thisArray);
+        localrc = newIO->addArray(thisArray, (char*)NULL);
+        if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          IO::destroy(&newIO);
+          return rc;
+        }
+      }
+
+      ESMC_IOFmt_Flag localiofmt = ESMF_IOFMT_NETCDF;
+      bool localoverwrite = true;
+      ESMC_FileStatus_Flag localstatus = ESMC_FILESTATUS_UNKNOWN;
+      int* timeslice = NULL;
+
+      localrc = newIO->write (fileName.c_str (), localiofmt, localoverwrite, localstatus, timeslice);
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+        IO::destroy(&newIO);
+        return rc;
+      }
+
+      IO::destroy(&newIO);
+      newIO = NULL;
+#else
       IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate("", base, &localrc);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &localrc);
-      if (localrc != ESMF_SUCCESS) rc = localrc;
+      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+      // From here out, we need to be sure to clean up before returning
 
       // set this State object as the source of data to write out
       io_netcdf->setState(this);
@@ -1039,6 +1084,7 @@ namespace ESMCI {
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
+#endif
 
       return rc;
 

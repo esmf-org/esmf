@@ -1980,7 +1980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	        if (ncStatus /= nf90_noerror) cycle
 	        ncStatus=nf90_get_att(gridid, i, 'units', attvalue)
                 if (ncStatus /= nf90_noerror) then
-                  print '("NetCDF error: " A)', trim(nf90_strerror(ncStatus))
+                  print '("NetCDF error: ", A)', trim(nf90_strerror(ncStatus))
                   return
                 endif
                 if (attvalue(len:len) .eq. achar(0)) len = len-1
@@ -2195,13 +2195,13 @@ subroutine CreateDstVar(srcFile, dstFile, fileType, srcVarName, dstVarName, &
        if (extradim > 0) then
          j = 1
 	 do i=1,extradim
-           write(dimname, '("extradim" I1)') j
+           write(dimname, '("extradim", I1)') j
 	   ! check if the dimension name already exist, if so and the value
            ! matches, use it, otherwise use another name
            ncStatus = nf90_inq_dimid(gridid1, dimname, dimid)
            do while (ncStatus == nf90_noerror) 
 	      j=j+1
-	      write(dimname, '("extradim" I1)') j
+	      write(dimname, '("extradim", I1)') j
               ncStatus = nf90_inq_dimid(gridid1, dimname, dimid)
            enddo	      
            ncStatus = nf90_redef(gridid1)

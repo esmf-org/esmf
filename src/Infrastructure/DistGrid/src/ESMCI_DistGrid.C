@@ -1879,7 +1879,8 @@ int DistGrid::destroy(
 //
 // !ARGUMENTS:
 //
-  DistGrid **distgrid){  // in - DistGrid to destroy
+  DistGrid **distgrid,          // in - DistGrid to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 //
@@ -1896,14 +1897,28 @@ int DistGrid::destroy(
     return rc;
   }
 
-  // destruct DistGrid object
-  localrc = (*distgrid)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
+  try{
+    // destruct DistGrid object
+    (*distgrid)->destruct(true, noGarbage);
+    // mark as invalid object
+    (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
   
-  // mark as invalid object
-  (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*distgrid); // remove object from garbage collection
+    delete (*distgrid);      // completely delete the object, free heap
+  }
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2105,9 +2120,10 @@ int DistGrid::construct(
 // !IROUTINE:  ESMCI::DistGrid::destruct
 //
 // !INTERFACE:
-int DistGrid::destruct(bool followCreator){
+int DistGrid::destruct(bool followCreator, bool noGarbage){
 //
-// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: The followCreator flag is only needed until we have reference counting
+// TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
 // TODO: sequence problems during automatic garbage collection unitl reference
 // TODO: counting comes in to solve this problem in the final manner.
@@ -2170,7 +2186,7 @@ int DistGrid::destruct(bool followCreator){
       delete [] regDecomp;
     
     if (delayoutCreator && followCreator){
-      localrc = DELayout::destroy(&delayout); 
+      localrc = DELayout::destroy(&delayout, noGarbage); 
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
     }

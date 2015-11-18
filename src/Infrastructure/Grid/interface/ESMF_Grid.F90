@@ -9372,8 +9372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
-       real,                      intent(in)            :: minCoord(:)
-       real,                      intent(in)            :: maxCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: minCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: maxCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
@@ -9537,10 +9537,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return 
     endif
 
-    ! Convert input coords to R8
+    ! Copy input into internal arrays
     do d=1,dimCount
-       minCoordR8(d)=REAL(minCoord(d),ESMF_KIND_R8)
-       maxCoordR8(d)=REAL(maxCoord(d),ESMF_KIND_R8)
+       minCoordR8(d)=minCoord(d)
+       maxCoordR8(d)=maxCoord(d)
     enddo
 
     ! Add coordinates
@@ -9613,8 +9613,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
-       real,                      intent(in)            :: minCoord(:)
-       real,                      intent(in)            :: maxCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: minCoord(:)
+       real(ESMF_KIND_R8),        intent(in)            :: maxCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
        integer,                   intent(in),  optional :: petMap(:,:,:)
@@ -9766,10 +9766,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return 
     endif
 
-    ! Convert input coords to R8
+    ! Copy input into internal arrays
     do d=1,dimCount
-       minCoordR8(d)=REAL(minCoord(d),ESMF_KIND_R8)
-       maxCoordR8(d)=REAL(maxCoord(d),ESMF_KIND_R8)
+       minCoordR8(d)=minCoord(d)
+       maxCoordR8(d)=maxCoord(d)
     enddo
 
     ! Add coordinates

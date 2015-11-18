@@ -234,13 +234,13 @@ end interface
 ! !IROUTINE: ESMF_GeomBaseGetArrayInfo" - get information to make an Array from a GeomBase
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGetArrayInfo(gridbase, &
+      subroutine ESMF_GeomBaseGetArrayInfo(geombase, &
                            gridToFieldMap, ungriddedLBound, ungriddedUBound, &
                            distgrid, distgridToArrayMap, undistLBound, undistUBound,   &
                            rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_GeomBase),   intent(in)            :: gridbase
+       type(ESMF_GeomBase),   intent(in)            :: geombase
        integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
@@ -255,26 +255,26 @@ end interface
 !  
 ! This subroutine gets information from a GeomBase which is useful in creating an
 ! Array. This subroutine takes as input {\tt gridToFieldMap} which gives for each
-! gridbase object dimension which dimension in the eventual Array it should be
+! geombase object dimension which dimension in the eventual Array it should be
 ! mapped to. It also takes {\tt ungriddedLBound} and {\tt ungriddedUBound} which
-! describes the dimensions of the Array not associated with the gridbase object. 
+! describes the dimensions of the Array not associated with the geombase object. 
 ! From these it produces a mapping from the distgrid to the Array, the undistributed
 ! bounds of the Array in the correct order. (For everything besides {\tt Grid}  the 
 ! gridToFieldMap and distgridToArrayMap will be single element
-! arrays describing which dimension in the Array the gridbase object (e.g. Mesh)
+! arrays describing which dimension in the Array the geombase object (e.g. Mesh)
 ! is mapped to.
 !
 ! The arguments are:
 ! \begin{description}
-!\item[{gridbase}]
-!     The gridbase to get the information from to create the Array.
+!\item[{geombase}]
+!     The geombase to get the information from to create the Array.
 !\item[{[distgrid]}]
 !     The distgrid to create the Array on
 !\item[{[gridToFieldMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
-!     {\tt The array gridToFieldMap} should be at least of size equal to the gridbase object's
+!     {\tt The array gridToFieldMap} should be at least of size equal to the geombase object's
 !     Array dimension (e.g. Mesh = 1)
-!     If not set defaults to (1,2,3,....,gridbase objects dim).
+!     If not set defaults to (1,2,3,....,geombase objects dim).
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
 !\item[{[ungriddedUBound]}]
@@ -298,10 +298,10 @@ end interface
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
 
     ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
+    gbcp=>geombase%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -706,7 +706,7 @@ end interface
     gbcp%xgridIndex = localGridIndex
 
     ! Set GeomBase Type into GeomBase
-     ESMF_GeomBaseCreateXGrid%gbcp=>gbcp
+    ESMF_GeomBaseCreateXGrid%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
     call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateXGrid, ESMF_ID_GEOMBASE%objectID)
@@ -727,20 +727,39 @@ end interface
 ! !IROUTINE: ESMF_GeomBaseDestroy - Release resources associated with a GeomBase
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseDestroy(gridbase, rc)
+      subroutine ESMF_GeomBaseDestroy(geombase, noGarbage, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase) :: gridbase
+      type(ESMF_GeomBase)            :: geombase
+      logical, intent(in),  optional :: noGarbage
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Destroys an {\tt ESMF\_GridBase} object. This call does not destroy wrapped
+!   Destroys an {\tt ESMF\_GeomBase} object. This call does not destroy wrapped
 !   Grid, LocStream, or other Grid objects. 
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[gridbase]
+!     \item[geombase]
 !          {\tt ESMF\_GeomBase} to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -748,16 +767,31 @@ end interface
 !EOPI
 
     ! Initialize return code; assume failure until success is certain
+    integer                 :: localrc ! local error status
+    logical                 :: opt_noGarbage  ! helper variable
+    
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, geombase, rc)
 
-    ! do _not_ deallocate/nullify GeomBase memory here because ESMF
-    ! garbage collection will handle cleaning up GeomBase allocations
+    ! Set default flags
+    opt_noGarbage = .false.
+    if (present(noGarbage)) opt_noGarbage = noGarbage
+
+    ! Conditionally remove object from memory
+    if (opt_noGarbage) then
+      ! remove reference to this object from ESMF garbage collection table
+      call c_ESMC_VMRmFObject(geombase)
+      ! deallocate GeomBase type
+      deallocate(geombase%gbcp, stat=localrc)
+      if (ESMF_LogFoundDeallocError(localrc, &
+        msg="Deallocating GeomBase type object", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set init code
-    ESMF_INIT_SET_DELETED(gridbase)
+    ESMF_INIT_SET_DELETED(geombase)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -772,14 +806,14 @@ end interface
 ! !IROUTINE: ESMF_GeomBaseGet - Get information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGet(gridbase, &
+      subroutine ESMF_GeomBaseGet(geombase, &
           dimCount, localDECount, distgrid, &
           distgridToGridMap, indexFlag, geomtype, &
           grid, staggerloc, mesh, meshloc, locstream, &
           xgrid, xgridside, gridIndex,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase),   intent(in)            :: gridbase
+      type(ESMF_GeomBase),   intent(in)            :: geombase
       integer,               intent(out), optional :: dimCount
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
@@ -802,8 +836,8 @@ end interface
 !
 !The arguments are:
 !\begin{description}
-!\item[{gridbase}]
-!   Gridbase to get the information from.
+!\item[{geombase}]
+!   GeomBase to get the information from.
 !\item[{[dimCount]}]
 !   DimCount of the GeomBase object (e.g. the number of dimensions in the Array
 !   it will be mapped to (e.g. Mesh=1)). 
@@ -817,18 +851,18 @@ end interface
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
 ! \item[{[geomtype]}]
-!    Flag that indicates what type of object this gridbase holds. 
+!    Flag that indicates what type of object this geombase holds. 
 !    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
 ! \item[{[grid]}]
-!    The Grid object that this gridbase object holds. 
+!    The Grid object that this geombase object holds. 
 ! \item[{[staggerloc]}]
 !    The Grid stagger location.
 ! \item[{[mesh]}]
-!    The Mesh object that this gridbase object holds. 
+!    The Mesh object that this geombase object holds. 
 ! \item[{[meshloc]}]
 !    The part of the mesh that the field is on
 ! \item[{[locstream]}]
-!    The LocStream object that this gridbase object holds. 
+!    The LocStream object that this geombase object holds. 
 ! \item[{[XGridSide]}]
 !      The xgrid side that the Fiels was created on. 
 ! \item[{[gridIndex]}]
@@ -847,10 +881,10 @@ end interface
 
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
 
     ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
+    gbcp=>geombase%gbcp
 
     ! get type
     if (present(geomtype)) then
@@ -1042,12 +1076,12 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseGetPLocalDE - Get information about a particular DE 
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGetPLocalDe(gridbase, localDe, &
+      subroutine ESMF_GeomBaseGetPLocalDe(geombase, localDe, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,  rc)
 
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase),        intent(in)            :: gridbase
+      type(ESMF_GeomBase),        intent(in)            :: geombase
       integer,                intent(in)            :: localDe
        integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
@@ -1060,7 +1094,7 @@ end subroutine ESMF_GeomBaseGet
 !
 !The arguments are:
 !\begin{description}
-!\item[{gridbase}]
+!\item[{geombase}]
 !    Grid Base to get the information from.
 !\item[{[localDe]}]
 !     The local DE from which to get the information.  
@@ -1093,10 +1127,10 @@ end subroutine ESMF_GeomBaseGet
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
 
     ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
+    gbcp=>geombase%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1199,14 +1233,14 @@ end subroutine ESMF_GeomBaseGet
 #define ESMF_METHOD "ESMF_GeomBaseSerialize"
 
 !BOPI
-! !IROUTINE: ESMF_GeomBaseSerialize - Serialize gridbase info into a byte stream
+! !IROUTINE: ESMF_GeomBaseSerialize - Serialize geombase info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseSerialize(gridbase, buffer, length, offset, &
+      subroutine ESMF_GeomBaseSerialize(geombase, buffer, length, offset, &
                                         attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase), intent(inout) :: gridbase 
+      type(ESMF_GeomBase), intent(inout) :: geombase 
       character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -1221,7 +1255,7 @@ end subroutine ESMF_GeomBaseGet
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [gridbase]
+!     \item [geombase]
 !           {\tt ESMF\_GeomBase} object to be serialized.
 !     \item [buffer]
 !           Data buffer which will hold the serialized information.
@@ -1252,7 +1286,7 @@ end subroutine ESMF_GeomBaseGet
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
 
     ! deal with optional attreconflag and inquireflag
     if (present(attreconflag)) then
@@ -1268,7 +1302,7 @@ end subroutine ESMF_GeomBaseGet
     end if
 
     ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
+    gbcp=>geombase%gbcp
 
     ! serialize GeomBase info
     call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
@@ -1465,10 +1499,10 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseValidate - Validate GeomBase internals
 
 ! !INTERFACE:
-  subroutine ESMF_GeomBaseValidate(gridbase, rc)
+  subroutine ESMF_GeomBaseValidate(geombase, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GeomBase), intent(in)              :: gridbase
+    type(ESMF_GeomBase), intent(in)              :: geombase
     integer,             intent(out),  optional  :: rc  
 !         
 !
@@ -1477,7 +1511,7 @@ end subroutine ESMF_GeomBaseGet
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[gridbase] 
+!     \item[geombase] 
 !          Specified {\tt ESMF\_GeomBase} object.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1492,10 +1526,10 @@ end subroutine ESMF_GeomBaseGet
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
 
     ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
+    gbcp=>geombase%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1544,27 +1578,27 @@ end subroutine ESMF_GeomBaseGet
 ! !IROUTINE: ESMF_GeomBaseGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseGetInit(gridbase)
+      function ESMF_GeomBaseGetInit(geombase)
 !
 ! !RETURN VALUE:
       ESMF_INIT_TYPE :: ESMF_GeomBaseGetInit
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase), intent(in), optional :: gridbase
+      type(ESMF_GeomBase), intent(in), optional :: geombase
 !
 ! !DESCRIPTION:
 ! Access deep object init code.
 !
 ! The arguments are:
 ! \begin{description}
-! \item [gridbase]
+! \item [geombase]
 ! Grid Base object.
 ! \end{description}
 !
 !EOPI
 
-    if (present(gridbase)) then
-      ESMF_GeomBaseGetInit = ESMF_INIT_GET(gridbase)
+    if (present(geombase)) then
+      ESMF_GeomBaseGetInit = ESMF_INIT_GET(geombase)
     else
       ESMF_GeomBaseGetInit = ESMF_INIT_CREATED
     endif

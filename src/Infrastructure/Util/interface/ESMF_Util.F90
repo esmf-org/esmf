@@ -468,7 +468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       do, i1=0, nargs
         call ESMF_UtilGetArg (i1, argvalue=string, rc=localrc1)
-	if (ESMF_LogFoundError ( localrc1, ESMF_ERR_PASSTHRU,  &
+        if (ESMF_LogFoundError ( localrc1, ESMF_ERR_PASSTHRU,  &
             ESMF_CONTEXT, rcToReturn=rc1))  &
           return
         if (string == argvalue) exit
@@ -611,7 +611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_FAILURE
 
-    mode_local = o'755'
+    mode_local = int (o'755')
     if (present (mode)) mode_local = mode
 
     pflag = .false.

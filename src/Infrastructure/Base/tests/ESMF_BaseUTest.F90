@@ -82,7 +82,7 @@
 
       !NEX_UTest
       ! test creation of base objects
-      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+      call ESMF_BaseCreate(base, "Base", "test object", 0, rc=rc)
       write(name, *) "ESMF_BaseCreate"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -91,7 +91,7 @@
                       
       !NEX_UTest
       ! destroy base object
-      call ESMF_BaseDestroy(base, rc)
+      call ESMF_BaseDestroy(base, rc=rc)
       write(name, *) "ESMF_Destroy"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -103,7 +103,7 @@
                       
       !EX_UTest
       ! destroy base object
-      call ESMF_BaseDestroy(base, rc)
+      call ESMF_BaseDestroy(base, rc=rc)
       write(name, *) "Destroy a destroyed Base"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
@@ -112,7 +112,7 @@
                       
       !EX_UTest
       ! destroy base object
-      call ESMF_BaseDestroy(base1, rc)
+      call ESMF_BaseDestroy(base1, rc=rc)
       write(name, *) "Destroy a non-created Base"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
@@ -122,7 +122,7 @@
       !EX_UTest
       ! test print method of deleted base via option string
       print_options = "brief"
-      call ESMF_BasePrint(base, print_options, rc)
+      call ESMF_BasePrint(base, print_options, rc=rc)
       write(name, *) "ESMF_BasePrint of deleted Base"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
@@ -132,7 +132,7 @@
       !EX_UTest
       ! test print method of non-created base via option string
       print_options = "brief"
-      call ESMF_BasePrint(base1, print_options, rc)
+      call ESMF_BasePrint(base1, print_options, rc=rc)
       write(name, *) "ESMF_BasePrint of non-created Base"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
@@ -142,7 +142,7 @@
       ! test setting of ESMF_Base members values of uncreated Base
       ! Note That this will recreate the base
       name_set = "fred"
-      call ESMF_SetName(base1, name_set, "Base", rc)
+      call ESMF_SetName(base1, name_set, "Base", rc=rc)
       write(name, *) "ESMF_SetName of non-created Base"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -153,7 +153,7 @@
       ! test setting of ESMF_Base members values of deleted Base
       ! Note That this will recreate the base
       name_set = "fred"
-      call ESMF_SetName(base, name_set, "Base", rc)
+      call ESMF_SetName(base, name_set, "Base", rc=rc)
       write(name, *) "ESMF_SetName of deleted Base"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -161,14 +161,14 @@
 
 
       ! destroy base objects created by ESMF_SetName
-      call ESMF_BaseDestroy(base, rc)
-      call ESMF_BaseDestroy(base1, rc)
+      call ESMF_BaseDestroy(base, rc=rc)
+      call ESMF_BaseDestroy(base1, rc=rc)
 
 
       
       !EX_UTest
       ! test creation of base objects
-      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+      call ESMF_BaseCreate(base, "Base", "test object", 0, rc=rc)
       write(name, *) "ESMF_BaseCreate"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -178,7 +178,7 @@
       !EX_UTest
       ! test setting of ESMF_Base members values
       name_set = "fred"
-      call ESMF_SetName(base, name_set, "Base", rc)
+      call ESMF_SetName(base, name_set, "Base", rc=rc)
       write(name, *) "ESMF_SetName"
       write(failMsg, *) "rc =", rc, ", name =", trim(name_set)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -187,7 +187,7 @@
       !EX_UTest
       ! test getting of ESMF_Base members values,
       !   compare to values set previously
-      call ESMF_GetName(base, name_get, rc)
+      call ESMF_GetName(base, name_get, rc=rc)
       write(name, *) "ESMF_GetName"
       write(failMsg, *) "rc =", rc, ", name =", name_get
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. name_get .eq. name_set), &
@@ -196,7 +196,7 @@
       !EX_UTest
       ! test validate method via option string
       validate_options = ''
-      call ESMF_BaseValidate(base, validate_options, rc)
+      call ESMF_BaseValidate(base, validate_options, rc=rc)
       write(name, *) "ESMF_BaseValidate"
       write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -205,7 +205,7 @@
       !EX_UTest
       ! test print method via option string
       print_options = "brief"
-      call ESMF_BasePrint(base, print_options, rc)
+      call ESMF_BasePrint(base, print_options, rc=rc)
       write(name, *) "ESMF_BasePrint"
       write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -239,7 +239,7 @@
       allocate (buffer(buff_size))
       offset2 = 0
       call ESMF_BaseSerialize (base, buffer, offset2, &
-          attreconflag, ESMF_NOINQUIRE, rc)
+          attreconflag, ESMF_NOINQUIRE, rc=rc)
       write(name, *) "ESMF_BaseSerialize - perform serialization"
       write(failMsg, *) "rc =", rc, ", offset =", offset2
       call ESMF_Test((rc == ESMF_SUCCESS), &
@@ -263,7 +263,7 @@
       ! part of the supported ESMF user API!
       offset3 = 0
       base2 = ESMF_BaseDeserialize (buffer, offset3, &
-          attreconflag, rc)
+          attreconflag, rc=rc)
       write(name, *) "ESMF_BaseDeserialize - perform deserialization"
       write(failMsg, *) "rc =", rc, ", offset =", offset2
       call ESMF_Test((rc == ESMF_SUCCESS), &
@@ -285,7 +285,7 @@
 
       !EX_UTest
       ! destroy base object
-      call ESMF_BaseDestroy(base, rc)
+      call ESMF_BaseDestroy(base, rc=rc)
       write(name, *) "ESMF_Destroy"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
