@@ -64,6 +64,7 @@ static const char *const version = "$Id$";
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+  void FTN_X(f_esmf_fortranudtpointercompare)(void *ptr1, void *ptr2, int *flag);
   void FTN_X(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
@@ -1788,8 +1789,49 @@ void VM::addFObject(
   int size = matchTable_FObjects[i].size();
   matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
+  
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
+
   matchTable_FObjects[i][size].objectID = objectID;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::rmFObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::rmFObject - Remove Fortran object from table for garbage collection
+//
+// !INTERFACE:
+void VM::rmFObject(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  void **fobject){   // object to be removed
+//
+// !DESCRIPTION:
+//    Remove Fortran object from matchTable_Objects list for current VM.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  for (vector<FortranObject>::iterator 
+    it = matchTable_FObjects[matchTableIndex].begin();
+    it != matchTable_FObjects[matchTableIndex].end(); ++it){
+  
+    void *fobjectElement = (void *)&(it->fobject);
+    
+    int flag;
+    FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
+    
+    if (flag){
+      matchTable_FObjects[matchTableIndex].erase(it);  // erase the object entry
+      break;
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 

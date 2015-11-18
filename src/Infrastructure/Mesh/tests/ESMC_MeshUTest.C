@@ -200,6 +200,21 @@ int main(void){
   for (int i=0; i< num_nodes; i++) {
     printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
   }*/
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshVerifyCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  correct=true;
+  if (num_nodes != num_node)
+    correct=false;
+  for(int i=0; i<num_nodes*2; i++) {
+    if (abs(coords[i] - nodeCoord_s[i]) > .001) {
+      printf("expecting coordinate of %.8f and got %.8f\n",nodeCoord_s[i],coords[i]);
+      correct=false;
+    }
+  }
+  ESMC_Test(correct, 
+	    name, failMsg, &result, __FILE__, __LINE__, 0);
   free(coords);
 
   //----------------------------------------------------------------------------
@@ -220,7 +235,23 @@ int main(void){
       printf("%.1f ", elem_coords[ind++]);
     }
     printf("\n");
-  }*/
+    }*/
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshVerifyElemCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  correct=true;
+  if (num_elems != num_elem)
+    correct=false;
+  for(int i=0; i<num_elems*2; i++) {
+    if (abs(elem_coords[i] - elemCoord_s[i]) > .001) {
+      printf("expecting coordinate of %.8f and got %.8f\n",elemCoord_s[i],elem_coords[i]);
+      correct=false;
+    }
+  }
+  ESMC_Test(correct, 
+	    name, failMsg, &result, __FILE__, __LINE__, 0);
   free(elem_coords);
 
   //----------------------------------------------------------------------------

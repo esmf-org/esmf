@@ -2309,7 +2309,7 @@ module ESMF_ComplianceICMod
         
     write (output, *) objCount
     call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
-    "ESMF objects (F & C++) referenced by the ESMF garbage collection: "// &
+    "ESMF Base objects (all C++, most Fortran) referenced by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &

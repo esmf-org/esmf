@@ -115,7 +115,7 @@ namespace ESMCI {
       int *regDecompArg, InterfaceInt *connectionList,
       Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
       DELayout *delayout, bool delayoutCreator, VM *vm);
-    int destruct(bool followCreator=true);
+    int destruct(bool followCreator=true, bool noGarbage=false);
    public:
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
@@ -148,7 +148,7 @@ namespace ESMCI {
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
-    static int destroy(DistGrid **distgrid);
+    static int destroy(DistGrid **distgrid, bool noGarbage=false);
     // is()
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
     bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;

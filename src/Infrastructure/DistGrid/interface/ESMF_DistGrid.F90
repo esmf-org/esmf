@@ -2549,33 +2549,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DistGridDestroy - Release resources associated with a DistGrid 
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridDestroy(distgrid, keywordEnforcer, rc)
+  subroutine ESMF_DistGridDestroy(distgrid, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid), intent(inout)          :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,             intent(in),   optional :: noGarbage
     integer,             intent(out),  optional :: rc  
 !         
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_DistGrid}, releasing the resources associated
 !   with the object.
 !
-!   The arguments are:
-!   \begin{description}
-!   \item[distgrid] 
-!     {\tt ESMF\_DistGrid} object to be destroyed.
-!   \item[{[rc]}] 
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+!   By default a small remnant of the object is kept in memory in order to 
+!   prevent problems with dangling aliases. The default garbage collection
+!   mechanism can be overridden with the {\tt noGarbage} argument.
+!
+! The arguments are:
+! \begin{description}
+! \item[distgrid] 
+!      {\tt ESMF\_DistGrid} object to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
+! \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                 :: localrc        ! local return code
+    type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2584,8 +2614,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
+    ! Set default flags
+    opt_noGarbage = ESMF_FALSE
+    if (present(noGarbage)) opt_noGarbage = noGarbage
+
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridDestroy(distgrid, localrc)
+    call c_ESMC_DistGridDestroy(distgrid, opt_noGarbage, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  

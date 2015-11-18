@@ -92,6 +92,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
+      ESMC_Logical *noGarbage,
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -102,9 +103,15 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
   
-  // nothing to be done, because automatic garbage collection takes care
-  // of Base delete
+  // convert to bool
+  bool noGarbageOpt = false;  // default
+  if (noGarbage != NULL)
+    if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
 
+  if (noGarbageOpt){
+    delete *base;
+  }
+  
   // return successfully
   *rc = ESMF_SUCCESS;
   return;

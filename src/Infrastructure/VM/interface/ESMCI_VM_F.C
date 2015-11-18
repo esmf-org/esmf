@@ -1383,6 +1383,20 @@ extern "C" {
     ESMCI::VM::addFObject(fobject, *objectID, vmID);
   }
     
+  void FTN_X(c_esmc_vmrmfobject)(void **fobject){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmrmfobject()"
+    int rc;
+    ESMCI::VM::rmFObject(fobject);
+  }
+    
+  void FTN_X(c_esmc_vmrmobject)(ESMC_Base **base){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmrmobject()"
+    int rc;
+    ESMCI::VM::rmObject(*base);
+  }
+    
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Fortran entry point to info about automatic garbage collection
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

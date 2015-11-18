@@ -20,6 +20,8 @@ module NUOPC_Auxiliary
   
   private
   
+  public NUOPC_GridCreateSimpleSph        ! method TODO: to cover by ESMF
+  public NUOPC_GridCreateSimpleXY         ! method TODO: to cover by ESMF
   public NUOPC_Write                      ! method
   
 !==============================================================================
@@ -40,6 +42,351 @@ module NUOPC_Auxiliary
   contains
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCreateSimpleSph - Create a simple spherical grid
+! !INTERFACE:
+  function NUOPC_GridCreateSimpleSph(x_min, y_min, x_max, y_max, &
+    i_count, j_count, half_polar_cell, area_adj, regional, rc)
+! !RETURN VALUE:
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleSph
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
+    integer,            intent(in)            :: i_count, j_count
+    logical,            intent(in),  optional :: half_polar_cell
+    real(ESMF_KIND_R4), intent(in),  optional :: area_adj
+    logical,            intent(in) , optional :: regional
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return a simple spherical Grid.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[x\_min]
+!     Lower bound x coordinate.
+!   \item[x\_max]
+!     Upper bound x coordinate.
+!   \item[y\_min]
+!     Lower bound y coordinate.
+!   \item[y\_max]
+!     Upper bound y coordinate.
+!   \item[i\_count]
+!     Number of elements along x.
+!   \item[j\_count]
+!     Number of elements along y.
+!   \item[{[half\_polar\_cell]}]
+!     {\em Need documentation.}
+!   \item[{[area\_adj]}]
+!     {\em Need documentation.}
+!   \item[{[regional]}]
+!     When set to .true., consider this a regional grid. Otherwise apply 
+!     periodic boundary conditions (default).
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                                   :: nx, ny
+    real(ESMF_KIND_R8)                        :: dx, dy, sx, sy, halfdy
+    integer                                   :: i, j
+    real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
+    real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:)
+    real(ESMF_KIND_R8), pointer               :: o_area(:,:)
+    real(ESMF_KIND_R8)                        :: startx, starty
+    logical                                   :: l_regional
+    type(ESMF_Mesh)                           :: mesh
+    type(ESMF_Field)                          :: field
+    logical                                   :: l_half_polar_cell
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    l_half_polar_cell = .false.
+    if(present(half_polar_cell)) l_half_polar_cell = half_polar_cell
+
+    ! convert to input variables to the internal variables
+    sx = x_min
+    sy = y_min
+    nx = i_count
+    ny = j_count
+    dx = (x_max - x_min) / nx
+    if(l_half_polar_cell) then
+      dy = (y_max - y_min) / (ny - 1)
+      halfdy = dy/2.
+    else
+      dy = (y_max - y_min) / ny
+    endif
+    
+    ! scheme
+    l_regional = .false.
+    if(present(regional)) l_regional = regional
+
+    if(.not.l_regional) then
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreate1PeriDim(maxIndex=(/nx, ny/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      NUOPC_GridCreateSimpleSph = ESMF_GridCreateNoPeriDim(maxIndex=(/nx, ny/),&
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif 
+
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
+      staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridAddCoord(NUOPC_GridCreateSimpleSph, &
+      staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! global indexing
+    ! atm grid is not decomposed in the y direction
+    !startx = lpet*nx/npet*dx
+    startx = sx
+    starty = sy
+    ! compute coord
+    ! X center
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! Y center
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if(l_half_polar_cell) then
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + dx/2. + (i-1)*dx
+          coordY(i,j) = starty + halfdy/2. + (j-1)*dy
+        enddo
+      enddo
+    else
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + dx/2. + (i-1)*dx
+          coordY(i,j) = starty + dy/2. + (j-1)*dy
+        enddo
+      enddo
+    endif
+    !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
+    ! X corner
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, farrayPtr=coordX, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! Y corner
+    call ESMF_GridGetCoord(NUOPC_GridCreateSimpleSph, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, farrayPtr=coordY, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if(l_half_polar_cell) then
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + (i-1)*dx
+          if(j == 1) then
+            coordY(i,j) = starty
+          else 
+            coordY(i,j) = starty + halfdy + (j-2)*dy
+          endif
+        enddo
+      enddo
+    else
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordX, 2), ubound(coordX, 2)
+          coordX(i,j) = startx + (i-1)*dx
+          coordY(i,j) = starty + (j-1)*dy
+        enddo
+      enddo
+    endif
+
+    if(present(area_adj)) then
+      ! retrieve area
+
+      !mesh = ESMF_GridToMesh(NUOPC_GridCreateSimpleSph, &
+      !  ESMF_STAGGERLOC_CORNER, 0, &
+      !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=rc)
+      !if (ESMF_LogFoundError(rc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !allocate(f_area_m(mesh%NumOwnedElements))
+      !call ESMF_MeshGetElemArea(mesh,  arealist=f_area_m, rc=rc)
+      !if (ESMF_LogFoundError(rc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !deallocate(f_area_m)
+
+      ! find out original Grid cell area
+      field = ESMF_FieldCreate(NUOPC_GridCreateSimpleSph, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_FieldRegridGetArea(field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_FieldGet(field, farrayPtr=o_area, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      ! add area to Grid
+      call ESMF_GridAddItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER,  rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      call ESMF_GridGetItem(NUOPC_GridCreateSimpleSph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, farrayptr=f_area, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      ! adjust Grid area
+      f_area = area_adj*o_area
+
+    endif
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian grid
+! !INTERFACE:
+  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
+    i_count, j_count, rc)
+! !RETURN VALUE:
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
+! !ARGUMENTS:
+    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
+    integer,            intent(in)            :: i_count, j_count
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Create a very simple XY cartesian Grid.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[x\_min]
+!     Lower bound x coordinate.
+!   \item[x\_max]
+!     Upper bound x coordinate.
+!   \item[y\_min]
+!     Lower bound y coordinate.
+!   \item[y\_max]
+!     Upper bound y coordinate.
+!   \item[i\_count]
+!     Number of elements along x.
+!   \item[j\_count]
+!     Number of elements along y.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: i, j, imin_t, imax_t, jmin_t, jmax_t
+    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
+    real(ESMF_KIND_R8):: dx, dy
+    type(ESMF_Grid):: grid
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    dx = (x_max-x_min)/i_count
+    dy = (y_max-y_min)/j_count
+
+    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
+      coordDep1=(/1/), coordDep2=(/2/), &
+      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+      indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! add center stagger
+    call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=1, farrayPtr=coordX, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=2, farrayPtr=coordY, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! compute center stagger coordinate values
+    imin_t = lbound(CoordX,1)
+    imax_t = ubound(CoordX,1)
+    jmin_t = lbound(CoordY,1)
+    jmax_t = ubound(CoordY,1)
+      
+    coordX(imin_t) = x_min + (imin_t-1)*dx + 0.5*dx
+    do i = imin_t+1, imax_t
+      coordX(i) = coordX(i-1) + dx
+    enddo
+    coordY(jmin_t) = y_min + (jmin_t-1)*dy + 0.5*dy
+    do j = jmin_t+1, jmax_t
+      coordY(j) = coordY(j-1) + dy
+    enddo
+    
+    NUOPC_GridCreateSimpleXY = grid
+    
+  end function
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
