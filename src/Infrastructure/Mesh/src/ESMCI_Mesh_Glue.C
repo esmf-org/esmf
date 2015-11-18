@@ -463,7 +463,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - clockwise polygons not supported in triangulation routine",
+                   " - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -550,7 +550,7 @@ static void triangulate_warea(int sdim, int num_p, double *p,
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - clockwise polygons not supported in triangulation routine",
+                   " - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -3359,7 +3359,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
          return;
       } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - clockwise polygons not supported in triangulation routine",
+          " - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)",
           ESMC_CONTEXT, rc);
          return;
       } else {

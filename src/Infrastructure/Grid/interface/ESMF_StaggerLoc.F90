@@ -65,6 +65,7 @@
 ! !PUBLIC MEMBER FUNCTIONS:
   public ESMF_StaggerLocString
   public ESMF_StaggerLocSet
+  public ESMF_StaggerLocGet
   public ESMF_StaggerLocPrint
   public assignment(=)
   public operator(==), operator(/=) 
@@ -242,10 +243,89 @@ interface ESMF_StaggerLocSet
 !EOPI 
 end interface
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_StaggerLocGet -- Generic interface
+
+! !INTERFACE:
+interface ESMF_StaggerLocGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_StaggerLocGetDim
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_StaggerLocGet} functions.   
+!EOPI 
+end interface
+
 !
 !==============================================================================
 
       contains
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocGetDim"
+!BOP
+! !IROUTINE: ESMF_StaggerLocGet - Get the value of one dimension of a StaggerLoc
+
+! !INTERFACE:
+  ! Private name; call using ESMF_StaggerLocGet() 
+      subroutine ESMF_StaggerLocGetDim(staggerloc, dim, loc, &
+					keywordenforcer, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_StaggerLoc), intent(in) :: staggerloc
+      integer,                intent(in)    :: dim
+      integer,                intent(out)   :: loc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional                     :: rc 
+
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Gets the position of a particular dimension of a cell {\tt staggerloc}
+!   The argument {\tt loc} will be only be 0,1. 
+!    If {\tt loc} is 0 it means the position 
+!    should be in the center in that dimension. If {\tt loc} is +1 then
+!    for the dimension, the position should be on the positive side of the cell. 
+!    Please see Section~\ref{sec:usage:staggerloc:adv} for diagrams.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[staggerloc]
+!          Stagger location to be initialized
+!     \item[dim]
+!          Dimension to be changed (1-7).
+!     \item[loc]
+!          Output position data should be either 0,1.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+     integer :: tmp
+
+     ! Initialize return code; assume routine not implemented
+     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+     ! Get stagger location value
+     tmp=(staggerloc%staggerloc)/(2**(dim-1))
+     loc=mod(tmp,2)
+
+     ! Set return values.
+     if (present(rc)) rc = ESMF_SUCCESS
+
+
+     end subroutine ESMF_StaggerLocGetDim
 
 
 

@@ -2350,16 +2350,35 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
 
   ! Create Grid
-  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
-       minCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
-       maxCoord=(/1.0_ESMF_KIND_R8,1.0_ESMF_KIND_R8/), &
-       coordSys=ESMF_COORDSYS_CART, rc=localrc)
+  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/12,12/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/1.0_ESMF_KIND_R8,1.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, &
+       ESMF_STAGGERLOC_CORNER, &
+       ESMF_STAGGERLOC_EDGE1, &
+       ESMF_STAGGERLOC_EDGE2/), &
+       rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+#if 0
+  ! Dump grid staggers to file
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmCntGrid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
-  !                       rc=localrc)
-  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, filename="ufrmCnrGrid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE1, filename="ufrmEdge1Grid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE2, filename="ufrmEdge2Grid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+#endif
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -2377,43 +2396,64 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
 
   ! Create Grid
-  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10,12/), &
-       minCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
-       maxCoord=(/50.0_ESMF_KIND_R8,50.0_ESMF_KIND_R8/), &
+  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/12,12/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/50.0_ESMF_KIND_R8,50.0_ESMF_KIND_R8/), &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
- ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
- !                        rc=localrc)
- ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! destroy grid
-  call ESMF_GridDestroy(grid,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_GridCreateNoPeriDimUfrm with Default CoordSys (Spherical)"
-  write(failMsg, *) "Incorrect result"
-
-  ! init success flag
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  grid=ESMF_GridCreate1PeriDimUfrm(regDecomp=(/2,2/),maxIndex=(/10,12/), &
-       minCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
-       maxCoord=(/350.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
-       rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
- ! call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
+ !call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmGrid", &
  !                        rc=localrc)
  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreate1PeriDimUfrm"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Create Grid
+  grid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/12,12/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, &
+       ESMF_STAGGERLOC_CORNER, &
+       ESMF_STAGGERLOC_EDGE1, &
+       ESMF_STAGGERLOC_EDGE2/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+
+#if 0
+  ! Dump grid staggers to file
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="ufrmCntGrid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, filename="ufrmCnrGrid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE1, filename="ufrmEdge1Grid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE2, filename="ufrmEdge2Grid", &
+                         rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+#endif
+
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
