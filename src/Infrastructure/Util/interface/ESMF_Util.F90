@@ -609,9 +609,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical) :: pflag, rflag  
     integer :: localrc
 
+    integer :: mode_default
+    data mode_default/o'755'/
+
     if (present(rc)) rc = ESMF_FAILURE
 
-    mode_local = int (o'755')
+    mode_local = mode_default
     if (present (mode)) mode_local = mode
 
     pflag = .false.
