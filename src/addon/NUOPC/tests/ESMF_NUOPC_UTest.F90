@@ -358,8 +358,9 @@ program ESMF_NUOPC_UTest
   write(name, *) "ESMF_GridCreate1PeriDimUfrm() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/500, 400/), &
-    minCoord=(/0._ESMF_KIND_R8, -85._ESMF_KIND_R8/), &
-    maxCoord=(/360._ESMF_KIND_R8, 85._ESMF_KIND_R8/), rc=rc)
+    minCornerCoord=(/0._ESMF_KIND_R8, -85._ESMF_KIND_R8/), &
+    maxCornerCoord=(/360._ESMF_KIND_R8, 85._ESMF_KIND_R8/), &
+    staggerLocList=(/ESMF_STAGGERLOC_CENTER/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -453,8 +454,8 @@ program ESMF_NUOPC_UTest
   write(name, *) "ESMF_GridCreateNoPeriDimUfrm() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   grid = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/100, 100/), &
-    minCoord=(/0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8/), &
-    maxCoord=(/-1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8/), &
+    minCornerCoord=(/0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8/), &
+    maxCornerCoord=(/-1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8/), &
     coordSys=ESMF_COORDSYS_CART, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
