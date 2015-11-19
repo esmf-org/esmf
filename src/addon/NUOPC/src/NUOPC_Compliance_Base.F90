@@ -1662,8 +1662,8 @@ contains
     ! The below could be moved into NUOPC_Comp with appropriate interface definition
     !
 
-    !BOP
-    ! !IROUTINE: NUOPC_GridCompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
+    !BOPI
+    ! !IROUTINE: NUOPC_CompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
     ! !INTERFACE:
     ! Private name; call using NUOPC_CompSearchPhaseMapByIndex()
     subroutine NUOPC_GridCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
@@ -1690,7 +1690,7 @@ contains
         ! default attribute is checked, e.g., "InitializePhaseMap", but this
         ! can be overridden by providing an attributeToCheck argument.
         !
-        !EOP
+        !EOPI
 
         !-----------------------------------------------------------------------------
         ! local variables
@@ -1761,8 +1761,8 @@ contains
 
     end subroutine
 
-    !BOP
-    ! !IROUTINE: NUOPC_CplCompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
+    !BOPI
+    ! !IROUTINE: NUOPC_CompSearchPhaseMapByIndex - Search the Phase Map of a GridComp
     ! !INTERFACE:
     ! Private name; call using NUOPC_CompSearchPhaseMapByIndex()
     subroutine NUOPC_CplCompSearchPhaseMapByIndex(comp, methodflag, phaseIndex, &
@@ -1785,7 +1785,7 @@ contains
         ! {\tt phaseIndex}.  If a matching {\tt methodFlag} and {\tt phaseIndex}
         ! are not found, {\tt phaseLabel} is set to an empty string. If multiple
         ! matching {\tt phaseLabel}s are found, the first is returned.
-        !EOP
+        !EOPI
 
         !-----------------------------------------------------------------------------
         ! local variables
