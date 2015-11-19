@@ -451,17 +451,6 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ESMF_GridCreateNoPeriDimUfrm() Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/100, 100/), &
-    minCornerCoord=(/0._ESMF_KIND_R8, 5.75_ESMF_KIND_R8/), &
-    maxCornerCoord=(/-1.5_ESMF_KIND_R8, 2.0_ESMF_KIND_R8/), &
-    coordSys=ESMF_COORDSYS_CART, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
   write(name, *) "NUOPC_Advertise() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Advertise(stateA, "sea_surface_temperature", rc=rc)
