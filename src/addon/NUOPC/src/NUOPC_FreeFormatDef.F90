@@ -288,10 +288,10 @@ module NUOPC_FreeFormatDef
 !BOP
 ! !IROUTINE: NUOPC_FreeFormatGet - Get information from a FreeFormat object
 ! !INTERFACE:
-  subroutine NUOPC_FreeFormatGet(freeFormat, count, capacity, stringList, rc)
+  subroutine NUOPC_FreeFormatGet(freeFormat, lineCount, capacity, stringList, rc)
 ! !ARGUMENTS:
     type(NUOPC_FreeFormat),                       intent(in)  :: freeFormat
-    integer,                            optional, intent(out) :: count
+    integer,                            optional, intent(out) :: lineCount
     integer,                            optional, intent(out) :: capacity
     character(len=NUOPC_FreeFormatLen), optional, pointer     :: stringList(:)
     integer,                            optional, intent(out) :: rc
@@ -301,8 +301,8 @@ module NUOPC_FreeFormatDef
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
     
-    if (present(count)) then
-      count = freeFormat%count
+    if (present(lineCount)) then
+      lineCount = freeFormat%count
     endif
 
     if (present(capacity)) then
