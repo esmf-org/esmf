@@ -9,7 +9,68 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
+
+module ESMF_NUOPC_UTest_Mod
+  
+  use ESMF
+  use NUOPC
+  use NUOPC_Driver, &
+    driver_routine_SS               => SetServices, &
+    driver_label_SetModelServices   => label_SetModelServices
+  use NUOPC_Model, &
+    model_routine_SS                => SetServices
+  use NUOPC_Connector, only: cplSS  => SetServices
+
+  private
+  
+  public driverSetServices
+
+  contains
+
+  subroutine driverSetServices(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+    rc=ESMF_SUCCESS
+    call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
+      specRoutine=SetModelServices, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+  end subroutine
+
+  subroutine SetModelServices(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+    rc=ESMF_SUCCESS
+    call NUOPC_DriverAddComp(driver=driver, compLabel="testComp1", &
+      compSetServicesRoutine=model_routine_SS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_DriverAddComp(driver=driver, compLabel="testComp2", &
+      compSetServicesRoutine=model_routine_SS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    call NUOPC_DriverAddComp(driver, srcCompLabel="testComp1", &
+      dstCompLabel="testComp2", compSetServicesRoutine=cplSS, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+  end subroutine
+  
+end module
+
+
 program ESMF_NUOPC_UTest
 
 !------------------------------------------------------------------------------
@@ -30,12 +91,8 @@ program ESMF_NUOPC_UTest
   use ESMF_TestMod     ! test methods
   use ESMF
   use NUOPC
-  use NUOPC_Driver, &
-    driver_routine_SS               => SetServices, &
-    driver_label_SetModelServices   => label_SetModelServices
-  use NUOPC_Model, &
-    model_routine_SS                => SetServices
-  use NUOPC_Connector, only: cplSS  => SetServices
+  use NUOPC_Driver
+  use ESMF_NUOPC_UTest_Mod
 
   implicit none
 
@@ -745,51 +802,8 @@ program ESMF_NUOPC_UTest
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
   
- contains
-   
-  subroutine driverSetServices(driver, rc)
-    type(ESMF_GridComp)  :: driver
-    integer, intent(out) :: rc
-    rc=ESMF_SUCCESS
-    call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
-      specRoutine=SetModelServices, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-  end subroutine
-  
-  subroutine SetModelServices(driver, rc)
-    type(ESMF_GridComp)  :: driver
-    integer, intent(out) :: rc
-    rc=ESMF_SUCCESS
-    call NUOPC_DriverAddComp(driver=gridComp, compLabel="testComp1", &
-      compSetServicesRoutine=model_routine_SS, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_DriverAddComp(driver=gridComp, compLabel="testComp2", &
-      compSetServicesRoutine=model_routine_SS, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_DriverAddComp(driver, srcCompLabel="testComp1", &
-      dstCompLabel="testComp2", compSetServicesRoutine=cplSS, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-  end subroutine
   
 end program ESMF_NUOPC_UTest
-
 
 ! -- A SetServices() routine must be present for the NUOPC_CompSetService()
 ! -- unit test above.
