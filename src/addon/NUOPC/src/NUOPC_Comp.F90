@@ -814,7 +814,7 @@ module NUOPC_Comp
     endif
     
     ! access the FreeFormat lineCount
-    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -910,7 +910,7 @@ module NUOPC_Comp
     endif
     
     ! access the FreeFormat lineCount
-    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
