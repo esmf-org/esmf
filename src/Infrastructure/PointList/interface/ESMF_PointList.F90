@@ -970,7 +970,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListPrint"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PointListPrint - Print the contents of a PointList
 
 ! !INTERFACE:
@@ -991,7 +991,7 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -1019,7 +1019,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListWriteVTK"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PointListWriteVTK - Print the contents of a PointList to a VTK file
 
 ! !INTERFACE:
@@ -1041,7 +1041,7 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
