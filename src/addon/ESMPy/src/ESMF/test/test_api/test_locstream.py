@@ -18,8 +18,9 @@ class TestLocStream(TestBase):
         locstream["ESMF:Y"] = (7, 7, 7, 7, 7)
         locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
 
-        assert locstream.lower_bounds == [0]
-        assert locstream.upper_bounds == [5]
+        if local_pet() == 0:
+            assert locstream.lower_bounds == [0]
+            assert locstream.upper_bounds == [5]
 
         print locstream
 

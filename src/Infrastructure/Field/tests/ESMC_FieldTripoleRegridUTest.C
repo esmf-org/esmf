@@ -58,7 +58,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   ESMC_PoleKind_Flag *pkptr = polekind;
 
   grid = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind, 
-                                 pkptr, NULL);
+                                 pkptr, NULL, NULL);
 
   // free memory
   free(maxIndex);

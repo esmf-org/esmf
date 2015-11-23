@@ -60,7 +60,7 @@ static const char *const version = "$Id$";
 extern "C" {
 // Prototypes of the Fortran interface functions.
   void FTN_X(f_esmf_locstreamcreate)(ESMCI::LocStream *locstreamp, int *ls_size, 
-				     ESMC_CoordSys_Flag *coordSys, int *rc);
+				     ESMC_IndexFlag *indexflag, ESMC_CoordSys_Flag *coordSys, int *rc);
   void FTN_X(f_esmf_locstreamgetbounds)(ESMCI::LocStream *locstreamp, int *localDe,
 				        int *cLBound, int *cUBound, int *rc);
   void FTN_X(f_esmf_locstreamaddkeyalloc)(ESMCI::LocStream *locstreamp, char *keyName, 
@@ -96,6 +96,7 @@ namespace ESMCI {
 //
 // !ARGUMENTS:
 				   int ls_size,         // size of location stream
+				   ESMC_IndexFlag *indexflag,
 				   ESMC_CoordSys_Flag *coordSys, 
 				   int *rc) {           // out - return code
 //
@@ -117,7 +118,7 @@ namespace ESMCI {
 
       locstream = new LocStream;
 
-      FTN_X(f_esmf_locstreamcreate)(locstream, &ls_size, coordSys, &localrc);
+      FTN_X(f_esmf_locstreamcreate)(locstream, &ls_size, indexflag, coordSys, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
 	return ESMC_NULL_POINTER;
       }

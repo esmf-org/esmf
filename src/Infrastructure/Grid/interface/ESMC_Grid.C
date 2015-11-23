@@ -68,6 +68,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
 ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
                                    enum ESMC_TypeKind_Flag *coordTypeKind, 
+                                   enum ESMC_IndexFlag *indexflag,
                                    int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -78,7 +79,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt *maxIndex,
   grid.ptr = NULL;
   
   grid.ptr = reinterpret_cast<ESMCI::Grid *>(ESMCI::Grid::createnoperidim(maxIndex,
-                                      coordSys, coordTypeKind, &localrc));
+                                      coordSys, coordTypeKind, indexflag, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
 
@@ -96,7 +97,8 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
                                   int *periodicDim, int *poleDim,
                                   enum ESMC_CoordSys_Flag *coordSys,
                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
-                                  enum ESMC_PoleKind_Flag *poleKind, 
+                                  enum ESMC_PoleKind_Flag *poleKind,
+                                  enum ESMC_IndexFlag *indexflag,
                                   int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
@@ -111,6 +113,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
                                                                   coordSys, 
                                                                   coordTypeKind, 
                                                                   poleKind, 
+                                                                  indexflag,
                                                                   &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
@@ -125,11 +128,11 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt *maxIndex,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
 ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag, 
-				  int *regDecomp, int *decompflag,
-				  int *isSphere, int *addCornerStagger,
-				  int *addUserArea, int *addMask, 
-                                  const char *varname, const char **coordNames,
-                                  int *rc) {
+                  int *regDecomp, int *decompflag,
+                  int *isSphere, int *addCornerStagger,
+                  int *addUserArea, enum ESMC_IndexFlag *indexflag, int *addMask,
+                  const char *varname, const char **coordNames,
+                  int *rc) {
 
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
@@ -140,8 +143,8 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 
   grid.ptr = reinterpret_cast<void *>
     (ESMCI::Grid::createfromfile(filename, fileTypeFlag, regDecomp, decompflag,
-				 isSphere, addCornerStagger, addUserArea, 
-				 addMask, varname, coordNames, &localrc));
+                 isSphere, addCornerStagger, addUserArea, indexflag,
+                 addMask, varname, coordNames, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
 

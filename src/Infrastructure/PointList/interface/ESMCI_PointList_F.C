@@ -27,13 +27,13 @@
 #include "ESMCI_LogErr.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
 //  allows F90 to call C++ for supporting {\tt PointList} class functions.
 //
-//EOP
+//EOPI
 //------------------------------------------------------------------------------
 
 

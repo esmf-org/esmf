@@ -284,6 +284,7 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
+                                          OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None, 
@@ -323,10 +324,13 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
     if poleDim is not None:
         poleDim += 1
 
+    # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
+    indexflag = 1
+
     # create the ESMF Grid and retrieve a ctypes pointer to it
     gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
                                                periodicDim, poleDim, coordSys,
-                                               coordTypeKind, None, 
+                                               coordTypeKind, None, indexflag,
                                                ct.byref(lrc))
 
     # check the return code from ESMF
@@ -341,6 +345,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
+                                           OptionalNamedConstant,
                                            OptionalNamedConstant,
                                            OptionalNamedConstant,
                                            ct.POINTER(ct.c_int)]
@@ -374,9 +379,12 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     # this was not working in 32 bit mode because the array was not copied
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
+    # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
+    indexflag = 1
+
     # create the ESMF Grid and retrieve a ctypes pointer to it
     gridstruct = _ESMF.ESMC_GridCreateNoPeriDim(ct.byref(maxIndex_i), coordSys,
-                                                coordTypeKind, ct.byref(lrc))
+                                                coordTypeKind, indexflag, ct.byref(lrc))
 
     # check the return code from ESMF
     rc = lrc.value
@@ -391,6 +399,7 @@ _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
+                                          OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -424,10 +433,14 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
         List of Strings (optional)          :: coordNames\n
     """
     lrc = ct.c_int(0)
+
+    # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
+    indexflag = 1
+
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,
                                                isSphere, addCornerStagger,
-                                               addUserArea, addMask, varname, 
+                                               addUserArea, indexflag, addMask, varname,
                                                coordNames, ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
@@ -1122,6 +1135,7 @@ def ESMP_MeshWrite(mesh, filename):
 _ESMF.ESMC_LocStreamCreateLocal.restype = ESMP_LocStream
 _ESMF.ESMC_LocStreamCreateLocal.argtypes = [ct.c_int,
                                             OptionalNamedConstant,
+                                            OptionalNamedConstant,
                                             ct.POINTER(ct.c_int)]
 def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
     """
@@ -1142,8 +1156,11 @@ def ESMP_LocStreamCreateLocal(localCount, coordSys=None):
     # NOTE: for some reason the default argument does not come through correctly
     coordSys = coordSys or constants.CoordSys.CART
 
+    # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
+    indexflag = 1
+
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, coordSys, ct.byref(lrc))
+    locstream = _ESMF.ESMC_LocStreamCreateLocal(localCount, indexflag, coordSys, ct.byref(lrc))
 
     # check the return code from ESMF
     rc = lrc.value

@@ -422,7 +422,7 @@ int main(void){
   //NEX_UTest 
   strcpy(name, "LocStreamCreateLocal");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  dstlocstream = ESMC_LocStreamCreateLocal(ls_size, &local_coordSys, &rc);
+  dstlocstream = ESMC_LocStreamCreateLocal(ls_size, NULL, &local_coordSys, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //---------------------------------------------------------------------------- 
 

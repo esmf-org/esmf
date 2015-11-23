@@ -1065,8 +1065,8 @@ extern "C" {
      arrayUndistUBound=array->getUndistUBound();
    }
 
-   // Compute offset if ESMF_INDEX_USER
-   if (grid->getIndexFlag()==ESMF_INDEX_USER) {
+   // Compute offset if ESMC_INDEX_USER
+   if (grid->getIndexFlag()==ESMC_INDEX_USER) {
      
      // Get staggerMemLBound
      const int *staggerMemLBound=grid->getStaggerMemLBound(staggerloc);
@@ -1562,8 +1562,8 @@ extern "C" {
               ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
    }
 
-   // Compute offset if ESMF_INDEX_USER
-   if (grid->getIndexFlag()==ESMF_INDEX_USER) {
+   // Compute offset if ESMC_INDEX_USER
+   if (grid->getIndexFlag()==ESMC_INDEX_USER) {
      
      // Get staggerMemLBound
      const int *staggerMemLBound=grid->getStaggerMemLBound(staggerloc);
@@ -2023,8 +2023,8 @@ extern "C" {
    if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
-   // Compute offset if ESMF_INDEX_USER
-   if (grid->getIndexFlag()==ESMF_INDEX_USER) {
+   // Compute offset if ESMC_INDEX_USER
+   if (grid->getIndexFlag()==ESMC_INDEX_USER) {
 
      // Get staggerMemLBound
      const int *staggerMemLBound=grid->getStaggerMemLBound(staggerloc);
@@ -2966,7 +2966,7 @@ extern "C" {
    regDecompIntIntArray[1]=1;
    ESMCI::InterfaceInt *regDecompIntInt=new ESMCI::InterfaceInt(regDecompIntIntArray,1,extent);
    
-   ESMC_IndexFlag indexflag=ESMF_INDEX_GLOBAL;
+   ESMC_IndexFlag indexflag=ESMC_INDEX_GLOBAL;
 
    ESMCI::DistGrid *distgrid=ESMCI::DistGrid::create(
   minIndexIntInt,                 // (in)

@@ -2641,6 +2641,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! check if slot index is valid
+    if (slot<=0 .or. slot>size(is%wrap%runSeq)) then
+      ! bail out with error
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Slot index is out of bounds.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! Figuring out the index into the modelComp array.
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static array modelComp,
@@ -3069,7 +3078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     
     ! access the FreeFormat lineCount
-    call NUOPC_FreeFormatGet(freeFormat, count=lineCount, rc=rc)
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

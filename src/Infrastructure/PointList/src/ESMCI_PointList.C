@@ -126,7 +126,7 @@ namespace ESMCI {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::PointList::add()"
-  //BOP
+  //BOPI
   // !IROUTINE:  add
   //
   // !INTERFACE:
@@ -145,7 +145,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // Add a point to the PointList.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
     // initialize return code; assume routine not implemented
@@ -184,7 +184,7 @@ namespace ESMCI {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::PointList::sort_by_id()"
-  //BOP
+  //BOPI
   // !IROUTINE:  sort_by_id
   //
   // !INTERFACE:
@@ -201,7 +201,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // Add a point to the PointList.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
     // initialize return code; assume routine not implemented
@@ -232,7 +232,7 @@ namespace ESMCI {
   //mvr not currently getting used, may need some testing
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::operator=()"
-  //BOP
+  //BOPI
   // !IROUTINE:  operator=
   //
   // !INTERFACE:
@@ -261,7 +261,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::WriteVTK()"
-  //BOP
+  //BOPI
   // !IROUTINE:  diagprint
   //
   // !INTERFACE:
@@ -278,7 +278,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // dump contents of PointList to stdout.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
     // initialize return code; assume routine not implemented
@@ -340,7 +340,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::diagprint()"
-  //BOP
+  //BOPI
   // !IROUTINE:  diagprint
   //
   // !INTERFACE:
@@ -357,7 +357,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // dump contents of PointList to stdout.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
     // initialize return code; assume routine not implemented
@@ -383,7 +383,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_id_ptr()"
-  //BOP
+  //BOPI
   // !IROUTINE:  get_id_ptr
   //
   // !INTERFACE:
@@ -400,7 +400,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // return pointer to the id corresponding to given location.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
 
@@ -418,7 +418,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_coord()"
-  //BOP
+  //BOPI
   // !IROUTINE:  get_coord
   //
   // !INTERFACE:
@@ -435,7 +435,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // copy coordinates corresponding to given location into a given array.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
 
@@ -465,7 +465,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_id()"
-  //BOP
+  //BOPI
   // !IROUTINE:  get_id
   //
   // !INTERFACE:
@@ -482,7 +482,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // return the id corresponding to given location.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
 
@@ -500,7 +500,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_point()"
-  //BOP
+  //BOPI
   // !IROUTINE:  get_point
   //
   // !INTERFACE:
@@ -517,7 +517,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // return a reference to the id corresponding to given location.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
 
@@ -535,7 +535,7 @@ namespace ESMCI {
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_coord_ptr()"
-  //BOP
+  //BOPI
   // !IROUTINE:  get_coord_ptr
   //
   // !INTERFACE:
@@ -552,7 +552,7 @@ namespace ESMCI {
     // !DESCRIPTION:
     // return pointer to coordinates corresponding to given location.
     //
-    //EOP
+    //EOPI
     //-----------------------------------------------------------------------------
 
 

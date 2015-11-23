@@ -170,7 +170,7 @@ namespace ESMCI {
     Array(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       typekind = ESMF_NOKIND;
       rank = 0;
-      indexflag = ESMF_INDEX_DELOCAL;
+      indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
       exclusiveLBound = NULL;
@@ -199,7 +199,7 @@ namespace ESMCI {
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
       rank = 0;
-      indexflag = ESMF_INDEX_DELOCAL;
+      indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
       exclusiveLBound = NULL;

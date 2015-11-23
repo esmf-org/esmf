@@ -245,18 +245,20 @@ template <class TYPE>
   // ESMC interface:
   static Grid* createnoperidim(ESMC_InterfaceInt *maxIndex, 
                                ESMC_CoordSys_Flag *coordSys,
-                               ESMC_TypeKind_Flag *coordTypeKind, 
+                               ESMC_TypeKind_Flag *coordTypeKind,
+                               ESMC_IndexFlag *indexflag,
                                int *rc);
   static Grid* create1peridim(ESMC_InterfaceInt *maxIndex, 
                               int *periodicDim, int *poleDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
-                              ESMC_PoleKind_Flag *poleKind, 
+                              ESMC_PoleKind_Flag *poleKind,
+                              ESMC_IndexFlag *indexflag,
                               int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 
 			      int *regDecomp, int *decompflag,
 			      int *isSphere, int *addCornerStagger,
-			      int *addUserArea, int *addMask, const char *varname,
+			      int *addUserArea, ESMC_IndexFlag *indexflag, int *addMask, const char *varname,
 			      const char **coordNames, int *rc);
 
   int write(ESMC_StaggerLoc staggerloc, const char *fname);

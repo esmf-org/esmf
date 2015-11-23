@@ -609,7 +609,7 @@ Array *Array::create(
   // distgrid -> indexCountPDimPDe[]
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
-  ESMC_IndexFlag indexflag = ESMF_INDEX_DELOCAL;  // default
+  ESMC_IndexFlag indexflag = ESMC_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
   // figure exclusive region
@@ -628,7 +628,7 @@ Array *Array::create(
         exclusiveUBound[i*redDimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
   }
   // optionally shift origin of exclusive region to pseudo global index space
-  if (indexflag == ESMF_INDEX_GLOBAL){
+  if (indexflag == ESMC_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
       int de = localDeToDeMap[i];
       for (int j=0; j<dimCount; j++){
@@ -871,7 +871,7 @@ Array *Array::create(
   vector<int> temp_larrayLBound(rank);
   vector<int> temp_larrayUBound(rank);
   for (int i=0; i<localDeCount; i++){
-    if (indexflag == ESMF_INDEX_USER){
+    if (indexflag == ESMC_INDEX_USER){
       // don't adjust dope vector, use F90 pointers directly and their bounds
       const int *temp_counts = larrayListArg[i]->getCounts();
       int j=0;    // reset distributed index
@@ -1285,20 +1285,20 @@ Array *Array::create(
   // distgrid -> indexCountPDimPDe[]
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
-  ESMC_IndexFlag indexflag = ESMF_INDEX_DELOCAL;  // default
+  ESMC_IndexFlag indexflag = ESMC_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
   // check that presence of distLBoundArg is consistent with indexflag
-  if(indexflag == ESMF_INDEX_USER){
+  if(indexflag == ESMC_INDEX_USER){
     if (!present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- distLBoundArg required in ESMF_INDEX_USER mode", ESMC_CONTEXT, rc);
+        "- distLBoundArg required in ESMC_INDEX_USER mode", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }else{
     if (present(distLBoundArg)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- distLBoundArg must only be specified in ESMF_INDEX_USER mode",
+        "- distLBoundArg must only be specified in ESMC_INDEX_USER mode",
         ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
@@ -1319,7 +1319,7 @@ Array *Array::create(
         exclusiveUBound[i*redDimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
   }
   // optionally shift origin of exclusive region to pseudo global index space
-  if (indexflag == ESMF_INDEX_GLOBAL){
+  if (indexflag == ESMC_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
       int de = localDeToDeMap[i];
       for (int j=0; j<dimCount; j++){
