@@ -312,17 +312,24 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistwritevtk)(ESMCI::PointList **ptr, char *filename, int *rc){
+  void FTN_X(c_esmc_pointlistwritevtk)(ESMCI::PointList **ptr, char *filename, int *rc, ESMCI_FortranStrLenArg nlen){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistwritevtk()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    // Convert fortran filename to c
+    char *c_filename=ESMC_F90toCstring(filename,nlen);
+
     // call into C++
-    localrc = (*ptr)->WriteVTK(filename);
+    localrc = (*ptr)->WriteVTK(c_filename);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+    // Delete c filename
+    delete [] c_filename;
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

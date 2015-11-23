@@ -291,7 +291,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
   
     // Output Mesh without poles for Debugging
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH_WO_POLE
-    WriteMesh(*srcmesh, "src_rgd_mesh_wo_p");
+    if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh_wo_p");
+    else if (srcpointlist != NULL) srcpointlist->WriteVTK("src_rgd_mesh_wo_p");
     // No pole is added to dst mesh
 #endif
 
@@ -314,8 +315,11 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
     // Output Mesh for Debugging
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH
-    WriteMesh(*srcmesh, "src_rgd_mesh");
-    WriteMesh(*dstmesh, "dst_rgd_mesh");
+    if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh");
+    else if (srcpointlist != NULL) srcpointlist->WriteVTK("src_rgd_mesh");
+
+    if (dstmesh != NULL) WriteMesh(*dstmesh, "dst_rgd_mesh");
+    else if (dstpointlist != NULL) dstpointlist->WriteVTK("dst_rgd_mesh");
 #endif
 
 
