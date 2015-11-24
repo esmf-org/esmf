@@ -2371,7 +2371,7 @@ program ESMF_GridCreateUTest
                          rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE1, filename="ufrmEdge1Grid", &
+   call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_EDGE1, filename="ufrmEdge1Grid", &
                          rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -2418,22 +2418,20 @@ program ESMF_GridCreateUTest
   !NEX_UTest
   write(name, *) "Test ESMF_GridCreate1PeriDimUfrm"
   write(failMsg, *) "Incorrect result"
-
+ 
   ! init success flag
   rc=ESMF_SUCCESS
 
   ! Create Grid
   grid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/12,12/), &
-       minCornerCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
-       maxCornerCoord=(/360.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
+       minCornerCoord=(/-180.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/ 180.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
        staggerLocList=(/ESMF_STAGGERLOC_CENTER, &
        ESMF_STAGGERLOC_CORNER, &
        ESMF_STAGGERLOC_EDGE1, &
        ESMF_STAGGERLOC_EDGE2/), &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
 
 #if 0
   ! Dump grid staggers to file
