@@ -13,12 +13,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <cmath>
 
 // ESMF header
 #include "ESMC.h"
 
 // ESMF Test header
 #include "ESMC_Test.h"
+
+
+using std::abs;
 
 //==============================================================================
 //BOP
