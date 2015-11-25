@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_Regrid_F.C"
+#define ESMC_FILENAME "ESMCI_Mesh_Regrid_Glue.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
