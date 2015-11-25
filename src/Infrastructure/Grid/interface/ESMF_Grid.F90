@@ -43,7 +43,7 @@
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
-       use ESMF_DELayoutMod
+      use ESMF_DELayoutMod
       use ESMF_StaggerLocMod
       use ESMF_DistGridMod
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
@@ -9371,7 +9371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    
     integer :: localrc
     integer :: lDE, localDECount
-    integer :: clbnd(ESMF_MAXDIM), cubnd(ESMF_MAXDIM), i
+     integer :: clbnd(ESMF_MAXDIM), cubnd(ESMF_MAXDIM), i
     real(ESMF_KIND_R8), pointer :: coordPtr(:)
     integer :: d, dimCount, loc
     real(ESMF_KIND_R8) :: p, p_plus1
@@ -9409,7 +9409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Compute hypothetical corner span
-     ! use minCorners + off set of number of cells + 1
+      ! use minCorners + off set of number of cells + 1
      do d=1,dimCount
         hcornerMaxIndex(d)=hcornerMinIndex(d)+ &
              (centerMaxIndex(d)-centerMinIndex(d))+1
@@ -9447,7 +9447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Get coordinate memory
           call ESMF_GridGetCoord(grid, localDE=lDE, staggerLoc=staggerloc, coordDim=d, &
                computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=coordPtr, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -9485,12 +9485,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate1PeriDimUfrm()
       function ESMF_GridCreate1PeriDimUfrmR(regDecomp, decompFlag, &
         minIndex, maxIndex, minCornerCoord, maxCornerCoord, &
-        keywordEnforcer, polekindflag, coordSys, &
-        staggerLocList, petMap, name, rc)
+        keywordEnforcer, polekindflag, coordSys, staggerLocList, &
+        ignoreNonPeriCoord, petMap, name, rc)
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreate1PeriDimUfrmR
+       type(ESMF_Grid) :: ESMF_GridCreate1PeriDimUfrmR
 !
 ! !ARGUMENTS:
        integer,                   intent(in),  optional :: regDecomp(:)
@@ -9503,6 +9503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
        type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
+       logical,                   intent(in),  optional :: ignoreNonPeriCoord
        integer,                   intent(in),  optional :: petMap(:,:,:)
        character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
@@ -9510,7 +9511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
- ! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
 ! 
 ! The resulting grid has it's coordinates uniformly spread between the 
 ! ranges specified by the user. The coordinates are ESMF\_TYPEKIND\_R8. 
@@ -9520,15 +9521,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
-! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
+ ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible. Currently this call
 ! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
-! {\bf CAUTION:} This method is still volatile and can be expected to change
+ ! {\bf CAUTION:} This method is still volatile and can be expected to change
 !  over the next couple of releases. 
 !      
 !  This call internally uses the defaults of the following arguments to 
-!  {\tt ESMF\_GridCreate1PeriDim()}: periodicDim, poleDim,
+ !  {\tt ESMF\_GridCreate1PeriDim()}: periodicDim, poleDim,
 !  coordTypeKind, gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound.
 !
 !  The following arguments have been set to non-typical values and so 
@@ -9543,32 +9544,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !  The argument indexFlag has internally been set to ESMF\_INDEX\_GLOBAL. This
 !  means that the grid created from this function will have a global index space.
-!
-! The arguments are:
+ !
+ ! The arguments are:
 ! \begin{description}
 ! \item[{[regDecomp]}] 
 !      A ndims-element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
-! \item[{[decompflag]}]
-!      List of decomposition flags indicating how each dimension of the
+ ! \item[{[decompflag]}]
+ !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
-!      The bottom extent of the grid array. If not given then the value defaults
+  !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
 ! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[minCornerCoord] 
-!      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
+ !      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
 !      size(minCornerCoord) must be equal to size(maxIndex).
 ! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
-!      size(maxCornerCoord) must be equal to size(maxIndex).
+ !      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[polekindflag]}] 
-!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
+ !      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
 !      the connection that occurs at the maximum end of the index dimension. Please see 
 !      Section~\ref{const:polekind} for a full list of options. If not specified, the default
 !      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
@@ -9577,8 +9578,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[staggerLocList]}]
-!     The list of staggerLocs to fill with coordinates. If not passed, then 
-!      no staggers are added or filled.  
+!     The list of stagger locations to fill with coordinates. Please see Section~\ref{const:staggerloc} 
+!     for a description of the available stagger locations. If not present, then 
+!     no staggers are added or filled. 
+! \item[{[ignoreNonPeriCoord]}]
+!     If .true., do not check if the coordinates for the periodic dimension (i.e. dim=1) specify a full periodic range (e.g. 0 to 360 degrees).
+!     If not specified, defaults to .false. .  
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -9587,24 +9592,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
- !
+   ! \end{description}
+  !
 !EOP
    type(ESMF_Grid)  :: grid
     integer :: localrc
     integer :: dimCount
     integer :: s
-  
+    logical :: localIgnoreNonPeriCoord
+    type(ESMF_CoordSys_Flag) :: localCoordSys 
+    real(ESMF_KIND_R8), parameter :: PiX2= &
+     6.2831853071795862319959269370883703232_ESMF_KIND_R8 
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+     
     ! Create grid structure
-    if (size(maxIndex) < 3) then
-       grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
+     if (size(maxIndex) < 3) then
+        grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
              decompFlag=decompFlag, &
              minIndex=minIndex, &
-            maxIndex=maxIndex, &
+             maxIndex=maxIndex, &
             coordSys=coordSys, &
             coordTypeKind=ESMF_TYPEKIND_R8,   &
             polekindflag=polekindflag, &
@@ -9616,7 +9625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             rc=localrc) 
     else 
        grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
-            decompFlag=decompFlag, &
+             decompFlag=decompFlag, &
             minIndex=minIndex, &
             maxIndex=maxIndex, &
             coordSys=coordSys, &
@@ -9625,13 +9634,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             coordDep3=(/3/), &
-             indexFlag=ESMF_INDEX_GLOBAL, &
-            petMap=petMap, &
+              indexFlag=ESMF_INDEX_GLOBAL, &
+             petMap=petMap, &
             name=name, &
             rc=localrc)
     endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+     ! Get CoordSys of Grid
+     call ESMF_GridGet(grid, coordSys=localCoordSys, rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+     ! Handle optional ignoreNonPeriCoord argument
+     if (present(ignoreNonPeriCoord)) then
+        localIgnoreNonPeriCoord=ignoreNonPeriCoord
+     else 
+        localIgnoreNonPeriCoord=.false.
+     endif
+
+    ! Make sure periodic dimension has periodic coords
+     if (.not. localIgnoreNonPeriCoord) then
+        if (localCoordSys .eq. ESMF_COORDSYS_SPH_DEG) then
+           if (abs(abs(maxCornerCoord(1) - minCornerCoord(1))- &
+                360.0_ESMF_KIND_R8) > Tiny(maxCornerCoord(1))) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
+msg=" coords in periodic dim (i.e. 1) are not periodic "// &
+    "(i.e. max coord(1)-min coord(1) /= 360)", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        else if (coordSys .eq. ESMF_COORDSYS_SPH_RAD) then
+           if (abs(abs(maxCornerCoord(1) - minCornerCoord(1))- &
+                PiX2) > Tiny(maxCornerCoord(1))) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & 
+msg=" coords in periodic dim (i.e. 1) are not periodic "// &
+    "(i.e. max coord(1)-min coord(1) /= 2Pi)", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+              return 
+           endif
+        endif
+     endif
 
 
     ! Get  dimCount
@@ -9643,16 +9688,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (size(minCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
             msg="- minCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
-            ESMF_CONTEXT, rcToReturn=rc) 
+             ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (size(maxCornerCoord) .ne. dimCount) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
              msg="- maxCornerCoord array must be the same dimension as the grid (i.e. maxIndex)", & 
-            ESMF_CONTEXT, rcToReturn=rc) 
-       return 
+             ESMF_CONTEXT, rcToReturn=rc) 
+        return 
     endif
+
 
     ! Fill staggers
     if (present(staggerLocList)) then
@@ -9668,7 +9714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Set Grid
-    ESMF_GridCreate1PeriDimUfrmR=grid   
+     ESMF_GridCreate1PeriDimUfrmR=grid   
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9688,7 +9734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         minIndex, maxIndex, minCornerCoord, maxCornerCoord, keywordEnforcer,    &
         coordSys, staggerLocList, petMap, name, rc)
 
-!
+ !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateNoPeriDimUfrmR
 !
@@ -9706,7 +9752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
 !
-! !DESCRIPTION:
+ ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}) with no periodic dimension.
@@ -9716,7 +9762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Currently, this method only fills the center stagger with coordinates, and
 ! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
 ! the center stagger. 
-!
+ !
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
@@ -9726,7 +9772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  over the next couple of releases. 
 !      
 !  This call internally uses the defaults of the following arguments to 
-!  {\tt ESMF\_GridCreateNoPeriDim()}: coordTypeKind, gridEdgeLWidth,
+ !  {\tt ESMF\_GridCreateNoPeriDim()}: coordTypeKind, gridEdgeLWidth,
 !  gridEdgeUWidth, gridAlign, gridMemLBound.
 !
 !  The following arguments have been set to non-typical values and so 
@@ -9754,7 +9800,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
-! \item[{[minIndex]}] 
+ ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
 ! \item[maxIndex] 
@@ -9764,14 +9810,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      size(minCornerCoord) must be equal to size(maxIndex).
 ! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
-!      size(maxCornerCoord) must be equal to size(maxIndex).
+  !      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[staggerLocList]}]
-!     The list of staggerLocs to fill with coordinates. If not passed, then 
-!      no staggers are added or filled.  
+!     The list of stagger locations to fill with coordinates. Please see Section~\ref{const:staggerloc} 
+!     for a description of the available stagger locations. If not present, then 
+!     no staggers are added or filled. 
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -9802,7 +9849,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             coordTypeKind=ESMF_TYPEKIND_R8,   &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
-            indexFlag=ESMF_INDEX_GLOBAL, &
+             indexFlag=ESMF_INDEX_GLOBAL, &
             petMap=petMap, &
             name=name, &
             rc=localrc) 
