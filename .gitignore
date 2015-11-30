@@ -12,12 +12,12 @@ PET*.ESMF_Logfile
 
 # esmf build generated directories #
 ####################################
-/apps/
-/examples/
+/DEFAULTINSTALLDIR/
 /lib/
 /mod/
 /obj/
 /doc/
+/src/etc/
 /src/include/
 /test/
 
