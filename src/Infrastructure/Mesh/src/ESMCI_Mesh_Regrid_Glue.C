@@ -34,7 +34,7 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
-  #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
+#include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
 
 #include <iostream>
@@ -133,9 +133,7 @@ void ESMCI_regrid_create(ESMCI::VM **vmpp,
 
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
-    if (*_ignoreDegenerate) ignoreDegenerate=true;
-    else ignoreDegenerate=false;
-
+    if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
 
     //// Precheck Meshes for errors
     bool degenerate=false;
