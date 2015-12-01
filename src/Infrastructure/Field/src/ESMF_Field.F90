@@ -138,6 +138,7 @@ module ESMF_FieldMod
 ! - ESMF-public methods:
    public ESMF_FieldIsCreated          ! Check if a Field object is created
    public ESMF_FieldValidate           ! Check internal consistency
+   public ESMF_FieldSet
    public operator(==), operator(/=)
 
 ! - ESMF-internal methods:
@@ -765,5 +766,66 @@ function ESMF_sfne(sf1, sf2)
 
  ESMF_sfne = (sf1%status /= sf2%status)
 end function
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSet()"
+!BOP
+! !IROUTINE: ESMF_FieldSet - Set object-wide Field information
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldSet()
+  subroutine ESMF_FieldSet(field, keywordEnforcer, name, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Field),   intent(inout)         :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{7.0.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!     Sets adjustable settings in an {\tt ESMF\_Field} object. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       {\tt ESMF\_Field} object for which to set properties.
+!     \item [{[name]}]
+!       The Field name.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+    
+    ! Set the name in Base object
+    if (present(name)) then
+      !call ESMF_ArraySet(field%ftypep%array, name=name, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !  ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldSet
 
 end module ESMF_FieldMod
