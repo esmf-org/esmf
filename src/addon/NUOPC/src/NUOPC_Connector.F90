@@ -2956,7 +2956,7 @@ print *, "found match:"// &
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get parameters from a Connector.
+! Get parameters from the {\tt connector} internal state.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2969,6 +2969,13 @@ print *, "found match:"// &
     call ESMF_CplCompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! early exit if nothing to be done -> this allows calling the method even
+    ! if the internal state does not (yet) exist - done for testing
+    if (.not.present(srcFields) .and. &
+        .not.present(dstFields) .and. &
+        .not.present(rh) .and. &
+        .not.present(state)) return
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -3001,7 +3008,7 @@ print *, "found match:"// &
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set parameters in a Connector.
+! Set parameters in the {\tt connector} internal state.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -3015,6 +3022,13 @@ print *, "found match:"// &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! early exit if nothing to be done -> this allows calling the method even
+    ! if the internal state does not (yet) exist - done for testing
+    if (.not.present(srcFields) .and. &
+        .not.present(dstFields) .and. &
+        .not.present(rh) .and. &
+        .not.present(state)) return
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)

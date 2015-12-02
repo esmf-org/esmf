@@ -178,9 +178,30 @@
       ! specifying an associated data array. In this case specifying the 
       ! grid parameters and data array dimensions may be deferred until 
       ! data is attached.
-      f1 = ESMF_FieldEmptyCreate(rc=rc) 
+      f1 = ESMF_FieldEmptyCreate(name='name1', rc=rc) 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with no data"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get name in a field: ", fname
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_FieldSet(f1, name='name2', rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Reset name in a field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get name in a field after reset: ", fname
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
