@@ -63,7 +63,7 @@ with open(esmfmk, 'r') as MKFILE:
         elif 'ESMF_VERSION_STRING=' in line:
             esmfversion = line.split("=")[1]
             esmfversion = esmfversion.rstrip('\n')
-        
+
 if not libsdir:
     raise ValueError("ESMF_LIBSDIR not found!")
 if not esmfos:
@@ -101,6 +101,15 @@ if "mpiuni" in esmfcomm:
 
 # set _ESMF_VERSION_STRING 
 constants._ESMF_VERSION = esmfversion
+
+# look for ESMPY_MPIRUN, set accordingly
+try:
+    constants._ESMF_MPIRUN = os.environ['ESMPY_MPIRUN']
+except:
+    if constants._ESMF_OS == constants._ESMF_OS_UNICOS:
+        constants._ESMF_MPIRUN = "aprun"
+    else:
+        constants._ESMF_MPIRUN = "mpirun"
 
 #### SHARED LIBRARY ###########################################################
 
