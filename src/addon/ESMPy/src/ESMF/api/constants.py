@@ -42,8 +42,11 @@ _ESMF_NETCDF = False
 _ESMF_COMM = None
 _ESMF_COMM_MPIUNI = -1
 
-# ESMF_COMM
+# ESMF_VERSION
 _ESMF_VERSION = None
+
+# ESMF_MPIRUN
+_ESMF_MPIRUN = "mpirun"
 
 #### NAMED CONSTANTS ##########################################################
 
