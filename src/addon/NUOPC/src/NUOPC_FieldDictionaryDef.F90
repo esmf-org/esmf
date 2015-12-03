@@ -172,7 +172,8 @@ module NUOPC_FieldDictionaryDef
 !   Return {\tt .true.} if the NUOPC Field dictionary considers
 !   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
 !   otherwise. An entry with standard name of {\tt standardName1} must
-!   exist in the field dictionary, or else an error will be returned. 
+!   exist in the field dictionary, or else an error will be returned in 
+!   {\tt rc}, and the return value set to {.false.}.
 !   However, {\tt standardName2} need not correspond to an existing entry.
 !   If {\tt standardName2} does not correspond to an existing entry in the 
 !   field dictionary, the value of {.false.} will be returned.
@@ -187,12 +188,13 @@ module NUOPC_FieldDictionaryDef
     
     if (trim(standardName2) == trim(standardName1)) return  ! early bail out
     
+    NUOPC_FieldDictionaryMatchSynoI = .false. ! re-initialize
+
     call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName1), &
       fdEntry, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    NUOPC_FieldDictionaryMatchSynoI = .false. ! re-initialize
     do i=1, size(fdEntry%wrap%synonyms)
       if (trim(standardName2) == trim(fdEntry%wrap%synonyms(i))) then
         NUOPC_FieldDictionaryMatchSynoI = .true.

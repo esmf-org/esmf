@@ -10,8 +10,12 @@
 !
 !==============================================================================
 
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
+
 module ESMF_NUOPC_UTest_Mod
   
+  use ESMF_TestMod     ! test methods
   use ESMF
   use NUOPC
   use NUOPC_Driver, &
@@ -29,14 +33,28 @@ module ESMF_NUOPC_UTest_Mod
   subroutine driverSetServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer :: result = 0
+
     rc=ESMF_SUCCESS
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompDerive() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSpecialize() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
       specRoutine=SetModelServices, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -74,9 +92,6 @@ program ESMF_NUOPC_UTest
 
 !------------------------------------------------------------------------------
  
-#include "ESMF.h"
-#include "ESMF_Macros.inc"
-
 !==============================================================================
 !BOP
 ! !PROGRAM: ESMF_NUOPC_Test - This unit test file verifies NUOPC methods.
@@ -555,7 +570,23 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry) Test"
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry1) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("abcd_adoption_level", &
+    "esmf_adoption_level", rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry1) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry2) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_FieldDictionaryMatchSyno("esmf_adoption_level", &
     "abcd_adoption_level", rc=rc)
@@ -564,7 +595,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry) Test"
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry2) Test"
   write(failMsg, *) "Did not return the correct value"
   call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
