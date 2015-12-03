@@ -523,8 +523,8 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_FieldDictionarySetSyno() (existing entry) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level"/), &
-    rc=rc)
+  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level    ", &
+    "sea_surface_temperature"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -535,6 +535,38 @@ program ESMF_NUOPC_UTest
   call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level", &
     "abcd_adoption_level"/), rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("esmf_adoption_level", &
+    "sea_surface_temperature", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("esmf_adoption_level", &
+    "abcd_adoption_level", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

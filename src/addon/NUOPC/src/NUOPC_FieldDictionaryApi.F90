@@ -162,6 +162,8 @@ module NUOPC_FieldDictionaryApi
 !   otherwise. An entry with standard name of {\tt standardName1} must
 !   exist in the field dictionary, or else an error will be returned. 
 !   However, {\tt standardName2} need not correspond to an existing entry.
+!   If {\tt standardName2} does not correspond to an existing entry in the 
+!   field dictionary, the value of {.false.} will be returned.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
