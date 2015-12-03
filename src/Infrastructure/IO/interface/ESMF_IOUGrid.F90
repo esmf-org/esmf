@@ -925,7 +925,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     real(ESMF_KIND_R8), pointer, optional   :: faceCoords(:,:)
-    logical, intent(in), optional  :: convertToDeg
+     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
     type(ESMF_VM) :: vm
@@ -937,7 +937,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 
     integer :: coordinateDims(3), coordDim, meshDim
     integer :: i, j, count, nodeCount, MaxNodePerElmt, localFillValue
-    integer :: localCount, remain, elmtCount
+     integer :: localCount, remain, elmtCount, localPolyBreakValue
 
     character(len=256) :: errmsg, locations, locNames(3), elmtConnName
     character(len=256) :: nodeCoordString, faceCoordString
@@ -961,7 +961,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
     errmsg = "Attribute node_coordinates in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
+     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
@@ -997,8 +997,8 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
        faceCoordNames(1) = faceCoordString(1:pos-1)
        faceCoordNames(2)=faceCoordString(pos+1:len)
     endif
-    ! Get dimension (# nodes) used to define the node coordinates
-    errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
+     ! Get dimension (# nodes) used to define the node coordinates
+     errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
     ncStatus = nf90_inq_varid (ncid, nodeCoordNames(1), VarId)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -1035,7 +1035,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 
       ! if units is radians_east or radians_north, convert to degrees
       ! get the attribute 'units'
-      ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
       errmsg = "Attribute units for "//nodeCoordNames(i)//" in "//trim(filename)
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
@@ -1058,7 +1058,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           return
       endif
       ! if units is "radians", convert it to degrees
-      if (convertToDegLocal) then
+       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
             nodeCoords(i,:) = &
                  nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
@@ -1072,7 +1072,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ncStatus = nf90_inquire_attribute(ncid, meshId, "face_node_connectivity", len=len)
     ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
     if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
+       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Get element connectivity (UGRID convention is transposed compared to others)
@@ -1088,11 +1088,28 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (ncStatus /= nf90_noerror) localFillValue = -1
+
+    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so 
+    ! it's ignored
+    ncStatus = nf90_get_att (ncid, VarId, "polygon_break_value", &
+         values=localPolyBreakValue)
+    if (ncStatus /= nf90_noerror) then
+       localPolyBreakValue = localFillValue
+    else
+      ! If it's been set, then make sure that this value isn't the same as _FillValue
+       if (localPolyBreakValue == localFillValue) then
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+            msg="- polygon_break_value can't be the same as _localFillValue", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       endif
+    endif
+
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based
     if (ncStatus /= nf90_noerror) indexBase = 0
-    ! Get dimensions of element connectivity (transposed) (for allocation)
+     ! Get dimensions of element connectivity (transposed) (for allocation)
     errmsg = "Dimensions of "//trim(elmtConnName)//" in "//trim(filename)
     ncStatus = nf90_inquire_variable (ncid, VarId, dimids=DimIds)
     if (CDFCheckError (ncStatus, &
@@ -1102,7 +1119,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ncStatus = nf90_inquire_dimension (ncid, DimIds(2), len=elmtCount)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
+       ESMF_SRCLINE, errmsg, &
       rc)) return
     ncStatus = nf90_inquire_dimension (ncid, DimIds(1), len=MaxNodePerElmt)
     if (CDFCheckError (ncStatus, &
@@ -1111,7 +1128,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       rc)) return
  
     ! Decompose the element array evenly across all PETs
-    localCount = elmtCount/PetCnt
+     localCount = elmtCount/PetCnt
     remain = mod (elmtCount,PetCnt) 
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
@@ -1129,7 +1146,7 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     if (present(faceCoords)) then
        allocate(faceCoords(2,localCount), faceCoord1D(localCount))
        do i=1,2
-          errmsg = "Variable "//faceCoordNames(i)//" in "//trim(filename)
+           errmsg = "Variable "//faceCoordNames(i)//" in "//trim(filename)
           ncStatus = nf90_inq_varid (ncid, faceCoordNames(i), VarId)
           if (CDFCheckError (ncStatus, &
               ESMF_METHOD,  &
@@ -1163,10 +1180,10 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           rc)) return
           ! if units is not "degrees" or "radians" return errors
           if (units(len:len) .eq. achar(0)) len = len-1
-          units = ESMF_UtilStringLowerCase(units(1:len))
+           units = ESMF_UtilStringLowerCase(units(1:len))
           if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                    msg="- units attribute is not degrees or radians", & 
+                     msg="- units attribute is not degrees or radians", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
               return
           endif
@@ -1189,7 +1206,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         do j=1,MaxNodePerElmt
 	  ! change 0-base to 1-base
           if (elmtConn(j,i) /= localFillValue) then 
-	     elmtConn(j,i)=elmtConn(j,i)+1
+             if (elmtConn(j,i) /= localPolyBreakValue) then 
+                elmtConn(j,i)=elmtConn(j,i)+1
+             endif
 	  else
 	     ! find the first FillValue
 	     elmtNums(i) = j-1
@@ -1201,11 +1220,24 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       do i=1,localcount
         j = MaxNodePerElmt
         do while (elmtConn(j,i) == localFillValue)
-	  j = j - 1
+ 	  j = j - 1
         enddo
         elmtNums(i) = j
       enddo
     endif
+
+    ! Change File PolyBreak to MeshPolyBreak
+    ! (if localPolyBreakValue was set then it'll be different than localFillValue)
+    if (localPolyBreakValue /= localFillValue) then
+       do i=1,localcount
+          do j=1,elmtNums(i)
+             if (elmtConn(j,i)==localPolyBreakValue) then
+                elmtConn(j,i)=ESMF_MESH_POLYBREAK
+             endif
+          enddo
+       enddo
+    endif
+
 
     ! Deallocations
     deallocate( nodeCoordNames, nodeCoord1D )
@@ -1248,7 +1280,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
 
     integer :: coordinateDims(3), coordDim, meshDim
     integer :: i, j, count, nodeCount, MaxNodePerElmt, localFillValue
-    integer :: localCount, remain, elmtCount
+    integer :: localCount, remain, elmtCount, localPolyBreakValue
 
     character(len=256) :: errmsg, locations, locNames(3), elmtConnName
     character(len=256) :: nodeCoordString, faceCoordString
@@ -1431,6 +1463,23 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (ncStatus .ne. nf90_noerror) localFillValue = -1
+
+    ! Get PolyBreak Value if it's not present, then set it to localFillValue, so 
+    ! it's ignored
+    ncStatus = nf90_get_att (ncid, VarId, "polygon_break_value", &
+         values=localPolyBreakValue)
+    if (ncStatus /= nf90_noerror) then
+       localPolyBreakValue = localFillValue
+    else
+       ! If it's been set, then make sure that this value isn't the same as _FillValue
+       if (localPolyBreakValue == localFillValue) then
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+            msg="- polygon_break_value can't be the same as _localFillValue", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       endif
+    endif
+
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based
@@ -1501,7 +1550,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         do j=1,MaxNodePerElmt
 	  ! change 0-base to 1-base
           if (elmtConn(j,i) /= localFillValue) then 
-	     elmtConn(j,i)=elmtConn(j,i)+1
+             if (elmtConn(j,i) /= localPolyBreakValue) then 
+                elmtConn(j,i)=elmtConn(j,i)+1
+             endif
 	  else
 	     ! find the first FillValue
 	     elmtNums(i) = j-1
@@ -1517,6 +1568,18 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
         enddo
         elmtNums(i) = j
       enddo
+    endif
+
+    ! Change File PolyBreak to MeshPolyBreak
+    ! (if localPolyBreakValue was set then it'll be different than localFillValue)
+    if (localPolyBreakValue /= localFillValue) then
+       do i=1,localcount
+          do j=1,elmtNums(i)
+             if (elmtConn(j,i)==localPolyBreakValue) then
+                elmtConn(j,i)=ESMF_MESH_POLYBREAK
+             endif
+          enddo
+       enddo
     endif
 
     ! Deallocations

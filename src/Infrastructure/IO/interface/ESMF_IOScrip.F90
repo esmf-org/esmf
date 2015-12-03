@@ -35,7 +35,7 @@
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
       use ESMF_IOUGridMod
-      use ESMF_IOGridspecMod
+       use ESMF_IOGridspecMod
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ScripInq"
-!BOPI
+ !BOPI
 ! !ROUTINE: ESMF_ScripInq: Return the dimension, grid_rank, and other related 
 !  information from a SCRIP file
 !
@@ -109,7 +109,7 @@
     if (present(grid_size)) then
       ncStatus = nf90_inq_dimid (ncid, "grid_size", DimId)
       if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
+         ESMF_METHOD, &
         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
@@ -146,7 +146,7 @@
       errmsg = "dimension grid_rank in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
 
@@ -3016,16 +3016,19 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: DimId
     integer :: nodeCnt, ElmtCount, MaxNodePerElmt, coordDim
     integer :: localCount, remain
-
+ 
     integer :: VarNo
     character(len=256)::errmsg
     character(len=80) :: units
     integer :: len
     logical :: convertToDegLocal
     integer, parameter :: nf90_noerror = 0
+    integer :: localPolyBreakValue, i, j
+    logical :: PolyBreakFound
+
 
 #ifdef ESMF_NETCDF
-    convertToDegLocal = .false.
+     convertToDegLocal = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
     call ESMF_VMGetCurrent(vm, rc=rc)
@@ -3047,9 +3050,9 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
-
+ 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=ElmtCount)
-    if (CDFCheckError (ncStatus, &
+     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
@@ -3058,10 +3061,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     ncStatus = nf90_inq_dimid (ncid, "maxNodePElement", DimId)
     errmsg = "Dimension maxNodePElement in "//trim(filename)
     if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
+       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
-
+ 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=MaxNodePerElmt)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -3086,13 +3089,21 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), &
+     ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), &
     	       	      count=(/MaxNodePerElmt, localcount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
     
+    ! Get polybreak if it exists
+    PolyBreakFound=.false.    
+     ncStatus = nf90_get_att (ncid, VarNo, "polygon_break_value", &
+         values=localPolyBreakValue)
+    if (ncStatus == nf90_noerror) then
+       PolyBreakFound=.true.    
+    endif
+
     ! read num_elmt_verts
     ncStatus = nf90_inq_varid (ncid, "numElementConn", VarNo)
     errmsg = "Variable numElementConn in "//trim(filename)
@@ -3107,6 +3118,18 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
+    ! If a Polygon break value was found, then change those to internal polygon break
+    if (PolyBreakFound) then
+       do i=1,localcount
+          do j=1,elmtNums(i)
+             if (elementConn(j,i)==localPolyBreakValue) then
+                elementConn(j,i)=ESMF_MESH_POLYBREAK
+             endif
+          enddo
+        enddo
+    endif
+
+
     if (present(elementMask)) then
        allocate(elementMask(localcount))
        ncStatus = nf90_inq_varid (ncid, "elementMask", VarNo)
@@ -3119,7 +3142,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
        ncStatus = nf90_get_var (ncid, VarNo, elementMask, start=(/startElmt/), count=(/localcount/))
        if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
+           ESMF_SRCLINE, errmsg, &
           rc)) return
 
     end if
@@ -3156,7 +3179,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
        if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
-          rc)) return
+           rc)) return
 
        ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
        if (CDFCheckError (ncStatus, &
@@ -3193,7 +3216,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
            ! if len != 7, something is wrong, check the value.  If it starts 
-           ! with Degres/degrees/Radians/radians, ignore the garbage after the
+            ! with Degres/degrees/Radians/radians, ignore the garbage after the
            ! word.  Otherwise, return the whole thing
            if (units(len:len) .eq. achar(0)) len = len-1
            units = ESMF_UtilStringLowerCase(units(1:len))
@@ -3255,6 +3278,8 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
     integer, parameter :: fillValue1 = -9999
     integer :: i,j, index
     character(len=256)::errmsg
+    integer :: localPolyBreakValue
+    integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
     allocate(nodeCoords(2, numNodes))
@@ -3292,10 +3317,20 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+
+    ! Get polybreak if it exists, if it doesn't just use set to fillValue
+     ncStatus = nf90_get_att (ncid, varId, "polygon_break_value", &
+         values=localPolyBreakValue)
+    if (ncStatus /= nf90_noerror) then
+       localPolyBreakValue=fillValue
+    endif
+
+
     ! Fill latBuffer and lonBuffer
     do i=1, numElements
       do j=1, numNodePElement
-         if (elementConn(j,i) /= fillValue) then
+         if ((elementConn(j,i) /= fillValue) .and. & 
+             (elementConn(j,i) /= localPolyBreakValue)) then
             index = elementConn(j,i)
             latBuffer(j,i) = nodeCoords(2,index)
             lonBuffer(j,i) = nodeCoords(1,index)

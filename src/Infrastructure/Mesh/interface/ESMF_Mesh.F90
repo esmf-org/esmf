@@ -122,9 +122,6 @@ module ESMF_MeshMod
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
 
 
-! Needs to be kept in line with MESH_POLYBREAK_IND
-! in ESMCI_Mesh.h
-  integer, parameter :: ESMF_MESH_POLYBREAK=-1
 
   type ESMF_MeshLoc
 #ifndef ESMF_NO_SEQUENCE
@@ -149,7 +146,6 @@ module ESMF_MeshMod
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
-  public ESMF_MESH_POLYBREAK
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
 
@@ -1838,7 +1834,7 @@ end function ESMF_MeshCreateFromFile
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
-    character(len=*), optional, intent(in)    :: varname
+     character(len=*), optional, intent(in)    :: varname
    integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -1899,7 +1895,7 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: ElemType(:)
     integer, allocatable                :: ElemConn(:)
     integer, pointer                    :: elementMask(:), ElemMask(:)
-    real(ESMF_KIND_R8), pointer         :: elementArea(:), ElemArea(:)
+     real(ESMF_KIND_R8), pointer         :: elementArea(:), ElemArea(:)
     integer, allocatable                :: LocalElmTable(:)
     integer                             :: sndBuf(1)
     type(ESMF_VM)                       :: vm
@@ -1960,7 +1956,7 @@ end function ESMF_MeshCreateFromFile
 
     if (present(maskFlag)) then
 	localAddMask = maskFlag
-    else
+     else
 	localAddMask = ESMF_MESHLOC_NONE
     endif
 
@@ -2021,7 +2017,7 @@ end function ESMF_MeshCreateFromFile
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
 	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
+ 				 convertToDeg=convertToDeg, rc=localrc)
        elseif (haveElmtMask) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
@@ -2065,7 +2061,7 @@ end function ESMF_MeshCreateFromFile
        if ( associated(faceCoords)) then
        	  hasFaceCoords = .true.
        endif
-       	  
+
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
@@ -2153,7 +2149,9 @@ end function ESMF_MeshCreateFromFile
     if (parametricDim .eq. 2) then
        do ElemNo =1, ElemCnt
           do i=1,elmtNum(ElemNo)	
-             NodeUsed(elementConn(i,ElemNo))=PetNo
+             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(i,ElemNo))=PetNo
+             endif
           enddo
           TotalConnects = TotalConnects+elmtNum(ElemNo)
 
@@ -2163,8 +2161,10 @@ end function ESMF_MeshCreateFromFile
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
        do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
-             NodeUsed(elementConn(i,ElemNo))=PetNo
+          do i=1,elmtNum(ElemNo)
+             if (elementConn(i,ElemNo) /= ESMF_MESH_POLYBREAK) then
+                NodeUsed(elementConn(i,ElemNo))=PetNo
+             endif
           enddo
           TotalConnects = TotalConnects+elmtNum(ElemNo)
        end do       
@@ -2231,6 +2231,7 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
+
     deallocate(nodeCoords)
     if (.not. haveNodeMask) then
        ! Add nodes
@@ -2277,12 +2278,15 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemConn(TotalConnects))
     if (localAddUserArea) allocate(ElemArea(TotalElements))
 
+
+
     ! Allocate mask if the user wants one
     haveMask=.false.
     if (haveElmtMask) then 
        allocate (ElemMask(TotalElements))
        haveMask=.true.
     endif
+
 
  ! XMRKX
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
@@ -2298,7 +2302,11 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
              do i=1,3
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                else
+                   ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
+                endif
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2308,7 +2316,11 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
              do i=1,4
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                else
+                   ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
+                endif
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2318,7 +2330,11 @@ end function ESMF_MeshCreateFromFile
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = elmtNum(j)
              do i=1,elmtNum(j)
-                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
+                   ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+                else
+                   ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
+                endif
              end do
 	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
@@ -2340,7 +2356,11 @@ end function ESMF_MeshCreateFromFile
           endif
 
           do i=1,elmtNum(j)
-             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             if (elementConn(i,j) /= ESMF_MESH_POLYBREAK) then
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             else
+                ElemConn (ConnNo+i) = ESMF_MESH_POLYBREAK
+             endif
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
           if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
