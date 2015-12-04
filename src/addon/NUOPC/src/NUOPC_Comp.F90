@@ -331,7 +331,11 @@ module NUOPC_Comp
         do k=1, itemCount
           tempString=trim(tempString)//" "//valueSL(k)
         enddo
-        deallocate(valueSL)
+        deallocate(valueSL, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of valueSL.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       elseif (tk==ESMF_TYPEKIND_I4) then
         allocate(valueIL(itemCount))
@@ -345,7 +349,11 @@ module NUOPC_Comp
         do k=1, itemCount
           write(tempString, *) trim(tempString)//" ", valueIL(k)
         enddo
-        deallocate(valueIL)
+        deallocate(valueIL, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of valueIL.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       endif
     enddo
@@ -353,8 +361,8 @@ module NUOPC_Comp
     freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
     
     deallocate(stringList, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="stringList.", &
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation stringList.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
@@ -422,7 +430,11 @@ module NUOPC_Comp
         do k=1, itemCount
           tempString=trim(tempString)//" "//valueSL(k)
         enddo
-        deallocate(valueSL)
+        deallocate(valueSL, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of valueSL.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       elseif (tk==ESMF_TYPEKIND_I4) then
         allocate(valueIL(itemCount))
@@ -436,7 +448,11 @@ module NUOPC_Comp
         do k=1, itemCount
           write(tempString, *) trim(tempString)//" ", valueIL(k)
         enddo
-        deallocate(valueIL)
+        deallocate(valueIL, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of valueIL.", &
+          line=__LINE__, &
+          file=trim(name)//":"//FILENAME)) return  ! bail out
         stringList(i)=trim(adjustl(tempString))
       endif
     enddo
@@ -444,8 +460,8 @@ module NUOPC_Comp
     freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
     
     deallocate(stringList, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="stringList.", &
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of stringList.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
@@ -796,6 +812,7 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
+    integer                                         :: stat
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     logical                                         :: addFlagOpt
@@ -863,7 +880,12 @@ module NUOPC_Comp
       endif
       
       ! clean-up
-      deallocate(tokenList)
+      deallocate(tokenList, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of tokenList.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
+
     enddo
     
   end subroutine
@@ -892,6 +914,7 @@ module NUOPC_Comp
 !EOP
   !-----------------------------------------------------------------------------
     character(ESMF_MAXSTR)                          :: name
+    integer                                         :: stat
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     logical                                         :: addFlagOpt
@@ -959,7 +982,12 @@ module NUOPC_Comp
       endif
       
       ! clean-up
-      deallocate(tokenList)
+      deallocate(tokenList, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of tokenList.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
+
     enddo
     
   end subroutine
@@ -984,7 +1012,8 @@ module NUOPC_Comp
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), allocatable            :: attrList(:)
+    integer                               :: stat
+    character(ESMF_MAXSTR), allocatable   :: attrList(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1009,7 +1038,11 @@ module NUOPC_Comp
         nestPurpose="ModelComp", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      deallocate(attrList)
+      deallocate(attrList, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of attrList.", &
+        line=__LINE__, &
+        file=FILENAME)) return  ! bail out
     else
       ! invalid component kind
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Invalid component kind",&
@@ -1029,7 +1062,11 @@ module NUOPC_Comp
       attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    deallocate(attrList)
+    deallocate(attrList, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of attrList.", &
+      line=__LINE__, &
+      file=FILENAME)) return  ! bail out
     
     ! Highest level of the AttPack hierarchy (where users operate)
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
@@ -1094,7 +1131,8 @@ module NUOPC_Comp
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), allocatable            :: attrList(:)
+    integer                               :: stat
+    character(ESMF_MAXSTR), allocatable   :: attrList(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1114,7 +1152,11 @@ module NUOPC_Comp
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    deallocate(attrList)
+    deallocate(attrList, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of attrList.", &
+      line=__LINE__, &
+      file=FILENAME)) return  ! bail out
     
     ! Add more Attributes -> NUOPC/Connector AttPack
     allocate(attrList(1))
@@ -1124,7 +1166,11 @@ module NUOPC_Comp
       attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    deallocate(attrList)
+    deallocate(attrList, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of attrList.", &
+      line=__LINE__, &
+      file=FILENAME)) return  ! bail out
     
     ! Highest level of the AttPack hierarchy (where users operate)
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
@@ -1526,18 +1572,21 @@ module NUOPC_Comp
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    if (itemCount==0) return ! nothing to be done -> early return     
+    
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+
+    ! get the current phases
+    call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! filter all entries that do not match entries in acceptStringList
     iii=0 ! reset
@@ -1566,7 +1615,11 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
-    deallocate(phases, newPhases)
+    deallocate(phases, newPhases, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of phases, newPhases.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1624,18 +1677,21 @@ module NUOPC_Comp
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    if (itemCount==0) return ! nothing to be done -> early return 
+    
     allocate(phases(itemCount), newPhases(itemCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
       line=__LINE__, &
       file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (itemCount > 0) then
-      call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
-        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+      
+    ! get the current phases
+    call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
+      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! filter all entries that do not match entries in acceptStringList
     iii=0 ! reset
@@ -1664,7 +1720,11 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
-    deallocate(phases, newPhases)
+    deallocate(phases, newPhases, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of phases, newPhases.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1758,7 +1818,12 @@ module NUOPC_Comp
         read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
       endif
       ! clean-up
-      deallocate(phases)
+      deallocate(phases, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of phases.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
+
     endif
     
   end subroutine
@@ -1853,7 +1918,11 @@ module NUOPC_Comp
         read (tempString(ind+1:max), "(i4)") phaseIndex ! obtain phase index
       endif
       ! clean-up
-      deallocate(phases)
+      deallocate(phases, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of phases.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
   end subroutine
@@ -2026,7 +2095,11 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
-    deallocate(phases)
+    deallocate(phases, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of phases.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2153,7 +2226,11 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
-    deallocate(phases)
+    deallocate(phases, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of phases.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2281,8 +2358,12 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! clean-up
-    deallocate(phases)
-    
+    deallocate(phases, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of phases.", &
+      line=__LINE__, &
+      file=trim(name)//":"//FILENAME)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 

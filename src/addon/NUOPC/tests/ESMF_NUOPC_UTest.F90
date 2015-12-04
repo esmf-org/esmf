@@ -26,6 +26,10 @@ module ESMF_NUOPC_UTest_Mod
 
   private
   
+  character(ESMF_MAXSTR)  :: failMsg
+  character(ESMF_MAXSTR)  :: name
+  integer                 :: result = 0
+
   public driverSetServices
 
   contains
@@ -33,9 +37,6 @@ module ESMF_NUOPC_UTest_Mod
   subroutine driverSetServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
-    integer :: result = 0
 
     rc=ESMF_SUCCESS
     !------------------------------------------------------------------------
@@ -59,32 +60,77 @@ module ESMF_NUOPC_UTest_Mod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSetEntryPoint() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p20"/), userRoutine=DummyInit, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSetInternalEntryPoint() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p20"/), userRoutine=DummyInit, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
   end subroutine
 
   subroutine SetModelServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
     rc=ESMF_SUCCESS
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver=driver, compLabel="testComp1", &
       compSetServicesRoutine=model_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver=driver, compLabel="testComp2", &
       compSetServicesRoutine=model_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver, srcCompLabel="testComp1", &
       dstCompLabel="testComp2", compSetServicesRoutine=cplSS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
   end subroutine
   
+  subroutine DummyInit(driver, iState, eState, clock, rc)
+    type(ESMF_GridComp)  :: driver
+    type(ESMF_State)     :: iState, eState 
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    rc=ESMF_SUCCESS
+  end subroutine
+
 end module
 
 
@@ -894,6 +940,25 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_MediatorGet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_MediatorGet(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompFilterPhaseMap() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompFilterPhaseMap(gridComp, ESMF_METHOD_INITIALIZE, &
+    acceptStringList=(/"randomStringForTest"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompFilterPhaseMap() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+call ESMF_LogSet(trace=.true.)
+  call NUOPC_CompFilterPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
+    acceptStringList=(/"randomStringForTest"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
