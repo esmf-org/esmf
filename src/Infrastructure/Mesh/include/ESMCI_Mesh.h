@@ -27,7 +27,7 @@
 /**
  * @defgroup mesh
  * 
- * The basic system that is comprised of a topological mesh database,
+  * The basic system that is comprised of a topological mesh database,
  * field registrars, and communication.
  * 
  */
@@ -36,7 +36,7 @@ namespace ESMCI {
 
 
   // Defines for Mesh
-#define MESH_POLYBREAK_IND -1
+#define MESH_POLYBREAK_IND -7
 
   /**
    * Basic parallel mesh operations.  Aggregates the serial meshes,

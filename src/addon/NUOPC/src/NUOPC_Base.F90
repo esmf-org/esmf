@@ -35,6 +35,7 @@ module NUOPC_Base
   ! public FieldDictionary API
   public NUOPC_FieldDictionary            ! variable
   public NUOPC_FieldDictionaryAddEntry    ! defined in NUOPC_FieldDictionaryApi
+  public NUOPC_FieldDictionaryEgest       ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryGetEntry    ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryHasEntry    ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryMatchSyno   ! defined in NUOPC_FieldDictionaryApi
@@ -277,23 +278,9 @@ module NUOPC_Base
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      !TODO: simplify the following once ESMF supports changing name of Fields
-      call ESMF_FieldDestroy(field, rc=rc)
+      call ESMF_FieldSet(field, name=trim(tempString), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      field = ESMF_FieldEmptyCreate(name=trim(tempString), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call NUOPC_InitAttributes(field, StandardName=StandardName, &
-        Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     if (present(TransferOfferGeomObject)) then
       if (trim(TransferOfferGeomObject)=="will provide") then

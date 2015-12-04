@@ -15,6 +15,7 @@
 module NUOPC_FieldDictionaryDef
 
   use ESMF
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -36,6 +37,7 @@ module NUOPC_FieldDictionaryDef
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
+  public NUOPC_FieldDictionaryEgestI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
   public NUOPC_FieldDictionaryMatchSynoI
@@ -63,7 +65,7 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
     ! local variables
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    integer                           :: stat, i, count
+    integer                           :: stat
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -93,6 +95,68 @@ module NUOPC_FieldDictionaryDef
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryEgestI - Egest NUOPC Field dictionary into FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryEgestI(fieldDictionary, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),   intent(inout)         :: fieldDictionary
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
+!EOPI
+  !-----------------------------------------------------------------------------
+    type(NUOPC_FieldDictionaryEntry)                :: fdEntry
+    integer                                         :: stat, i, j, k, count
+    character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
+    character(len=NUOPC_FreeFormatLen)              :: tempString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_ContainerGet(fieldDictionary, itemCount=count, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    allocate(stringList(2*count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of stringList failed.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    j=1 ! stringList counter
+    do i=1, count
+      call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
+        ESMF_ITEMORDER_ABC, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      write(tempString, "('standardName: ',a40, ', canonicalUnits: ',a16)") &
+        trim(fdEntry%wrap%standardName), trim(fdEntry%wrap%canonicalUnits)
+      stringList(j)=trim(adjustl(tempString))
+      j=j+1
+      tempString = "synonyms:"
+      do k=1, size(fdEntry%wrap%synonyms)
+        tempString=trim(tempString)//" "//trim(fdEntry%wrap%synonyms(k))
+      enddo
+      stringList(j)=trim(adjustl(tempString))
+      j=j+1      
+    enddo
+
+    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    
+    deallocate(stringList, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntryI - Get information about a NUOPC Field dictionary entry
@@ -172,8 +236,11 @@ module NUOPC_FieldDictionaryDef
 !   Return {\tt .true.} if the NUOPC Field dictionary considers
 !   {\tt standardName1} and {\tt standardName2} synonyms, {\tt .false.} 
 !   otherwise. An entry with standard name of {\tt standardName1} must
-!   exist in the field dictionary, or else an error will be returned. 
+!   exist in the field dictionary, or else an error will be returned in 
+!   {\tt rc}, and the return value set to {.false.}.
 !   However, {\tt standardName2} need not correspond to an existing entry.
+!   If {\tt standardName2} does not correspond to an existing entry in the 
+!   field dictionary, the value of {.false.} will be returned.
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
@@ -185,12 +252,13 @@ module NUOPC_FieldDictionaryDef
     
     if (trim(standardName2) == trim(standardName1)) return  ! early bail out
     
+    NUOPC_FieldDictionaryMatchSynoI = .false. ! re-initialize
+
     call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName1), &
       fdEntry, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    NUOPC_FieldDictionaryMatchSynoI = .false. ! initialize
     do i=1, size(fdEntry%wrap%synonyms)
       if (trim(standardName2) == trim(fdEntry%wrap%synonyms(i))) then
         NUOPC_FieldDictionaryMatchSynoI = .true.
@@ -225,6 +293,15 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    ! first loop to ensure all of the provided standard names are valid entries
+    do i=1, size(standardNames)
+      call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &
+        fdEntry, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    enddo
+    
+    ! second loop to set the synonyms
     do i=1, size(standardNames)
     
       call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &

@@ -108,6 +108,7 @@ contains
     type(ESMF_Grid)                 :: grid
     type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: rank
+    integer, allocatable            :: coordDimCount(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D3(:,:,:)
@@ -115,6 +116,7 @@ contains
     real(ESMF_KIND_R4), pointer     :: dataPtrR4D2(:,:)
     real(ESMF_KIND_R4), pointer     :: dataPtrR4D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D1(:)
+    real(ESMF_KIND_R8), pointer     :: coord2PtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D3(:,:,:)
@@ -129,6 +131,8 @@ contains
       line=__LINE__, &
       file=ESMF_FILE)) &
       return  ! bail out
+      
+    allocate(coordDimCount(rank))
 
     if (trim(dataFillScheme)=="sincos") then
       if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
@@ -161,28 +165,78 @@ contains
           line=__LINE__, &
           file=ESMF_FILE)) &
           return  ! bail out
-        call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D2, rc=rc)
+        call ESMF_GridGet(grid, coordDimCount=coordDimCount, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
           file=ESMF_FILE)) &
           return  ! bail out
-        call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D2, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-          line=__LINE__, &
-          file=ESMF_FILE)) &
-          return  ! bail out
+        if (coordDimCount(1)==1) then
+          call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            line=__LINE__, &
+            file=ESMF_FILE)) &
+            return  ! bail out
+        else
+          ! assume the only other choice here is 2D, if not will trigger error
+          call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=coord1PtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            line=__LINE__, &
+            file=ESMF_FILE)) &
+            return  ! bail out
+        endif
+        if (coordDimCount(2)==1) then
+          call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            line=__LINE__, &
+            file=ESMF_FILE)) &
+            return  ! bail out
+        else
+          ! assume the only other choice here is 2D, if not will trigger error
+          call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=coord2PtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            line=__LINE__, &
+            file=ESMF_FILE)) &
+            return  ! bail out
+        endif
         call ESMF_FieldGet(field, farrayPtr=dataPtrR8D2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           line=__LINE__, &
           file=ESMF_FILE)) &
           return  ! bail out
-        do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
-        do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
-          dataPtrR8D2(i,j) = &
-            sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
-            cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
-        enddo
-        enddo
+        if (coordDimCount(1)==1 .and. coordDimCount(2)==1) then
+          do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+            dataPtrR8D2(i,j) = &
+              sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.) * &
+              cos(real(member)*3.1416*(coord2PtrR8D1(j)+real(step))/180.)
+          enddo
+          enddo
+        else if (coordDimCount(1)==2 .and. coordDimCount(2)==1) then
+          do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+            dataPtrR8D2(i,j) = &
+              sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
+              cos(real(member)*3.1416*(coord2PtrR8D1(j)+real(step))/180.)
+          enddo
+          enddo
+        else if (coordDimCount(1)==1 .and. coordDimCount(2)==2) then
+          do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+            dataPtrR8D2(i,j) = &
+              sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.) * &
+              cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+          enddo
+          enddo
+        else
+          ! only choice left is both 2d coordinate arrays
+          do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
+          do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
+            dataPtrR8D2(i,j) = &
+              sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
+              cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+          enddo
+          enddo
+        endif
       elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
         ! 3D sin*cos*sin pattern
         ! TODO: support Meshes
@@ -294,6 +348,8 @@ contains
       return ! bail out
     endif
     
+    deallocate(coordDimCount)
+
   end subroutine
 ^undef ESMF_FILE
 !------------------------------------------------------------------------------

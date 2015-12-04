@@ -54,7 +54,7 @@
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
-
+ 
 !     NEED TO ADD MORE HERE
       implicit none
 
@@ -13490,7 +13490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target,     intent(out), optional :: coordDimCount(:)
       integer,       target,     intent(out), optional :: coordDimMap(:,:)
       integer,                   intent(out), optional :: arbDim
-      integer,                   intent(out), optional :: rank
+        integer,                   intent(out), optional :: rank
       integer,                   intent(out), optional :: arbDimCount
       integer,       target,     intent(out), optional :: gridEdgeLWidth(:)
       integer,       target,     intent(out), optional :: gridEdgeUWidth(:)
@@ -13531,10 +13531,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 ! \item[{[coordDimCount]}]
-!   List that has as many elements as the grid dimCount (from arrayspec).
-!   Gives the dimension of each component (e.g. x) array. This is 
-!   to allow factorization of the coordinate arrays. If not specified
-!   all arrays are the same size as the grid. 
+!   This argument needs to be of size equal to the Grid's dimCount. 
+!   Each entry in the argument will be filled with the dimCount of the corresponding coordinate component (e.g. the
+!   dimCount of coordDim=1 will be put into entry 1). 
+!   This is useful because it describes the factorization of the coordinate components in the Grid. 
 !\item[{[coordDimMap]}]
 !   2D list of size grid dimCount x grid dimCount. This array describes the
 !   map of each component array's dimensions onto the grids
@@ -16325,8 +16325,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
-!   of coordinates from that index location. This method will eventually be overloaded
-!   to support the full complement of types supported by the Grid. 
+!   of coordinates from that index location. This method should work no matter what
+!   the factorization of the Grid's coordinate components.
 !
 !     The arguments are:
 !     \begin{description}
@@ -16413,8 +16413,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
-!   of coordinates from that index location. This method will eventually be overloaded
-!   to support the full complement of types supported by the Grid. 
+!   of coordinates from that index location. This method should work no matter what
+!   the factorization of the Grid's coordinate components.
 !
 !     The arguments are:
 !     \begin{description}

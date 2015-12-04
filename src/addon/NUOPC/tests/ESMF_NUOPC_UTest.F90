@@ -10,19 +10,26 @@
 !
 !==============================================================================
 
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
+
 module ESMF_NUOPC_UTest_Mod
   
+  use ESMF_TestMod     ! test methods
   use ESMF
   use NUOPC
   use NUOPC_Driver, &
     driver_routine_SS               => SetServices, &
     driver_label_SetModelServices   => label_SetModelServices
-  use NUOPC_Model, &
-    model_routine_SS                => SetServices
-  use NUOPC_Connector, only: cplSS  => SetServices
+  use NUOPC_Model, model_routine_SS => SetServices
+  use NUOPC_Connector, cplSS        => SetServices
 
   private
   
+  character(ESMF_MAXSTR)  :: failMsg
+  character(ESMF_MAXSTR)  :: name
+  integer                 :: result = 0
+
   public driverSetServices
 
   contains
@@ -30,14 +37,47 @@ module ESMF_NUOPC_UTest_Mod
   subroutine driverSetServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
+
     rc=ESMF_SUCCESS
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompDerive() for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompDerive(driver, driver_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSpecialize() for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_CompSpecialize(driver, specLabel=driver_label_SetModelServices, &
       specRoutine=SetModelServices, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSetEntryPoint() for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p20"/), userRoutine=DummyInit, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_CompSetInternalEntryPoint() for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"IPDv00p20"/), userRoutine=DummyInit, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -48,26 +88,49 @@ module ESMF_NUOPC_UTest_Mod
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
     rc=ESMF_SUCCESS
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver=driver, compLabel="testComp1", &
       compSetServicesRoutine=model_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver=driver, compLabel="testComp2", &
       compSetServicesRoutine=model_routine_SS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NUOPC_DriverAddComp() Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
     call NUOPC_DriverAddComp(driver, srcCompLabel="testComp1", &
       dstCompLabel="testComp2", compSetServicesRoutine=cplSS, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
   end subroutine
   
+  subroutine DummyInit(driver, iState, eState, clock, rc)
+    type(ESMF_GridComp)  :: driver
+    type(ESMF_State)     :: iState, eState 
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    rc=ESMF_SUCCESS
+  end subroutine
+
 end module
 
 
@@ -75,9 +138,6 @@ program ESMF_NUOPC_UTest
 
 !------------------------------------------------------------------------------
  
-#include "ESMF.h"
-#include "ESMF_Macros.inc"
-
 !==============================================================================
 !BOP
 ! !PROGRAM: ESMF_NUOPC_Test - This unit test file verifies NUOPC methods.
@@ -92,6 +152,10 @@ program ESMF_NUOPC_UTest
   use ESMF
   use NUOPC
   use NUOPC_Driver
+  use NUOPC_Connector
+  use NUOPC_ModelBase
+  use NUOPC_Model
+  use NUOPC_Mediator
   use ESMF_NUOPC_UTest_Mod
 
   implicit none
@@ -131,7 +195,7 @@ program ESMF_NUOPC_UTest
   real(ESMF_KIND_R8),      pointer  :: xPtr(:), yPtr(:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   character(len=120)      :: tempString
-  type(NUOPC_FreeFormat)  :: runSeqFF
+  type(NUOPC_FreeFormat)  :: runSeqFF, attrFF, fdFF
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
 
 
@@ -196,6 +260,14 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_NoOp() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_NoOp(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! -> Generic Driver methods
   !------------------------------------------------------------------------
   
@@ -213,6 +285,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverGetComp(gridComp, compLabel="testComp1", comp=comp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -220,6 +293,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverPrint(gridComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -227,6 +301,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverSetRunSequence(gridComp, slot=1, clock=clockC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -234,6 +309,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverNewRunSequence(gridComp, slotCount=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -241,6 +317,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverAddRunElement(gridComp, slot=2, compLabel="testComp1", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! -> FreeFormat methods
@@ -259,6 +336,7 @@ program ESMF_NUOPC_UTest
     "@"/
   runSeqFF = NUOPC_FreeFormatCreate(runSequence, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! -> Generic Driver methods
@@ -270,6 +348,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverIngestRunSequence(gridComp, runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -277,6 +356,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatGetLine(runSeqFF, line=1, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -284,6 +364,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -291,9 +372,6 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverEgestRunSequence(gridComp, runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  ! -> FreeFormat methods
   !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
@@ -302,6 +380,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatPrint(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -309,6 +388,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatGet(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -316,6 +396,7 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   ! -> NUOPC Utility methods
@@ -401,7 +482,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAreServicesSet() Test"
+  write(name, *) "NUOPC_CompAreServicesSet() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_CompAreServicesSet(cplComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -409,7 +490,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAttributeInit() Test"
+  write(name, *) "NUOPC_CompAttributeInit() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeInit(cplComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -417,7 +498,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAttributeAdd() Test"
+  write(name, *) "NUOPC_CompAttributeAdd() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeAdd(cplComp, attrList=(/"myAttribute"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -425,7 +506,15 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAttributeGet() Test"
+  write(name, *) "NUOPC_CompAttributeSet() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeSet(cplComp, name="myAttribute", value="test", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeGet() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeGet(cplComp, name="CplList", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -513,8 +602,8 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_FieldDictionarySetSyno() (existing entry) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level"/), &
-    rc=rc)
+  call NUOPC_FieldDictionarySetSyno(standardNames=(/"esmf_adoption_level    ", &
+    "sea_surface_temperature"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -529,9 +618,81 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("esmf_adoption_level", &
+    "sea_surface_temperature", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry1) Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("abcd_adoption_level", &
+    "esmf_adoption_level", rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry1) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() (non existing entry2) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_FieldDictionaryMatchSyno("esmf_adoption_level", &
+    "abcd_adoption_level", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryMatchSyno() return value (not existing entry2) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FieldDictionarySetup() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldDictionarySetup(rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryEgest() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FieldDictionaryEgest(freeFormat=fdFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatLog() for fdFF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatLog(fdFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatDestroy() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatDestroy(fdFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -590,7 +751,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAreServicesSet() Test"
+  write(name, *) "NUOPC_CompAreServicesSet() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_CompAreServicesSet(gridComp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -598,7 +759,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAttributeInit() Test"
+  write(name, *) "NUOPC_CompAttributeInit() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeInit(gridComp, kind="Model", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -606,7 +767,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompAttributeAdd() Test"
+  write(name, *) "NUOPC_CompAttributeAdd() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompAttributeAdd(gridComp, attrList=(/"myAttribute"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -614,7 +775,55 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompCheckSetClock() Test"
+  write(name, *) "NUOPC_CompAttributeSet() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeSet(gridComp, name="myAttribute", value="test", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeEgest() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeEgest(gridComp, freeFormat=attrFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatPrint() for attrFF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatPrint(attrFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeIngest() for GridComp w/o addFlag Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call NUOPC_CompAttributeIngest(comp, freeFormat=attrFF, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompAttributeIngest() for GridComp w/ addFlag Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompAttributeIngest(comp, freeFormat=attrFF, addFlag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatDestroy() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatDestroy(attrFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompCheckSetClock() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompCheckSetClock(gridComp, clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -622,7 +831,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompSetClock() Test"
+  write(name, *) "NUOPC_CompSetClock() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompSetClock(gridComp, clockB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -630,7 +839,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompSetServices() Test"
+  write(name, *) "NUOPC_CompSetServices() for GridComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   ! Not specifying the sharedObj argument results in look-up in the executable
   ! itself.... and there is a SetServices() routine outside the program below.
@@ -781,6 +990,82 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_TimePrint(startTime, &
     preString="Printing time to tempString: ", unit=tempString, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConnectorSet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_ConnectorSet(cplComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ConnectorGet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_ConnectorGet(cplComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ModelBaseGet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_ModelBaseGet(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_ModelGet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_ModelGet(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_MediatorGet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_MediatorGet(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompFilterPhaseMap() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompFilterPhaseMap(gridComp, ESMF_METHOD_INITIALIZE, &
+    acceptStringList=(/"randomStringForTest"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompFilterPhaseMap() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompFilterPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
+    acceptStringList=(/"randomStringForTest"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSearchPhaseMap() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompSearchPhaseMap(gridComp, ESMF_METHOD_INITIALIZE, &
+    phaseIndex=valueInt, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSearchPhaseMap() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompSearchPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
+    phaseIndex=valueInt, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
