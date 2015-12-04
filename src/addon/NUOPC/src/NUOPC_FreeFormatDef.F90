@@ -279,6 +279,7 @@ module NUOPC_FreeFormatDef
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of NUOPC_FreeFormat%stringList.", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      nullify(freeFormat%stringList)
     endif
 
   end subroutine

@@ -43,6 +43,7 @@ module NUOPC
   ! public FieldDictionary API
   public NUOPC_FieldDictionary            ! variable
   public NUOPC_FieldDictionaryAddEntry    ! method
+  public NUOPC_FieldDictionaryEgest       ! method
   public NUOPC_FieldDictionaryGetEntry    ! method
   public NUOPC_FieldDictionaryHasEntry    ! method
   public NUOPC_FieldDictionaryMatchSyno   ! method

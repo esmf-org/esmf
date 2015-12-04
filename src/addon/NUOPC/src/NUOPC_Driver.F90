@@ -3415,7 +3415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
     endif
     
-    ! fill the compList and/of petLists
+    ! fill the compList and/or petLists
     if (present(compList) .or. present(petLists)) then
       do i=1, mapCount
         call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, &

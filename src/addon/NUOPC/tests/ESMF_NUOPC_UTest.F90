@@ -195,7 +195,7 @@ program ESMF_NUOPC_UTest
   real(ESMF_KIND_R8),      pointer  :: xPtr(:), yPtr(:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   character(len=120)      :: tempString
-  type(NUOPC_FreeFormat)  :: runSeqFF, attrFF
+  type(NUOPC_FreeFormat)  :: runSeqFF, attrFF, fdFF
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
 
 
@@ -669,6 +669,30 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_FieldDictionarySetup() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldDictionarySetup(rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryEgest() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FieldDictionaryEgest(freeFormat=fdFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatPrint() for fdFF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatPrint(fdFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatDestroy() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatDestroy(fdFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

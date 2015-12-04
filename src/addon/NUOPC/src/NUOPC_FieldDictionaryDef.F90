@@ -15,6 +15,7 @@
 module NUOPC_FieldDictionaryDef
 
   use ESMF
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -36,6 +37,7 @@ module NUOPC_FieldDictionaryDef
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
+  public NUOPC_FieldDictionaryEgestI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
   public NUOPC_FieldDictionaryMatchSynoI
@@ -63,7 +65,7 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
     ! local variables
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    integer                           :: stat, i, count
+    integer                           :: stat
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -93,6 +95,60 @@ module NUOPC_FieldDictionaryDef
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryEgestI - Egest NUOPC Field dictionary into FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryEgestI(fieldDictionary, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),   intent(inout)         :: fieldDictionary
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
+!EOPI
+  !-----------------------------------------------------------------------------
+    type(NUOPC_FieldDictionaryEntry)                :: fdEntry
+    integer                                         :: stat, i, count
+    character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
+    character(len=NUOPC_FreeFormatLen)              :: tempString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_ContainerGet(fieldDictionary, itemCount=count, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    allocate(stringList(count), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of stringList failed.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    do i=1, count
+      call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
+        ESMF_ITEMORDER_ABC, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      write(tempString, "('standardName: ',a50, ', canonicalUnits: ',a20)") &
+        trim(fdEntry%wrap%standardName), trim(fdEntry%wrap%canonicalUnits)
+      stringList(i)=trim(adjustl(tempString))
+    enddo
+
+    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    
+    deallocate(stringList, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation stringList.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntryI - Get information about a NUOPC Field dictionary entry

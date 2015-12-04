@@ -16,6 +16,7 @@ module NUOPC_FieldDictionaryApi
 
   use ESMF
   use NUOPC_FieldDictionaryDef
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -34,6 +35,7 @@ module NUOPC_FieldDictionaryApi
   
   ! public module interface for the NUOPC API
   public NUOPC_FieldDictionaryAddEntry
+  public NUOPC_FieldDictionaryEgest
   public NUOPC_FieldDictionaryGetEntry
   public NUOPC_FieldDictionaryHasEntry
   public NUOPC_FieldDictionaryMatchSyno
@@ -46,7 +48,7 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, rc)
@@ -57,7 +59,7 @@ module NUOPC_FieldDictionaryApi
 ! !DESCRIPTION:
 !   Add an entry to the NUOPC Field dictionary. If necessary the dictionary is
 !   first set up.
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -78,6 +80,37 @@ module NUOPC_FieldDictionaryApi
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionaryEgest - Egest NUOPC Field dictionary into FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryEgest(freeFormat, rc)
+! !ARGUMENTS:
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_FieldDictionaryEgestI(NUOPC_FieldDictionary, freeFormat, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntry - Get information about a NUOPC Field dictionary entry

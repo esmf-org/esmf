@@ -35,6 +35,7 @@ module NUOPC_Base
   ! public FieldDictionary API
   public NUOPC_FieldDictionary            ! variable
   public NUOPC_FieldDictionaryAddEntry    ! defined in NUOPC_FieldDictionaryApi
+  public NUOPC_FieldDictionaryEgest       ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryGetEntry    ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryHasEntry    ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryMatchSyno   ! defined in NUOPC_FieldDictionaryApi
