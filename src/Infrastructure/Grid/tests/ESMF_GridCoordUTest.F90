@@ -62,7 +62,7 @@ program ESMF_GridCoordUTest
   integer :: compELWidth(3),compEUWidth(3)
   integer :: rank,clbnd(3),cubnd(3)
   integer :: i,i1,i2,i3, index(3)
-  integer :: lDE, localDECount,t
+  integer :: lDE, localDECount,t, loc
   real(ESMF_KIND_R8) :: coord(3)
   character(len=ESMF_MAXSTR) :: string
 
@@ -736,6 +736,45 @@ program ESMF_GridCoordUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_StaggerLocGet() "
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Check that output is as expected
+  correct=.true.
+
+  ! Should be all 0's for _CENTER
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_CENTER, dim=1, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 0) correct=.false.
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_CENTER, dim=2, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 0) correct=.false.
+
+  ! Should be all 1's for _CORNER
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_CORNER, dim=1, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 1) correct=.false.
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_CORNER, dim=2, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 1) correct=.false.
+
+  ! Should be 1 and 0 for _EDGE1
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_EDGE1, dim=1, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 1) correct=.false.
+  call ESMF_StaggerLocGet(ESMF_STAGGERLOC_EDGE1, dim=2, loc=loc, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  if (loc .ne. 0) correct=.false.
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest

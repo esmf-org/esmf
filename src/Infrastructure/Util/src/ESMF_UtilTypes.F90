@@ -107,6 +107,11 @@
       logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .false.
 #endif
 
+
+! Needs to be kept in line with MESH_POLYBREAK_IND
+! in ESMCI_Mesh.h
+  integer, parameter :: ESMF_MESH_POLYBREAK=-7
+
 !------------------------------------------------------------------------------
 !
 !    ! Keyword enforcement type
@@ -1064,6 +1069,8 @@
 
       public ESMF_NormType_Flag
       public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
+
+      public ESMF_MESH_POLYBREAK
 
       
 !  Overloaded = operator functions
