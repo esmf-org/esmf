@@ -1605,7 +1605,7 @@ module NUOPC_Comp
     ! insert a dummy entry in case no entries are left
     if (iii==0) then
       iii=1
-      newPhases(1) = "IPDvDummy" ! something obvious
+      newPhases(1) = "IPDvDummy=-999" ! something obvious
     endif
     
     ! set the filtered phase map as the Attribute
@@ -1710,7 +1710,7 @@ module NUOPC_Comp
     ! insert a dummy entry in case no entries are left
     if (iii==0) then
       iii=1
-      newPhases(1) = "IPDvDummy" ! something obvious
+      newPhases(1) = "IPDvDummy=-999" ! something obvious
     endif
     
     ! set the filtered phase map as the Attribute
@@ -1824,8 +1824,7 @@ module NUOPC_Comp
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    endif
-    
+    endif    
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1924,7 +1923,6 @@ module NUOPC_Comp
         line=__LINE__, &
         file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
   end subroutine
   !-----------------------------------------------------------------------------
 

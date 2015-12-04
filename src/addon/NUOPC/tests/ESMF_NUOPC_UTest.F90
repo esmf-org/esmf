@@ -956,9 +956,26 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_CompFilterPhaseMap() for CplComp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-call ESMF_LogSet(trace=.true.)
   call NUOPC_CompFilterPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
     acceptStringList=(/"randomStringForTest"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSearchPhaseMap() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompSearchPhaseMap(gridComp, ESMF_METHOD_INITIALIZE, &
+    phaseIndex=valueInt, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSearchPhaseMap() for CplComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompSearchPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
+    phaseIndex=valueInt, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
