@@ -12545,7 +12545,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
                 2,3,5,   &       ! elem id 2
                 3,6,5,   &       ! elem id 3
                 4,5,9,8,7, &     ! elem id 4
-                5,6,9,-1,12,11,10/) ! elem id 5
+                5,6,9,ESMF_MESH_POLYBREAK,12,11,10/) ! elem id 5
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -12739,7 +12739,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
         ! Allocate and fill the element connection type array.
         allocate(elemConn(numElemConn))
-        elemConn=(/1,2,3,-1,6,5,4/) ! elem id 5
+        elemConn=(/1,2,3,ESMF_MESH_POLYBREAK,6,5,4/) ! elem id 5
        endif
     endif
 
@@ -12804,7 +12804,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
      y=0.0
      num_conn=0
      do i2=1,elemTypes(i1)
-         if (elemConn(iconn) .ne. -1) then
+         if (elemConn(iconn) .ne. ESMF_MESH_POLYBREAK) then
            inode=2*(elemConn(iconn)-1)
            x=x+nodeCoords(inode+1)
            y=y+nodeCoords(inode+2)
@@ -12920,7 +12920,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
                 2,3,5,   &       ! elem id 2
                 3,6,5,   &       ! elem id 3
                 4,5,9,8,7, &     ! elem id 4
-                5,6,9,-1,12,11,10/) ! elem id 5
+                5,6,9,ESMF_MESH_POLYBREAK,12,11,10/) ! elem id 5
 
  else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -13114,7 +13114,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
 
         ! Allocate and fill the element connection type array.
         allocate(elemConn(numElemConn))
-        elemConn=(/1,2,3,-1,6,5,4/) ! elem id 5
+        elemConn=(/1,2,3,ESMF_MESH_POLYBREAK,6,5,4/) ! elem id 5
        endif
     endif
 
@@ -13188,7 +13188,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
    endif
 
 
-  ! set interpolated function
+  ! Set exact dest value
   iconn=1
   do i1=1,numTotElems
 
@@ -13196,18 +13196,20 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
      ! to compute point in center
      x=0.0
      y=0.0
-     do i2=1,elemTypes(i1) 
-        inode=2*(elemConn(iconn)-1)
-        x=x+nodeCoords(inode+1)
-        y=y+nodeCoords(inode+2)
-        
+     num_conn=0
+     do i2=1,elemTypes(i1)
+         if (elemConn(iconn) .ne. ESMF_MESH_POLYBREAK) then
+           inode=2*(elemConn(iconn)-1)
+           x=x+nodeCoords(inode+1)
+           y=y+nodeCoords(inode+2)
+           num_conn=num_conn+1
+        endif
         iconn=iconn+1
      enddo
-     x=x*(1.0/REAL(elemTypes(i1),ESMF_KIND_R8))
-     y=y*(1.0/REAL(elemTypes(i1),ESMF_KIND_R8))
+     x=x*(1.0/REAL(num_conn,ESMF_KIND_R8))
+     y=y*(1.0/REAL(num_conn,ESMF_KIND_R8))
 
-
-     ! Set source function
+     ! Set exact function
      xdstFarrayPtr(i1) = 20.0+x+y
   enddo
 
