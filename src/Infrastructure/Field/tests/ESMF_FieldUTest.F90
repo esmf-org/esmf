@@ -49,6 +49,7 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
+      character(5)           :: tname1, tname2
 
 !     !LOCAL VARIABLES:
       type(ESMF_VM) :: vm
@@ -185,9 +186,9 @@
  
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      call ESMF_FieldGet(f1, name=tname1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get name in a field: ", fname
+      write(name, *) "Get name in a field: ", tname1
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
@@ -199,10 +200,17 @@
   
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      call ESMF_FieldGet(f1, name=tname2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Get name in a field after reset: ", fname
+      write(name, *) "Get name in a field after reset: ", tname2
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Compare the two names"
+      call ESMF_Test((tname1=="name1" .and. tname2=="name2"), &
+        name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
