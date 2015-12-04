@@ -682,9 +682,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FreeFormatPrint() for fdFF Test"
+  write(name, *) "NUOPC_FreeFormatLog() for fdFF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FreeFormatPrint(fdFF, rc=rc)
+  call NUOPC_FreeFormatLog(fdFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   

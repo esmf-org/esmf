@@ -31,6 +31,7 @@ module NUOPC_FreeFormatDef
   public NUOPC_FreeFormatDestroy
   public NUOPC_FreeFormatGet
   public NUOPC_FreeFormatGetLine
+  public NUOPC_FreeFormatLog
   public NUOPC_FreeFormatPrint
   
   
@@ -406,6 +407,34 @@ module NUOPC_FreeFormatDef
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FreeFormatLog - Write a FreeFormat object to the default Log
+! !INTERFACE:
+  subroutine NUOPC_FreeFormatLog(freeFormat, rc)
+! !ARGUMENTS:
+    type(NUOPC_FreeFormat),           intent(in)    :: freeFormat
+    integer,                optional, intent(out)   :: rc
+! !DESCRIPTION:
+!   Write a FreeFormat object to the default Log.
+!EOP
+  !-----------------------------------------------------------------------------
+    integer   :: i
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! loop over lines
+    if (associated(freeFormat%stringList)) then
+      do i=1, freeFormat%count
+        call ESMF_LogWrite(freeFormat%stringList(i), ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      enddo
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_FreeFormatPrint - Print a FreeFormat object
 ! !INTERFACE:
   subroutine NUOPC_FreeFormatPrint(freeFormat, rc)
@@ -420,7 +449,7 @@ module NUOPC_FreeFormatDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! conditionally deallocate members 
+    ! loop over lines
     if (associated(freeFormat%stringList)) then
       do i=1, freeFormat%count
         print *, freeFormat%stringList(i)

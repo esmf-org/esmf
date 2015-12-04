@@ -111,7 +111,7 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     type(NUOPC_FieldDictionaryEntry)                :: fdEntry
-    integer                                         :: stat, i, count
+    integer                                         :: stat, i, j, k, count
     character(len=NUOPC_FreeFormatLen), allocatable :: stringList(:)
     character(len=NUOPC_FreeFormatLen)              :: tempString
     
@@ -122,21 +122,29 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    allocate(stringList(count), stat=stat)
+    allocate(stringList(2*count), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of stringList failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    j=1 ! stringList counter
     do i=1, count
       call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
         ESMF_ITEMORDER_ABC, rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('standardName: ',a50, ', canonicalUnits: ',a20)") &
+      write(tempString, "('standardName: ',a40, ', canonicalUnits: ',a16)") &
         trim(fdEntry%wrap%standardName), trim(fdEntry%wrap%canonicalUnits)
-      stringList(i)=trim(adjustl(tempString))
+      stringList(j)=trim(adjustl(tempString))
+      j=j+1
+      tempString = "synonyms:"
+      do k=1, size(fdEntry%wrap%synonyms)
+        tempString=trim(tempString)//" "//trim(fdEntry%wrap%synonyms(k))
+      enddo
+      stringList(j)=trim(adjustl(tempString))
+      j=j+1      
     enddo
 
     freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)

@@ -38,6 +38,7 @@ module NUOPC
   public NUOPC_FreeFormatDestroy          ! method
   public NUOPC_FreeFormatGet              ! method
   public NUOPC_FreeFormatGetLine          ! method
+  public NUOPC_FreeFormatLog              ! method
   public NUOPC_FreeFormatPrint            ! method
 
   ! public FieldDictionary API
