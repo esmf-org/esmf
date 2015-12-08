@@ -262,6 +262,7 @@ contains
     logical, pointer :: recvd_needs_matrix(:,:)
 
     type(ESMF_CharPtr), allocatable :: items_recv(:)
+    character, pointer :: buffer_recv(:)
 
     integer :: i
 
@@ -415,6 +416,11 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    deallocate (recvd_needs_matrix, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
     if (meminfo) call ESMF_VMLogMemInfo ('after Step 5')
 
 
@@ -429,9 +435,11 @@ contains
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    buffer_recv => null ()
     call ESMF_ReconcileExchgItems (vm,  &
         id_info=id_info,  &
-        recv_items=items_recv,  &
+        recv_items=items_recv,  &  ! %cptr aliased to portions of buffer_recv
+        recv_buffer=buffer_recv,  &
         rc=localrc)
     if (debug)  &
         localrc = ESMF_ReconcileAllRC (vm, localrc)
@@ -485,21 +493,14 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': At clean up.', ask=.false.)
     end if
-
     call ESMF_VMBarrier (vm)
-    deallocate (recvd_needs_matrix, stat=memstat)
-    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
 
-    do, i=0,npets-1
-      if (associated (items_recv(i)%cptr)) then
-        deallocate (items_recv(i)%cptr, stat=memstat)
-        if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
-      end if
-    end do
+    if (associated (buffer_recv)) then
+      deallocate (buffer_recv, stat=memstat)
+      if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
 
     if (associated (ids_send)) then
       deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
@@ -1036,8 +1037,8 @@ contains
 #endif
 
     if (needs_count /= ubound (vm_ids, 1)) then
-      print *, ESMF_METHOD,  &
-          ': WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
+      print *, ESMF_METHOD, ': pet', mypet,  &
+          ':: WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1653,12 +1654,13 @@ contains
 ! !IROUTINE: ESMF_ReconcileExchgItems
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileExchgItems (vm, id_info, recv_items, rc)
+  subroutine ESMF_ReconcileExchgItems (vm, id_info, recv_items, recv_buffer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)  :: vm
     type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
     type(ESMF_CharPtr),         intent(out) :: recv_items(0:)
+    character,                  pointer     :: recv_buffer(:) ! intent(out)
     integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1688,7 +1690,7 @@ contains
 
     integer,   allocatable :: counts_recv(:),  counts_send(:)
     integer,   allocatable :: offsets_recv(:), offsets_send(:)
-    character, allocatable :: buffer_recv(:),  buffer_send(:)
+    character, allocatable :: buffer_send(:)
 
     logical, parameter :: debug = .false.
 
@@ -1777,7 +1779,7 @@ contains
 
     allocate (  &
         offsets_recv(0:npets-1),  &
-        buffer_recv(0:sum (counts_recv)-1),  &
+        recv_buffer(0:sum (counts_recv)-1),  &
         stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -1794,7 +1796,7 @@ contains
 
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
-        recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
+        recvData=recv_buffer, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -1811,24 +1813,32 @@ contains
     do, i=0, npets-1
       itemcount = counts_recv(i)
       if (itemcount > 0) then
-        if (debug) then
-          print *, ESMF_METHOD, '(', myPet, '): ',  &
-              'allocating item_buffer(0:', itemcount-1, ')'
-        end if
-        allocate (  &
-            recv_items(i)%cptr(0:itemcount-1),  &
-            stat=memstat)
-        if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
         offset_pos = offsets_recv(i)
-        recv_items(i)%cptr = buffer_recv(offset_pos:offset_pos+itemcount-1)
+#if 0
+      ! Fortran 2003 version
+        recv_items(i)%cptr(0:) => recv_buffer(offset_pos:offset_pos+itemcount-1)
+#else
+      ! Fortran 90/95 version
+        call ptr_assoc_zero (recv_buffer(offset_pos), itemcount, recv_items(i)%cptr)
+!       print *, 'associated cptr(', lbound (recv_items(i)%cptr,1), ':', ubound (recv_items(i)%cptr,1), ')'
+#endif
       else
         recv_items(i)%cptr => null ()
       end if
     end do
 
     rc = localrc
+
+  contains
+
+    subroutine ptr_assoc_zero (cbuffer, itemcount, cptr)
+      integer,   intent(in)   :: itemcount
+      character, intent(in), target :: cbuffer(0:itemcount-1)
+      character, pointer      :: cptr(:)
+
+      cptr => cbuffer
+
+    end subroutine
 
   end subroutine ESMF_ReconcileExchgItems
 
