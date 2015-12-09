@@ -57,6 +57,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
     if is_mesh:
+        # Mesh
         if regrid_method == ESMF.RegridMethod.CONSERVE:
             lons = grid_or_mesh.get_coords(0, meshloc=ESMF.element)
             lats = grid_or_mesh.get_coords(1, meshloc=ESMF.element)
@@ -64,21 +65,10 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
             lons = grid_or_mesh.get_coords(0, meshloc=ESMF.node)
             lats = grid_or_mesh.get_coords(1, meshloc=ESMF.node)
     else:
-        # get the data pointer and bounds of the ESMF allocation
-        lonptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 0, staggerloc=ESMF.StaggerLoc.CENTER)
-        latptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 1, staggerloc=ESMF.StaggerLoc.CENTER)
-        lb, ub = ESMF.ESMP_GridGetCoordBounds(grid_or_mesh, staggerloc=ESMF.StaggerLoc.CENTER)
-
-        if grid_or_mesh.ndims == 1:
-            lons_1d = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][0],))
-            lats_1d = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, (grid_or_mesh.size[ESMF.StaggerLoc.CENTER][1],))
-
-            lons = np.array([[lons_1d[i]]*len(lats_1d) for i in range(len(lons_1d))])
-            lats = np.array([lats_1d for lon in lons_1d])
-        else:
-            lons = ESMF.ndarray_from_esmf(lonptr, grid_or_mesh.type, ub - lb)
-            lats = ESMF.ndarray_from_esmf(latptr, grid_or_mesh.type, ub - lb)
-
+        # Grid
+        lons = grid_or_mesh.get_coords(0, staggerloc=ESMF.StaggerLoc.CENTER)
+        lats = grid_or_mesh.get_coords(1, staggerloc=ESMF.StaggerLoc.CENTER)
+    # Convert to radians
     lons = np.radians(lons)
     lats = np.radians(lats)
     return lons,lats
