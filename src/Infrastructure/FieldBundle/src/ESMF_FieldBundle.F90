@@ -2044,12 +2044,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleRead}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRead(fieldbundle, file, &
+  subroutine ESMF_FieldBundleRead(fieldbundle, fileName, &
     keywordEnforcer, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
-    character(*),           intent(in)             :: file
+    character(*),           intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),  optional  :: singleFile
     integer,                intent(in),  optional  :: timeslice
@@ -2072,7 +2072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{description}
 !   \item[fieldbundle] 
 !     An {\tt ESMF\_FieldBundle} object.
-!   \item[file]
+!   \item[fileName]
 !     The name of the file from which fieldbundle data is read.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all Fields in the bundle 
@@ -2103,7 +2103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     type(ESMF_Field), allocatable  :: fieldList(:)
     logical                        :: singlef
     character(len=3)               :: cnum
-    character(len=len (file) + 3)  :: filename     ! len (file)+len (cnum)
+    character(len=len (fileName) + 3) :: filename_num ! len (file)+len (cnum)
     type(ESMF_Array)               :: array 
     type(ESMF_IOFmt_Flag)          :: opt_iofmt
     type(ESMF_IO)                  :: io           ! The I/O object
@@ -2127,9 +2127,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -2173,7 +2173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (errorFound) exit
       enddo
       if (.not. errorFound) then
-        call ESMF_IORead(io, trim(file), timeslice=time,                &
+        call ESMF_IORead(io, trim(fileName), timeslice=time,                &
             iofmt=opt_iofmt, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -2183,7 +2183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename = trim (file) // cnum
+        filename_num = trim (fileName) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -2193,7 +2193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
             ESMF_CONTEXT, rcToReturn=rc)
         if (errorFound) exit
         if (.not. errorFound) then
-          call ESMF_IORead(io, trim(filename), timeslice=time,          &
+          call ESMF_IORead(io, trim(filename_num), timeslice=time,          &
               iofmt=opt_iofmt, rc=localrc)
           errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
               ESMF_CONTEXT, rcToReturn=rc)
@@ -4978,12 +4978,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleWrite(fieldbundle, file, &
+  subroutine ESMF_FieldBundleWrite(fieldbundle, fileName, &
     keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),     intent(in)             :: fieldbundle
-    character(*),               intent(in)             :: file
+    character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                    intent(in),  optional  :: singleFile
     logical  ,                  intent(in),  optional  :: overwrite
@@ -5008,7 +5008,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{description}
 !   \item[fieldbundle] 
 !     An {\tt ESMF\_FieldBundle} object.
-!   \item[file]
+!   \item[fileName]
 !     The name of the output file to which field bundle data is written.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 
@@ -5075,7 +5075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     type(ESMF_Field), allocatable   :: fieldList(:)
     logical                         :: singlef
     character(len=3)                :: cnum
-    character(len=len (file) + 3)   :: filename          ! len (file) + len (cnum)
+    character(len=len (fileName) + 3) :: filename_num    ! len (file) + len (cnum)
     type(ESMF_Array)                :: array 
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -5106,9 +5106,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -5148,7 +5148,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
-      call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,    &
+      call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5158,7 +5158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename = trim (file) // cnum
+        filename_num = trim (fileName) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5167,7 +5167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_IOWrite(io, trim(filename),                         &
+        call ESMF_IOWrite(io, trim(filename_num),                      &
              overwrite=opt_overwriteflag, status=opt_status,           &
              timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &

@@ -72,13 +72,13 @@ contains
 ! \label{api:FieldWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_FieldWrite(field, file, keywordEnforcer,   &
+  subroutine ESMF_FieldWrite(field, fileName, keywordEnforcer,   &
       variableName, overwrite, status, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_Field),           intent(in)             :: field 
-    character(*),               intent(in)             :: file 
+    character(*),               intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional  :: variableName
     logical,                    intent(in),  optional  :: overwrite
@@ -103,7 +103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [field]
 !     The {\tt ESMF\_Field} object that contains data to be written.
-!   \item[file]
+!   \item[fileName]
 !     The name of the output file to which Field data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of field.
@@ -193,9 +193,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -241,7 +241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (.not. errorfound) then
-      call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,  &
+      call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,  &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)

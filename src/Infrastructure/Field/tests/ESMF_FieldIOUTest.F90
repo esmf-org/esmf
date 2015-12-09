@@ -158,7 +158,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
-  call ESMF_FieldWrite(field_w, file="field.nc",        &
+  call ESMF_FieldWrite(field_w, fileName="field.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in Field"
@@ -206,7 +206,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in nohalo Field
-  call ESMF_FieldWrite(field_w_nohalo, file="fieldNoHalo.nc",        &
+  call ESMF_FieldWrite(field_w_nohalo, fileName="fieldNoHalo.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in nohalo Field"
@@ -261,13 +261,13 @@ program ESMF_FieldIOUTest
     ! Also, stop using the status flag after t = 3
     select case (t)
     case (1,2)
-      call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t,     &
+      call ESMF_FieldWrite(field_t, fileName="field_time.nc", timeslice=t,     &
            status=statusFlag, overwrite=.true., rc=rc)
     case (3)
-      call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
+      call ESMF_FieldWrite(field_t, fileName="field_time.nc",                  &
            status=statusFlag, overwrite=.true., rc=rc)
     case (4:)
-      call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
+      call ESMF_FieldWrite(field_t, fileName="field_time.nc",                  &
            overwrite=.true., rc=rc)
     end select
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -298,7 +298,7 @@ program ESMF_FieldIOUTest
     endif
 !------------------------------------------------------------------------
     ! Write Fortran array in Field without halo
-    call ESMF_FieldWrite(field_s, file="fieldNoHalo_time.nc", timeslice=t,   &
+    call ESMF_FieldWrite(field_s, fileName="fieldNoHalo_time.nc", timeslice=t,   &
          status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) then
@@ -351,7 +351,7 @@ program ESMF_FieldIOUTest
   ! Read data to Object Field_r
   write(failMsg, *) ""
   write(name, *) "Read data to object field_r"
-  call ESMF_FieldRead(field_r, file="field.nc", rc=rc)
+  call ESMF_FieldRead(field_r, fileName="field.nc", rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -434,7 +434,7 @@ program ESMF_FieldIOUTest
   ! Read data at time=t to Object Field_r with Halos
   write(failMsg, *) ""
   write(name, *) "Read data time=t to object field_r per slice"
-  call ESMF_FieldRead(field_tr, file="field_time.nc", timeslice=t, rc=rc)
+  call ESMF_FieldRead(field_tr, fileName="field_time.nc", timeslice=t, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -494,7 +494,7 @@ program ESMF_FieldIOUTest
   ! Read data at time=t to Object Field_r without Halos
   write(failMsg, *) ""
   write(name, *) "Read data time=t to object field_r per slice"
-  call ESMF_FieldRead(field_sr, file="fieldNoHalo_time.nc", timeslice=t, rc=rc)
+  call ESMF_FieldRead(field_sr, fileName="fieldNoHalo_time.nc", timeslice=t, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -590,7 +590,7 @@ program ESMF_FieldIOUTest
         enddo
       enddo
 
-      call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
+      call ESMF_FieldWrite(field, fileName='halof.nc', timeslice=k,   &
            status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
@@ -656,7 +656,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Fill array and write
   Farray_w = localPet ! Fill
-  call ESMF_FieldWrite(field_gw, file="field_globalindex.nc",        &
+  call ESMF_FieldWrite(field_gw, fileName="field_globalindex.nc",        &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write globally indexed Field"
@@ -681,7 +681,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! read array into Field.
-  call ESMF_FieldRead(field_gr, file="field_globalindex.nc",        &
+  call ESMF_FieldRead(field_gr, fileName="field_globalindex.nc",        &
        rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Read globally indexed Field data"
@@ -735,7 +735,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Attempt to read array into Field with wrong field name.
-  call ESMF_FieldRead(field_gr2, file="field_globalindex.nc",        &
+  call ESMF_FieldRead(field_gr2, fileName="field_globalindex.nc",        &
        rc=rc)
   write(failMsg, *) "Did not fail"
   write(name, *) "Read globally indexed Field data"
@@ -807,7 +807,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran 2DE array in Field
-  call ESMF_FieldWrite(field_w2DE, file="field_2DE.nc",        &
+  call ESMF_FieldWrite(field_w2DE, fileName="field_2DE.nc",        &
        iofmt=ESMF_IOFMT_NETCDF,  &
        status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -841,7 +841,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! read array into Field.
-  call ESMF_FieldRead(field_r2DE, file="field_2DE.nc",        &
+  call ESMF_FieldRead(field_r2DE, fileName="field_2DE.nc",        &
        rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Read 2DE Field Array data"

@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test
-  call ESMF_FieldBundleWrite(bundleTst, file="single.nc",      &
+  call ESMF_FieldBundleWrite(bundleTst, fileName="single.nc",      &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file Test"
@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test with timeslice
-  call ESMF_FieldBundleWrite(bundleTst, file="single_ts.nc", timeslice=1,  &
+  call ESMF_FieldBundleWrite(bundleTst, fileName="single_ts.nc", timeslice=1,  &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file with timeslice Test"
@@ -227,7 +227,7 @@
   ! FieldBundle Write to multiple files Test
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to multiple files Test"
-  call ESMF_FieldBundleWrite(bundleTst, file="multi.nc",  &
+  call ESMF_FieldBundleWrite(bundleTst, fileName="multi.nc",  &
       status=ESMF_FILESTATUS_REPLACE, singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Read from a single file Test
-  call ESMF_FieldBundleRead(bundleRd, file="single.nc", rc=rc)
+  call ESMF_FieldBundleRead(bundleRd, fileName="single.nc", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Reading a FieldBundle from a single file Test"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -319,7 +319,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Read from multiple files Test
-  call ESMF_FieldBundleRead(bundleRd, file="multi.nc", &
+  call ESMF_FieldBundleRead(bundleRd, fileName="multi.nc", &
                            singleFile=.false., rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
   write(name, *) "Reading a FieldBundle from multiple files Test"

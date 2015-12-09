@@ -207,7 +207,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
+  call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.nc',    &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -221,7 +221,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, attempt to overwrite an existing file (should fail)
   write(name, *) "Write ESMF_Array with Halo Test overwrite test"
   write(failMsg, *) "Did not return ESMF_RC_FILE_WRITE"
-  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
+  call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.nc',    &
       status=ESMF_FILESTATUS_NEW, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_RC_FILE_WRITE), name, failMsg, result, ESMF_SRCLINE)
@@ -235,7 +235,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the binary file.
   write(name, *) "Write ESMF_Array with Halo to binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.bin', &
+  call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.bin', &
        status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_BIN, rc=rc)
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -250,7 +250,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array without Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_wouthalo, file='file3D_wouthalo.nc',         &
+  call ESMF_ArrayWrite(array_wouthalo, fileName='file3D_wouthalo.nc',         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -306,7 +306,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array without Halo from NetCDF file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_wouthalo2, file='file3D_wouthalo.nc',  &
+  call ESMF_ArrayRead(array_wouthalo2, fileName='file3D_wouthalo.nc',  &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -357,7 +357,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read ESMF_Array with Halo from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo2, file='file3D_withhalo.nc', rc=rc)
+  call ESMF_ArrayRead(array_withhalo2, fileName='file3D_withhalo.nc', rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -370,7 +370,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a binary file to an ESMF array.
   write(name, *) "Read ESMF_Array with Halo from binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
+  call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -432,7 +432,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a binary file to an ESMF array specifying a variable.
   write(name, *) "Read ESMF_Array variable with Halo from binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
+  call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, variableName='dummyname', rc=rc)
 ! ! Should fail since varname not supported in binary mode
   call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -533,7 +533,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, file='file2D_withhalo.nc',        &
+  call ESMF_ArrayWrite(array_withhalo, fileName='file2D_withhalo.nc',        &
       status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -556,7 +556,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array written for Array with halo to ESMF_Array without halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_wouthalo, file="file2D_withhalo.nc", rc=rc)
+  call ESMF_ArrayRead(array_wouthalo, fileName="file2D_withhalo.nc", rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -612,7 +612,7 @@ program ESMF_ArrayIOUTest
 ! ! Read in a netCDF file to an ESMF array.
   write(name, *) "Read 2D ESMF_Array with different distgrid from NetCDF test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_diff, file="file2D_withhalo.nc", rc=rc)
+  call ESMF_ArrayRead(array_diff, fileName="file2D_withhalo.nc", rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -728,7 +728,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2DE ESMF_Array to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_2DE, file='Array_2DE.nc',         &
+  call ESMF_ArrayWrite(array_2DE, fileName='Array_2DE.nc',         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -768,7 +768,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Read 2DE ESMF_Array from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead (array_2DE_r, file='Array_2DE.nc',         &
+  call ESMF_ArrayRead (array_2DE_r, fileName='Array_2DE.nc',         &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -886,7 +886,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2/0DE ESMF_Array to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_20DE, file='Array_20DE.nc',         &
+  call ESMF_ArrayWrite(array_20DE, fileName='Array_20DE.nc',         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -936,7 +936,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Read 2/0DE ESMF_Array from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead (array_20DE_r, file='Array_20DE.nc',         &
+  call ESMF_ArrayRead (array_20DE_r, fileName='Array_20DE.nc',         &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1121,7 +1121,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with undistributed dimensions (prototype) to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_tmp, file="Array_myData.nc",         &
+  call ESMF_ArrayWrite(array_tmp, fileName="Array_myData.nc",         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1136,7 +1136,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Array with undistributed dimensions write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_undist, file="Array_undist.nc",         &
+  call ESMF_ArrayWrite(array_undist, fileName="Array_undist.nc",         &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1160,7 +1160,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Array with undistributed dimensions read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead (array_undist_r, file='Array_undist.nc',         &
+  call ESMF_ArrayRead (array_undist_r, fileName='Array_undist.nc',         &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

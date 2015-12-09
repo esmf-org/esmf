@@ -1746,12 +1746,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayWrite}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
+  subroutine ESMF_ArrayWrite(array, fileName, keywordEnforcer, &
      variableName, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
-    character(*),               intent(in)            :: file
+    character(*),               intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),               intent(in),  optional :: variableName
     logical,                    intent(in),  optional :: overwrite
@@ -1776,7 +1776,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  \begin{description}
 !   \item[array]
 !    The {\tt ESMF\_Array} object that contains data to be written.
-!   \item[file]
+!   \item[fileName]
 !    The name of the output file to which Array data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of Array.
@@ -1808,8 +1808,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[timeslice]}]
 !    \begin{sloppypar}
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
-!    time slices. The {\tt timeslice} argument provides access to this
-!    capability. {\tt timeslice} must be positive. The behavior of this
+!    time slices.  An unlimited dimension called {\tt time} is defined in the
+!    file variable for this capability.
+!    The {\tt timeslice} argument provides access to the {\tt time} dimension,
+!    and must have a positive value. The behavior of this
 !    option may depend on the setting of the {\tt overwrite} flag:
 !    \begin{description}
 !    \item[{\tt overwrite = .false.}:]\ If the timeslice value is
@@ -1863,9 +1865,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -1886,7 +1888,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywrite(array, file,                        &
+    call c_esmc_arraywrite(array, fileName,                    &
         variableName, len_varName, opt_overwriteflag,          &
         opt_status, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &

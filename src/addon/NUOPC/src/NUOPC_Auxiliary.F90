@@ -213,7 +213,7 @@ module NUOPC_Auxiliary
         file=FILENAME)) &
         return  ! bail out
     
-      call ESMF_FieldWrite(field, file=file, variableName=standardName, &
+      call ESMF_FieldWrite(field, fileName=file, variableName=standardName, &
         overwrite=overwrite, status=status, timeslice=timeslice, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &

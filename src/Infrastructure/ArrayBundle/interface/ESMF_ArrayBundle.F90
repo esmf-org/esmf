@@ -1547,12 +1547,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleRead}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, file, keywordEnforcer, &
+  subroutine ESMF_ArrayBundleRead(arraybundle, fileName, keywordEnforcer, &
     singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
-    character(*),           intent(in)             :: file
+    character(*),           intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: singleFile
     integer,                intent(in),  optional  :: timeslice
@@ -1575,7 +1575,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[arraybundle] 
 !     An {\tt ESMF\_ArrayBundle} object.
-!   \item[file]
+!   \item[fileName]
 !     The name of the file from which ArrayBundle data is read.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all Arrays in the bundle 
@@ -1614,7 +1614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
 
     ! Get filename length
-    len_fileName = len_trim(file)
+    len_fileName = len_trim(fileName)
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
@@ -1628,9 +1628,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -1644,7 +1644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraybundleread(arraybundle, file, len_fileName     ,     &
+    call c_esmc_arraybundleread(arraybundle, fileName, len_fileName,      &
         opt_singlefileflag, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                    &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3228,12 +3228,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, keywordEnforcer, &
+  subroutine ESMF_ArrayBundleWrite(arraybundle, fileName, keywordEnforcer, &
     singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: arraybundle
-    character(*),               intent(in)              :: file
+    character(*),               intent(in)              :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional  :: singleFile
     logical,                    intent(in),  optional  :: overwrite
@@ -3258,7 +3258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[arraybundle] 
 !     An {\tt ESMF\_ArrayBundle} object.
-!   \item[file]
+!   \item[fileName]
 !     The name of the output file to which array bundle data is written.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all arrays in the bundle 
@@ -3350,9 +3350,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (file, '.') > 0) then
-        file_ext_p = index (file, '.', back=.true.)
-        select case (file(file_ext_p:))
+      if (index (fileName, '.') > 0) then
+        file_ext_p = index (fileName, '.', back=.true.)
+        select case (fileName(file_ext_p:))
         case ('.nc')
           opt_iofmt = ESMF_IOFMT_NETCDF
         case ('.bin')
@@ -3366,10 +3366,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     ! Get string lengths
-    len_fileName = len_trim(file)
+    len_fileName = len_trim(fileName)
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraybundlewrite(arraybundle, file, len_fileName,            &
+    call c_esmc_arraybundlewrite(arraybundle, fileName, len_fileName,        &
         opt_singlefileflag, opt_overwriteflag, opt_status,                   &
         timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                       &

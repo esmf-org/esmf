@@ -825,7 +825,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 ! print *, ESMF_METHOD, ': file = ', file, ', variableName not present'
 ! end if
 ! print *, ESMF_METHOD, ': overwrite = ', overwrite, ', timeSlice =', timeSlice
-    call ESMF_FieldWrite (field, file=file,  &
+    call ESMF_FieldWrite (field, fileName=file,  &
         variableName=variablename,  &
         overwrite=overwrite, status=status, timeSlice=timeSlice, iofmt=iofmt,  &
         rc=localrc)

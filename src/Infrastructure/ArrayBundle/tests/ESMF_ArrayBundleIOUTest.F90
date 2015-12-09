@@ -161,7 +161,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc",         &
+  call ESMF_ArrayBundleWrite(arraybundle_w, fileName="bundle.nc",         &
                              status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -174,7 +174,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file with timeslice Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle_ts.nc", timeslice=1,  &
+  call ESMF_ArrayBundleWrite(arraybundle_w, fileName="bundle_ts.nc", timeslice=1,  &
                              status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -187,7 +187,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Multiple files Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc",      &
+  call ESMF_ArrayBundleWrite(arraybundle_w, fileName="sep.nc",      &
                              status=ESMF_FILESTATUS_REPLACE,    &
                              singleFile=.false., rc=rc)
   if(rc==ESMF_RC_LIB_NOT_PRESENT) then
@@ -239,8 +239,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleRead Multiple file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
-  call ESMF_ArrayBundleRead(arraybundle_r, file="sep.nc",   &
+  !call ESMF_ArrayBundleRead(arraybundle_r, fileName="bundle.nc", rc=rc)
+  call ESMF_ArrayBundleRead(arraybundle_r, fileName="sep.nc",   &
                             singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -367,7 +367,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite 2 DE Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_2DE_w, file="abundle2DE.nc",         &
+  call ESMF_ArrayBundleWrite(arraybundle_2DE_w, fileName="abundle2DE.nc",         &
                              status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -404,8 +404,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleRead 2 DE Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  !call ESMF_ArrayBundleRead(arraybundle_r, file="bundle.nc", rc=rc)
-  call ESMF_ArrayBundleRead(arraybundle_2DE_r, file="abundle2DE.nc",   &
+  !call ESMF_ArrayBundleRead(arraybundle_r, fileName="bundle.nc", rc=rc)
+  call ESMF_ArrayBundleRead(arraybundle_2DE_r, fileName="abundle2DE.nc",   &
                             singleFile=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
