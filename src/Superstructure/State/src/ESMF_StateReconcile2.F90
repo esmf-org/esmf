@@ -36,7 +36,7 @@ module ESMF_StateReconcile2Mod
 ! The code in this file implements the Fortran function and subroutine 
 !  interfaces to ensure that {\tt ESMF\_State} data is consistent across
 !  all PETs.  The intended use is by components that have subcomponents 
-!  which run on subsets of the coupler's PET list.
+!  which run on subsets of the couplers PET list.
 !  Objects that have been created on only a subset of the PETs cannot be
 !  identified to methods like Regrid or Redistribution since they have no 
 !  valid handles to identify them.  The code here communicates the missing
@@ -146,7 +146,7 @@ contains
 !     running {\tt ESMF\_Component}.  
 !     For example, if a coupler is operating on data
 !     which was created by another component that ran on only a subset
-!     of the coupler's {\tt PET}s, the coupler must make this call first
+!     of the couplers {\tt PET}s, the coupler must make this call first
 !     before operating on any data inside that {\tt ESMF\_State}.
 !     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
 !     a common view of all objects contained in this {\tt ESMF\_State}.
@@ -1692,6 +1692,8 @@ contains
     integer,   allocatable :: offsets_recv(:), offsets_send(:)
     character, allocatable :: buffer_send(:)
 
+    character, pointer :: cptr_tmp(:)
+
     logical, parameter :: debug = .false.
 
     localrc = ESMF_RC_NOT_IMPL
@@ -1819,7 +1821,9 @@ contains
         recv_items(i)%cptr(0:) => recv_buffer(offset_pos:offset_pos+itemcount-1)
 #else
       ! Fortran 90/95 version
-        call ptr_assoc_zero (recv_buffer(offset_pos), itemcount, recv_items(i)%cptr)
+        cptr_tmp => recv_buffer(offset_pos:offset_pos+itemcount-1)
+      ! cptr_tmp is 1-based.  Convert to 0-based.
+        call ptr_assoc_zero (cptr_tmp, itemcount, recv_items(i)%cptr)
 !       print *, 'associated cptr(', lbound (recv_items(i)%cptr,1), ':', ubound (recv_items(i)%cptr,1), ')'
 #endif
       else

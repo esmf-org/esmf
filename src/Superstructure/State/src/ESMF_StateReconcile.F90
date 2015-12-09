@@ -32,7 +32,7 @@
 ! The code in this file implements the Fortran function and subroutine 
 !  interfaces to ensure that {\tt ESMF\_State} data is consistent across
 !  all PETs.  The intended use is by components that have subcomponents 
-!  which run on subsets of the coupler's PET list.
+!  which run on subsets of the couplers PET list.
 !  Objects that have been created on only a subset of the PETs cannot be
 !  identified to methods like Regrid or Redistribution since they have no 
 !  valid handles to identify them.  The code here communicates the missing
@@ -158,7 +158,7 @@
 !     running {\tt ESMF\_Component}.  
 !     For example, if a coupler is operating on data
 !     which was created by another component that ran on only a subset
-!     of the coupler's {\tt PET}s, the coupler must make this call first
+!     of the couplers {\tt PET}s, the coupler must make this call first
 !     before operating on any data inside that {\tt ESMF\_State}.
 !     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
 !     a common view of all objects contained in this {\tt ESMF\_State}.
@@ -640,7 +640,7 @@
 !!DEBUG "error -- i, offset, lbufsize = ", i, offset, lbufsize
 
            ! TODO: this is a bit too late; if offset has moved past the end
-           ! of the buffer, we've already written over memory that is not ours.
+           ! of the buffer, we have already written over memory that is not ours.
            ! but better late than never??
            if (offset > lbufsize) then
                call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_INCONS, &
