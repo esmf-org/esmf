@@ -744,7 +744,7 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_Write(field, file="field_test.nc", &
+  call NUOPC_Write(field, fileName="field_test.nc", &
     status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
