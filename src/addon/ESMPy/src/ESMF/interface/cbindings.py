@@ -1786,7 +1786,6 @@ _ESMF.ESMC_ScripInq.argtypes = [ct.c_char_p,
                                 np.ctypeslib.ndpointer(dtype=np.int32), 
                                 ct.POINTER(ct.c_int),
                                 ct.POINTER(ct.c_int)]
-@deprecated
 @netcdf
 def ESMP_ScripInq(filename):
     """
@@ -1812,7 +1811,6 @@ def ESMP_ScripInq(filename):
 _ESMF.ESMC_GridspecInq.restype = None
 _ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 
                                    ct.POINTER(ct.c_int)]
-@deprecated
 @netcdf
 def ESMP_GridspecInq(filename):
     """
