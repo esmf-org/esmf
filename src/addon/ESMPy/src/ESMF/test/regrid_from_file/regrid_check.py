@@ -58,11 +58,11 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None,
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh, regrid_method):
     if is_mesh:
         if regrid_method == ESMF.RegridMethod.CONSERVE:
-            coords_interleaved, num_coords, num_dims = ESMF.ESMP_MeshGetElemCoordPtr(grid_or_mesh)
+            lons = grid_or_mesh.get_coords(0, meshloc=ESMF.element)
+            lats = grid_or_mesh.get_coords(1, meshloc=ESMF.element)
         else:
-            coords_interleaved, num_coords, num_dims = ESMF.ESMP_MeshGetCoordPtr(grid_or_mesh)
-        lons = np.array([coords_interleaved[2*i] for i in range(num_coords)])
-        lats = np.array([coords_interleaved[2*i+1] for i in range(num_coords)])
+            lons = grid_or_mesh.get_coords(0, meshloc=ESMF.node)
+            lats = grid_or_mesh.get_coords(1, meshloc=ESMF.node)
     else:
         # get the data pointer and bounds of the ESMF allocation
         lonptr = ESMF.ESMP_GridGetCoordPtr(grid_or_mesh, 0, staggerloc=ESMF.StaggerLoc.CENTER)
