@@ -571,7 +571,7 @@ class Mesh(object):
              meshloc: the mesh location of the coordinates. \n
                 Argument values are: \n
                     node=0 (default) \n
-                    element=1 (not implemented) \n
+                    element=1 \n
         Returns: \n
             A numpy array of coordinate values at the specified meshloc. \n
         """
