@@ -716,9 +716,9 @@ void PIO_Handler::arrayRead(
       }
       frame = *timeslice;
     } else {
-      frame = 1;
+      frame = -1;
     }
-    if (unlim >= 0) {
+    if (unlim >= 0 && frame > 0) {
       pio_cpp_setframe(vardesc, frame);
     }
   }
@@ -730,6 +730,7 @@ void PIO_Handler::arrayRead(
   PRINTMSG("calling read_darray, status = " << statusOK <<
            ", pio type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
+std::cout << ESMC_METHOD << ": narrDims: " << narrDims << std::endl;
   switch(basepiotype) {
   case PIO_int:
     pio_cpp_read_darray_int(pioFileDesc, vardesc, iodesc,
@@ -1095,7 +1096,7 @@ void PIO_Handler::arrayWrite(
       if (!CHECKPIOERROR(piorc, "Defining dimension",
           localrc))
         if (ESMC_LogDefault.MsgFoundError(localrc,
-            std::string("Defining dimension: ").append(axis),
+            std::string("Defining dimension: ") + axis,
             ESMC_CONTEXT, rc)) {
           free (vardesc);
           return;
@@ -1381,7 +1382,7 @@ void PIO_Handler::open(
 #endif // ESMFIO_DEBUG
     piorc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
-    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ").append(getFilename()).c_str(), (*rc))) {
+    if (!CHECKPIOWARN(piorc, (std::string("Unable to create file: ") + getFilename()).c_str (), (*rc))) {
       free (pioFileDesc);
       pioFileDesc = NULL;
       return;
@@ -1399,7 +1400,7 @@ void PIO_Handler::open(
     piorc = pio_cpp_openfile(&pioSystemDesc, pioFileDesc,
                                iotype, getFilename(), mode);
     PRINTMSG(", called pio_cpp_openfile on " << getFilename());
-    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ").append(getFilename()).c_str(), (*rc))) {
+    if (!CHECKPIOWARN(piorc, (std::string("Unable to open existing file: ") + getFilename()).c_str(), (*rc))) {
       free (pioFileDesc);
       pioFileDesc = NULL;
       return;
