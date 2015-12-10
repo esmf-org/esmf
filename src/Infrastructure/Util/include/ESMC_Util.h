@@ -107,7 +107,7 @@ enum ESMC_LogMsgType_Flag{
 		ESMC_LOGMSG_ERROR=3,
 		ESMC_LOGMSG_TRACE=4 };
 
-enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
+enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
                         ESMC_MESHLOC_ELEMENT};
 
 enum ESMC_NormType_Flag {ESMC_NORMTYPE_DSTAREA=0,
