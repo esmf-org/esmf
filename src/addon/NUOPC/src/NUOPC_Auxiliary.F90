@@ -129,11 +129,11 @@ module NUOPC_Auxiliary
 ! !IROUTINE: NUOPC_Write - Write Field data to file
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
-  subroutine NUOPC_FieldWrite(field, file, overwrite, status, timeslice, &
+  subroutine NUOPC_FieldWrite(field, fileName, overwrite, status, timeslice, &
     iofmt, relaxedflag, rc)
 ! !ARGUMENTS:
-    type(ESMF_Field),           intent(in)            :: field 
-    character(*),               intent(in)            :: file 
+    type(ESMF_Field),           intent(in)            :: field
+    character(*),               intent(in)            :: fileName
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -148,7 +148,7 @@ module NUOPC_Auxiliary
 !   \begin{description}
 !   \item[field]
 !     The {\tt ESMF\_Field} object whose data is to be written.
-!   \item[file]
+!   \item[fileName]
 !     The name of the file to write to.
 !   \item[{[overwrite]}]
 !      A logical flag, the default is .false., i.e., existing Field data may
@@ -213,8 +213,9 @@ module NUOPC_Auxiliary
         file=FILENAME)) &
         return  ! bail out
     
-      call ESMF_FieldWrite(field, fileName=file, variableName=standardName, &
-        overwrite=overwrite, status=status, timeslice=timeslice, rc=rc)
+      call ESMF_FieldWrite(field, fileName=fileName, &
+        variableName=standardName, overwrite=overwrite, status=status, &
+        timeslice=timeslice, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -230,12 +231,12 @@ module NUOPC_Auxiliary
 ! !IROUTINE: NUOPC_Write - Write the Fields within a State to NetCDF files
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Write
-  subroutine NUOPC_StateWrite(state, fieldNameList, filePrefix, overwrite, &
+  subroutine NUOPC_StateWrite(state, fieldNameList, fileNamePrefix, overwrite, &
     status, timeslice, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),           intent(in)            :: state
     character(len=*),           intent(in),  optional :: fieldNameList(:)
-    character(len=*),           intent(in),  optional :: filePrefix
+    character(len=*),           intent(in),  optional :: fileNamePrefix
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
@@ -253,7 +254,7 @@ module NUOPC_Auxiliary
 !   \item[{[fieldNameList]}]
 !     List of names of the fields to be written. By default write all the fields
 !     in {\tt state}.
-!   \item[{[filePrefix]}]
+!   \item[{[fileNamePrefix]}]
 !     File name prefix, common to all the files written.
 !   \item[{[overwrite]}]
 !      A logical flag, the default is .false., i.e., existing Field data may
@@ -332,13 +333,14 @@ module NUOPC_Auxiliary
           file=FILENAME)) &
           return  ! bail out
         ! -> output to file
-        if (present(filePrefix)) then
-          write (fileName,"(A)") filePrefix//trim(fieldNameList_loc(i))//".nc"
+        if (present(fileNamePrefix)) then
+          write (fileName,"(A)") fileNamePrefix//trim(fieldNameList_loc(i))//".nc"
         else
           write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
         endif
-        call NUOPC_FieldWrite(field, file=trim(fileName), overwrite=overwrite, &
-          status=status, timeslice=timeslice, relaxedflag=relaxedflag, rc=rc)
+        call NUOPC_FieldWrite(field, fileName=trim(fileName), &
+          overwrite=overwrite, status=status, timeslice=timeslice, &
+          relaxedflag=relaxedflag, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed writing file: "// &
           trim(fileName), &
           line=__LINE__, &
