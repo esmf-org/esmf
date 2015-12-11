@@ -29,7 +29,7 @@
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_Integrate.h"
- #include "Mesh/include/ESMCI_Interp.h"
+#include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
@@ -756,7 +756,7 @@ bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id)
 
 }
 
-bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
+bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *_missing_id) {
 
   // Get mask Field
   MEField<> *mptr = mesh->GetField("elem_mask");
@@ -768,6 +768,8 @@ bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
   Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
 
   // Loop checking that all elems have weights
+  bool missing=false;
+  int missing_id=-1;
   for (; ei != ee; ++ei) {
     const MeshObj &elem=*ei;
 
@@ -783,8 +785,11 @@ bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
     // get elem id
     int elem_id=elem.get_id();
 
-    // get weight id
-    int wt_id=wi->first.id;
+    // If we've entered the range of split elements then just quit.
+    // (Elements are in order by id here and all the split elems are at top.
+    // If we've reached this point then part of the split elem mapped
+    // (the part with the orig_id), so no use checking the rest.)
+    if (mesh->is_split && (elem_id > mesh->max_non_split_id)) break;
 
     // Advance weights until not less than elem id
     while ((wi != we) && (wi->first.id <elem_id)) {
@@ -794,21 +799,130 @@ bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id) {
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
     if (wi==we) {
-      *missing_id=elem_id;
-      char msg[1024];
-      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
-      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
-      return false;
+      missing=true;
+      missing_id=elem_id;
+      break;
     }
 
     // If we're not equal to the elem id then we must have passed it
     if (wi->first.id != elem_id) {
-      *missing_id=elem_id;
-      char msg[1024];
-      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
-      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
-      return false;
+      missing=true;
+      missing_id=elem_id;
+      break;
     }
+  }
+
+  // If not missing leave
+  if (!missing) return true;
+
+  // If the mesh contains split elements, we could have 
+  // a false missing element, so only leave if we're not split
+  if (missing && !mesh->is_split) {
+    *_missing_id=missing_id;
+    char msg[1024];
+    sprintf(msg,"Destination id=%d NOT found in weight matrix.",missing_id);
+    ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+    return false;
+  }
+
+  //
+  // We should only reach this point if we are split and have missing elements //
+  //
+
+  // Count the number of entries in the list
+  int num_dst_ids=0;
+  for (wi = wts.begin_row(); wi != we; ++wi) {
+    num_dst_ids++;
+  }
+
+  // If there are no dst ids, then leave
+  if (num_dst_ids <= 0) return true;
+
+  // Allocate space for ids
+  UInt *dst_ids = NULL;
+  if (num_dst_ids>0) dst_ids=new UInt[num_dst_ids];
+
+  // Loop through weights generating a list of destination ids
+  int pos=0;
+  for (wi = wts.begin_row(); wi != we; ++wi) {
+    const WMat::Entry &w = wi->first;
+
+    // Get original id
+    UInt orig_id;
+    std::map<UInt,UInt>::iterator soi =  mesh->split_to_orig_id.find(w.id);
+    if (soi == mesh->split_to_orig_id.end()) {
+      orig_id=w.id;
+    } else {
+      orig_id=soi->second;
+    }
+
+    // Put in array
+    dst_ids[pos]=orig_id;
+
+    // Next position
+    pos++;
+  }
+
+  // Sort list
+  std::sort(dst_ids,dst_ids+num_dst_ids);
+
+  // Loop checking that all elems have weights with new sorted list
+  missing=false;
+  missing_id=-1;
+  pos=0;
+  for (ei=mesh->map_begin(MeshObj::ELEMENT); ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local elems
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get elem id
+    int elem_id=elem.get_id();
+
+    // If we've entered the range of split elements then just quit.
+    // (Elements are in order by id here and all the split elems are at top.
+    // If we've reached this point then part of the split elem mapped
+    // (the part with the orig_id), so no use checking the rest.)
+    if (mesh->is_split && (elem_id > mesh->max_non_split_id)) break;
+
+    // Advance weights until not less than elem id
+    while ((pos<num_dst_ids) && (dst_ids[pos] < elem_id)) {
+      pos++;
+    }
+
+    // If we're at the end of the weights then exit saying we don't have 
+    // all of them
+    if (pos >= num_dst_ids) {
+      missing=true;
+      missing_id=elem_id;
+      break;
+    }
+
+    // If we're not equal to the elem id then we must have passed it
+    if (dst_ids[pos] != elem_id) {
+      missing=true;
+      missing_id=elem_id;
+      break;
+    }
+  }
+
+  // deallocate list
+  if (dst_ids !=NULL) delete [] dst_ids;
+
+  // If the mesh contains split elements, we could have 
+  // a false missing element, so only leave if we're not split
+  if (missing) {
+    *_missing_id=missing_id;
+    char msg[1024];
+    sprintf(msg,"Destination id=%d NOT found in weight matrix.",missing_id);
+    ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+    return false;
   }
 
   // Still here, so must have found them all
