@@ -27,6 +27,7 @@ module NUOPC_FreeFormatDef
   public NUOPC_FreeFormatLen
 
   ! methods  
+  public NUOPC_FreeFormatAdd
   public NUOPC_FreeFormatCreate
   public NUOPC_FreeFormatDestroy
   public NUOPC_FreeFormatGet
@@ -71,6 +72,58 @@ module NUOPC_FreeFormatDef
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FreeFormatAdd - Add lines to a FreeFormat object
+! !INTERFACE:
+  subroutine NUOPC_FreeFormatAdd(freeFormat, stringList, rc)
+! !ARGUMENTS:
+    type(NUOPC_FreeFormat),           intent(inout) :: freeFormat
+    character(len=*),                 intent(in)    :: stringList(:)
+    integer,                optional, intent(out)   :: rc
+! !DESCRIPTION:
+!   Add lines to a FreeFormat object. The capacity of {\tt freeFormat} is 
+!   increased by at list the size of {\tt stringList}, but potentially more.
+!   The elements in {\tt stringList} are added to the end of {\tt freeFormat}.
+!EOP
+  !-----------------------------------------------------------------------------
+    integer             :: stat, i, j
+    integer             :: stringCount, availableCount, newCapacity
+    integer, parameter  :: extraCount = 10
+    character(len=NUOPC_FreeFormatLen), pointer   :: newStringList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    stringCount = size(stringList)
+    availableCount = size(freeFormat%stringList)-freeFormat%count
+    
+    if (stringCount >= availableCount) then
+      newCapacity = freeFormat%count + stringCount + extraCount
+      allocate(newStringList(newCapacity), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of new stringList.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      do i=1, freeFormat%count
+        newStringList(i) = freeFormat%stringList(i)  ! copy the existing entries
+      enddo
+      deallocate(freeFormat%stringList, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of stringList.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      freeFormat%stringList => newStringList ! point to the new stringList
+    endif
+
+    i = freeFormat%count + 1
+    do j=1, stringCount
+      freeFormat%stringList(i) =  stringList(j)
+      i=i+1
+    enddo
+
+    freeFormat%count = freeFormat%count + stringCount
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object
 ! !INTERFACE:
   ! call using generic interface: NUOPC_FreeFormatCreate
@@ -78,9 +131,9 @@ module NUOPC_FreeFormatDef
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateDefault
 ! !ARGUMENTS:
-    character(len=NUOPC_FreeFormatLen), optional, intent(in)  :: stringList(:)
-    integer,                            optional, intent(in)  :: capacity
-    integer,                            optional, intent(out) :: rc
+    character(len=*), optional, intent(in)  :: stringList(:)
+    integer,          optional, intent(in)  :: capacity
+    integer,          optional, intent(out) :: rc
 ! !DESCRIPTION:
 !   Create a new FreeFormat object. If {\tt stringList} is provided, then the
 !   newly created object will hold the provided strings and the count is that 

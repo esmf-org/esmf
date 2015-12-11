@@ -339,10 +339,6 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  ! -> Generic Driver methods
-  !------------------------------------------------------------------------
-  
-  !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_DriverIngestRunSequence() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -355,6 +351,14 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_FreeFormatGetLine() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatGetLine(runSeqFF, line=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatAdd() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatAdd(runSeqFF, stringList=(/"abc", "def"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
