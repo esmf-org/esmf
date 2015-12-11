@@ -220,14 +220,14 @@ class _MeshLoc(namedtuple('MeshLoc', ['NODE', 'ELEMENT'])):
     """
     The Mesh location used to hold Field data.\n
     Values are:\n
-        NODE = 1\n
+        NODE = 0\n
             The nodes of the Mesh.\n
-        ELEMENT = 2\n
+        ELEMENT = 1\n
             The elements of the Mesh.\n
     """
     pass
 
-MeshLoc = _MeshLoc(NODE=1, ELEMENT=2)
+MeshLoc = _MeshLoc(NODE=0, ELEMENT=1)
 
 # NormType
 class _NormType(namedtuple('NormType', ['DSTAREA', 'FRACAREA'])):

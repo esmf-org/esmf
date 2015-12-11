@@ -132,9 +132,9 @@ module ESMF_MeshMod
   end type
 
   type(ESMF_MeshLoc), parameter :: &
-        ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
-        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2), &
-	ESMF_MESHLOC_NONE = ESMF_MeshLoc(3)
+        ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
+        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
+	    ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
 
  !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
