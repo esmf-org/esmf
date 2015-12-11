@@ -136,7 +136,7 @@ module NUOPC_FieldDictionaryDef
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('cannonicalUnits:       ',a40)") &
+      write(tempString, "('canonicalUnits:        ',a40)") &
         trim(fdEntry%wrap%canonicalUnits)
       call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
