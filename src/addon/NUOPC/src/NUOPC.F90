@@ -34,6 +34,7 @@ module NUOPC
   ! public FreeFormat API
   public NUOPC_FreeFormat                 ! type
   public NUOPC_FreeFormatLen              ! parameter
+  public NUOPC_FreeFormatAdd              ! method
   public NUOPC_FreeFormatCreate           ! method
   public NUOPC_FreeFormatDestroy          ! method
   public NUOPC_FreeFormatGet              ! method
