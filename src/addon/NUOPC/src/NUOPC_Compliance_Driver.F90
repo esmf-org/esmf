@@ -404,7 +404,7 @@ contains
 
             ! phase specific checks
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
-                phase, importState, exportState, clock, .true., rc)
+                phase, importState, exportState, clock, .true., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -521,7 +521,7 @@ contains
             !      return  ! bail out
 
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
-                phase, importState, exportState, clock, .false., rc)
+                phase, importState, exportState, clock, .false., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -954,9 +954,13 @@ contains
             if (methodflag==ESMF_METHOD_INITIALIZE) then
               if (index(event_AllFieldsRealized, trim(phaseLabel)) > 0) then
                 call checkPhaseEpilogue_AllFieldsRealized(prefix, comp, importState, &
-                   exportState, clock, rc)
-              end if
-            end if
+                   exportState, clock, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+              endif
+            endif
         endif
 
     end subroutine dispatchPhaseChecks
@@ -982,14 +986,14 @@ contains
         exportFieldCount = 0
 
         call checkStateFieldMetadataAfterRealize(prefix, &
-            importState, importFieldCount, rc)
+            importState, importFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
         call checkStateFieldMetadataAfterRealize(prefix, &
-            exportState, exportFieldCount, rc)
+            exportState, exportFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &

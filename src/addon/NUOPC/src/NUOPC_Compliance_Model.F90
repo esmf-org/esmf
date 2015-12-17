@@ -419,7 +419,7 @@ contains
 
             ! phase specific checks
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
-                phase, importState, exportState, clock, .true., rc)
+                phase, importState, exportState, clock, .true., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -522,7 +522,7 @@ contains
             !      return  ! bail out
 
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
-                phase, importState, exportState, clock, .false., rc)
+                phase, importState, exportState, clock, .false., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
                 file=FILENAME)) &
@@ -954,10 +954,18 @@ contains
             if (methodflag==ESMF_METHOD_INITIALIZE) then
                 if (index(event_AdvertiseFields, trim(phaseLabel)) > 0) then
                     call checkPhaseEpilogue_Advertise(prefix, comp, importState, &
-                        exportState, clock, rc)
+                        exportState, clock, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
                 elseif (index(event_InternalClockSet, trim(phaseLabel)) > 0) then
                     call checkPhaseEpilogue_InternalClockSet(prefix, comp, importState, &
-                        exportState, clock, rc)
+                        exportState, clock, rc=rc)
+                    if (ESMF_LogFoundError(rc, &
+                      line=__LINE__, &
+                      file=FILENAME)) &
+                      return  ! bail out
                 endif
             endif
         endif
@@ -987,14 +995,14 @@ contains
         exportFieldCount = 0
 
         call checkStateFieldMetadataAfterAdvertise(prefix, &
-            importState, importFieldCount, rc)
+            importState, importFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
 
         call checkStateFieldMetadataAfterAdvertise(prefix, &
-            exportState, exportFieldCount, rc)
+            exportState, exportFieldCount, rc=rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
