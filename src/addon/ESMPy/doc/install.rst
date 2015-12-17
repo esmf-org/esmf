@@ -8,7 +8,7 @@ Requirements
 
 The following packages are *required* to work with ESMPy:
 
-* `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc>`_
+* `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/node9.html>`_
 * `python <http://python.org/>`_
 * `numpy <http://www.numpy.org/>`_
 
@@ -23,9 +23,11 @@ The following packages are *optional*:
 Getting the code
 ----------------
 
-The ESMF User's Guide contains information on building and installing ESMF.
-The ESMF Reference Manual contains information on the architecture of ESMF,
-example code, and details of the API (Application Programming Interface).
+The `ESMF User's Guide <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_usrdoc/>`_
+contains information on building and installing ESMF.
+The `ESMF Reference Manual <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_refdoc/>`_
+contains information on the architecture of ESMF, example code, and details of the API (Application Programming
+Interface).
 
 Instructions on how to download the ESMPy code can be found at the `ESMPy Download page
 <http://www.earthsystemcog.org/projects/esmpy/releases>`_.
@@ -52,7 +54,7 @@ standard Python package installation directory on that particular machine.
 
 Note: The ESMPy build does not have to be installed to be used.  The
 PYTHONPATH environment variable can simply be pointed to the directory
-containing the ESMF module (esmfcontrib-ESMPy/src from a default git clone)
+containing the ESMF module (esmf/src/addon/ESMPy/src from a default git clone)
 after the build command.
 
 As usual, any command followed by --help should print out some information
@@ -120,17 +122,19 @@ e.g.
 Limitations
 -----------
 
-ESMPy doesn't include many aspects of ESMF, including components, array
-interfaces, time management, etc.  The limitations listed here are relative
+ESMPy doesn't include many aspects of ESMF, including components, field bundles,
+time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
 - There is no FieldBundle class, only single Fields.
-- There is no support for multi-tile Grids, nor Grids defined across multiple files.
+- There is no support for multi-tile Grids, nor Grids defined across multiple
+  files.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK
   support.
 - Conservative regridding with a source Mesh created from file is not supported,
   because the Mesh cannot retrieve coordinates from the elements.
-- Meshes can only be created in-memory (not from-file) with a Cartesian coordinate system.
+- Meshes can only be created in-memory (not from-file) with a Cartesian
+  coordinate system.
 - To avoid memory leaks, each ESMPy class instance should be manually released
   using the destroy() method.
 

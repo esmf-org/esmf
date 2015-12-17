@@ -866,7 +866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="Both specialStringList and specialValueList must either be "// &
         "present or absent.", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=ESMF_FILENAME, &
         rcToReturn=rc)
       return ! bail out
     endif
@@ -878,7 +878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Both specialStringList and specialValueList must have "// &
           "the same number of elements.", &
           line=__LINE__, &
-          file=__FILE__, &
+          file=ESMF_FILENAME, &
           rcToReturn=rc)
         return ! bail out
       endif
@@ -898,7 +898,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="The string '"//trim(string)//"' could not be converted to integer.", &
             line=__LINE__, &
-            file=__FILE__, &
+            file=ESMF_FILENAME, &
             rcToReturn=rc)
         return ! bail out
       end if
@@ -908,7 +908,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="The string '"//trim(string)//"' contains characters besides "// &
           "numbers, cannot convert to integer.", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=ESMF_FILENAME, &
         rcToReturn=rc)
       return ! bail out
     endif
