@@ -441,7 +441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
 !     are summed into partial sums on the source PET before being transferred
-!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
 !     is done on the destination PET; source elements are neither multiplied
 !     by their factors nor added into partial sums before being sent off by the
 !     source PET. A value of 1 indicates that source elements are multiplied
@@ -899,7 +899,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
 !     are summed into partial sums on the source PET before being transferred
-!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     to the destination PET. A value of 0 indicates that the entire arithmetic
 !     is done on the destination PET; source elements are neither multiplied
 !     by their factors nor added into partial sums before being sent off by the
 !     source PET. A value of 1 indicates that source elements are multiplied

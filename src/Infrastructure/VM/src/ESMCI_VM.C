@@ -1742,11 +1742,34 @@ void VM::rmObject(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // find current VM index
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;  // correct index if non-threaded VM
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", ESMC_CONTEXT, &rc);
+      throw rc;
+    }
+  }
+  // found a match
+
+  // proceed to remove object from this VM's garbage collection table
   for (vector<ESMC_Base *>::iterator 
-    it = matchTable_Objects[matchTableIndex].begin();
-    it != matchTable_Objects[matchTableIndex].end(); ++it){
+    it = matchTable_Objects[i].begin();
+    it != matchTable_Objects[i].end(); ++it){
     if (*it == object){
-      matchTable_Objects[matchTableIndex].erase(it);  // erase the object entry
+      matchTable_Objects[i].erase(it);  // erase the object entry
       break;
     }
   }
@@ -1818,9 +1841,32 @@ void VM::rmFObject(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // find current VM index
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;  // correct index if non-threaded VM
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", ESMC_CONTEXT, &rc);
+      throw rc;
+    }
+  }
+  // found a match
+
+  // proceed to remove object from this VM's garbage collection table
   for (vector<FortranObject>::iterator 
-    it = matchTable_FObjects[matchTableIndex].begin();
-    it != matchTable_FObjects[matchTableIndex].end(); ++it){
+    it = matchTable_FObjects[i].begin();
+    it != matchTable_FObjects[i].end(); ++it){
   
     void *fobjectElement = (void *)&(it->fobject);
     
@@ -1828,7 +1874,7 @@ void VM::rmFObject(
     FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
     
     if (flag){
-      matchTable_FObjects[matchTableIndex].erase(it);  // erase the object entry
+      matchTable_FObjects[i].erase(it);  // erase the object entry
       break;
     }
   }

@@ -1739,7 +1739,7 @@ contains
     itemcount_global = sum (counts_send)
 
     allocate (  &
-        buffer_send(0:itemcount_global-1),  &
+        buffer_send(0:max (0,itemcount_global-1)),  &
         stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -1781,7 +1781,7 @@ contains
 
     allocate (  &
         offsets_recv(0:npets-1),  &
-        recv_buffer(0:sum (counts_recv)-1),  &
+        recv_buffer(0:max (0, sum (counts_recv)-1)),  &
         stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &

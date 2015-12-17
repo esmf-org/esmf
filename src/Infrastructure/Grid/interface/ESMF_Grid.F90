@@ -5561,13 +5561,13 @@ end subroutine pack_and_send_int2D
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag), intent(in)	   :: fileformat
-    type(ESMF_DistGrid),    intent(in)		   :: distgrid
+    type(ESMF_FileFormat_Flag), intent(in)         :: fileformat
+    type(ESMF_DistGrid),    intent(in)             :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
-    type(ESMF_Index_Flag), intent(in), optional  :: indexflag
+    type(ESMF_Index_Flag), intent(in), optional    :: indexflag
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
@@ -5589,7 +5589,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see Section~\ref{const:grid:fileformat}
+!     The Grid file format, please see section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
 ! \item[distGrid] 
 !      A distGrid defines how the grid is distributed
@@ -5604,8 +5604,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
 !      .false.
 ! \item[{[indexflag]}]
-!      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_DELOCAL}
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      section~\ref{const:indexflag} for the list of options. If not present,
+!      defaults to {\tt ESMF\_INDEX\_DELOCAL}.
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. 
 !      This flag is only needed for the GRIDSPEC file format.  If not set, the default value is .false.
@@ -5790,14 +5791,14 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag), intent(in)   :: fileformat
+    type(ESMF_FileFormat_Flag), intent(in)         :: fileformat
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in), optional   :: regDecomp(:)
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
-    type(ESMF_Index_Flag), intent(in), optional :: indexflag
+    type(ESMF_Index_Flag), intent(in), optional    :: indexflag
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
@@ -5820,7 +5821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see Section~\ref{const:grid:fileformat}
+!     The Grid file format, please see section~\ref{const:grid:fileformat}
 !         for a list of valid options. 
 ! \item[{[regDecomp]}] 
 !      A 2 element array specifying how the grid is decomposed.
@@ -5832,7 +5833,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{const:decompflag} for a full description of the 
+!      section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
@@ -5846,8 +5847,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
 !      .false.
 ! \item[{[indexflag]}]
-!      indicates the indexing scheme to be used in the new Grid.  If not present, defaults
-!      to {\tt ESMF\_INDEX\_DELOCAL}
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      section~\ref{const:indexflag} for the list of options. If not present,
+!      defaults to {\tt ESMF\_INDEX\_DELOCAL}.
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'. This flag
 !      is only needed for the GRIDSPEC file format.  If not set, the default value is .false.

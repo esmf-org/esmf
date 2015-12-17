@@ -1720,6 +1720,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdShapArb)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth}, 
+!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth}, 
+!   {\tt computationalUWidth}, {\tt totalLWidth}, {\tt totalUWidth}. These
+!   arguments were missed in previous versions by mistake.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:

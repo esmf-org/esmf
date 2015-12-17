@@ -217,6 +217,7 @@ extern "C" {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
       if (status == NC_ENOTNC) {
 	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+        fflush(stderr);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
           rc);
@@ -227,6 +228,7 @@ extern "C" {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (status == NC_ENOTNC) {
 	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
+        fflush(stderr);
 	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT,
           rc);

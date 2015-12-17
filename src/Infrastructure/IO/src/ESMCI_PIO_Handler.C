@@ -730,7 +730,6 @@ void PIO_Handler::arrayRead(
   PRINTMSG("calling read_darray, status = " << statusOK <<
            ", pio type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
-std::cout << ESMC_METHOD << ": narrDims: " << narrDims << std::endl;
   switch(basepiotype) {
   case PIO_int:
     pio_cpp_read_darray_int(pioFileDesc, vardesc, iodesc,

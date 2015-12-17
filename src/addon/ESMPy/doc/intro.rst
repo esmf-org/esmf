@@ -16,7 +16,7 @@ Please see the `ESMF home page <http://www.earthsystemmodeling.org>`_
 for more information on ESMF in general.
 
 `Fast Parallel Grid Remapping for Unstructured and Structured Grids
-<http://www.earthsystemmodeling.org/presentations/pres_1109_see_regridding.ppt>`_
+<http://earthsystemcog.org/site_media/projects/esmf/pres_1105_goessp_oehmke.ppt>`_
 gives a nice overview of the ESMF remapping functionality.
 
 The `ESMF Regridding Status
