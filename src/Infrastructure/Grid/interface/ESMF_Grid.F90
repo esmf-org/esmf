@@ -19822,10 +19822,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  Check if {\tt grid1} and {\tt grid2} match. Returns a range of values of type
 !  ESMF\_GridMatch indicating how closely the Grids match. For a description of
 !  the possible return values, please see~\ref{const:gridmatch}. 
-!  Please also note that this call returns the match for the piece of the Grids on
-!  the local PET only. It's entirely possible for this call to return a different match
-!  on different PETs for the same Grids. The user is responsible for computing the 
-!  global match across the set of PETs. 
+!  Please also note that by default this call is not collective and only returns the match
+!  for the piece of the Grids onthe local PET. In this case, it's possible for this call to 
+!  return a different match on different PETs for the same Grids. To do a global match operation, 
+!  the user should set the {\tt global} argument to .true.. In this case, the call becomes collective
+!  across the current VM ensuring the same result is returned on all PETs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -19833,9 +19834,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_Grid} object.
 !     \item[grid2] 
 !          {\tt ESMF\_Grid} object.
-!     \item[global] 
+!     \item[{[global]}] 
 !          By default this flag is set to false. When it's set to true, the
-!          function performs the match check globally.
+!          function performs the match check globally. In this case,
+!          the method becomes collective across the current VM. 
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
