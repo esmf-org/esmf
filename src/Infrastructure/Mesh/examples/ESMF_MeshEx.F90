@@ -845,7 +845,7 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-pentagons.nc", &
-	   filetypeflag=ESMF_FILEFORMAT_SCRIP, rc=localrc)
+	   fileformat=ESMF_FILEFORMAT_SCRIP, rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -869,7 +869,7 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-esmf.nc", &
-            filetypeflag=ESMF_FILEFORMAT_ESMFMESH, &
+            fileformat=ESMF_FILEFORMAT_ESMFMESH, &
             rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

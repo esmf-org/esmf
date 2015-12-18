@@ -18,7 +18,7 @@ module ESMF_MeshMod
 !==============================================================================
 !
 ! This file contains the F90 wrapper code for the C++ implementation of
- !  the Mesh class.
+  !  the Mesh class.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -38,7 +38,7 @@ module ESMF_MeshMod
 !
 !------------------------------------------------------------------------------
 
- ! !USES:
+  ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -58,7 +58,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-       
+        
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -77,7 +77,7 @@ module ESMF_MeshMod
     logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
     integer :: numOwnedNodes
     integer :: numOwnedElements
-     integer :: spatialDim
+      integer :: spatialDim
     integer :: parametricDim
 
     type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
@@ -95,7 +95,7 @@ module ESMF_MeshMod
     integer :: origElemStart
     integer :: origElemCount
 
-     ESMF_INIT_DECLARE
+      ESMF_INIT_DECLARE
   end type
 
   type ESMF_MeshElement
@@ -114,7 +114,7 @@ module ESMF_MeshMod
 !!        ESMF_MESHELEMTYPE_HEX = ESMF_MeshElement(2), &
 !!        ESMF_MESHELEMTYPE_TET = ESMF_MeshElement(3)
 !!!!
- 
+  
   integer, parameter :: &
         ESMF_MESHELEMTYPE_TRI    = 3,  &  ! Triangle
         ESMF_MESHELEMTYPE_QUAD   = 4,  &  ! Quadralateral
@@ -134,7 +134,7 @@ module ESMF_MeshMod
   type(ESMF_MeshLoc), parameter :: &
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
-	    ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
+ 	    ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
 
  !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
@@ -153,7 +153,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!
+ !
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
@@ -1629,7 +1629,7 @@ end function ESMF_MeshCreateFromMeshes
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, keywordEnforcer, &
+    function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, meshname, maskFlag, varname, &
 		 nodalDistgrid, elementDistgrid, rc)
 !
@@ -1638,7 +1638,7 @@ end function ESMF_MeshCreateFromMeshes
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
-    type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
@@ -1658,19 +1658,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[fileTypeFlag] 
-!         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
+!   \item[fileformat] 
+!         The file format of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
 !         defaults to {\tt .false.}. Converting to dual is not supported when the 
-!         file type is {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!         file format is {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
 !         defaults to {\tt .false.}.
 !   \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
 !   \item[{[maskFlag]}]
 !         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
@@ -1725,19 +1725,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
     endif
 
-    if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
+    if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	myMesh = ESMF_MeshCreateFromScrip(filename, localConvertToDual, &
           addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
+    elseif (fileformat == ESMF_FILEFORMAT_ESMFMESH) then
 	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	   addUserArea=localAddUserArea, &
            convertToDual=localConvertToDual, &
-	   filetype=filetypeflag, rc=localrc)
+	   fileformat=fileformat, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
+    elseif (fileformat == ESMF_FILEFORMAT_UGRID) then
         ! Warning message about add user area
         if (localAddUserArea) then
            call ESMF_LogWrite("ESMF does not currently support " // &
@@ -1750,13 +1750,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	if (present(maskFlag)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     filetype=filetypeflag, meshname = meshname, &
+	     fileformat=fileformat, meshname = meshname, &
              convertToDual=localConvertToDual, &
 	     maskFlag=maskFlag, varname=varname, &
 	     rc=localrc)
 	else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     filetype=filetypeflag, meshname = meshname, &
+	     fileformat=fileformat, meshname = meshname, &
              convertToDual=localConvertToDual, &
 	     rc=localrc)
 	endif 
@@ -1764,7 +1764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                 msg="- unrecognized filetypeflag", & 
+                 msg="- unrecognized fileformat", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
@@ -1821,7 +1821,7 @@ end function ESMF_MeshCreateFromFile
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, convertToDual, filetype, meshname, &
+    function ESMF_MeshCreateFromUnstruct(filename, convertToDual, fileformat, meshname, &
 			addUserArea, maskFlag, varname, rc)
 !
 !
@@ -1830,7 +1830,7 @@ end function ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
     logical, intent(in), optional               :: convertToDual
-    type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
+    type(ESMF_FileFormat_Flag), optional, intent(in) :: fileformat
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
@@ -1849,10 +1849,10 @@ end function ESMF_MeshCreateFromFile
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. 
-!   \item [{[filetype]}]
+!   \item [{[fileformat]}]
 !         The type of grid file
 !   \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item[{[maskFlag]}]
 !      If present, generate the mask using the missing\_value attribute defined in 'varname' on
@@ -1920,7 +1920,7 @@ end function ESMF_MeshCreateFromFile
     integer                             :: spatialDim
     integer                             :: parametricDim
     integer                             :: lni,ti,tk
-    type(ESMF_FileFormat_Flag)          :: filetypelocal
+    type(ESMF_FileFormat_Flag)          :: fileformatlocal
     integer                             :: coordDim
     logical                             :: convertToDeg
     logical                             :: haveNodeMask, haveElmtMask
@@ -1961,13 +1961,13 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! Read the mesh definition from the file
-    if (present(filetype)) then
-	filetypelocal = filetype
+    if (present(fileformat)) then
+	fileformatlocal = fileformat
     else
-	filetypelocal = ESMF_FILEFORMAT_ESMFMESH
+	fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
     endif
 
-    if (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+    if (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
 	if (.not. present(meshname)) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="- meshname argument is missing", & 
@@ -1989,7 +1989,7 @@ end function ESMF_MeshCreateFromFile
     ! define default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
  
-    if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
+    if (fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
        	    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, rc=localrc)
@@ -2038,7 +2038,7 @@ end function ESMF_MeshCreateFromFile
        endif
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+    elseif (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
        haveElmtMask = .false.
        haveNodeMask = .false.
        if (localAddMask == ESMF_MESHLOC_ELEMENT) then
@@ -2098,7 +2098,7 @@ end function ESMF_MeshCreateFromFile
        endif 
     else
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- unrecognized filetype", & 
+                             msg="- unrecognized fileformat", & 
                              ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
@@ -5280,7 +5280,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
+    function ESMF_MeshCreateFromUnstruct(filename, fileformat, meshname, &
 			addUserArea, maskFlag, varname, rc)
 !
 !
@@ -5288,7 +5288,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
-    type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
+    type(ESMF_FileFormat_Flag), optional, intent(in) :: fileformat
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
@@ -5304,10 +5304,10 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. 
-!   \item [{[filetype]}]
+!   \item [{[fileformat]}]
 !         The type of grid file
 !   \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item[{[maskFlag]}]
 !      If present, generate the mask using the missing\_value attribute defined in 'varname' on
@@ -5378,7 +5378,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     integer                             :: spatialDim
     integer                             :: parametricDim
     integer                             :: lni,ti,tk
-    type(ESMF_FileFormat_Flag)          :: filetypelocal
+    type(ESMF_FileFormat_Flag)          :: fileformatlocal
     integer                             :: coordDim
     logical                             :: convertToDeg
     logical                             :: haveNodeMask, haveElmtMask
@@ -5420,13 +5420,13 @@ end subroutine ESMF_MeshMergeSplitDstInd
     endif
 
     ! Read the mesh definition from the file
-    if (present(filetype)) then
-	filetypelocal = filetype
+    if (present(fileformat)) then
+	fileformatlocal = fileformat
     else
-	filetypelocal = ESMF_FILEFORMAT_ESMFMESH
+	fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
     endif
 
-    if (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+    if (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
 	if (.not. present(meshname)) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="- meshname argument is missing", & 
@@ -5448,7 +5448,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
     ! Default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
  
-    if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
+    if (fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
        	    haveElmtMask=haveElmtMask, rc=localrc)
@@ -5493,7 +5493,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+    elseif (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
        haveElmtMask = .false.
        haveNodeMask = .false.
        if (localAddMask == ESMF_MESHLOC_ELEMENT) then
@@ -5547,7 +5547,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
        endif 
     else
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- unrecognized filetype", & 
+                             msg="- unrecognized fileformat", & 
                              ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
