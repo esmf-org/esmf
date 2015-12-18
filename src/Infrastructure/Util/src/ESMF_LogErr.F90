@@ -853,8 +853,8 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       type(ESMF_Log), intent(inout), optional :: log
+type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       integer,        intent(out),   optional :: rc
 
 !
