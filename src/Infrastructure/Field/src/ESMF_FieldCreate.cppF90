@@ -4831,15 +4831,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_VMRmFObject(field)
         ! deallocate the actual field data structure
         deallocate(field%ftypep, stat=localrc)
-        if (ESMF_LogFoundDeallocError(localrc, msg="Allocating Field information", &
+        if (ESMF_LogFoundDeallocError(localrc, &
+          msg="Deallocating Field information", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
     
+    ! Mark this field as invalid
     nullify(field%ftypep)
 
+    ! Set init code
     ESMF_INIT_SET_DELETED(field)
 
+    ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldDestroy

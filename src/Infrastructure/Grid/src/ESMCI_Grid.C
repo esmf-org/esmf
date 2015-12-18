@@ -1606,7 +1606,8 @@ int Grid::destroy(
 //
 // !ARGUMENTS:
 //
- Grid **gridArg){  // in - Grid to destroy
+  Grid **gridArg,               // in - Grid to destroy
+  bool noGarbage){              // in - remove from garbage collection
 //
 // !DESCRIPTION:
 // Deallocate a Grid's internal memory and then deallocate the Grid object 
@@ -1629,7 +1630,7 @@ int Grid::destroy(
 
   try{
     // destruct Grid object
-    (*gridArg)->destruct();
+    (*gridArg)->destruct(true, noGarbage);
     // mark as invalid object
     (*gridArg)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
@@ -1643,7 +1644,13 @@ int Grid::destroy(
     return rc;
   }
 
-  // return successfully
+  // optionally delete the complete object and remove from garbage collection
+  if (noGarbage){
+    VM::rmObject(*gridArg); // remove object from garbage collection
+    delete (*gridArg);      // completely delete the object, free heap
+  }
+
+    // return successfully
   return ESMF_SUCCESS;
 }
 
@@ -4431,7 +4438,7 @@ Grid::Grid(
 // !IROUTINE:  ESMCI::Grid::destruct
 //
 // !INTERFACE:
-void Grid::destruct(bool followCreator){
+void Grid::destruct(bool followCreator, bool noGarbage){
 //
 // !RETURN VALUE:
 //    none
@@ -4453,7 +4460,7 @@ void Grid::destruct(bool followCreator){
    for(int i=0; i<staggerLocCount; i++) {
      for(int j=0; j<dimCount; j++) {
        if (coordDidIAllocList[i][j] && (coordArrayList[i][j]!=ESMC_NULL_POINTER)) {
-         Array::destroy(&coordArrayList[i][j]);
+         Array::destroy(&coordArrayList[i][j], noGarbage);
        }
      }
    }
@@ -4463,7 +4470,7 @@ void Grid::destruct(bool followCreator){
    for(int i=0; i<staggerLocCount; i++) {
      for(int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
        if (itemDidIAllocList[i][j] && (itemArrayList[i][j]!=ESMC_NULL_POINTER)){
-         Array::destroy(&itemArrayList[i][j]);
+         Array::destroy(&itemArrayList[i][j], noGarbage);
        }
      }
    }
@@ -4478,21 +4485,22 @@ void Grid::destruct(bool followCreator){
 
    // delete distgrid
    if (destroyDistgrid) {
-     DistGrid::destroy(&distgrid);
+     DistGrid::destroy(&distgrid, noGarbage);
    }
 
    // Grid created this one
-   if (distgrid_wo_poles!=ESMC_NULL_POINTER) DistGrid::destroy(&distgrid_wo_poles);
+   if (distgrid_wo_poles!=ESMC_NULL_POINTER)
+     DistGrid::destroy(&distgrid_wo_poles, noGarbage);
 
    // delete delayout
    if (destroyDELayout) {
-     DELayout::destroy(&tmpDELayout);
+     DELayout::destroy(&tmpDELayout, noGarbage);
    }
 
    // Get rid of staggerDistgrids
    for (int i=0; i<staggerLocCount; i++) {
      if (staggerDistgridList[i]!=ESMC_NULL_POINTER) {
-       DistGrid::destroy(&staggerDistgridList[i]);
+       DistGrid::destroy(&staggerDistgridList[i], noGarbage);
      }
    }
    

@@ -437,7 +437,7 @@ template <class TYPE>
 
 
   // deallocate a grid and all internal structures
-  static int destroy(Grid **grid);
+  static int destroy(Grid **grid, bool noGarbage=false);
 
   // Grid Construct (grid NOT usable after construction)
   Grid(VM *vm=NULL);  // allow specific VM instead default
@@ -445,7 +445,7 @@ template <class TYPE>
 
   // Grid Destruct
  private:
-  void destruct(bool followCreator=true);
+  void destruct(bool followCreator=true, bool noGarbage=false);
  public:
   ~Grid(){destruct(false);}
 
