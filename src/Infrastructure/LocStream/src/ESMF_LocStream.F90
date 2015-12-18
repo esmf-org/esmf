@@ -2919,16 +2919,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-!      subroutine ESMF_LocStreamGetKeyI4(locstream, localDE, keyName,    &
+!      subroutine ESMF_LocStreamGetKey(locstream, keyName, localDE,      &
 !          exclusiveLBound, exclusiveUBound, exclusiveCount,             &
 !          computationalLBound, computationalUBound, computationalCount, &
 !          totalLBound, totalUBound, totalCount,                         &
 !          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_LocStream), intent(in) :: locstream
-!      integer, intent(in), optional :: localDE
-!      character (len=*),    intent(in)              :: keyName
+!      type(ESMF_LocStream),   intent(in)            :: locstream
+!      character (len=*),      intent(in)            :: keyName
+!      integer,                intent(in),  optional :: localDE
 !      integer,                intent(out), optional :: exclusiveLBound
 !      integer,                intent(out), optional :: exclusiveUBound
 !      integer,                intent(out), optional :: exclusiveCount
@@ -2959,10 +2959,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3006,16 +3006,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyI4(locstream, localDE, keyName, & 
+      subroutine ESMF_LocStreamGetKeyI4(locstream, keyName, localDE, & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in), optional :: localDE
-      character (len=*),    intent(in)              :: keyName
+      type(ESMF_LocStream),   intent(in)            :: locstream
+      character (len=*),      intent(in)            :: keyName
+      integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -3039,17 +3039,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region
-!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
+ !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the computational region.
 !     \item[{[computationalUBound]}]
@@ -3091,7 +3091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  ! Check init status of arguments 
  ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
- 
+  
  ! Set Defaults
  if (present(datacopyflag)) then
     datacopyflagInt=datacopyflag
@@ -3133,20 +3133,20 @@ end subroutine ESMF_LocStreamGetKeyI4
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyR4"
 !BOPI
-! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
+ ! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyR4(locstream, localDE, keyName,        & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
-          computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,     &
+  subroutine ESMF_LocStreamGetKeyR4(locstream, keyName, localDE,       & 
+          exclusiveLBound, exclusiveUBound, exclusiveCount,            &
+          computationalLBound, computationalUBound, computationalCount,&
+          totalLBound, totalUBound, totalCount,                        &
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in), optional :: localDE
       character (len=*),    intent(in)              :: keyName
+      integer, intent(in), optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -3170,10 +3170,10 @@ end subroutine ESMF_LocStreamGetKeyI4
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3241,7 +3241,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
+  call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -3269,16 +3269,16 @@ end subroutine ESMF_LocStreamGetKeyR4
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyR8(locstream, localDE, keyName, & 
+      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, localDE, & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(in), optional :: localDE
-      character (len=*),    intent(in)              :: keyName
+      type(ESMF_LocStream),   intent(in)            :: locstream
+      character (len=*),      intent(in)            :: keyName
+      integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -3302,10 +3302,10 @@ end subroutine ESMF_LocStreamGetKeyR4
 !     \begin{description}
 !     \item[{locstream}]
 !          LocStream to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{keyName}]
 !          The key to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3327,7 +3327,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !     \item[{[totalCount]}]
 !          Upon return this holds the number of items in the total region
 !          (i.e. {\tt totalUBound-totalLBound+1}). 
-!     \item[{farray}]
+ !     \item[{farray}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
@@ -3369,7 +3369,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                          ESMF_CONTEXT, rcToReturn=rc)) return
-
+ 
 
  ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
@@ -3433,7 +3433,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !     \item[{[exclusiveCount]}]
-!          Upon return this holds the number of items in the exclusive region
+ !          Upon return this holds the number of items in the exclusive region
 !	   \newline
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
 !     \item[{[computationalLBound]}]
@@ -3475,7 +3475,7 @@ end subroutine ESMF_LocStreamGetKeyR8
  ! Get exclusiveUBound
  if (present(exclusiveUBound)) then
     call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             exclusiveUBound, localrc)
+              exclusiveUBound, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
  endif 
@@ -3517,7 +3517,7 @@ end subroutine ESMF_LocStreamGetKeyR8
  if (present(computationalCount)) then
     call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
              tmpLBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
@@ -3559,7 +3559,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[locstream1] 
+ !     \item[locstream1] 
 !          {\tt ESMF\_Locstream} object.
 !     \item[locstream2] 
 !          {\tt ESMF\_Locstream} object.
@@ -3601,7 +3601,7 @@ end subroutine ESMF_LocStreamGetBounds
 #define ESMF_METHOD "ESMF_LocStreamIsCreated()"
 !BOP
 ! !IROUTINE: ESMF_LocStreamIsCreated - Check whether a LocStream object has been created
-
+ 
 ! !INTERFACE:
   function ESMF_LocStreamIsCreated(locstream, rc)
 ! !RETURN VALUE:
@@ -3643,7 +3643,7 @@ end subroutine ESMF_LocStreamGetBounds
 ! !DESCRIPTION:
 !     Prints information about the {\tt locstream} to {\tt stdout}.
 !  This subroutine goes through the internal data members of a locstream
-!  data type and prints information of each data member.
+ !  data type and prints information of each data member.
 !
 !     The arguments are:
 !     \begin{description}
