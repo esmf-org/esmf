@@ -994,16 +994,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleDestroy - Release resources associated with a FieldBundle
 
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleDestroy(fieldbundle, keywordEnforcer, rc)
+  subroutine ESMF_FieldBundleDestroy(fieldbundle, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
+    type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc  
+    logical,                intent(in),   optional :: noGarbage
+    integer,                intent(out),  optional :: rc  
 !         
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1015,6 +1022,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[fieldbundle] 
 !      {\tt ESMF\_FieldBundle} object to be destroyed.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this 
+!      condition ESMF cannot protect against accessing the destroyed object 
+!      through dangling aliases -- a situation which may lead to hard to debug 
+!      application crashes.
+! 
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use 
+!      temporary ESMF objects. For situations where the repeated creation and 
+!      destruction of temporary objects leads to memory issues, it is 
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      removing the entire temporary object from memory.
 ! \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1030,6 +1055,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
+    ! more input checking
     if (.not.associated(fieldbundle%this)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg="Uninitialized or already destroyed FieldBundle: this pointer unassociated", &
@@ -1037,9 +1063,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    ! Destruct all fieldbundle internals and then free fieldbundle memory.
     call ESMF_FieldBundleDestruct(fieldbundle%this, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(noGarbage)) then
+      if (noGarbage) then
+        ! remove Base entry from garbage collection
+        call c_esmc_vmrmobject(fieldbundle%this%base)
+        ! destroy Base object
+        call ESMF_BaseDestroy(fieldbundle%this%base, noGarbage, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! remove reference to this object from ESMF garbage collection table
+        call c_ESMC_VMRmFObject(fieldbundle)
+        ! deallocate the actual fieldbundle data structure
+        deallocate(fieldbundle%this, stat=localrc)
+        if (ESMF_LogFoundDeallocError(localrc, &
+          msg="Deallocating FieldBundle information", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
 
     ! Mark this fieldbundle as invalid
     nullify(fieldbundle%this)
