@@ -983,10 +983,11 @@
 ! !IROUTINE:  ESMF_TimePrint - Print Time information
 
 ! !INTERFACE:
-      subroutine ESMF_TimePrint(time, options, preString, unit, rc)
+      subroutine ESMF_TimePrint(time, keywordEnforcer, options, preString, unit, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(in)            :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       character(*),      intent(in),  optional :: preString
       character(*),      intent(out), optional :: unit

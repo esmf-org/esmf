@@ -1375,10 +1375,11 @@
 ! !IROUTINE:  ESMF_ClockPrint - Print Clock information
 
 ! !INTERFACE:
-      subroutine ESMF_ClockPrint(clock, options, preString, unit, rc)
+      subroutine ESMF_ClockPrint(clock, keywordEnforcer, options, preString, unit, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       character(*),      intent(in),  optional :: preString
       character(*),      intent(out), optional :: unit
