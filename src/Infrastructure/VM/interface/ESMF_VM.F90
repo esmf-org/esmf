@@ -4230,6 +4230,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added argument {\tt accDeviceCount}.
+!   The argument provides access to the number of available accelerator devices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:

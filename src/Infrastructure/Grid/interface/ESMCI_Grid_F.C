@@ -2566,16 +2566,20 @@ extern "C" {
    
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN_X(c_esmc_griddestroy)(ESMCI::Grid **ptr, int *rc){
+  void FTN_X(c_esmc_griddestroy)(ESMCI::Grid **ptr, ESMC_Logical *noGarbage,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_griddestroy()"
 
     //Initialize return code
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-
+    // convert to bool
+    bool noGarbageOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(noGarbage) != ESMC_NULL_POINTER)
+      if (*noGarbage == ESMF_TRUE) noGarbageOpt = true;
     // call into C++
-        ESMC_LogDefault.MsgFoundError(ESMCI::Grid::destroy(ptr),
-         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    ESMC_LogDefault.MsgFoundError(ESMCI::Grid::destroy(ptr, noGarbageOpt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   } 
 
   ///////////////////////////////////////////////////////////////////////////////////

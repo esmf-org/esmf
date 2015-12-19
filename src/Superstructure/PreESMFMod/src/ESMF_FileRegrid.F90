@@ -51,7 +51,7 @@ module ESMF_FileRegridMod
   use ESMF_LocStreamMod
 
 #ifdef ESMF_NETCDF
-      use netcdf
+  use netcdf
 #endif
   
   implicit none
@@ -80,7 +80,7 @@ contains
   subroutine ESMF_FileRegrid(srcFile, dstFile, srcVarName, dstVarName, keywordEnforcer, &
     dstCoordVars, regridmethod, polemethod, regridPoleNPnts, &
     unmappedaction, ignoreDegenerate, srcRegionalFlag, dstRegionalFlag, &
-    useUserAreaFlag, verboseFlag, rc) 
+    verboseFlag, rc) 
 
 ! !ARGUMENTS:
 
@@ -97,7 +97,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: srcRegionalFlag
   logical,                      intent(in),  optional :: dstRegionalFlag
-  logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
@@ -157,10 +156,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[dstRegionalFlag]}]
 !     If .TRUE., the destination grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.
-!   \item [{[useUserAreaFlag]}]
-!     If .TRUE., the element area values defined in the grid files are used.
-!     Only the SCRIP and ESMF format grid files have user specified areas. This flag
-!     is only used for conservative regridding. The default is .FALSE. 
 !   \item [{[verboseFlag]}]
 !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
@@ -269,7 +264,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dstIsRegional = .false.
     srcIsLocStream = .false.
     dstIsLocStream = .false.
-    localUserAreaflag = .false.
     localPoleNPnts = 0
     localIgnoreDegenerate = .false.
     
@@ -328,22 +322,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localPoleNPnts = 0
     endif
 
-    if (present(useUserAreaFlag)) then
-	    localUserAreaFlag = useUserAreaFlag
-    endif
-
     if (present(verboseFlag)) then
       localVerboseFlag = verboseFlag
     endif
 
-    ! user area only needed for conservative regridding
-    if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	      msg = " user defined area is only used for the conservative regridding", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-    
 !    if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
 !       srcLocStr = 'face'
 !       dstLocStr = 'face'
@@ -689,9 +671,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (localIgnoreDegenerate) then
               print *, "  Ignore degenerate cells in the input grids"
         endif   
-        if (localUserAreaFlag) then
-	      print *, "  Use user defined cell area for both the source and destination grids"
-        endif
         write(*,*)
     endif 
 
@@ -817,14 +796,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (useSrcMask) then 
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
               meshname = trim(srcVarStr), maskFlag =srcmeshloc, &
-              addUserArea=localUserAreaFlag, &
 	      convertToDual= .not. useSrcCorner, &
   	      varname=trim(srcVarName), rc=localrc)
         else
           srcMesh = ESMF_MeshCreate(srcfile, localsrcfiletype, &
               meshname = trim(srcVarStr), &
 	      convertToDual=.not. useSrcCorner, &
-              addUserArea=localUserAreaFlag, &
   	      rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
@@ -915,13 +892,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
             meshname = trim(dstVarStr), maskFlag=dstmeshloc, &
 	    convertToDual= .not. useDstCorner, &
-            addUserArea=localUserAreaFlag, &
             varname=trim(dstVarName), rc=localrc)
         else  
           dstMesh = ESMF_MeshCreate(dstfile, localdstfiletype, &
             meshname = trim(dstVarStr), &
 	    convertToDual=.not. useDstCorner, &
-            addUserArea=localUserAreaFlag, &
             rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &

@@ -703,7 +703,7 @@ contains
       compp%petlist = petlist     ! copy contents of petlist
     else
       compp%npetlist = 0
-      allocate(compp%petlist(0), stat=localrc)
+      allocate(compp%petlist(1), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="local petlist", &
         ESMF_CONTEXT, rcTOReturn=rc)) return 
     endif

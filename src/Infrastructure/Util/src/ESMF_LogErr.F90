@@ -853,8 +853,8 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       type(ESMF_Log), intent(inout), optional :: log
+type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       integer,        intent(out),   optional :: rc
 
 !
@@ -1464,11 +1464,11 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, logappend, logkindflag, rc)
+      subroutine ESMF_LogInitialize(filename, logappendflag, logkindflag, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in)           :: filename
-      logical,                 intent(in), optional :: logappend
+      logical,                 intent(in), optional :: logappendflag
       type(ESMF_LogKind_Flag), intent(in), optional :: logkindflag
       integer,                 intent(out),optional :: rc
 
@@ -1484,7 +1484,7 @@ end subroutine ESMF_LogGet
 !            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 64 characters.
-!     \item [{[logappend]}]
+!     \item [{[logappendflag]}]
 !           If the log file already exists, a value of {\tt .false.}
 !           will set the file position to the beginning of the file.  A value
 !           of [\tt .true.} sets the position to the end of the file.
@@ -1501,7 +1501,7 @@ end subroutine ESMF_LogGet
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     call ESMF_LogOpen(ESMF_LogDefault, filename,  &
-        append=logappend, logkindflag=logkindflag, rc=rc)
+        appendflag=logappendflag, logkindflag=logkindflag, rc=rc)
 
 end subroutine ESMF_LogInitialize
 
@@ -1512,12 +1512,14 @@ end subroutine ESMF_LogInitialize
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, append, logkindflag, rc)
+    subroutine ESMF_LogOpen(log, filename, keywordEnforcer,  &
+        appendflag, logkindflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Log),          intent(inout)         :: log   
     character(len=*),        intent(in)            :: filename
-    logical,                 intent(in),  optional :: append
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(in),  optional :: appendflag
     type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
     integer,                 intent(out), optional :: rc   
 
@@ -1536,7 +1538,7 @@ end subroutine ESMF_LogInitialize
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
 !            Name of log file to be opened.
-!      \item [{[append]}]
+!      \item [{[appendflag]}]
 !            If the log file exists, setting to {\tt .false.} will set the file position
 !            to the beginning of the file.  Otherwise, new records will be appended to the
 !            end of the file.  If not specified, defaults to {\tt .true.}.  
@@ -1558,7 +1560,7 @@ end subroutine ESMF_LogInitialize
 
     integer :: localrc, rc2
     integer :: iostat, memstat
-    logical                                                :: append_local
+    logical                                                :: appendflag_local
     integer                                                :: i
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=ESMF_MAXPATHLEN)                         :: fname
@@ -1577,9 +1579,9 @@ end subroutine ESMF_LogInitialize
         rc=ESMF_FAILURE
     endif
 
-    append_local = .true.
-    if (present (append)) then
-      append_local = append
+    appendflag_local = .true.
+    if (present (appendflag)) then
+      appendflag_local = appendflag
     end if
 
     if(log%logTableIndex>0) then
@@ -1666,7 +1668,7 @@ end subroutine ESMF_LogInitialize
         return
     endif
 
-    position = merge ("append", "rewind", append_local)
+    position = merge ("append", "rewind", appendflag_local)
 
     ! open the file, with retries
     do i=1, ESMF_LOG_MAXTRYOPEN
@@ -1734,11 +1736,13 @@ end subroutine ESMF_LogOpen
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LogOpen ()
-    subroutine ESMF_LogOpenDefault (filename, append, logkindflag, rc)
+    subroutine ESMF_LogOpenDefault (filename, keywordEnforcer,  &
+        appendflag, logkindflag, rc)
 !
 ! !ARGUMENTS:
     character(len=*),        intent(in)            :: filename
-    logical,                 intent(in),  optional :: append
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(in),  optional :: appendflag
     type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag    
     integer,                 intent(out), optional :: rc   
 
@@ -1753,7 +1757,7 @@ end subroutine ESMF_LogOpen
 !      \begin{description}
 !      \item [filename]
 !            Name of DEFAULT log file to be opened.
-!      \item [{[append]}]
+!      \item [{[appendflag]}]
 !            If the log file exists, setting to {\tt .false.} will set the file position
 !            to the beginning of the file.  Otherwise, new records will be appended to the
 !            end of the file.  If not specified, defaults to {\tt .true.}.  
@@ -1776,7 +1780,7 @@ end subroutine ESMF_LogOpen
     rc=ESMF_FAILURE
   endif
 
-  call ESMF_LogOpen (ESMF_LogDefault, filename, append=append, logkindflag=logkindflag, rc=localrc)
+  call ESMF_LogOpen (ESMF_LogDefault, filename, appendflag=appendflag, logkindflag=logkindflag, rc=localrc)
   if (localrc /= ESMF_SUCCESS) then
     call ESMF_LogRc2Msg (localrc, msg=errmsg, msglen=errmsg_len)
     write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ', errmsg(:errmsg_len)
