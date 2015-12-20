@@ -457,12 +457,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind, &
-               keyUnits, keyLongName, rc)
+  subroutine ESMF_LocStreamAddKeyAlloc(locstream, keyName, keywordEnforcer, &
+               keyTypeKind, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream),     intent(in)            :: locstream
     character (len=*),        intent(in)            :: keyName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind_Flag), intent(in),  optional :: keyTypeKind
     character (len=*),        intent(in),  optional :: keyUnits 
     character (len=*),        intent(in),  optional :: keyLongName 
@@ -508,7 +509,7 @@ contains
 
     ! set defaults
     if (present(keyTypeKind)) then
-       localKeyTypeKind=keyTypeKind     
+        localKeyTypeKind=keyTypeKind     
     else
        localKeyTypeKind=ESMF_TYPEKIND_R8
     endif
@@ -553,12 +554,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
   subroutine ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray, &
-               destroyKey, keyUnits, keyLongName, rc)
+               keywordEnforcer, destroyKey, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)             :: locstream
     character (len=*),    intent(in)             :: keyName
     type(ESMF_Array),     intent(in)             :: keyArray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,              intent(in),  optional  :: destroyKey
     character (len=*),    intent(in),  optional  :: keyUnits 
     character (len=*),    intent(in),  optional  :: keyLongName 
@@ -645,7 +647,7 @@ contains
    ! (Should we eventually make this a linked list???)   
    !! hold old data
    if (keyCount .gt. 0) then
-      tmpKeyNames=>lstypep%keyNames
+       tmpKeyNames=>lstypep%keyNames
       tmpKeyUnits =>lstypep%keyUnits 
       tmpKeyLongNames=>lstypep%keyLongNames
       tmpDestroyKeys=>lstypep%destroyKeys
@@ -707,12 +709,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
 !  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, &
-!               datacopyflag, keyUnits, keyLongName, rc)
+!               keywordEnforcer, datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_Locstream), intent(in) :: locstream
 !    character (len=*), intent(in) :: keyName
 !    <farray>
+! type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
 !    character (len=*), intent(in), optional :: keyUnits
 !    character (len=*), intent(in), optional :: keyLongName
@@ -745,7 +748,7 @@ contains
 !    Specifies whether the Array object will reference the memory allocation 
 !    provided by {\tt farray} directly or will copy the data from 
 !    {\tt farray} into a new memory allocation. Valid options are 
-!    {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
+ !    {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
 !    Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option 
 !    may be unsafe when specifying an array slice for {\tt farray}. 
 !    \item [{[keyUnits]}]
@@ -766,13 +769,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, datacopyflag, &
-               keyUnits, keyLongName, rc)
+  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, keywordEnforcer, &
+       datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream),                intent(in)            :: locstream
     character (len=*),                   intent(in)            :: keyName
     integer(ESMF_KIND_I4), dimension(:), intent(in)            :: farray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag),            intent(in),  optional :: datacopyflag
     character (len=*),                   intent(in),  optional :: keyUnits 
     character (len=*),                   intent(in),  optional :: keyLongName 
@@ -858,13 +862,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, &
+  subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, keywordEnforcer, &
                datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream),              intent(in)           :: locstream
     character (len=*),                 intent(in)           :: keyName
     real(ESMF_KIND_R4),  dimension(:), intent(in)           :: farray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag),          intent(in), optional :: datacopyflag
     character (len=*),                 intent(in), optional :: keyUnits 
     character (len=*),                 intent(in), optional :: keyLongName 
@@ -916,7 +921,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
     ! get the pointer to the locstream
-    lstypep => locstream%lstypep
+     lstypep => locstream%lstypep
 
    ! Create Array
    array=ESMF_ArrayCreate(lstypep%distgrid, farray, &
@@ -950,13 +955,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyR8(locstream, keyName, farray, datacopyflag, &
-               keyUnits, keyLongName, rc)
+  subroutine ESMF_LocStreamAddKeyR8(locstream, keyName, farray, keywordEnforcer, &
+       datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)                   :: locstream
     character (len=*),   intent(in)                    :: keyName
     real(ESMF_KIND_R8),  dimension(:), intent(in)      :: farray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag), intent(in), optional     :: datacopyflag
     character (len=*),    intent(in), optional         :: keyUnits 
     character (len=*),    intent(in), optional         :: keyLongName 
@@ -1042,7 +1048,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgGrid(locstream, &
-                 background, maskValues, &
+                 background, keywordEnforcer, maskValues, &
                  unmappedaction, name, rc)
 
 !
@@ -1053,6 +1059,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_LocStream),           intent(in)            :: locstream
       type(ESMF_Grid),                intent(in)            :: background
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          intent(in),  optional :: maskValues(:)
       type(ESMF_UnmappedAction_Flag), intent(in),  optional :: unmappedaction
       character (len=*),              intent(in),  optional :: name
@@ -1087,7 +1094,7 @@ contains
 !           If not specified, no masking will occur. 
 !      \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Options are 
+ !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} [NOT IMPLEMENTED]. If not specified, defaults 
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
@@ -1147,7 +1154,8 @@ contains
 
      ! Create new locstream from Background Mesh
      ESMF_LocStreamCreateByBkgGrid=ESMF_LocStreamCreate(locstream, &
-                 mesh, unmappedaction, name=name, rc=localrc)
+                 background=mesh, unmappedaction=unmappedaction, &
+                 name=name, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1155,7 +1163,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_LocStreamCreateByBkgGrid
+       end function ESMF_LocStreamCreateByBkgGrid
 
 
 !------------------------------------------------------------------------------
@@ -1167,7 +1175,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgMesh(locstream, &
-                 background, unmappedaction, name, rc)
+                 background, keywordEnforcer, unmappedaction, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -1177,6 +1185,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_LocStream),           intent(in)           :: locstream
       type(ESMF_Mesh),                intent(in)           :: background
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       character (len=*),              intent(in), optional :: name
       integer,                        intent(out),optional :: rc
@@ -1257,7 +1266,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return     
 
-      call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
+       call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return     
@@ -1325,7 +1334,7 @@ contains
 
       ! Get Points 
       call ESMF_LocStreamGetPntList(locstream, coordKeyNames, pntDim, &
-              pntCount, pntList, rc=localrc)
+               pntCount, pntList, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1387,15 +1396,16 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromDG(distgrid, indexflag, coordSys, &
-        name, vm, rc )
+      function ESMF_LocStreamCreateFromDG(distgrid, keywordEnforcer, &
+        indexflag, coordSys, name, vm, rc )
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromDG
 
-!
+ !
 ! !ARGUMENTS:
       type(ESMF_DistGrid),      intent(in)            :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Index_Flag),    intent(in),  optional :: indexflag    
       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       character (len=*),        intent(in),  optional :: name
@@ -1459,7 +1469,7 @@ contains
         ! only actual member PETs actually create a LocStream object
       
         ! Make sure DistGrid is 1D
-        call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+         call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1527,7 +1537,7 @@ contains
 
       ! set init status to created
       ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateFromDG)
-
+ 
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1544,7 +1554,7 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateIrreg(minIndex, countsPerDE, &
-                  indexflag, coordSys, name, rc)
+                  keywordEnforcer, indexflag, coordSys, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateIrreg
@@ -1553,6 +1563,7 @@ contains
 ! !ARGUMENTS:
       integer, intent(in), optional                   :: minIndex
       integer, intent(in)                             :: countsPerDE(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Index_Flag), intent(in), optional     :: indexflag
       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       character (len=*), intent(in), optional         :: name
@@ -1594,7 +1605,7 @@ contains
     integer, pointer :: deBLockList(:,:,:)   
     integer               :: minIndexLocal, maxIndexLocal
     type(ESMF_Index_Flag)  :: indexflagLocal
-    type(ESMF_CoordSys_Flag) :: coordSysLocal
+     type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     integer :: numDEs
 
@@ -1662,7 +1673,7 @@ contains
       ! Create LocStream using CreateFromDistGrid version
       ESMF_LocStreamCreateIrreg=ESMF_LocStreamCreateFromDG(name=name, &
                                                                distgrid=distgrid, &
-                                                               indexflag=indexflagLocal, &
+                                                                indexflag=indexflagLocal, &
                                                                coordSys=coordSysLocal, &
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
@@ -1687,7 +1698,8 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromLocal(localCount, indexflag, coordSys, name, rc)
+      function ESMF_LocStreamCreateFromLocal(localCount, keywordEnforcer, &
+                  indexflag, coordSys, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromLocal
@@ -1695,6 +1707,7 @@ contains
 !
 ! !ARGUMENTS:
       integer, intent(in)                             :: localCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Index_Flag), intent(in), optional     :: indexflag
       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
       character (len=*), intent(in), optional         :: name
@@ -1834,7 +1847,8 @@ contains
 
 ! !INTERFACE:  
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromNewDG(locstream, distgrid, name, rc)
+      function ESMF_LocStreamCreateFromNewDG(locstream, distgrid, keywordEnforcer, &
+           name, rc)
 
 !
 ! !RETURN VALUE:
@@ -1844,6 +1858,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in)                :: locstream
       type(ESMF_DistGrid),  intent(in)                :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),    intent(in), optional      :: name
       integer,              intent(out), optional     :: rc
 !
@@ -1916,8 +1931,12 @@ contains
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return     
 
-         call ESMF_LocStreamAddKey(newLocStream, oldLstypep%keyNames(i), keyTypeKind, &
-                       oldLstypep%keyUnits(i), oldLstypep%keyLongNames(i), rc=localrc)
+         call ESMF_LocStreamAddKey(newLocStream, &
+              keyName=oldLstypep%keyNames(i), &
+              keyTypekind=keyTypeKind, &
+              keyUnits=oldLstypep%keyUnits(i), &
+              keyLongName=oldLstypep%keyLongNames(i), &
+              rc=localrc)
          if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return     
@@ -1994,7 +2013,8 @@ contains
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateReg(regDecomp, decompFlag, &
-                    minIndex, maxIndex, coordSys, indexflag, name, rc)
+                    minIndex, maxIndex, keywordEnforcer, &
+                    coordSys, indexflag, name, rc)
 
 
 !
@@ -2007,6 +2027,7 @@ contains
       type(ESMF_Decomp_Flag),   intent(in),  optional  :: decompflag
       integer,                  intent(in),  optional  :: minIndex
       integer,                  intent(in)             :: maxIndex
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CoordSys_Flag), intent(in),  optional  :: coordSys
       type(ESMF_Index_Flag),    intent(in),  optional  :: indexflag
       character (len=*),        intent(in),  optional  :: name
@@ -2143,22 +2164,23 @@ contains
 !\label{locstream:createfromfile}
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateFromFile(filename, fileformat, &
-      	       meshname, varname, indexflag, centerflag, name, rc)
+      function ESMF_LocStreamCreateFromFile(filename, keywordEnforcer, &
+           fileformat, meshname, varname, indexflag, centerflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromFile
 
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in)               :: filename
-      type(ESMF_FileFormat_Flag), intent(in), optional  :: fileformat
-      character (len=*), intent(in), optional     :: meshname
-      character(len=*),  intent(in),  optional    :: varname
-      type(ESMF_Index_Flag), intent(in), optional :: indexflag
-      logical, intent(in), optional               :: centerflag
-      character (len=*), intent(in), optional     :: name
-      integer, intent(out), optional              :: rc
+      character (len=*),          intent(in)           :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_FileFormat_Flag), intent(in), optional :: fileformat
+      character (len=*),          intent(in), optional :: meshname
+      character(len=*),           intent(in), optional :: varname
+      type(ESMF_Index_Flag),      intent(in), optional :: indexflag
+      logical,                    intent(in), optional :: centerflag
+      character (len=*),          intent(in), optional :: name
+      integer,                    intent(out),optional :: rc
 
 ! !DESCRIPTION:
 !     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
@@ -2615,11 +2637,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_LocStreamGet - Return object-wide information from a LocStream
 
 ! !INTERFACE:
-  subroutine ESMF_LocStreamGet(locstream, distgrid, keyCount, keyNames, &
-    localDECount, indexflag, coordSys, name, rc)
+  subroutine ESMF_LocStreamGet(locstream, keywordEnforcer, &
+       distgrid, keyCount, keyNames, localDECount, indexflag, &
+       coordSys, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream),         intent(in)            :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid),          intent(out), optional :: distgrid
     integer,                      intent(out), optional :: keyCount
     character(len=ESMF_MAXSTR),                optional :: keyNames(:) 
@@ -2742,13 +2766,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyArray(locstream, keyName, keyArray, rc)
+  subroutine ESMF_LocStreamGetKeyArray(locstream, keyName, keyArray, &
+       keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)            :: locstream
     character (len=*),    intent(in)            :: keyName
-    type(ESMF_Array),     intent(out)            :: keyArray
-    integer, intent(out), optional :: rc
+    type(ESMF_Array),     intent(out)           :: keyArray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Get ESMF Array associated with key.
@@ -2814,17 +2840,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, &
-                keyLongName, typekind, isPresent, rc)
+  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keywordEnforcer,&
+       keyUnits, keyLongName, typekind, isPresent, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Locstream), intent(in)              :: locstream
-    character (len=*),    intent(in)              :: keyName
-    character (len=*),    intent(out), optional   :: keyUnits 
-    character (len=*),    intent(out), optional   :: keyLongName 
-    type(ESMF_TypeKind_Flag), intent(out), optional    :: typekind
-    logical,              intent(out), optional   :: isPresent
-    integer, intent(out), optional :: rc
+    type(ESMF_Locstream),     intent(in)            :: locstream
+    character (len=*),        intent(in)            :: keyName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character (len=*),        intent(out), optional :: keyUnits 
+    character (len=*),        intent(out), optional :: keyLongName 
+    type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+    logical,                  intent(out), optional :: isPresent
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Get ESMF Array associated with key.
@@ -2919,15 +2946,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-!      subroutine ESMF_LocStreamGetKey(locstream, keyName, localDE,      &
-!          exclusiveLBound, exclusiveUBound, exclusiveCount,             &
-!          computationalLBound, computationalUBound, computationalCount, &
-!          totalLBound, totalUBound, totalCount,                         &
+!      subroutine ESMF_LocStreamGetKey(locstream, keyName, keywordEnforcer, &
+!          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,       &
+!          computationalLBound, computationalUBound, computationalCount,    &
+!          totalLBound, totalUBound, totalCount,                            &
 !          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_LocStream),   intent(in)            :: locstream
 !      character (len=*),      intent(in)            :: keyName
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      integer,                intent(in),  optional :: localDE
 !      integer,                intent(out), optional :: exclusiveLBound
 !      integer,                intent(out), optional :: exclusiveUBound
@@ -3006,8 +3034,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyI4(locstream, keyName, localDE, & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
+      subroutine ESMF_LocStreamGetKeyI4(locstream, keyName, keywordEnforcer, &
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
           farray, datacopyflag, rc)
@@ -3015,6 +3043,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_LocStream),   intent(in)            :: locstream
       character (len=*),      intent(in)            :: keyName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -3137,16 +3166,17 @@ end subroutine ESMF_LocStreamGetKeyI4
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyR4(locstream, keyName, localDE,       & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,            &
-          computationalLBound, computationalUBound, computationalCount,&
-          totalLBound, totalUBound, totalCount,                        &
+  subroutine ESMF_LocStreamGetKeyR4(locstream, keyName, keywordEnforcer, &
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,     &
+          computationalLBound, computationalUBound, computationalCount,  &
+          totalLBound, totalUBound, totalCount,                          &
           farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      character (len=*),    intent(in)              :: keyName
-      integer, intent(in), optional :: localDE
+      type(ESMF_LocStream),   intent(in)            :: locstream
+      character (len=*),      intent(in)            :: keyName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
       integer,                intent(out), optional :: exclusiveCount
@@ -3269,8 +3299,8 @@ end subroutine ESMF_LocStreamGetKeyR4
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, localDE, & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
+      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, keywordEnforcer,&
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
           farray, datacopyflag, rc)
@@ -3278,6 +3308,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 ! !ARGUMENTS:
       type(ESMF_LocStream),   intent(in)            :: locstream
       character (len=*),      intent(in)            :: keyName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -3403,13 +3434,14 @@ end subroutine ESMF_LocStreamGetKeyR8
 ! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamGetBounds(locstream, localDE, & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
-          computationalLBound, computationalUBound, computationalCount,     &
+      subroutine ESMF_LocStreamGetBounds(locstream, keywordEnforcer,   &
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,   &
+          computationalLBound, computationalUBound, computationalCount,&
           rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream),   intent(in) :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),  optional :: localDE
       integer,                intent(out), optional :: exclusiveLBound
       integer,                intent(out), optional :: exclusiveUBound
@@ -3540,7 +3572,7 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE: ESMF_LocStreamMatch - Check if two Locstream objects match
 
 ! !INTERFACE:
-  function ESMF_LocStreamMatch(locstream1, locstream2, rc)
+  function ESMF_LocStreamMatch(locstream1, locstream2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LocStreamMatch
@@ -3548,7 +3580,8 @@ end subroutine ESMF_LocStreamGetBounds
 ! !ARGUMENTS:
     type(ESMF_Locstream),  intent(in)              :: locstream1
     type(ESMF_Locstream),  intent(in)              :: locstream2
-    integer,          intent(out),  optional  :: rc  
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -3603,13 +3636,15 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE: ESMF_LocStreamIsCreated - Check whether a LocStream object has been created
  
 ! !INTERFACE:
-  function ESMF_LocStreamIsCreated(locstream, rc)
+  function ESMF_LocStreamIsCreated(locstream, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_LocStreamIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt locstream} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
@@ -3632,13 +3667,14 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE:  ESMF_LocStreamPrint - Print the contents of a LocStream
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamPrint(locstream, options, rc)
+      subroutine ESMF_LocStreamPrint(locstream, keywordEnforcer, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(inout) :: locstream 
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc
+      type(ESMF_LocStream), intent(inout)          :: locstream 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *),  intent(in),   optional :: options
+      integer,              intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt locstream} to {\tt stdout}.
@@ -4014,12 +4050,12 @@ end subroutine ESMF_LocStreamGetBounds
 ! !IROUTINE:  ESMF_LocStreamValidate - Check validity of a LocStream
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamValidate(locstream, options, rc)
+      subroutine ESMF_LocStreamValidate(locstream, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(inout) :: locstream 
-      character (len = *), intent(in), optional :: options 
-      integer, intent(out), optional :: rc   
+      type(ESMF_LocStream), intent(inout)         :: locstream 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,              intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt locstream} is internally consistent.
@@ -4032,8 +4068,6 @@ end subroutine ESMF_LocStreamGetBounds
 !     \begin{description}
 !     \item [locstream]
 !           {\tt ESMF\_LocStream} to validate.
-!     \item [{[options]}]
-!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt locstream} 
 !           is valid.
@@ -4050,10 +4084,7 @@ end subroutine ESMF_LocStreamGetBounds
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
-      !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-      !TODO: Remove the following dummy test when dummy argument actually used
-      if (present (options)) continue
-
+      ! return success
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LocStreamValidate
