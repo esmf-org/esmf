@@ -5567,7 +5567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
-    type(ESMF_Index_Flag), intent(in), optional    :: indexflag
+    type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
@@ -5793,12 +5793,12 @@ end function ESMF_GridCreateFrmNCFileDG
     character(len=*),       intent(in)             :: filename
     type(ESMF_FileFormat_Flag), intent(in)         :: fileformat
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in), optional   :: regDecomp(:)
+    integer,                intent(in),  optional  :: regDecomp(:)
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
     logical,                intent(in),  optional  :: addUserArea
-    type(ESMF_Index_Flag), intent(in), optional    :: indexflag
+    type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     character(len=*),       intent(in),  optional  :: coordNames(:)
