@@ -19841,7 +19841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
 ! !INTERFACE:
-  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, global, rc)
+  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, globalflag, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridMatch_Flag) :: ESMF_GridMatch
@@ -19850,7 +19850,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid),  intent(in)              :: grid1
     type(ESMF_Grid),  intent(in)              :: grid2
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,          intent(in),   optional  :: global
+    logical,          intent(in),   optional  :: globalflag
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -19861,7 +19861,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  Please also note that by default this call is not collective and only returns the match
 !  for the piece of the Grids onthe local PET. In this case, it's possible for this call to 
 !  return a different match on different PETs for the same Grids. To do a global match operation, 
-!  the user should set the {\tt global} argument to .true.. In this case, the call becomes collective
+!  the user should set the {\tt globalflag} argument to .true.. In this case, the call becomes collective
 !  across the current VM ensuring the same result is returned on all PETs.
 !
 !     The arguments are:
@@ -19870,7 +19870,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_Grid} object.
 !     \item[grid2] 
 !          {\tt ESMF\_Grid} object.
-!     \item[{[global]}] 
+!     \item[{[globalflag]}] 
 !          By default this flag is set to false. When it's set to true, the
 !          function performs the match check globally. In this case,
 !          the method becomes collective across the current VM. 
@@ -19918,7 +19918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     l_global = .false.
-    if(present(global)) l_global = global
+    if(present(globalflag)) l_global = globalflag
     
     if(l_global) then
       call ESMF_VMGetCurrent(vm, rc=localrc)

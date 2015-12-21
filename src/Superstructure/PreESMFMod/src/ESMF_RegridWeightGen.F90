@@ -963,15 +963,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (srcUseLocStream) then
        if (srcMissingValue) then
-         srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      fileformatflag=localSrcFileType, &
+         srcLocStream = ESMF_LocStreamCreate(srcfile, & 
+       		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
 		      meshname = trim(srcMeshName), &
 		      varname=trim(srcMissingvalueVar), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
        else		      
-         srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      fileformatflag=localSrcFileType, &
+         srcLocStream = ESMF_LocStreamCreate(srcfile, & 
+       		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
 		      centerflag=.not. useSrcCorner, rc=localrc)
        endif
@@ -1104,15 +1104,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (dstUseLocStream) then
        if (dstMissingValue) then
-         dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, &
-       		      fileformatflag=localDstFileType, &
+         dstLocStream = ESMF_LocStreamCreate(dstfile, &
+       		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
 		      meshname = trim(dstMeshName), &
 		      varname= trim(dstMissingvalueVar), &
 		      centerflag=.not. useDstCorner, rc=localrc)
        else
-         dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, &
-       		      fileformatflag=localDstFileType, &
+         dstLocStream = ESMF_LocStreamCreate(dstfile, &
+       		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_GLOBAL, & 
 		      centerflag=.not. useDstCorner, rc=localrc)
        endif		      

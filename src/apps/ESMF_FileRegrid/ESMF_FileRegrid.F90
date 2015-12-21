@@ -396,7 +396,7 @@ program ESMF_FileRegridApp
 			    unmappedaction = unmappedaction, &
 			    ignoreDegenerate = ignoreDegenerate, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
-                            useUserAreaFlag = userAreaFlag, &
+! BOB: Not in interface??   useUserAreaFlag = userAreaFlag, &
                             verboseFlag = .true., rc = rc)
 
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)

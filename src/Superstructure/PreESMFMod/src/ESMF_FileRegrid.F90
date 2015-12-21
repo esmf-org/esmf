@@ -772,15 +772,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
         srcIsLocStream = .TRUE.
         if (useSrcMask) then 
-          srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      fileformatflag=localSrcFileType, &
+          srcLocStream = ESMF_LocStreamCreate(srcfile, & 
+       		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
 		      meshname=trim(srcVarStr), &
 		      varname=trim(srcVarName), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
         else
-          srcLocStream = ESMF_LocStreamCreate('srcLocStream', srcfile, & 
-       		      fileformatflag=localSrcFileType, &
+          srcLocStream = ESMF_LocStreamCreate(srcfile, & 
+       		      fileformat=localSrcFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
 		      meshname=trim(srcVarStr), &
 		      centerflag=.not. useSrcCorner, rc=localrc)
@@ -867,15 +867,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
         dstIsLocStream = .TRUE.
         if (useDstMask) then
-           dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
-       		      fileformatflag=localDstFileType, &
+           dstLocStream = ESMF_LocStreamCreate(dstfile, & 
+       		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
 		      meshname=trim(dstVarStr), &
 		      varname=trim(dstVarName), &
 		      centerflag=.not. useDstCorner, rc=localrc)
         else 
-           dstLocStream = ESMF_LocStreamCreate('dstLocStream', dstfile, & 
-       		      fileformatflag=localDstFileType, &
+           dstLocStream = ESMF_LocStreamCreate(dstfile, & 
+       		      fileformat=localDstFileType, &
 		      indexflag=ESMF_INDEX_DELOCAL, & 
 		      meshname=trim(dstVarStr), &
 		      centerflag=.not. useDstCorner, rc=localrc)

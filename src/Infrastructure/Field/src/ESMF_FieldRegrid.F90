@@ -1490,8 +1490,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(srcGrid, gridA(i)%gbcp%grid, global=.true.)&
-                  >=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(srcGrid, gridA(i)%gbcp%grid, &
+                     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1499,8 +1499,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid, global=.true.)&
-                  >=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid, &
+                     globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                       ! TODO: maybe we should attach standard attibute
                       ! to differentiate src and dst side for regridding
@@ -1601,8 +1601,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid, global=.true.)&
-                  >=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid, &
+                   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1610,8 +1610,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid, global=.true.)&
-                  >=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid, &
+                   globalflag=.true.) >=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                         msg="- duplication of Grid found in XGrid", &
