@@ -2990,7 +2990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-
+!          The local DE for which to get the information. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
