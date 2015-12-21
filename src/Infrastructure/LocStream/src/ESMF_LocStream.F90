@@ -3671,7 +3671,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(inout)          :: locstream 
+      type(ESMF_LocStream), intent(in)             :: locstream 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *),  intent(in),   optional :: options
       integer,              intent(out),  optional :: rc
@@ -4053,7 +4053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_LocStreamValidate(locstream, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(inout)         :: locstream 
+      type(ESMF_LocStream), intent(in)            :: locstream 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(out), optional :: rc   
 !
