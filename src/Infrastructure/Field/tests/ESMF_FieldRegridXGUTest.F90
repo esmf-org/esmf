@@ -450,7 +450,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_FieldFill(f_atm, "one", 1, 1, rc=localrc)
+    call ESMF_FieldFill(f_atm, dataFillScheme="one", member=1, step=1, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

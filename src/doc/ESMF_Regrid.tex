@@ -1,7 +1,7 @@
 % $Id$
 
-\section{ESMF\_FileRegrid}
-\label{sec:ESMF_FileRegrid}
+\section{ESMF\_Regrid}
+\label{sec:ESMF_Regrid}
 
 \subsection{Description}
 
@@ -162,7 +162,7 @@ one character short keyword prefixed with {\tt '-'} are supported.  The format t
 as follows:
 
 \begin{verbatim}
-ESMF_FileRegrid  
+ESMF_Regrid  
         --source|-s src_grid_filename
         --destination|-d dst_grid_filename
 	--src_var var_name
@@ -284,7 +284,7 @@ method and write the interpolated data into a variable named {\tt zeta}.
 
 \begin{verbatim}
 
-  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+  mpirun -np 4 ESMF_Regrid -s simple_ugrid.nc -d simple_gridspec.nc \
                 --src_var zeta --dst_var zeta
 
 \end{verbatim}
@@ -327,7 +327,7 @@ regridding.
 
 \begin{verbatim}
 
-  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+  mpirun -np 4 ESMF_Regrid -s simple_ugrid.nc -d simple_gridspec.nc \
                --src_var ua --dst_var ua -m conserve
 
 \end{verbatim}

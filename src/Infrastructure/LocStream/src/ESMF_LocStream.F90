@@ -2199,7 +2199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
 !          list of valid options.  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[meshname]}]
-!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt fileformat}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}.  This argument is optional.
 !     \item[{[varname]}]
 !         An optional variable name stored in the UGRID file to be used to

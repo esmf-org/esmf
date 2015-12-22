@@ -839,7 +839,7 @@ program ESMF_MeshEx
 ! weights are properly generated for the cell centers in the file. 
 !
 ! The following example code depicts how to create a Mesh using a SCRIP file. Note that
-! you have to set the filetypeflag to ESMF\_FILEFORMAT\_SCRIP.  
+! you have to set the {\tt fileformat} to ESMF\_FILEFORMAT\_SCRIP.  
 !EOE
 
 #ifdef ESMF_NETCDF
@@ -862,7 +862,7 @@ program ESMF_MeshEx
 ! topologies.  Currently, ESMF\_MeshCreate() does not support conversion to a dual mesh for this format. All regrid methods
 ! are supported on Meshes in this format. 
 !
-! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the filetypeflag to
+! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the {\tt fileformat} to
 ! ESMF\_FILEFORMAT\_ESMFMESH.  
 !EOE
 

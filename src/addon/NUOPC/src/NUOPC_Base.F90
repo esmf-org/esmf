@@ -1900,7 +1900,7 @@ module NUOPC_Base
           return  ! bail out
         if (present(dataFillScheme)) then
           ! a data fill scheme was provided -> use it to initialize
-          call ESMF_FieldFill(field, dataFillScheme, member=k, step=0, rc=rc)
+          call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=__FILE__)) &
@@ -1924,7 +1924,7 @@ module NUOPC_Base
             return  ! bail out
           if (present(dataFillScheme)) then
             ! a data fill scheme was provided -> use it to initialize
-            call ESMF_FieldFill(field, dataFillScheme, member=k, step=0, rc=rc)
+            call ESMF_FieldFill(field, dataFillScheme=dataFillScheme, member=k, step=0, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=__FILE__)) &

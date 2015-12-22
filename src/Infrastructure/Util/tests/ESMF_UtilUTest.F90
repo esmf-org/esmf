@@ -791,7 +791,8 @@
   !EX_UTest
   write(name, *) "ESMF_UtilString2Int() - special string missing - Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  valueInt = ESMF_UtilString2Int(" bla ", (/" bla ", "bla  "/), &
+  valueInt = ESMF_UtilString2Int(" bla ",  &
+    specialStringList=(/" bla ", "bla  "/), &
     rc=rc)
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
@@ -800,8 +801,9 @@
   !EX_UTest
   write(name, *) "ESMF_UtilString2Int() - special string - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  valueInt = ESMF_UtilString2Int("bla", (/"aha", "bla"/), &
-    (/1,2/), rc=rc)
+  valueInt = ESMF_UtilString2Int("bla",  &
+    specialStringList=(/"aha", "bla"/), specialValueList=(/1,2/),  &
+    rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

@@ -75,13 +75,15 @@ contains
 !BOP
 ! !IROUTINE: ESMF_FieldFill - Fill data into a Field
 ! !INTERFACE:
-  subroutine ESMF_FieldFill(field, dataFillScheme, member, step, rc)
+  subroutine ESMF_FieldFill(field, keywordEnforcer, &
+    dataFillScheme, member, step, rc)
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(inout) :: field
-    character(len=*), intent(in)    :: dataFillScheme
-    integer, intent(in)             :: member
-    integer, intent(in)             :: step
-    integer, intent(out), optional  :: rc
+    type(ESMF_Field), intent(inout)           :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*), intent(in), optional    :: dataFillScheme
+    integer, intent(in), optional             :: member
+    integer, intent(in), optional             :: step
+    integer, intent(out), optional            :: rc
 ! !DESCRIPTION:
 !   \label{ESMF_FieldFill}
 !   Fill {\tt field} with data according to {\tt dataFillScheme}. Depending
@@ -92,12 +94,12 @@ contains
 !   \begin{description}
 !   \item[field]
 !     The {\tt ESMF\_Field} object to fill with data.
-!   \item[dataFillScheme]
-!     The fill scheme. The available options are "sincos", and "one".
-!   \item[member]
-!     Member incrementor.
-!   \item[step]
-!     Step incrementor.
+!   \item[{[dataFillScheme]}]
+!     The fill scheme. The available options are "sincos", and "one". Defaults to "one"
+!   \item[{[member]}]
+!     Member incrementor. Defaults to 1.
+!   \item[{[step]}]
+!     Step incrementor. Defaults to 1.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -123,6 +125,9 @@ contains
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
     integer                         :: i, j, k
+
+    integer                         :: l_member, l_step
+    character(len=16)               :: l_dataFillScheme
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -131,10 +136,17 @@ contains
       line=__LINE__, &
       file=ESMF_FILE)) &
       return  ! bail out
+
+    l_member = 1
+    if(present(member)) l_member = member
+    l_step = 1
+    if(present(step)) l_step = step
+    l_dataFillScheme = "sincos"
+    if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
       
     allocate(coordDimCount(rank))
 
-    if (trim(dataFillScheme)=="sincos") then
+    if (trim(l_dataFillScheme)=="sincos") then
       if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
         ! 1D sin pattern
         ! TODO: support Meshes
@@ -155,7 +167,7 @@ contains
           return  ! bail out
         do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
           dataPtrR8D1(i) = &
-            sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.)
+            sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
         enddo
       elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
         ! 2D sin*cos pattern
@@ -207,24 +219,24 @@ contains
           do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
           do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
             dataPtrR8D2(i,j) = &
-              sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.) * &
-              cos(real(member)*3.1416*(coord2PtrR8D1(j)+real(step))/180.)
+              sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
+              cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
           enddo
           enddo
         else if (coordDimCount(1)==2 .and. coordDimCount(2)==1) then
           do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
           do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
             dataPtrR8D2(i,j) = &
-              sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
-              cos(real(member)*3.1416*(coord2PtrR8D1(j)+real(step))/180.)
+              sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
+              cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
           enddo
           enddo
         else if (coordDimCount(1)==1 .and. coordDimCount(2)==2) then
           do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
           do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
             dataPtrR8D2(i,j) = &
-              sin(real(member)*3.1416*(coord1PtrR8D1(i)+real(step))/180.) * &
-              cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+              sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
+              cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
           enddo
           enddo
         else
@@ -232,8 +244,8 @@ contains
           do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
           do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
             dataPtrR8D2(i,j) = &
-              sin(real(member)*3.1416*(coord1PtrR8D2(i,j)+real(step))/180.) * &
-              cos(real(member)*3.1416*(coord2PtrR8D2(i,j)+real(step))/180.)
+              sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
+              cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
           enddo
           enddo
         endif
@@ -269,9 +281,9 @@ contains
         do j=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
         do i=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
           dataPtrR8D3(i,j,k) = &
-            sin(real(member)*3.1416*(coord1PtrR8D3(i,j,k)+real(step))/180.) * &
-            cos(real(member)*3.1416*(coord2PtrR8D3(i,j,k)+real(step))/180.) * &
-            sin(real(member)*3.1416*(coord3PtrR8D3(i,j,k)+real(step))/180.)
+            sin(real(l_member)*3.1416*(coord1PtrR8D3(i,j,k)+real(l_step))/180.) * &
+            cos(real(l_member)*3.1416*(coord2PtrR8D3(i,j,k)+real(l_step))/180.) * &
+            sin(real(l_member)*3.1416*(coord3PtrR8D3(i,j,k)+real(l_step))/180.)
         enddo
         enddo
         enddo
