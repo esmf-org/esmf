@@ -16514,17 +16514,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_GridGetCoordInfo"
 !BOP
 !\label{API:GridGetCoordInfo}
-! !IROUTINE: ESMF_GridGetCoord - Get information about a Grid Coordinates
+! !IROUTINE: ESMF_GridGetCoord - Get information about the coordinates at a particular stagger location
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordInfo(grid, staggerloc, &
-        keywordEnforcer, isPresent, rc)
+      subroutine ESMF_GridGetCoordInfo(grid, keywordEnforcer, &
+        staggerloc, isPresent, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),           intent(in)            :: grid
-      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
       logical,                   intent(out), optional :: isPresent
       integer,                   intent(out), optional :: rc
 !
@@ -19353,19 +19353,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemInfo"
 !BOP
-!\label{API:GridGetItemInfo}
-! !IROUTINE: ESMF_GridGetItem - Get information about a Grid Item
+!\label{API:GridGetItemInfo}     
+! !IROUTINE: ESMF_GridGetItem - Get information about an item at a particular stagger location
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemInfo(grid, itemflag,  staggerloc, &
-        keywordEnforcer, isPresent, rc)
+      subroutine ESMF_GridGetItemInfo(grid, itemflag, keywordEnforcer, &
+        staggerloc, isPresent, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),           intent(in)            :: grid
       type (ESMF_GridItem_Flag), intent(in)            :: itemflag
-      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
       logical,                   intent(out), optional :: isPresent
       integer,                   intent(out), optional :: rc
 !
