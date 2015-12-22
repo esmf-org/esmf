@@ -806,11 +806,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !BOP
 ! !IROUTINE: ESMF_UtilString2Int - Convert a string to an integer
 ! !INTERFACE:
-  function ESMF_UtilString2Int(string, specialStringList, specialValueList, rc)
+  function ESMF_UtilString2Int(string, keywordEnforcer,  &
+      specialStringList, specialValueList, rc)
 ! !RETURN VALUE:
     integer :: ESMF_UtilString2Int
 ! !ARGUMENTS:
     character(len=*), intent(in)            :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in),  optional :: specialStringList(:)
     integer,          intent(in),  optional :: specialValueList(:)
     integer,          intent(out), optional :: rc
@@ -961,10 +963,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  !IROUTINE:  ESMF_UtilStringLowerCase - convert string to lowercase
 !  
 ! !INTERFACE: 
-    function ESMF_UtilStringLowerCase(string, rc) 
+    function ESMF_UtilStringLowerCase(string, keywordEnforcer, rc) 
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out), optional  :: rc  
 ! !RETURN VALUE:
       character(len (string)) :: ESMF_UtilStringLowerCase
@@ -1007,10 +1010,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  !IROUTINE:  ESMF_UtilStringUpperCase - convert string to uppercase
 !  
 ! !INTERFACE: 
-      function ESMF_UtilStringUpperCase(string, rc) 
+      function ESMF_UtilStringUpperCase(string, keywordEnforcer, rc) 
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out), optional  :: rc  
 ! !RETURN VALUE:
       character(len (string)) :: ESMF_UtilStringUpperCase
