@@ -1326,13 +1326,15 @@ end function ESMF_LogFoundError
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
 ! !INTERFACE: 
-      subroutine ESMF_LogGet(log, flush,    &
+      subroutine ESMF_LogGet(log, keywordEnforcer,  &
+                             flush,    &
                              logmsgAbort, logkindflag, &
                              maxElements, trace, fileName, rc)
 !
 ! !ARGUMENTS:
 !      
       type(ESMF_Log),          intent(in),  optional :: log
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical),      intent(out), optional :: flush       
       type(ESMF_LogMsg_Flag),  pointer,     optional :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag
@@ -1834,13 +1836,15 @@ end subroutine ESMF_LogRc2Msg
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
-    subroutine ESMF_LogSet(log, flush,  &
+    subroutine ESMF_LogSet(log, keywordEnforcer,  &
+        flush,  &
         logmsgAbort, maxElements, logmsgList,  &
         errorMask, trace, rc)
 !
 ! !ARGUMENTS:
 !
       type(ESMF_Log),         intent(inout), optional :: log
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),    optional :: flush
       type(ESMF_LogMsg_Flag), intent(in),    optional :: logmsgAbort(:)
       integer,                intent(in),    optional :: maxElements
