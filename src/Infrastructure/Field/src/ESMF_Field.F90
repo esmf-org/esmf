@@ -184,13 +184,15 @@ contains
 ! !IROUTINE: ESMF_FieldIsCreated - Check whether a Field object has been created
 
 ! !INTERFACE:
-  function ESMF_FieldIsCreated(field, rc)
+  function ESMF_FieldIsCreated(field, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_FieldIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt field} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

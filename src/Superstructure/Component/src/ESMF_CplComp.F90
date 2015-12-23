@@ -1234,22 +1234,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompIsCreated - Check whether a CplComp object has been created
 
 ! !INTERFACE:
-  function ESMF_CplCompIsCreated(scicomp, rc)
+  function ESMF_CplCompIsCreated(cplcomp, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_CplCompIsCreated
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(in)            :: scicomp
+    type(ESMF_CplComp), intent(in)            :: cplcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt scicomp} has been created. Otherwise return
+!   Return {\tt .true.} if the {\tt cplcomp} has been created. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ESMF_CplCompIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
-    if (ESMF_CplCompGetInit(scicomp)==ESMF_INIT_CREATED) &
+    if (ESMF_CplCompGetInit(cplcomp)==ESMF_INIT_CREATED) &
       ESMF_CplCompIsCreated = .true.
   end function
 !------------------------------------------------------------------------------

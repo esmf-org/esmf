@@ -1458,13 +1458,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleIsCreated - Check whether an ArrayBundle object has been created
 
 ! !INTERFACE:
-  function ESMF_ArrayBundleIsCreated(arraybundle, rc)
+  function ESMF_ArrayBundleIsCreated(arraybundle, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_ArrayBundleIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt arraybundle} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

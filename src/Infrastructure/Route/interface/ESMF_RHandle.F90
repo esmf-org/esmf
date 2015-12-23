@@ -310,13 +310,15 @@ contains
 ! !IROUTINE: ESMF_RouteHandleIsCreated - Check whether a RouteHandle object has been created
 
 ! !INTERFACE:
-  function ESMF_RouteHandleIsCreated(routehandle, rc)
+  function ESMF_RouteHandleIsCreated(routehandle, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_RouteHandleIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt routehandle} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

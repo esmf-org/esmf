@@ -4573,13 +4573,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIsCreated - Check whether a VM object has been created
 
 ! !INTERFACE:
-  function ESMF_VMIsCreated(vm, rc)
+  function ESMF_VMIsCreated(vm, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_VMIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt vm} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

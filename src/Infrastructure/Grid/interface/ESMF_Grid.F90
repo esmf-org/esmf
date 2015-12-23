@@ -2760,7 +2760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
        type(ESMF_GRIDITEM_FLAG) :: gridItem
        type(ESMF_CoordSys_Flag) :: coordSys
-       integer                  :: localDeCount, localDe    
+       integer                  :: localDECount, localDE    
 
        
        ! Initialize return code; assume failure until success is certain
@@ -2879,7 +2879,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! construct temporary 2D Arrays and fill with data if necessary
        do k=1, dimCount*nStaggers
           call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=dimCount, &
-            localDeCount=localDeCount, rc=localrc)          
+            localDECount=localDECount, rc=localrc)          
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (rank==dimCount) then
@@ -2900,7 +2900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            if (localDeCount/=0) then
+            if (localDECount/=0) then
               call ESMF_ArrayGet(srcA(k), farrayPtr=farrayPtr, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2995,15 +2995,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        do k=1, dimCount*nStaggers
         if (dstRepl(k)) then
           call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, &
-            localDeCount=localDeCount, rc=localrc)
+            localDECount=localDECount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          do localDe=0, localDeCount-1
-            call ESMF_ArrayGet(dstA(k), localDe=localDe, &
+          do localDE=0, localDECount-1
+            call ESMF_ArrayGet(dstA(k), localDE=localDE, &
               farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArrayGet(dstA2D(k), localDe=localDe, &
+            call ESMF_ArrayGet(dstA2D(k), localDE=localDE, &
               farrayPtr=farrayPtr2D, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4468,14 +4468,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
+      call ESMF_DELayoutGet(delayout, localDECount=deCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (deCount > 0) then
         allocate(collocation(distDimCount))  ! dimCount
         call ESMF_DistGridGet(distgrid, collocation=collocation, rc=localrc)
         do i=1,distDimCount
-          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(i), &
+          call ESMF_DistGridGet(distgrid, localDE=0, collocation=collocation(i), &
             arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4789,13 +4789,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_DistGridGet(distgrid,localDe=0, elementCount=localCounts, rc=localrc)
+    call ESMF_DistGridGet(distgrid,localDE=0, elementCount=localCounts, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! reconstruct the localArbIndex from local1DIndices
     allocate(local1DIndices(localCounts))
-    call ESMF_DistGridGet(distgrid,localDe=0, seqIndexList=local1DIndices, rc=localrc)
+    call ESMF_DistGridGet(distgrid,localDE=0, seqIndexList=local1DIndices, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -4833,7 +4833,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
+      call ESMF_DELayoutGet(delayout, localDECount=deCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     if (deCount > 0) then
@@ -4844,7 +4844,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i=1,dimCount1
-          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(i), &
+          call ESMF_DistGridGet(distgrid, localDE=0, collocation=collocation(i), &
               arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5628,7 +5628,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid) :: grid
     integer         :: localrc
     logical         :: localIsSphere, localAddCorner
-    type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    type(ESMF_Decomp_Flag) :: localDEcompFlag(2)
     type(ESMF_vm)   :: vm
     integer         :: i, PetCnt, PetNo
     integer         :: xpart, ypart, bigFac
@@ -5723,11 +5723,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     deallocate(griddims)
 
-    localDecompFlag(:) = ESMF_DECOMP_BALANCED
+    localDEcompFlag(:) = ESMF_DECOMP_BALANCED
 
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
@@ -5745,12 +5745,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
         else
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
@@ -5872,7 +5872,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid) :: grid
     integer         :: localrc
     logical         :: localIsSphere, localAddCorner
-    type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    type(ESMF_Decomp_Flag) :: localDEcompFlag(2)
     integer         :: regDecompLocal(2)
     type(ESMF_Index_Flag) :: localIndexFlag
     type(ESMF_VM) :: vm
@@ -5926,9 +5926,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(decompFlag)) then
-	localDecompFlag = decompflag
+	localDEcompFlag = decompflag
     else
-        localDecompFlag(:) = ESMF_DECOMP_BALANCED
+        localDEcompFlag(:) = ESMF_DECOMP_BALANCED
     endif
 
     if (present(indexflag)) then
@@ -5938,7 +5938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecompLocal, &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 	        isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
@@ -5956,13 +5956,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addMask=addMask, varname=varname, coordNames=coordNames, &
 		rc=localrc)
         else
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
-	        localIndexFlag, decompflag=localDecompflag, &
+	        localIndexFlag, decompflag=localDEcompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		coordNames = coordNames, rc=localrc)
 	endif
@@ -9481,27 +9481,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_GridCreate1PeriDimUfrmR"
  !BOP
-! !IROUTINE: ESMF_GridCreate1PeriDimUfrm - Create a Uniform Grid with one periodic dim and a regular distribution
+! !IROUTINE: ESMF_GridCreate1PeriDimUfrm - Create a uniform Grid with one periodic dim and a regular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate1PeriDimUfrm()
-      function ESMF_GridCreate1PeriDimUfrmR(regDecomp, decompFlag, &
-        minIndex, maxIndex, minCornerCoord, maxCornerCoord, &
-        keywordEnforcer, polekindflag, coordSys, staggerLocList, &
-        ignoreNonPeriCoord, petMap, name, rc)
+      function ESMF_GridCreate1PeriDimUfrmR(minIndex, maxIndex, &
+           minCornerCoord, maxCornerCoord, &
+           keywordEnforcer, regDecomp, decompFlag, &
+           polekindflag, coordSys, staggerLocList, &
+           ignoreNonPeriCoord, petMap, name, rc)
 
 !
 ! !RETURN VALUE:
        type(ESMF_Grid) :: ESMF_GridCreate1PeriDimUfrmR
 !
 ! !ARGUMENTS:
-       integer,                   intent(in),  optional :: regDecomp(:)
-       type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
        real(ESMF_KIND_R8),        intent(in)            :: minCornerCoord(:)
        real(ESMF_KIND_R8),        intent(in)            :: maxCornerCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,                   intent(in),  optional :: regDecomp(:)
+       type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
        type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
@@ -9523,16 +9524,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
- ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
+! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible. Currently this call
 ! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
-!
- ! {\bf CAUTION:} This method is still volatile and can be expected to change
-!  over the next couple of releases. 
-!      
-!  This call internally uses the defaults of the following arguments to 
- !  {\tt ESMF\_GridCreate1PeriDim()}: periodicDim, poleDim,
-!  coordTypeKind, gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound.
 !
 !  The following arguments have been set to non-typical values and so 
 !  there is a reasonable possibility that they may change in the future
@@ -9546,32 +9540,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !  The argument indexFlag has internally been set to ESMF\_INDEX\_GLOBAL. This
 !  means that the grid created from this function will have a global index space.
- !
- ! The arguments are:
+!
+! The arguments are:
 ! \begin{description}
+! \item[{[minIndex]}] 
+!      The bottom extent of the grid array. If not given then the value defaults
+!      to /1,1,1,.../.
+! \item[maxIndex] 
+!      The upper extent of the grid array.
+! \item[minCornerCoord] 
+!      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
+!      size(minCornerCoord) must be equal to size(maxIndex).
+! \item[maxCornerCoord] 
+!      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
+!      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[regDecomp]}] 
 !      A ndims-element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
- ! \item[{[decompflag]}]
- !      List of decomposition flags indicating how each dimension of the
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
-! \item[{[minIndex]}] 
-  !      The bottom extent of the grid array. If not given then the value defaults
-!      to /1,1,1,.../.
-! \item[maxIndex] 
-!      The upper extent of the grid array.
-! \item[minCornerCoord] 
- !      The coordinates of the corner of the grid that corresponds to {\tt minIndex}. 
-!      size(minCornerCoord) must be equal to size(maxIndex).
-! \item[maxCornerCoord] 
-!      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
- !      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[polekindflag]}] 
- !      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2) 
 !      the connection that occurs at the maximum end of the index dimension. Please see 
 !      Section~\ref{const:polekind} for a full list of options. If not specified, the default
 !      is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
@@ -9594,8 +9588,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-   ! \end{description}
-  !
+! \end{description}
+!
 !EOP
    type(ESMF_Grid)  :: grid
     integer :: localrc
@@ -9626,13 +9620,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             name=name, &
             rc=localrc) 
     else 
-       grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
+        grid=ESMF_GridCreate1PeriDim(regDecomp=regDecomp, &
              decompFlag=decompFlag, &
             minIndex=minIndex, &
             maxIndex=maxIndex, &
             coordSys=coordSys, &
             coordTypeKind=ESMF_TYPEKIND_R8,   &
-            polekindflag=polekindflag, &
+             polekindflag=polekindflag, &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             coordDep3=(/3/), &
@@ -9675,13 +9669,13 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
 msg=" coords in periodic dim (i.e. 1) are not periodic "// &
     "(i.e. max coord(1)-min coord(1) /= 2Pi)", & 
               ESMF_CONTEXT, rcToReturn=rc) 
-              return 
+               return 
            endif
         endif
      endif
 
 
-    ! Get  dimCount
+     ! Get  dimCount
     call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -9710,7 +9704,7 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
                staggerloc=staggerLocList(s), &
                rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
     endif
 
@@ -9724,16 +9718,17 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
    end function ESMF_GridCreate1PeriDimUfrmR
 
 
-!------------------------------------------------------------------------------
+ !------------------------------------------------------------------------------
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_GridCreateNoPeriDimUfrmR"
 !BOP
-! !IROUTINE: ESMF_GridCreateNoPeriDimUfrm - Create a Uniform Grid with no periodic dim and a regular distribution
+! !IROUTINE: ESMF_GridCreateNoPeriDimUfrm - Create a uniform Grid with no periodic dim and a regular distribution
  
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreateNoPeriDimUfrm()
-      function ESMF_GridCreateNoPeriDimUfrmR(regDecomp, decompFlag, &
-        minIndex, maxIndex, minCornerCoord, maxCornerCoord, keywordEnforcer,    &
+ ! !INTERFACE:
+ ! Private name; call using ESMF_GridCreateNoPeriDimUfrm()
+      function ESMF_GridCreateNoPeriDimUfrmR(minIndex, maxIndex, &
+        minCornerCoord, maxCornerCoord, &
+        keywordEnforcer, regDecomp, decompFlag, &
         coordSys, staggerLocList, petMap, name, rc)
 
  !
@@ -9741,20 +9736,20 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
       type(ESMF_Grid) :: ESMF_GridCreateNoPeriDimUfrmR
 !
 ! !ARGUMENTS:
-          integer,                   intent(in),  optional :: regDecomp(:)
-       type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        integer,                   intent(in),  optional :: minIndex(:)
        integer,                   intent(in)            :: maxIndex(:)
        real(ESMF_KIND_R8),        intent(in)            :: minCornerCoord(:)
        real(ESMF_KIND_R8),        intent(in)            :: maxCornerCoord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,                   intent(in),  optional :: regDecomp(:)
+       type(ESMF_Decomp_Flag),    intent(in),  optional :: decompflag(:)
        type(ESMF_CoordSys_Flag),  intent(in),  optional :: coordSys
        type(ESMF_StaggerLoc),     intent(in),  optional :: staggerLocList(:)
        integer,                   intent(in),  optional :: petMap(:,:,:)
        character (len=*),         intent(in),  optional :: name 
        integer,                   intent(out), optional :: rc
 !
- ! !DESCRIPTION:
+! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}) with no periodic dimension.
@@ -9764,18 +9759,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Currently, this method only fills the center stagger with coordinates, and
 ! the {\tt minCornerCoord} and {\tt maxCornerCoord} arguments give the boundaries of 
 ! the center stagger. 
- !
+!
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible. Currently this call
-! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3.!
-! {\bf CAUTION:} This method is still volatile and can be expected to change
-!  over the next couple of releases. 
-!      
-!  This call internally uses the defaults of the following arguments to 
- !  {\tt ESMF\_GridCreateNoPeriDim()}: coordTypeKind, gridEdgeLWidth,
-!  gridEdgeUWidth, gridAlign, gridMemLBound.
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3.
 !
 !  The following arguments have been set to non-typical values and so 
 !  there is a reasonable possibility that they may change in the future
@@ -9802,7 +9791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
- ! \item[{[minIndex]}] 
+! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
 ! \item[maxIndex] 
@@ -9812,7 +9801,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      size(minCornerCoord) must be equal to size(maxIndex).
 ! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
-  !      size(maxCornerCoord) must be equal to size(maxIndex).
+!      size(maxCornerCoord) must be equal to size(maxIndex).
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
@@ -9865,7 +9854,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             coordDep3=(/3/), &
-            indexFlag=ESMF_INDEX_GLOBAL, &
+             indexFlag=ESMF_INDEX_GLOBAL, &
             petMap=petMap, &
             name=name, &
             rc=localrc)
@@ -9877,7 +9866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Get  dimCount
     call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check size of coordinate arrays
     if (size(minCornerCoord) .ne. dimCount) then
@@ -9926,7 +9915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         countsPerDEDim3, &
         connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-        bipolePos1, bipolePos2, bipolePos3, &
+         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
         gridMemLBound, indexflag, petMap, name, rc)
@@ -9975,7 +9964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! that dimension.  The dimCount of the grid is equal to the number of 
 ! countsPerDEDim arrays that are specified. 
 !
- ! Section \ref{example:2DIrregUniGrid} shows an example
+  ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
 ! coordinates.  This creation method can also be used as the basis for
 ! grids with rectilinear coordinates or curvilinear coordinates.
@@ -10024,7 +10013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-!     [CURRENTLY NOT IMPLEMENTED]
+ !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
 !     Two element array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
@@ -10073,7 +10062,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordDep1]}] 
 !     This array specifies the dependence of the first 
 !     coordinate component on the three index dimensions
-!     described by {\tt coordsPerDEDim1,2,3}. The size of the 
+ !     described by {\tt coordsPerDEDim1,2,3}. The size of the 
 !     array specifies the number of dimensions of the first
 !     coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
@@ -10122,7 +10111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
 !       Sets the mapping of pets to the created DEs. This 3D
-!       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
+ !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
 !       \end{sloppypar}
@@ -10171,7 +10160,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !TODO: Remove the following test when dummy argument actually used
     if (present(polestaggerloc2)) then
     	if (polestaggerloc2(1)==polestaggerloc2(1)) continue;
-    endif
+     endif
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following test when dummy argument actually used
@@ -10220,7 +10209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if ((dimCount .lt. 3) .and. present(connflagDim3)) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                  msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -10269,7 +10258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-               msg="- coordDep3 size incompatible with grid dimCount", & 
+                msg="- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
@@ -10318,7 +10307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
         endif 
     endif
-
+ 
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
@@ -10367,7 +10356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
-            endif
+             endif
          endif
          if (connflagDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
@@ -10416,7 +10405,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          endif
          if (connflagDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) > 0) then
+                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                      msg="- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -10465,7 +10454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                      msg="- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+                  ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -10514,7 +10503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerDEDim2Local", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim2Local=countsPerDEDim2
-
+ 
     if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerDEDim3Local", &
@@ -10563,7 +10552,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
        connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
        connflagDim2Local(2)=ESMF_GRIDCONN_NONE
-    endif
+     endif
 
     if (present(connflagDim3)) then
        if (size(connflagDim3) == 1) then
@@ -10612,7 +10601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -10661,7 +10650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
+     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
 
     if (dimCount > 2) then
@@ -10710,7 +10699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  allocate(deDimCount(dimCount), stat=localrc)
   if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxPerDEDim", &
               ESMF_CONTEXT, rcToReturn=rc)) return
-
+ 
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
   d=1
@@ -10759,7 +10748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         k=k+1
      enddo
      enddo
-  else if (dimCount == 3) then
+   else if (dimCount == 3) then
      k=1
      do i3=1,deDimCount(3)
      do i2=1,deDimCount(2)
@@ -10808,7 +10797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          enddo
          enddo
       else 
-	 k=1
+ 	 k=1
      	 do i3=1,1
          do i2=1,size(countsPerDEDim2Local)
          do i1=1,size(countsPerDEDim1Local)
@@ -10857,7 +10846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    else 
       coordDimCount(1)=dimCount
       do i=1,dimCount
-         coordDimMap(1,i)=i      
+          coordDimMap(1,i)=i      
       enddo
    endif
 
@@ -10906,7 +10895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set internal items to be destroyed with grid
     call ESMF_GridSetDestroyDistgrid( ESMF_GridCreateShapeTileIrreg,destroy=.true., &
            rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridSetDestroyDELayout( ESMF_GridCreateShapeTileIrreg,destroy=.true., &
@@ -10955,7 +10944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         gridMemLBound, indexflag, petMap, name, rc)
 
 
-!
+ !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileReg
 !
@@ -13843,13 +13832,13 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
-      subroutine ESMF_GridGetPLocalDe(grid, localDe, keywordEnforcer, &
+      subroutine ESMF_GridGetPLocalDe(grid, localDE, keywordEnforcer, &
         isLBound,isUBound, arbIndexCount, arbIndexList, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in)            :: localDe
+      integer,                intent(in)            :: localDE
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(out), optional :: isLBound(:)
       logical,                intent(out), optional :: isUBound(:)
@@ -13869,8 +13858,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\begin{description}
 !\item[grid]
 !    Grid to get the information from.
-!\item[localDe]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
+!\item[localDE]
+!     The local DE from which to get the information. {\tt [0,..,localDECount-1]} 
 !\item[{[isLBound]}]
 !     Upon return, for each dimension this indicates if the DE is a lower bound of the Grid.
 !     {\tt isLBound} must be allocated to be of size equal to the Grid dimCount.
@@ -14001,7 +13990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
-      integer,                intent(in)            :: localDe
+      integer,                intent(in)            :: localDE
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
@@ -14040,8 +14029,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations.
-!\item[localDe]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
+!\item[localDE]
+!     The local DE from which to get the information. {\tt [0,..,localDECount-1]} 
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the Grid dimCount.
@@ -14431,7 +14420,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -14543,7 +14534,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -14834,7 +14827,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -14989,7 +14984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayGet(array, localDe=localDE, localarray=localarray, rc=localrc) 
+    call ESMF_ArrayGet(array, localDE=localDE, localarray=localarray, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -15122,7 +15117,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -15418,7 +15415,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -15708,7 +15707,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -15996,7 +15997,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[datacopyflag]}]
@@ -16342,7 +16345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordR4(grid, staggerloc, localDe, &
+      subroutine ESMF_GridGetCoordR4(grid, staggerloc, localDE, &
         index, coord, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
@@ -16374,7 +16377,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[index]
 !          This array holds the index location to be queried in the Grid. This array must
 !          at least be of the size Grid rank.
@@ -16462,7 +16467,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[index]
 !          This array holds the index location to be queried in the Grid. This array must
 !          at least be of the size Grid rank.
@@ -16514,17 +16521,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_GridGetCoordInfo"
 !BOP
 !\label{API:GridGetCoordInfo}
-! !IROUTINE: ESMF_GridGetCoord - Get information about a Grid Coordinates
+! !IROUTINE: ESMF_GridGetCoord - Get information about the coordinates at a particular stagger location
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordInfo(grid, staggerloc, &
-        keywordEnforcer, isPresent, rc)
+      subroutine ESMF_GridGetCoordInfo(grid, keywordEnforcer, &
+        staggerloc, isPresent, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),           intent(in)            :: grid
-      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
       logical,                   intent(out), optional :: isPresent
       integer,                   intent(out), optional :: rc
 !
@@ -16645,7 +16652,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{[localDE]}]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -16872,7 +16881,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[farrayPtr]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -16983,8 +16994,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -17241,8 +17254,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -17500,8 +17515,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -17627,7 +17644,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_ArrayGet(array, localDe=localDe, localarray=localarray, rc=localrc) 
+    call ESMF_ArrayGet(array, localDE=localDE, localarray=localarray, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -17757,8 +17774,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -17882,7 +17901,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayGet(array, localDe=localDE, localarray=localarray, rc=localrc) 
+    call ESMF_ArrayGet(array, localDE=localDE, localarray=localarray, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -18014,8 +18033,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -18081,7 +18102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local variables 
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
-    integer :: localDeCount, dimCount 
+    integer :: localDECount, dimCount 
     type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
@@ -18273,8 +18294,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -18531,8 +18554,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -18788,8 +18813,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -19049,8 +19076,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{[localDE]}]
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[datacopyflag]}]
@@ -19176,7 +19205,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayGet(array, localDe=localDE, localarray=localarray, rc=localrc) 
+    call ESMF_ArrayGet(array, localDE=localDE, localarray=localarray, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -19353,19 +19382,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemInfo"
 !BOP
-!\label{API:GridGetItemInfo}
-! !IROUTINE: ESMF_GridGetItem - Get information about a Grid Item
+!\label{API:GridGetItemInfo}     
+! !IROUTINE: ESMF_GridGetItem - Get information about an item at a particular stagger location
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemInfo(grid, itemflag,  staggerloc, &
-        keywordEnforcer, isPresent, rc)
+      subroutine ESMF_GridGetItemInfo(grid, itemflag, keywordEnforcer, &
+        staggerloc, isPresent, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),           intent(in)            :: grid
       type (ESMF_GridItem_Flag), intent(in)            :: itemflag
-      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
       logical,                   intent(out), optional :: isPresent
       integer,                   intent(out), optional :: rc
 !
@@ -19492,7 +19521,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{[localDE]}]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
+!          The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!          For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -19814,13 +19845,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridIsCreated - Check whether a Grid object has been created
 
 ! !INTERFACE:
-  function ESMF_GridIsCreated(grid, rc)
+  function ESMF_GridIsCreated(grid, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_GridIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(in)            :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt grid} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
