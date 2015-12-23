@@ -10,7 +10,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !!-------------------------------------------------------------------------------------
 
-program ESMF_FileRegridApp
+program ESMF_RegridApp
 
 ! !USES:
   use ESMF
@@ -55,12 +55,12 @@ program ESMF_FileRegridApp
 #ifndef ESMF_MPIUNI
   call MPI_Init(rc)
   if (rc /= MPI_SUCCESS) then
-      write(*,*) "ERROR: ESMF_FileRegrid initialization error."
+      write(*,*) "ERROR: ESMF_Regrid initialization error."
       stop 1
   endif
   call MPI_Comm_rank(MPI_COMM_WORLD, PetNo, rc) 
   if (rc /= MPI_SUCCESS) then
-      write(*,*) "ERROR: ESMF_FileRegrid initialization error."
+      write(*,*) "ERROR: ESMF_Regrid initialization error."
       call MPI_Finalize(rc)
       stop 1
   endif
@@ -86,7 +86,7 @@ program ESMF_FileRegridApp
   ! Initialize ESMF
   !
   call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
-	defaultlogfilename="FileRegrid.Log", &
+	defaultlogfilename="Regrid.Log", &
                 	logkindflag=logflag, rc=rc)
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
   
@@ -417,9 +417,9 @@ contains
     integer ::  localPet
   
     if (localPet >= 0) then
-      write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.FileRegrid.Log files for a traceback."
+      write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.Regrid.Log files for a traceback."
     else
-      write(*,*) "ERROR: Please see the PET*.FileRegrid.Log files for a traceback."
+      write(*,*) "ERROR: Please see the PET*.Regrid.Log files for a traceback."
     endif
   
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -427,7 +427,7 @@ contains
   end subroutine ErrorMsgAndAbort
 
   subroutine PrintUsage()
-    print *, "Usage: ESMF_FileRegrid"
+    print *, "Usage: ESMF_Regrid"
     print *, "                      --source|-s src_grid_filename" 
     print *, "                	--destination|-d dst_grid_filename"
     print *, "                      --src_var src_varname"
@@ -487,4 +487,4 @@ contains
     print *, ""
   end subroutine PrintUsage
 
-end program ESMF_FileRegridApp
+end program ESMF_RegridApp
