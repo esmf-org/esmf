@@ -1092,12 +1092,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[maskValues]}]
 !           List of values that indicate a background grid point should be masked out. 
 !           If not specified, no masking will occur. 
-!      \item [{[unmappedaction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
- !           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} [NOT IMPLEMENTED]. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. [NOTE: the {\tt unmappedaction=ESMF\_UNMAPPEDACTION\_IGNORE} option is currently not implemented.]
 !      \item[{[name]}]
 !          Name of the resulting location stream
 !      \item[{[rc]}]
@@ -1207,12 +1205,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Location stream from which the new location stream is to be created
 !      \item[background]
 !          Background Mesh which determines the distribution of entries in the new locatiion stream.
-!      \item [{[unmappedaction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} [NOT IMPLEMENTED]. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. [NOTE: the {\tt unmappedaction=ESMF\_UNMAPPEDACTION\_IGNORE} option is currently not implemented.]
 !      \item[{[name]}]
 !          Name of the resulting location stream
 !      \item[{[rc]}]

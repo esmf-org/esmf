@@ -281,13 +281,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If .TRUE., the output weight file is in NetCDF4 file format. 
 !     The default is .FALSE.
 !   \item [{[verboseFlag]}]
- !     If .TRUE., it will print summary information about the regrid parameters,
+!     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !EOP
-
       
     type(ESMF_RegridMethod_Flag) :: localRegridMethod
     type(ESMF_PoleMethod_Flag)   :: localPoleMethod
