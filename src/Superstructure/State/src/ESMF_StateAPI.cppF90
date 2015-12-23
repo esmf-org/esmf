@@ -1667,13 +1667,15 @@ StateGetMacro(ESMF_State,State,nestedState,spp)
 ! !IROUTINE: ESMF_StateIsCreated - Check whether an State object has been created
 
 ! !INTERFACE:
-  function ESMF_StateIsCreated(state, rc)
+  function ESMF_StateIsCreated(state, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_StateIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt state} has been created. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is

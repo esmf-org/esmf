@@ -1052,13 +1052,15 @@
 ! !IROUTINE: ESMF_CalendarIsCreated - Check whether a Calendar object has been created
 
 ! !INTERFACE:
-  function ESMF_CalendarIsCreated(calendar, rc)
+  function ESMF_CalendarIsCreated(calendar, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_CalendarIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Calendar), intent(in)            :: calendar
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt calendar} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

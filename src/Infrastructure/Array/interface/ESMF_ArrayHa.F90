@@ -473,13 +473,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayIsCreated - Check whether an Array object has been created
 
 ! !INTERFACE:
-  function ESMF_ArrayIsCreated(array, rc)
+  function ESMF_ArrayIsCreated(array, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_ArrayIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)            :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt array} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

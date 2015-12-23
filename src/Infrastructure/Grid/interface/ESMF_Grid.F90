@@ -19814,13 +19814,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridIsCreated - Check whether a Grid object has been created
 
 ! !INTERFACE:
-  function ESMF_GridIsCreated(grid, rc)
+  function ESMF_GridIsCreated(grid, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_GridIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(in)            :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt grid} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

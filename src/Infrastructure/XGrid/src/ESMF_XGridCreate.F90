@@ -2699,13 +2699,15 @@ end subroutine ESMF_XGridConstructBaseObj
 ! !IROUTINE: ESMF_XGridIsCreated - Check whether a XGrid object has been created
 
 ! !INTERFACE:
-  function ESMF_XGridIsCreated(xgrid, rc)
+  function ESMF_XGridIsCreated(xgrid, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_XGridIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid), intent(in)            :: xgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt xgrid} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

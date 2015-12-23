@@ -1633,13 +1633,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutIsCreated - Check whether a DELayout object has been created
 
 ! !INTERFACE:
-  function ESMF_DELayoutIsCreated(delayout, rc)
+  function ESMF_DELayoutIsCreated(delayout, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_DELayoutIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in)            :: delayout
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt delayout} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

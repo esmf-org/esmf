@@ -1283,22 +1283,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompIsCreated - Check whether a GridComp object has been created
 
 ! !INTERFACE:
-  function ESMF_GridCompIsCreated(scicomp, rc)
+  function ESMF_GridCompIsCreated(gridcomp, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_GridCompIsCreated
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: scicomp
+    type(ESMF_GridComp), intent(in)            :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt scicomp} has been created. Otherwise return
+!   Return {\tt .true.} if the {\tt gridcomp} has been created. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ESMF_GridCompIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
-    if (ESMF_GridCompGetInit(scicomp)==ESMF_INIT_CREATED) &
+    if (ESMF_GridCompGetInit(gridcomp)==ESMF_INIT_CREATED) &
       ESMF_GridCompIsCreated = .true.
   end function
 !------------------------------------------------------------------------------

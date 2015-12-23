@@ -1983,13 +1983,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleIsCreated - Check whether a FieldBundle object has been created
 
 ! !INTERFACE:
-  function ESMF_FieldBundleIsCreated(fieldbundle, rc)
+  function ESMF_FieldBundleIsCreated(fieldbundle, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_FieldBundleIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt fieldbundle} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 

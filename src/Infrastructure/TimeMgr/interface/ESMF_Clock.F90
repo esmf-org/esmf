@@ -1112,13 +1112,15 @@
 ! !IROUTINE: ESMF_ClockIsCreated - Check whether a Clock object has been created
 
 ! !INTERFACE:
-  function ESMF_ClockIsCreated(clock, rc)
+  function ESMF_ClockIsCreated(clock, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_ClockIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Clock), intent(in)            :: clock
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt clock} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
