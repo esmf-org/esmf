@@ -3284,6 +3284,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added arguments {\tt ignoreDegenerate}, {\tt lineType},
+!              and {\tt normType}. The argument {\tt ignoreDegenerate} allows the user to skip degenerate
+!              cells in the regridding instead of stopping with an error. 
+!              The argument {\tt lineType} allows the user to 
+!              control the path of the line between two points on a sphere surface. 
+!              This allows the user to use their preferred line path for the calculation
+!              of distances and the shape of cells during regrid weight calculation on 
+!              a sphere. The argument {\tt normType} allows the user to 
+!              control the type of normalization done during conservative weight generation. 
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3298,13 +3310,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Congruent Fields possess matching DistGrids, and the shape of the local
 !   array tiles matches between the Fields for every DE. For weakly congruent
 !   Fields the sizes of the undistributed dimensions, that vary faster with
- !   memory than the first distributed dimension, are permitted to be different.
+!   memory than the first distributed dimension, are permitted to be different.
 !   This means that the same {\tt routehandle} can be applied to a large class
 !   of similar Fields that differ in the number of elements in the left most
 !   undistributed dimensions.
 !   Note {\tt ESMF\_FieldBundleRegridStore()} assumes the coordinates used in the Grids 
 !   upon which the FieldBundles are built are in degrees.  
-
 !  
 !   This call is {\em collective} across the current VM.  
 !
@@ -3355,18 +3366,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
-!    can't be mapped to a source cell. Options are 
-!    {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!    to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
-!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
-!           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
-!           always skip degenerate cells. 
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[routehandle]}]
 !     Handle to the precomputed Route.
- !   \item [{[rc]}]
+!   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
