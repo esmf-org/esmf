@@ -146,7 +146,7 @@ be read  in and stored at the corner stagger location ({\tt ESMF\_STAGGERLOC\_CO
 The data variable is defined as a ESMF\_Field object at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) of the grid.   
 
 If the source grid is an unstructured grid and the the regrid method is nearest neighbor, or if the destination grid 
-is unstructured and the regrid method is non-conservative, {\tt ESMF\_LocStreamCreate()}(~\ref{locstream:createfromfile} is used to create an ESMF_LocStream object.  Otherwise,
+is unstructured and the regrid method is non-conservative, {\tt ESMF\_LocStreamCreate()}(~\ref{locstream:createfromfile} is used to create an ESMF\_LocStream object.  Otherwise,
 {\tt ESMF\_MeshCreate()}(~\ref{API:MeshCreateFromFile}) is used to create an ESMF\_Mesh object for the unstructured 
 input grids.  Currently, only the 2D unstructured grid is supported.
 If the application performs a conservative regridding, the variable has to be defined on the face of the mesh cells, i.e., its {\tt location} attribute has to be set to {\tt face}.  Otherwise, the variable has to be 
