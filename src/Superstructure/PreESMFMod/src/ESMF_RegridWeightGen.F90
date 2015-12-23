@@ -113,9 +113,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
   integer,                      intent(in),  optional :: regridPoleNPnts
-  type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
-  type(ESMF_NormType_Flag),    intent(in),   optional :: normType
-
+  type(ESMF_LineType_Flag),     intent(in),  optional :: lineType
+  type(ESMF_NormType_Flag),     intent(in),  optional :: normType
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
@@ -192,20 +191,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           list of valid options for this argument. If not specified, the default depends on the 
 !           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
 !           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
-!   \item [{[normType]}] 
-!    This argument controls the type of normalization used when generating conservative weights. This option
-!    only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
-!    {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
-!   \item [{[unmappedaction]}]
-!     specify what should happen if there are destination points that
-!     can't be mapped to a source cell. Options are 
-!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!   \item [{[ignoreDegenerate]}]
-!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenerate cell produces an error.
-!     The default is .FALSE.  
+!     \item [{[normType]}] 
+!           This argument controls the type of normalization used when generating conservative weights. This option
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
+!           Section~\ref{opt:normType} for a 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[unmappedaction]}]
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!     \item [{[ignoreDegenerate]}]
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[srcFileType]}]
 !     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
 !     Section~\ref{const:mesh:fileformat} for a list of valid options.
@@ -1777,8 +1775,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_DistGrid),          intent(in),  optional :: srcNodalDistgrid
   type(ESMF_DistGrid),          intent(in),  optional :: dstNodalDistgrid
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
-  type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
-  type(ESMF_NormType_Flag),    intent(in),   optional :: normType
+  type(ESMF_LineType_Flag),     intent(in),  optional :: lineType
+  type(ESMF_NormType_Flag),     intent(in),  optional :: normType
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: useUserAreaFlag
@@ -1837,20 +1835,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           list of valid options for this argument. If not specified, the default depends on the 
 !           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
 !           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
-!   \item [{[normType]}] 
-!    This argument controls the type of normalization used when generating conservative weights. This option
-!    only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. If not specified
-!    {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
-!   \item [{[unmappedaction]}]
-!     specify what should happen if there are destination points that
-!     can't be mapped to a source cell. Options are 
-!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!   \item [{[ignoreDegenerate]}]
-!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenerate cell produces an error.
-!     The default is .FALSE.  
+!     \item [{[normType]}] 
+!           This argument controls the type of normalization used when generating conservative weights. This option
+!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
+!           Section~\ref{opt:normType} for a 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[unmappedaction]}]
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!     \item [{[ignoreDegenerate]}]
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.
 !     Only the SCRIP and ESMF format grid files have user specified areas. This flag
