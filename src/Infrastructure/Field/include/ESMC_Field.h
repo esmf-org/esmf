@@ -799,8 +799,7 @@ int ESMC_FieldRegridStore(
 //    As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
 //    built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
 //    list of valid options for this argument. If not specified, the default depends on the
-//    regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-//    which line types are supported for each regrid method as well as showing the default line type by regrid method.
+//    regrid method. Section~\ref{opt:lineType} has the defaults by line type.
 //  \item[normType]
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
