@@ -400,12 +400,12 @@ TypeKindRankDeclarationMacro(LocalArrayGetData)
 ! !IROUTINE: ESMF_LocalArrayIsCreated - Check whether a LocalArray object has been created
 
 ! !INTERFACE:
-  function ESMF_LocalArrayIsCreated(array, keywordEnforcer, rc)
+  function ESMF_LocalArrayIsCreated(localarray, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_LocalArrayIsCreated
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray), intent(in)            :: array
+    type(ESMF_LocalArray), intent(in)            :: localarray
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: rc
 
@@ -417,7 +417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
     ESMF_LocalArrayIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
-    if (ESMF_LocalArrayGetInit(array)==ESMF_INIT_CREATED) &
+    if (ESMF_LocalArrayGetInit(localarray)==ESMF_INIT_CREATED) &
       ESMF_LocalArrayIsCreated = .true.
   end function
 !------------------------------------------------------------------------------
