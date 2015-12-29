@@ -9781,16 +9781,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[regDecomp]}] 
-!      A ndims-element array specifying how the grid is decomposed.
-!      Each entry is the number of decounts for that dimension.
-! \item[{[decompflag]}]
-!      List of decomposition flags indicating how each dimension of the
-!      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{const:decompflag} for a full description of the 
-!      possible options. Note that currently the option
-!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
@@ -9802,6 +9792,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[maxCornerCoord] 
 !      The coordinates of the corner of the grid that corresponds to {\tt maxIndex}. 
 !      size(maxCornerCoord) must be equal to size(maxIndex).
+! \item[{[regDecomp]}] 
+!      A ndims-element array specifying how the grid is decomposed.
+!      Each entry is the number of decounts for that dimension.
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
+!      tile is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
+!      Section~\ref{const:decompflag} for a full description of the 
+!      possible options. Note that currently the option
+!      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
 !     For a full list of options, please see Section~\ref{const:coordsys}. 
