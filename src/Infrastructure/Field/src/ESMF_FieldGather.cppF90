@@ -95,7 +95,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[field]
 !     The {\tt ESMF\_Field} object to fill with data.
 !   \item[{[dataFillScheme]}]
-!     The fill scheme. The available options are "sincos", and "one". Defaults to "one"
+!     The fill scheme. The available options are "sincos", and "one". 
+!     Defaults to "one".
 !   \item[{[member]}]
 !     Member incrementor. Defaults to 1.
 !   \item[{[step]}]

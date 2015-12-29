@@ -786,11 +786,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: name
     integer,            intent(out), optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{7.0.0r}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 !     Sets adjustable settings in an {\tt ESMF\_Field} object. 
 !
