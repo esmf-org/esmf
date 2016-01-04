@@ -400,22 +400,33 @@ TypeKindRankDeclarationMacro(LocalArrayGetData)
 ! !IROUTINE: ESMF_LocalArrayIsCreated - Check whether a LocalArray object has been created
 
 ! !INTERFACE:
-  function ESMF_LocalArrayIsCreated(array, rc)
+  function ESMF_LocalArrayIsCreated(localarray, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_LocalArrayIsCreated
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray), intent(in)            :: array
+    type(ESMF_LocalArray), intent(in)            :: localarray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt localarray} has been created. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[localarray]
+!     {\tt ESMF\_LocalArray} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ESMF_LocalArrayIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
-    if (ESMF_LocalArrayGetInit(array)==ESMF_INIT_CREATED) &
+    if (ESMF_LocalArrayGetInit(localarray)==ESMF_INIT_CREATED) &
       ESMF_LocalArrayIsCreated = .true.
   end function
 !------------------------------------------------------------------------------

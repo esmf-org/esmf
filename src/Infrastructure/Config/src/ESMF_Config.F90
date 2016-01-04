@@ -2418,17 +2418,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ConfigIsCreated - Check whether a Config object has been created
 
 ! !INTERFACE:
-  function ESMF_ConfigIsCreated(config, rc)
+  function ESMF_ConfigIsCreated(config, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_ConfigIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Config), intent(in)            :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt config} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[config]
+!     {\tt ESMF\_Config} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_ConfigIsCreated = .false.   ! initialize

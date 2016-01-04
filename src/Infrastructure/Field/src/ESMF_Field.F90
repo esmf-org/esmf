@@ -184,17 +184,28 @@ contains
 ! !IROUTINE: ESMF_FieldIsCreated - Check whether a Field object has been created
 
 ! !INTERFACE:
-  function ESMF_FieldIsCreated(field, rc)
+  function ESMF_FieldIsCreated(field, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_FieldIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt field} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[field]
+!     {\tt ESMF\_Field} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_FieldIsCreated = .false.   ! initialize
@@ -783,11 +794,6 @@ end function
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: name
     integer,            intent(out), optional :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{7.0.0r}
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets adjustable settings in an {\tt ESMF\_Field} object. 

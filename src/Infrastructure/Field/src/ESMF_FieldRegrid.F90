@@ -370,7 +370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              {\tt pipelineDepth}, and {\tt unmappedDstList}.
 !              The argument {\tt ignoreDegenerate} allows the user to skip degenerate
 !              cells in the regridding instead of stopping with an error. 
- !              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
+!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. The argument {\tt unmappedDstList} allows the user to 
 !              get a list of the destination items which the regridding couldn't 
@@ -462,30 +462,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!           The unmapped destination point error detection currently doesn't work with 
-!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method, so 
-!           with that regrid method this subroutine will behave as if
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !     \item [{[ignoreDegenerate]}]
- !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
-!           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
-!           always skip degenerate cells. 
-!   \item [{[srcTermProcessing]}]
-!     The {\tt srcTermProcessing} parameter controls how many source terms,
-!     located on the same PET and summing into the same destination element,
-!     are summed into partial sums on the source PET before being transferred
-!     to the destination PET. A value of 0 indicates that the entire arithmetic
-!     is done on the destination PET; source elements are neither multiplied 
-!     by their factors nor added into partial sums before being sent off by the
-!     source PET. A value of 1 indicates that source elements are multiplied
-!     by their factors on the source side before being sent to the destination
-!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
-!     of terms in the partial sums on the source side.
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
+!     \item [{[srcTermProcessing]}]
+!           The {\tt srcTermProcessing} parameter controls how many source terms,
+!           located on the same PET and summing into the same destination element,
+!           are summed into partial sums on the source PET before being transferred
+!           to the destination PET. A value of 0 indicates that the entire arithmetic
+!           is done on the destination PET; source elements are neither multiplied 
+!           by their factors nor added into partial sums before being sent off by the
+!           source PET. A value of 1 indicates that source elements are multiplied
+!           by their factors on the source side before being sent to the destination
+!           PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!           of terms in the partial sums on the source side.
 !
 !     Note that partial sums may lead to bit-for-bit differences in the results.
 !     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
@@ -499,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     support both overriding and accessing the auto-tuning parameter.
 !     If an argument $>= 0$ is specified, it is used for the 
 !     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
- !     In this case the {\tt srcTermProcessing} argument is not modified on
+!     In this case the {\tt srcTermProcessing} argument is not modified on
 !     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt srcTermProcessing} argument is re-set to the internally
@@ -530,7 +523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     case the {\tt pipelineDepth} argument is re-set to the internally
 !     determined value on return. Auto-tuning is also used if the optional 
 !     {\tt pipelineDepth} argument is omitted.
- !     \item [{[routehandle]}]
+!     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
 !           user doesn't need it, then they can indicate that by not requesting it. 

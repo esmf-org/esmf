@@ -1,7 +1,7 @@
 % $Id$
 
-\section{ESMF\_FileRegrid}
-\label{sec:ESMF_FileRegrid}
+\section{ESMF\_Regrid}
+\label{sec:ESMF_Regrid}
 
 \subsection{Description}
 
@@ -108,27 +108,28 @@ There are three variables defined in the above UGRID file - {\tt zeta} on the no
 
 If the variable specified for the destination file does not already exist in the file, the file type is determined as follows:  
 First search for a variable that has a {\tt cf\_role} attribute of value {\tt mesh\_topology}.  If successful,
-the file is a UGRID file.  If not, check if there is a variable with its {\tt units} attribute set to {\tt degrees\_east} and another variable with it's {\tt units} attribute set to {\tt degrees\_west}.  If such a pair is found, 
+the file is a UGRID file.  The destination variable will be created on the nodes if the regrid method is 
+non-conservative and the source variable is located on the nodes.  Otherwise, the destination variable will be created
+on the face.  If the destination file is not a UGRID file, check if there is a variable with its {\tt units} attribute set to {\tt degrees\_east} and another variable with it's {\tt units} attribute set to {\tt degrees\_west}.  If such a pair is found, 
 the file is a GRIDSPEC file and the above two variables will be used as the coordinate variables for the 
 variable to be created.  If more than one pair of coordinate variables are found in the file, the application 
-will fail with an error message.  In case it happens, user can use an optional argument 
-{\tt --dst\_coordinates} to specify which pair of variables to be used for the coordinates of the variable.
+will fail with an error message.  
 
 If the destination 
 variable exists in the destination grid file, it has to have the same number of dimensions and the same type as the source variable. Except for the latitude and longitude dimensions, the size of 
 the destination variable's extra dimensions (e.g., time and vertical layers) has to match with the 
-source variable.   A
-new variable will be created with the same type and matching dimensions as the source variable in the destination grid file.
+source variable.   If the destination varialbe does not exist in the destination grid file, a
+new variable will be created with the same type and matching dimensions as the source variable.
 All the attributes of the source variable will be copied to the destination variable except those
 related to the grid definition (i.e. {\tt coordinates} attribute if the destination file is in  
 GRIDSPEC format or {\tt mesh} and {\tt location} attributes if the destination file is in UGRID format.
 
-Addition rules beyond the CF convention are adopted to determine whether there is a time dimension defined
+Additional rules beyond the CF convention are adopted to determine whether there is a time dimension defined
 in the source and destination files.  In this application, only a dimension with a name {\tt time} is 
 considered as a time dimension.
 If the source variable has a {\tt time} dimension and the destination variable is not already defined, 
 the application first checks if there is a {\tt time} dimension defined in the destination file.  If so, 
-the values of the {\tt time} dimension in both files have to be identical.  If they are not, the application
+the values of the {\tt time} dimension in both files have to be identical.  If the time dimension values don't match, the application
 terminates with an error message.  The application does not check the existence of a {\tt time} variable 
 or if the {\tt units} attribute of the {\tt time} variable match in two input files.  If the destination 
 file does not have a {\tt time} dimension, it will be created.  UNLIMITED time dimension is allowed in the
@@ -144,8 +145,10 @@ conservative regridding, the {\tt addCornerStager} argument is set to {\tt TRUE}
 be read  in and stored at the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER}).  If the variable has an {\tt \_FillValue} attribute defined, a mask will be generated using the missing values of the variable. 
 The data variable is defined as a ESMF\_Field object at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) of the grid.   
 
-{\tt ESMF\_MeshCreate()}(~\ref{API:MeshCreateFromFile}) is used to create an ESMF\_Mesh object if the
-source or destination grid is an unstructured grid. Currently, only the 2D mesh is supported.
+If the source grid is an unstructured grid and the the regrid method is nearest neighbor, or if the destination grid 
+is unstructured and the regrid method is non-conservative, {\tt ESMF\_LocStreamCreate()}(~\ref{locstream:createfromfile} is used to create an ESMF\_LocStream object.  Otherwise,
+{\tt ESMF\_MeshCreate()}(~\ref{API:MeshCreateFromFile}) is used to create an ESMF\_Mesh object for the unstructured 
+input grids.  Currently, only the 2D unstructured grid is supported.
 If the application performs a conservative regridding, the variable has to be defined on the face of the mesh cells, i.e., its {\tt location} attribute has to be set to {\tt face}.  Otherwise, the variable has to be 
 defined on the node and its ({\tt location} attribute is set to {\tt node}).
 
@@ -162,7 +165,7 @@ one character short keyword prefixed with {\tt '-'} are supported.  The format t
 as follows:
 
 \begin{verbatim}
-ESMF_FileRegrid  
+ESMF_Regrid  
         --source|-s src_grid_filename
         --destination|-d dst_grid_filename
 	--src_var var_name
@@ -174,7 +177,6 @@ ESMF_FileRegrid
         [-r]
         [--src_regional]
         [--dst_regional]
-	[--dst_coordinates lon_name,var_name]
         [--no_log]
 	[--help]
         [--version]
@@ -258,14 +260,6 @@ where
     --dst_regional    - an optional argument specifying that the destination
                         is a regional grid and the source is a global grid.
 
-    --dst_coordinates - an optional argument that defines the longitude and
-			 latitude variable names in the destination grid file
-			 if the file type is GRIDSPEC.  The variable names are
-			 separated by comma.  This argument is required when
-                         the destination variable is not defined and
-			 there are multiple sets of coordinate variables defined
-			 in the file.  
-
      --no_log         - Turn off the ESMF error log.
 
      --help           - Print the usage message and exit.
@@ -284,7 +278,7 @@ method and write the interpolated data into a variable named {\tt zeta}.
 
 \begin{verbatim}
 
-  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+  mpirun -np 4 ESMF_Regrid -s simple_ugrid.nc -d simple_gridspec.nc \
                 --src_var zeta --dst_var zeta
 
 \end{verbatim}
@@ -327,7 +321,7 @@ regridding.
 
 \begin{verbatim}
 
-  mpirun -np 4 ESMF_FileRegrid -s simple_ugrid.nc -d simple_gridspec.nc \
+  mpirun -np 4 ESMF_Regrid -s simple_ugrid.nc -d simple_gridspec.nc \
                --src_var ua --dst_var ua -m conserve
 
 \end{verbatim}

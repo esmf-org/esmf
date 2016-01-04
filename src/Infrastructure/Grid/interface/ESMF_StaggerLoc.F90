@@ -277,20 +277,15 @@ end interface
 ! !INTERFACE:
   ! Private name; call using ESMF_StaggerLocGet() 
       subroutine ESMF_StaggerLocGetDim(staggerloc, dim, loc, &
-					keywordenforcer, rc)
+           keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StaggerLoc), intent(in) :: staggerloc
-      integer,                intent(in)    :: dim
-      integer,                intent(out)   :: loc
+      type (ESMF_StaggerLoc), intent(in)  :: staggerloc
+      integer,                intent(in)  :: dim
+      integer,                intent(out) :: loc
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer, optional                     :: rc 
+      integer, optional                   :: rc 
 
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 !   Gets the position of a particular dimension of a cell {\tt staggerloc}
 !   The argument {\tt loc} will be only be 0,1. 
@@ -302,11 +297,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[staggerloc]
-!          Stagger location to be initialized
+!          Stagger location for which to get information. 
 !     \item[dim]
-!          Dimension to be changed (1-7).
+!          Dimension for which to get information (1-7).
 !     \item[loc]
-!          Output position data should be either 0,1.
+!          Output position data (should be either 0,1).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -337,7 +332,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_StaggerLocSet() 
-     subroutine ESMF_StaggerLocSetAllDim(staggerloc, loc, keywordenforcer, rc)
+     subroutine ESMF_StaggerLocSetAllDim(staggerloc, loc, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
@@ -353,7 +348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !    Sets a custom {\tt staggerloc} to a position in a cell by using the array
 !    {\tt loc}. The values in the array should only be 0,1. If loc(i) is 0 it 
-!    means the position should be in the center in that dimension. If loc(i) is 1 then
+ !    means the position should be in the center in that dimension. If loc(i) is 1 then
 !    for dimension i, the position should be on the side of the cell. 
 !    Please see Section~\ref{sec:usage:staggerloc:adv}
 !    for diagrams and further discussion of custom stagger locations. 
@@ -402,8 +397,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_StaggerLocSet() 
-      subroutine ESMF_StaggerLocSetDim(staggerloc, dim, loc, &
-					keywordenforcer, rc)
+       subroutine ESMF_StaggerLocSetDim(staggerloc, dim, loc, &
+            keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
@@ -465,8 +460,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_StaggerLocString - Return a StaggerLoc as a string
 !
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocString(staggerloc, string, keywordenforcer, &
-					rc)
+      subroutine ESMF_StaggerLocString(staggerloc, string, &
+           keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
@@ -503,7 +498,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! (Strings should be appropriate for 2D and 3D)
         if (staggerloc < ESMF_STAGGERLOC_CENTER) string="No String For This StaggerLoc" 
         if (staggerloc == ESMF_STAGGERLOC_CENTER) string="Center" 
-        if (staggerloc == ESMF_STAGGERLOC_CORNER) string="Corner of Dim. 1 and Dim. 2" 
+         if (staggerloc == ESMF_STAGGERLOC_CORNER) string="Corner of Dim. 1 and Dim. 2" 
         if (staggerloc == ESMF_STAGGERLOC_EDGE1)  string="Middle of Face Offset in Dim. 1" 
         if (staggerloc == ESMF_STAGGERLOC_EDGE2)  string="Middle of Face Offset in Dim. 2" 
         if (staggerloc == ESMF_STAGGERLOC_CENTER_VFACE) string="Middle of Face Offset in Dim. 3"
@@ -552,7 +547,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else if (string == "ESMF_STAGGERLOC_EDGE2") then
         slval = ESMF_STAGGERLOC_EDGE2
       else if (string == "ESMF_STAGGERLOC_CORNER") then
-        slval = ESMF_STAGGERLOC_CORNER
+         slval = ESMF_STAGGERLOC_CORNER
       endif
 
       end subroutine ESMF_StaggerLocAssignment
@@ -601,7 +596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !RETURN VALUE:
       logical :: ESMF_StaggerLocNotEqual
-
+ 
 ! !ARGUMENTS:
 
       type (ESMF_StaggerLoc), intent(in) :: &
@@ -650,7 +645,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[StaggerLoc1, StaggerLoc2]
+ !     \item[StaggerLoc1, StaggerLoc2]
 !          Two igrid statuses to compare for equality
 !     \end{description}
 !
@@ -699,7 +694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocGreaterEqual"
 !BOPI
-! !IROUTINE: ESMF_StaggerLocGreaterEqual - Greater than or equal of StaggerLoc statuses
+ ! !IROUTINE: ESMF_StaggerLocGreaterEqual - Greater than or equal of StaggerLoc statuses
 !
 ! !INTERFACE:
       function ESMF_StaggerLocGreaterEqual(StaggerLoc1, StaggerLoc2)
@@ -770,7 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_StaggerLocPrint - Print StaggerLoc information
 
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocPrint(staggerloc, keywordenforcer, rc)
+      subroutine ESMF_StaggerLocPrint(staggerloc, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(in)  :: staggerloc

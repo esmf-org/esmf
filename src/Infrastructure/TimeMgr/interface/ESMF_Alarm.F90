@@ -816,17 +816,28 @@
 ! !IROUTINE: ESMF_AlarmIsCreated - Check whether a Alarm object has been created
 
 ! !INTERFACE:
-  function ESMF_AlarmIsCreated(alarm, rc)
+  function ESMF_AlarmIsCreated(alarm, keywordEnforcer, rc)
 ! !RETURN VALUE:
     logical :: ESMF_AlarmIsCreated
 !
 ! !ARGUMENTS:
     type(ESMF_Alarm), intent(in)            :: alarm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt alarm} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[alarm]
+!     {\tt ESMF\_Alarm} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_AlarmIsCreated = .false.   ! initialize

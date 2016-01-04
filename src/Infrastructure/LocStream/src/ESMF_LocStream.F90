@@ -1092,12 +1092,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[maskValues]}]
 !           List of values that indicate a background grid point should be masked out. 
 !           If not specified, no masking will occur. 
-!      \item [{[unmappedaction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
- !           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} [NOT IMPLEMENTED]. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. [NOTE: the {\tt unmappedaction=ESMF\_UNMAPPEDACTION\_IGNORE} option is currently not implemented.]
 !      \item[{[name]}]
 !          Name of the resulting location stream
 !      \item[{[rc]}]
@@ -1207,12 +1205,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Location stream from which the new location stream is to be created
 !      \item[background]
 !          Background Mesh which determines the distribution of entries in the new locatiion stream.
-!      \item [{[unmappedaction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} [NOT IMPLEMENTED]. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. [NOTE: the {\tt unmappedaction=ESMF\_UNMAPPEDACTION\_IGNORE} option is currently not implemented.]
 !      \item[{[name]}]
 !          Name of the resulting location stream
 !      \item[{[rc]}]
@@ -2311,7 +2307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! totaldims represent grid_ranks in SCRIP - 1 for unstructured and
        ! 2 for logically rectangular
        call ESMF_ScripInq(filename, grid_rank=totaldims, &
-		  grid_size=totalpoints, rc=localrc)
+                          grid_size=totalpoints, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ScripInqUnits(filename, units=units, rc=localrc)
@@ -2327,7 +2323,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! totaldims is the dimension of the lat/lon variable: 1 for regular
        ! grid and 2 for curvilinear
        call ESMF_GridspecInq(filename, ndims=totaldims, &
-	       	     grid_dims = grid_dims, coordids=varids, rc=localrc)
+                             grid_dims = grid_dims, &
+                             coordids=varids, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        totalpoints=grid_dims(1)*grid_dims(2)
@@ -2336,10 +2333,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! totaldims is the coordDim, 2 for 2D and 3 for 3D
        if (localcenterflag) then
            call ESMF_EsmfInq(filename, elementCount=totalpoints, & 
-	        coordDim=totaldims, rc=localrc)
+                             coordDim=totaldims, rc=localrc)
        else
            call ESMF_EsmfInq(filename, nodeCount=totalpoints, &
-	        coordDim=totaldims, rc=localrc)
+                             coordDim=totaldims, rc=localrc)
        endif
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2355,8 +2352,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! totaldims is the mesh_dimension (2 for 2D and 3 for 3D)
        if (localcenterflag) then
           call ESMF_UGridInq(filename, meshname=meshname, elementCount=totalpoints, &
-	     	  meshid=meshid, nodeCoordDim=totaldims, faceCoordFlag=haveface, &
-		  rc=localrc)
+                             meshid=meshid, nodeCoordDim=totaldims, &
+                             faceCoordFlag=haveface, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (.not. haveface) then
@@ -2367,7 +2364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        else
           call ESMF_UGridInq(filename, meshname=meshname, nodeCount=totalpoints, &
-	          meshid=meshid, nodeCoordDim=totaldims, rc=localrc)
+                             meshid=meshid, nodeCoordDim=totaldims, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
        endif
@@ -2400,7 +2397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
        allocate(coord2D(totaldims,localcount))
        call ESMF_EsmfGetCoords(filename, coord2D, imask, &
-	       starti, localcount, localcenterflag, rc=localrc)
+                               starti, localcount, localcenterflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
        coordX(:) = coord2D(1,:)
@@ -2413,7 +2410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
        allocate(coord2D(localcount, totaldims))
        call ESMF_UGridGetCoords(filename, meshid, coord2D, &
-       	    starti, localcount, localcenterflag, rc=localrc)
+                                starti, localcount, localcenterflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
        coordX(:) = coord2D(:,1)
@@ -2428,14 +2425,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (present(varname)) then
           allocate(varbuffer(localcount))
           call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
-	       startind=starti, count=localcount, location=location, &
-	       missingvalue=missingvalue, rc=localrc)
+                                      startind=starti, count=localcount, &
+                                      location=location, &
+                                      missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-	  do i=1,localcount
+          do i=1,localcount
             if (varbuffer(i)==missingvalue) imask(i)=0
           enddo
-	  deallocate(varbuffer)
+          deallocate(varbuffer)
        endif
     endif
     ! create Location Stream
@@ -2447,25 +2445,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !print *, PetNo, starti, localcount, coordX(1), coordY(1)
     ! Add coordinate keys
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
-    	 		      keyLongName='Longitude', rc=localrc)
+                              keyLongName='Longitude', rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
-    	 		      keyLongName='Latitude', rc=localrc)
+                              keyLongName='Latitude', rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     !If 3D grid, add the height coordinates
     if (totaldims == 3) then
        call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
-    	 		      keyLongName='Height', rc=localrc)
+                                 keyLongName='Height', rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
-    	 		      keyLongName='Mask', rc=localrc)
+                              keyLongName='Mask', rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -2759,6 +2757,147 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamGetBounds"
+!BOP
+! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
+
+! !INTERFACE:
+      subroutine ESMF_LocStreamGetBounds(locstream, keywordEnforcer,   &
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,   &
+          computationalLBound, computationalUBound, computationalCount,&
+          rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream),   intent(in) :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(in),  optional :: localDE
+      integer,                intent(out), optional :: exclusiveLBound
+      integer,                intent(out), optional :: exclusiveUBound
+      integer,                intent(out), optional :: exclusiveCount
+      integer,                intent(out), optional :: computationalLBound
+      integer,                intent(out), optional :: computationalUBound
+      integer,                intent(out), optional :: computationalCount
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets the bounds of a localDE for a locstream.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{locstream}]
+!          LocStream to get the information from.
+!     \item[{localDE}]
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!     \item[{[exclusiveCount]}]
+ !          Upon return this holds the number of items in the exclusive region
+!     \newline
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the computational region.
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the computational region.
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region
+!     \newline
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+ integer :: localrc
+ integer :: tmpLBnd, tmpUBnd
+ type(ESMF_LocStreamType), pointer :: lstypep
+
+ ! Initialize return code 
+ localrc = ESMF_RC_NOT_IMPL 
+ if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+ ! Check init status of arguments 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+
+ ! Get locstream type object
+ lstypep=>locstream%lstypep
+
+ ! Get exclusiveLBound
+ if (present(exclusiveLBound)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             exclusiveLBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get exclusiveUBound
+ if (present(exclusiveUBound)) then
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+              exclusiveUBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get exclusiveCount
+ if (present(exclusiveCount)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpLBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpUBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    exclusiveCount=tmpUBnd-tmpLBnd+1
+ endif 
+
+ ! For now computational bounds are the same as exclusive bounds
+
+ ! Get computationalLBound
+ if (present(computationalLBound)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             computationalLBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get computationalUBound
+ if (present(computationalUBound)) then
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             computationalUBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get computationalCount
+ if (present(computationalCount)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpLBnd, localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpUBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    computationalCount=tmpUBnd-tmpLBnd+1
+ endif 
+
+ ! Return successfully 
+ if (present(rc)) rc = ESMF_SUCCESS 
+
+end subroutine ESMF_LocStreamGetBounds
+
+
+!------------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyArray"
 !BOP
@@ -2990,7 +3129,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[localDE]}]
-!          The local DE for which to get the information. {\tt [0,..,localDeCount-1]}
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3071,7 +3212,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3203,7 +3346,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3336,7 +3481,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{keyName}]
 !          The key to get the information from.
 !     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !     \item[{[exclusiveUBound]}]
@@ -3427,144 +3574,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LocStreamGetKeyR8
 
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamGetBounds"
-!BOP
-! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
-
-! !INTERFACE:
-      subroutine ESMF_LocStreamGetBounds(locstream, keywordEnforcer,   &
-          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,   &
-          computationalLBound, computationalUBound, computationalCount,&
-          rc)
-!
-! !ARGUMENTS:
-      type(ESMF_LocStream),   intent(in) :: locstream
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(in),  optional :: localDE
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    This method gets the bounds of a localDE for a locstream.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{locstream}]
-!          LocStream to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{[exclusiveLBound]}]
-!          Upon return this holds the lower bounds of the exclusive region.
-!     \item[{[exclusiveUBound]}]
-!          Upon return this holds the upper bounds of the exclusive region.
-!     \item[{[exclusiveCount]}]
- !          Upon return this holds the number of items in the exclusive region
-!	   \newline
-!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
-!     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region.
-!     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!     \item[{[computationalCount]}]
-!          Upon return this holds the number of items in the computational region
-!	   \newline
-!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
- integer :: localrc
- integer :: tmpLBnd, tmpUBnd
- type(ESMF_LocStreamType), pointer :: lstypep
-
- ! Initialize return code 
- localrc = ESMF_RC_NOT_IMPL 
- if (present(rc)) rc = ESMF_RC_NOT_IMPL 
-
- ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- ! Get locstream type object
- lstypep=>locstream%lstypep
-
- ! Get exclusiveLBound
- if (present(exclusiveLBound)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             exclusiveLBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get exclusiveUBound
- if (present(exclusiveUBound)) then
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-              exclusiveUBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get exclusiveCount
- if (present(exclusiveCount)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpLBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpUBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    exclusiveCount=tmpUBnd-tmpLBnd+1
- endif 
-
- ! For now computational bounds are the same as exclusive bounds
-
- ! Get computationalLBound
- if (present(computationalLBound)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             computationalLBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get computationalUBound
- if (present(computationalUBound)) then
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             computationalUBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get computationalCount
- if (present(computationalCount)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpLBnd, localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpUBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    computationalCount=tmpUBnd-tmpLBnd+1
- endif 
-
- ! Return successfully 
- if (present(rc)) rc = ESMF_SUCCESS 
-
-end subroutine ESMF_LocStreamGetBounds
-
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamMatch()"
@@ -3649,6 +3658,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return {\tt .true.} if the {\tt locstream} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[locstream]
+!     {\tt ESMF\_LocStream} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_LocStreamIsCreated = .false.   ! initialize
@@ -4416,10 +4434,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! Make sure we aren't going to overrun memory
         if ((pos+seqCount-1) >petListCount) then
-	     if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+          if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
                  msg=" - Too many seq indices in locstream disgrid", &
                 ESMF_CONTEXT, rcToReturn=rc)) return               
-	endif
+        endif
 
         ! Get list of seqindices
         call  ESMF_DistGridGet(oldLStypep%distgrid, localDe=lDE, &
@@ -4428,7 +4446,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! advance to next set of positions
-	pos=pos+seqCount
+        pos=pos+seqCount
      enddo
 
 
@@ -4669,13 +4687,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        string = trim(coordKeyNames )
        do while ( string /= '' )
           ! make sure that we aren't overwriting our array
-       	  if (dim >3) then
-	     if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+          if (dim >3) then
+            if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
                  msg=" - too many coordinate key names", &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-	  ! Pull out coordinate name
+          ! Pull out coordinate name
           call ESMF_StripKey( string, coordKeyList(dim))
 
           ! advance to next position
@@ -4684,7 +4702,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        ! check pntDim
        if (pntDim /= dim-1) then
-	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+         if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
            msg=" - number of coordinate key names doesn't match pnt dimension", &
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
@@ -4706,8 +4724,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-	! Copy data based on typekind
-	if (typekind .eq. ESMF_TYPEKIND_R8) then
+        ! Copy data based on typekind
+        if (typekind .eq. ESMF_TYPEKIND_R8) then
            pos=i
            do lDE=0,localDECount-1
               ! Get data
@@ -4721,7 +4739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  pntList(pos)=keyDataR8(j)
                  pos=pos+pntDim
               enddo
-	   enddo
+           enddo
         else if (typekind .eq. ESMF_TYPEKIND_R4) then
            pos=i
            do lDE=0,localDECount-1
@@ -4736,7 +4754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  pntList(pos)=REAL(keyDataR4(j),ESMF_KIND_R8)
                  pos=pos+pntDim
               enddo
-	   enddo
+           enddo
 
         else if (typekind .eq. ESMF_TYPEKIND_I4) then
            pos=i
@@ -4752,10 +4770,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  pntList(pos)=REAL(keyDataI4(j),ESMF_KIND_R8)
                  pos=pos+pntDim
               enddo
-	   enddo
+           enddo
 
-	else 
-	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
+        else 
+          if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
            msg=" - unsupported coordinate data type", &
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif

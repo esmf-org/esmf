@@ -101,8 +101,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
-! This subroutine provides the same function as the {\tt ESMF\_FileRegrid} application
-! described in Section~\ref{sec:ESMF_FileRegrid}.  It takes two grid files in NetCDF format and interpolate
+! This subroutine provides the same function as the {\tt ESMF\_Regrid} application
+! described in Section~\ref{sec:ESMF_Regrid}.  It takes two grid files in NetCDF format and interpolate
 ! the variable defined in the source grid file to the destination variable using one of the ESMF supported
 ! regrid methods -- bilinear~(\ref{sec:interpolation:bilinear}), higher-order patch~(\ref{sec:interpolation:patch}),
 ! first order conservative~(\ref{sec:interpolation:conserve}) or nearest neighbor methods.  
@@ -141,15 +141,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points should be averaged over at the pole.
 !   \item [{[unmappedaction]}]
-!     specify what should happen if there are destination points that
-!     can't be mapped to a source cell. Options are 
-!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           Specifies what should happen if there are destination points that
+!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
-!     Ignore degenerate cells when checking the input Grids or Meshes for errors. The flag only applies to
-!     the conservative regridding.  If set to false, a degenerate cell produces an error.
-!     The default is .FALSE.  
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.
