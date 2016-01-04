@@ -1530,9 +1530,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This routine opens a file named {\tt filename} and associates
 !      it with the {\tt ESMF\_Log}.  When {\tt logkindflag} is set to
 !      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
-!      number identification.  If the incoming log is already a
-!      valid Log object, no new Log is opened and the Log argument remains
-!      unchanged.
+!      number identification.  If the incoming log is already open,
+!      no new Log is opened, an error is returned and the existing log
+!      remains open.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1753,7 +1753,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This routine opens a file named {\tt filename} and associates
 !      it with the default log.  When {\tt logkindflag} is set to
 !      {\tt ESMF\_LOGKIND\_MULTI} the file name is prepended with PET
-!      number identification.
+!      number identification.  If the incoming default log is already open,
+!      no new Log is opened, an error is returned and the existing log
+!      remains open.
 !
 !      The arguments are:
 !      \begin{description}
