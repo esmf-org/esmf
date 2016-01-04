@@ -780,7 +780,7 @@ end function
 !
 ! !ARGUMENTS:
     type(ESMF_Field),   intent(inout)         :: field
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: name
     integer,            intent(out), optional :: rc
 !
