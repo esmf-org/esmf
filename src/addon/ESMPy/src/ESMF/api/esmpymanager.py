@@ -44,32 +44,42 @@ def pet_count():
 
 class Manager(object):
     '''
-    This singleton class is designed to ensure that ESMF is properly initialized and finalized.  ESMF is
-    initialized at Manager creation, and the __del__ method is registered with atexit to ensure ESMF
-    is always finalized prior to exiting Python.  If the object is copied, the copy will always be an
-    alias to the original Manager object.  The Manager will be created when the first ESMPy object is created if
-    it is not created explicitly by the user.
+    This singleton class is designed to ensure that ESMF is properly initialized 
+    and finalized.  ESMF is initialized at Manager creation, and the __del__ 
+    method is registered with atexit to ensure ESMF is always finalized prior to 
+    exiting Python.  If the object is copied, the copy will always be an alias 
+    to the original Manager object.  The Manager will be created when the first 
+    ESMPy object is created if it is not created explicitly by the user.
 
-    Explicit creation of a Manager object allows for setting a flag which results in the output of debug information
-    from the ESMF logging capability during the application runtime.  The output log files are named
+    Explicit creation of a Manager object allows for setting a flag which 
+    results in the output of debug information from the ESMF logging capability 
+    during the application runtime.  The output log files are named 
     PET<processor number>.ESMF_LogFile.
 
-    The processor rank (local_pet) and total number of processers (pet_count) can also be retrieved from the Manager
-    using the following calls::
+    The processor rank (local_pet) and total number of processers (pet_count) 
+    can also be retrieved from the Manager using the following calls::
 
         ESMF.local_pet()
         ESMF.pet_count()
 
     *local_pet* and *pet_count* are also properties of the Manager.
-    '''
 
+    Calls ESMP_Initialize and registers __del__ with atexit when called the
+    first time.  Subsequent calls only return whether or not ESMF is
+    initialized.  Registering __del__ with atexit ensures the ESMP_Finalize
+    will always be called prior to exiting Python.  Calling __init__
+    explicitly results in a no-op.
+
+    :param bool debug: outputs logging information to ESMF logfiles. If
+        ``None``, defaults to False.
+    '''
     # The singleton instance for this class
     __singleton = None
     
     def __new__(cls, debug=False):
         '''
-        Returns the singleton instance of this class,
-        creating it if it does not already exist.
+        Returns the singleton instance of this class, creating it if it does 
+        not already exist.
         '''
 
         # If this is the first call, create the singleton object
@@ -82,22 +92,6 @@ class Manager(object):
 
 
     def __init__(self, debug=False):
-        '''
-        Calls ESMP_Initialize and registers __del__ with atexit
-        when called the first time.  Subsequent calls only return
-        whether or not ESMF is initialized.  Registering __del__ with
-        atexit ensures the ESMP_Finalize will always be called
-        prior to exiting Python.  Calling __init__ explicitly
-        results in a no-op. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            debug: outputs logging information to ESMF logfiles. \n
-                type: boolean (defaults to False) \n
-        Returns: \n
-            Manager \n
-        '''
-
         # Return no-op
         if self.__esmp_finalized:
             return
@@ -131,19 +125,11 @@ class Manager(object):
 
     def __del__(self):
         '''
-        Calls ESMP_Finalize if ESMF has been initialized.
-        This function is registered with atexit
-        by __init__ when it calls ESMP_Initialize to
-        ensure ESMP_Finalize is always called before exiting
-        Python.  However, this function can be called directly
-        (presumably to delete the log file) before exiting without
-        causing problems. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Calls ESMP_Finalize if ESMF has been initialized. This function is
+        registered with atexit by __init__ when it calls ESMP_Initialize to
+        ensure ESMP_Finalize is always called before exiting Python.  However,
+        this function can be called directly (presumably to delete the log file)
+        before exiting without causing problems.
         '''
         # If ESMP not initialize, or already finalized, just return
         if not self.__esmp_initialized:
@@ -157,9 +143,6 @@ class Manager(object):
         self.__esmp_finalized = True
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("ESMPyManager:\n"
                   "    local_pet = %r\n"
                   "    pet_count = %r\n)" 
@@ -168,4 +151,3 @@ class Manager(object):
                    self.pet_count))
 
         return string
-    

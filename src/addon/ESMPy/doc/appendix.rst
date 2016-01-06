@@ -26,9 +26,11 @@ Named Constants
     DecompFlag
     FileFormat
     GridItem
+    LineType
     LogKind
     MeshElemType
     MeshLoc
+    NormType
     PoleMethod
     Region
     RegridMethod

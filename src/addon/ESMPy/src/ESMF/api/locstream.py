@@ -16,68 +16,69 @@ from ESMF.util.slicing import get_formatted_slice
 
 class LocStream(dict):
     """
-    The LocStream class is a Python wrapper object for the ESMF LocStream.  LocStream is a derived type of the
-    Python dict class.
-    The individual values of all key arrays are referenced to those of the underlying Fortran ESMF object.
+    The ``LocStream`` class is a Python wrapper object for the ESMF LocStream.
+    ``LocStream`` is a derived type of a Python dictionary.
 
-    A location stream (LocStream) is used to represent the locations of a set of data points. The values of the
-    data points are stored within a Field created using the LocStream.
+    The individual values of all key arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
-    In the data assimilation world, LocStreams can be thought of as a set of observations. Their locations are
-    generally described using Cartesian (x, y, z), or (lat, lon, height) coordinates. There is no assumption of
-    any regularity in the positions of the points. To make the concept more general, the locations for each data
-    point are represented using a construct called keys. Keys can include other descriptors besides location,
-    including a second set of coordinates.
+    A location stream (``LocStream``) is used to represent the locations of a
+    set of data points. The values of the data points are stored within a
+    :class:`~ESMF.api.field.Field` created using the ``LocStream``.
 
-    For more information about the ESMF LocStream class, please see the `ESMF LocStream documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+    In the data assimilation world, location streams can be thought of as a set
+    of observations. Their locations are generally described using Cartesian
+    (x, y, z), or (lat, lon, height) coordinates. There is no assumption of
+    any regularity in the positions of the points. To make the concept more
+    general, the locations for each data point are represented using a construct
+    called keys. Keys can include other descriptors besides location, including
+    a second set of coordinates.
 
-    LocStream follows standard Python.dict behavior for setting and getting keys.  For example::
+    For more information about the ESMF ``LocStream`` class, please see the
+    `ESMF LocStream documentation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
 
-        locstream["ESMF:X"] = [1, 2, 3]
-        x = locstream["ESMF:X"]
-        locstream["ESMF:Y"] = [1, 2, 3]
-        y = locstream["ESMF:Y"]
-        locstream["ESMF:Mask"] = [0, 1, 0]
-        mask = locstream["ESMF:Mask"]
+    ``LocStream`` follows standard dictionary syntax. For example:
 
-    NOTE: Setting keys of lists of mixed types can result in errors due to type mismatches from the ESMF library.
+    >>> locstream["ESMF:X"] = [1, 2, 3]
+    >>> x = locstream["ESMF:X"]
+    >>> locstream["ESMF:Y"] = [1, 2, 3]
+    >>> y = locstream["ESMF:Y"]
+    >>> locstream["ESMF:Mask"] = [0, 1, 0]
+    >>> mask = locstream["ESMF:Mask"]
 
-    NOTE: Mask must be of type TypeKind.I4, and coordinates must by of type TypeKind.R8
+    .. note:: Setting keys of lists of mixed types can result in errors due to
+    type mismatches from the ESMF library.
 
-    For ESMF to be able to recognize coordinates specified in a LocStream key they need to be named with the
-    appropriate identifiers. The particular identifiers depend on the coordinate system (i.e. coord_sys argument)
-    used to create the LocStream.
+    .. note:: Mask must be of type TypeKind.I4, and coordinates must by of type
+    TypeKind.R8.
+
+    For ESMF to be able to recognize coordinates specified in a LocStream key
+    they need to be named with the appropriate identifiers. The particular
+    identifiers depend on the coordinate system (i.e. ``coord_sys`` argument)
+    used to create the ``LocStream``.
 
     The valid values are:
 
-    ===================  ===========  ===========  ===========
-    Coordinate System    dimension 1  dimension 2  dimension 3
-    ===================  ===========  ===========  ===========
-    CoordSys.SPH_DEG     ESMF:Lon     ESMF:Lat     ESMF:Radius
-    CoordSys.SPH_RAD     ESMF:Lon     ESMF:Lat     ESMF:Radius
-    CoordSys.CART        ESMF:X       ESMF:Y       ESMF:Z
-    ===================  ===========  ===========  ===========
+    ============================================  ===========  ===========  ===========
+    Coordinate System                             dimension 1  dimension 2  dimension 3
+    ============================================  ===========  ===========  ===========
+    :attr:`~ESMF.api.constants.CoordSys.SPH_DEG`  ESMF:Lon     ESMF:Lat     ESMF:Radius
+    :attr:`~ESMF.api.constants.CoordSys.SPH_RAD`  ESMF:Lon     ESMF:Lat     ESMF:Radius
+    :attr:`~ESMF.api.constants.CoordSys.CART`     ESMF:X       ESMF:Y       ESMF:Z
+    ============================================  ===========  ===========  ===========
+
+    :param int location_count: The number of points in this stream.
+    :param CoordSys coord_sys: Coordinate system for the location stream.
+        If ``None``, defaults to :attr:`ESMF.api.constants.CoordSys.SPH_DEG`.
+    :param str name: Optional name for the location stream.
+    :param bool esmf: Internal parameter controlling shallow copying by ESMF.
     """
 
     @initialize
     def __init__(self, location_count, coord_sys=None, name=None, esmf=True):
-        '''
-        Create a LocStream. \n
-        Required Arguments: \n
-            location_count: the number of point in this stream. \n
-        Optional Arguments: \n
-            coord_sys: the coordinates system for the Grid. \n
-                    Argument values are:\n
-                        (default) CoordSys.CART\n
-                        CoordSys.SPH_DEG\n
-                        CoordSys.SPH_RAD\n
-            name: user friendly name for the LocStream. \n
-            esmf: internal parameter to allow "shallow" copies. \n
-        '''
 
         # for ocgis compatibility
-        self._ocgis = {}
+        self._meta = {}
 
         # bookkeeping
         self._rank = 1
@@ -105,15 +106,6 @@ class LocStream(dict):
         super(LocStream, self).__init__()
 
     def __del__(self):
-        """
-        Release the memory associated with a LocStream. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
         self.destroy()
 
     def __getitem__(self, slc):
@@ -145,9 +137,6 @@ class LocStream(dict):
         return ret
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("LocStream:\n"
                   "    name = %r \n"
                   "    lower_bounds = %r \n"
@@ -182,63 +171,103 @@ class LocStream(dict):
         return ret
 
     @property
+    def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
+
+        return self._finalized
+
+    @property
     def lower_bounds(self):
         """
-        :return: the lower bounds of the LocStream
+        :rtype: int
+        :return: The lower bounds of the :class:`~ESMF.api.locstream.LocStream`.
         """
+
         return self._lower_bounds
 
     @property
     def mask(self):
         """
-        :return: the mask of the LocStream
+        :rtype: list
+        :return: The mask of the :class:`~ESMF.api.locstream.LocStream`.
         """
-        try:
-            return self["ESMF:Mask"]
-        except:
-            return None
+
+        return self.get("ESMF:Mask")
+
+    @property
+    def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
+
+        return self._meta
+
     @property
     def name(self):
         """
-        :return: the name of the LocStream
+        :rtype: str
+        :return: The name of the :class:`~ESMF.api.locstream.LocStream`.
         """
+
         return self._name
 
     @property
     def rank(self):
         """
-        :return: the rank of the LocStream
+        :rtype: int
+        :return: The rank of the :class:`~ESMF.api.locstream.LocStream`.
         """
+
         return self._rank
 
     @property
     def singlestagger(self):
+        """
+        :rtype: bool
+        :return: A boolean value to tell if this
+            :class:`~ESMF.api.locstream.LocStream` has been sliced.
+        """
+
         return self._singlestagger
 
     @property
     def size(self):
+        """
+        :rtype: int
+        :return: The size of the :class:`~ESMF.api.locstream.LocStream`.
+        """
+
         return self._size
 
     @property
     def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for this
+            :class:`~ESMF.api.locstream.LocStream`.
+        """
+
         return self._struct
 
     @property
     def upper_bounds(self):
         """
-        :return: the upper bounds of the LocStream
+        :rtype: int
+        :return: the upper bounds of the :class:`~ESMF.api.locstream.LocStream`.
         """
+
         return self._upper_bounds
 
     def copy(self):
         """
-        Copy a LocStream in an ESMF-safe manner. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            A new LocStream copy. \n
+        Copy a :class:`~ESMF.api.locstream.LocStream` in an ESMF-safe manner.
+
+        :return: A :class:`~ESMF.api.locstream.LocStream` shallow copy.
         """
         # shallow copy
         ret = LocStream(self._size, name=self._name, esmf=False)
@@ -257,14 +286,10 @@ class LocStream(dict):
 
     def destroy(self):
         """
-        Release the memory associated with a LocStream. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Release the memory associated with a
+        :class:`~ESMF.api.locstream.LocStream`.
         """
+
         if hasattr(self, '_finalized'):
             if not self._finalized:
                 ESMP_LocStreamDestroy(self)
