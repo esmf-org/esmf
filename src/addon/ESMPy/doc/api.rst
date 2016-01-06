@@ -36,19 +36,21 @@ that further explain the available values.
 =========================================================== ==============================
 Named constants                                             Description
 =========================================================== ==============================
-:class:`CoordSys<ESMF.api.constants._CoordSys>`             Specify the coordinate system of a Grid
-:class:`DecompFlag<ESMF.api.constants._DecompFlag>`         Specify how DistGrid elements are decomposed over DEs
-:class:`FileFormat<ESMF.api.constants._FileFormat>`         Specify the format of a data file
-:class:`GridItem<ESMF.api.constants._GridItem>`             Specify a mask or area item on a Grid
-:class:`LogKind<ESMF.api.constants._LogKind>`               Specify how much logging should be done
-:class:`MeshElemType<ESMF.api.constants._MeshElemType>`     Specify the type of the Mesh elements
-:class:`MeshLoc<ESMF.api.constants._MeshLoc>`               Specify a nodal or elemental Mesh
-:class:`Region<ESMF.api.constants._Region>`                 Specify various regions in the data layout of
-:class:`RegridMethod<ESMF.api.constants._RegridMethod>`     Specify which interpolation method to use regridding
-:class:`StaggerLoc<ESMF.api.constants._StaggerLoc>`         Specify the position for data in a Grid cell
-:class:`TypeKind<ESMF.api.constants._TypeKind>`             Specify the type and kind of data
-:class:`UnmappedAction<ESMF.api.constants._UnmappedAction>` Specify which action to take with respect to unmapped destination points
-:class:`PoleMethod<ESMF.api.constants._PoleMethod>`         Specify  which type of artificial pole to construct on the source Grid for regridding
+:class:`CoordSys<ESMF.api.constants.CoordSys>`              Specify the coordinate system of a Grid
+:class:`DecompFlag<ESMF.api.constants.DecompFlag>`          Specify how DistGrid elements are decomposed over DEs
+:class:`FileFormat<ESMF.api.constants.FileFormat>`          Specify the format of a data file
+:class:`GridItem<ESMF.api.constants.GridItem>`              Specify a mask or area item on a Grid
+:class:`LineType<ESMF.api.constants.LineType>`              Specify the type of line that connects two points on a sphere
+:class:`LogKind<ESMF.api.constants.LogKind>`                Specify how much logging should be done
+:class:`MeshElemType<ESMF.api.constants.MeshElemType>`      Specify the type of the Mesh elements
+:class:`MeshLoc<ESMF.api.constants.MeshLoc>`                Specify a nodal or elemental Mesh
+:class:`NormType<ESMF.api.constants.NormType>`              Specify the type of normalization to use for conservative regridding weights
+:class:`PoleMethod<ESMF.api.constants.PoleMethod>`          Specify which type of artificial pole to construct on the source Grid for regridding
+:class:`Region<ESMF.api.constants.Region>`                  Specify various regions in the data layout of
+:class:`RegridMethod<ESMF.api.constants.RegridMethod>`      Specify which interpolation method to use regridding
+:class:`StaggerLoc<ESMF.api.constants.StaggerLoc>`          Specify the position for data in a Grid cell
+:class:`TypeKind<ESMF.api.constants.TypeKind>`              Specify the type and kind of data
+:class:`UnmappedAction<ESMF.api.constants.UnmappedAction>`  Specify which action to take with respect to unmapped destination points
 =========================================================== ==============================
 
 

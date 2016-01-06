@@ -23,7 +23,7 @@ class TestField(TestBase):
 
     def examine_field_attributes(self, field):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        assert (type(field.staggerloc) is int)
+        assert (type(field.staggerloc) in [MeshLoc, StaggerLoc, int])
 
         # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.lower_bounds is np.ndarray))

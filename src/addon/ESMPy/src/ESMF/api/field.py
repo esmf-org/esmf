@@ -17,14 +17,48 @@ from ESMF.util.esmpyarray import *
 class Field(object):
     """
     The Field class is a Python wrapper object for the ESMF Field.
-    The individual values of all data arrays are referenced to those of the underlying Fortran ESMF object.
+    The individual values of all data arrays are referenced to those of the
+    underlying Fortran ESMF object.
 
-    A Field represents a physical field, such as temperature.   The Field class contains distributed and
-    discretized field data, a reference to its associated grid, and metadata. The Field class stores the grid
-    staggering for that physical field. This is the relationship of how the data array of a field maps onto a
-    grid (e.g. one item per cell located at the cell center, one item per cell located at the NW corner,
-    one item per cell vertex, etc.). This means that different Fields which are on the same underlying
-    Grid but have different staggerings can share the same Grid object without needing to replicate it multiple times.
+    A Field represents a physical field, such as temperature.   The Field class
+    contains distributed and discretized field data, a reference to its
+    associated grid, and metadata. The Field class stores the grid staggering
+    for that physical field. This is the relationship of how the data array of
+    a field maps onto a grid (e.g. one item per cell located at the cell center,
+    one item per cell located at the NW corner, one item per cell vertex, etc.).
+    This means that different Fields which are on the same underlying Grid but
+    have different staggerings can share the same Grid object without needing to
+    replicate it multiple times.
+
+    The following parameters are used to create a :class:`~ESMF.api.field.Field`
+    from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or
+    :class:`~ESMF.api.locstream.LocStream`.
+
+    *REQUIRED:*
+
+    :param Grid grid: A :class:`~ESMF.api.grid.Grid`,
+        :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`
+        with coordinates allocated on at least one stagger location.
+
+    *OPTIONAL:*
+
+    :param str name: An optional user friendly name for the
+        :class:`~ESMF.api.field.Field`.
+    :param TypeKind typekind: Type of the :class:`~ESMF.api.field.Field`
+        data. If ``None``, defaults to :attr:`~ESMF.api.constants.TypeKind.R8`.
+    :param StaggerLoc staggerloc: The stagger location of the
+        :class:`~ESMF.api.field.Field` data, only specify this argument when
+        using a :class:`~ESMF.api.grid.Grid`.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.StaggerLoc.CENTER`
+        in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
+    :param MeshLoc meshloc: The mesh location of the
+        :class:`~ESMF.api.field.Field` data, only specify this argument when
+        using a :class:`~ESMF.api.mesh.Mesh`
+        if ``None``, defaults to :attr:`~ESMF.api.constants.MeshLoc.NODE`.
+    :param tuple ndbounds: The number of entries in an extra
+        :class:`~ESMF.api.field.Field` dimension. This is represented as a
+        single value, a list or a tuple containing the number of entries for
+        each desired extra dimension of the :class:`~ESMF.api.field.Field`.
 
     For more information about the ESMF Field class, please see the `ESMF Field documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
@@ -36,49 +70,6 @@ class Field(object):
                 staggerloc=None,
                 meshloc=None,
                 ndbounds=None):
-        """
-        Create a Field from a Grid, Mesh or LocStream. \n
-        Required Arguments: \n
-            grid: a Grid, Mesh or LocStream with coordinates allocated on
-                  at least one stagger location. \n
-        Optional Arguments: \n
-            name: user friendly name for the Field. \n
-            typekind: the type of the Field data. \n
-                Argument values are: \n
-                    TypeKind.I4 \n
-                    TypeKind.I8 \n
-                    TypeKind.R4 \n
-                    (default) TypeKind.R8 \n
-            staggerloc: the stagger location on which to locate the
-                        Field data, only specify this argument when 
-                        using a Grid. \n
-                Argument values are: \n
-                    2D: \n
-                    (default) StaggerLoc.CENTER \n
-                    StaggerLoc.EDGE1 \n
-                    StaggerLoc.EDGE2 \n
-                    StaggerLoc.CORNER \n
-                    3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER \n
-                    StaggerLoc.EDGE1_VCENTER \n
-                    StaggerLoc.EDGE2_VCENTER \n
-                    StaggerLoc.CORNER_VCENTER \n
-                    StaggerLoc.CENTER_VFACE \n
-                    StaggerLoc.EDGE1_VFACE \n
-                    StaggerLoc.EDGE2_VFACE \n
-            meshloc: the mesh location on which to locate the Field
-                     data, only specify this argument when using a 
-                     Mesh. \n
-                Argument values are: \n
-                    (default) MeshLoc.NODE \n
-                    MeshLoc.ELEMENT \n
-            ndbounds: the number of entries in an extra field dimension. This
-                      is represented as a single value, a list or a tuple containing
-                      a number of entries for each desired extra dimension of a field.\n
-        Returns: \n
-            Field \n
-        """
-
         # optional arguments
         if staggerloc is None:
             staggerloc = StaggerLoc.CENTER
@@ -170,15 +161,6 @@ class Field(object):
         self._finalized = False
 
     def __del__(self):
-        """
-        Release the memory associated with a Field. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
         self.destroy()
 
     def __getitem__(self, slc):
@@ -205,9 +187,6 @@ class Field(object):
         return ret
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("Field:\n"
                   "    name = %r\n"
                   "    type = %r\n"
@@ -238,94 +217,120 @@ class Field(object):
     @property
     def data(self):
         """
-        :return: the data of the Field
+        :rtype: :attr:`~ESMF.api.constants.TypeKind`
+        :return: The data of the :class:`~ESMF.api.field.Field`
         """
         return self._data
 
     @property
     def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
+
         return self._finalized
 
     @property
     def grid(self):
         """
-        :return: the Grid, Mesh or LocStream upon which this Field is built
+        :rtype: :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, or
+            :class:`~ESMF.api.locstream.LocStream`
+        :return: The discretization object upon which the
+            :class:`~ESMF.api.field.Field` is built.
         """
         return self._grid
 
     @property
     def lower_bounds(self):
         """
-        :return: the lower bounds of the Field
+        :rtype: ndarray
+        :return: The lower bounds of the :class:`~ESMF.api.field.Field`.
         """
         return self._lower_bounds
 
     @property
     def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
         return self._meta
 
     @property
     def name(self):
         """
-        :return: the name of the Field
+        :rtype: str
+        :return: the name of the :class:`~ESMF.api.field.Field`.
         """
         return self._name
 
     @property
     def ndbounds(self):
         """
-        :return: the bounds of the extra dimensions in the Field
+        :rtype: list
+        :return: The bounds of the extra dimensions in the
+            :class:`~ESMF.api.field.Field`.
         """
         return self._ndbounds
 
     @property
     def rank(self):
         """
-        :return: the rank of the Field
+        :rtype: int
+        :return: The rank of the :class:`~ESMF.api.field.Field`.
         """
         return self._rank
 
     @property
     def staggerloc(self):
         """
-        :return: the Grid staggerloc or Mesh meshloc upon which this Field is built
+        :rtype: :attr:`~ESMF.api.constants.StaggerLoc` or
+            :attr:`~ESMF.api.constants.MeshLoc`
+        :return: The location upon which the `~ESMF.api.field.Field` is built.
         """
         return self._staggerloc
 
     @property
     def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for this
+            :class:`~ESMF.api.field.Field`.
+        """
         return self._struct
 
     @property
     def type(self):
         """
-        :return: the type of the data in the Field
+        :rtype: :attr:`~ESMF.api.constants.TypeKind`
+        :return: The type of the data in the :class:`~ESMF.api.field.Field`.
         """
         return self._type
 
     @property
     def upper_bounds(self):
         """
-        :return: the upper bounds of the Field
+        :rtype: ndarray
+        :return: The upper bounds of the :class:`~ESMF.api.field.Field`.
         """
         return self._upper_bounds
 
     @property
     def xd(self):
         """
-        :return: the number of extra (ungridded) dimensions of the Field
+        :rtype: int
+        :return: The number of extra (ungridded) dimensions of the
+            :class:`~ESMF.api.field.Field`.
         """
         return self._xd
 
     def copy(self):
         """
-        Copy a Field in an ESMF-safe manner. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            A new Field copy. \n
+        Copy a :class:`~ESMF.api.field.Field` in an ESMF-safe manner.
+
+        :return: A :class:`~ESMF.api.field.Field` shallow copy.
         """
         # shallow copy
         ret = copy(self)
@@ -336,13 +341,7 @@ class Field(object):
 
     def destroy(self):
         """
-        Release the memory associated with a Field. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Release the memory associated with a :class:`~ESMF.api.field.Field`.
         """
         if hasattr(self, '_finalized'):
             if self._finalized is False:
@@ -351,14 +350,9 @@ class Field(object):
 
     def get_area(self):
         """
-        Initialize a Field with the areas of the cells of the 
-        underlying Grid or Mesh. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None
+        Initialize an existing :class:`~ESMF.api.field.Field` with the areas of
+        the cells of the underlying :class:`~ESMF.api.grid.Grid` or
+        :class:`~ESMF.api.mesh.Mesh`.
         """
 
         # call into the ctypes layer
@@ -366,15 +360,20 @@ class Field(object):
 
     def read(self, filename, variable, ndbounds=None):
         """
-        Read data into a Field from a NetCDF file. \n
-        NOTE: This interface is not supported when ESMF is built with ESMF_COMM=mpiuni. \n
-        Required Arguments: \n
-            filename: the name of the NetCDF file. \n
-            variable: the name of the data variable to read. \n
-        Optional Arguments: \n
-            ndbounds: the number of ungridded dimensions to read.\n
-        Returns: \n
-            None \n
+        Read data into an existing :class:`~ESMF.api.field.Field` from a
+        CF-compliant NetCDF file.
+
+        :note: This interface is not supported when ESMF is built with
+            ``ESMF_COMM=mpiuni``.
+
+        *REQUIRED:*
+
+        :param str filename: The name of the NetCDF file.
+        :param str variable: The name of the data variable to read from file.
+
+        *OPTIONAL:*
+
+        :param list ndbounds: The number of ungridded dimensions to read.
         """
 
         assert (type(filename) is str)

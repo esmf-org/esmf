@@ -1,7 +1,7 @@
 ~~~~~~~~
-GridItem
+NormType
 ~~~~~~~~
 
-.. autoclass:: ESMF.api.constants.GridItem
+.. autoclass:: ESMF.api.constants.NormType
     :members:
     :exclude-members: __new__

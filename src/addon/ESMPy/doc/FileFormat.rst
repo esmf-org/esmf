@@ -2,5 +2,6 @@
 FileFormat
 ~~~~~~~~~~
 
-.. autoclass:: ESMF.api.constants._FileFormat
+.. autoclass:: ESMF.api.constants.FileFormat
     :members:
+    :exclude-members: __new__

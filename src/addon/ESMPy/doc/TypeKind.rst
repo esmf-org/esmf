@@ -2,5 +2,6 @@
 TypeKind
 ~~~~~~~~
 
-.. autoclass:: ESMF.api.constants._TypeKind
+.. autoclass:: ESMF.api.constants.TypeKind
     :members:
+    :exclude-members: __new__

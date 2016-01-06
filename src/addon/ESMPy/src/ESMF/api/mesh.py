@@ -23,19 +23,91 @@ import warnings
 class Mesh(object):
     """
     The Mesh class is a Python wrapper object for the ESMF Mesh.
-    The individual values of all coordinate and mask arrays are referenced to those of the
-    underlying Fortran ESMF object.
+    The individual values of all coordinate and mask arrays are referenced to
+    those of the underlying Fortran ESMF object.
 
-    The ESMF library provides a class for representing unstructured grids called the Mesh. Fields can be created
-    on a Mesh to hold data. Fields created on a Mesh can also be used as either the source or destination or both
-    of a regrididng operation which allows data to be moved between unstructured grids.  A Mesh is constructed of
-    nodes and elements. A node, also known as a vertex or corner, is a part of a Mesh which represents a single
-    point. Coordinate information is set in a node. An element, also known as a cell, is a part of a mesh which
-    represents a small region of space. Elements are described in terms of a connected set of nodes which represent
-    locations along their boundaries. Field data may be located on either the nodes or elements of a Mesh.
+    The ESMF library provides a class for representing unstructured grids called
+    the Mesh. Fields can be created on a Mesh to hold data. Fields created on a
+    Mesh can also be used as either the source or destination or both of a
+    regrididng operation which allows data to be moved between unstructured
+    grids.  A Mesh is constructed of nodes and elements. A node, also known as
+    a vertex or corner, is a part of a Mesh which represents a single point.
+    Coordinate information is set in a node. An element, also known as a cell,
+    is a part of a mesh which represents a small region of space. Elements are
+    described in terms of a connected set of nodes which represent locations
+    along their boundaries. Field data may be located on either the nodes or
+    elements of a Mesh.
 
-    For more information about the ESMF Mesh class, please see the `ESMF Mesh documentation
+    For more information about the ESMF Mesh class, please see the `ESMF Mesh
+    documentation
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+
+    An unstructured Mesh can be created in two different ways, as a Mesh in
+    memory, or from a SCRIP formatted or CF compliant UGRID file. The arguments
+    for each type of Mesh creation are outlined below.
+
+    **Created in-memory:**
+
+    The in-memory Mesh can be created manually in 3 steps:
+        1. create the Mesh (specifying parametric_dim and spatial_dim),
+        2. add nodes,
+        3. add elements.
+
+    *REQUIRED:*
+
+    :param int parametric_dim: the dimension of the topology of the
+        Mesh (e.g. a Mesh composed of squares would have a
+        parametric dimension of 2 and a Mesh composed of cubes
+        would have a parametric dimension of 3).
+    :param int spatial_dim: the number of coordinate dimensions
+        needed to describe the locations of the nodes making up the
+        Mesh.  For a manifold the spatial dimension can be larger
+        than the parametric dimension (e.g. the 2D surface of a
+        sphere in 3D space), but it cannot be smaller.
+
+    *OPTIONAL:*
+
+    :param CoordSys coord_sys: Coordinate system for the
+        :class:`~ESMF.api.mesh.Mesh`.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.CoordSys.SPH_DEG`.
+
+    **Created from file:**
+
+    Note that Meshes created from file do not use the parametric_dim and
+    spatial dim parameters.
+
+    *REQUIRED:*
+
+    :param str filename: the name of NetCDF file containing the Mesh.
+    :param FileFormat filetype: the input
+        :attr:`~ESMF.api.constants.FileFormat` of the Mesh.
+
+    *OPTIONAL:*
+
+    :param bool convert_to_dual: a boolean value to specify if the
+        dual Mesh should be calculated.  Defaults to False.  This
+        argument is only supported with
+        :attr:`~ESMF.api.constants.FileFormat.SCRIP`.
+    :param bool add_user_area: a boolean value to specify if an area
+        property should be added to the mesh.  This argument is only
+        supported for :attr:`~ESMF.api.constants.FileFormat.SCRIP`
+        or :attr:`~ESMF.api.constants.FileFormat.ESMFMESH`.
+        If ``None``, defaults to False.
+    :param str meshname: the name of the Mesh metadata variable in
+        a UGRID file.  This argument is only supported with
+        :attr:`~ESMF.api.constants.FileFormat.UGRID`.
+        If ``None``, defaults to the empty string.
+    :param MeshLoc mask_flag: an enumerated integer that, if
+        specified, tells whether a mask in a UGRID file should be
+        defined on the :attr:`~ESMF.api.constants.MeshLoc.NODE`s, or
+        :attr:`~ESMF.api.constants.MeshLoc.ELEMENT`s of the Mesh.
+        This argument is only supported with
+        :attr:`~ESMF.api.constants._FileFormat.UGRID`.
+        If ``None``, defaults to no masking.
+    :param str varname: a variable name for the mask in a UGRID file
+        if mask_flag is specified.  This argument is only supported
+        for :attr:`~ESMF.api.constants.FileFormat.UGRID`.
+        If ``None``, defaults to the empty string.
     """
 
     @initialize
@@ -49,63 +121,6 @@ class Mesh(object):
                  meshname="",
                  mask_flag=None,
                  varname=""):
-        """
-        Create an unstructured Mesh. This can be done two different ways, 
-        as a Mesh in memory, or from a SCRIP formatted or CF compliant UGRID 
-        file. The argument for each type of Mesh creation are outlined below. \n
-            Mesh in memory: \n
-                The in-memory Mesh can be created manually in 3 steps: \n
-                    1. create the Mesh (specifying parametric_dim and spatial_dim), \n
-                    2. add nodes, \n
-                    3. add elements. \n
-                    Required arguments for a Mesh in memory: \n
-                        parametric_dim: the dimension of the topology of the Mesh (e.g.
-                            a Mesh composed of squares would have a parametric dimension of
-                            2 and a Mesh composed of cubes would have a parametric dimension
-                            of 3). \n
-                        spatial_dim: the number of coordinate dimensions needed to
-                            describe the locations of the nodes making up the Mesh.  For a
-                            manifold the spatial dimension can be larger than the parametric
-                            dimension (e.g. the 2D surface of a sphere in 3D space), but it
-                            cannot be smaller. \n
-                    Optional arguments for creating a Mesh in memory: \n
-                        coord_sys: the coordinate system for the Mesh. \n
-                            Argument values are:\n
-                                (default) CoordSys.CART\n
-                                CoordSys.SPH_DEG\n
-                                CoordSys.SPH_RAD\n
-                        None \n
-            Mesh from file: \n
-                Note that Meshes created from file do not have the parametric_dim and
-                spatial dim set.  \n
-                Required arguments for creating a Mesh from file: \n
-                    filename: the name of NetCDF file containing the Mesh. \n
-                    filetype: the input file type of the Mesh. \n
-                        Argument values are: \n
-                            FileFormat.SCRIP \n
-                            FileFormat.ESMFMESH \n
-                            FileFormat.UGRID \n
-                Optional arguments for creating a Mesh from file: \n
-                    convert_to_dual: a boolean value to specify if the dual
-                        Mesh should be calculated.  Defaults to False.  This
-                        argument is only supported with filetype FileFormat.SCRIP.\n
-                    add_user_area: a boolean value to specify if an area
-                        property should be added to the mesh.  This argument is only
-                        supported for filetype FileFormat.SCRIP or FileFormat.ESMFMESH.
-                        Defaults to False. \n
-                    meshname: a string value specifying the name of the
-                        Mesh metadata variable in a UGRID file.  This argument is only
-                        supported with filetype FileFormat.UGRID.  Defaults to the empty string. \n
-                    mask_flag: an enumerated integer that, if specified, tells whether
-                        a mask in a UGRID file should be defined on the nodes (MeshLoc.NODE)
-                        or the elements (MeshLoc.ELEMENT) of the Mesh.  This argument is only
-                        supported with filetype FileFormat.UGRID.  Defaults to no masking. \n
-                    varname: a string to specify a variable name for the mask in a UGRID file
-                        if mask_flag is specified.  This argument is only supported for
-                        filetype FileFormat.UGRID.  Defaults to the empty string. \n
-            Returns: \n
-                Mesh \n
-        """
 
         # handle input arguments
         fromfile = False
@@ -202,15 +217,6 @@ class Mesh(object):
         self._finalized = False
 
     def __del__(self):
-        """
-        Release the memory associated with a Mesh. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
-        """
         self.destroy()
 
     def __getitem__(self, slc):
@@ -231,9 +237,6 @@ class Mesh(object):
         return ret
 
     def __repr__(self):
-        """
-        Return a string containing a printable representation of the object
-        """
         string = ("Mesh:\n"
                   "    rank = %r\n"
                   "    size = %r\n"
@@ -251,21 +254,29 @@ class Mesh(object):
     @property
     def area(self):
         """
-        :return: the Mesh area represented as a numpy array of floats of the same number of entries as Mesh elements
+        :rtype: A two element list of numpy arrays to hold values for the nodes
+            and elements of the :class:`~ESMF.api.mesh.Mesh`.
+        :return: the :class:`~ESMF.api.mesh.Mesh` area represented as a numpy
+            array of floats of the same number of entries as Mesh elements.
         """
         return self._area
 
     @property
     def coords(self):
         """
-        :return: a 2 element list containing numpy arrays of the coordinates of the nodes and elements of the Mesh
+        :rtype: A two element list of numpy arrays to hold values for the nodes
+            and elements of the :class:`~ESMF.api.mesh.Mesh`.
+        :return: the coordinates represented as a numpy array of floats
+            with a value for each node and/or element of the Mesh
+            :class:`~ESMF.api.mesh.Mesh`.
         """
         return self._coords
 
     @property
     def coord_sys(self):
         """
-        :return: the coordinate system of the mesh as defined by the CoordSys named constant
+        :rtype: :attr:`~ESMF.api.constants.CoordSys`
+        :return: the coordinate system of the :class:`~ESMF.api.mesh.Mesh`.
         """
         return self._coord_sys
 
@@ -299,17 +310,29 @@ class Mesh(object):
 
     @property
     def finalized(self):
+        """
+        :rtype: bool
+        :return: Indicate if the underlying ESMF memory for this object has
+            been deallocated.
+        """
         return self._finalized
 
     @property
     def mask(self):
         """
-        :return: A 2 element list of numpy arrays representing the masked values on the nodes and elements of the Mesh
+        :rtype: A two element list of numpy arrays to hold values for the nodes
+            and elements of the :class:`~ESMF.api.mesh.Mesh`.
+        :return: the masked values on the nodes and elements of the
+            :class:`~ESMF.api.mesh.Mesh`.
         """
         return self._mask
 
     @property
     def meta(self):
+        """
+        :rtype: tdk
+        :return: tdk
+        """
         return self._meta
 
     @property
@@ -335,21 +358,26 @@ class Mesh(object):
     @property
     def rank(self):
         """
-        :return: the rank of the Mesh, (i.e. the number of dimensions of the coordinate arrays (always 1)
+        :rtype: int
+        :return: the rank of the Mesh, (i.e. always 1).
         """
         return self._rank
 
     @property
     def size(self):
         """
-        :return: a 2 element list containing the number of nodes and elements in the Mesh on the current processor
+        :rtype: a two element list of integers.
+        :return: the number of nodes and elements in the Mesh on the current
+            processor.
         """
         return self._size
 
     @property
     def size_owned(self):
         """
-        :return: a 2 element list containing the number of owned nodes and elements in the Mesh on the current processor
+        :rtype: a two element list of integers.
+        :return: the number of owned nodes and elements in the Mesh on the
+            current processor.
         """
         return self._size_owned
 
@@ -359,6 +387,11 @@ class Mesh(object):
 
     @property
     def struct(self):
+        """
+        :rtype: pointer
+        :return: A pointer to the underlying ESMF allocation for this
+            :class:`~ESMF.api.mesh.Mesh`.
+        """
         return self._struct
 
     def add_elements(self, element_count,
@@ -369,51 +402,32 @@ class Mesh(object):
                      element_area=None,
                      element_coords=None):
         """
-        Add elements to a Mesh, this must be done after adding nodes. \n
-        Required Arguments: \n
-            element_count: the number of elements to add to the Mesh. \n
-            element_ids: a numpy array (internally cast to 
-                dtype=numpy.int32) to specify the element_ids. \n
-                    type: numpy.array \n
-                    shape: (element_count, 1) \n
-            element_types: a numpy array (internally cast to 
-                dtype=numpy.int32) to specify the element_types. \n
-                    type: numpy.array \n
-                    shape: (element_count, 1) \n
-                Argument values are: \n
-                    MeshElemType.TRI \n
-                    MeshElemType.QUAD \n
-                    MeshElemType.TETRA \n
-                    MeshElemType.HEX \n
-            element_conn: a numpy array (internally cast to 
-                dtype=numpy.int32) to specify the connectivity 
-                of the Mesh.  The connectivity array is 
-                constructed by concatenating
-                the tuples that correspond to the 
-                element_ids.  The connectivity tuples are
-                constructed by listing the node_ids of each 
-                element in COUNTERCLOCKWISE order. \n
-                    type: numpy.array \n
-                    shape: (sum(element_types[:], 1) \n
-        Optional Arguments: \n
-            element_mask: a numpy array (internally cast to 
-                dtype=numpy.int32) containing integer values to 
-                specify masked elements.  The specific values that are masked
-                are specified in the Regrid() constructor.\n
-                    type: numpy.array \n
-                    shape: (element_count, 1) \n
-            element_area: a numpy array (internally cast to 
-                dtype=numpy.float64) to specify the areas of the 
-                elements. \n
-                    type: numpy.array \n
-                    shape: (element_count, 1) \n
-            element_coords: a numpy array (internally cast to 
-                dtype=numpy.float64) to specify the coordinates of the
-                elements. \n
-                    type: numpy.array \n
-                    shape: (element_count, 1) \n
-        Returns: \n
-            None \n
+        Add elements to a Mesh, this must be done after adding nodes.
+
+        *REQUIRED:*
+
+        :param int element_count: the number of elements to add to the Mesh.
+        :param ndarray element_ids: a numpy array of of shape (element_count, 1)
+            to specify the element_ids.
+        :param ndarray element_types: a numpy array of
+            :attr:`~ESMF.api.constants.MeshElemType`s of shape
+            (element_count, 1) to specify the element types.
+        :param ndarray element_conn: a numpy array of shape
+            (sum(element_types[:], 1) to specify the connectivity of the Mesh.
+            The connectivity array is constructed by concatenating the tuples
+            that correspond to the element_ids. The connectivity tuples are
+            constructed by listing the node_ids of each element in
+            COUNTERCLOCKWISE order.
+
+        *OPTIONAL:*
+
+        :param ndarray element_mask: a numpy array of shape (element_count, 1)
+            containing integer values to specify masked elements. The specific
+            values that are masked are specified in the Regrid() constructor.
+        :param ndarray element_area: a numpy array of shape (element_count, 1)
+            to specify the areas of the elements.
+        :param ndarray element_coords: a numpy array of shape (element_count, 1)
+            to specify the coordinates of the elements.
         """
 
         # initialize not fromfile variables
@@ -468,29 +482,17 @@ class Mesh(object):
                   node_coords,
                   node_owners):
         """
-        Add nodes to a Mesh, this must be done before adding elements. \n
-        Required Arguments: \n
-            node_count: the number of nodes to add to the Mesh. \n
-            node_ids: a numpy array (internally cast to 
-                dtype=numpy.int32) to specify the node_ids. \n
-                    type: numpy.array \n
-                    shape: (node_count, 1) \n
-            node_coords: a numpy array (internally cast to 
-                dtype=numpy.float64) to specify the coordinates 
-                of the Mesh.  The array should be constructed by 
-                concatenating the coordinate tuples into a numpy array 
-                that correspond to node_ids. \n
-                    type: numpy.array \n
-                    shape: (spatial_dim*node_count, 1) \n
-            node_owners: a numpy array (internally cast to 
-                dtype=numpy.int32) to specify the rank of the
-                processor that owns each node. \n
-                    type: numpy.array \n
-                    shape: (node_count, 1) \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Add nodes to a Mesh, this must be done before adding elements.
+
+        :param int node_count: the number of nodes to add to the Mesh.
+        :param ndarray node_ids: a numpy array of shape (node_count, 1) to
+            specify the node_ids.
+        :param ndarray node_coords: a numpy array of shape
+            (spatial_dim*node_count, 1) to specify the coordinates of the Mesh.
+            The array should be constructed by concatenating the coordinate
+            tuples into a numpy array that correspond to node_ids.
+        :param ndarray node_owners: a numpy array of shape (node_count, 1) to
+            specify the rank of the processor that owns each node.
         """
 
         self._node_count = node_count
@@ -514,13 +516,9 @@ class Mesh(object):
 
     def copy(self):
         """
-        Copy a Mesh in an ESMF-safe manner. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            A new Mesh copy. \n
+        Copy a :class:`~ESMF.api.mesh.Mesh` in an ESMF-safe manner.
+
+        :return: A class:`~ESMF.api.mesh.Mesh` shallow copy.
         """
         # shallow copy
         ret = copy(self)
@@ -532,13 +530,7 @@ class Mesh(object):
 
     def destroy(self):
         """
-        Release the memory associated with a Mesh. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Release the memory associated with a :class:`~ESMF.api.mesh.Mesh`.
         """
         if hasattr(self, '_finalized'):
             if not self._finalized:
@@ -547,33 +539,33 @@ class Mesh(object):
 
     def free_memory(self):
         """
-        Free memory associated with the creation of a Mesh which is no longer needed. \n
-        Required Arguments: \n
-            None \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Free memory associated with the creation of a
+        :class:`~ESMF.api.locstream.Mesh` which is no longer needed for ongoing
+        operations.
         """
         # call into ctypes layer
         ESMP_MeshFreeMemory(self)
 
-    def get_coords(self, coord_dim, meshloc=node):
+    def get_coords(self, coord_dim, meshloc=MeshLoc.NODE):
         """
         Return a numpy array of coordinates at a specified Mesh 
         location (coordinates can only be returned for the Mesh NODES 
         at this time). The returned array is NOT a copy, it is
-        directly aliased to the underlying memory allocated by ESMF.\n
-        Required Arguments: \n
-           coord_dim: the dimension number of the coordinates to return:
-                       e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1) \n
-        Optional Arguments: \n
-             meshloc: the mesh location of the coordinates. \n
-                Argument values are: \n
-                    node=0 (default) \n
-                    element=1 \n
-        Returns: \n
-            A numpy array of coordinate values at the specified meshloc. \n
+        directly aliased to the underlying memory allocated by ESMF.
+
+        *REQUIRED:*
+
+        :param int coord_dim: the dimension number of the coordinates to return:
+            e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1)
+
+        *OPTIONAL:*
+
+        :param MeshLoc meshloc: the :attr:`~ESMF.api.constants.MeshLoc` of the
+            coordinates.  If ``None``, defaults to
+            :attr:`~ESMF.api.constants.MeshLoc.NODE`.
+
+        :return: A numpy array of coordinate values at the specified
+            :attr:`~ESMF.api.constants.MeshLoc`.
         """
 
         ret = None
@@ -626,13 +618,9 @@ class Mesh(object):
 
     def _write_(self, filename):
         """
-        Write the Mesh to a vtk formatted file. \n
-        Required Arguments: \n
-            filename: the name of the file, .vtk will be appended. \n
-        Optional Arguments: \n
-            None \n
-        Returns: \n
-            None \n
+        Write the Mesh to a vtk formatted file.
+
+        :param str filename: the name of the output file, .vtk will be appended.
         """
 
         # call into ctypes layer
