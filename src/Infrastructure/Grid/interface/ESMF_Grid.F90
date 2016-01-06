@@ -5594,7 +5594,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[distGrid] 
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
-!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+!      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to 
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -5837,7 +5837,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
-!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+!      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to 
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6032,7 +6032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.  
 ! \item[{[isSphere]}]
-!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+!      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the SCRIP file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to false. 
@@ -6549,7 +6549,7 @@ end function ESMF_GridCreateFrmScrip
 !      a two-element array containing the longitude and latitude variable names in a 
 !      GRIDSPEC file if there are multiple coordinates defined in the file
 ! \item[{[isSphere]}]
-!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+!      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the GridSpec file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to true (since GridSpec defaults to
