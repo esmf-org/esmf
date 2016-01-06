@@ -16,7 +16,7 @@
 #include "ESMF.h"
 
 ! The SLEEPTIME macro defines the time in seconds that Finalize will delay
-#define SLEEPTIME 3
+#define SLEEPTIME 3.0_ESMF_KIND_R8
 
 module ESMF_CompTunnelUTest_comp_mod
 
@@ -137,7 +137,7 @@ module ESMF_CompTunnelUTest_comp_mod
 
     ! In order to test blocking/non-blocking dual component feature put the
     ! actual component to sleep for a few seconds:
-    call ESMF_VMWtimeDelay(SLEEPTIME._ESMF_KIND_R8) ! sleep a few seconds
+    call ESMF_VMWtimeDelay(SLEEPTIME) ! sleep a few seconds
     
     ! Need a barrier so that time tests on the dual component PETs will be
     ! as expected. This is only for testing! Generally this kind of
@@ -186,7 +186,7 @@ module ESMF_CompTunnelUTest_comp_mod
       
     ! In order to test blocking/non-blocking dual component feature put the
     ! actual component to sleep for a few seconds:
-    call ESMF_VMWtimeDelay(SLEEPTIME._ESMF_KIND_R8) ! sleep a few seconds
+    call ESMF_VMWtimeDelay(SLEEPTIME) ! sleep a few seconds
     
     ! Need a barrier so that time tests on the dual component PETs will be
     ! as expected. This is only for testing! Generally this kind of
@@ -461,10 +461,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (blocking) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -490,7 +490,7 @@ program ESMF_CompTunnelUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   delayTime = endTime - startTime
   ! all PETs must not be blocking
-  call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   write(logString, *) "delayTime (non-blocking) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -516,10 +516,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (wait) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -574,7 +574,7 @@ program ESMF_CompTunnelUTest
   !   pair-E:     act.  act.  dual  act.  dual        act.
   !------------------------------------------------------------------------
   
-  ! --- create A's ---
+  ! --- create As ---
 
   !------------------------------------------------------------------------
   ! construct petList for the actual Component A
@@ -637,7 +637,7 @@ program ESMF_CompTunnelUTest
   
   deallocate(petList)
 
-  ! --- create B's ---
+  ! --- create Bs ---
 
   !------------------------------------------------------------------------
   ! construct petList for the actual Component B
@@ -700,7 +700,7 @@ program ESMF_CompTunnelUTest
   
   deallocate(petList)
 
-  ! --- create C's ---
+  ! --- create Cs ---
 
   !------------------------------------------------------------------------
   ! construct petList for the actual Component C
@@ -763,7 +763,7 @@ program ESMF_CompTunnelUTest
   
   deallocate(petList)
 
-  ! --- create D's ---
+  ! --- create Ds ---
 
   !------------------------------------------------------------------------
   ! construct petList for the actual Component D
@@ -826,7 +826,7 @@ program ESMF_CompTunnelUTest
   
   deallocate(petList)
   
-  ! --- create E's ---
+  ! --- create Es ---
 
   !------------------------------------------------------------------------
   ! construct petList for the actual Component E
@@ -923,7 +923,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- connect A's ---
+  ! --- connect As ---
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -949,7 +949,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- connect B's ---
+  ! --- connect Bs ---
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -967,7 +967,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- connect C's ---
+  ! --- connect Cs ---
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1075,7 +1075,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- destroy A's ---
+  ! --- destroy As ---
   
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1093,7 +1093,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
-  ! --- destroy B's ---
+  ! --- destroy Bs ---
   
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1111,8 +1111,8 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- don't destroy C's in order to test that automatic garbage collection
-  ! --- during ESMF_Finalize() correctly terminates C's ServiceLoop & cleans up
+  ! --- don't destroy Cs in order to test that automatic garbage collection
+  ! --- during ESMF_Finalize() correctly terminates Cs ServiceLoop & cleans up
   
   !------------------------------------------------------------------------
   ! -- socket based component pair "D" with the following petLists:
@@ -1121,7 +1121,7 @@ program ESMF_CompTunnelUTest
   !   pair-D:           dual  act.  act.  dual        act.
   !------------------------------------------------------------------------
   
-  ! --- connect D's ---
+  ! --- connect Ds ---
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1139,7 +1139,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- initialize D's blocking
+  ! --- initialize Ds blocking
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1152,7 +1152,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- run D's blocking and non-blocking
+  ! --- run Ds blocking and non-blocking
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1198,10 +1198,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualCompD)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (blocking) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1237,7 +1237,7 @@ program ESMF_CompTunnelUTest
   endif
   !------------------------------------------------------------------------
 
-  ! --- finalize D's non-blocking
+  ! --- finalize Ds non-blocking
 
   call ESMF_VMWtime(startTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1274,17 +1274,17 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualCompD)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (wait) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
   
-  ! --- destroy D's ---
+  ! --- destroy Ds ---
   
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1374,7 +1374,7 @@ program ESMF_CompTunnelUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
-  ! make sure the dual component isn't executed while the actual component waits
+  ! make sure the dual component is not executed while the actual component waits
   if (ESMF_GridCompIsPetLocal(dualCompE)) then
     call ESMF_VMWtimeDelay(real(timeout+1,ESMF_KIND_R8)) ! sleep a few seconds
   endif
@@ -1403,7 +1403,7 @@ program ESMF_CompTunnelUTest
   endif
   !------------------------------------------------------------------------
 
-  ! make sure the dual component isn't executed while the actual component waits
+  ! make sure the dual component is not executed while the actual component waits
   if (ESMF_GridCompIsPetLocal(dualCompE)) then
     call ESMF_VMWtimeDelay(real(timeout+1,ESMF_KIND_R8)) ! sleep a few seconds
   endif
@@ -1455,7 +1455,7 @@ program ESMF_CompTunnelUTest
   endif
   !------------------------------------------------------------------------
 
-  ! --- connect E's with timeout on actual side: ServiceLoop ---
+  ! --- connect Es with timeout on actual side: ServiceLoop ---
 
   call ESMF_GridCompGet(unionCompE, vm=vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1554,7 +1554,7 @@ program ESMF_CompTunnelUTest
   endif
   !------------------------------------------------------------------------
   
-  ! --- re-connect E's with timeout on actual side: ServiceLoop ---
+  ! --- re-connect Es with timeout on actual side: ServiceLoop ---
 
   ! synchronize PETs across actual and dual components E
   if (ESMF_GridCompIsPetLocal(unionCompE)) then
@@ -1633,7 +1633,7 @@ program ESMF_CompTunnelUTest
   endif
   !------------------------------------------------------------------------
 
-  ! --- again re-connect E's ---
+  ! --- again re-connect Es ---
 
   ! synchronize PETs across actual and dual components E
   if (ESMF_GridCompIsPetLocal(unionCompE)) then
@@ -1658,7 +1658,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- initialize E's blocking
+  ! --- initialize Es blocking
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1671,7 +1671,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- run E's blocking with timeout
+  ! --- run Es blocking with timeout
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1755,7 +1755,7 @@ program ESMF_CompTunnelUTest
   call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  ! --- don't destroy E's in order to test that automatic garbage collection
+  ! --- don't destroy Es in order to test that automatic garbage collection
   ! --- during ESMF_Finalize() correctly terminates E's ServiceLoop & cleans up
 
 10 continue
