@@ -101,7 +101,7 @@ class Grid(object):
     :param list coord_names:  A two-element array containing the longitude and
         latitude variable names in a GRIDSPEC file if there are multiple
         coordinates defined in the file. This argument is only supported with
-        filetype :attr:`~ESMF.api.constants._FileFormat.GRIDSPEC`.
+        filetype :attr:`~ESMF.api.constants.FileFormat.GRIDSPEC`.
         Defaults to ``None``.
     """
 
@@ -397,7 +397,8 @@ class Grid(object):
         :rtype: A list of numpy arrays with an entry for every stagger location
             of the :class:`~ESMF.api.grid.Grid`.
         :return: The :class:`~ESMF.api.grid.Grid` cell areas represented as
-            numpy arrays of floats of size given by upper_bounds - lower_bounds.
+            numpy arrays of floats of size given by
+            ``upper_bounds - lower_bounds``.
         """
 
         return self._area
@@ -415,10 +416,11 @@ class Grid(object):
     @property
     def coords(self):
         """
-        :rtype: 2D list of numpy arrays of size given by upper_bounds -
-            lower_bounds, where the first index represents the stagger locations
-            of the :class:`~ESMF.api.grid.Grid` and the second index represent
-            the coordinate dimensions of the :class:`~ESMF.api.grid.Grid`.
+        :rtype: 2D list of numpy arrays of size given by
+            ``upper_bounds - lower_bounds``, where the first index represents
+            the stagger locations of the :class:`~ESMF.api.grid.Grid` and the
+            second index represent the coordinate dimensions of the
+            :class:`~ESMF.api.grid.Grid`.
         :return: The coordinates of the :class:`~ESMF.api.grid.Grid`.
         """
 
@@ -460,7 +462,7 @@ class Grid(object):
             of the :class:`~ESMF.api.grid.Grid`.
         :return: The lower bounds of the :class:`~ESMF.api.grid.Grid`
             represented as numpy arrays of ints of size given by
-            upper_bounds - lower_bounds.
+            ``upper_bounds - lower_bounds``.
         """
 
         return self._lower_bounds
@@ -471,7 +473,8 @@ class Grid(object):
         :rtype: A list of numpy arrays with an entry for every stagger location
             of the :class:`~ESMF.api.grid.Grid`.
         :return: The mask of the :class:`~ESMF.api.grid.Grid` represented as
-            numpy arrays of ints of size given by upper_bounds - lower_bounds.
+            numpy arrays of ints of size given by `
+            `upper_bounds - lower_bounds``.
         """
 
         return self._mask
@@ -521,7 +524,8 @@ class Grid(object):
         """
         :rtype: int
         :return: The periodic dimension of the :class:`~ESMF.api.grid.Grid`
-            (e.g. 0 for x or longitude, 1 for y or latitude, etc.).
+            (e.g. ``0`` for ``x`` or ``longitude``, ``1`` for ``y`` or
+            ``latitude``, etc.).
         """
 
         return self._periodic_dim
@@ -531,7 +535,8 @@ class Grid(object):
         """
         :rtype: int
         :return: The pole dimension of the :class:`~ESMF.api.grid.Grid`
-            (e.g. 0 for x or longitude, 1 for y or latitude, etc.).
+            (e.g. ``0`` for ``x`` or ``longitude``, ``1`` for ``y`` or
+            ``latitude``, etc.).
         """
 
         return self._pole_dim
@@ -551,7 +556,8 @@ class Grid(object):
         :rtype: A list of numpy arrays with an entry for every stagger location
             of the :class:`~ESMF.api.grid.Grid`.
         :return: The size of the :class:`~ESMF.api.grid.Grid` represented as
-            numpy arrays of ints of size given by upper_bounds - lower_bounds.
+            numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
         """
 
         return self._size
@@ -592,7 +598,7 @@ class Grid(object):
             of the :class:`~ESMF.api.grid.Grid`.
         :return: The upper bounds of the :class:`~ESMF.api.grid.Grid`
             represented as numpy arrays of ints of size given by
-            upper_bounds - lower_bounds.
+            ``upper_bounds - lower_bounds``.
         """
         return self._upper_bounds
 
@@ -607,13 +613,13 @@ class Grid(object):
             in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
             3D.
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1)
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
             (coordinates will not be returned if coord_dim is not specified and
             staggerlocs is a list with more than one element).
         :param bool from_file: Boolean for internal use to determine whether the
             :class:`~ESMF.api.grid.Grid` has already been created from file.
 
-        :return : A numpy array of coordinate values if staggerloc and
+        :return: A numpy array of coordinate values if staggerloc and
             coord_dim are specified, otherwise return None.
         """
         if staggerloc is None:
@@ -648,7 +654,8 @@ class Grid(object):
 
         *REQUIRED:*
 
-        :param GridItem item: The `~ESMF.api.constants.GridItem` to allocate.
+        :param GridItem item: The :attr:`~ESMF.api.constants.GridItem` to
+            allocate.
 
         *OPTIONAL:*
 
@@ -732,9 +739,9 @@ class Grid(object):
         *REQUIRED:*
 
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1)
-            (coordinates will not be returned if coord_dim is not specified and
-            staggerlocs is a list with more than one element).
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            (coordinates will not be returned if ``coord_dim`` is not specified
+            and ``staggerlocs`` is a list with more than one element).
 
         *OPTIONAL:*
 
@@ -769,13 +776,14 @@ class Grid(object):
 
         *REQUIRED:*
 
-        :param GridItem item: The `~ESMF.api.constants.GridItem` to return.
+        :param GridItem item: The :attr:`~ESMF.api.constants.GridItem` to
+            return.
 
         *OPTIONAL:*
 
         :param StaggerLoc staggerloc: The stagger location of the item
             values. If ``None``, defaults to
-            :attr:`~ESMF.api.constants._StaggerLoc.CENTER` in 2D and
+            :attr:`~ESMF.api.constants.StaggerLoc.CENTER` in 2D and
             :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
 
         :return: A numpy array of mask or area values at the specified staggerloc.

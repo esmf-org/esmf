@@ -49,7 +49,7 @@ class Mesh(object):
     **Created in-memory:**
 
     The in-memory Mesh can be created manually in 3 steps:
-        1. create the Mesh (specifying parametric_dim and spatial_dim),
+        1. create the Mesh (specifying ``parametric_dim`` and ``spatial_dim``),
         2. add nodes,
         3. add elements.
 
@@ -73,8 +73,8 @@ class Mesh(object):
 
     **Created from file:**
 
-    Note that Meshes created from file do not use the parametric_dim and
-    spatial dim parameters.
+    Note that Meshes created from file do not use the ``parametric_dim`` and
+    ``spatial_dim`` parameters.
 
     *REQUIRED:*
 
@@ -102,7 +102,7 @@ class Mesh(object):
         defined on the :attr:`~ESMF.api.constants.MeshLoc.NODE`s, or
         :attr:`~ESMF.api.constants.MeshLoc.ELEMENT`s of the Mesh.
         This argument is only supported with
-        :attr:`~ESMF.api.constants._FileFormat.UGRID`.
+        :attr:`~ESMF.api.constants.FileFormat.UGRID`.
         If ``None``, defaults to no masking.
     :param str varname: a variable name for the mask in a UGRID file
         if mask_flag is specified.  This argument is only supported
@@ -256,7 +256,7 @@ class Mesh(object):
         """
         :rtype: A two element list of numpy arrays to hold values for the nodes
             and elements of the :class:`~ESMF.api.mesh.Mesh`.
-        :return: the :class:`~ESMF.api.mesh.Mesh` area represented as a numpy
+        :return: The :class:`~ESMF.api.mesh.Mesh` area represented as a numpy
             array of floats of the same number of entries as Mesh elements.
         """
         return self._area
@@ -266,7 +266,7 @@ class Mesh(object):
         """
         :rtype: A two element list of numpy arrays to hold values for the nodes
             and elements of the :class:`~ESMF.api.mesh.Mesh`.
-        :return: the coordinates represented as a numpy array of floats
+        :return: The coordinates represented as a numpy array of floats
             with a value for each node and/or element of the Mesh
             :class:`~ESMF.api.mesh.Mesh`.
         """
@@ -276,7 +276,7 @@ class Mesh(object):
     def coord_sys(self):
         """
         :rtype: :attr:`~ESMF.api.constants.CoordSys`
-        :return: the coordinate system of the :class:`~ESMF.api.mesh.Mesh`.
+        :return: The coordinate system of the :class:`~ESMF.api.mesh.Mesh`.
         """
         return self._coord_sys
 
@@ -322,7 +322,7 @@ class Mesh(object):
         """
         :rtype: A two element list of numpy arrays to hold values for the nodes
             and elements of the :class:`~ESMF.api.mesh.Mesh`.
-        :return: the masked values on the nodes and elements of the
+        :return: The masked values on the nodes and elements of the
             :class:`~ESMF.api.mesh.Mesh`.
         """
         return self._mask
@@ -359,15 +359,15 @@ class Mesh(object):
     def rank(self):
         """
         :rtype: int
-        :return: the rank of the Mesh, (i.e. always 1).
+        :return: The rank of the Mesh, (i.e. always 1).
         """
         return self._rank
 
     @property
     def size(self):
         """
-        :rtype: a two element list of integers.
-        :return: the number of nodes and elements in the Mesh on the current
+        :rtype: A two element list of integers.
+        :return: The number of nodes and elements in the Mesh on the current
             processor.
         """
         return self._size
@@ -375,8 +375,8 @@ class Mesh(object):
     @property
     def size_owned(self):
         """
-        :rtype: a two element list of integers.
-        :return: the number of owned nodes and elements in the Mesh on the
+        :rtype: A two element list of integers.
+        :return: The number of owned nodes and elements in the Mesh on the
             current processor.
         """
         return self._size_owned
@@ -407,27 +407,28 @@ class Mesh(object):
         *REQUIRED:*
 
         :param int element_count: the number of elements to add to the Mesh.
-        :param ndarray element_ids: a numpy array of of shape (element_count, 1)
-            to specify the element_ids.
+        :param ndarray element_ids: a numpy array of of shape
+            ``(element_count, 1)`` to specify the element ids.
         :param ndarray element_types: a numpy array of
             :attr:`~ESMF.api.constants.MeshElemType`s of shape
-            (element_count, 1) to specify the element types.
+            ``(element_count, 1)`` to specify the element types.
         :param ndarray element_conn: a numpy array of shape
-            (sum(element_types[:], 1) to specify the connectivity of the Mesh.
-            The connectivity array is constructed by concatenating the tuples
-            that correspond to the element_ids. The connectivity tuples are
-            constructed by listing the node_ids of each element in
-            COUNTERCLOCKWISE order.
+            ``sum(element_types[:], 1)`` to specify the connectivity of the
+            Mesh. The connectivity array is constructed by concatenating the
+            tuples that correspond to the element_ids. The connectivity tuples
+            are constructed by listing the node_ids of each element in
+            **COUNTERCLOCKWISE** order.
 
         *OPTIONAL:*
 
-        :param ndarray element_mask: a numpy array of shape (element_count, 1)
-            containing integer values to specify masked elements. The specific
-            values that are masked are specified in the Regrid() constructor.
-        :param ndarray element_area: a numpy array of shape (element_count, 1)
-            to specify the areas of the elements.
-        :param ndarray element_coords: a numpy array of shape (element_count, 1)
-            to specify the coordinates of the elements.
+        :param ndarray element_mask: a numpy array of shape
+            ``(element_count, 1)`` containing integer values to specify masked
+            elements. The specific values that are masked are specified in the
+            Regrid() constructor.
+        :param ndarray element_area: a numpy array of shape
+            ``(element_count, 1)`` to specify the areas of the elements.
+        :param ndarray element_coords: a numpy array of shape
+            ``(element_count, 1)`` to specify the coordinates of the elements.
         """
 
         # initialize not fromfile variables
@@ -518,7 +519,7 @@ class Mesh(object):
         """
         Copy a :class:`~ESMF.api.mesh.Mesh` in an ESMF-safe manner.
 
-        :return: A class:`~ESMF.api.mesh.Mesh` shallow copy.
+        :return: A :class:`~ESMF.api.mesh.Mesh` shallow copy.
         """
         # shallow copy
         ret = copy(self)
@@ -540,7 +541,7 @@ class Mesh(object):
     def free_memory(self):
         """
         Free memory associated with the creation of a
-        :class:`~ESMF.api.locstream.Mesh` which is no longer needed for ongoing
+        :class:`~ESMF.api.mesh.Mesh` which is no longer needed for ongoing
         operations.
         """
         # call into ctypes layer
@@ -549,14 +550,15 @@ class Mesh(object):
     def get_coords(self, coord_dim, meshloc=MeshLoc.NODE):
         """
         Return a numpy array of coordinates at a specified Mesh 
-        location (coordinates can only be returned for the Mesh NODES 
+        location (coordinates can only be returned for the Mesh
+        :attr:`~ESMF.api.constants.MeshLoc.NODE`s
         at this time). The returned array is NOT a copy, it is
         directly aliased to the underlying memory allocated by ESMF.
 
         *REQUIRED:*
 
         :param int coord_dim: the dimension number of the coordinates to return:
-            e.g. [x, y, z] = (0, 1, 2), or [lat, lon] = (0, 1)
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
 
         *OPTIONAL:*
 
