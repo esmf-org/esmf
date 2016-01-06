@@ -28,8 +28,8 @@ class LocStream(dict):
 
     In the data assimilation world, location streams can be thought of as a set
     of observations. Their locations are generally described using Cartesian
-    (x, y, z), or (lat, lon, height) coordinates. There is no assumption of
-    any regularity in the positions of the points. To make the concept more
+    ``(x, y, z)``, or ``(lat, lon, height)`` coordinates. There is no assumption
+    of any regularity in the positions of the points. To make the concept more
     general, the locations for each data point are represented using a construct
     called keys. Keys can include other descriptors besides location, including
     a second set of coordinates.
@@ -49,8 +49,8 @@ class LocStream(dict):
     .. note:: Setting keys of lists of mixed types can result in errors due to
     type mismatches from the ESMF library.
 
-    .. note:: Mask must be of type TypeKind.I4, and coordinates must by of type
-    TypeKind.R8.
+    .. note:: Mask must be of type :attr:`~ESMF.api.constants.TypeKind.I4`,
+    and coordinates must by of type :attr:`~ESMF.api.constants.TypeKind.R8`.
 
     For ESMF to be able to recognize coordinates specified in a LocStream key
     they need to be named with the appropriate identifiers. The particular
@@ -69,7 +69,7 @@ class LocStream(dict):
 
     :param int location_count: The number of points in this stream.
     :param CoordSys coord_sys: Coordinate system for the location stream.
-        If ``None``, defaults to :attr:`ESMF.api.constants.CoordSys.SPH_DEG`.
+        If ``None``, defaults to :attr:`~ESMF.api.constants.CoordSys.SPH_DEG`.
     :param str name: Optional name for the location stream.
     :param bool esmf: Internal parameter controlling shallow copying by ESMF.
     """
@@ -258,7 +258,7 @@ class LocStream(dict):
     def upper_bounds(self):
         """
         :rtype: int
-        :return: the upper bounds of the :class:`~ESMF.api.locstream.LocStream`.
+        :return: The upper bounds of the :class:`~ESMF.api.locstream.LocStream`.
         """
 
         return self._upper_bounds

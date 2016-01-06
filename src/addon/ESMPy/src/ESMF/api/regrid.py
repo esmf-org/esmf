@@ -53,7 +53,7 @@ class Regrid(object):
         to construct on the source Grid for regridding.  If ``None``, defaults
         to: :attr:`~ESMF.api.constants.PoleMethod.NONE` for
         regridmethod == :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`, or
-        :attr:`~ESMF.api.constants._PoleMethod.ALLAVG` for
+        :attr:`~ESMF.api.constants.PoleMethod.ALLAVG` for
         regridmethod != :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`.
     :param int regrid_pole_npoints: specifies how many points to average over
         if polemethod == :attr:`~ESMF.api.constants.PoleMethod.ALLAVG`.
@@ -62,7 +62,7 @@ class Regrid(object):
         which distances are calculated and the shape of the edges that make up a
         cell.  If ``None``, defaults to:
         :attr:`~ESMF.api.constants.LineType.GREAT_CIRCLE` for
-        regridmethod == :attr:`~ESMF.api.constants._RegridMethod.CONSERVE`, or
+        regridmethod == :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`, or
         :attr:`~ESMF.api.constants.LineType.CART` for
         regridmethod != :attr:`~ESMF.api.constants.RegridMethod.CONSERVE`.
     :param NormType norm_type: control which type of normalization to do when
@@ -120,6 +120,7 @@ class Regrid(object):
                            regridmethod=regrid_method,
                            polemethod=pole_method,
                            regridPoleNPnts=regrid_pole_npoints,
+                           lineType=line_type,
                            normType=norm_type,
                            unmappedaction=unmapped_action,
                            ignoreDegenerate=ignore_degenerate,
@@ -282,7 +283,7 @@ class Regrid(object):
         """
         Copy a :class:`~ESMF.api.regrid.Regrid` in an ESMF-safe manner.
 
-        :return: A class:`~ESMF.api.regrid.Regrid` shallow copy.
+        :return: A :class:`~ESMF.api.regrid.Regrid` shallow copy.
         """
 
         # shallow copy

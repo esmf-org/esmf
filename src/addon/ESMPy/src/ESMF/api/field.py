@@ -288,7 +288,8 @@ class Field(object):
         """
         :rtype: :attr:`~ESMF.api.constants.StaggerLoc` or
             :attr:`~ESMF.api.constants.MeshLoc`
-        :return: The location upon which the `~ESMF.api.field.Field` is built.
+        :return: The location upon which the :class:`~ESMF.api.field.Field`
+            is built.
         """
         return self._staggerloc
 
