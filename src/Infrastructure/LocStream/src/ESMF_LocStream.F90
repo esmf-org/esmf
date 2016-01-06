@@ -2757,6 +2757,147 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamGetBounds"
+!BOP
+! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
+
+! !INTERFACE:
+      subroutine ESMF_LocStreamGetBounds(locstream, keywordEnforcer,   &
+          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,   &
+          computationalLBound, computationalUBound, computationalCount,&
+          rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream),   intent(in) :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(in),  optional :: localDE
+      integer,                intent(out), optional :: exclusiveLBound
+      integer,                intent(out), optional :: exclusiveUBound
+      integer,                intent(out), optional :: exclusiveCount
+      integer,                intent(out), optional :: computationalLBound
+      integer,                intent(out), optional :: computationalUBound
+      integer,                intent(out), optional :: computationalCount
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets the bounds of a localDE for a locstream.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{locstream}]
+!          LocStream to get the information from.
+!     \item[{localDE}]
+!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
+!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
+!          in which case it will default to {\tt localDE=0}.
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!     \item[{[exclusiveCount]}]
+ !          Upon return this holds the number of items in the exclusive region
+!     \newline
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the computational region.
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the computational region.
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region
+!     \newline
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+ integer :: localrc
+ integer :: tmpLBnd, tmpUBnd
+ type(ESMF_LocStreamType), pointer :: lstypep
+
+ ! Initialize return code 
+ localrc = ESMF_RC_NOT_IMPL 
+ if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+ ! Check init status of arguments 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+
+ ! Get locstream type object
+ lstypep=>locstream%lstypep
+
+ ! Get exclusiveLBound
+ if (present(exclusiveLBound)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             exclusiveLBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get exclusiveUBound
+ if (present(exclusiveUBound)) then
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+              exclusiveUBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get exclusiveCount
+ if (present(exclusiveCount)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpLBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpUBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    exclusiveCount=tmpUBnd-tmpLBnd+1
+ endif 
+
+ ! For now computational bounds are the same as exclusive bounds
+
+ ! Get computationalLBound
+ if (present(computationalLBound)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             computationalLBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get computationalUBound
+ if (present(computationalUBound)) then
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             computationalUBound, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+ endif 
+
+ ! Get computationalCount
+ if (present(computationalCount)) then
+    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpLBnd, localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
+             tmpUBnd, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    computationalCount=tmpUBnd-tmpLBnd+1
+ endif 
+
+ ! Return successfully 
+ if (present(rc)) rc = ESMF_SUCCESS 
+
+end subroutine ESMF_LocStreamGetBounds
+
+
+!------------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyArray"
 !BOP
@@ -3433,146 +3574,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LocStreamGetKeyR8
 
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LocStreamGetBounds"
-!BOP
-! !IROUTINE: ESMF_LocStreamGetBounds - Get DE-local bounds of a LocStream
-
-! !INTERFACE:
-      subroutine ESMF_LocStreamGetBounds(locstream, keywordEnforcer,   &
-          localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,   &
-          computationalLBound, computationalUBound, computationalCount,&
-          rc)
-!
-! !ARGUMENTS:
-      type(ESMF_LocStream),   intent(in) :: locstream
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(in),  optional :: localDE
-      integer,                intent(out), optional :: exclusiveLBound
-      integer,                intent(out), optional :: exclusiveUBound
-      integer,                intent(out), optional :: exclusiveCount
-      integer,                intent(out), optional :: computationalLBound
-      integer,                intent(out), optional :: computationalUBound
-      integer,                intent(out), optional :: computationalCount
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    This method gets the bounds of a localDE for a locstream.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{locstream}]
-!          LocStream to get the information from.
-!     \item[{localDE}]
-!         The local DE for which information is requested. {\tt [0,..,localDECount-1]}.
-!         For {\tt localDECount==1} the {\tt localDE} argument may be omitted,
-!          in which case it will default to {\tt localDE=0}.
-!     \item[{[exclusiveLBound]}]
-!          Upon return this holds the lower bounds of the exclusive region.
-!     \item[{[exclusiveUBound]}]
-!          Upon return this holds the upper bounds of the exclusive region.
-!     \item[{[exclusiveCount]}]
- !          Upon return this holds the number of items in the exclusive region
-!     \newline
-!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
-!     \item[{[computationalLBound]}]
-!          Upon return this holds the lower bounds of the computational region.
-!     \item[{[computationalUBound]}]
-!          Upon return this holds the upper bounds of the computational region.
-!     \item[{[computationalCount]}]
-!          Upon return this holds the number of items in the computational region
-!     \newline
-!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
- integer :: localrc
- integer :: tmpLBnd, tmpUBnd
- type(ESMF_LocStreamType), pointer :: lstypep
-
- ! Initialize return code 
- localrc = ESMF_RC_NOT_IMPL 
- if (present(rc)) rc = ESMF_RC_NOT_IMPL 
-
- ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
-
- ! Get locstream type object
- lstypep=>locstream%lstypep
-
- ! Get exclusiveLBound
- if (present(exclusiveLBound)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             exclusiveLBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get exclusiveUBound
- if (present(exclusiveUBound)) then
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-              exclusiveUBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get exclusiveCount
- if (present(exclusiveCount)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpLBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpUBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    exclusiveCount=tmpUBnd-tmpLBnd+1
- endif 
-
- ! For now computational bounds are the same as exclusive bounds
-
- ! Get computationalLBound
- if (present(computationalLBound)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             computationalLBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get computationalUBound
- if (present(computationalUBound)) then
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             computationalUBound, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
- endif 
-
- ! Get computationalCount
- if (present(computationalCount)) then
-    call c_ESMC_locstreamgetelbnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpLBnd, localrc)
-     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_locstreamgeteubnd(lstypep%distgrid, localDE, lstypep%indexflag, & 
-             tmpUBnd, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-    computationalCount=tmpUBnd-tmpLBnd+1
- endif 
-
- ! Return successfully 
- if (present(rc)) rc = ESMF_SUCCESS 
-
-end subroutine ESMF_LocStreamGetBounds
-
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamMatch()"
@@ -3657,6 +3658,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return {\tt .true.} if the {\tt locstream} has been created. Otherwise return 
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
 !   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[locstream]
+!     {\tt ESMF\_LocStream} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------    
     ESMF_LocStreamIsCreated = .false.   ! initialize

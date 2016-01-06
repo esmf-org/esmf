@@ -180,7 +180,7 @@ ESMC_Grid ESMC_GridCreateFromFile(const char *filename, int fileTypeFlag,
 //      List of decomposition flags indicating how each dimension of the
 //      tile is to be divided between the DEs. The default setting
 //      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-//      Section~\ref{const:decompflag} for a full description of the 
+//      Section~\ref{const:cdecompflag} for a full description of the 
 //      possible options. 
 // \item[{[isSphere]}]
 //      Set to 1 for a spherical grid, or 0 for regional. Defaults to 1.
