@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2015, University Corporation for Atmospheric Research, 
+! Copyright 2002-2016, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -47,7 +47,7 @@ module ESMF_MeshMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
-  use ESMF_RHandleMod
+   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   use ESMF_IOScripMod
   use ESMF_IOUGridMod
@@ -96,7 +96,7 @@ module ESMF_MeshMod
     integer :: origElemCount
 
       ESMF_INIT_DECLARE
-  end type
+   end type
 
   type ESMF_MeshElement
 #ifndef ESMF_NO_SEQUENCE
@@ -145,7 +145,7 @@ module ESMF_MeshMod
 ! !PUBLIC TYPES:
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
-         ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
+          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
 
@@ -194,7 +194,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
+ ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
     '$Id$'
 
@@ -243,7 +243,7 @@ module ESMF_MeshMod
 !     ESMF MeshLoc.  It is provided for easy comparisons of 
 !     these types with defined values.
 !
-!EOPI
+ !EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ module ESMF_MeshMod
 ! !IROUTINE: ESMF_MeshOperator(==) - Mesh equality operator
 !
 ! !INTERFACE:
-  interface operator(==)
+   interface operator(==)
 !   if (mesh1 == mesh2) then ... endif
 !             OR
 !   result = (mesh1 == mesh2)
@@ -341,7 +341,7 @@ module ESMF_MeshMod
 !   if (mesh1 /= mesh2) then ... endif
 !             OR
 !   result = (mesh1 /= mesh2)
-! !RETURN VALUE:
+ ! !RETURN VALUE:
 !   logical :: result
 !
 ! !ARGUMENTS:
@@ -390,7 +390,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshEQ()"
 !BOPI
-! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
+ ! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
 !
 ! !INTERFACE:
   function ESMF_MeshEQ(mesh1, mesh2)
@@ -2738,51 +2738,6 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshSetMOAB()"
-!BOPI
-! !IROUTINE: ESMF_MeshSetMOAB -- Turn on or off moab
-!
-! !INTERFACE:
-   subroutine ESMF_MeshSetMOAB(moabOn, rc)
-!
-! !ARGUMENTS:
-    logical, intent(in)                        :: moabOn
-    integer, intent(out) , optional            :: rc
-!
-! !DESCRIPTION:
-!   Turn on Moab 
-!
-!   \begin{description}
-!   \item [moabOn]
-!         Variable used to turn MOAB on or off
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
-
-    ! Init localrc
-    localrc = ESMF_SUCCESS
-    
-   ! Translate to integer
-   intMoabOn=0
-   if (moabOn) then
-      intMoabOn=1
-   endif
-
-    call c_esmc_meshsetMOAB(intMoabOn, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    end subroutine ESMF_MeshSetMOAB
-
     
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3809,6 +3764,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end function ESMF_MeshMatch
 !------------------------------------------------------------------------------
 
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshSerialize"
@@ -4027,6 +3984,55 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
      end function ESMF_MeshDeserialize
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshSetMOAB()"
+!BOP
+! !IROUTINE: ESMF_MeshSetMOAB -- Toggle using the MOAB library internally. 
+!
+! !INTERFACE:
+   subroutine ESMF_MeshSetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in)                        :: moabOn
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   This method can be employed to turn on or off using the MOAB library 
+!   to hold the internal structure of the Mesh. When set to .true. the following
+!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes 
+!   created on MOAB are only supported in a limited set of operations and should be used
+!   with caution as they haven't yet been tested as thoroughly as the native version.  
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Variable used to turn MOAB on or off
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    integer :: intMoabOn    
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+   ! Translate to integer
+   intMoabOn=0
+   if (moabOn) then
+      intMoabOn=1
+   endif
+
+    call c_esmc_meshsetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshSetMOAB
 
 !------------------------------------------------------------------------------
 
