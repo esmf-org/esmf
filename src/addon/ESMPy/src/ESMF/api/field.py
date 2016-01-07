@@ -30,13 +30,16 @@ class Field(object):
     have different staggerings can share the same Grid object without needing to
     replicate it multiple times.
 
+    For more information about the ESMF Field class, please see the `ESMF Field documentation
+    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+
     The following parameters are used to create a :class:`~ESMF.api.field.Field`
     from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or
     :class:`~ESMF.api.locstream.LocStream`.
 
     *REQUIRED:*
 
-    :param Grid grid: A :class:`~ESMF.api.grid.Grid`,
+    :param Grid/Mesh/LocStream grid: A :class:`~ESMF.api.grid.Grid`,
         :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`
         with coordinates allocated on at least one stagger location.
 
@@ -59,9 +62,6 @@ class Field(object):
         :class:`~ESMF.api.field.Field` dimension. This is represented as a
         single value, a list or a tuple containing the number of entries for
         each desired extra dimension of the :class:`~ESMF.api.field.Field`.
-
-    For more information about the ESMF Field class, please see the `ESMF Field documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
     """
 
     @initialize

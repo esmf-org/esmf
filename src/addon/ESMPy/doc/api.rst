@@ -37,7 +37,6 @@ that further explain the available values.
 Named constants                                             Description
 =========================================================== ==============================
 :class:`CoordSys<ESMF.api.constants.CoordSys>`              Specify the coordinate system of a Grid
-:class:`DecompFlag<ESMF.api.constants.DecompFlag>`          Specify how DistGrid elements are decomposed over DEs
 :class:`FileFormat<ESMF.api.constants.FileFormat>`          Specify the format of a data file
 :class:`GridItem<ESMF.api.constants.GridItem>`              Specify a mask or area item on a Grid
 :class:`LineType<ESMF.api.constants.LineType>`              Specify the type of line that connects two points on a sphere

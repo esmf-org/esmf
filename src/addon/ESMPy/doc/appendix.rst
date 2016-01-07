@@ -23,7 +23,6 @@ Named Constants
 .. toctree::
 
     CoordSys
-    DecompFlag
     FileFormat
     GridItem
     LineType
