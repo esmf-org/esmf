@@ -2984,7 +2984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !   \item[{[collocation]}]
 !     Collocation for which information is requested. Default to first
-!     collocation in {\tt collocationPDim} list.
+!     collocation in {\tt collocation} list.
 !   \item[{[arbSeqIndexFlag]}]
 !     Indicates whether collocation is associated with arbitrary sequence
 !     indices.
@@ -3078,7 +3078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[indexList]
 !     Upon return this holds the list of DistGrid tile-local indices
 !     for {\tt localDe} along dimension {\tt dim}. The supplied variable 
-!     must be at least of size {\tt indexCountPDimPDe(dim, localDeToDeMap(localDe))}.
+!     must be at least of size {\tt indexCountPDe(dim, localDeToDeMap(localDe))}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
