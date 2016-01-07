@@ -26,7 +26,7 @@ As described above, this tool reads in
 two grid files and outputs weights for interpolation
  between the two grids. The input and output files are all in NetCDF format. The grid files can be defined in four
 different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an input to SCRIP~\cite{ref:SCRIP}, the GRIDSPEC Tile grid file~\ref{sec:fileformat:gridspec} following the
-\htmladdnormallink{CF metadata conventions}{http://cf-pcmdi.llnl.gov},
+\htmladdnormallink{CF metadata conventions}{http://cfconventions.org},
 the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid data model (UGRID) ~\ref{sec:fileformat:ugrid}
 in the current ESMF release.  GRIDSPEC is a proposed CF extension for the annotation of complex Earth system grids.  In the current ESMF release, we only support a single tile grid file for rectangular lat/lon grid.  For UGRID, we support the 2D flexible mesh topology with mixed triangles and quadrilaterals and fully 3D unstructured mesh topology with hexahedrons and tetrahedrons.
 
@@ -802,7 +802,7 @@ grid definition.
 
 Currently, ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file
 is a CF compliant NetCDF file for a logically rectangular lat/lon grid based on the
-\htmladdnormallink{CF Metadata Conventions V1.6} {http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html}.   An example grid file is shown below.
+\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}.   An example grid file is shown below.
 The cell center coordinate variables are determined by the value of its attribute {\tt units}.  The longitude
 variable has the attribute value set to either {\tt degrees\_east}, {\tt degree\_east}, {\tt degrees\_E}, {\tt degree\_E},
 {\tt degreesE} or {\tt degreeE}.  The latitude variable has the attribute value set to {\tt degrees\_north}, {\tt degree\_north}, {\tt degrees\_N},
