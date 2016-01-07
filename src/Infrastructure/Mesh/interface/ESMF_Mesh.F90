@@ -439,7 +439,7 @@ contains
 
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
- #define ESMF_METHOD "ESMF_MeshNE()"
+#define ESMF_METHOD "ESMF_MeshNE()"
 !BOPI
 ! !IROUTINE:  ESMF_MeshNE - Compare two Meshes for non-equality
 !
@@ -3998,8 +3998,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) , optional            :: rc
 !
 ! !DESCRIPTION:
-!   This method can be employed to turn on or off using the MOAB library internally 
-!   to represent the internal structure of the Mesh. When set to .true. the following
+!   This method can be employed to turn on or off using the MOAB library 
+!   to hold the internal structure of the Mesh. When set to .true. the following
 !   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
 !   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes 
 !   created on MOAB are only supported in a limited set of operations and should be used
