@@ -362,11 +362,11 @@ extern "C" {
     return;
   }
 #else
-  int winrt = GetCurrentDirectory (pathname_l, pathname)
-  if (winrt == 0 || winrt > pathname_l)
+  int winrt = GetCurrentDirectory (pathname_l, pathname);
+  if (winrt == 0 || winrt > pathname_l) {
     *rc = ESMF_FAILURE;
     return;
-  else
+  } else
     *rc = ESMF_SUCCESS;
 #endif
   int len = strlen (pathname);
