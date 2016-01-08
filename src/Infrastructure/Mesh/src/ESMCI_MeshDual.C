@@ -705,6 +705,16 @@ namespace ESMCI {
     if (elemConn !=NULL) delete [] elemConn;
     if (nodes !=NULL) delete [] nodes;
 
+    // The main goal for this is to use it for non-conserve on centers, so
+    // I'm not moving some of the node information to elem (e.g. masking)
+    // do that eventually for full generality. 
+    // However, I am registering thw elem frac field, because that's the one
+    // that should always be there. 
+    {
+      Context ctxt; ctxt.flip();
+      MEField<> *elem_frac = dual_mesh->RegisterField("elem_frac",
+                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    }
 
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
