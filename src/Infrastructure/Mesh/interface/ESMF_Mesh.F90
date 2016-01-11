@@ -1663,8 +1663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         for a list of valid options. 
 !   \item[{[convertToDual]}] 
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
-!         defaults to {\tt .false.}. Converting to dual is not supported when the 
-!         file format is {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!         defaults to {\tt .false.}. 
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
